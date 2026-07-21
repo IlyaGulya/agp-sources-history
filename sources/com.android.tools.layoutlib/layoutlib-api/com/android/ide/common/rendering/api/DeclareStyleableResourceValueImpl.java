@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,50 +18,30 @@ package com.android.ide.common.rendering.api;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.resources.ResourceType;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * A Resource value representing a declare-styleable resource.
- *
- * <p>{@link #getValue()} will return null, instead use {@link #getAllAttributes()} to get the list
- * of attributes defined in the declare-styleable.
+ * This class will replace {@link DeclareStyleableResourceValue} when the latter becomes an
+ * interface.
  */
-public class DeclareStyleableResourceValue extends ResourceValueImpl {
-    @NonNull
-    private List<AttrResourceValue> mAttrs = new ArrayList<>();
-
-    public DeclareStyleableResourceValue(
+public class DeclareStyleableResourceValueImpl extends DeclareStyleableResourceValue {
+    public DeclareStyleableResourceValueImpl(
             @NonNull ResourceReference reference, @Nullable String value) {
-        this(reference, value, null);
+        super(reference, value);
     }
 
-    public DeclareStyleableResourceValue(
+    public DeclareStyleableResourceValueImpl(
             @NonNull ResourceReference reference,
             @Nullable String value,
             @Nullable String libraryName) {
         super(reference, value, libraryName);
-        assert reference.getResourceType() == ResourceType.DECLARE_STYLEABLE;
     }
 
-    public DeclareStyleableResourceValue(
+    public DeclareStyleableResourceValueImpl(
             @NonNull ResourceNamespace namespace,
             @NonNull ResourceType type,
             @NonNull String name,
             @Nullable String value,
             @Nullable String libraryName) {
         super(namespace, type, name, value, libraryName);
-        assert type == ResourceType.DECLARE_STYLEABLE;
-    }
-
-    @NonNull
-    public List<AttrResourceValue> getAllAttributes() {
-        return mAttrs;
-    }
-
-    public void addValue(@NonNull AttrResourceValue attr) {
-        assert attr.isFramework() || !isFramework()
-                : "Can't add non-framework attributes to framework resource.";
-        mAttrs.add(attr);
     }
 }
