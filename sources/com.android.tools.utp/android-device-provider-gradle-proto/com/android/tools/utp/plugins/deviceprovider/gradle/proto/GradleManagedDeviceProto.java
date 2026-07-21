@@ -176,6 +176,16 @@ public final class GradleManagedDeviceProto {
      */
     com.google.protobuf.ByteString
         getEmulatorGpuBytes();
+
+    /**
+     * <pre>
+     * When enabled, "-verbose" and "-show-kernel" emulator options are added.
+     * </pre>
+     *
+     * <code>bool show_emulator_kernel_logging = 8;</code>
+     * @return The showEmulatorKernelLogging.
+     */
+    boolean getShowEmulatorKernelLogging();
   }
   /**
    * <pre>
@@ -283,6 +293,11 @@ public final class GradleManagedDeviceProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               emulatorGpu_ = s;
+              break;
+            }
+            case 64: {
+
+              showEmulatorKernelLogging_ = input.readBool();
               break;
             }
             default: {
@@ -592,6 +607,20 @@ public final class GradleManagedDeviceProto {
       }
     }
 
+    public static final int SHOW_EMULATOR_KERNEL_LOGGING_FIELD_NUMBER = 8;
+    private boolean showEmulatorKernelLogging_;
+    /**
+     * <pre>
+     * When enabled, "-verbose" and "-show-kernel" emulator options are added.
+     * </pre>
+     *
+     * <code>bool show_emulator_kernel_logging = 8;</code>
+     * @return The showEmulatorKernelLogging.
+     */
+    public boolean getShowEmulatorKernelLogging() {
+      return showEmulatorKernelLogging_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -627,6 +656,9 @@ public final class GradleManagedDeviceProto {
       if (!getEmulatorGpuBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, emulatorGpu_);
       }
+      if (showEmulatorKernelLogging_ != false) {
+        output.writeBool(8, showEmulatorKernelLogging_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -659,6 +691,10 @@ public final class GradleManagedDeviceProto {
       }
       if (!getEmulatorGpuBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, emulatorGpu_);
+      }
+      if (showEmulatorKernelLogging_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(8, showEmulatorKernelLogging_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -695,6 +731,8 @@ public final class GradleManagedDeviceProto {
           .equals(other.getGradleDslDeviceName())) return false;
       if (!getEmulatorGpu()
           .equals(other.getEmulatorGpu())) return false;
+      if (getShowEmulatorKernelLogging()
+          != other.getShowEmulatorKernelLogging()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -725,6 +763,9 @@ public final class GradleManagedDeviceProto {
       hash = (53 * hash) + getGradleDslDeviceName().hashCode();
       hash = (37 * hash) + EMULATOR_GPU_FIELD_NUMBER;
       hash = (53 * hash) + getEmulatorGpu().hashCode();
+      hash = (37 * hash) + SHOW_EMULATOR_KERNEL_LOGGING_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getShowEmulatorKernelLogging());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -884,6 +925,8 @@ public final class GradleManagedDeviceProto {
 
         emulatorGpu_ = "";
 
+        showEmulatorKernelLogging_ = false;
+
         return this;
       }
 
@@ -925,6 +968,7 @@ public final class GradleManagedDeviceProto {
         }
         result.gradleDslDeviceName_ = gradleDslDeviceName_;
         result.emulatorGpu_ = emulatorGpu_;
+        result.showEmulatorKernelLogging_ = showEmulatorKernelLogging_;
         onBuilt();
         return result;
       }
@@ -997,6 +1041,9 @@ public final class GradleManagedDeviceProto {
         if (!other.getEmulatorGpu().isEmpty()) {
           emulatorGpu_ = other.emulatorGpu_;
           onChanged();
+        }
+        if (other.getShowEmulatorKernelLogging() != false) {
+          setShowEmulatorKernelLogging(other.getShowEmulatorKernelLogging());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -1804,6 +1851,48 @@ public final class GradleManagedDeviceProto {
         onChanged();
         return this;
       }
+
+      private boolean showEmulatorKernelLogging_ ;
+      /**
+       * <pre>
+       * When enabled, "-verbose" and "-show-kernel" emulator options are added.
+       * </pre>
+       *
+       * <code>bool show_emulator_kernel_logging = 8;</code>
+       * @return The showEmulatorKernelLogging.
+       */
+      public boolean getShowEmulatorKernelLogging() {
+        return showEmulatorKernelLogging_;
+      }
+      /**
+       * <pre>
+       * When enabled, "-verbose" and "-show-kernel" emulator options are added.
+       * </pre>
+       *
+       * <code>bool show_emulator_kernel_logging = 8;</code>
+       * @param value The showEmulatorKernelLogging to set.
+       * @return This builder for chaining.
+       */
+      public Builder setShowEmulatorKernelLogging(boolean value) {
+        
+        showEmulatorKernelLogging_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * When enabled, "-verbose" and "-show-kernel" emulator options are added.
+       * </pre>
+       *
+       * <code>bool show_emulator_kernel_logging = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearShowEmulatorKernelLogging() {
+        
+        showEmulatorKernelLogging_ = false;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -1874,15 +1963,16 @@ public final class GradleManagedDeviceProto {
       "\n\"gradle_managed_device_config.proto\0229co" +
       "m.android.tools.utp.plugins.deviceprovid" +
       "er.gradle.proto\032\031google/protobuf/any.pro" +
-      "to\"\342\001\n\031GradleManagedDeviceConfig\022(\n\navd_" +
+      "to\"\210\002\n\031GradleManagedDeviceConfig\022(\n\navd_" +
       "folder\030\001 \001(\0132\024.google.protobuf.Any\022\020\n\010av" +
       "d_name\030\002 \001(\t\022\016\n\006avd_id\030\003 \001(\t\022\026\n\016enable_d" +
       "isplay\030\004 \001(\010\022+\n\remulator_path\030\005 \001(\0132\024.go" +
       "ogle.protobuf.Any\022\036\n\026gradle_dsl_device_n" +
-      "ame\030\006 \001(\t\022\024\n\014emulator_gpu\030\007 \001(\tBU\n9com.a" +
-      "ndroid.tools.utp.plugins.deviceprovider." +
-      "gradle.protoB\030GradleManagedDeviceProtob\006" +
-      "proto3"
+      "ame\030\006 \001(\t\022\024\n\014emulator_gpu\030\007 \001(\t\022$\n\034show_" +
+      "emulator_kernel_logging\030\010 \001(\010BU\n9com.and" +
+      "roid.tools.utp.plugins.deviceprovider.gr" +
+      "adle.protoB\030GradleManagedDeviceProtob\006pr" +
+      "oto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -1894,7 +1984,7 @@ public final class GradleManagedDeviceProto {
     internal_static_com_android_tools_utp_plugins_deviceprovider_gradle_proto_GradleManagedDeviceConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_android_tools_utp_plugins_deviceprovider_gradle_proto_GradleManagedDeviceConfig_descriptor,
-        new java.lang.String[] { "AvdFolder", "AvdName", "AvdId", "EnableDisplay", "EmulatorPath", "GradleDslDeviceName", "EmulatorGpu", });
+        new java.lang.String[] { "AvdFolder", "AvdName", "AvdId", "EnableDisplay", "EmulatorPath", "GradleDslDeviceName", "EmulatorGpu", "ShowEmulatorKernelLogging", });
     com.google.protobuf.AnyProto.getDescriptor();
   }
 
