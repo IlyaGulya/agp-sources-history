@@ -23,7 +23,7 @@ import com.android.builder.model.v2.AndroidModel
  *
  * @since 4.2
  */
-interface AdbOptions: AndroidModel {
+interface Installation: AndroidModel {
 
     /** The time out used for all adb operations. */
     val timeOutInMs: Int
