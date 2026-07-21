@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.repository.api
 
-package com.android.build.gradle.internal.ide
-
-import com.android.builder.model.DependenciesInfo
-import java.io.Serializable
-
-data class DependenciesInfoImpl(
-    override val includeInApk: Boolean,
-    override val includeInBundle: Boolean
-): DependenciesInfo, Serializable {
-    companion object {
-        private const val serialVersionUID = 1L;
-    }
-}
+/**
+ * An instance of ProgressIndicator that does nothing.
+ */
+object NullProgressIndicator : ProgressIndicatorAdapter()
