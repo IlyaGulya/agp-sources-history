@@ -19,6 +19,8 @@ package com.android.build.gradle.internal.tasks
 import com.android.SdkConstants
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.gradle.internal.component.ApkCreationConfig
+import com.android.build.gradle.internal.component.VariantCreationConfig
+import com.android.build.gradle.internal.dsl.ModulePropertyKey
 import com.android.build.gradle.internal.profile.ProfileAwareWorkAction
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
@@ -34,16 +36,18 @@ import com.android.tools.profgen.DexFile
 import com.android.tools.profgen.Diagnostics
 import com.android.tools.profgen.HumanReadableProfile
 import com.android.tools.profgen.ObfuscationMap
+import com.google.common.annotations.VisibleForTesting
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskProvider
-import java.lang.RuntimeException
 
 /**
  * Task that transforms a human readable art profile into a binary form version that can be shipped
@@ -61,6 +65,9 @@ abstract class CompileArtProfileTask: NonIncrementalTask() {
 
     @get: [InputFiles Optional PathSensitive(PathSensitivity.RELATIVE)]
     abstract val featuresDexFolders: ConfigurableFileCollection
+
+    @get: Input
+    abstract val useMappingFile: Property<Boolean>
 
     @get: [InputFiles Optional PathSensitive(PathSensitivity.NAME_ONLY)]
     abstract val obfuscationMappingFile: RegularFileProperty
@@ -126,7 +133,9 @@ abstract class CompileArtProfileTask: NonIncrementalTask() {
             it.initializeFromAndroidVariantTask(this)
             it.mergedArtProfile.set(mergedArtProfile)
             it.dexFolders.from(dexFolders)
-            it.obfuscationMappingFile.set(obfuscationMappingFile)
+            if (useMappingFile.get()) {
+                it.obfuscationMappingFile.set(obfuscationMappingFile)
+            }
             it.binaryArtProfileOutputFile.set(binaryArtProfile)
             it.binaryArtProfileMetadataOutputFile.set(binaryArtProfileMetadata)
         }
@@ -173,8 +182,21 @@ abstract class CompileArtProfileTask: NonIncrementalTask() {
             }
             task.featuresDexFolders.disallowChanges()
 
+            configureObfuscationMappingFile(task)
+        }
+
+        @VisibleForTesting
+        internal fun configureObfuscationMappingFile(task: CompileArtProfileTask) {
+            if (creationConfig is VariantCreationConfig) {
+                task.useMappingFile.setDisallowChanges(
+                    creationConfig.experimentalProperties.map {
+                        !ModulePropertyKey.BooleanWithDefault.ART_PROFILE_R8_REWRITING.getValue(it)
+                    })
+            } else {
+                task.useMappingFile.setDisallowChanges(true)
+            }
             task.obfuscationMappingFile.setDisallowChanges(
-                    creationConfig.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE)
+                creationConfig.artifacts.get(SingleArtifact.OBFUSCATION_MAPPING_FILE)
             )
         }
     }

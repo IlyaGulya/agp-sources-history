@@ -17,7 +17,6 @@
 package com.android.build.api.variant.impl
 
 import com.android.build.gradle.internal.dsl.KotlinMultiplatformAndroidExtension
-import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 import org.jetbrains.kotlin.gradle.ExternalKotlinTargetApi
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
@@ -27,58 +26,17 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.external.DecoratedExternalKotlinTa
 class KotlinMultiplatformAndroidTargetImpl(
     delegate: Delegate,
     kotlinExtension: KotlinMultiplatformExtension,
-    private val androidExtension: KotlinMultiplatformAndroidExtension
-) : DecoratedExternalKotlinTarget(delegate), KotlinMultiplatformAndroidTarget {
+    androidExtension: KotlinMultiplatformAndroidExtension
+) : DecoratedExternalKotlinTarget(delegate),
+    KotlinMultiplatformAndroidTarget,
+    KotlinMultiplatformAndroidExtension by androidExtension {
 
-    override val options: KotlinMultiplatformAndroidExtension
-        get() = androidExtension
-
-    override val compilations: NamedDomainObjectContainer<KotlinMultiplatformAndroidCompilationImpl> =
+    override val compilations: NamedDomainObjectContainer<KotlinMultiplatformAndroidCompilation> =
         project.objects.domainObjectContainer(
-            KotlinMultiplatformAndroidCompilationImpl::class.java,
+            KotlinMultiplatformAndroidCompilation::class.java,
             KotlinMultiplatformAndroidCompilationFactory(
                 this,
                 kotlinExtension
             )
         )
-
-    private val compilationOperations = mapOf(
-        KmpPredefinedAndroidCompilation.MAIN to mutableListOf<Action<KotlinMultiplatformAndroidCompilation>>(),
-        KmpPredefinedAndroidCompilation.TEST to mutableListOf(),
-        KmpPredefinedAndroidCompilation.INSTRUMENTED_TEST to mutableListOf(),
-    )
-
-    private fun onCompilation(
-        type: KmpPredefinedAndroidCompilation,
-        action: KotlinMultiplatformAndroidCompilation.() -> Unit
-    ) {
-        compilations.findByName(type.compilationName)?.let(action) ?:
-        compilationOperations[type]!!.add(action)
-    }
-
-    override fun onMainCompilation(action: KotlinMultiplatformAndroidCompilation.() -> Unit) {
-        onCompilation(KmpPredefinedAndroidCompilation.MAIN, action)
-    }
-
-    override fun onUnitTestCompilation(action: KotlinMultiplatformAndroidCompilation.() -> Unit) {
-        onCompilation(KmpPredefinedAndroidCompilation.TEST, action)
-    }
-
-    override fun onInstrumentedTestCompilation(action: KotlinMultiplatformAndroidCompilation.() -> Unit) {
-        onCompilation(KmpPredefinedAndroidCompilation.INSTRUMENTED_TEST, action)
-    }
-
-    internal fun executeCompilationOperations() {
-        compilationOperations.forEach { (type, actions) ->
-            compilations.findByName(type.compilationName)?.let { compilation ->
-                actions.forEach {
-                    it.execute(compilation)
-                }
-            }
-        }
-    }
-
-    override fun options(action: KotlinMultiplatformAndroidExtension.() -> Unit) {
-        androidExtension.action()
-    }
 }

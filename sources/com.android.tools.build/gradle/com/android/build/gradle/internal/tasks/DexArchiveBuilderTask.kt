@@ -66,7 +66,7 @@ import kotlin.math.max
 /**
  * Task that converts CLASS files to dex archives, [com.android.builder.dexing.DexArchive].
  * This will process class files, and for each of the input scopes (project, subprojects, external
- * Maven libraries, mixed-scope classses), corresponding dex archive will be produced.
+ * Maven libraries, mixed-scope classes), corresponding dex archive will be produced.
  *
  * This task is incremental, only changed classes will be converted again. If only a single class
  * file is changed, only that file will be dex'ed. Additionally, if a jar changes, only classes in
@@ -296,7 +296,7 @@ abstract class DexArchiveBuilderTask : NewIncrementalTask() {
                 taskProvider,
                 DexArchiveBuilderTask::previousRunNumberOfBucketsFile
             ).withName("out").on(InternalArtifactType.DEX_NUMBER_OF_BUCKETS_FILE)
-            if (creationConfig.services.projectOptions[BooleanOption.ENABLE_GLOBAL_SYNTHETICS]) {
+            if (creationConfig.enableGlobalSynthetics) {
                 creationConfig.artifacts.setInitialProvider(
                     taskProvider
                 ) { it.projectOutputs.globalSynthetics }
@@ -373,6 +373,9 @@ abstract class DexArchiveBuilderTask : NewIncrementalTask() {
                 task.dexParams.coreLibDesugarConfig.set(getDesugarLibConfig(creationConfig.services))
             }
 
+            task.dexParams.enableApiModeling.set(creationConfig.enableApiModeling)
+            task.dexParams.enableGlobalSynthetics.set(creationConfig.enableGlobalSynthetics)
+
             if (dexExternalLibsInArtifactTransform) {
                 task.externalLibDexFiles.from(getDexForExternalLibs(task, "jar"))
                 task.externalLibDexFiles.from(getDexForExternalLibs(task, "dir"))
@@ -397,8 +400,8 @@ abstract class DexArchiveBuilderTask : NewIncrementalTask() {
                     this.errorFormat.set(task.dexParams.errorFormatMode)
                     this.enableDesugaring.set(task.dexParams.withDesugaring)
                     this.libConfiguration.set(task.dexParams.coreLibDesugarConfig)
-                    this.enableGlobalSynthetics.set(
-                        services.projectOptions[BooleanOption.ENABLE_GLOBAL_SYNTHETICS])
+                    this.enableGlobalSynthetics.set(task.dexParams.enableGlobalSynthetics)
+                    this.enableApiModeling.set(task.dexParams.enableApiModeling)
                 }
 
                 // Until Gradle provides a better way to run artifact transforms for arbitrary
@@ -490,6 +493,12 @@ abstract class DexParameterInputs {
     abstract val coreLibDesugarConfig: Property<String>
 
     @get:Input
+    abstract val enableGlobalSynthetics: Property<Boolean>
+
+    @get:Input
+    abstract val enableApiModeling: Property<Boolean>
+
+    @get:Input
     abstract val errorFormatMode: Property<SyncOptions.ErrorFormatMode>
 
     fun toDexParameters(): DexParameters {
@@ -500,6 +509,7 @@ abstract class DexParameterInputs {
             desugarBootclasspath = desugarBootclasspath.files.toList(),
             desugarClasspath = desugarClasspath.files.toList(),
             coreLibDesugarConfig = coreLibDesugarConfig.orNull,
+            enableApiModeling = enableApiModeling.get(),
             errorFormatMode = errorFormatMode.get(),
         )
     }
