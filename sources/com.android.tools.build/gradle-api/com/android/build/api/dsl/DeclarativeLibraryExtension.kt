@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal
+package com.android.build.api.dsl
 
-import org.gradle.api.artifacts.dsl.DependencyCollector
-import org.gradle.api.artifacts.dsl.GradleDependencies
+import org.gradle.api.Incubating
+import org.gradle.api.NamedDomainObjectContainer
 
-interface DependenciesExtension : GradleDependencies {
-  // main configurations
-  val api: DependencyCollector
-  val implementation: DependencyCollector
+@Incubating
+/** @suppress */
+interface DeclarativeLibraryExtension : LibraryExtension {
+  @get:Incubating val dependencies: DependenciesExtension
 
-  // test configurations
-  val testImplementation: DependencyCollector
+  @get:Incubating override val buildTypes: NamedDomainObjectContainer<DeclarativeLibraryBuildType>
 
-  // android test configurations
-  val androidTestImplementation: DependencyCollector
+  @get:Incubating override val productFlavors: NamedDomainObjectContainer<DeclarativeLibraryFlavor>
 }

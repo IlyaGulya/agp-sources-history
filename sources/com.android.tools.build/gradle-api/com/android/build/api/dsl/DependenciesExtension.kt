@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.api
+package com.android.build.api.dsl
 
 import org.gradle.api.Incubating
-import org.gradle.api.Plugin
-import org.gradle.api.Project
+import org.gradle.api.artifacts.dsl.DependencyCollector
+import org.gradle.api.artifacts.dsl.GradleDependencies
 
 @Incubating
-class PrivacySandboxSdkPlugin : Plugin<Project> {
-  override fun apply(project: Project) {
-    project.apply(mapOf("plugin" to "com.android.internal.privacy-sandbox-sdk"))
-  }
+/** @suppress */
+interface DependenciesExtension : GradleDependencies {
+  // main configurations
+  @get:Incubating val api: DependencyCollector
+  @get:Incubating val implementation: DependencyCollector
+
+  // test configurations
+  @get:Incubating val testImplementation: DependencyCollector
+
+  // android test configurations
+  @get:Incubating val androidTestImplementation: DependencyCollector
 }

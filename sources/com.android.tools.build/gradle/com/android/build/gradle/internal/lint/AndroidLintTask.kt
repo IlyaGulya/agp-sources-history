@@ -169,6 +169,8 @@ abstract class AndroidLintTask : NonIncrementalTask() {
 
   @get:Input abstract val baselineOmitLineNumbers: Property<Boolean>
 
+  @get:Input abstract val useHtmlV2: Property<Boolean>
+
   @get:Nested abstract val uastInputs: UastInputs
 
   override fun doTaskAction() {
@@ -318,7 +320,8 @@ abstract class AndroidLintTask : NonIncrementalTask() {
     }
     intermediateTextReport.orNull?.let { arguments.add("--text", it) }
     if (htmlReportEnabled.get()) {
-      arguments.add("--html", htmlReportOutputFile.get())
+      val htmlFlag = if (useHtmlV2.get()) "--html-v2" else "--html"
+      arguments.add(htmlFlag, htmlReportOutputFile.get())
     }
     if (xmlReportEnabled.get()) {
       arguments.add("--xml", xmlReportOutputFile.get())
@@ -439,7 +442,13 @@ abstract class AndroidLintTask : NonIncrementalTask() {
       get() = "Run lint on the ${creationConfig.name} variant"
 
     override fun handleProvider(taskProvider: TaskProvider<AndroidLintTask>) {
-      registerLintIntermediateArtifacts(taskProvider, creationConfig.artifacts, variantName = creationConfig.name)
+      registerLintIntermediateArtifacts(
+        taskProvider,
+        creationConfig.artifacts,
+        InternalArtifactType.LINT_INTERMEDIATE_TEXT_REPORT,
+        InternalArtifactType.LINT_RETURN_VALUE,
+        variantName = creationConfig.name,
+      )
       registerLintReportArtifacts(
         taskProvider,
         creationConfig.artifacts,
@@ -477,7 +486,13 @@ abstract class AndroidLintTask : NonIncrementalTask() {
       get() = "Create local lint report on the ${creationConfig.name} variant"
 
     override fun handleProvider(taskProvider: TaskProvider<AndroidLintTask>) {
-      registerLintIntermediateArtifacts(taskProvider, creationConfig.artifacts, variantName = creationConfig.name)
+      registerLintIntermediateArtifacts(
+        taskProvider,
+        creationConfig.artifacts,
+        InternalArtifactType.LINT_INTERMEDIATE_TEXT_REPORT,
+        InternalArtifactType.LINT_RETURN_VALUE,
+        variantName = creationConfig.name,
+      )
       registerLintReportArtifacts(
         taskProvider,
         creationConfig.artifacts,
@@ -515,6 +530,14 @@ abstract class AndroidLintTask : NonIncrementalTask() {
       get() = true
 
     override fun handleProvider(taskProvider: TaskProvider<AndroidLintTask>) {
+      registerLintIntermediateArtifacts(
+        taskProvider,
+        creationConfig.artifacts,
+        InternalArtifactType.AGGREGATED_LINT_INTERMEDIATE_TEXT_REPORT,
+        InternalArtifactType.AGGREGATED_LINT_RETURN_VALUE,
+        prefix = "aggregated-",
+        variantName = creationConfig.name,
+      )
       registerLintReportArtifacts(
         taskProvider,
         creationConfig.artifacts,
@@ -570,7 +593,13 @@ abstract class AndroidLintTask : NonIncrementalTask() {
       get() = "Run lint with only the fatal issues enabled on the ${creationConfig.name} variant"
 
     override fun handleProvider(taskProvider: TaskProvider<AndroidLintTask>) {
-      registerLintIntermediateArtifacts(taskProvider, creationConfig.artifacts, fatalOnly = true, variantName = creationConfig.name)
+      registerLintIntermediateArtifacts(
+        taskProvider,
+        creationConfig.artifacts,
+        InternalArtifactType.LINT_VITAL_INTERMEDIATE_TEXT_REPORT,
+        InternalArtifactType.LINT_VITAL_RETURN_VALUE,
+        variantName = creationConfig.name,
+      )
     }
 
     override fun configureOutputSettings(task: AndroidLintTask) {
@@ -623,6 +652,7 @@ abstract class AndroidLintTask : NonIncrementalTask() {
 
       task.description = description
 
+      task.initializeOutputTypesConvention()
       task.initializeGlobalInputs(variant.main.services, isAndroid = true, lintMode)
       task.lintRuleJars.from(creationConfig.global.localCustomLintChecks)
       task.lintRuleJars.from(
@@ -636,6 +666,10 @@ abstract class AndroidLintTask : NonIncrementalTask() {
       task.fatalOnly.setDisallowChanges(fatalOnly)
       task.autoFix.setDisallowChanges(autoFix)
       task.lintMode.setDisallowChanges(lintMode)
+      task.useHtmlV2.setDisallowChanges(
+        creationConfig.services.projectOptions.get(BooleanOption.LINT_REPORT_AGGREGATION) &&
+          (this is LocalLintReportCreationAction || this is AggregatedLintReportCreationAction)
+      )
       if (autoFix) {
         task.lintFixBuildService.set(getBuildService(creationConfig.services.buildServiceRegistry))
       }
@@ -822,7 +856,6 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         // is not annotated as an output
         task.outputs.upToDateWhen { false }
       }
-      task.initializeOutputTypesConvention()
       configureOutputSettings(task)
       task.finalizeOutputTypes()
       task.missingBaselineIsEmptyBaseline.setDisallowChanges(
@@ -876,30 +909,22 @@ abstract class AndroidLintTask : NonIncrementalTask() {
       fun registerLintIntermediateArtifacts(
         taskProvider: TaskProvider<AndroidLintTask>,
         artifacts: ArtifactsImpl,
-        fatalOnly: Boolean = false,
+        intermediateTextReportArtifactType: InternalArtifactType<RegularFile>,
+        returnValueArtifactType: InternalArtifactType<RegularFile>,
+        prefix: String = "",
         variantName: String? = null,
       ) {
-        val reportName = "lint-results" + if (variantName != null) "-$variantName" else ""
+        val reportName = "${prefix}lint-results" + if (variantName != null) "-$variantName" else ""
         artifacts
           .setInitialProvider(taskProvider, AndroidLintTask::intermediateTextReport)
           .withName("$reportName.txt")
-          .on(
-            when {
-              fatalOnly -> InternalArtifactType.LINT_VITAL_INTERMEDIATE_TEXT_REPORT
-              else -> InternalArtifactType.LINT_INTERMEDIATE_TEXT_REPORT
-            }
-          )
+          .on(intermediateTextReportArtifactType)
 
-        val returnValueName = "return-value" + if (variantName != null) "-$variantName" else ""
+        val returnValueName = "${prefix}return-value" + if (variantName != null) "-$variantName" else ""
         artifacts
           .setInitialProvider(taskProvider, AndroidLintTask::returnValueOutputFile)
           .withName("$returnValueName.txt")
-          .on(
-            when {
-              fatalOnly -> InternalArtifactType.LINT_VITAL_RETURN_VALUE
-              else -> InternalArtifactType.LINT_RETURN_VALUE
-            }
-          )
+          .on(returnValueArtifactType)
       }
     }
   }
@@ -910,6 +935,7 @@ abstract class AndroidLintTask : NonIncrementalTask() {
     xmlReportEnabled.convention(false)
     sarifReportEnabled.convention(false)
     textReportToStdOut.convention(false)
+    useHtmlV2.convention(false)
   }
 
   private fun finalizeOutputTypes() {
@@ -918,6 +944,7 @@ abstract class AndroidLintTask : NonIncrementalTask() {
     xmlReportEnabled.disallowChanges()
     sarifReportEnabled.disallowChanges()
     textReportToStdOut.disallowChanges()
+    useHtmlV2.disallowChanges()
   }
 
   private fun initializeGlobalInputs(services: TaskCreationServices, isAndroid: Boolean, lintMode: LintMode) {
@@ -968,6 +995,7 @@ abstract class AndroidLintTask : NonIncrementalTask() {
     fatalOnly: Boolean = false,
     autoFix: Boolean = false,
   ) {
+    this.initializeOutputTypesConvention()
     initializeGlobalInputs(taskCreationServices, isAndroid = false, lintMode)
     this.variantName = ""
     this.analyticsService.setDisallowChanges(getBuildService(taskCreationServices.buildServiceRegistry))
@@ -995,7 +1023,6 @@ abstract class AndroidLintTask : NonIncrementalTask() {
     this.nestedComponentPartialResults.disallowChanges()
     unitTestLintModel?.let { this.nestedComponentLintModels.from(it) }
     this.nestedComponentLintModels.disallowChanges()
-    this.initializeOutputTypesConvention()
     when {
       fatalOnly -> {
         // do nothing
