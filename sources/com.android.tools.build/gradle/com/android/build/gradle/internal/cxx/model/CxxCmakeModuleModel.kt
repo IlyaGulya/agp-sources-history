@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.cxx.logging
+package com.android.build.gradle.internal.cxx.model
 
-enum class LoggingLevel {
-    INFO,
-    WARN,
-    ERROR;
-    fun log(message : String) = when(this) {
-        INFO -> infoln(message)
-        WARN -> warnln(message)
-        ERROR -> errorln(message)
-    }
+import com.android.repository.Revision
+import java.io.File
+
+interface CxxCmakeModuleModel {
+    /** Path to cmake.exe (ex /path/to/cmake/cmake.exe) */
+    val cmakeExe: File
+    /** The version of CMake found by executing CMake --version (ex 3.10.2) */
+    val foundCmakeVersion: Revision
+    /** Path to ninja.exe (ex /path/to/ninja/ninja.exe) */
+    val ninjaExe: File
+    /** Path to the CMake toolchain in NDK (ex /path/to/ndk/android.toolchain.cmake) */
+    val cmakeToolchainFile: File
 }
