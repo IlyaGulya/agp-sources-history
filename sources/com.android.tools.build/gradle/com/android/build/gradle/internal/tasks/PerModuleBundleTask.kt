@@ -134,15 +134,20 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
     @get:Input
     abstract val fileName: Property<String>
 
+    @get:Optional
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NAME_ONLY)
+    abstract val privacySandboxSdkRuntimeConfigFile: RegularFileProperty
+
     @get:Input
     val jarCreatorType: Property<JarCreatorType> = objects.property(JarCreatorType::class.java)
 
     public override fun doTaskAction() {
         val outputPath =
-            (outputFile.orNull?.asFile ?: File(outputDir.get().asFile, fileName.get())).toPath()
+                (outputFile.orNull?.asFile ?: File(outputDir.get().asFile, fileName.get())).toPath()
         val jarCreator =
-            JarCreatorFactory.make(
-                jarFile = outputPath,
+                JarCreatorFactory.make(
+                        jarFile = outputPath,
                 type = jarCreatorType.get()
             )
 
@@ -186,15 +191,21 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
             // featureJavaResFiles.files.isNotEmpty() because we want to use featureJavaResFiles
             // even if it's empty (which will be the case when using proguard)
             val javaResFilesSet =
-                if (hasFeatureDexFiles()) featureJavaResFiles.files else javaResFiles.files
+                    if (hasFeatureDexFiles()) featureJavaResFiles.files else javaResFiles.files
             addHybridFolder(it, javaResFilesSet, Relocator("root"), JarMerger.EXCLUDE_CLASSES)
             addHybridFolder(
-                it,
-                appMetadata.orNull?.asFile?.let { metadataFile -> setOf(metadataFile) } ?: setOf(),
-                Relocator("root/META-INF/com/android/build/gradle"),
-                JarMerger.EXCLUDE_CLASSES)
+                    it,
+                    appMetadata.orNull?.asFile?.let { metadataFile -> setOf(metadataFile) }
+                            ?: setOf(),
+                    Relocator("root/META-INF/com/android/build/gradle"),
+                    JarMerger.EXCLUDE_CLASSES)
 
             addHybridFolder(it, nativeLibsFiles.files, fileFilter = abiFilter)
+
+            if (privacySandboxSdkRuntimeConfigFile.isPresent) {
+                it.addFile("runtime_enabled_sdk_config.pb",
+                        privacySandboxSdkRuntimeConfigFile.get().asFile.toPath())
+            }
         }
     }
 
@@ -250,20 +261,19 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
                     PrivacySandboxSdkInternalArtifactType.DEX
                 )
             )
-
             task.assetsFilesDirectory.setDisallowChanges(
-                creationConfig.artifacts.get(FusedLibraryInternalArtifactType.MERGED_ASSETS)
+                creationConfig.artifacts.get(FusedLibraryInternalArtifactType.MERGED_ASSETS).map {
+                    it.dir(SdkConstants.FD_ASSETS)
+                }
             )
             task.resFiles.setDisallowChanges(
                 creationConfig.artifacts.get(
                     PrivacySandboxSdkInternalArtifactType.LINKED_MERGE_RES_FOR_ASB
                 )
             )
-
-            // TODO(b/234613831): Support java resources
-            //    task.javaResFiles.fromDisallowChanges(
-            //        creationConfig.artifacts.get(FusedLibraryInternalArtifactType.MERGED_JAVA_RES)
-            //    )
+            task.javaResFiles.fromDisallowChanges(
+                    creationConfig.artifacts.get(FusedLibraryInternalArtifactType.MERGED_JAVA_RES)
+            )
 
             // Not applicable
             task.featureDexFiles.fromDisallowChanges()
@@ -400,6 +410,15 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
 
             task.jarCreatorType.set(creationConfig.global.jarCreatorType)
             task.jarCreatorType.disallowChanges()
+            if (creationConfig.services.projectOptions[BooleanOption.PRIVACY_SANDBOX_SDK_SUPPORT] && creationConfig.componentType.isBaseModule) {
+                artifacts.setTaskInputToFinalProduct(
+                        InternalArtifactType.PRIVACY_SANDBOX_SDK_RUNTIME_CONFIG_FILE,
+                        task.privacySandboxSdkRuntimeConfigFile
+                )
+            } else {
+                task.privacySandboxSdkRuntimeConfigFile.disallowChanges()
+            }
+
         }
     }
 }
