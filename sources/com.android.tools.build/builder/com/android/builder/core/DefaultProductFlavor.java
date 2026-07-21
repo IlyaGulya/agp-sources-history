@@ -22,11 +22,13 @@ import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.builder.internal.BaseConfigImpl;
 import com.android.builder.model.ApiVersion;
+import com.android.builder.model.BaseConfig;
 import com.android.builder.model.ProductFlavor;
 import com.android.builder.model.SigningConfig;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -488,6 +490,76 @@ public class DefaultProductFlavor extends BaseConfigImpl implements ProductFlavo
         return mResourceConfiguration;
     }
 
+    /** Class representing a request with fallbacks. */
+    public static class DimensionRequest {
+        @NonNull private final String requested;
+        @NonNull private final ImmutableList<String> fallbacks;
+
+        public DimensionRequest(
+                @NonNull String requested, @NonNull ImmutableList<String> fallbacks) {
+            this.requested = requested;
+            this.fallbacks = fallbacks;
+        }
+
+        @NonNull
+        public String getRequested() {
+            return requested;
+        }
+
+        @NonNull
+        public List<String> getFallbacks() {
+            return fallbacks;
+        }
+    }
+
+    /** map of dimension -> request */
+    private Map<String, DimensionRequest> missingDimensionSelections;
+
+    public void missingDimensionStrategy(String dimension, String requestedValue) {
+        missingDimensionStrategy(dimension, ImmutableList.of(requestedValue));
+    }
+
+    public void missingDimensionStrategy(String dimension, String... requestedValues) {
+        missingDimensionStrategy(dimension, ImmutableList.copyOf(requestedValues));
+    }
+
+    public void missingDimensionStrategy(String dimension, List<String> requestedValues) {
+        if (requestedValues.isEmpty()) {
+            throw new RuntimeException("List of requested values cannot be empty");
+        }
+
+        final DimensionRequest selection = computeRequestedAndFallBacks(requestedValues);
+
+        if (missingDimensionSelections == null) {
+            missingDimensionSelections = Maps.newHashMap();
+        }
+
+        missingDimensionSelections.put(dimension, selection);
+    }
+
+    /**
+     * Computes the requested value and the fallback list from the list of values provided in the
+     * DSL
+     *
+     * @param requestedValues the values provided in the DSL
+     * @return a DimensionRequest with the main requested value and the fallbacks.
+     */
+    @NonNull
+    protected DimensionRequest computeRequestedAndFallBacks(@NonNull List<String> requestedValues) {
+        // default implementation is that the fallback's first item is the requested item.
+        return new DimensionRequest(
+                requestedValues.get(0),
+                ImmutableList.copyOf(requestedValues.subList(1, requestedValues.size())));
+    }
+
+    public Map<String, DimensionRequest> getMissingDimensionStrategies() {
+        if (missingDimensionSelections == null) {
+            return ImmutableMap.of();
+        }
+
+        return missingDimensionSelections;
+    }
+
     /**
      * Merges the flavors by analyzing the specified one and the list. Flavors whose position in the
      * list is higher will have their values overwritten by the lower-position flavors (in case they
@@ -622,9 +694,6 @@ public class DefaultProductFlavor extends BaseConfigImpl implements ProductFlavo
         flavor.addBuildConfigFields(base.getBuildConfigFields());
         flavor.addBuildConfigFields(overlay.getBuildConfigFields());
 
-        flavor.addFlavorSelections(base.getFlavorSelections());
-        flavor.addFlavorSelections(overlay.getFlavorSelections());
-
         flavor.setMultiDexEnabled(chooseNotNull(
                 overlay.getMultiDexEnabled(), base.getMultiDexEnabled()));
 
@@ -648,6 +717,19 @@ public class DefaultProductFlavor extends BaseConfigImpl implements ProductFlavo
                 chooseNotNull(
                         overlay.getVectorDrawables().getUseSupportLibrary(),
                         base.getVectorDrawables().getUseSupportLibrary()));
+
+        flavor.missingDimensionSelections = Maps.newHashMap();
+        if (base instanceof DefaultProductFlavor) {
+            flavor.missingDimensionSelections.putAll(
+                    ((DefaultProductFlavor) base).getMissingDimensionStrategies());
+        }
+        if (overlay instanceof DefaultProductFlavor) {
+            flavor.missingDimensionSelections.putAll(
+                    ((DefaultProductFlavor) overlay).getMissingDimensionStrategies());
+        }
+
+        // no need to merge missingDimensionStrategies, it's not queried from the merged flavor.
+        // TODO this should all be clean up with the new variant DSL/API in 3.1
 
         return flavor;
     }
@@ -696,18 +778,38 @@ public class DefaultProductFlavor extends BaseConfigImpl implements ProductFlavo
         flavor.addResValues(productFlavor.getResValues());
         flavor.addBuildConfigFields(productFlavor.getBuildConfigFields());
 
-        flavor.addFlavorSelections(productFlavor.getFlavorSelections());
-
         flavor.setMultiDexEnabled(productFlavor.getMultiDexEnabled());
 
         flavor.setMultiDexKeepFile(productFlavor.getMultiDexKeepFile());
         flavor.setMultiDexKeepProguard(productFlavor.getMultiDexKeepProguard());
         flavor.setJarJarRuleFiles(ImmutableList.copyOf(productFlavor.getJarJarRuleFiles()));
 
+        if (productFlavor instanceof DefaultProductFlavor) {
+            final DefaultProductFlavor defaultProductFlavor = (DefaultProductFlavor) productFlavor;
+            flavor.missingDimensionSelections =
+                    Maps.newHashMap(defaultProductFlavor.getMissingDimensionStrategies());
+        }
+
         return flavor;
     }
 
-    private static <T> T chooseNotNull(T overlay, T base) {
+    protected void cloneFrom(@NonNull ProductFlavor flavor) {
+        // nothing to do
+    }
+
+    @Override
+    protected void _initWith(@NonNull BaseConfig that) {
+        super._initWith(that);
+        if (that instanceof DefaultProductFlavor) {
+            DefaultProductFlavor from = (DefaultProductFlavor) that;
+            if (from.missingDimensionSelections != null) {
+                // the objects inside the map are immutable, so it's fine to keep them.
+                missingDimensionSelections = Maps.newHashMap(from.missingDimensionSelections);
+            }
+        }
+    }
+
+    protected static <T> T chooseNotNull(T overlay, T base) {
         return overlay != null ? overlay : base;
     }
 
