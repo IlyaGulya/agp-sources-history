@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.build.api.variant
+package com.android.sdklib.internal.avd;
 
-/**
- * Model for dynamic feature components that only contains build-time properties.
- *
- * See [Component] and [Variant] for more information.
- */
-@Suppress("DEPRECATION")
-interface DynamicFeatureVariant : Variant,
-    GeneratesApk,
-    HasDeviceTests,
-    HasAndroidTest,
-    HasUnitTest,
-    HasTestFixtures {
+import com.android.annotations.NonNull;
 
-    /**
-     * Variant's packagingOptions, initialized by the corresponding global DSL element.
-     */
-    override val packaging: TestedApkPackaging
+/** An exception with a user-facing error message thrown by AvdManager. */
+public class AvdManagerException extends Exception {
+  AvdManagerException(String message) {
+    super(message);
+  }
+
+  AvdManagerException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }
