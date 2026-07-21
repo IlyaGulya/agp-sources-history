@@ -17,6 +17,7 @@
 package com.android.utils;
 
 import static com.android.SdkConstants.DOT_9PNG;
+import static com.android.SdkConstants.DOT_AVIF;
 import static com.android.SdkConstants.DOT_BMP;
 import static com.android.SdkConstants.DOT_GIF;
 import static com.android.SdkConstants.DOT_JPEG;
@@ -137,6 +138,30 @@ public class SdkUtils {
             int firstLineWidth,
             int nextLineWidth,
             @Nullable String hangingIndent) {
+        return wrap(text, firstLineWidth, nextLineWidth, hangingIndent, true);
+    }
+
+    /**
+     * Wraps the given text at the given line width, with an optional hanging
+     * indent.
+     *
+     * @param text           the text to be wrapped
+     * @param firstLineWidth the line width to wrap the text to (on the first line)
+     * @param nextLineWidth  the line width to wrap the text to (on subsequent lines).
+     *                       This does not include the hanging indent, if any.
+     * @param hangingIndent  the hanging indent (to be used for the second and
+     *                       subsequent lines in each paragraph, or null if not known
+     * @param forceBreak     whether to force a newline in the middle of a long word
+     *                       that doesn't fit on a single line
+     * @return the string, wrapped
+     */
+    @NonNull
+    public static String wrap(
+            @NonNull String text,
+            int firstLineWidth,
+            int nextLineWidth,
+            @Nullable String hangingIndent,
+            boolean forceBreak) {
         if (hangingIndent == null) {
             hangingIndent = "";
         }
@@ -166,6 +191,17 @@ public class SdkUtils {
                         // No space anywhere on the line: it contains something wider than
                         // can fit (like a long URL) so just hard break it
                         next = lineEnd;
+                        if (!forceBreak) {
+                            while (next < explanationLength) {
+                                char c = text.charAt(next);
+                                if (Character.isWhitespace(c)) {
+                                    break;
+                                } else {
+                                    lineEnd++;
+                                    next++;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -176,7 +212,7 @@ public class SdkUtils {
                 lineWidth = nextLineWidth - hangingIndent.length();
             }
 
-            sb.append(text.substring(index, lineEnd));
+            sb.append(text, index, lineEnd);
             sb.append('\n');
             index = next;
         }
@@ -331,7 +367,7 @@ public class SdkUtils {
     }
 
     public static final List<String> IMAGE_EXTENSIONS = ImmutableList.of(
-            DOT_PNG, DOT_9PNG, DOT_GIF, DOT_JPEG, DOT_JPG, DOT_BMP, DOT_WEBP);
+            DOT_PNG, DOT_9PNG, DOT_GIF, DOT_JPEG, DOT_JPG, DOT_BMP, DOT_WEBP, DOT_AVIF);
 
     /**
      * Returns true if the given file path points to an image file recognized by
