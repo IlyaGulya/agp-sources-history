@@ -727,8 +727,8 @@ abstract class AndroidLintTask : NonIncrementalTask() {
                     .map { it.equals("true", ignoreCase = true) }.orElse(false)
             )
         }
-        systemPropertyInputs.initialize(project.providers)
-        environmentVariableInputs.initialize(project.providers)
+        systemPropertyInputs.initialize(project.providers, isForAnalysis = false)
+        environmentVariableInputs.initialize(project.providers, isForAnalysis = false)
     }
 
     fun configureForStandalone(
@@ -765,7 +765,9 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         // Do not support check dependencies in the standalone lint plugin
         this.variantInputs.initializeForStandalone(project, javaPluginConvention, projectOptions, checkDependencies=false)
         this.lintRulesJar.fromDisallowChanges(customLintChecksConfig)
-        this.lintModelDirectory.setDisallowChanges(project.layout.buildDirectory.dir("intermediates/android-lint-model"))
+        this.lintModelDirectory.setDisallowChanges(
+            project.layout.buildDirectory.dir("intermediates/${this.name}/android-lint-model")
+        )
         this.partialResults.setDisallowChanges(partialResults)
         this.lintModelWriterTaskOutputPath.setDisallowChanges(
             lintModelWriterTaskOutputDir.absolutePath
