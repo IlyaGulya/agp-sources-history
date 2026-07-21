@@ -22,7 +22,6 @@ import static com.android.build.gradle.internal.publishing.AndroidArtifacts.Cons
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
-import com.android.annotations.concurrency.GuardedBy;
 import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.IncrementalTask;
@@ -44,6 +43,7 @@ import com.google.common.collect.Multimap;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -66,52 +66,43 @@ public class AidlCompile extends IncrementalTask {
     private static final String DEPENDENCY_STORE = "dependency.store";
     private static final PatternSet PATTERN_SET = new PatternSet().include("**/*.aidl");
 
-    // ----- PUBLIC TASK API -----
     private File sourceOutputDir;
+
     @Nullable
     private File packagedDir;
+
     @Nullable
     private Collection<String> packageWhitelist;
 
-    // ----- PRIVATE TASK API -----
+    private Supplier<Collection<File>> sourceDirs;
+    private FileCollection importDirs;
+
     @Input
     public String getBuildToolsVersion() {
         return getBuildTools().getRevision().toString();
     }
-    private Supplier<Collection<File>> sourceDirs;
-    private FileCollection importDirs;
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
     public FileTree getSourceFiles() {
         // this is because aidl may be in the same folder as Java and we want to restrict to
         // .aidl files and not java files.
-        FileTree src = null;
-        Collection<File> sources = sourceDirs.get();
-        if (!sources.isEmpty()) {
-            src = getProject().files(sources).getAsFileTree().matching(PATTERN_SET);
-        }
-        return src == null ? getProject().files().getAsFileTree() : src;
+        return getProject().files(sourceDirs.get()).getAsFileTree().matching(PATTERN_SET);
     }
 
     private static class DepFileProcessor implements DependencyFileProcessor {
-
-        @GuardedBy("this")
-        List<DependencyData> dependencyDataList = Lists.newArrayList();
+        List<DependencyData> dependencyDataList =
+                Collections.synchronizedList(Lists.newArrayList());
 
         List<DependencyData> getDependencyDataList() {
-            synchronized (this) {
-                return dependencyDataList;
-            }
+            return dependencyDataList;
         }
 
         @Override
         public DependencyData processFile(@NonNull File dependencyFile) throws IOException {
             DependencyData data = DependencyData.parseDependencyFile(dependencyFile);
             if (data != null) {
-                synchronized (this) {
-                    dependencyDataList.add(data);
-                }
+                dependencyDataList.add(data);
             }
 
             return data;
@@ -297,10 +288,8 @@ public class AidlCompile extends IncrementalTask {
     private File getSourceFolder(@NonNull File file) {
         File parentDir = file;
         while ((parentDir = parentDir.getParentFile()) != null) {
-            for (File folder : sourceDirs.get()) {
-                if (parentDir.equals(folder)) {
-                    return folder;
-                }
+            if (sourceDirs.get().contains(parentDir)) {
+                return parentDir;
             }
         }
 

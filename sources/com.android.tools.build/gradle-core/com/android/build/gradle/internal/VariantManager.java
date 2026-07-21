@@ -1068,7 +1068,9 @@ public class VariantManager implements VariantModel {
                                 .setMinifyEnabled(variantScope.getCodeShrinker() != null)
                                 .setUseMultidex(variantConfig.isMultiDexEnabled())
                                 .setUseLegacyMultidex(variantConfig.isLegacyMultiDexMode())
-                                .setVariantType(variantData.getType().getAnalyticsVariantType());
+                                .setVariantType(variantData.getType().getAnalyticsVariantType())
+                                .setDexBuilder(AnalyticsUtil.toProto(variantScope.getDexer()))
+                                .setDexMerger(AnalyticsUtil.toProto(variantScope.getDexMerger()));
 
                 if (variantConfig.getTargetSdkVersion().getApiLevel() > 0) {
                     profileBuilder.setTargetSdkVersion(
@@ -1085,8 +1087,7 @@ public class VariantManager implements VariantModel {
                         variantData.getScope().getJava8LangSupportType();
                 if (supportType != VariantScope.Java8LangSupport.INVALID
                         && supportType != VariantScope.Java8LangSupport.UNUSED) {
-                    profileBuilder.setJava8LangSupport(
-                            getJava8LangSupportForAnalytics(supportType));
+                    profileBuilder.setJava8LangSupport(AnalyticsUtil.toProto(supportType));
                 }
 
                 if (variantFactory.hasTestScope()) {
@@ -1164,24 +1165,5 @@ public class VariantManager implements VariantModel {
     @NonNull
     private ManifestAttributeSupplier getParser(@NonNull File file) {
         return manifestParserMap.computeIfAbsent(file, DefaultManifestParser::new);
-    }
-
-    @NonNull
-    private static GradleBuildVariant.Java8LangSupport getJava8LangSupportForAnalytics(
-            @NonNull VariantScope.Java8LangSupport type) {
-        Preconditions.checkArgument(
-                type != VariantScope.Java8LangSupport.UNUSED
-                        && type != VariantScope.Java8LangSupport.INVALID,
-                "Unsupported type");
-        switch (type) {
-            case RETROLAMBDA:
-                return GradleBuildVariant.Java8LangSupport.RETROLAMBDA;
-            case DEXGUARD:
-                return GradleBuildVariant.Java8LangSupport.DEXGUARD;
-            case DESUGAR:
-                return GradleBuildVariant.Java8LangSupport.INTERNAL;
-            default:
-                throw new AssertionError("Unrecognized type");
-        }
     }
 }

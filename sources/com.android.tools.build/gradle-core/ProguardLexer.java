@@ -1,4 +1,4 @@
-// $ANTLR 3.5.2 Proguard.g 2017-07-20 20:57:10
+// $ANTLR 3.5.2 Proguard.g 2017-07-31 13:51:02
 
 package com.android.build.gradle.shrinker.parser;
 
