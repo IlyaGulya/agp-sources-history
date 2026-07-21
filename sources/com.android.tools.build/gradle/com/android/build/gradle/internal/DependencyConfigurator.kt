@@ -692,7 +692,7 @@ class DependencyConfigurator(
             dimension: String,
             alternateMap: Map<String, List<String>>
         ) {
-            val attr = ProductFlavorAttr.of(dimension)
+            val attr = Attribute.of(dimension, ProductFlavorAttr::class.java)
             val flavorStrategy = schema.attribute(attr)
             flavorStrategy
                 .compatibilityRules

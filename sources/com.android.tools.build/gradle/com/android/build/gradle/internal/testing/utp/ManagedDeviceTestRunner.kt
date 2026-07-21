@@ -35,9 +35,9 @@ class ManagedDeviceTestRunner(
     private val configFactory: UtpConfigFactory = UtpConfigFactory(),
     private val runUtpTestSuiteAndWaitFunc: (
         List<UtpRunnerConfig>, String, String, File, ILogger
-    ) -> List<Boolean> = { runnerConfigs, projectName, variantName, resultsDir, logger ->
+    ) -> List<Boolean> = { runnerConfigs, projectPath, variantName, resultsDir, logger ->
         runUtpTestSuiteAndWait(
-            runnerConfigs, workerExecutor, projectName, variantName, resultsDir, logger,
+            runnerConfigs, workerExecutor, projectPath, variantName, resultsDir, logger,
             null, utpDependencies)
     }
 ) {
@@ -45,7 +45,7 @@ class ManagedDeviceTestRunner(
         managedDevice: UtpManagedDevice,
         outputDirectory: File,
         coverageOutputDirectory: File,
-        projectName: String,
+        projectPath: String,
         variantName: String,
         testData: StaticTestData,
         additionalInstallOptions: List<String>,
@@ -67,16 +67,17 @@ class ManagedDeviceTestRunner(
                     mkdirs()
                 }
             }
+            val shardedManagedDevice = if (numShards == null) {
+                managedDevice
+            } else {
+                managedDevice.forShard(currentShard)
+            }
             val runnerConfigProto: (
                 UtpTestResultListenerServerMetadata,
                 File
             ) -> RunnerConfigProto.RunnerConfig = { resultListenerServerMetadata, utpTmpDir ->
                     configFactory.createRunnerConfigProtoForManagedDevice(
-                        if (shardConfig == null) {
-                            managedDevice
-                        } else {
-                            managedDevice.forShard(currentShard)
-                        },
+                        shardedManagedDevice,
                         testData,
                         testedApks,
                         additionalInstallOptions,
@@ -93,17 +94,18 @@ class ManagedDeviceTestRunner(
                     )
                 }
             runnerConfigs.add(UtpRunnerConfig(
-                managedDevice.deviceName,
-                managedDevice.id,
+                shardedManagedDevice.deviceName,
+                shardedManagedDevice.id,
                 utpOutputDir,
                 runnerConfigProto,
-                configFactory.createServerConfigProto()
+                configFactory.createServerConfigProto(),
+                shardConfig
             ))
         }
 
         val results = runUtpTestSuiteAndWaitFunc(
             runnerConfigs,
-            projectName,
+            projectPath,
             variantName,
             outputDirectory,
             logger

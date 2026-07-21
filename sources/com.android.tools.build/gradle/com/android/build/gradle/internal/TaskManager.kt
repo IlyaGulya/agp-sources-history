@@ -150,7 +150,6 @@ import com.android.build.gradle.internal.tasks.databinding.DataBindingGenBaseCla
 import com.android.build.gradle.internal.tasks.databinding.DataBindingMergeBaseClassLogTask
 import com.android.build.gradle.internal.tasks.databinding.DataBindingMergeDependencyArtifactsTask
 import com.android.build.gradle.internal.tasks.databinding.DataBindingTriggerTask
-import com.android.build.gradle.internal.tasks.databinding.KAPT_FIX_KOTLIN_VERSION
 import com.android.build.gradle.internal.tasks.databinding.MergeRFilesForDataBindingTask
 import com.android.build.gradle.internal.tasks.factory.TaskConfigAction
 import com.android.build.gradle.internal.tasks.factory.TaskFactory
@@ -170,7 +169,6 @@ import com.android.build.gradle.internal.transforms.ShrinkResourcesNewShrinkerTa
 import com.android.build.gradle.internal.utils.KOTLIN_KAPT_PLUGIN_ID
 import com.android.build.gradle.internal.utils.addComposeArgsToKotlinCompile
 import com.android.build.gradle.internal.utils.getKotlinCompile
-import com.android.build.gradle.internal.utils.getProjectKotlinPluginKotlinVersion
 import com.android.build.gradle.internal.utils.isKotlinKaptPluginApplied
 import com.android.build.gradle.internal.utils.isKotlinPluginApplied
 import com.android.build.gradle.internal.utils.recordIrBackendForAnalytics
@@ -1168,7 +1166,9 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                                     .build())
             creationConfig
                     .artifacts
-                    .appendTo(MultipleArtifact.ALL_CLASSES_DIRS, RUNTIME_R_CLASS_CLASSES)
+                    .appendTo(
+                            MultipleArtifact.ALL_CLASSES_DIRS,
+                            creationConfig.artifacts.get(RUNTIME_R_CLASS_CLASSES));
             return
         }
         createNonNamespacedResourceTasks(
@@ -1240,7 +1240,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                 }
                 artifacts.appendTo(
                         MultipleArtifact.ALL_CLASSES_JARS,
-                        COMPILE_AND_RUNTIME_NOT_NAMESPACED_R_CLASS_JAR)
+                        artifacts.get(COMPILE_AND_RUNTIME_NOT_NAMESPACED_R_CLASS_JAR));
 
                 if (!creationConfig.debuggable &&
                         !creationConfig.variantType.isForTesting &&
@@ -1389,7 +1389,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                 .artifacts
                 .appendTo(
                         MultipleArtifact.ALL_CLASSES_DIRS,
-                        JAVAC)
+                        creationConfig.artifacts.get(JAVAC));
     }
 
     /**
@@ -1735,12 +1735,14 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
     }
 
     protected fun createTestDevicesTasks() {
-        if (!shouldEnableUtp(projectOptions, extension.testOptions, variantType = null) ||
-                extension.testOptions.devices.isEmpty()) {
+        if (!shouldEnableUtp(projectOptions, extension.testOptions, variantType = null)) {
             return
         }
 
-        logger.warn("WARNING: The Gradle Managed Device DSL and associated tests are experimental")
+        if (extension.testOptions.devices.isNotEmpty()) {
+            logger.warn(
+                "WARNING: The Gradle Managed Device DSL and associated tests are experimental")
+        }
         val managedDevices = mutableListOf<ManagedVirtualDevice>()
         extension
                 .testOptions
@@ -1877,8 +1879,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
             }
         }
 
-        if (shouldEnableUtp(projectOptions, extension.testOptions, testedVariant.variantType) &&
-                extension.testOptions.devices.isNotEmpty()) {
+        if (shouldEnableUtp(projectOptions, extension.testOptions, testedVariant.variantType)) {
             // Now for each managed device defined in the dsl
             val managedDevices = mutableListOf<ManagedVirtualDevice>()
             extension
@@ -2288,14 +2289,8 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         if (dataBindingEnabled) {
             if (projectOptions[BooleanOption.NON_TRANSITIVE_R_CLASS]
                     && isKotlinKaptPluginApplied(project)) {
-                val kotlinVersion = getProjectKotlinPluginKotlinVersion(project)
-                if (kotlinVersion != null && kotlinVersion < KAPT_FIX_KOTLIN_VERSION) {
-                    // Before Kotlin version 1.5.20 there was an issue with KAPT resolving files
-                    // at configuration time. We only need this task as a workaround for it, if the
-                    // version is newer than 1.5.20 or KAPT isn't applied, we can skip it.
-                    taskFactory.register(
-                            MergeRFilesForDataBindingTask.CreationAction(creationConfig))
-                }
+                // TODO(183423660): Undo this workaround for KAPT resolving files at compile time
+                taskFactory.register(MergeRFilesForDataBindingTask.CreationAction(creationConfig))
             }
             taskFactory.register(DataBindingTriggerTask.CreationAction(creationConfig))
             setDataBindingAnnotationProcessorParams(creationConfig)
@@ -2310,8 +2305,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                 creationConfig,
                 logger.isDebugEnabled,
                 DataBindingBuilder.getPrintMachineReadableOutput(),
-                isKotlinKaptPluginApplied(project),
-                getProjectKotlinPluginKotlinVersion(project))
+                isKotlinKaptPluginApplied(project))
         // Even though at this point, the old variantDsl related objects are dead, the KAPT plugin
         // is using reflection to query the [CompilerArgumentProvider] to look if databinding is
         // turned on, so keep on adding to the [VariantDslInfo]'s list until KAPT switches to the
@@ -2329,7 +2323,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
     fun createPackagingTask(creationConfig: ApkCreationConfig) {
         // ApkVariantData variantData = (ApkVariantData) variantScope.getVariantData();
         val taskContainer = creationConfig.taskContainer
-        val signedApk = creationConfig.signingConfigImpl?.isSigningReady() ?: false
+        val signedApk = creationConfig.signingConfig?.isSigningReady() ?: false
 
         /*
          * PrePackaging step class that will look if the packaging of the main FULL_APK split is
@@ -2374,7 +2368,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                 null)
 
         // create the listing file redirect
-        taskFactory.register(
+        val ideRedirectFileTask = taskFactory.register(
             ListingFileRedirectTask.CreationAction(
                 creationConfig = creationConfig,
                 taskSuffix = "Apk",
@@ -2388,6 +2382,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                 .configure { task: Task ->
                     task.dependsOn(
                             creationConfig.artifacts.get(SingleArtifact.APK),
+                            ideRedirectFileTask
                     )
                 }
 
@@ -2411,7 +2406,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
     }
 
     protected fun createValidateSigningTask(creationConfig: ApkCreationConfig) {
-        if (creationConfig.signingConfigImpl?.isSigningReady() != true) {
+        if (creationConfig.signingConfig?.isSigningReady() != true) {
             return
         }
 
@@ -2570,7 +2565,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         }
     }
 
-    private fun createAssembleTask(component: ComponentImpl) {
+    fun createAssembleTask(component: ComponentImpl) {
         taskFactory.register(
                 component.computeTaskName("assemble"),
                 null /*preConfigAction*/,
@@ -2590,7 +2585,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         )
     }
 
-    private fun createBundleTask(component: ComponentImpl) {
+    fun createBundleTask(component: ComponentImpl) {
         taskFactory.register(
                 component.computeTaskName("bundle"),
                 null,
@@ -2598,6 +2593,8 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                     override fun configure(task: Task) {
                         task.description = "Assembles bundle for variant " + component.name
                         task.dependsOn(component.artifacts.get(SingleArtifact.BUNDLE))
+                        task.dependsOn(component.artifacts.get(InternalArtifactType.BUNDLE_IDE_MODEL))
+                        task.dependsOn(component.artifacts.get(InternalArtifactType.BUNDLE_IDE_REDIRECT_FILE))
                     }
                 },
                 object : TaskProviderCallback<Task> {

@@ -26,7 +26,6 @@ import static com.android.build.gradle.internal.publishing.AndroidArtifacts.Publ
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.PublishedConfigType.RUNTIME_ELEMENTS;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.PublishedConfigType.RUNTIME_PUBLICATION;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.PublishedConfigType.SOURCE_PUBLICATION;
-import static java.util.Objects.requireNonNull;
 import static org.gradle.api.attributes.Bundling.BUNDLING_ATTRIBUTE;
 import static org.gradle.api.attributes.Bundling.EXTERNAL;
 import static org.gradle.api.attributes.Category.CATEGORY_ATTRIBUTE;
@@ -219,7 +218,7 @@ public class VariantDependenciesBuilder {
         VariantType variantType = variantDslInfo.getVariantType();
         String buildType = variantDslInfo.getComponentIdentity().getBuildType();
         Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> consumptionFlavorMap =
-                getConsumptionFlavorAttributes(flavorSelection);
+                getFlavorAttributes(flavorSelection);
 
         final ConfigurationContainer configurations = project.getConfigurations();
         final DependencyHandler dependencies = project.getDependencies();
@@ -374,7 +373,7 @@ public class VariantDependenciesBuilder {
                                 : variantName);
 
         Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> publicationFlavorMap =
-                getElementsPublicationFlavorAttributes();
+                getFlavorAttributes(null);
 
         if (variantType.getPublishToOtherModules()) {
             // this is the configuration that contains the artifacts for inter-module
@@ -437,13 +436,14 @@ public class VariantDependenciesBuilder {
                                 Maps.newHashMap();
                         if (component.getAttributesConfig() != null) {
                             buildTypeAttribute = component.getAttributesConfig().getBuildType();
-                            for (String dimensionName :
-                                    component.getAttributesConfig().getFlavorDimensions()) {
-                                Attribute<ProductFlavorAttr> attribute =
-                                        ProductFlavorAttr.of(dimensionName);
-                                flavorAttributes.put(
-                                        attribute,
-                                        requireNonNull(publicationFlavorMap.get(attribute)));
+                            for (Map.Entry<Attribute<ProductFlavorAttr>, ProductFlavorAttr> entry :
+                                    publicationFlavorMap.entrySet()) {
+                                if (component
+                                        .getAttributesConfig()
+                                        .getFlavorDimensions()
+                                        .contains(entry.getKey().getName())) {
+                                    flavorAttributes.put(entry.getKey(), entry.getValue());
+                                }
                             }
                         }
 
@@ -775,27 +775,14 @@ public class VariantDependenciesBuilder {
         }
     }
 
-    private Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> getConsumptionFlavorAttributes(
-            @Nullable Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> flavorSelection) {
-        return getFlavorAttributes(flavorSelection, false);
-    }
-
-    private Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr>
-            getElementsPublicationFlavorAttributes() {
-        return getFlavorAttributes(null, true);
-    }
-
     /**
      * Returns a map of Configuration attributes containing all the flavor values.
      *
      * @param flavorSelection a list of override for flavor matching or for new attributes.
-     * @param addCompatibilityUnprefixedFlavorDimensionAttributes when true also add the previous
-     *     un-prefixed flavor dimension attributes for compatibility
      */
     @NonNull
     private Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> getFlavorAttributes(
-            @Nullable Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> flavorSelection,
-            boolean addCompatibilityUnprefixedFlavorDimensionAttributes) {
+            @Nullable Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> flavorSelection) {
         List<ProductFlavor> productFlavors = variantDslInfo.getProductFlavorList();
         Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> map =
                 Maps.newHashMapWithExpectedSize(productFlavors.size());
@@ -815,15 +802,8 @@ public class VariantDependenciesBuilder {
             assert f.getDimension() != null;
 
             map.put(
-                    ProductFlavorAttr.of(f.getDimension()),
+                    Attribute.of(f.getDimension(), ProductFlavorAttr.class),
                     objectFactory.named(ProductFlavorAttr.class, f.getName()));
-            // Compatibility for e.g. the hilt plugin creates its own configuration with the
-            // old-style attributes
-            if (addCompatibilityUnprefixedFlavorDimensionAttributes) {
-                map.put(
-                        Attribute.of(f.getDimension(), ProductFlavorAttr.class),
-                        objectFactory.named(ProductFlavorAttr.class, f.getName()));
-            }
         }
 
         // then go through the override or new attributes.

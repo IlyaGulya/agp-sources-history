@@ -17,12 +17,12 @@
 package com.android.build.gradle.internal.component
 
 import com.android.build.api.artifact.impl.ArtifactsImpl
+import com.android.build.api.component.ComponentIdentity
 import com.android.build.api.component.impl.TestComponentImpl
 import com.android.build.api.dsl.SdkComponents
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.variant.AndroidVersion
-import com.android.build.api.variant.ComponentIdentity
 import com.android.build.api.variant.JavaCompilation
 import com.android.build.api.variant.impl.VariantOutputList
 import com.android.build.api.variant.impl.VariantImpl
@@ -40,7 +40,6 @@ import com.android.build.gradle.internal.services.TaskCreationServices
 import com.android.build.gradle.internal.variant.BaseVariantData
 import com.android.build.gradle.internal.variant.VariantPathHelper
 import com.android.builder.core.VariantType
-import com.android.builder.model.ApiVersion
 import com.google.common.collect.ImmutableSet
 import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.file.Directory

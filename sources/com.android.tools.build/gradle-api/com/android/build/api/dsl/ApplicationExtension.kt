@@ -59,6 +59,7 @@ interface ApplicationExtension :
      *
      * For more information about the properties you can configure in this block, see [ApplicationPublishing]
      */
+    @get:Incubating
     val publishing: ApplicationPublishing
 
     /**
@@ -66,5 +67,6 @@ interface ApplicationExtension :
      *
      * For more information about the properties you can configure in this block, see [ApplicationPublishing]
      */
+    @Incubating
     fun publishing(action: ApplicationPublishing.() -> Unit)
 }

@@ -23,6 +23,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.android.SdkConstants;
 import com.android.Version;
 import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
 import com.android.build.api.component.impl.TestComponentImpl;
 import com.android.build.api.component.impl.TestFixturesImpl;
 import com.android.build.api.dsl.CommonExtension;
@@ -30,7 +31,6 @@ import com.android.build.api.extension.impl.VariantApiOperationsRegistrar;
 import com.android.build.api.variant.AndroidComponentsExtension;
 import com.android.build.api.variant.Variant;
 import com.android.build.api.variant.VariantBuilder;
-import com.android.build.api.variant.impl.ArtifactMetadataProcessor;
 import com.android.build.api.variant.impl.GradleProperty;
 import com.android.build.api.variant.impl.VariantBuilderImpl;
 import com.android.build.api.variant.impl.VariantImpl;
@@ -73,7 +73,7 @@ import com.android.build.gradle.internal.errors.SyncIssueReporterImpl;
 import com.android.build.gradle.internal.ide.ModelBuilder;
 import com.android.build.gradle.internal.ide.dependencies.LibraryDependencyCacheBuildService;
 import com.android.build.gradle.internal.ide.dependencies.MavenCoordinatesCacheBuildService;
-import com.android.build.gradle.internal.ide.v2.GlobalLibraryBuildService;
+import com.android.build.gradle.internal.ide.v2.GlobalSyncService;
 import com.android.build.gradle.internal.ide.v2.NativeModelBuilder;
 import com.android.build.gradle.internal.lint.LintFixBuildService;
 import com.android.build.gradle.internal.lint.LintFromMaven;
@@ -123,6 +123,7 @@ import com.google.common.base.CharMatcher;
 import com.google.wireless.android.sdk.stats.GradleBuildProfileSpan.ExecutionType;
 import com.google.wireless.android.sdk.stats.GradleBuildProject;
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -369,9 +370,8 @@ public abstract class BasePlugin<
                 project, mavenCoordinatesCacheBuildService
         ).execute();
 
-        new GlobalLibraryBuildService.RegistrationAction(
-                project, mavenCoordinatesCacheBuildService
-        ).execute();
+        new GlobalSyncService.RegistrationAction(project, mavenCoordinatesCacheBuildService)
+                .execute();
 
         extraModelInfo = new ExtraModelInfo();
 
@@ -557,6 +557,7 @@ public abstract class BasePlugin<
 
         registry.register(
                 new com.android.build.gradle.internal.ide.v2.ModelBuilder(
+                        project,
                         globalScope,
                         projectServices.getProjectOptions(),
                         variantModel,
@@ -720,7 +721,7 @@ public abstract class BasePlugin<
                     .setBuildToolsVersion(extension.getBuildToolsRevision().toString())
                     .setSplits(AnalyticsUtil.toProto(extension.getSplits()));
 
-            String kotlinPluginVersion = KgpUtils.getKotlinPluginVersion(project);
+            String kotlinPluginVersion = getKotlinPluginVersion();
             if (kotlinPluginVersion != null) {
                 projectBuilder.setKotlinPluginVersion(kotlinPluginVersion);
             }
@@ -799,7 +800,6 @@ public abstract class BasePlugin<
         variantManager.setHasCreatedTasks(true);
         for (ComponentInfo<VariantBuilderT, VariantT> variant : variants) {
             variant.getVariant().getArtifacts().ensureAllOperationsAreSatisfied();
-            ArtifactMetadataProcessor.Companion.wireAllFinalizedBy(variant.getVariant());
         }
         // notify our properties that configuration is over for us.
         GradleProperty.Companion.endOfEvaluation();
@@ -884,6 +884,29 @@ public abstract class BasePlugin<
     }
 
     /**
+     * returns the kotlin plugin version, or null if plugin is not applied to this project, or
+     * "unknown" if plugin is applied but version can't be determined.
+     */
+    @Nullable
+    private String getKotlinPluginVersion() {
+        Plugin plugin = project.getPlugins().findPlugin("kotlin-android");
+        if (plugin == null) {
+            return null;
+        }
+        try {
+            // No null checks below because we're catching all exceptions.
+            @SuppressWarnings("JavaReflectionMemberAccess")
+            Method method = plugin.getClass().getMethod("getKotlinPluginVersion");
+            method.setAccessible(true);
+            return method.invoke(plugin).toString();
+        } catch (Throwable e) {
+            // Defensively catch all exceptions because we don't want it to crash
+            // if kotlin plugin code changes unexpectedly.
+            return "unknown";
+        }
+    }
+
+    /**
      * If overridden in a subclass to return "true," the package Configuration will be named
      * "publish" instead of "apk"
      */
@@ -955,6 +978,9 @@ public abstract class BasePlugin<
                             + " to run. You are currently using Java "
                             + current.toString()
                             + ".\n"
+                            + "Your current JDK is located in  "
+                            + System.getProperty("java.home")
+                            + "\n"
                             + "You can try some of the following options:\n"
                             + "  - changing the IDE settings.\n"
                             + "  - changing the JAVA_HOME environment variable.\n"

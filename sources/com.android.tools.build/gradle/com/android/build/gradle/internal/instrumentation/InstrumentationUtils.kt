@@ -19,15 +19,12 @@ package com.android.build.gradle.internal.instrumentation
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.gradle.options.StringOption
 import com.google.common.collect.Lists
-import org.objectweb.asm.Opcodes
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 import java.lang.reflect.ParameterizedType
 import java.util.ServiceLoader
 import java.util.function.BiConsumer
-
-const val ASM_API_VERSION_FOR_INSTRUMENTATION = Opcodes.ASM9
 
 fun getParamsImplClass(factoryClass: Class<out AsmClassVisitorFactory<*>>): Class<*> {
     return (factoryClass.genericInterfaces[0] as ParameterizedType).actualTypeArguments[0] as Class<*>
@@ -72,11 +69,4 @@ fun loadTransformFunction(
     throw IllegalStateException(
             "Transform jar ${jarFile.absolutePath} must provide a BiConsumer<InputStream, OutputStream>"
     )
-}
-
-fun getJavaMajorVersionOfCompiledClass(byteCode: ByteArray): Int {
-    // first 4 bytes -> java magic value, next two bytes for the minor version and the next two
-    // bytes for the major version
-    val offset = 6
-    return ((byteCode[offset].toInt() shl 8) or (byteCode[offset + 1].toInt()))
 }

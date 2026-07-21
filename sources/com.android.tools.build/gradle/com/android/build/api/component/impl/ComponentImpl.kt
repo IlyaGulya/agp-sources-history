@@ -18,6 +18,8 @@ package com.android.build.api.component.impl
 
 import com.android.build.api.artifact.impl.ArtifactsImpl
 import com.android.build.api.attributes.ProductFlavorAttr
+import com.android.build.api.component.ComponentIdentity
+import com.android.build.api.component.Component
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.SdkComponents
 import com.android.build.api.extension.impl.VariantApiOperationsRegistrar
@@ -25,8 +27,6 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationParameters
 import com.android.build.api.instrumentation.InstrumentationScope
-import com.android.build.api.variant.Component
-import com.android.build.api.variant.ComponentIdentity
 import com.android.build.api.variant.JavaCompilation
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
@@ -49,7 +49,6 @@ import com.android.build.gradle.internal.dependency.AsmClassesTransform
 import com.android.build.gradle.internal.dependency.RecalculateStackFramesTransform
 import com.android.build.gradle.internal.dependency.VariantDependencies
 import com.android.build.gradle.internal.instrumentation.AsmClassVisitorsFactoryRegistry
-import com.android.build.gradle.internal.instrumentation.ASM_API_VERSION_FOR_INSTRUMENTATION
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope
@@ -85,6 +84,7 @@ import org.gradle.api.attributes.LibraryElements
 import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
+import org.gradle.api.file.RegularFile
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -145,7 +145,7 @@ abstract class ComponentImpl(
     // INTERNAL API
     // ---------------------------------------------------------------------------------------------
 
-    override val asmApiVersion = ASM_API_VERSION_FOR_INSTRUMENTATION
+    override val asmApiVersion = org.objectweb.asm.Opcodes.ASM9
 
     // this is technically a public API for the Application Variant (only)
     override val outputs: VariantOutputList
@@ -605,7 +605,9 @@ abstract class ComponentImpl(
         sourceSets.add(internalServices.fileTree(baseClassSource).builtBy(baseClassSource))
     }
 
-    /** Returns the path(s) to compiled R classes (R.jar). */
+    /**
+     * Returns the path(s) to compiled R classes (R.jar).
+     */
     fun getCompiledRClasses(configType: ConsumedConfigType): FileCollection {
         return if (services.projectInfo.getExtension().aaptOptions.namespaced) {
             internalServices.fileCollection().also { fileCollection ->
@@ -663,6 +665,51 @@ abstract class ComponentImpl(
         }
     }
 
+    /**
+     * Returns the artifact for the compiled R class
+     *
+     * This can be null for unit tests without resource support.
+     */
+    fun getCompiledRClassArtifact(): Provider<RegularFile>? {
+        return if (services.projectInfo.getExtension().aaptOptions.namespaced) {
+            artifacts.get(COMPILE_R_CLASS_JAR)
+        } else {
+            val variantType = variantDslInfo.variantType
+
+            if (testedConfig == null) {
+                // TODO(b/138780301): Also use it in android tests.
+                val useCompileRClassInApp = (internalServices
+                    .projectOptions[BooleanOption
+                    .ENABLE_APP_COMPILE_TIME_R_CLASS]
+                        && !variantType.isForTesting)
+                if (variantType.isAar || useCompileRClassInApp) {
+                    if (androidResourcesEnabled) {
+                        artifacts.get(COMPILE_R_CLASS_JAR)
+                    } else {
+                        null
+                    }
+                } else {
+                    Preconditions.checkState(
+                        variantType.isApk,
+                        "Expected APK type but found: $variantType"
+                    )
+
+                    artifacts.get(COMPILE_AND_RUNTIME_NOT_NAMESPACED_R_CLASS_JAR)
+                }
+            } else { // Android test or unit test
+                if (variantType === VariantTypeImpl.ANDROID_TEST) {
+                    artifacts.get(COMPILE_AND_RUNTIME_NOT_NAMESPACED_R_CLASS_JAR)
+                } else {
+                    if (androidResourcesEnabled) {
+                        variantScope.rJarForUnitTests
+                    } else {
+                        null
+                    }
+                }
+            }
+        }
+    }
+
      fun getCompiledBuildConfig(): FileCollection {
         val isBuildConfigJar = getBuildConfigType() == BuildConfigType.JAR
         val isAndroidTest = variantDslInfo.variantType == VariantTypeImpl.ANDROID_TEST
@@ -697,7 +744,11 @@ abstract class ComponentImpl(
         // First, setup the requested value, which isn't the actual requested value, but
         // the variant name, modified
         val requestedValue = VariantManager.getModifiedName(name)
-        val attributeKey = ProductFlavorAttr.of(dimension)
+        val attributeKey =
+            Attribute.of(
+                dimension,
+                ProductFlavorAttr::class.java
+            )
         val attributeValue: ProductFlavorAttr = internalServices.named(
             ProductFlavorAttr::class.java, requestedValue
         )

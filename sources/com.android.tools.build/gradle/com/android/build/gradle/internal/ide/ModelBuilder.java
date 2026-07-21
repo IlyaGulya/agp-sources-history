@@ -928,9 +928,9 @@ public class ModelBuilder<Extension extends BaseExtension>
         com.android.build.api.variant.impl.SigningConfigImpl signingConfig = null;
         boolean isSigningReady = false;
         if (component instanceof ApkCreationConfig) {
-            signingConfig = ((ApkCreationConfig) component).getSigningConfigImpl();
+            signingConfig = ((ApkCreationConfig) component).getSigningConfig();
             if (signingConfig != null) {
-                isSigningReady = signingConfig.hasConfig() && signingConfig.isSigningReady();
+                isSigningReady = signingConfig.isSigningReady();
             }
         }
         String signingConfigName = null;

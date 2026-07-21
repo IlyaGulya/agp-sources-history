@@ -51,7 +51,7 @@ abstract class ListingFileRedirectTask: NonIncrementalTask() {
     abstract val redirectFile: RegularFileProperty
 
     @get:InputFile
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val listingFile: RegularFileProperty
 
     @TaskAction

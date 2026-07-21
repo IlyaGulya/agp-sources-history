@@ -22,15 +22,11 @@ import com.android.build.gradle.internal.profile.ProfileAwareWorkAction
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.tasks.factory.TaskCreationAction
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
-import com.android.build.gradle.internal.tasks.featuresplit.toIdString
 import com.android.build.gradle.internal.utils.setDisallowChanges
-import org.gradle.api.artifacts.ArtifactCollection
-import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.internal.project.ProjectIdentifier
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
@@ -41,14 +37,13 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskProvider
 import java.io.File
-import java.lang.RuntimeException
 
 @CacheableTask
 abstract class ProcessAssetPackManifestTask : NonIncrementalTask() {
 
-    @InputFiles
-    @PathSensitive(PathSensitivity.RELATIVE)
-    fun getAssetPackManifestFiles(): FileCollection = assetPackManifests.artifactFiles
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val assetPackManifests: ConfigurableFileCollection
 
     @get:OutputDirectory
     abstract val processedManifests: DirectoryProperty
@@ -57,20 +52,19 @@ abstract class ProcessAssetPackManifestTask : NonIncrementalTask() {
     abstract val applicationId: Property<String>
 
     @get:Input
-    val assetPackIds: Set<String>
-        get() = assetPackManifests.map { it.toIdString() }.toSet()
-
-    private lateinit var assetPackManifests: ArtifactCollection
+    lateinit var assetPackNames: Set<String>
+        private set
 
     override fun doTaskAction() {
-        assetPackManifests.forEach { assetPackManifestArtifact ->
-            val projectId = assetPackManifestArtifact.id.componentIdentifier as?
-                    ProjectComponentIdentifier ?: throw RuntimeException("unexpected identifier type for $assetPackManifestArtifact")
+        for (assetPackManifest: File in assetPackManifests.files) {
+            val assetPackName = assetPackNames.first { assetPackName ->
+                assetPackManifest.absolutePath.contains(assetPackName)
+            }
 
             workerExecutor.noIsolation().submit(ProcessAssetPackManifestWorkAction::class.java) {
                 it.initializeFromAndroidVariantTask(this)
-                it.assetPackManifest.set(assetPackManifestArtifact.file)
-                it.assetPackName.set(projectId.projectPath.replace(":", File.separator))
+                it.assetPackManifest.set(assetPackManifest)
+                it.assetPackName.set(assetPackName)
                 it.applicationId.set(applicationId)
                 it.processedManifestsDir.set(processedManifests)
             }
@@ -80,7 +74,8 @@ abstract class ProcessAssetPackManifestTask : NonIncrementalTask() {
     internal class CreationForAssetPackBundleAction(
         private val artifacts: ArtifactsImpl,
         private val applicationId: String,
-        private val assetPackManifestFileCollection: ArtifactCollection
+        private val assetPackManifestFileCollection: FileCollection,
+        private val assetPackNames: Set<String>
     ) : TaskCreationAction<ProcessAssetPackManifestTask>() {
 
         override val type = ProcessAssetPackManifestTask::class.java
@@ -96,13 +91,15 @@ abstract class ProcessAssetPackManifestTask : NonIncrementalTask() {
         override fun configure(task: ProcessAssetPackManifestTask) {
             task.configureVariantProperties(variantName = "", task.project)
             task.applicationId.setDisallowChanges(applicationId)
-            task.assetPackManifests = assetPackManifestFileCollection
+            task.assetPackManifests.from(assetPackManifestFileCollection)
+            task.assetPackNames = assetPackNames
         }
     }
 
     internal class CreationAction(
         creationConfig: ApkCreationConfig,
-        private val assetPackManifestFileCollection: ArtifactCollection
+        private val assetPackManifestFileCollection: FileCollection,
+        private val assetPackNames: Set<String>
     ) : VariantTaskCreationAction<ProcessAssetPackManifestTask, ApkCreationConfig>(
         creationConfig
     ) {
@@ -124,7 +121,8 @@ abstract class ProcessAssetPackManifestTask : NonIncrementalTask() {
         ) {
             super.configure(task)
             task.applicationId.setDisallowChanges(creationConfig.applicationId)
-            task.assetPackManifests = assetPackManifestFileCollection
+            task.assetPackManifests.from(assetPackManifestFileCollection)
+            task.assetPackNames = assetPackNames
         }
     }
 }

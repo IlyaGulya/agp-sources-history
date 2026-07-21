@@ -22,7 +22,6 @@ import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.setDisallowChanges
-import com.android.utils.usLocaleCapitalize
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.collect.ImmutableList
 import com.google.common.io.Closeables
@@ -177,8 +176,7 @@ abstract class JacocoReportTask : NonIncrementalTask() {
             creationConfig.artifacts.setTaskInputToFinalProduct(
                 InternalArtifactType.UNIT_TEST_CODE_COVERAGE, task.jacocoUnitTestCoverageFile)
             /** Jacoco coverage files are generated from [AndroidUnitTest] */
-            task.dependsOn(
-                "${JavaPlugin.TEST_TASK_NAME}${creationConfig.name.usLocaleCapitalize()}")
+            task.dependsOn(JavaPlugin.TEST_TASK_NAME)
         }
     }
 
@@ -197,6 +195,7 @@ abstract class JacocoReportTask : NonIncrementalTask() {
                     InternalArtifactType.CODE_COVERAGE,
                     task.jacocoConnectedTestsCoverageDir
                 )
+
         }
     }
 

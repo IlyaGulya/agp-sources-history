@@ -66,7 +66,7 @@ data class UtpRunnerConfig(
 fun runUtpTestSuiteAndWait(
     runnerConfigs: List<UtpRunnerConfig>,
     workerExecutor: WorkerExecutor,
-    projectName: String,
+    projectPath: String,
     variantName: String,
     resultsDir: File,
     logger: ILogger,
@@ -100,7 +100,7 @@ fun runUtpTestSuiteAndWait(
                     } else {
                         "${config.deviceName}_${config.shardConfig.index}"
                     },
-                    projectName,
+                    projectPath,
                     variantName,
                     logger).apply {
                     setReportDir(resultsDir)
@@ -129,9 +129,7 @@ fun runUtpTestSuiteAndWait(
                 val resultsProto = resultsProto
                 val testPassed = if (resultsProto != null) {
                     val testResultPbFile = File(config.utpOutputDir, "test-result.pb")
-                    testResultPbFile.outputStream().use {
-                        resultsProto.writeTo(it)
-                    }
+                    resultsProto.writeTo(testResultPbFile.outputStream())
                     logger.quiet(
                         "\nTest results saved as ${testResultPbFile.toURI()}. " +
                                 "Inspect these results in Android Studio by selecting Run > Import Tests " +

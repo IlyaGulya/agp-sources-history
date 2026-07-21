@@ -26,10 +26,6 @@ interface ApplicationVariant : GeneratesApk, Variant, HasAndroidTest, HasTestFix
 
     /**
      * Variant's application ID as present in the final manifest file of the APK.
-     *
-     * Setting this value will override anything set via the DSL with
-     * [com.android.build.api.dsl.ApplicationBaseFlavor.applicationId], and
-     * [com.android.build.api.dsl.ApplicationVariantDimension.applicationIdSuffix]
      */
     override val applicationId: Property<String>
 
@@ -46,7 +42,17 @@ interface ApplicationVariant : GeneratesApk, Variant, HasAndroidTest, HasTestFix
      * Variant's signingConfig, initialized by the corresponding DSL element.
      * @return Variant's config or null if the variant is not configured for signing.
      */
-    val signingConfig: SigningConfig
+    val signingConfig: SigningConfig?
+
+    @Suppress("DEPRECATION")
+    @Deprecated(
+        message= "Use the com.android.build.api.variant.AndroidTest",
+        replaceWith = ReplaceWith(
+            "AndroidTest?",
+            "com.android.build.api.variant.AndroidTest"),
+        level = DeprecationLevel.WARNING
+    )
+    override val androidTest: com.android.build.api.component.AndroidTest?
 
     /**
      * Variant's information related to the bundle creation configuration.

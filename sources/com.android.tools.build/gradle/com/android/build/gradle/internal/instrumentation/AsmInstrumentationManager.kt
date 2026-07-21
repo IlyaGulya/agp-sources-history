@@ -25,7 +25,6 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.MethodVisitor
-import org.objectweb.asm.Opcodes
 import java.io.BufferedOutputStream
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -73,31 +72,21 @@ class AsmInstrumentationManager(
         loadTransformFunction(jarFile, classLoader)
     }
 
-    private fun getClassWriterFlags(javaVersion: Int): Int =
+    private val classWriterFlags: Int =
         when (framesComputationMode) {
             FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_METHODS,
-            FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_CLASSES -> {
-                // Don't compute frames for bytecode compiled by a version older than java 6
-                if (javaVersion < Opcodes.V1_6) {
-                    ClassWriter.COMPUTE_MAXS
-                } else {
-                    ClassWriter.COMPUTE_FRAMES
-                }
-            }
+            FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_CLASSES ->
+                ClassWriter.COMPUTE_FRAMES
             else -> 0
         }
 
-    private fun getClassReaderFlags(javaVersion: Int): Int {
-        if (javaVersion < Opcodes.V1_6) {
-            return ClassReader.EXPAND_FRAMES
-        }
-        return when (framesComputationMode) {
+    private val classReaderFlags: Int =
+        when (framesComputationMode) {
             FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_CLASSES,
             FramesComputationMode.COMPUTE_FRAMES_FOR_ALL_CLASSES ->
                 ClassReader.SKIP_FRAMES
             else -> ClassReader.EXPAND_FRAMES
         }
-    }
 
     override fun close() {
         profilingTransformsClassLoaders.forEach(URLClassLoader::close)
@@ -198,15 +187,9 @@ class AsmInstrumentationManager(
             filteredVisitors.isNotEmpty() -> {
                 classInputStream.invoke().use {
                     val classContext = ClassContextImpl(classData, classesHierarchyResolver)
-                    val byteCode = performProfilingTransformations(it)
-                    val classReader = ClassReader(byteCode)
-                    val javaVersion = getJavaMajorVersionOfCompiledClass(byteCode)
+                    val classReader = ClassReader(performProfilingTransformations(it))
                     val classWriter =
-                        FixFramesClassWriter(
-                            classReader,
-                            getClassWriterFlags(javaVersion),
-                            classesHierarchyResolver
-                        )
+                        FixFramesClassWriter(classReader, classWriterFlags, classesHierarchyResolver)
                     var nextVisitor: ClassVisitor = classWriter
 
                     if (framesComputationMode == FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_CLASSES) {
@@ -217,12 +200,8 @@ class AsmInstrumentationManager(
                         nextVisitor = entry.createClassVisitor(classContext, nextVisitor)
                     }
 
-                    classReader.accept(nextVisitor, getClassReaderFlags(javaVersion))
-                    try {
-                        classWriter.toByteArray()
-                    } catch (e: Exception) {
-                        throw RuntimeException("Error occurred while instrumenting class $classFullName", e)
-                    }
+                    classReader.accept(nextVisitor, classReaderFlags)
+                    classWriter.toByteArray()
                 }
             }
             profilingTransforms.isNotEmpty() -> {

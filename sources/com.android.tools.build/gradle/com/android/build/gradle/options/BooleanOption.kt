@@ -24,8 +24,16 @@ import com.android.build.gradle.options.Version.VERSION_4_1
 import com.android.build.gradle.options.Version.VERSION_4_2
 import com.android.build.gradle.options.Version.VERSION_7_0
 import com.android.build.gradle.internal.errors.DeprecationReporter.DeprecationTarget.VERSION_8_0
+import com.android.build.gradle.options.Version.VERSION_7_2
 import com.android.build.gradle.options.Version.VERSION_BEFORE_4_0
 import com.android.builder.model.AndroidProject
+import com.android.builder.model.AndroidProject.PROPERTY_BUILD_MODEL_ONLY
+import com.android.builder.model.PROPERTY_BUILD_MODEL_V2_ONLY
+import com.android.builder.model.PROPERTY_BUILD_WITH_STABLE_IDS
+import com.android.builder.model.PROPERTY_DEPLOY_AS_INSTANT_APP
+import com.android.builder.model.PROPERTY_EXTRACT_INSTANT_APK
+import com.android.builder.model.PROPERTY_INVOKED_FROM_IDE
+import com.android.builder.model.PROPERTY_REFRESH_EXTERNAL_NATIVE_MODEL
 
 enum class BooleanOption(
     override val propertyName: String,
@@ -38,25 +46,25 @@ enum class BooleanOption(
      */
 
     // IDE properties
-    IDE_INVOKED_FROM_IDE(AndroidProject.PROPERTY_INVOKED_FROM_IDE, false, ApiStage.Stable),
-    IDE_BUILD_MODEL_ONLY_V2(com.android.builder.model.v2.models.AndroidProject.PROPERTY_BUILD_MODEL_ONLY, false, ApiStage.Stable),
-    @Deprecated("Use IDE_BUILD_MODEL_ONLY_V2")
-    IDE_BUILD_MODEL_ONLY(AndroidProject.PROPERTY_BUILD_MODEL_ONLY, false, ApiStage.Stable),
+    IDE_INVOKED_FROM_IDE(PROPERTY_INVOKED_FROM_IDE, false, ApiStage.Stable),
+    IDE_BUILD_MODEL_ONLY_V2(PROPERTY_BUILD_MODEL_V2_ONLY, false, ApiStage.Stable),
+    @Deprecated("This is for model v1 only. Please also use IDE_BUILD_MODEL_ONLY_V2")
+    IDE_BUILD_MODEL_ONLY(PROPERTY_BUILD_MODEL_ONLY, false, ApiStage.Stable),
     @Deprecated("Use IDE_BUILD_MODEL_ONLY_V2")
     IDE_BUILD_MODEL_ONLY_ADVANCED(AndroidProject.PROPERTY_BUILD_MODEL_ONLY_ADVANCED, false, ApiStage.Stable),
     @Deprecated("Use IDE_BUILD_MODEL_ONLY_V2")
     IDE_BUILD_MODEL_FEATURE_FULL_DEPENDENCIES(AndroidProject.PROPERTY_BUILD_MODEL_FEATURE_FULL_DEPENDENCIES, false, ApiStage.Stable),
-    IDE_REFRESH_EXTERNAL_NATIVE_MODEL(AndroidProject.PROPERTY_REFRESH_EXTERNAL_NATIVE_MODEL, false, ApiStage.Stable),
-    IDE_GENERATE_SOURCES_ONLY(AndroidProject.PROPERTY_GENERATE_SOURCES_ONLY, false, ApiStage.Stable),
+    IDE_REFRESH_EXTERNAL_NATIVE_MODEL(PROPERTY_REFRESH_EXTERNAL_NATIVE_MODEL, false, ApiStage.Stable),
+    //IDE_GENERATE_SOURCES_ONLY(AndroidProject.PROPERTY_GENERATE_SOURCES_ONLY, false, ApiStage.Stable),
 
     // tell bundletool to only extract instant APKs.
-    IDE_EXTRACT_INSTANT(AndroidProject.PROPERTY_EXTRACT_INSTANT_APK, false, ApiStage.Stable),
+    IDE_EXTRACT_INSTANT(PROPERTY_EXTRACT_INSTANT_APK, false, ApiStage.Stable),
 
     // Flag used to indicate a "deploy as instant" run configuration.
-    IDE_DEPLOY_AS_INSTANT_APP(AndroidProject.PROPERTY_DEPLOY_AS_INSTANT_APP, false, ApiStage.Stable),
+    IDE_DEPLOY_AS_INSTANT_APP(PROPERTY_DEPLOY_AS_INSTANT_APP, false, ApiStage.Stable),
 
     ENABLE_STUDIO_VERSION_CHECK("android.injected.studio.version.check", true, ApiStage.Stable),
-    ENABLE_STABLE_IDS("android.injected.enableStableIds", false, ApiStage.Stable),
+    ENABLE_STABLE_IDS(PROPERTY_BUILD_WITH_STABLE_IDS, false, ApiStage.Stable),
 
     // Features' default values
     BUILD_FEATURE_AIDL("android.defaults.buildfeatures.aidl", true, ApiStage.Stable),
@@ -190,8 +198,6 @@ enum class BooleanOption(
 
     ENABLE_INCREMENTAL_DATA_BINDING("android.databinding.incremental", true, FeatureStage.SoftlyEnforced(VERSION_8_0)),
 
-    /** Whether to use lint's partial analysis functionality. */
-    USE_LINT_PARTIAL_ANALYSIS("android.enableParallelLint", true, FeatureStage.SoftlyEnforced(VERSION_8_0)),
 
     ENABLE_RESOURCE_OPTIMIZATIONS("android.enableResourceOptimizations", true, FeatureStage.SoftlyEnforced(VERSION_8_0)),
 
@@ -424,6 +430,9 @@ enum class BooleanOption(
     ENABLE_SYMBOL_TABLE_CACHING("android.enableSymbolTableCaching", true, FeatureStage.Enforced(VERSION_7_0)),
 
     ENABLE_JVM_RESOURCE_COMPILER("android.enableJvmResourceCompiler", true, FeatureStage.Enforced(VERSION_7_0)),
+
+    /** Whether to use lint's partial analysis functionality. */
+    USE_LINT_PARTIAL_ANALYSIS("android.enableParallelLint", true, FeatureStage.Enforced(VERSION_7_2)),
 
     /* ----------------
      * REMOVED FEATURES

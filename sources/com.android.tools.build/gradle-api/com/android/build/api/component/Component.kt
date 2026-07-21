@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.ide.v2
+package com.android.build.api.component
 
-import com.android.builder.model.v2.ide.Library
-import com.android.builder.model.v2.models.GlobalLibraryMap
-import java.io.Serializable
-
-/**
- * Implementation of [GlobalLibraryMap] for serialization via the Tooling API.
- */
-data class GlobalLibraryMapImpl(
-    override val libraries: Map<String, Library>
-) : GlobalLibraryMap, Serializable {
-    companion object {
-        @JvmStatic
-        private val serialVersionUID: Long = 1L
-    }
-}
+@Deprecated(
+    message= "Use the com.android.build.api.variant package",
+    replaceWith = ReplaceWith(
+        "Component",
+        "com.android.build.api.variant.Component"
+    ),
+    level = DeprecationLevel.WARNING
+)
+interface Component: com.android.build.api.variant.Component

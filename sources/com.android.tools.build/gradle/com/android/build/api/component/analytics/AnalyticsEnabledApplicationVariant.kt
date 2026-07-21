@@ -17,7 +17,6 @@
 package com.android.build.api.component.analytics
 
 import com.android.build.api.variant.AndroidResources
-import com.android.build.api.variant.AndroidTest
 import com.android.build.api.variant.GeneratesApk
 import com.android.build.api.variant.ApkPackaging
 import com.android.build.api.variant.ApplicationVariant
@@ -61,15 +60,17 @@ open class AnalyticsEnabledApplicationVariant @Inject constructor(
             return delegate.dependenciesInfo
         }
 
-    val userVisibleSigningConfig: AnalyticsEnabledSigningConfig by lazy {
-        objectFactory.newInstance(
-            AnalyticsEnabledSigningConfig::class.java,
-            delegate.signingConfig,
-            stats
-        )
+    val userVisibleSigningConfig: AnalyticsEnabledSigningConfig? by lazy {
+        delegate.signingConfig?.let {
+            objectFactory.newInstance(
+                AnalyticsEnabledSigningConfig::class.java,
+                it,
+                stats
+            )
+        }
     }
 
-    override val signingConfig: SigningConfig
+    override val signingConfig: SigningConfig?
         get() {
             stats.variantApiAccessBuilder.addVariantPropertiesAccessBuilder().type =
                 VariantPropertiesMethodType.SIGNING_CONFIG_VALUE
@@ -86,7 +87,7 @@ open class AnalyticsEnabledApplicationVariant @Inject constructor(
         }
     }
 
-    override val androidTest: AndroidTest?
+    override val androidTest: com.android.build.api.component.AndroidTest?
         get() {
             stats.variantApiAccessBuilder.addVariantPropertiesAccessBuilder().type =
                 VariantPropertiesMethodType.ANDROID_TEST_VALUE

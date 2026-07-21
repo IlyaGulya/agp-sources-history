@@ -15,6 +15,7 @@
  */
 package com.android.build.gradle.internal.core
 
+import com.android.build.api.component.ComponentIdentity
 import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationProductFlavor
 import com.android.build.api.dsl.BuildType
@@ -24,7 +25,6 @@ import com.android.build.api.dsl.LibraryVariantDimension
 import com.android.build.api.dsl.ProductFlavor
 import com.android.build.api.dsl.VariantDimension
 import com.android.build.api.variant.BuildConfigField
-import com.android.build.api.variant.ComponentIdentity
 import com.android.build.api.variant.ResValue
 import com.android.build.api.variant.impl.MutableAndroidVersion
 import com.android.build.api.variant.impl.ResValueKeyImpl
@@ -510,13 +510,6 @@ open class VariantDslInfoImpl<CommonExtensionT: CommonExtension<*, *, *, *>> int
                 return services.provider(callable)
             }
 
-            // TODO: figure out whether it's worth it to put all this inside a Provider to make it lazy.
-            val injectedVersionName =
-                services.projectOptions[StringOption.IDE_VERSION_NAME_OVERRIDE]
-            if (injectedVersionName != null) {
-                return services.provider(Callable { injectedVersionName })
-            }
-
             // If the version name from the flavors is null, then we read from the manifest and combine
             // with suffixes, unless it's a test at which point we just return.
             // If the name is not-null, we just combine it with suffixes
@@ -578,13 +571,6 @@ open class VariantDslInfoImpl<CommonExtensionT: CommonExtension<*, *, *, *>> int
             if (variantType.isForTesting) {
                 val callable: Callable<Int?> = Callable { null }
                 return services.provider(callable)
-            }
-
-            // TODO: figure out whether it's worth it to put all this inside a Provider to make it lazy.
-            val injectedVersionCode =
-                services.projectOptions.get(IntegerOption.IDE_VERSION_CODE_OVERRIDE)
-            if (injectedVersionCode != null) {
-                return services.provider(Callable { injectedVersionCode })
             }
 
             // If the version code from the flavors is null, then we read from the manifest and combine

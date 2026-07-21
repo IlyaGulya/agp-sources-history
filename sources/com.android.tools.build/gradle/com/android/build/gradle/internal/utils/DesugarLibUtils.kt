@@ -209,7 +209,7 @@ private fun getDesugarLibLintFromTransform(
  */
 @CacheableTransform
 abstract class DesugarLibConfigExtractor : TransformAction<TransformParameters.None> {
-    @get:PathSensitive(PathSensitivity.NAME_ONLY)
+    @get:PathSensitive(PathSensitivity.NONE)
     @get:InputArtifact
     abstract val inputArtifact: Provider<FileSystemLocation>
 
@@ -246,7 +246,7 @@ abstract class DesugarLibLintExtractor : TransformAction<DesugarLibLintExtractor
     }
 
     @get:InputArtifact
-    @get:PathSensitive(PathSensitivity.NAME_ONLY)
+    @get:PathSensitive(PathSensitivity.NONE)
     abstract val inputArtifact: Provider<FileSystemLocation>
 
     override fun transform(outputs: TransformOutputs) {

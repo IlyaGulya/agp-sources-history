@@ -26,7 +26,7 @@ import java.io.File
  * An AndroidSourceDirectorySet represents a set of directory inputs for an Android project.
  */
 @Incubating
-interface AndroidSourceDirectorySet : Named {
+interface AndroidSourceDirectorySet : Named, PatternFilterable {
 
     /**
      * A concise name for the source directory (typically used to identify it in a collection).

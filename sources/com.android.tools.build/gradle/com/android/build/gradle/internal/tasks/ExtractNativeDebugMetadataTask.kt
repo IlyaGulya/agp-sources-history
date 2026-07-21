@@ -46,7 +46,6 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.IgnoreEmptyDirectories
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
@@ -98,7 +97,6 @@ abstract class ExtractNativeDebugMetadataTask : NonIncrementalTask() {
     // We need this inputFiles property because SkipWhenEmpty doesn't work for inputDir because it's
     // a DirectoryProperty
     @get:InputFiles
-    @get:IgnoreEmptyDirectories
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     val inputFiles: FileTree

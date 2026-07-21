@@ -50,7 +50,6 @@ import com.android.builder.core.BuilderConstants
 import com.android.builder.core.BuilderConstants.FD_FLAVORS
 import com.android.builder.core.BuilderConstants.FD_REPORTS
 import com.android.builder.core.BuilderConstants.MANAGED_DEVICE
-import com.android.builder.model.AndroidProject
 import com.android.builder.model.TestOptions
 import com.android.repository.Revision
 import com.android.utils.FileUtils
@@ -236,7 +235,7 @@ abstract class ManagedDeviceInstrumentationTestTask(): NonIncrementalTask(), And
                         managedDevice,
                         resultsOutDir,
                         codeCoverageOutDir,
-                        projectName,
+                        projectPath.get(),
                         testData.get().flavorName.get(),
                         testData.get().getAsStaticData(),
                         installOptions.getOrElse(listOf()),
@@ -384,18 +383,18 @@ abstract class ManagedDeviceInstrumentationTestTask(): NonIncrementalTask(), And
                             AndroidArtifacts.ArtifactType.CLASSES_JAR)
 
             val flavor: String? = testData.flavorName.get()
-            val flavorFolder = flavor?.let { "$FD_FLAVORS/$it"} ?: ""
+            val flavorFolder = if (flavor.isNullOrEmpty()) "" else "$FD_FLAVORS/$flavor"
             val deviceFolder = "$MANAGED_DEVICE/${device.name}"
             val subFolder = "/$deviceFolder/$flavorFolder"
 
-            val resultsLocation = extension.testOptions.resultsDir ?:
-                    "${task.project.buildDir}/${AndroidProject.FD_OUTPUTS}/" +
-                    BuilderConstants.FD_ANDROID_RESULTS
+            val resultsLocation =
+                extension.testOptions.resultsDir
+                    ?: "${task.project.buildDir}/${SdkConstants.FD_OUTPUTS}/${BuilderConstants.FD_ANDROID_RESULTS}"
             task.resultsDir.set(File(resultsLocation + subFolder))
 
-            val reportsLocation = extension.testOptions.reportDir ?:
-                    "${task.project.buildDir}/$FD_REPORTS/" +
-                    BuilderConstants.FD_ANDROID_TESTS
+            val reportsLocation =
+                extension.testOptions.reportDir
+                    ?: "${task.project.buildDir}/$FD_REPORTS/${BuilderConstants.FD_ANDROID_TESTS}"
             task.getReportsDir().set(File(reportsLocation + subFolder))
 
             task.project.configurations

@@ -176,13 +176,12 @@ abstract class UtpDependencies {
  */
 fun maybeCreateUtpConfigurations(project: Project) {
     UtpDependency.values().forEach { nitrogenDependency ->
-        project.configurations.findByName(nitrogenDependency.configurationName) ?:
-            project.configurations.create(nitrogenDependency.configurationName).apply {
-                isVisible = false
-                isTransitive = true
-                isCanBeConsumed = false
-                description = "A configuration to resolve the Unified Test Platform dependencies."
-            }
+        project.configurations.maybeCreate(nitrogenDependency.configurationName).apply {
+            isVisible = false
+            isTransitive = true
+            isCanBeConsumed = false
+            description = "A configuration to resolve the Unified Test Platform dependencies."
+        }
         project.dependencies.add(
                 nitrogenDependency.configurationName,
                 nitrogenDependency.mavenCoordinate())

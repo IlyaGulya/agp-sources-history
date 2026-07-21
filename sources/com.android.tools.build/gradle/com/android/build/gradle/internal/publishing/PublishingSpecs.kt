@@ -19,7 +19,6 @@ package com.android.build.gradle.internal.publishing
 import com.android.build.api.artifact.Artifact
 import com.android.build.api.artifact.SingleArtifact.APK
 import com.android.build.api.artifact.SingleArtifact.MERGED_MANIFEST
-import com.android.build.api.artifact.SingleArtifact.METADATA_LIBRARY_DEPENDENCIES_REPORT
 import com.android.build.api.artifact.SingleArtifact.OBFUSCATION_MAPPING_FILE
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.PublishedConfigType
@@ -62,6 +61,7 @@ import com.android.build.gradle.internal.scope.InternalArtifactType.MANIFEST_MET
 import com.android.build.gradle.internal.scope.InternalArtifactType.MERGED_JAVA_RES
 import com.android.build.gradle.internal.scope.InternalArtifactType.METADATA_FEATURE_DECLARATION
 import com.android.build.gradle.internal.scope.InternalArtifactType.METADATA_FEATURE_MANIFEST
+import com.android.build.gradle.internal.scope.InternalArtifactType.METADATA_LIBRARY_DEPENDENCIES_REPORT
 import com.android.build.gradle.internal.scope.InternalArtifactType.MODULE_AND_RUNTIME_DEPS_CLASSES
 import com.android.build.gradle.internal.scope.InternalArtifactType.MODULE_BUNDLE
 import com.android.build.gradle.internal.scope.InternalArtifactType.NATIVE_DEBUG_METADATA
@@ -74,7 +74,6 @@ import com.android.build.gradle.internal.scope.InternalArtifactType.PREFAB_PACKA
 import com.android.build.gradle.internal.scope.InternalArtifactType.PUBLIC_RES
 import com.android.build.gradle.internal.scope.InternalArtifactType.RENDERSCRIPT_HEADERS
 import com.android.build.gradle.internal.scope.InternalArtifactType.RES_STATIC_LIBRARY
-import com.android.build.gradle.internal.scope.InternalArtifactType.RUNTIME_APP_CLASSES_JAR
 import com.android.build.gradle.internal.scope.InternalArtifactType.RUNTIME_LIBRARY_CLASSES_DIR
 import com.android.build.gradle.internal.scope.InternalArtifactType.RUNTIME_LIBRARY_CLASSES_JAR
 import com.android.build.gradle.internal.scope.InternalArtifactType.SIGNING_CONFIG_DATA
@@ -134,8 +133,7 @@ class PublishingSpecs {
                 // the JarTransform will convert it back to CLASSES
                 // FIXME: stop using TYPE_JAR for APK_CLASSES
                 api(APP_CLASSES, ArtifactType.JAR)
-                api(APP_CLASSES, ArtifactType.CLASSES_JAR)
-                runtime(RUNTIME_APP_CLASSES_JAR, ArtifactType.CLASSES_JAR)
+                output(APP_CLASSES, ArtifactType.CLASSES_JAR)
                 output(JAVA_RES, ArtifactType.JAVA_RES)
                 api(OBFUSCATION_MAPPING_FILE, ArtifactType.APK_MAPPING)
 
@@ -173,8 +171,7 @@ class PublishingSpecs {
                 // the JarTransform will convert it back to CLASSES
                 // FIXME: stop using TYPE_JAR for APK_CLASSES
                 api(APP_CLASSES, ArtifactType.JAR)
-                api(APP_CLASSES, ArtifactType.CLASSES_JAR)
-                runtime(RUNTIME_APP_CLASSES_JAR, ArtifactType.CLASSES_JAR)
+                output(APP_CLASSES, ArtifactType.CLASSES_JAR)
                 output(JAVA_RES, ArtifactType.JAVA_RES)
                 api(OBFUSCATION_MAPPING_FILE, ArtifactType.APK_MAPPING)
 

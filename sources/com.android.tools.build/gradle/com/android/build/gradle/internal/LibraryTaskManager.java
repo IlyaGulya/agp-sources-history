@@ -80,6 +80,7 @@ import com.android.build.gradle.tasks.ProcessLibraryArtProfileTask;
 import com.android.build.gradle.tasks.ProcessLibraryManifest;
 import com.android.build.gradle.tasks.SourceJarTask;
 import com.android.build.gradle.tasks.ZipMergingTask;
+import com.android.build.gradle.tasks.sync.LibraryVariantModelTask;
 import com.android.builder.errors.IssueReporter;
 import com.android.builder.errors.IssueReporter.Type;
 import com.google.common.base.Preconditions;
@@ -125,13 +126,14 @@ public class LibraryTaskManager extends TaskManager<LibraryVariantBuilderImpl, L
 
         createAnchorTasks(libraryVariant);
 
-        taskFactory.register(new ExtractDeepLinksTask.CreationAction(libraryVariant));
+        taskFactory.register(new LibraryVariantModelTask.CreationAction(libraryVariant));
 
         // Create all current streams (dependencies mostly at this point)
         createDependencyStreams(libraryVariant);
 
         if (buildFeatures.getAndroidResources()) {
             createGenerateResValuesTask(libraryVariant);
+            taskFactory.register(new ExtractDeepLinksTask.CreationAction(libraryVariant));
         } else { // Resource processing is disabled.
             // TODO(b/147579629): add a warning for manifests containing resource references.
             if (extension.getAaptOptions().getNamespaced()) {

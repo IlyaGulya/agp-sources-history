@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.api.artifact.impl.ArtifactsImpl;
-import com.android.build.api.variant.ComponentIdentity;
+import com.android.build.api.component.ComponentIdentity;
 import com.android.build.api.variant.impl.VariantImpl;
 import com.android.build.gradle.BaseExtension;
 import com.android.build.gradle.internal.PostprocessingFeatures;
@@ -131,9 +131,6 @@ public class VariantScopeImpl implements VariantScope {
                 PublishingSpecs.getVariantSpec(variantDslInfo.getVariantType());
         this.testedVariantProperties = testedVariantProperties;
 
-        if (globalScope.isActive(OptionalCompilationStep.INSTANT_DEV)) {
-            throw new RuntimeException("InstantRun mode is not supported");
-        }
         this.postProcessingOptions = variantDslInfo.getPostProcessingOptions();
 
         configureNdk();

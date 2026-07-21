@@ -204,13 +204,22 @@ class ApplicationTaskManager(
 
         if (assetPacks.isNotEmpty()) {
             val assetPackManifest =
-                assetPackManifestConfiguration.incoming.artifacts
+                assetPackManifestConfiguration.incoming.files
             val assetFiles = assetPackFilesConfiguration.incoming.files
 
             taskFactory.register(
                 ProcessAssetPackManifestTask.CreationAction(
                         appVariant,
-                    assetPackManifest
+                    assetPackManifest,
+                    assetPacks
+                        .stream()
+                        .map { assetPackName: String ->
+                            assetPackName.replace(
+                                ":",
+                                File.separator
+                            )
+                        }
+                        .collect(Collectors.toSet())
                 )
             )
             taskFactory.register(
@@ -281,7 +290,7 @@ class ApplicationTaskManager(
 
             taskFactory.register(AnchorTaskNames.getExtractApksAnchorTaskName(variant)) {
                 it.dependsOn(variant.artifacts.get(
-                    InternalArtifactType.EXTRACTED_APKS
+                    InternalArtifactType.APK_FROM_BUNDLE_IDE_REDIRECT_FILE
                 ))
             }
 

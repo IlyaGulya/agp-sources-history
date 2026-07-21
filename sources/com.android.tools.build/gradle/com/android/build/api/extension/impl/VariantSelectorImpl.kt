@@ -20,7 +20,8 @@ import com.android.build.api.variant.ComponentIdentity
 import com.android.build.api.variant.VariantSelector
 import java.util.regex.Pattern
 
-open class VariantSelectorImpl : VariantSelector {
+open class VariantSelectorImpl :
+    VariantSelector, com.android.build.api.extension.VariantSelector {
 
     override fun all(): VariantSelectorImpl = this
 

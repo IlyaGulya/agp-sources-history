@@ -19,11 +19,10 @@ package com.android.build.api.variant
 import com.android.build.api.dsl.ApplicationExtension
 
 /**
- * Extension for the Android Application Gradle Plugin components.
+ * Extension for Application module variant.
  *
- * This is the `androidComponents` block when the `com.android.application` plugin is applied.
- *
- * Only the Android Gradle Plugin should create instances of interfaces in com.android.build.api.variant.
+ * An application module is created when a build script is applying the 'com.android.application'
+ * plugin.
  */
 interface ApplicationAndroidComponentsExtension:
     AndroidComponentsExtension<ApplicationExtension, ApplicationVariantBuilder, ApplicationVariant>

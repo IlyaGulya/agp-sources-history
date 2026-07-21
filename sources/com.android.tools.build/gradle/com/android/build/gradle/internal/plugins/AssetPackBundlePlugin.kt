@@ -196,7 +196,8 @@ class AssetPackBundlePlugin : Plugin<Project> {
             ProcessAssetPackManifestTask.CreationForAssetPackBundleAction(
                 artifacts,
                 extension.applicationId,
-                assetPackManifestConfiguration.incoming.artifacts
+                assetPackManifestConfiguration,
+                extension.assetPacks.map { it.replace(':', File.separatorChar) }.toSet()
             )
         )
 

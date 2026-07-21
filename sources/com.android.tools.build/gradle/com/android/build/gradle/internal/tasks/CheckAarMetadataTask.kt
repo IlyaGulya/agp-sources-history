@@ -51,7 +51,6 @@ import org.gradle.workers.WorkParameters
 import java.io.File
 import java.io.Serializable
 import java.util.Properties
-import javax.inject.Inject
 
 /** A task that reads the dependencies' AAR metadata files and checks for compatibility */
 @CacheableTask
@@ -79,9 +78,6 @@ abstract class CheckAarMetadataTask : NonIncrementalTask() {
 
     @get:Input
     abstract val compileSdkVersion: Property<String>
-
-    @get:Internal
-    abstract val projectPath: Property<String>
 
     @get:Input
     abstract val agpVersion: Property<String>
@@ -144,21 +140,18 @@ abstract class CheckAarMetadataTask : NonIncrementalTask() {
                 creationConfig.globalScope.extension.compileSdkVersion
                     ?: throw RuntimeException("compileSdkVersion is not specified.")
             )
-            task.projectPath.setDisallowChanges(task.project.path)
             task.agpVersion.setDisallowChanges(Version.ANDROID_GRADLE_PLUGIN_VERSION)
         }
     }
 }
 
 /** [WorkAction] to check AAR metadata files */
-abstract class CheckAarMetadataWorkAction @Inject constructor(
-    private val checkAarMetadataWorkParameters: CheckAarMetadataWorkParameters
-): WorkAction<CheckAarMetadataWorkParameters> {
+abstract class CheckAarMetadataWorkAction: WorkAction<CheckAarMetadataWorkParameters> {
 
     override fun execute() {
         val errorMessages: MutableList<String> =
             mutableListOf("One or more issues found when checking AAR metadata values:")
-        checkAarMetadataWorkParameters.aarMetadataArtifacts.get().forEach {
+        parameters.aarMetadataArtifacts.get().forEach {
             checkAarMetadataArtifact(it, errorMessages)
         }
         if (errorMessages.size > 1) {
@@ -190,7 +183,7 @@ abstract class CheckAarMetadataWorkAction @Inject constructor(
             try {
                 val majorAarVersion = Revision.parseRevision(aarFormatVersion).major
                 val maxMajorAarVersion =
-                    Revision.parseRevision(checkAarMetadataWorkParameters.aarFormatVersion.get())
+                    Revision.parseRevision(parameters.aarFormatVersion.get())
                         .major
                 if (majorAarVersion > maxMajorAarVersion) {
                     errorMessages.add(
@@ -232,7 +225,7 @@ abstract class CheckAarMetadataWorkAction @Inject constructor(
             try {
                 val majorAarMetadataVersion = Revision.parseRevision(aarMetadataVersion).major
                 val maxMajorAarMetadataVersion =
-                    Revision.parseRevision(checkAarMetadataWorkParameters.aarMetadataVersion.get())
+                    Revision.parseRevision(parameters.aarMetadataVersion.get())
                         .major
                 if (majorAarMetadataVersion > maxMajorAarMetadataVersion) {
                     errorMessages.add(
@@ -274,14 +267,14 @@ abstract class CheckAarMetadataWorkAction @Inject constructor(
                         """.trimIndent()
                 )
             } else {
-                val compileSdkVersion = checkAarMetadataWorkParameters.compileSdkVersion.get()
+                val compileSdkVersion = parameters.compileSdkVersion.get()
                 val compileSdkVersionInt = getApiIntFromString(compileSdkVersion)
                 if (minCompileSdkInt > compileSdkVersionInt) {
                     // TODO(b/199900566) - change compileSdkVersion to compileSdk for AGP 8.0.
                     errorMessages.add(
                         """
                             Dependency '$displayName' requires 'compileSdkVersion' to be set to $minCompileSdk or higher.
-                            Compilation target for module '${checkAarMetadataWorkParameters.projectPath.get()}' is '$compileSdkVersion'
+                            Compilation target for module '${parameters.projectPath.get()}' is '$compileSdkVersion'.
                             """.trimIndent()
                     )
                 }
@@ -307,12 +300,12 @@ abstract class CheckAarMetadataWorkAction @Inject constructor(
                 )
             } else {
                 val parsedAgpVersion =
-                    GradleVersion.parseAndroidGradlePluginVersion(checkAarMetadataWorkParameters.agpVersion.get())
+                    GradleVersion.parseAndroidGradlePluginVersion(parameters.agpVersion.get())
                 if (parsedMinAgpVersion > parsedAgpVersion) {
                     errorMessages.add(
                         """
                             Dependency '$displayName' requires an Android Gradle Plugin version of $minAgpVersion or higher.
-                            The Android Gradle Plugin version used for this build is ${checkAarMetadataWorkParameters.agpVersion.get()}.
+                            The Android Gradle Plugin version used for this build is ${parameters.agpVersion.get()}.
                             """.trimIndent()
                     )
                 }

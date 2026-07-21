@@ -31,6 +31,7 @@ import java.util.Collections
  *                   source.
  */
 abstract class ClassesDataSourceCache(val sourceType: SourceType) : Closeable {
+    private val asmApiVersion = org.objectweb.asm.Opcodes.ASM7
     private val loadedClassesData: MutableMap<String, ClassData> =
         Collections.synchronizedMap(mutableMapOf())
 
@@ -40,7 +41,7 @@ abstract class ClassesDataSourceCache(val sourceType: SourceType) : Closeable {
         val interfacesList = mutableListOf<String>()
         classInputStream.use { inputStream ->
             val classReader = ClassReader(ByteStreams.toByteArray(inputStream))
-            classReader.accept(object : ClassVisitor(ASM_API_VERSION_FOR_INSTRUMENTATION) {
+            classReader.accept(object : ClassVisitor(asmApiVersion) {
 
                 override fun visitAnnotation(
                     descriptor: String?,
