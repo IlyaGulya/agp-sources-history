@@ -42,8 +42,8 @@ import com.android.build.gradle.internal.api.VariantFilter;
 import com.android.build.gradle.internal.api.artifact.BuildArtifactSpec;
 import com.android.build.gradle.internal.core.GradleVariantConfiguration;
 import com.android.build.gradle.internal.crash.ExternalApiUsageException;
+import com.android.build.gradle.internal.dependency.AarCompileClassesTransform;
 import com.android.build.gradle.internal.dependency.AarResourcesCompilerTransform;
-import com.android.build.gradle.internal.dependency.AarToClassTransform;
 import com.android.build.gradle.internal.dependency.AarTransform;
 import com.android.build.gradle.internal.dependency.AlternateCompatibilityRule;
 import com.android.build.gradle.internal.dependency.AlternateDisambiguationRule;
@@ -86,6 +86,7 @@ import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.options.SigningOptions;
 import com.android.build.gradle.options.StringOption;
+import com.android.build.gradle.options.SyncOptions;
 import com.android.builder.core.BuilderConstants;
 import com.android.builder.core.DefaultManifestParser;
 import com.android.builder.core.DefaultProductFlavor;
@@ -493,23 +494,13 @@ public class VariantManager implements VariantModel {
                                     multiDexInstrumentationDep);
                 }
 
-                taskManager.createAndroidTestVariantTasks(
-                        (TestVariantData) variantData,
-                        variantScopes
-                                .stream()
-                                .filter(TaskManager::isLintVariant)
-                                .collect(Collectors.toList()));
+                taskManager.createAndroidTestVariantTasks((TestVariantData) variantData);
             } else { // UNIT_TEST
                 taskManager.createUnitTestVariantTasks((TestVariantData) variantData);
             }
 
         } else {
-            taskManager.createTasksForVariantScope(
-                    variantScope,
-                    variantScopes
-                            .stream()
-                            .filter(TaskManager::isLintVariant)
-                            .collect(Collectors.toList()));
+            taskManager.createTasksForVariantScope(variantScope);
         }
     }
 
@@ -712,47 +703,45 @@ public class VariantManager implements VariantModel {
                                         ArtifactType.COMPILED_REMOTE_RESOURCES.getType());
 
                         reg.parameters(
-                                params ->
-                                        params.getAapt2FromMaven()
-                                                .from(
-                                                        Aapt2MavenUtils.getAapt2FromMaven(
-                                                                globalScope)));
+                                params -> {
+                                    params.getAapt2FromMaven()
+                                            .from(Aapt2MavenUtils.getAapt2FromMaven(globalScope));
+                                    params.getErrorFormatMode()
+                                            .set(
+                                                    SyncOptions.getErrorFormatMode(
+                                                            globalScope.getProjectOptions()));
+                                });
                     });
         }
 
-        // API Jar: Produce a single API jar from the AAR
-        // TODO(b/136244851): Add support for generating a compilation R class.
+        // API jar(s)
         Usage apiUsage = project.getObjects().named(Usage.class, Usage.JAVA_API);
         dependencies.registerTransform(
-                AarToClassTransform.class,
                 reg -> {
-                    reg.getFrom().attribute(ARTIFACT_FORMAT, TYPE_PROCESSED_AAR);
+                    reg.getFrom().attribute(ARTIFACT_FORMAT, EXPLODED_AAR.getType());
                     reg.getFrom().attribute(Usage.USAGE_ATTRIBUTE, apiUsage);
                     reg.getTo().attribute(ARTIFACT_FORMAT, ArtifactType.CLASSES.getType());
                     reg.getTo().attribute(Usage.USAGE_ATTRIBUTE, apiUsage);
-                    reg.parameters(
-                            params -> {
-                                params.getForCompileUse().set(true);
-                                params.getAutoNamespaceDependencies()
-                                        .set(autoNamespaceDependencies);
-                            });
+                    reg.artifactTransform(
+                            AarCompileClassesTransform.class,
+                            config -> config.params(autoNamespaceDependencies));
                 });
 
-        // Produce a single runtime jar from the AAR.
+        // Runtime jars
         Usage runtimeUsage = project.getObjects().named(Usage.class, Usage.JAVA_RUNTIME);
         dependencies.registerTransform(
-                AarToClassTransform.class,
                 reg -> {
-                    reg.getFrom().attribute(ARTIFACT_FORMAT, TYPE_PROCESSED_AAR);
+                    reg.getFrom().attribute(ARTIFACT_FORMAT, EXPLODED_AAR.getType());
                     reg.getFrom().attribute(Usage.USAGE_ATTRIBUTE, runtimeUsage);
                     reg.getTo().attribute(ARTIFACT_FORMAT, ArtifactType.CLASSES.getType());
                     reg.getTo().attribute(Usage.USAGE_ATTRIBUTE, runtimeUsage);
-                    reg.parameters(
-                            params -> {
-                                params.getForCompileUse().set(false);
-                                params.getAutoNamespaceDependencies()
-                                        .set(autoNamespaceDependencies);
-                            });
+                    reg.artifactTransform(
+                            AarTransform.class,
+                            config ->
+                                    config.params(
+                                            ArtifactType.CLASSES,
+                                            sharedLibSupport,
+                                            autoNamespaceDependencies));
                 });
 
         if (globalScope.getProjectOptions().get(BooleanOption.ENABLE_PROGUARD_RULES_EXTRACTION)) {
@@ -837,7 +826,8 @@ public class VariantManager implements VariantModel {
                 artifactConfiguration.registerTransform(
                         globalScope.getProject().getName(),
                         dependencies,
-                        globalScope.getBootClasspath());
+                        globalScope.getBootClasspath(),
+                        SyncOptions.getErrorFormatMode(globalScope.getProjectOptions()));
             }
         }
     }

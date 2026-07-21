@@ -191,9 +191,6 @@ public interface VariantScope extends TransformVariantScope {
     FileCollection getProvidedOnlyClasspath();
 
     @NonNull
-    File getIntermediateJarOutputFolder();
-
-    @NonNull
     File getDefaultMergeResourcesOutputDir();
 
     @NonNull
@@ -247,9 +244,6 @@ public interface VariantScope extends TransformVariantScope {
     File getBundleArtifactFolderForDataBinding();
 
     @NonNull
-    File getProcessAndroidResourcesProguardOutputFile();
-
-    @NonNull
     File getFullApkPackagesOutputDirectory();
 
     @NonNull
@@ -266,9 +260,6 @@ public interface VariantScope extends TransformVariantScope {
 
     @NonNull
     File getApkLocation();
-
-    @NonNull
-    File getMergedClassesJarFile();
 
     @NonNull
     MutableTaskContainer getTaskContainer();

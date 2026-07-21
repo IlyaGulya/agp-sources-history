@@ -18,7 +18,7 @@ package com.android.build.gradle.internal.res.namespaced
 import com.android.build.api.artifact.BuildableArtifact
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.res.Aapt2CompileRunnable
-import com.android.build.gradle.internal.res.getAapt2FromMavenAndVersion
+import com.android.build.gradle.internal.res.getAapt2FromMaven
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.VariantScope
@@ -30,13 +30,14 @@ import com.android.builder.internal.aapt.v2.Aapt2RenamingConventions
 import com.android.ide.common.resources.CompileResourceRequest
 import com.android.ide.common.resources.FileStatus
 import com.android.utils.FileUtils
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileCollection
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.workers.WorkerExecutor
@@ -50,13 +51,12 @@ import javax.inject.Inject
  *
  * The link step handles resource overlays.
  */
-abstract class CompileSourceSetResources
+open class CompileSourceSetResources
 @Inject constructor(workerExecutor: WorkerExecutor, objects: ObjectFactory) : IncrementalTask() {
-    @get:Input
-    lateinit var aapt2Version: String
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    lateinit var aapt2FromMaven: FileCollection
         private set
-    @get:Internal
-    abstract val aapt2FromMaven: ConfigurableFileCollection
 
     @get:InputFiles
     @get:SkipWhenEmpty
@@ -213,7 +213,7 @@ abstract class CompileSourceSetResources
                 InternalArtifactType.PARTIAL_R_FILES,
                 BuildArtifactsHolder.OperationType.APPEND,
                 taskProvider,
-                taskProvider.map { it.partialRDirectory })
+                CompileSourceSetResources::partialRDirectory)
         }
 
         override fun configure(task: CompileSourceSetResources) {
@@ -224,10 +224,7 @@ abstract class CompileSourceSetResources
             task.isPngCrunching = variantScope.isCrunchPngs
             task.isPseudoLocalize =
                     variantScope.variantData.variantConfiguration.buildType.isPseudoLocalesEnabled
-
-            val (aapt2FromMaven,aapt2Version) = getAapt2FromMavenAndVersion(variantScope.globalScope)
-            task.aapt2FromMaven.from(aapt2FromMaven)
-            task.aapt2Version = aapt2Version
+            task.aapt2FromMaven = getAapt2FromMaven(variantScope.globalScope)
 
             task.dependsOn(variantScope.taskContainer.resourceGenTask)
 

@@ -40,7 +40,6 @@ import com.android.build.gradle.internal.TaskManager;
 import com.android.build.gradle.internal.VariantManager;
 import com.android.build.gradle.internal.api.dsl.extensions.BaseExtension2;
 import com.android.build.gradle.internal.crash.CrashReporting;
-import com.android.build.gradle.internal.dependency.ConstraintHandler;
 import com.android.build.gradle.internal.dependency.SourceSetManager;
 import com.android.build.gradle.internal.dsl.BuildType;
 import com.android.build.gradle.internal.dsl.BuildTypeFactory;
@@ -78,6 +77,7 @@ import com.android.build.gradle.options.SyncOptions.ErrorFormatMode;
 import com.android.build.gradle.tasks.LintBaseTask;
 import com.android.build.gradle.tasks.factory.AbstractCompilesUtil;
 import com.android.builder.core.BuilderConstants;
+import com.android.builder.errors.EvalIssueException;
 import com.android.builder.errors.EvalIssueReporter;
 import com.android.builder.errors.EvalIssueReporter.Type;
 import com.android.builder.model.Version;
@@ -87,6 +87,8 @@ import com.android.builder.profile.ThreadRecorder;
 import com.android.builder.utils.FileCache;
 import com.android.dx.command.dexer.Main;
 import com.android.ide.common.repository.GradleVersion;
+import com.android.sdklib.AndroidTargetHash;
+import com.android.sdklib.SdkVersionInfo;
 import com.android.tools.lint.gradle.api.ToolingRegistryProvider;
 import com.android.utils.ILogger;
 import com.google.common.annotations.VisibleForTesting;
@@ -95,6 +97,8 @@ import com.google.wireless.android.sdk.stats.GradleBuildProfileSpan.ExecutionTyp
 import com.google.wireless.android.sdk.stats.GradleBuildProject;
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -414,7 +418,6 @@ public abstract class BasePlugin<E extends BaseExtension2>
                         Workers.INSTANCE.shutdown();
                         sdkComponents.unload();
                         SdkLocator.resetCache();
-                        ConstraintHandler.clearCache();
                         threadRecorder.record(
                                 ExecutionType.BASE_PLUGIN_BUILD_FINISHED,
                                 project.getPath(),
@@ -620,7 +623,6 @@ public abstract class BasePlugin<E extends BaseExtension2>
                         }));
     }
 
-
     static void checkGradleVersion(
             @NonNull Project project,
             @NonNull ILogger logger,
@@ -651,6 +653,25 @@ public abstract class BasePlugin<E extends BaseExtension2>
 
     @VisibleForTesting
     final void createAndroidTasks() {
+
+        if (extension.getCompileSdkVersion() == null) {
+            if (SyncOptions.getModelQueryMode(projectOptions)
+                    .equals(SyncOptions.EvaluationMode.IDE)) {
+                String newCompileSdkVersion = findHighestSdkInstalled();
+                if (newCompileSdkVersion == null) {
+                    newCompileSdkVersion = "android-" + SdkVersionInfo.HIGHEST_KNOWN_STABLE_API;
+                }
+                extension.setCompileSdkVersion(newCompileSdkVersion);
+            }
+
+            extraModelInfo
+                    .getSyncIssueHandler()
+                    .reportError(
+                            Type.COMPILE_SDK_VERSION_NOT_SET,
+                            new EvalIssueException(
+                                    "compileSdkVersion is not specified. Please add it to build.gradle"));
+        }
+
         // Make sure unit tests set the required fields.
         checkState(extension.getCompileSdkVersion() != null, "compileSdkVersion is not specified.");
         extension
@@ -729,7 +750,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
 
         // must run this after scopes are created so that we can configure kotlin
         // kapt tasks
-        taskManager.addDataBindingDependenciesIfNecessary(
+        taskManager.addBindingDependenciesIfNecessary(
                 extension.getDataBinding(), variantManager.getVariantScopes());
 
 
@@ -754,6 +775,24 @@ public abstract class BasePlugin<E extends BaseExtension2>
 
         checkSplitConfiguration();
         variantManager.setHasCreatedTasks(true);
+    }
+
+    private String findHighestSdkInstalled() {
+        String highestSdk = null;
+        File folder = new File(globalScope.getSdkComponents().getSdkFolder(), "platforms");
+        File[] listOfFiles = folder.listFiles();
+
+        if (listOfFiles != null) {
+            Arrays.sort(listOfFiles, Comparator.comparing(File::getName).reversed());
+            for (File file : listOfFiles) {
+                if (AndroidTargetHash.getPlatformVersion(file.getName()) != null) {
+                    highestSdk = file.getName();
+                    break;
+                }
+            }
+        }
+
+        return highestSdk;
     }
 
     private void checkSplitConfiguration() {

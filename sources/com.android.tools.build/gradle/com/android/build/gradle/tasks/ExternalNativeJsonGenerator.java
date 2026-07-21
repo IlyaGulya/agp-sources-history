@@ -23,7 +23,10 @@ import static com.android.build.gradle.internal.cxx.logging.LoggingEnvironmentKt
 import static com.android.build.gradle.internal.cxx.logging.PassThroughRecordingLoggingEnvironmentKt.toJsonString;
 import static com.android.build.gradle.internal.cxx.model.CreateCxxAbiModelKt.createCxxAbiModel;
 import static com.android.build.gradle.internal.cxx.model.CreateCxxVariantModelKt.createCxxVariantModel;
+import static com.android.build.gradle.internal.cxx.model.GetCxxBuildModelKt.getCxxBuildModel;
 import static com.android.build.gradle.internal.cxx.model.JsonUtilKt.writeJsonToFile;
+import static com.android.build.gradle.internal.cxx.services.CxxCompleteModelServiceKt.registerAbi;
+import static com.android.build.gradle.internal.cxx.services.CxxEvalIssueReporterServiceKt.evalIssueReporter;
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
@@ -32,9 +35,11 @@ import com.android.build.gradle.internal.cxx.configure.JsonGenerationInvalidatio
 import com.android.build.gradle.internal.cxx.json.AndroidBuildGradleJsons;
 import com.android.build.gradle.internal.cxx.json.NativeBuildConfigValueMini;
 import com.android.build.gradle.internal.cxx.json.NativeLibraryValueMini;
-import com.android.build.gradle.internal.cxx.logging.ErrorsAreFatalThreadLoggingEnvironment;
+import com.android.build.gradle.internal.cxx.logging.IssueReporterLoggingEnvironment;
 import com.android.build.gradle.internal.cxx.logging.PassThroughRecordingLoggingEnvironment;
+import com.android.build.gradle.internal.cxx.logging.ThreadLoggingEnvironment;
 import com.android.build.gradle.internal.cxx.model.CxxAbiModel;
+import com.android.build.gradle.internal.cxx.model.CxxBuildModel;
 import com.android.build.gradle.internal.cxx.model.CxxCmakeModuleModel;
 import com.android.build.gradle.internal.cxx.model.CxxModuleModel;
 import com.android.build.gradle.internal.cxx.model.CxxVariantModel;
@@ -86,17 +91,6 @@ public abstract class ExternalNativeJsonGenerator {
         this.variant = variant;
         this.abis = abis;
         this.stats = stats;
-
-        // Check some basic configuration information at sync time.
-        if (!getNdkFolder().isDirectory()) {
-            errorln(
-                    "NDK not configured (%s).\n"
-                            + "Download the NDK from http://developer.android.com/tools/sdk/ndk/."
-                            + "Then add ndk.dir=path/to/ndk in local.properties.\n"
-                            + "(On Windows, make sure you escape backslashes, "
-                            + "e.g. C:\\\\ndk rather than C:\\ndk)",
-                    getNdkFolder());
-        }
     }
 
     /**
@@ -149,8 +143,9 @@ public abstract class ExternalNativeJsonGenerator {
     @Nullable
     private Void buildForOneConfigurationConvertExceptions(
             boolean forceJsonGeneration, CxxAbiModel abi) {
-        try (ErrorsAreFatalThreadLoggingEnvironment ignore =
-                new ErrorsAreFatalThreadLoggingEnvironment()) {
+        try (ThreadLoggingEnvironment ignore =
+                new IssueReporterLoggingEnvironment(
+                        evalIssueReporter(abi.getVariant().getModule()))) {
             try {
                 buildForOneConfiguration(forceJsonGeneration, abi);
             } catch (@NonNull IOException | GradleException e) {
@@ -416,24 +411,26 @@ public abstract class ExternalNativeJsonGenerator {
 
     @NonNull
     public static ExternalNativeJsonGenerator create(
-            @NonNull CxxModuleModel module,
-            @NonNull VariantScope scope) {
-        try (ErrorsAreFatalThreadLoggingEnvironment ignore =
-                new ErrorsAreFatalThreadLoggingEnvironment()) {
+            @NonNull CxxModuleModel module, @NonNull VariantScope scope) {
+        try (ThreadLoggingEnvironment ignore =
+                new IssueReporterLoggingEnvironment(evalIssueReporter(module))) {
             return createImpl(module, scope);
         }
     }
 
     @NonNull
-    public static ExternalNativeJsonGenerator createImpl(
-            @NonNull CxxModuleModel module,
-            @NonNull VariantScope scope) {
+    private static ExternalNativeJsonGenerator createImpl(
+            @NonNull CxxModuleModel module, @NonNull VariantScope scope) {
         CxxVariantModel variant = createCxxVariantModel(module, scope.getVariantData());
         List<CxxAbiModel> abis = Lists.newArrayList();
+
+        CxxBuildModel cxxBuildModel =
+                getCxxBuildModel(scope.getGlobalScope().getProject().getGradle());
         for (Abi abi : variant.getValidAbiList()) {
-            abis.add(
-                    createCxxAbiModel(
-                            variant, abi, scope.getGlobalScope(), scope.getVariantData()));
+            CxxAbiModel model =
+                    createCxxAbiModel(variant, abi, scope.getGlobalScope(), scope.getVariantData());
+            abis.add(model);
+            registerAbi(cxxBuildModel, model);
         }
 
         GradleBuildVariant.Builder stats =
@@ -477,8 +474,8 @@ public abstract class ExternalNativeJsonGenerator {
 
     public void forEachNativeBuildConfiguration(@NonNull Consumer<JsonReader> callback)
             throws IOException {
-        try (ErrorsAreFatalThreadLoggingEnvironment ignore =
-                new ErrorsAreFatalThreadLoggingEnvironment()) {
+        try (ThreadLoggingEnvironment ignore =
+                new IssueReporterLoggingEnvironment(evalIssueReporter(variant.getModule()))) {
             List<File> files = getNativeBuildConfigurationsJsons();
             infoln("streaming %s JSON files", files.size());
             for (File file : getNativeBuildConfigurationsJsons()) {
@@ -553,7 +550,7 @@ public abstract class ExternalNativeJsonGenerator {
     @Optional
     @Input
     public List<String> getcFlags() {
-        return variant.getCFlagList();
+        return variant.getCFlagsList();
     }
 
     @NonNull
@@ -582,7 +579,7 @@ public abstract class ExternalNativeJsonGenerator {
     @NonNull
     @Input // We don't need contents of the files in the generated JSON, just the path.
     public File getSdkFolder() {
-        return variant.getModule().getSdkFolder();
+        return variant.getModule().getProject().getSdkFolder();
     }
 
     @Input

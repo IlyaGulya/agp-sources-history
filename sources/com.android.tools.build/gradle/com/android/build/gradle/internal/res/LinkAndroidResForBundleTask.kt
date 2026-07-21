@@ -46,7 +46,6 @@ import com.android.utils.FileUtils
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
 import org.gradle.api.artifacts.ArtifactCollection
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
@@ -54,7 +53,6 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
@@ -71,7 +69,7 @@ import javax.inject.Inject
  * Task to link app resources into a proto format so that it can be consumed by the bundle tool.
  */
 @CacheableTask
-abstract class LinkAndroidResForBundleTask
+open class LinkAndroidResForBundleTask
 @Inject constructor(workerExecutor: WorkerExecutor) : NonIncrementalTask() {
 
     private val workers = Workers.preferWorkers(project.name, path, workerExecutor)
@@ -128,11 +126,10 @@ abstract class LinkAndroidResForBundleTask
     lateinit var mainSplit: ApkData
         private set
 
-    @get:Input
-    lateinit var aapt2Version: String
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    lateinit var aapt2FromMaven: FileCollection
         private set
-    @get:Internal
-    abstract val aapt2FromMaven: ConfigurableFileCollection
 
     private var compiledRemoteResources: ArtifactCollection? = null
 
@@ -301,9 +298,7 @@ abstract class LinkAndroidResForBundleTask
                     projectOptions.get(StringOption.IDE_BUILD_TARGET_DENSITY)
 
             task.mergeBlameLogFolder = variantScope.resourceBlameLogDir
-            val (aapt2FromMaven, aapt2Version) = getAapt2FromMavenAndVersion(variantScope.globalScope)
-            task.aapt2FromMaven.from(aapt2FromMaven)
-            task.aapt2Version = aapt2Version
+            task.aapt2FromMaven = getAapt2FromMaven(variantScope.globalScope)
             task.minSdkVersion = variantScope.minSdkVersion.apiLevel
 
             task.resConfig =

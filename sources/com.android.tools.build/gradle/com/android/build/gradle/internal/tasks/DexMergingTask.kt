@@ -48,6 +48,7 @@ import com.android.utils.PathUtils.toSystemIndependentPath
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.base.Throwables
 import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.Logging
 import org.gradle.api.provider.Provider
@@ -61,15 +62,12 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.workers.WorkerExecutor
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
 import java.io.File
 import java.io.Serializable
 import java.nio.file.Files
 import java.util.Collections
 import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.TimeUnit
-import java.util.zip.ZipFile
 import javax.inject.Inject
 
 /**
@@ -94,7 +92,7 @@ import javax.inject.Inject
  * performance regression.
  */
 @CacheableTask
-open class DexMergingTask @Inject constructor(workerExecutor: WorkerExecutor) :
+abstract class DexMergingTask @Inject constructor(workerExecutor: WorkerExecutor) :
     NonIncrementalTask() {
 
     private val workers: WorkerExecutorFacade = Workers.preferWorkers(project.name, path, workerExecutor)
@@ -133,8 +131,7 @@ open class DexMergingTask @Inject constructor(workerExecutor: WorkerExecutor) :
     @get:Optional
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.NONE)
-    var fileDependencyDexFiles: Provider<Directory>? = null
-        private set
+    abstract val fileDependencyDexFiles: DirectoryProperty
 
     // Dummy folder, used as a way to set up dependency
     @get:Optional
@@ -163,7 +160,7 @@ open class DexMergingTask @Inject constructor(workerExecutor: WorkerExecutor) :
                     mergingThreshold,
                     mainDexListFile?.singleFile(),
                     dexFiles.files,
-                    fileDependencyDexFiles?.get()?.asFile,
+                    fileDependencyDexFiles.orNull?.asFile,
                     outputDir
                 )
             )
@@ -210,7 +207,7 @@ open class DexMergingTask @Inject constructor(workerExecutor: WorkerExecutor) :
             task.errorFormatMode =
                 SyncOptions.getErrorFormatMode(variantScope.globalScope.projectOptions)
             task.dexMerger = variantScope.dexMerger
-            task.minSdkVersion = variantScope.variantConfiguration.minSdkVersionWithTargetDeviceApi.featureLevel
+            task.minSdkVersion = variantScope.minSdkVersion.featureLevel
             task.isDebuggable = variantScope.variantConfiguration.buildType.isDebuggable
             if (variantScope.globalScope.projectOptions[BooleanOption.ENABLE_DUPLICATE_CLASSES_CHECK]) {
                 task.duplicateClassesCheck = variantScope.artifacts.getFinalArtifactFiles(
@@ -218,9 +215,12 @@ open class DexMergingTask @Inject constructor(workerExecutor: WorkerExecutor) :
                 )
             }
             if (separateFileDependenciesDexingTask) {
-                task.fileDependencyDexFiles = variantScope.artifacts.getFinalProduct(
-                    InternalArtifactType.EXTERNAL_FILE_LIB_DEX_ARCHIVES
+                variantScope.artifacts.setTaskInputToFinalProduct(
+                    InternalArtifactType.EXTERNAL_FILE_LIB_DEX_ARCHIVES,
+                    task.fileDependencyDexFiles
                 )
+            } else {
+                task.fileDependencyDexFiles.set(null as Directory?)
             }
             task.outputDir = output
         }
@@ -329,11 +329,11 @@ open class DexMergingTask @Inject constructor(workerExecutor: WorkerExecutor) :
             return when (action) {
                 DexMergingAction.MERGE_LIBRARY_PROJECTS ->
                     when {
-                        variantScope.variantConfiguration.minSdkVersionWithTargetDeviceApi.featureLevel < 23 -> {
+                        variantScope.minSdkVersion.featureLevel < 23 -> {
                             task.outputs.cacheIf { getAllRegularFiles(task.dexFiles.files).size < LIBRARIES_MERGING_THRESHOLD }
                             LIBRARIES_MERGING_THRESHOLD
                         }
-                        else -> LIBRARIES_M_PLUS_MAX_THRESHOLD
+                        else -> Integer.MAX_VALUE
                     }
                 else -> 0
             }
@@ -380,11 +380,6 @@ private fun getAllRegularFiles(files: Iterable<File>): List<File> {
  * is 21 or 22.
  */
 internal const val LIBRARIES_MERGING_THRESHOLD = 51
-/**
- * Max number of DEX files to generate on 23+, above that dex2out might have issues. See
- * http://b/110374966 for more info.
- */
-internal const val LIBRARIES_M_PLUS_MAX_THRESHOLD = 500
 
 enum class DexMergingAction {
     /** Merge only external libraries' dex files. */
@@ -427,9 +422,7 @@ class DexMergingTaskRunnable @Inject constructor(
                 return
             }
 
-            val allDexFiles = lazy { getAllRegularFiles(dexFiles) }
-            if (dexFiles.size >= params.mergingThreshold
-                || allDexFiles.value.size >= params.mergingThreshold) {
+            if (dexFiles.size >= params.mergingThreshold) {
                 DexMergerTransformCallable(
                     messageReceiver,
                     params.dexingType,
@@ -443,25 +436,8 @@ class DexMergingTaskRunnable @Inject constructor(
                     params.isDebuggable
                 ).call()
             } else {
-                val outputPath =
-                    { id: Int -> params.outputDir.resolve("classes_$id.${SdkConstants.EXT_DEX}") }
-                var index = 0
-                for (file in allDexFiles.value) {
-                    if (file.extension == SdkConstants.EXT_JAR) {
-                        // Dex files can also come from jars when dexing is not done in artifact
-                        // transforms. See b/130965921 for details.
-                        ZipFile(file).use {
-                            for (entry in it.entries()) {
-                                BufferedInputStream(it.getInputStream(entry)).use { inputStream ->
-                                    BufferedOutputStream(outputPath(index++).outputStream()).use { outputStream ->
-                                        inputStream.copyTo(outputStream)
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        file.copyTo(outputPath(index++))
-                    }
+                for (file in getAllRegularFiles(dexFiles).withIndex()) {
+                    file.value.copyTo(params.outputDir.resolve("classes_${file.index}.${SdkConstants.EXT_DEX}"))
                 }
             }
         } catch (e: Exception) {

@@ -16,8 +16,10 @@
 
 package com.android.build.gradle.internal.tasks
 
+import com.android.SdkConstants
 import com.android.build.api.artifact.BuildableArtifact
 import com.android.build.gradle.internal.api.artifact.singleFile
+import com.android.build.gradle.internal.scope.BuildArtifactsHolder
 import com.android.build.gradle.internal.scope.ExistingBuildElements
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.VariantScope
@@ -26,6 +28,8 @@ import com.android.ide.common.symbols.generateMinifyKeepRules
 import com.android.ide.common.symbols.parseManifest
 import com.google.common.collect.Iterables
 import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
@@ -33,6 +37,7 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.workers.WorkerExecutor
 import java.io.File
 import java.io.Serializable
@@ -48,18 +53,16 @@ import javax.inject.Inject
  * collects information from them and generates the keep rules file.
  */
 @CacheableTask
-open class GenerateLibraryProguardRulesTask @Inject constructor(workerExecutor: WorkerExecutor)
+abstract class GenerateLibraryProguardRulesTask @Inject constructor(workerExecutor: WorkerExecutor)
     : NonIncrementalTask() {
     private val workers = Workers.preferWorkers(project.name, path, workerExecutor)
 
     @get:OutputFile
-    lateinit var proguardOutputFile: File
-        private set
+    abstract val proguardOutputFile: RegularFileProperty
 
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    lateinit var manifestFiles: Provider<Directory>
-        private set
+    abstract val manifestFiles: DirectoryProperty
 
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -76,7 +79,7 @@ open class GenerateLibraryProguardRulesTask @Inject constructor(workerExecutor: 
                 GenerateProguardRulesRunnable::class.java,
                 GenerateProguardRulesParams(
                     manifestFile = manifest,
-                    proguardOutputFile = proguardOutputFile,
+                    proguardOutputFile = proguardOutputFile.get().asFile,
                     inputResourcesDir = inputResourcesDir.singleFile()
                 ))
         }
@@ -111,28 +114,24 @@ open class GenerateLibraryProguardRulesTask @Inject constructor(workerExecutor: 
         override val type: Class<GenerateLibraryProguardRulesTask>
             get() = GenerateLibraryProguardRulesTask::class.java
 
-        override fun preConfigure(taskName: String) {
-            super.preConfigure(taskName)
+        override fun handleProvider(taskProvider: TaskProvider<out GenerateLibraryProguardRulesTask>) {
+            super.handleProvider(taskProvider)
 
-            variantScope
-                .artifacts
-                .appendArtifact(
-                    InternalArtifactType.AAPT_PROGUARD_FILE,
-                    listOf(variantScope.processAndroidResourcesProguardOutputFile),
-                    taskName)
+            variantScope.artifacts.producesFile(InternalArtifactType.AAPT_PROGUARD_FILE,
+                BuildArtifactsHolder.OperationType.INITIAL,
+                taskProvider,
+                GenerateLibraryProguardRulesTask::proguardOutputFile,
+                SdkConstants.FN_AAPT_RULES)
         }
-
 
         override fun configure(task:GenerateLibraryProguardRulesTask) {
             super.configure(task)
 
-            task.proguardOutputFile = variantScope.processAndroidResourcesProguardOutputFile
-
             task.inputResourcesDir = variantScope.artifacts.getFinalArtifactFiles(
                 InternalArtifactType.PACKAGED_RES)
 
-            task.manifestFiles = variantScope.artifacts.getFinalProduct(
-                InternalArtifactType.MERGED_MANIFESTS)
+             variantScope.artifacts.setTaskInputToFinalProduct(
+                 InternalArtifactType.MERGED_MANIFESTS, task.manifestFiles)
         }
     }
 }

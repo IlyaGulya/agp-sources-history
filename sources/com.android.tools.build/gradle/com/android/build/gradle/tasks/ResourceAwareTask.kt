@@ -29,11 +29,11 @@ abstract class ResourceAwareTask : IncrementalTask() {
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
-    fun getRenderscriptResOutputDir() = resourcesComputer.renderscriptResOutputDir!!
+    fun getRenderscriptResOutputDir() = resourcesComputer.renderscriptResOutputDir
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
-    fun getGeneratedResOutputDir() = resourcesComputer.generatedResOutputDir!!
+    fun getGeneratedResOutputDir() = resourcesComputer.generatedResOutputDir
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
@@ -48,9 +48,14 @@ abstract class ResourceAwareTask : IncrementalTask() {
     @Optional
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
-    fun getLibraries() = resourcesComputer.libraries?.artifactFiles
+    fun getLocalLibraries() = resourcesComputer.localLibraries?.artifactFiles
+
+    @Optional
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    fun getRemoteLibraries() = resourcesComputer.remoteLibraries?.artifactFiles
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
-    fun getResources() = resourcesComputer.resources!!.values
+    fun getResources() = resourcesComputer.resources.values
 }

@@ -53,7 +53,7 @@ class FilteredArtifactCollection(
     override fun getArtifacts() = filteringSpec.getArtifactFiles()
 
     override fun getFailures(): Collection<Throwable> = filteringSpec.artifacts.failures
-    override fun iterator() = artifacts.iterator()
+    override fun iterator() = artifacts.iterator() as MutableIterator<ResolvedArtifactResult>
     override fun spliterator() = artifacts.spliterator()
     override fun forEach(action: Consumer<in ResolvedArtifactResult>) = artifacts.forEach(action)
 }

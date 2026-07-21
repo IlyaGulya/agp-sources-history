@@ -17,7 +17,6 @@
 package com.android.build.gradle.internal.tasks.manifest
 
 import com.android.SdkConstants.DOT_XML
-import com.android.ide.common.blame.SourceFile
 import com.android.ide.common.blame.SourceFilePosition
 import com.android.ide.common.blame.SourcePosition
 import com.android.manifmerger.ManifestMerger2
@@ -35,7 +34,7 @@ fun mergeManifestsForApplication(
     mainManifest: File,
     manifestOverlays: List<File>,
     dependencies: List<ManifestProvider>,
-    navigationFiles: List<File>,
+    navigationJsons: List<File>,
     featureName: String?,
     packageOverride: String?,
     versionCode: Int,
@@ -61,7 +60,7 @@ fun mergeManifestsForApplication(
             .setPlaceHolderValues(placeHolders)
             .addFlavorAndBuildTypeManifests(*manifestOverlays.toTypedArray())
             .addManifestProviders(dependencies)
-            .addNavigationFiles(navigationFiles)
+            .addNavigationJsons(navigationJsons)
             .withFeatures(*optionalFeatures.toTypedArray())
             .setMergeReportFile(reportFile)
             .setFeatureName(featureName)
@@ -200,12 +199,6 @@ fun findOriginalManifestFilePosition(
     manifestMergeBlameContents: List<String>,
     mergedFilePosition: SourceFilePosition
 ): SourceFilePosition {
-    if (mergedFilePosition.file == SourceFile.UNKNOWN || mergedFilePosition.file.sourceFile?.absolutePath?.contains(
-            "merged_manifests"
-        ) == false
-    ) {
-        return mergedFilePosition
-    }
     try {
         val linePrefix = (mergedFilePosition.position.startLine + 1).toString() + "-->"
         manifestMergeBlameContents.forEach { line ->

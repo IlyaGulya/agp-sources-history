@@ -28,12 +28,11 @@ import com.android.tools.build.libraries.metadata.LibraryDependencies
 import com.android.tools.build.libraries.metadata.MavenLibrary
 import com.android.tools.build.libraries.metadata.ModuleDependencies
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.component.ModuleComponentSelector
 import org.gradle.api.artifacts.result.ComponentSelectionCause
-import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.internal.artifacts.result.DefaultResolvedDependencyResult
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
@@ -66,17 +65,13 @@ open class PerModuleReportDependenciesTask @Inject constructor(objectFactory: Ob
     val moduleName: String
         get() = moduleNameSupplier.get()
 
-    private fun convertDependencyToMavenLibrary(
-        moduleVersion: ModuleVersionIdentifier?,
-        librariesToIndexMap: Dictionary<Library, Integer>,
-        libraries: LinkedList<Library>
-    ): Integer? {
-        if (moduleVersion != null) {
+    private fun convertDependencyToMavenLibrary(dependency: ModuleComponentSelector?, librariesToIndexMap: Dictionary<Library, Integer>, libraries: LinkedList<Library>): Integer? {
+        if (dependency != null) {
             val lib = Library.newBuilder()
                 .setMavenLibrary(MavenLibrary.newBuilder()
-                    .setGroupId(moduleVersion.group)
-                    .setArtifactId(moduleVersion.name)
-                    .setVersion(moduleVersion.version)
+                    .setGroupId(dependency.group)
+                    .setArtifactId(dependency.module)
+                    .setVersion(dependency.version)
                     .build())
                 .build()
             var index = librariesToIndexMap.get(lib)
@@ -96,29 +91,22 @@ open class PerModuleReportDependenciesTask @Inject constructor(objectFactory: Ob
         val libraries = LinkedList<Library>()
         val libraryDependencies = LinkedList<LibraryDependencies>()
         val directDependenciesIndices: MutableSet<Integer> = HashSet()
+
         for (dependency in runtimeClasspath.incoming.resolutionResult.allDependencies) {
-            // ignore non maven repository dependencies for now.
-            if (dependency !is ResolvedDependencyResult
-                || dependency.requested !is ModuleComponentSelector) {
-                continue;
-            }
-            val resolvedComponent = dependency.selected
             val index = convertDependencyToMavenLibrary(
-                resolvedComponent.moduleVersion,
+                dependency.requested as? ModuleComponentSelector,
                 librariesToIndexMap,
                 libraries)
             if (index != null) {
+
                 // add library dependency if we haven't traversed it yet.
                 if (libraryDependencies.filter { it.libraryIndex == index.toInt() }.isEmpty()) {
                     val libraryDependency =
                         LibraryDependencies.newBuilder().setLibraryIndex(index.toInt())
-                    for (libDep in resolvedComponent.dependencies) {
-                        if (libDep !is ResolvedDependencyResult
-                            || libDep.requested !is ModuleComponentSelector) {
-                            continue;
-                        }
+                    val dependencyResult = dependency as DefaultResolvedDependencyResult
+                    for (libDep in dependencyResult.selected.dependencies) {
                         val depIndex = convertDependencyToMavenLibrary(
-                            libDep.selected.moduleVersion,
+                            libDep.requested as? ModuleComponentSelector,
                             librariesToIndexMap,
                             libraries
                         )
@@ -170,8 +158,8 @@ open class PerModuleReportDependenciesTask @Inject constructor(objectFactory: Ob
                     InternalArtifactType.METADATA_LIBRARY_DEPENDENCIES_REPORT,
                     BuildArtifactsHolder.OperationType.INITIAL,
                     taskProvider,
-                    taskProvider.map { task -> task.dependenciesList },
-                    "dependencies.pb"
+                    PerModuleReportDependenciesTask::dependenciesList,
+                    fileName = "dependencies.pb"
                 )
         }
 

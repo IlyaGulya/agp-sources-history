@@ -19,7 +19,7 @@ package com.android.build.gradle.internal.tasks
 import com.android.SdkConstants
 import com.android.build.api.artifact.BuildableArtifact
 import com.android.build.gradle.internal.api.artifact.singleFile
-import com.android.build.gradle.internal.res.getAapt2FromMavenAndVersion
+import com.android.build.gradle.internal.res.getAapt2FromMaven
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
@@ -27,11 +27,8 @@ import com.android.tools.build.bundletool.commands.BuildApksCommand
 import com.android.tools.build.bundletool.model.Aapt2Command
 import com.android.utils.FileUtils
 import com.google.common.util.concurrent.MoreExecutors
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -45,18 +42,18 @@ import javax.inject.Inject
 /**
  * Task that generates APKs from a bundle. All the APKs are bundled into a single zip file.
  */
-abstract class BundleToApkTask @Inject constructor(workerExecutor: WorkerExecutor) : NonIncrementalTask() {
+open class BundleToApkTask @Inject constructor(workerExecutor: WorkerExecutor) : NonIncrementalTask() {
 
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.NONE)
     lateinit var bundle: BuildableArtifact
         private set
 
-    @get:Input
-    lateinit var aapt2Version: String
+    @get:InputFiles
+    @get:org.gradle.api.tasks.Optional
+    @get:PathSensitive(PathSensitivity.NONE)
+    lateinit var aapt2FromMaven: FileCollection
         private set
-    @get:Internal
-    abstract val aapt2FromMaven: ConfigurableFileCollection
 
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
@@ -143,9 +140,7 @@ abstract class BundleToApkTask @Inject constructor(workerExecutor: WorkerExecuto
 
             task.outputFile = outputFile
             task.bundle = variantScope.artifacts.getFinalArtifactFiles(InternalArtifactType.INTERMEDIARY_BUNDLE)
-            val (aapt2FromMaven, aapt2Version) = getAapt2FromMavenAndVersion(variantScope.globalScope)
-            task.aapt2FromMaven.from(aapt2FromMaven)
-            task.aapt2Version = aapt2Version
+            task.aapt2FromMaven = getAapt2FromMaven(variantScope.globalScope)
             task.signingConfig = variantScope.signingConfigFileCollection
         }
     }

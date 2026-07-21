@@ -34,6 +34,7 @@ import com.android.build.gradle.internal.res.LinkingTaskInputAaptOptions;
 import com.android.build.gradle.internal.res.namespaced.Aapt2DaemonManagerService;
 import com.android.build.gradle.internal.res.namespaced.Aapt2ServiceKey;
 import com.android.build.gradle.internal.scope.ApkData;
+import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
 import com.android.build.gradle.internal.scope.BuildElements;
 import com.android.build.gradle.internal.scope.BuildOutput;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
@@ -63,20 +64,19 @@ import java.util.Set;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import javax.inject.Inject;
-import kotlin.Pair;
-import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
+import org.gradle.api.tasks.TaskProvider;
 import org.gradle.workers.WorkerExecutor;
 
 /** Generates all metadata (like AndroidManifest.xml) necessary for a ABI dimension split APK. */
@@ -102,16 +102,12 @@ public abstract class GenerateSplitAbiRes extends NonIncrementalTask {
 
     // We use a sorted map so the key set order is consistent since it's considered an input.
     private ImmutableSortedMap<String, ApkData> splits;
-    private File outputDirectory;
     private boolean debuggable;
     private AaptOptions aaptOptions;
     private VariantType variantType;
     @VisibleForTesting @Nullable Supplier<String> featureNameSupplier;
     @Nullable private FileCollection applicationIdOverride;
-    private String aapt2Version;
-
-    @Internal
-    public abstract ConfigurableFileCollection getAapt2FromMaven();
+    private FileCollection aapt2FromMaven;
 
     private File mergeBlameFolder;
 
@@ -149,9 +145,7 @@ public abstract class GenerateSplitAbiRes extends NonIncrementalTask {
     }
 
     @OutputDirectory
-    public File getOutputDirectory() {
-        return outputDirectory;
-    }
+    public abstract DirectoryProperty getOutputDirectory();
 
     @Input
     public boolean isDebuggable() {
@@ -177,9 +171,10 @@ public abstract class GenerateSplitAbiRes extends NonIncrementalTask {
         return applicationIdOverride;
     }
 
-    @Input
-    public String getAapt2Version() {
-        return aapt2Version;
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public FileCollection getAapt2FromMaven() {
+        return aapt2FromMaven;
     }
 
     @Override
@@ -204,7 +199,7 @@ public abstract class GenerateSplitAbiRes extends NonIncrementalTask {
 
                 Aapt2ServiceKey aapt2ServiceKey =
                         Aapt2DaemonManagerService.registerAaptService(
-                                getAapt2FromMaven(), new LoggerWrapper(getLogger()));
+                                aapt2FromMaven, new LoggerWrapper(getLogger()));
                 Aapt2ProcessResourcesRunnable.Params params =
                         new Aapt2ProcessResourcesRunnable.Params(
                                 aapt2ServiceKey,
@@ -221,7 +216,7 @@ public abstract class GenerateSplitAbiRes extends NonIncrementalTask {
                                 resPackageFile));
             }
         }
-        new BuildElements(buildOutputs.build()).save(outputDirectory);
+        new BuildElements(buildOutputs.build()).save(getOutputDirectory().get().getAsFile());
     }
 
     @Nullable
@@ -257,7 +252,7 @@ public abstract class GenerateSplitAbiRes extends NonIncrementalTask {
                         + "config."
                         + charMatcher.replaceFrom(split, '_');
 
-        File tmpDirectory = new File(outputDirectory, split);
+        File tmpDirectory = new File(getOutputDirectory().get().getAsFile(), split);
         FileUtils.mkdirs(tmpDirectory);
 
         File tmpFile = new File(tmpDirectory, "AndroidManifest.xml");
@@ -313,7 +308,9 @@ public abstract class GenerateSplitAbiRes extends NonIncrementalTask {
 
     // FIX ME : this calculation should move to SplitScope.Split interface
     private File getOutputFileForSplit(final String split) {
-        return new File(outputDirectory, "resources-" + getOutputBaseName() + "-" + split + ".ap_");
+        return new File(
+                getOutputDirectory().get().getAsFile(),
+                "resources-" + getOutputBaseName() + "-" + split + ".ap_");
     }
 
     // ----- CreationAction -----
@@ -321,7 +318,6 @@ public abstract class GenerateSplitAbiRes extends NonIncrementalTask {
     public static class CreationAction extends VariantTaskCreationAction<GenerateSplitAbiRes> {
 
         @NonNull private final FeatureSetMetadata.SupplierProvider provider;
-        private File outputDirectory;
 
         public CreationAction(@NonNull VariantScope scope) {
             this(scope, FeatureSetMetadata.getInstance());
@@ -348,14 +344,18 @@ public abstract class GenerateSplitAbiRes extends NonIncrementalTask {
         }
 
         @Override
-        public void preConfigure(@NonNull String taskName) {
-            super.preConfigure(taskName);
+        public void handleProvider(
+                @NonNull TaskProvider<? extends GenerateSplitAbiRes> taskProvider) {
+            super.handleProvider(taskProvider);
 
-            outputDirectory =
-                    getVariantScope()
-                            .getArtifacts()
-                            .appendArtifact(
-                                    InternalArtifactType.ABI_PROCESSED_SPLIT_RES, taskName, "out");
+            getVariantScope()
+                    .getArtifacts()
+                    .producesDir(
+                            InternalArtifactType.ABI_PROCESSED_SPLIT_RES,
+                            BuildArtifactsHolder.OperationType.INITIAL,
+                            taskProvider,
+                            GenerateSplitAbiRes::getOutputDirectory,
+                            "out");
         }
 
         @Override
@@ -375,17 +375,13 @@ public abstract class GenerateSplitAbiRes extends NonIncrementalTask {
             task.versionName = config::getVersionName;
 
             task.variantType = variantType;
-            task.outputDirectory = outputDirectory;
             task.splits = getAbiSplitData(scope);
             task.outputBaseName = config.getBaseName();
             task.applicationId = config::getApplicationId;
             task.debuggable = config.getBuildType().isDebuggable();
             task.aaptOptions =
                     DslAdaptersKt.convert(scope.getGlobalScope().getExtension().getAaptOptions());
-            Pair<FileCollection, String> aapt2AndVersion =
-                    Aapt2MavenUtils.getAapt2FromMavenAndVersion(scope.getGlobalScope());
-            task.getAapt2FromMaven().from(aapt2AndVersion.getFirst());
-            task.aapt2Version = aapt2AndVersion.getSecond();
+            task.aapt2FromMaven = Aapt2MavenUtils.getAapt2FromMaven(scope.getGlobalScope());
 
             task.androidJarProvider =
                     scope.getGlobalScope().getSdkComponents().getAndroidJarProvider();

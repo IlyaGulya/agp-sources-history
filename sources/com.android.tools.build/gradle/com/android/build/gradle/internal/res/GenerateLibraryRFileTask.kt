@@ -54,7 +54,7 @@ import java.io.Serializable
 import javax.inject.Inject
 
 @CacheableTask
-open class GenerateLibraryRFileTask @Inject constructor(
+abstract class GenerateLibraryRFileTask @Inject constructor(
     objects: ObjectFactory, workerExecutor: WorkerExecutor) : ProcessAndroidResources() {
 
     private val workers: WorkerExecutorFacade = Workers.preferWorkers(project.name, path, workerExecutor)
@@ -181,8 +181,8 @@ open class GenerateLibraryRFileTask @Inject constructor(
                 InternalArtifactType.COMPILE_ONLY_NOT_NAMESPACED_R_CLASS_JAR,
                 BuildArtifactsHolder.OperationType.INITIAL,
                 taskProvider,
-                taskProvider.map { it.rClassOutputJar },
-                "R.jar"
+                GenerateLibraryRFileTask::rClassOutputJar,
+                fileName = "R.jar"
             )
         }
 
@@ -207,8 +207,8 @@ open class GenerateLibraryRFileTask @Inject constructor(
                 Strings.nullToEmpty(variantScope.variantConfiguration.originalApplicationId)
             }
 
-            task.manifestFiles = variantScope.artifacts.getFinalProduct(
-                InternalArtifactType.MERGED_MANIFESTS)
+            variantScope.artifacts.setTaskInputToFinalProduct(
+                InternalArtifactType.MERGED_MANIFESTS, task.manifestFiles)
 
             task.namespacedRClass = variantScope.globalScope.projectOptions[BooleanOption.NAMESPACED_R_CLASS]
 

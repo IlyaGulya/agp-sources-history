@@ -16,7 +16,6 @@
 
 package com.android.build.gradle.tasks
 
-import com.android.build.gradle.internal.scope.BuildArtifactsHolder
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder.OperationType.APPEND
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder.OperationType.INITIAL
 import com.android.build.gradle.internal.scope.InternalArtifactType.AP_GENERATED_SOURCES
@@ -33,8 +32,7 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileTree
-import org.gradle.api.file.RegularFile
-import org.gradle.api.provider.Provider
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -95,8 +93,7 @@ abstract class AndroidJavaCompile: JavaCompile(), VariantAwareTask {
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
-    lateinit var processorListFile: Provider<RegularFile>
-        internal set
+    abstract val processorListFile: RegularFileProperty
 
     @get:Internal
     lateinit var sourceFileTrees: () -> List<FileTree>
@@ -273,11 +270,12 @@ abstract class AndroidJavaCompile: JavaCompile(), VariantAwareTask {
 
             variantScope.taskContainer.javacTask = taskProvider
 
-            variantScope.artifacts.producesDir(JAVAC,
+            variantScope.artifacts.producesDir(
+                JAVAC,
                 APPEND,
                 taskProvider,
-                taskProvider.map { it.outputDirectory },
-                "classes"
+                AndroidJavaCompile::outputDirectory,
+                fileName = "classes"
                 )
 
             // When doing annotation processing, register its output
@@ -286,7 +284,7 @@ abstract class AndroidJavaCompile: JavaCompile(), VariantAwareTask {
                     AP_GENERATED_SOURCES,
                     INITIAL,
                     taskProvider,
-                    taskProvider.map { it.annotationProcessorSourcesDirectory }
+                    AndroidJavaCompile::annotationProcessorSourcesDirectory
                 )
             }
         }
@@ -309,8 +307,8 @@ abstract class AndroidJavaCompile: JavaCompile(), VariantAwareTask {
             task.incrementalFromDslOrByDefault = compileOptions.incremental ?:
                     DEFAULT_INCREMENTAL_COMPILATION
             task.separateAnnotationProcessingFlag = separateAnnotationProcessingFlag
-            task.processorListFile =
-                    variantScope.artifacts.getFinalProduct(ANNOTATION_PROCESSOR_LIST)
+            variantScope.artifacts.setTaskInputToFinalProduct(
+                ANNOTATION_PROCESSOR_LIST, task.processorListFile)
             task.compileSdkVersion = globalScope.extension.compileSdkVersion
 
             // Configure properties for annotation processing, but only if it is not done by

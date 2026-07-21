@@ -23,7 +23,7 @@ import com.android.build.gradle.internal.api.artifact.singleFile
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.res.Aapt2CompileRunnable
 import com.android.build.gradle.internal.res.Aapt2ProcessResourcesRunnable
-import com.android.build.gradle.internal.res.getAapt2FromMavenAndVersion
+import com.android.build.gradle.internal.res.getAapt2FromMaven
 import com.android.build.gradle.internal.res.namespaced.Aapt2ServiceKey
 import com.android.build.gradle.internal.res.namespaced.registerAaptService
 import com.android.build.gradle.internal.scope.ExistingBuildElements
@@ -47,8 +47,8 @@ import com.android.utils.FileUtils
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Iterables
 import org.gradle.api.artifacts.ArtifactCollection
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
@@ -56,7 +56,6 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -88,14 +87,12 @@ constructor(workerExecutor: WorkerExecutor) : IncrementalTask() {
 
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    lateinit var manifestFiles: Provider<Directory>
-        private set
+    abstract val manifestFiles: DirectoryProperty
 
-    @get:Input
-    lateinit var aapt2Version: String
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    lateinit var aapt2FromMaven: FileCollection
         private set
-    @get:Internal
-    abstract val aapt2FromMaven: ConfigurableFileCollection
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
@@ -203,9 +200,7 @@ constructor(workerExecutor: WorkerExecutor) : IncrementalTask() {
         override fun configure(task: VerifyLibraryResourcesTask) {
             super.configure(task)
 
-            val (aapt2FromMaven, aapt2Version) = getAapt2FromMavenAndVersion(variantScope.globalScope)
-            task.aapt2FromMaven.from(aapt2FromMaven)
-            task.aapt2Version = aapt2Version
+            task.aapt2FromMaven = getAapt2FromMaven(variantScope.globalScope)
             task.incrementalFolder = variantScope.getIncrementalDir(name)
 
             task.inputDirectory =
@@ -221,8 +216,7 @@ constructor(workerExecutor: WorkerExecutor) : IncrementalTask() {
                 else ->
                     InternalArtifactType.MERGED_MANIFESTS
             }
-            task.manifestFiles = variantScope.artifacts
-                    .getFinalProduct(task.taskInputType)
+            variantScope.artifacts.setTaskInputToFinalProduct(task.taskInputType, task.manifestFiles)
 
             task.androidJar = variantScope.globalScope.sdkComponents.androidJarProvider
 

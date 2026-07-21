@@ -22,7 +22,6 @@ import com.android.ide.common.blame.SourceFilePosition;
 import com.android.ide.common.blame.SourcePosition;
 import com.android.tools.r8.Diagnostic;
 import com.android.tools.r8.DiagnosticsHandler;
-import com.android.tools.r8.errors.DesugarDiagnostic;
 import com.android.tools.r8.origin.ArchiveEntryOrigin;
 import com.android.tools.r8.origin.Origin;
 import com.android.tools.r8.origin.PathOrigin;
@@ -74,13 +73,7 @@ public class D8DiagnosticsHandler implements DiagnosticsHandler {
 
     @Override
     public void warning(Diagnostic warning) {
-        Message.Kind kind;
-        if (warning instanceof DesugarDiagnostic) {
-            kind = Message.Kind.INFO;
-        } else {
-            kind = Message.Kind.WARNING;
-        }
-        messageReceiver.receiveMessage(convertToMessage(kind, warning));
+        messageReceiver.receiveMessage(convertToMessage(Message.Kind.WARNING, warning));
     }
 
     @Override

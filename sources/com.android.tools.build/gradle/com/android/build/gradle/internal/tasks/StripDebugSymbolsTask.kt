@@ -35,7 +35,6 @@ import com.android.ide.common.resources.FileStatus.REMOVED
 import com.android.ide.common.workers.WorkerExecutorFacade
 import com.android.utils.FileUtils
 import com.google.common.annotations.VisibleForTesting
-import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.Logging
 import java.io.File
@@ -59,8 +58,7 @@ import javax.inject.Inject
 abstract class StripDebugSymbolsTask : IncrementalTask() {
 
     @get:Classpath
-    lateinit var inputDir: Provider<Directory>
-        private set
+    abstract val inputDir: DirectoryProperty
 
     @get:OutputDirectory
     abstract val outputDir: DirectoryProperty
@@ -135,15 +133,15 @@ abstract class StripDebugSymbolsTask : IncrementalTask() {
                 STRIPPED_NATIVE_LIBS,
                 BuildArtifactsHolder.OperationType.APPEND,
                 taskProvider,
-                taskProvider.map { it.outputDir },
-                "out"
+                StripDebugSymbolsTask::outputDir,
+                fileName = "out"
             )
         }
 
         override fun configure(task: StripDebugSymbolsTask) {
             super.configure(task)
 
-            task.inputDir = variantScope.artifacts.getFinalProduct(MERGED_NATIVE_LIBS)
+            variantScope.artifacts.setTaskInputToFinalProduct(MERGED_NATIVE_LIBS, task.inputDir)
             task.excludePatterns =
                 variantScope.globalScope.extension.packagingOptions.doNotStrip.sorted()
             task.stripToolFinderProvider =

@@ -26,6 +26,7 @@ import com.google.common.annotations.VisibleForTesting
 import com.android.build.gradle.internal.scope.GlobalScope
 import com.android.build.gradle.options.StringOption
 import com.android.builder.model.Version
+import com.google.common.base.Strings
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Sets
 import com.google.common.io.ByteStreams
@@ -62,43 +63,27 @@ private object Aapt2Version {
 /**
  * Returns a file collection, which will contain the directory with AAPT2 to be used.
  *
- * See [getAapt2FromMavenAndVersion].
+ * See [getAapt2FromMaven].
  *
  * Idempotent.
  */
 fun getAapt2FromMaven(globalScope: GlobalScope): FileCollection {
-    val (aapt2FromMaven, _) = getAapt2FromMavenAndVersion(globalScope)
-    return aapt2FromMaven
-}
-
-/**
- * Returns a file collection, which will contain the directory with AAPT2 to be used,
- * and a String identifying the version of AAPT2 being used.
- *
- * If [StringOption.AAPT2_FROM_MAVEN_OVERRIDE] is set, the value of that flag will be returned
- * instead since the AAPT2 version is not necessarily known in this case.
- *
- * Idempotent.
- */
-fun getAapt2FromMavenAndVersion(globalScope: GlobalScope): Pair<FileCollection, String> {
     // Use custom AAPT2 if it was overridden.
     val customAapt2 = globalScope.projectOptions[StringOption.AAPT2_FROM_MAVEN_OVERRIDE]
-    if (!customAapt2.isNullOrEmpty()) {
+    if (!Strings.isNullOrEmpty(customAapt2)) {
         if (!customAapt2!!.endsWith(SdkConstants.FN_AAPT2)) {
             error("Custom AAPT2 location does not point to an AAPT2 executable: $customAapt2")
         }
-        return Pair(globalScope.project.files(File(customAapt2).parentFile), customAapt2)
+        return globalScope.project.files(File(customAapt2).parentFile)
     }
-    return getAapt2FromMavenAndVersion(globalScope.project)
+    return getAapt2FromMaven(globalScope.project)
 }
 
 @VisibleForTesting
-fun getAapt2FromMavenAndVersion(project: Project): Pair<FileCollection, String> {
-    val version = "${Version.ANDROID_GRADLE_PLUGIN_VERSION}-${Aapt2Version.BUILD_NUMBER}"
-
+fun getAapt2FromMaven(project: Project): FileCollection {
     val existingConfig = project.configurations.findByName(AAPT2_CONFIG_NAME)
     if (existingConfig != null) {
-        return Pair(getArtifactCollection(existingConfig), version)
+        return getArtifactCollection(existingConfig)
     }
 
     val config = project.configurations.create(AAPT2_CONFIG_NAME) {
@@ -114,6 +99,7 @@ fun getAapt2FromMavenAndVersion(project: Project): Pair<FileCollection, String> 
         SdkConstants.PLATFORM_LINUX -> "linux"
         else -> error("Unknown platform '${System.getProperty("os.name")}'")
     }
+    val version = "${Version.ANDROID_GRADLE_PLUGIN_VERSION}-${Aapt2Version.BUILD_NUMBER}"
     project.dependencies.add(
         config.name,
         mapOf<String, String>(
@@ -133,7 +119,7 @@ fun getAapt2FromMavenAndVersion(project: Project): Pair<FileCollection, String> 
         it.artifactTransform(Aapt2Extractor::class.java)
     }
 
-    return Pair(getArtifactCollection(config), version)
+    return getArtifactCollection(config)
 }
 
 private fun getArtifactCollection(configuration: Configuration): FileCollection =
@@ -163,8 +149,7 @@ class Aapt2Extractor @Inject constructor() : ArtifactTransform() {
                 }
                 // Mark executable on linux.
                 if (entry.name == SdkConstants.FN_AAPT2 &&
-                    (SdkConstants.CURRENT_PLATFORM == SdkConstants.PLATFORM_LINUX || SdkConstants.CURRENT_PLATFORM == SdkConstants.PLATFORM_DARWIN)
-                ) {
+                    (SdkConstants.CURRENT_PLATFORM == SdkConstants.PLATFORM_LINUX || SdkConstants.CURRENT_PLATFORM == SdkConstants.PLATFORM_DARWIN)) {
                     val permissions = Files.getPosixFilePermissions(destinationFile)
                     Files.setPosixFilePermissions(
                         destinationFile,

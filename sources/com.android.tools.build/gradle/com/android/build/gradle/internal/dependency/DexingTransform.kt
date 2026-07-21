@@ -24,7 +24,6 @@ import com.android.build.gradle.options.SyncOptions
 import com.android.builder.dexing.ClassFileInputs
 import com.android.builder.dexing.DexArchiveBuilder
 import com.android.builder.dexing.r8.ClassFileProviderFactory
-import com.android.sdklib.AndroidVersion
 import com.android.tools.build.gradle.internal.profile.GradleTransformExecutionType
 import com.google.common.io.Closer
 import com.google.common.io.Files
@@ -41,6 +40,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.CompileClasspath
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.nio.file.Path
@@ -51,10 +51,10 @@ abstract class BaseDexingTransform : TransformAction<BaseDexingTransform.Paramet
         val minSdkVersion: Property<Int>
         @get:Input
         val debuggable: Property<Boolean>
-        @get:Input
-        val enableDesugaring: Property<Boolean>
         @get:Classpath
         val bootClasspath: ConfigurableFileCollection
+        @get:Internal
+        val errorFormat: Property<SyncOptions.ErrorFormatMode>
     }
 
     @get:Classpath
@@ -62,6 +62,8 @@ abstract class BaseDexingTransform : TransformAction<BaseDexingTransform.Paramet
     abstract val primaryInput: File
 
     protected abstract fun computeClasspathFiles(): List<Path>
+
+    protected abstract fun enableDesugaring(): Boolean
 
     override fun transform(outputs: TransformOutputs) {
         recordArtifactTransformSpan(
@@ -78,10 +80,10 @@ abstract class BaseDexingTransform : TransformAction<BaseDexingTransform.Paramet
                     ClassFileProviderFactory(parameters.bootClasspath.files.map(File::toPath))
                         .also { closer.register(it) },
                     ClassFileProviderFactory(computeClasspathFiles()).also { closer.register(it) },
-                    parameters.enableDesugaring.get(),
+                    enableDesugaring(),
                     MessageReceiverImpl(
-                        SyncOptions.ErrorFormatMode.MACHINE_PARSABLE,
-                        LoggerFactory.getLogger(DexingNoClasspathTransform::class.java)
+                        parameters.errorFormat.get(),
+                        LoggerFactory.getLogger(DexingNoDesugarTransform::class.java)
                     )
                 )
 
@@ -99,11 +101,12 @@ abstract class BaseDexingTransform : TransformAction<BaseDexingTransform.Paramet
     }
 }
 
-abstract class DexingNoClasspathTransform : BaseDexingTransform() {
+abstract class DexingNoDesugarTransform : BaseDexingTransform() {
     override fun computeClasspathFiles() = listOf<Path>()
+    override fun enableDesugaring() = false
 }
 
-abstract class DexingWithClasspathTransform : BaseDexingTransform() {
+abstract class DexingWithDesugarTransform : BaseDexingTransform() {
     /**
      * Using compile classpath normalization is safe here due to the design of desugar:
      * Method bodies are only moved to the companion class within the same artifact,
@@ -114,6 +117,8 @@ abstract class DexingWithClasspathTransform : BaseDexingTransform() {
     abstract val classpath: FileCollection
 
     override fun computeClasspathFiles() = classpath.files.map(File::toPath)
+
+    override fun enableDesugaring() = true
 }
 
 fun getDexingArtifactConfigurations(scopes: Collection<VariantScope>): Set<DexingArtifactConfiguration> {
@@ -121,7 +126,7 @@ fun getDexingArtifactConfigurations(scopes: Collection<VariantScope>): Set<Dexin
 }
 
 fun getDexingArtifactConfiguration(scope: VariantScope): DexingArtifactConfiguration {
-    val minSdk = scope.variantConfiguration.minSdkVersionWithTargetDeviceApi.featureLevel
+    val minSdk = scope.minSdkVersion.featureLevel
     val debuggable = scope.variantConfiguration.buildType.isDebuggable
     val enableDesugaring = scope.java8LangSupportType == VariantScope.Java8LangSupport.D8
 
@@ -134,24 +139,23 @@ data class DexingArtifactConfiguration(
     private val enableDesugaring: Boolean
 ) {
 
-    private val needsClasspath = enableDesugaring && minSdk < AndroidVersion.VersionCodes.N
-
     fun registerTransform(
         projectName: String,
         dependencyHandler: DependencyHandler,
-        bootClasspath: FileCollection
+        bootClasspath: FileCollection,
+        errorFormat: SyncOptions.ErrorFormatMode
     ) {
         dependencyHandler.registerTransform(getTransformClass()) { spec ->
             spec.parameters { parameters ->
                 parameters.projectName.set(projectName)
                 parameters.minSdkVersion.set(minSdk)
                 parameters.debuggable.set(isDebuggable)
-                parameters.enableDesugaring.set(enableDesugaring)
-                if (needsClasspath) {
+                if (enableDesugaring) {
                     parameters.bootClasspath.from(bootClasspath)
                 }
+                parameters.errorFormat.set(errorFormat)
             }
-            spec.from.attribute(ARTIFACT_FORMAT, AndroidArtifacts.ArtifactType.CLASSES.type)
+            spec.from.attribute(ARTIFACT_FORMAT, AndroidArtifacts.ArtifactType.PROCESSED_JAR.type)
             spec.to.attribute(ARTIFACT_FORMAT, AndroidArtifacts.ArtifactType.DEX.type)
 
             getAttributes().forEach { (attribute, value) ->
@@ -162,10 +166,10 @@ data class DexingArtifactConfiguration(
     }
 
     private fun getTransformClass(): Class<out BaseDexingTransform> {
-        return if (needsClasspath) {
-            DexingWithClasspathTransform::class.java
+        return if (enableDesugaring) {
+            DexingWithDesugarTransform::class.java
         } else {
-            DexingNoClasspathTransform::class.java
+            DexingNoDesugarTransform::class.java
         }
     }
 

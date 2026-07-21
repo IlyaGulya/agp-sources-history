@@ -17,16 +17,19 @@
 package com.android.build.gradle.tasks
 
 import com.android.SdkConstants
+import com.android.build.gradle.internal.scope.ApkData
+import com.android.build.gradle.internal.scope.BuildArtifactsHolder
 import com.android.build.gradle.internal.scope.ExistingBuildElements
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.utils.FileUtils
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputFile
-import java.io.File
+import org.gradle.api.tasks.TaskProvider
 
 /**
  * Task to persist the {@see OutputScope#apkdatas} which allows downstream tasks to depend
@@ -35,19 +38,19 @@ import java.io.File
  * produced and which ones are enabled.
  */
 @CacheableTask
-open class MainApkListPersistence : NonIncrementalTask() {
+abstract class MainApkListPersistence : NonIncrementalTask() {
 
     @get:OutputFile
-    lateinit var outputFile: File
-        private set
+    abstract val outputFile: RegularFileProperty
 
-    @get:Input
-    lateinit var apkDataListJson : String
+    @get:Nested
+    lateinit var apkDataList : List<ApkData>
         private set
 
     public override fun doTaskAction() {
-        FileUtils.deleteIfExists(outputFile)
-        FileUtils.createFile(outputFile, apkDataListJson)
+        FileUtils.deleteIfExists(outputFile.get().asFile)
+        FileUtils.createFile(outputFile.get().asFile,
+            ExistingBuildElements.persistApkList(apkDataList))
     }
 
     class CreationAction(
@@ -60,22 +63,22 @@ open class MainApkListPersistence : NonIncrementalTask() {
         override val type: Class<MainApkListPersistence>
             get() = MainApkListPersistence::class.java
 
-        private lateinit var outputFile: File
+        override fun handleProvider(taskProvider: TaskProvider<out MainApkListPersistence>) {
+            super.handleProvider(taskProvider)
 
-        override fun preConfigure(taskName: String) {
-            super.preConfigure(taskName)
-            outputFile = variantScope.artifacts.appendArtifact(
+            variantScope.artifacts.producesFile(
                 InternalArtifactType.APK_LIST,
-                taskName,
-                SdkConstants.FN_APK_LIST)
+                BuildArtifactsHolder.OperationType.INITIAL,
+                taskProvider,
+                MainApkListPersistence::outputFile,
+                fileName = SdkConstants.FN_APK_LIST
+            )
         }
 
         override fun configure(task: MainApkListPersistence) {
             super.configure(task)
 
-            task.apkDataListJson =
-                    ExistingBuildElements.persistApkList(variantScope.outputScope.apkDatas)
-            task.outputFile = outputFile
+            task.apkDataList = variantScope.outputScope.apkDatas
         }
     }
 }

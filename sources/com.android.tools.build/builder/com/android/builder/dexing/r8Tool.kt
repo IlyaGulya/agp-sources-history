@@ -39,7 +39,6 @@ import com.android.tools.r8.StringConsumer
 import com.android.tools.r8.Version
 import com.android.tools.r8.origin.Origin
 import com.android.tools.r8.utils.ArchiveResourceProvider
-import com.android.utils.PathUtils.toSystemIndependentPath
 import com.google.common.io.ByteStreams
 import java.io.BufferedOutputStream
 import java.io.IOException
@@ -168,11 +167,8 @@ fun runR8(
         when {
             Files.isRegularFile(path) -> r8ProgramResourceProvider.addProgramResourceProvider(
                 ArchiveProgramResourceProvider.fromArchive(path))
-            Files.isDirectory(path) -> Files.walk(path).use { stream ->
-                stream.filter {
-                    val relativePath = toSystemIndependentPath(path.relativize(it))
-                    Files.isRegularFile(it) && ClassFileInput.CLASS_MATCHER.test(relativePath)
-                }
+            Files.isDirectory(path) -> Files.walk(path).use {
+                it.filter { Files.isRegularFile(it) && it.toString().endsWith(DOT_CLASS) }
                     .forEach { r8CommandBuilder.addProgramFiles(it) }
             }
             else -> throw IOException("Unexpected file format: $path")

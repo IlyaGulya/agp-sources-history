@@ -24,9 +24,7 @@ import static com.android.build.gradle.internal.variant.TestVariantFactory.getTe
 import android.databinding.tool.DataBindingBuilder;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
-import com.android.build.api.artifact.BuildableArtifact;
 import com.android.build.gradle.AndroidConfig;
-import com.android.build.gradle.internal.api.artifact.BuildableArtifactImpl;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
 import com.android.build.gradle.internal.scope.CodeShrinker;
 import com.android.build.gradle.internal.scope.GlobalScope;
@@ -48,12 +46,13 @@ import com.android.builder.profile.Recorder;
 import com.android.builder.testing.ConnectedDeviceProvider;
 import com.google.common.base.Preconditions;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.file.Directory;
 import org.gradle.api.file.FileCollection;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 
@@ -84,18 +83,17 @@ public class TestApplicationTaskManager extends ApplicationTaskManager {
     }
 
     @Override
-    public void createTasksForVariantScope(
-            @NonNull VariantScope variantScope, @NonNull List<VariantScope> variantScopesForLint) {
+    public void createTasksForVariantScope(@NonNull VariantScope variantScope) {
 
-        super.createTasksForVariantScope(variantScope, variantScopesForLint);
+        super.createTasksForVariantScope(variantScope);
 
         Configuration testedApksConfig =
                 project.getConfigurations()
                         .getByName(
                                 getTestedApksConfigurationName(variantScope.getFullVariantName()));
 
-        BuildableArtifact testingApk =
-                variantScope.getArtifacts().getFinalArtifactFiles(InternalArtifactType.APK);
+        Provider<Directory> testingApk =
+                variantScope.getArtifacts().getFinalProduct(InternalArtifactType.APK);
 
         // create a FileCollection that will contain the APKs to be tested.
         // FULL_APK is published only to the runtime configuration
@@ -119,7 +117,7 @@ public class TestApplicationTaskManager extends ApplicationTaskManager {
                         variantScope.getVariantConfiguration(),
                         variantScope.getVariantData()::getApplicationId,
                         testingApk,
-                        new BuildableArtifactImpl(testedApks));
+                        testedApks);
 
         configureTestData(testData);
 
@@ -136,8 +134,6 @@ public class TestApplicationTaskManager extends ApplicationTaskManager {
                                                         .get(),
                                         extension.getAdbOptions().getTimeOutInMs(),
                                         new LoggerWrapper(getLogger())),
-                                DeviceProviderInstrumentTestTask.CreationAction.Type
-                                        .INTERNAL_CONNECTED_DEVICE_PROVIDER,
                                 testData,
                                 testedManifestMetadata) {
                             @NonNull
@@ -161,13 +157,12 @@ public class TestApplicationTaskManager extends ApplicationTaskManager {
     }
 
     @Override
-    public void createLintTasks(VariantScope scope, @NonNull List<VariantScope> variantScopes) {
+    public void createLintTasks(VariantScope scope) {
         // do nothing
     }
 
     @Override
-    public void maybeCreateLintVitalTask(
-            @NonNull ApkVariantData variantData, @NonNull List<VariantScope> variantScopes) {
+    public void maybeCreateLintVitalTask(@NonNull ApkVariantData variantData) {
         // do nothing
     }
 

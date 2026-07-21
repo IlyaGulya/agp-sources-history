@@ -49,6 +49,7 @@ import com.android.build.gradle.internal.tasks.PackageBundleTask;
 import com.android.build.gradle.internal.tasks.PerModuleBundleTask;
 import com.android.build.gradle.internal.tasks.PerModuleReportDependenciesTask;
 import com.android.build.gradle.internal.tasks.SigningConfigWriterTask;
+import com.android.build.gradle.internal.tasks.StripDebugSymbolsTask;
 import com.android.build.gradle.internal.tasks.TestPreBuildTask;
 import com.android.build.gradle.internal.tasks.databinding.DataBindingExportFeatureApplicationIdsTask;
 import com.android.build.gradle.internal.tasks.databinding.DataBindingExportFeatureInfoTask;
@@ -56,19 +57,18 @@ import com.android.build.gradle.internal.tasks.factory.TaskFactoryUtils;
 import com.android.build.gradle.internal.tasks.featuresplit.FeatureSetMetadataWriterTask;
 import com.android.build.gradle.internal.tasks.featuresplit.FeatureSplitDeclarationWriterTask;
 import com.android.build.gradle.internal.tasks.featuresplit.FeatureSplitTransitiveDepsWriterTask;
-import com.android.build.gradle.internal.variant.ApkVariantData;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.internal.variant.MultiOutputPolicy;
 import com.android.build.gradle.internal.variant.VariantFactory;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
+import com.android.build.gradle.tasks.ExtractDeepLinksTask;
 import com.android.build.gradle.tasks.MainApkListPersistence;
 import com.android.build.gradle.tasks.MergeResources;
 import com.android.builder.core.VariantType;
 import com.android.builder.profile.Recorder;
 import com.google.common.collect.Sets;
 import java.io.File;
-import java.util.List;
 import java.util.Set;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
@@ -109,10 +109,11 @@ public class ApplicationTaskManager extends TaskManager {
     }
 
     @Override
-    public void createTasksForVariantScope(
-            @NonNull final VariantScope variantScope,
-            @NonNull List<VariantScope> variantScopesForLint) {
+    public void createTasksForVariantScope(@NonNull final VariantScope variantScope) {
         createAnchorTasks(variantScope);
+
+        taskFactory.register(new ExtractDeepLinksTask.CreationAction(variantScope));
+
         createCheckManifestTask(variantScope);
 
         handleMicroApp(variantScope);
@@ -152,6 +153,8 @@ public class ApplicationTaskManager extends TaskManager {
 
         // Add a task to process the Android Resources and generate source files
         createApkProcessResTask(variantScope);
+
+        registerRClassTransformStream(variantScope);
 
         // Add a task to process the java resources
         createProcessJavaResTask(variantScope);
@@ -205,7 +208,7 @@ public class ApplicationTaskManager extends TaskManager {
         // Add a compile task
         createCompileTask(variantScope);
 
-        createStripNativeLibraryTask(taskFactory, variantScope);
+        taskFactory.register(new StripDebugSymbolsTask.CreationAction(variantScope));
 
         if (variantScope.getVariantData().getMultiOutputPolicy().equals(MultiOutputPolicy.SPLITS)) {
             if (extension.getBuildToolsRevision().getMajor() < 21) {
@@ -218,11 +221,8 @@ public class ApplicationTaskManager extends TaskManager {
 
         createPackagingTask(variantScope);
 
-        maybeCreateLintVitalTask(
-                (ApkVariantData) variantScope.getVariantData(), variantScopesForLint);
-
         // Create the lint tasks, if enabled
-        createLintTasks(variantScope, variantScopesForLint);
+        createLintTasks(variantScope);
 
         taskFactory.register(new FeatureSplitTransitiveDepsWriterTask.CreationAction(variantScope));
 

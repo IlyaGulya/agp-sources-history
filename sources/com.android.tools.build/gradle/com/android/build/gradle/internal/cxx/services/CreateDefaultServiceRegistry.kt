@@ -24,5 +24,6 @@ import com.android.build.gradle.internal.scope.GlobalScope
 fun createDefaultServiceRegistry(global : GlobalScope) : CxxServiceRegistry {
     val registry = CxxServiceRegistryBuilder()
     createProcessJunctionService(global, registry)
+    createEvalIssueReporterService(global, registry)
     return registry.build()
 }

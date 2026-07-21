@@ -19,9 +19,9 @@ package com.android.build.gradle.tasks;
 import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
-import com.android.build.api.artifact.BuildableArtifact;
 import com.android.build.gradle.internal.packaging.IncrementalPackagerBuilder;
 import com.android.build.gradle.internal.scope.ApkData;
+import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
 import com.android.build.gradle.internal.scope.BuildElementsTransformParams;
 import com.android.build.gradle.internal.scope.BuildElementsTransformRunnable;
 import com.android.build.gradle.internal.scope.ExistingBuildElements;
@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import javax.inject.Inject;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
@@ -48,23 +49,17 @@ import org.gradle.api.tasks.TaskProvider;
 import org.gradle.workers.WorkerExecutor;
 
 /** Package each split resources into a specific signed apk file. */
-public class PackageSplitRes extends NonIncrementalTask {
+public abstract class PackageSplitRes extends NonIncrementalTask {
 
     private FileCollection signingConfig;
     private File incrementalDir;
-    public BuildableArtifact processedResources;
-    public File splitResApkOutputDirectory;
     private boolean keepTimestampsInApk;
 
     @InputFiles
-    public BuildableArtifact getProcessedResources() {
-        return processedResources;
-    }
+    public abstract DirectoryProperty getProcessedResources();
 
     @OutputDirectory
-    public File getSplitResApkOutputDirectory() {
-        return splitResApkOutputDirectory;
-    }
+    public abstract DirectoryProperty getSplitResApkOutputDirectory();
 
     @InputFiles
     public FileCollection getSigningConfig() {
@@ -88,7 +83,7 @@ public class PackageSplitRes extends NonIncrementalTask {
     protected void doTaskAction() {
         ExistingBuildElements.from(
                         InternalArtifactType.DENSITY_OR_LANGUAGE_SPLIT_PROCESSED_RES,
-                        processedResources)
+                        getProcessedResources())
                 .transform(
                         workers,
                         PackageSplitResTransformRunnable.class,
@@ -96,7 +91,7 @@ public class PackageSplitRes extends NonIncrementalTask {
                                 new PackageSplitResTransformParams(apkInfo, file, this)))
                 .into(
                         InternalArtifactType.DENSITY_OR_LANGUAGE_PACKAGED_SPLIT,
-                        splitResApkOutputDirectory);
+                        getSplitResApkOutputDirectory().get().getAsFile());
     }
 
     private static class PackageSplitResTransformRunnable extends BuildElementsTransformRunnable {
@@ -150,7 +145,7 @@ public class PackageSplitRes extends NonIncrementalTask {
             this.input = input;
             output =
                     new File(
-                            task.splitResApkOutputDirectory,
+                            task.getSplitResApkOutputDirectory().get().getAsFile(),
                             getOutputFileNameForSplit(
                                     apkInfo,
                                     (String)
@@ -181,8 +176,6 @@ public class PackageSplitRes extends NonIncrementalTask {
 
     public static class CreationAction extends VariantTaskCreationAction<PackageSplitRes> {
 
-        private File splitResApkOutputDirectory;
-
         public CreationAction(VariantScope scope) {
             super(scope);
         }
@@ -200,21 +193,17 @@ public class PackageSplitRes extends NonIncrementalTask {
         }
 
         @Override
-        public void preConfigure(@NonNull String taskName) {
-            super.preConfigure(taskName);
-            splitResApkOutputDirectory =
-                    getVariantScope()
-                            .getArtifacts()
-                            .appendArtifact(
-                                    InternalArtifactType.DENSITY_OR_LANGUAGE_PACKAGED_SPLIT,
-                                    taskName,
-                                    "out");
-        }
-
-        @Override
         public void handleProvider(@NonNull TaskProvider<? extends PackageSplitRes> taskProvider) {
             super.handleProvider(taskProvider);
             getVariantScope().getTaskContainer().setPackageSplitResourcesTask(taskProvider);
+            getVariantScope()
+                    .getArtifacts()
+                    .producesDir(
+                            InternalArtifactType.DENSITY_OR_LANGUAGE_PACKAGED_SPLIT,
+                            BuildArtifactsHolder.OperationType.INITIAL,
+                            taskProvider,
+                            PackageSplitRes::getSplitResApkOutputDirectory,
+                            "out");
         }
 
         @Override
@@ -222,10 +211,10 @@ public class PackageSplitRes extends NonIncrementalTask {
             super.configure(task);
             VariantScope scope = getVariantScope();
 
-            task.processedResources =
-                    scope.getArtifacts().getFinalArtifactFiles(InternalArtifactType.PROCESSED_RES);
+            scope.getArtifacts()
+                    .setTaskInputToFinalProduct(
+                            InternalArtifactType.PROCESSED_RES, task.getProcessedResources());
             task.signingConfig = scope.getSigningConfigFileCollection();
-            task.splitResApkOutputDirectory = splitResApkOutputDirectory;
             task.incrementalDir = scope.getIncrementalDir(getName());
             task.keepTimestampsInApk =
                     scope.getGlobalScope()

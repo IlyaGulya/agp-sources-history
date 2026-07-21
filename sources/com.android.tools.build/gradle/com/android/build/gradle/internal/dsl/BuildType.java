@@ -285,8 +285,7 @@ public class BuildType extends DefaultBuildType implements CoreBuildType, Serial
         //noinspection deprecation Must still be copied.
         isCrunchPngsDefault = thatBuildType.isCrunchPngsDefault();
         matchingFallbacks = ImmutableList.copyOf(thatBuildType.getMatchingFallbacks());
-        // we don't want to dynamically link these values. We just want to copy the current value.
-        isDefault.set(thatBuildType.getIsDefault().get());
+        isDefault.set(thatBuildType.getIsDefault());
     }
 
     /** Override as DSL objects have no reason to be compared for equality. */
@@ -582,12 +581,12 @@ public class BuildType extends DefaultBuildType implements CoreBuildType, Serial
      *
      * <p>By default, when you enable code shrinking by setting <a
      * href="com.android.build.gradle.internal.dsl.BuildType.html#com.android.build.gradle.internal.dsl.BuildType:minifyEnabled">
-     * <code>minifyEnabled</code></a> to <code>true</code>, the Android plugin uses R8. If you set
-     * this property to <code>true</code>, the Android plugin uses ProGuard.
+     * <code>minifyEnabled</code></a> to <code>true</code>, the Android plugin uses ProGuard. If you
+     * set this property to <code>false</code>, the Android plugin will use R8.
      *
      * <p>To learn more, read <a
-     * href="https://developer.android.com/studio/build/shrink-code.html">Shrink, obfuscate, and
-     * optimize your app</a>.
+     * href="https://developer.android.com/studio/build/shrink-code.html">Shrink Your Code and
+     * Resources</a>.
      */
     @Override
     public Boolean isUseProguard() {
@@ -696,11 +695,6 @@ public class BuildType extends DefaultBuildType implements CoreBuildType, Serial
 
     @Override
     public BuildType initWith(com.android.builder.model.BuildType that) {
-        // we need to avoid doing this because of Property objects that cannot
-        // be set from themselves
-        if (that == this) {
-            return this;
-        }
         dslChecksEnabled.set(false);
         try {
             return (BuildType) super.initWith(that);

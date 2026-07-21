@@ -31,6 +31,7 @@ import com.android.build.gradle.internal.res.Aapt2MavenUtils;
 import com.android.build.gradle.internal.res.namespaced.Aapt2DaemonManagerService;
 import com.android.build.gradle.internal.res.namespaced.Aapt2ServiceKey;
 import com.android.build.gradle.internal.res.namespaced.NamespaceRemover;
+import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.Blocks;
@@ -74,15 +75,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.xml.bind.JAXBException;
-import kotlin.Pair;
 import org.gradle.api.GradleException;
-import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.OutputFile;
@@ -130,15 +129,9 @@ public abstract class MergeResources extends ResourceAwareTask {
 
     private Supplier<Integer> minSdk;
 
-    private String aapt2Version;
-
-    @Internal
-    public abstract ConfigurableFileCollection getAapt2FromMaven();
+    private FileCollection aapt2FromMaven;
 
     @Nullable private SingleFileProcessor dataBindingLayoutProcessor;
-
-    /** Where data binding exports its outputs after parsing layout files. */
-    @Nullable private File dataBindingLayoutInfoOutFolder;
 
     @Nullable private File mergedNotCompiledResourcesOutputDirectory;
 
@@ -181,12 +174,10 @@ public abstract class MergeResources extends ResourceAwareTask {
         return true;
     }
 
-    @Nullable
+    @NonNull
     @OutputDirectory
     @Optional
-    public File getDataBindingLayoutInfoOutFolder() {
-        return dataBindingLayoutInfoOutFolder;
-    }
+    public abstract DirectoryProperty getDataBindingLayoutInfoOutFolder();
 
     private final WorkerExecutorFacade workerExecutorFacade;
 
@@ -206,8 +197,9 @@ public abstract class MergeResources extends ResourceAwareTask {
         // this is full run, clean the previous outputs
         File destinationDir = getOutputDir();
         FileUtils.cleanOutputDir(destinationDir);
-        if (dataBindingLayoutInfoOutFolder != null) {
-            FileUtils.deleteDirectoryContents(dataBindingLayoutInfoOutFolder);
+        if (getDataBindingLayoutInfoOutFolder().isPresent()) {
+            FileUtils.deleteDirectoryContents(
+                    getDataBindingLayoutInfoOutFolder().get().getAsFile());
         }
 
         List<ResourceSet> resourceSets = getConfiguredResourceSets(preprocessor);
@@ -222,7 +214,7 @@ public abstract class MergeResources extends ResourceAwareTask {
 
         try (ResourceCompilationService resourceCompiler =
                 getResourceProcessor(
-                        getAapt2FromMaven(),
+                        aapt2FromMaven,
                         workerExecutorFacade,
                         errorFormatMode,
                         flags,
@@ -351,7 +343,7 @@ public abstract class MergeResources extends ResourceAwareTask {
 
             try (ResourceCompilationService resourceCompiler =
                     getResourceProcessor(
-                            getAapt2FromMaven(),
+                            aapt2FromMaven,
                             workerExecutorFacade,
                             errorFormatMode,
                             flags,
@@ -567,9 +559,10 @@ public abstract class MergeResources extends ResourceAwareTask {
         return vectorSupportLibraryIsUsed;
     }
 
-    @Input
-    public String getAapt2Version() {
-        return aapt2Version;
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public FileCollection getAapt2FromMaven() {
+        return aapt2FromMaven;
     }
 
     @Nullable
@@ -600,7 +593,6 @@ public abstract class MergeResources extends ResourceAwareTask {
         private final boolean processResources;
         private final boolean processVectorDrawables;
         @NonNull private final ImmutableSet<Flag> flags;
-        private File dataBindingLayoutInfoOutFolder;
 
         public CreationAction(
                 @NonNull VariantScope variantScope,
@@ -635,24 +627,6 @@ public abstract class MergeResources extends ResourceAwareTask {
         }
 
         @Override
-        public void preConfigure(@NonNull String taskName) {
-            super.preConfigure(taskName);
-
-            if (getVariantScope().getGlobalScope().getExtension().getDataBinding().isEnabled()) {
-                // Keep as an output.
-                dataBindingLayoutInfoOutFolder =
-                        getVariantScope()
-                                .getArtifacts()
-                                .appendArtifact(
-                                        mergeType == MERGE
-                                                ? DATA_BINDING_LAYOUT_INFO_TYPE_MERGE
-                                                : DATA_BINDING_LAYOUT_INFO_TYPE_PACKAGE,
-                                        taskName,
-                                        "out");
-            }
-        }
-
-        @Override
         public void handleProvider(@NonNull TaskProvider<? extends MergeResources> taskProvider) {
             super.handleProvider(taskProvider);
             // In LibraryTaskManager#createMergeResourcesTasks, there are actually two
@@ -663,6 +637,17 @@ public abstract class MergeResources extends ResourceAwareTask {
             // finally registered in the current scope.
             // Filed https://issuetracker.google.com//110412851 to clean this up at some point.
             getVariantScope().getTaskContainer().setMergeResourcesTask(taskProvider);
+
+            getVariantScope()
+                    .getArtifacts()
+                    .producesDir(
+                            mergeType == MERGE
+                                    ? DATA_BINDING_LAYOUT_INFO_TYPE_MERGE
+                                    : DATA_BINDING_LAYOUT_INFO_TYPE_PACKAGE,
+                            BuildArtifactsHolder.OperationType.INITIAL,
+                            taskProvider,
+                            MergeResources::getDataBindingLayoutInfoOutFolder,
+                            "out");
         }
 
         @Override
@@ -681,10 +666,7 @@ public abstract class MergeResources extends ResourceAwareTask {
                                             .getMinSdkVersion()
                                             .getApiLevel());
 
-            Pair<FileCollection, String> aapt2AndVersion =
-                    Aapt2MavenUtils.getAapt2FromMavenAndVersion(globalScope);
-            task.getAapt2FromMaven().from(aapt2AndVersion.getFirst());
-            task.aapt2Version = aapt2AndVersion.getSecond();
+            task.aapt2FromMaven = Aapt2MavenUtils.getAapt2FromMaven(globalScope);
             task.setIncrementalFolder(variantScope.getIncrementalDir(getName()));
             // Libraries use this task twice, once for compilation (with dependencies),
             // where blame is useful, and once for packaging where it is not.
@@ -724,9 +706,11 @@ public abstract class MergeResources extends ResourceAwareTask {
                 task.generatedPngsOutputDir = variantScope.getGeneratedPngsOutputDir();
             }
 
-            if (globalScope.getExtension().getDataBinding().isEnabled()) {
+            boolean isDataBindingEnabled = globalScope.getExtension().getDataBinding().isEnabled();
+            boolean isViewBindingEnabled =
+                    globalScope.getProjectOptions().get(BooleanOption.ENABLE_VIEW_BINDING);
+            if (isDataBindingEnabled || isViewBindingEnabled) {
                 // Keep as an output.
-                task.dataBindingLayoutInfoOutFolder = dataBindingLayoutInfoOutFolder;
                 task.dataBindingLayoutProcessor =
                         new SingleFileProcessor() {
 
@@ -748,7 +732,8 @@ public abstract class MergeResources extends ResourceAwareTask {
                                 return getProcessor()
                                         .processSingleFile(
                                                 RelativizableFile.fromAbsoluteFile(file, null),
-                                                out);
+                                                out,
+                                                isViewBindingEnabled);
                             }
 
                             @Override
@@ -759,7 +744,10 @@ public abstract class MergeResources extends ResourceAwareTask {
                             @Override
                             public void end() throws JAXBException {
                                 getProcessor()
-                                        .writeLayoutInfoFiles(task.dataBindingLayoutInfoOutFolder);
+                                        .writeLayoutInfoFiles(
+                                                task.getDataBindingLayoutInfoOutFolder()
+                                                        .get()
+                                                        .getAsFile());
                             }
                         };
             }

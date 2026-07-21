@@ -18,9 +18,8 @@ package com.android.build.gradle.internal.res.namespaced
 import com.android.SdkConstants
 import com.android.build.api.artifact.BuildableArtifact
 import com.android.build.gradle.internal.LoggerWrapper
-import com.android.build.gradle.internal.api.artifact.singlePath
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
-import com.android.build.gradle.internal.res.getAapt2FromMavenAndVersion
+import com.android.build.gradle.internal.res.getAapt2FromMaven
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.OutputScope
@@ -35,13 +34,12 @@ import com.android.builder.internal.aapt.AaptOptions
 import com.android.builder.internal.aapt.AaptPackageConfig
 import com.android.utils.FileUtils
 import com.google.common.collect.ImmutableList
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
-import org.gradle.api.model.ObjectFactory
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
@@ -66,7 +64,7 @@ import javax.inject.Inject
  */
 @CacheableTask
 abstract class ProcessAndroidAppResourcesTask
-@Inject constructor(objects: ObjectFactory, workerExecutor: WorkerExecutor) : NonIncrementalTask() {
+@Inject constructor(workerExecutor: WorkerExecutor) : NonIncrementalTask() {
     private val workers = Workers.preferWorkers(project.name, path, workerExecutor)
 
     private lateinit var errorFormatMode: SyncOptions.ErrorFormatMode
@@ -74,18 +72,15 @@ abstract class ProcessAndroidAppResourcesTask
     @get:InputFiles @get:PathSensitive(PathSensitivity.RELATIVE) lateinit var manifestFileDirectory: Provider<Directory> private set
     @get:InputFiles @get:PathSensitive(PathSensitivity.RELATIVE) lateinit var thisSubProjectStaticLibrary: BuildableArtifact private set
     @get:InputFiles @get:PathSensitive(PathSensitivity.NONE) lateinit var libraryDependencies: FileCollection private set
+
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.NONE)
     @get:Optional
-    var convertedLibraryDependencies: BuildableArtifact? = null
-        private set
-    @get:InputFiles @get:PathSensitive(PathSensitivity.NONE) lateinit var sharedLibraryDependencies: FileCollection private set
+    abstract val convertedLibraryDependencies: DirectoryProperty
 
-    @get:Input
-    lateinit var aapt2Version: String
-        private set
-    @get:Internal
-    abstract val aapt2FromMaven: ConfigurableFileCollection
+    @get:InputFiles @get:PathSensitive(PathSensitivity.NONE) lateinit var sharedLibraryDependencies: FileCollection private set
+    @get:InputFiles @get:PathSensitive(PathSensitivity.RELATIVE)
+    lateinit var aapt2FromMaven: FileCollection private set
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
@@ -93,16 +88,16 @@ abstract class ProcessAndroidAppResourcesTask
         private set
 
     @get:OutputDirectory lateinit var aaptIntermediateDir: File private set
-    @get:OutputDirectory val rClassSource= objects.directoryProperty()
-    @get:OutputFile lateinit var resourceApUnderscore: File private set
+    @get:OutputDirectory abstract val rClassSource: DirectoryProperty
+    @get:OutputFile abstract val resourceApUnderscore: RegularFileProperty
 
     @get:Internal lateinit var outputScope: OutputScope private set
 
     override fun doTaskAction() {
         val staticLibraries = ImmutableList.builder<File>()
         staticLibraries.addAll(libraryDependencies.files)
-        convertedLibraryDependencies?.singlePath()?.let { convertedDir ->
-            Files.list(convertedDir).use { convertedLibraries ->
+        if (convertedLibraryDependencies.isPresent) {
+            Files.list(convertedLibraryDependencies.get().asFile.toPath()).use { convertedLibraries ->
                 convertedLibraries.forEach { staticLibraries.add(it.toFile()) }
             }
         }
@@ -114,7 +109,7 @@ abstract class ProcessAndroidAppResourcesTask
                 staticLibraryDependencies = staticLibraries.build(),
                 imports = ImmutableList.copyOf(sharedLibraryDependencies.asIterable()),
                 sourceOutputDir = rClassSource.get().asFile,
-                resourceOutputApk = resourceApUnderscore,
+                resourceOutputApk = resourceApUnderscore.get().asFile,
                 variantType = VariantTypeImpl.LIBRARY,
                 intermediateDir = aaptIntermediateDir)
 
@@ -137,29 +132,23 @@ abstract class ProcessAndroidAppResourcesTask
         override val type: Class<ProcessAndroidAppResourcesTask>
             get() = ProcessAndroidAppResourcesTask::class.java
 
-        private lateinit var resourceApUnderscore: File
-
-        override fun preConfigure(taskName: String) {
-            super.preConfigure(taskName)
-
-            val artifacts = variantScope.artifacts
-
-            resourceApUnderscore = variantScope.artifacts
-                .appendArtifact(
-                    InternalArtifactType.PROCESSED_RES,
-                    taskName,
-                    "res.apk")
-
-        }
-
         override fun handleProvider(taskProvider: TaskProvider<out ProcessAndroidAppResourcesTask>) {
             super.handleProvider(taskProvider)
             variantScope.artifacts.producesDir(
                 InternalArtifactType.RUNTIME_R_CLASS_SOURCES,
                 BuildArtifactsHolder.OperationType.INITIAL,
                 taskProvider,
-                taskProvider.map { it.rClassSource },
-                "out"
+                ProcessAndroidAppResourcesTask::rClassSource,
+                fileName = "out"
+            )
+            // TODO: This is not correct, other location expect a directory for this type.
+            variantScope.artifacts.producesFile(
+                InternalArtifactType.PROCESSED_RES,
+                BuildArtifactsHolder.OperationType.INITIAL,
+                taskProvider,
+                ProcessAndroidAppResourcesTask::resourceApUnderscore,
+                "res.apk"
+
             )
         }
 
@@ -184,11 +173,9 @@ abstract class ProcessAndroidAppResourcesTask
                             AndroidArtifacts.ArtifactType.RES_STATIC_LIBRARY)
             if (variantScope.globalScope.extension.aaptOptions.namespaced &&
                 variantScope.globalScope.projectOptions.get(BooleanOption.CONVERT_NON_NAMESPACED_DEPENDENCIES)) {
-                task.convertedLibraryDependencies =
-                        variantScope
-                            .artifacts
-                            .getArtifactFiles(
-                                InternalArtifactType.RES_CONVERTED_NON_NAMESPACED_REMOTE_DEPENDENCIES)
+                variantScope.artifacts.setTaskInputToFinalProduct(
+                    InternalArtifactType.RES_CONVERTED_NON_NAMESPACED_REMOTE_DEPENDENCIES,
+                    task.convertedLibraryDependencies)
             }
             task.sharedLibraryDependencies =
                     variantScope.getArtifactFileCollection(
@@ -200,10 +187,7 @@ abstract class ProcessAndroidAppResourcesTask
             task.aaptIntermediateDir =
                     FileUtils.join(
                             variantScope.globalScope.intermediatesDir, "res-process-intermediate", variantScope.variantConfiguration.dirName)
-            task.resourceApUnderscore = resourceApUnderscore
-            val (aapt2FromMaven, aapt2Version) = getAapt2FromMavenAndVersion(variantScope.globalScope)
-            task.aapt2FromMaven.from(aapt2FromMaven)
-            task.aapt2Version = aapt2Version
+            task.aapt2FromMaven = getAapt2FromMaven(variantScope.globalScope)
             task.androidJar = variantScope.globalScope.sdkComponents.androidJarProvider
             task.errorFormatMode = SyncOptions.getErrorFormatMode(
                 variantScope.globalScope.projectOptions

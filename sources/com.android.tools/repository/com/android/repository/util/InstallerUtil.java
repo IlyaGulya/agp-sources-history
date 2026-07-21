@@ -56,7 +56,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -444,13 +443,6 @@ public class InstallerUtil {
                 requiredPackages.remove(p);
             }
             result.addAll(requiredPackages);
-        }
-
-        // This hack is only for Studio 3.5. Do not integrate it into studio-master-dev. Keep the condition synchronized with
-        // tools/idea/platform/util/src/com/intellij/openapi/util/SystemInfo.java.
-        if (System.getProperty("os.name").toLowerCase(Locale.US).startsWith("linux")
-                && new File("/dev/.cros_milestone").exists()) {
-            result.removeIf(remotePackage -> remotePackage.getPath().equals("emulator"));
         }
 
         return Lists.reverse(result);

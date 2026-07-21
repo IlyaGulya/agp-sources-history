@@ -18,6 +18,7 @@ package com.android.build.gradle.internal.tasks
 
 import com.android.annotations.concurrency.GuardedBy
 import com.android.build.gradle.internal.profile.ProfilerInitializer
+import com.android.build.gradle.internal.profile.TaskProfilingRecord
 import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.options.IntegerOption
 import com.android.build.gradle.options.ProjectOptions
@@ -104,11 +105,11 @@ object Workers {
      * @return an instance of [WorkerExecutorFacade].
      */
     fun preferThreads(projectName: String, owner: String, workerExecutor: WorkerExecutor): WorkerExecutorFacade {
-        return ProfileAwareExecutorServiceAdapter(
+        return Workers.ProfileAwareExecutorServiceAdapter(
             projectName,
             owner,
             defaultExecutor,
-            preferWorkers(projectName, owner, workerExecutor))
+            Workers.preferWorkers(projectName, owner, workerExecutor))
     }
 
     /**
@@ -122,7 +123,7 @@ object Workers {
      * @return an instance of [WorkerExecutorFacade]
      */
     fun withThreads(projectName: String, owner: String)=
-        ProfileAwareExecutorServiceAdapter(projectName, owner, defaultExecutor)
+        Workers.ProfileAwareExecutorServiceAdapter(projectName, owner, defaultExecutor)
 
     private const val MAX_AAPT2_THREAD_POOL_SIZE = 8
 
@@ -233,7 +234,8 @@ object Workers {
         WorkerExecutorFacade {
 
         val taskRecord by lazy {
-            ProfilerInitializer.getListener()?.getTaskRecord(owner)
+            (ProfilerInitializer.getListener()?.getTaskRecord(owner)
+                ?: TaskProfilingRecord.dummyTaskRecord)
         }
 
         override fun submit(
@@ -263,7 +265,7 @@ object Workers {
                 workerKey
             )
 
-            taskRecord?.addWorker(workerKey, GradleBuildProfileSpan.ExecutionType.WORKER_EXECUTION)
+            taskRecord.addWorker(workerKey, GradleBuildProfileSpan.ExecutionType.WORKER_EXECUTION)
 
             val classpath = configuration.classPath.toList()
 
@@ -278,7 +280,7 @@ object Workers {
 
         override fun await() {
             try {
-                taskRecord?.setTaskWaiting()
+                taskRecord.setTaskWaiting()
                 workerExecutor.await()
             } catch (e: WorkerExecutionException) {
                 throw WorkerExecutorException(e.causes)
@@ -301,7 +303,7 @@ object Workers {
          * @TaskAction starts (so, we are safe!).
          */
         override fun close() {
-            taskRecord?.setTaskClosed()
+            taskRecord.setTaskClosed()
         }
     }
 
@@ -312,7 +314,6 @@ object Workers {
         when(this) {
             WorkerExecutorFacade.IsolationMode.NONE -> IsolationMode.NONE
             WorkerExecutorFacade.IsolationMode.CLASSLOADER -> IsolationMode.CLASSLOADER
-            WorkerExecutorFacade.IsolationMode.PROCESS -> IsolationMode.PROCESS
             else -> throw IllegalArgumentException("$this is not a handled isolation mode")
         }
 
@@ -364,12 +365,13 @@ object Workers {
         ExecutorServiceAdapter(projectName, owner, executor, delegate) {
 
         private val taskRecord by lazy {
-            ProfilerInitializer.getListener()?.getTaskRecord(owner)
+            (ProfilerInitializer.getListener()?.getTaskRecord(owner)
+                ?: TaskProfilingRecord.dummyTaskRecord)
         }
 
         override fun workerSubmission(workerKey: String) {
             super.workerSubmission(workerKey)
-            taskRecord?.addWorker(workerKey, GradleBuildProfileSpan.ExecutionType.THREAD_EXECUTION)
+            taskRecord.addWorker(workerKey, GradleBuildProfileSpan.ExecutionType.THREAD_EXECUTION)
         }
     }
 }

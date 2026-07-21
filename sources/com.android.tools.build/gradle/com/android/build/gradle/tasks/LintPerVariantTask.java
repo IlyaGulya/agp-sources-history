@@ -21,8 +21,6 @@ import com.android.annotations.Nullable;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.VariantAwareTask;
 import com.android.utils.StringHelper;
-import java.util.List;
-import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
@@ -32,7 +30,6 @@ import org.gradle.api.tasks.TaskAction;
 public class LintPerVariantTask extends LintBaseTask implements VariantAwareTask {
 
     private VariantInputs variantInputs;
-    private ConfigurableFileCollection allInputs;
     private boolean fatalOnly;
 
     private String variantName;
@@ -51,8 +48,8 @@ public class LintPerVariantTask extends LintBaseTask implements VariantAwareTask
 
     @InputFiles
     @Optional
-    public FileCollection getAllInputs() {
-        return allInputs;
+    public FileCollection getVariantInputs() {
+        return variantInputs.getAllInputs();
     }
 
     @TaskAction
@@ -83,12 +80,10 @@ public class LintPerVariantTask extends LintBaseTask implements VariantAwareTask
     public static class CreationAction extends BaseCreationAction<LintPerVariantTask> {
 
         private final VariantScope scope;
-        private final List<VariantScope> variantScopes;
 
-        public CreationAction(@NonNull VariantScope scope, List<VariantScope> variantScopes) {
+        public CreationAction(@NonNull VariantScope scope) {
             super(scope.getGlobalScope());
             this.scope = scope;
-            this.variantScopes = variantScopes;
         }
 
         @Override
@@ -108,14 +103,8 @@ public class LintPerVariantTask extends LintBaseTask implements VariantAwareTask
             super.configure(lint);
 
             lint.setVariantName(scope.getFullVariantName());
-            lint.allInputs = scope.getGlobalScope().getProject().files();
 
             lint.variantInputs = new VariantInputs(scope);
-            lint.allInputs.from(lint.variantInputs.getAllInputs());
-
-            for (VariantScope variantScope : variantScopes) {
-                addJarArtifactsToInputs(lint.allInputs, variantScope);
-            }
 
             lint.setDescription(
                     StringHelper.appendCapitalized(
@@ -126,13 +115,10 @@ public class LintPerVariantTask extends LintBaseTask implements VariantAwareTask
     public static class VitalCreationAction extends BaseCreationAction<LintPerVariantTask> {
 
         private final VariantScope scope;
-        private final List<VariantScope> variantScopes;
 
-        public VitalCreationAction(
-                @NonNull VariantScope scope, @NonNull List<VariantScope> variantScopes) {
+        public VitalCreationAction(@NonNull VariantScope scope) {
             super(scope.getGlobalScope());
             this.scope = scope;
-            this.variantScopes = variantScopes;
         }
 
         @NonNull
@@ -152,15 +138,8 @@ public class LintPerVariantTask extends LintBaseTask implements VariantAwareTask
             super.configure(task);
 
             task.setVariantName(scope.getFullVariantName());
-            task.allInputs = scope.getGlobalScope().getProject().files();
 
             task.variantInputs = new VariantInputs(scope);
-            task.allInputs.from(task.variantInputs.getAllInputs());
-
-            for (VariantScope variantScope : variantScopes) {
-                addJarArtifactsToInputs(task.allInputs, variantScope);
-            }
-
             task.fatalOnly = true;
             task.setDescription(
                     "Runs lint on just the fatal issues in the "

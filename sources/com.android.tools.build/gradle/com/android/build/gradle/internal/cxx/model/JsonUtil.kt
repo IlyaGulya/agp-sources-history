@@ -19,8 +19,10 @@ package com.android.build.gradle.internal.cxx.model
 import com.android.build.gradle.internal.core.Abi
 import com.android.build.gradle.internal.cxx.json.PlainFileGsonTypeAdaptor
 import com.android.build.gradle.internal.cxx.services.CxxServiceRegistry
+import com.android.build.gradle.internal.ndk.Stl
 import com.android.build.gradle.tasks.NativeBuildSystem
 import com.android.repository.Revision
+import com.google.common.annotations.VisibleForTesting
 import com.google.gson.GsonBuilder
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
@@ -73,65 +75,101 @@ private class RevisionTypeAdapter : TypeAdapter<Revision>() {
 }
 
 /**
- * Private data-backed implementation of [CxxModuleModel] that Gson can
+ * Private data-backed implementation of [CxxProjectModel] that Gson can
  * use to read and write.
  */
-// TODO Can the Cxx*Data classes be automated or otherwise removed while still
-// TODO retaining JSON read/write? They're a pain to maintain.
-private data class CxxModuleModelData(
+@VisibleForTesting
+data class CxxProjectModelData(
     override val rootBuildGradleFolder: File = File("."),
     override val sdkFolder: File = File("."),
     override val isNativeCompilerSettingsCacheEnabled: Boolean = false,
     override val isBuildOnlyTargetAbiEnabled: Boolean = false,
     override val ideBuildTargetAbi: String? = null,
+    override val compilerSettingsCacheFolder: File = File("."),
+    override val cxxFolder: File = File("."),
+    override val isCmakeBuildCohabitationEnabled: Boolean = false
+) : CxxProjectModel
+
+private fun CxxProjectModel.toData() = CxxProjectModelData(
+    rootBuildGradleFolder = rootBuildGradleFolder,
+    sdkFolder = sdkFolder,
+    isNativeCompilerSettingsCacheEnabled = isNativeCompilerSettingsCacheEnabled,
+    isBuildOnlyTargetAbiEnabled = isBuildOnlyTargetAbiEnabled,
+    ideBuildTargetAbi = ideBuildTargetAbi,
+    compilerSettingsCacheFolder = compilerSettingsCacheFolder,
+    cxxFolder = cxxFolder,
+    isCmakeBuildCohabitationEnabled = isCmakeBuildCohabitationEnabled
+)
+
+/**
+ * Private data-backed implementation of [CxxModuleModel] that Gson can
+ * use to read and write.
+ */
+// TODO Can the Cxx*Data classes be automated or otherwise removed while still
+// TODO retaining JSON read/write? They're a pain to maintain.
+@VisibleForTesting
+data class CxxModuleModelData(
     override val splitsAbiFilterSet: Set<String> = setOf(),
     override val intermediatesFolder: File = File("."),
     override val gradleModulePathName: String = "",
     override val moduleRootFolder: File = File("."),
     override val makeFile: File = File("."),
     override val buildSystem: NativeBuildSystem = NativeBuildSystem.CMAKE,
-    override val compilerSettingsCacheFolder: File = File("."),
     override val cxxFolder: File = File("."),
     override val ndkFolder: File = File("."),
     override val ndkVersion: Revision = Revision.parseRevision("0.0.0"),
     override val ndkSupportedAbiList: List<Abi> = listOf(),
     override val ndkDefaultAbiList: List<Abi> = listOf(),
-    override val cmake: CxxCmakeModuleModel? = null,
-    override val cmakeToolchainFile: File = File(".")
+    override val cmake: CxxCmakeModuleModelData? = null,
+    override val cmakeToolchainFile: File = File("."),
+    override val stlSharedObjectMap: Map<Stl, Map<Abi, File>> = emptyMap(),
+    override val project: CxxProjectModelData = CxxProjectModelData()
 ) : CxxModuleModel {
     override val services: CxxServiceRegistry
         get() = throw RuntimeException("Cannot use services from deserialized CxxModuleModel")
 }
 
 private fun CxxModuleModel.toData() = CxxModuleModelData(
-    rootBuildGradleFolder = rootBuildGradleFolder,
-    sdkFolder = sdkFolder,
-    isNativeCompilerSettingsCacheEnabled = isNativeCompilerSettingsCacheEnabled,
-    isBuildOnlyTargetAbiEnabled = isBuildOnlyTargetAbiEnabled,
-    ideBuildTargetAbi = ideBuildTargetAbi,
     splitsAbiFilterSet = splitsAbiFilterSet,
     intermediatesFolder = intermediatesFolder,
     gradleModulePathName = gradleModulePathName,
     moduleRootFolder = moduleRootFolder,
     makeFile = makeFile,
     buildSystem = buildSystem,
-    compilerSettingsCacheFolder = compilerSettingsCacheFolder,
     cxxFolder = cxxFolder,
     ndkFolder = ndkFolder,
     ndkVersion = ndkVersion,
     ndkSupportedAbiList = ndkSupportedAbiList,
     ndkDefaultAbiList = ndkDefaultAbiList,
-    cmake = cmake
+    cmake = cmake?.toData(),
+    cmakeToolchainFile = cmakeToolchainFile,
+    stlSharedObjectMap = stlSharedObjectMap,
+    project = project.toData()
 )
+
+@VisibleForTesting
+data class CxxCmakeModuleModelData(
+    override val cmakeExe: File,
+    override val foundCmakeVersion: Revision,
+    override val ninjaExe: File
+) : CxxCmakeModuleModel
+
+private fun CxxCmakeModuleModel.toData() =
+    CxxCmakeModuleModelData(
+        cmakeExe = cmakeExe,
+        foundCmakeVersion = foundCmakeVersion,
+        ninjaExe = ninjaExe
+    )
 
 /**
  * Private data-backed implementation of [CxxVariantModel] that Gson can
  * use to read and write.
  */
-private data class CxxVariantModelData(
+@VisibleForTesting
+internal data class CxxVariantModelData(
     override val module: CxxModuleModelData = CxxModuleModelData(),
     override val buildSystemArgumentList: List<String> = listOf(),
-    override val cFlagList: List<String> = listOf(),
+    override val cFlagsList: List<String> = listOf(),
     override val cppFlagsList: List<String> = listOf(),
     override val variantName: String = "",
     override val soFolder: File = File("."),
@@ -147,7 +185,7 @@ private fun CxxVariantModel.toData() =
     CxxVariantModelData(
         module = module.toData(),
         buildSystemArgumentList = buildSystemArgumentList,
-        cFlagList = cFlagList,
+        cFlagsList = cFlagsList,
         cppFlagsList = cppFlagsList,
         variantName = variantName,
         soFolder = soFolder,
@@ -163,7 +201,8 @@ private fun CxxVariantModel.toData() =
  * Private data-backed implementation of [CxxAbiModel] that Gson can use
  * to read and write.
  */
-private data class CxxAbiModelData(
+@VisibleForTesting
+internal data class CxxAbiModelData(
     override val variant: CxxVariantModelData = CxxVariantModelData(),
     override val abi: Abi = Abi.X86,
     override val abiPlatformVersion: Int = 0,
@@ -199,15 +238,16 @@ private fun CxxAbiModel.toData(): CxxAbiModel = CxxAbiModelData(
  * Private data-backed implementation of [CxxCmakeAbiModel] that Gson can use
  * to read and write.
  */
-private data class CxxCmakeAbiModelData(
-    override val cmakeListsWrapperFile: File = File("."),
-    override val toolchainWrapperFile: File = File("."),
-    override val buildGenerationStateFile: File = File("."),
-    override val cacheKeyFile: File = File("."),
-    override val compilerCacheUseFile: File = File("."),
-    override val compilerCacheWriteFile: File = File("."),
-    override val toolchainSettingsFromCacheFile: File = File("."),
-    override val cmakeWrappingBaseFolder: File = File(".")
+@VisibleForTesting
+internal data class CxxCmakeAbiModelData(
+    override val cmakeListsWrapperFile: File,
+    override val toolchainWrapperFile: File,
+    override val buildGenerationStateFile: File,
+    override val cacheKeyFile: File,
+    override val compilerCacheUseFile: File,
+    override val compilerCacheWriteFile: File,
+    override val toolchainSettingsFromCacheFile: File,
+    override val cmakeWrappingBaseFolder: File
 ) : CxxCmakeAbiModel
 
 private fun CxxCmakeAbiModel.toData() = CxxCmakeAbiModelData(
@@ -217,7 +257,7 @@ private fun CxxCmakeAbiModel.toData() = CxxCmakeAbiModelData(
     cacheKeyFile = cacheKeyFile,
     compilerCacheUseFile = compilerCacheUseFile,
     compilerCacheWriteFile = compilerCacheWriteFile,
-    toolchainSettingsFromCacheFile = toolchainSettingsFromCacheFile
-
+    toolchainSettingsFromCacheFile = toolchainSettingsFromCacheFile,
+    cmakeWrappingBaseFolder = cmakeWrappingBaseFolder
 )
 

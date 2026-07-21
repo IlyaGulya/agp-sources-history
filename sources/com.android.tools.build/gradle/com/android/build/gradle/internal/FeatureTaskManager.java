@@ -31,7 +31,6 @@ import com.android.builder.errors.EvalIssueReporter.Type;
 import com.android.builder.profile.Recorder;
 import com.android.sdklib.AndroidTargetHash;
 import com.android.sdklib.AndroidVersion;
-import java.util.List;
 import org.gradle.api.Project;
 import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 
@@ -59,10 +58,8 @@ public class FeatureTaskManager extends ApplicationTaskManager {
     }
 
     @Override
-    public void createTasksForVariantScope(
-            @NonNull final VariantScope variantScope,
-            @NonNull List<VariantScope> variantScopesForLint) {
-        super.createTasksForVariantScope(variantScope, variantScopesForLint);
+    public void createTasksForVariantScope(@NonNull final VariantScope variantScope) {
+        super.createTasksForVariantScope(variantScope);
         // Ensure the compile SDK is at least 26 (O).
         final AndroidVersion androidVersion =
                 AndroidTargetHash.getVersionFromHash(

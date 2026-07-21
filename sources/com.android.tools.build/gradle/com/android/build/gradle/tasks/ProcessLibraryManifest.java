@@ -113,7 +113,6 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
                             isNamespaced,
                             getMainManifest(),
                             getManifestOverlays(),
-                            Collections.emptyList(),
                             getPackageOverride(),
                             getVersionCode(),
                             getVersionName(),
@@ -139,7 +138,6 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
         private final boolean isNamespaced;
         @NonNull private final File mainManifest;
         @NonNull private final List<File> manifestOverlays;
-        @NonNull private final List<File> navigationFiles;
         @NonNull private final String packageOverride;
         private final int versionCode;
         @Nullable private final String versionName;
@@ -159,7 +157,6 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
                 boolean isNamespaced,
                 @NonNull File mainManifest,
                 @NonNull List<File> manifestOverlays,
-                @NonNull List<File> navigationFiles,
                 @NonNull String packageOverride,
                 int versionCode,
                 @Nullable String versionName,
@@ -177,7 +174,6 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
             this.isNamespaced = isNamespaced;
             this.mainManifest = mainManifest;
             this.manifestOverlays = manifestOverlays;
-            this.navigationFiles = navigationFiles;
             this.packageOverride = packageOverride;
             this.versionCode = versionCode;
             this.versionName = versionName;
@@ -214,7 +210,7 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
                             params.mainManifest,
                             params.manifestOverlays,
                             Collections.emptyList(),
-                            params.navigationFiles,
+                            Collections.emptyList(),
                             null,
                             params.packageOverride,
                             params.versionCode,
@@ -414,8 +410,7 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
                             InternalArtifactType.AAPT_FRIENDLY_MERGED_MANIFESTS,
                             BuildArtifactsHolder.OperationType.INITIAL,
                             taskProvider,
-                            taskProvider.map(
-                                    ManifestProcessorTask::getAaptFriendlyManifestOutputDirectory),
+                            ManifestProcessorTask::getAaptFriendlyManifestOutputDirectory,
                             "aapt");
 
             scope.getArtifacts()
@@ -423,7 +418,7 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
                             InternalArtifactType.MERGED_MANIFESTS,
                             BuildArtifactsHolder.OperationType.INITIAL,
                             taskProvider,
-                            taskProvider.map(ManifestProcessorTask::getManifestOutputDirectory),
+                            ManifestProcessorTask::getManifestOutputDirectory,
                             "");
 
             scope.getArtifacts()
@@ -431,7 +426,7 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
                             InternalArtifactType.LIBRARY_MANIFEST,
                             BuildArtifactsHolder.OperationType.INITIAL,
                             taskProvider,
-                            taskProvider.map(ProcessLibraryManifest::getManifestOutputFile),
+                            ProcessLibraryManifest::getManifestOutputFile,
                             SdkConstants.ANDROID_MANIFEST_XML);
 
             getVariantScope()
@@ -440,7 +435,7 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
                             InternalArtifactType.MANIFEST_MERGE_BLAME_FILE,
                             BuildArtifactsHolder.OperationType.INITIAL,
                             taskProvider,
-                            taskProvider.map(ProcessLibraryManifest::getMergeBlameFile),
+                            ProcessLibraryManifest::getMergeBlameFile,
                             "manifest-merger-blame-"
                                     + getVariantScope().getVariantConfiguration().getBaseName()
                                     + "-report.txt");

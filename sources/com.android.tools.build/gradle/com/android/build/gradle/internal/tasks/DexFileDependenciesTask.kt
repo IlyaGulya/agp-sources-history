@@ -26,7 +26,6 @@ import com.android.build.gradle.options.SyncOptions
 import com.android.builder.dexing.ClassFileInputs
 import com.android.builder.dexing.DexArchiveBuilder
 import com.android.builder.dexing.r8.ClassFileProviderFactory
-import com.android.sdklib.AndroidVersion
 import com.google.common.io.Closer
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
@@ -40,7 +39,6 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.workers.WorkerExecutor
 import java.io.File
@@ -150,7 +148,7 @@ open class DexFileDependenciesTask
                 artifactType = InternalArtifactType.EXTERNAL_FILE_LIB_DEX_ARCHIVES,
                 operationType = BuildArtifactsHolder.OperationType.INITIAL,
                 taskProvider = taskProvider,
-                product = taskProvider.map(DexFileDependenciesTask::outputDirectory),
+                productProvider = DexFileDependenciesTask::outputDirectory,
                 fileName = "out"
             )
         }
@@ -158,6 +156,7 @@ open class DexFileDependenciesTask
         override fun configure(task: DexFileDependenciesTask) {
             super.configure(task)
             task.debuggable.set(variantScope.variantConfiguration.buildType.isDebuggable)
+            task.minSdkVersion.set(variantScope.minSdkVersion.featureLevel)
             task.classes.from(
                 variantScope.getArtifactFileCollection(
                     AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
@@ -165,19 +164,14 @@ open class DexFileDependenciesTask
                     AndroidArtifacts.ArtifactType.PROCESSED_JAR
                 )
             )
-            val minSdkVersion =
-                variantScope.variantConfiguration.minSdkVersionWithTargetDeviceApi.featureLevel
-            task.minSdkVersion.set(minSdkVersion)
-            if (minSdkVersion < AndroidVersion.VersionCodes.N) {
-                task.classpath.from(
-                    variantScope.getArtifactFileCollection(
-                        AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
-                        AndroidArtifacts.ArtifactScope.REPOSITORY_MODULE,
-                        AndroidArtifacts.ArtifactType.PROCESSED_JAR
-                    )
+            task.classpath.from(
+                variantScope.getArtifactFileCollection(
+                    AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
+                    AndroidArtifacts.ArtifactScope.REPOSITORY_MODULE,
+                    AndroidArtifacts.ArtifactType.PROCESSED_JAR
                 )
-                task.bootClasspath.from(variantScope.globalScope.bootClasspath)
-            }
+            )
+            task.bootClasspath.from(variantScope.globalScope.bootClasspath)
             task.errorFormatMode =
                 SyncOptions.getErrorFormatMode(variantScope.globalScope.projectOptions)
         }

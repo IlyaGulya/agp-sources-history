@@ -363,7 +363,7 @@ public class ModelBuilder<Extension extends AndroidConfig>
                         // It will cause ExternalNativeJsonGenerator#create to be invoked.
                         // This function does work, like trying to located the NDK, that
                         // can trigger sync messages.
-                        provider.get();
+                        provider.get().build(false);
                     }
                 }
             }
@@ -736,15 +736,24 @@ public class ModelBuilder<Extension extends AndroidConfig>
                             .getAsFile());
         }
         // The separately compile R class, if applicable.
-        VariantScope testedScope = Objects.requireNonNull(scope.getTestedVariantData()).getScope();
-        if (testedScope
-                .getArtifacts()
-                .hasFinalProduct(InternalArtifactType.COMPILE_ONLY_NOT_NAMESPACED_R_CLASS_JAR)) {
+        BuildArtifactsHolder testedArtifacts =
+                Objects.requireNonNull(scope.getTestedVariantData()).getScope().getArtifacts();
+        if (testedArtifacts.hasFinalProduct(
+                InternalArtifactType.COMPILE_ONLY_NOT_NAMESPACED_R_CLASS_JAR)) {
             additionalTestClasses.add(
-                    testedScope
-                            .getArtifacts()
+                    testedArtifacts
                             .getFinalProduct(
                                     InternalArtifactType.COMPILE_ONLY_NOT_NAMESPACED_R_CLASS_JAR)
+                            .get()
+                            .getAsFile());
+        }
+        if (testedArtifacts.hasFinalProduct(
+                InternalArtifactType.COMPILE_AND_RUNTIME_NOT_NAMESPACED_R_CLASS_JAR)) {
+            additionalTestClasses.add(
+                    testedArtifacts
+                            .getFinalProduct(
+                                    InternalArtifactType
+                                            .COMPILE_AND_RUNTIME_NOT_NAMESPACED_R_CLASS_JAR)
                             .get()
                             .getAsFile());
         }
@@ -790,12 +799,12 @@ public class ModelBuilder<Extension extends AndroidConfig>
             // can't use ProjectOptions as this is likely to change from the initialization of
             // ProjectOptions due to how lint dynamically add/remove this property.
             boolean downloadSources =
-                    !Boolean.valueOf(
-                            String.valueOf(
+                    !project.hasProperty(AndroidProject.PROPERTY_BUILD_MODEL_DISABLE_SRC_DOWNLOAD)
+                            || !Boolean.TRUE.equals(
                                     project.getProperties()
                                             .get(
                                                     AndroidProject
-                                                            .PROPERTY_BUILD_MODEL_DISABLE_SRC_DOWNLOAD)));
+                                                            .PROPERTY_BUILD_MODEL_DISABLE_SRC_DOWNLOAD));
 
             if (modelLevel >= AndroidProject.MODEL_LEVEL_4_NEW_DEP_MODEL) {
                 result =
@@ -1020,11 +1029,16 @@ public class ModelBuilder<Extension extends AndroidConfig>
                                         mainApkInfo.getType(),
                                         mainApkInfo.getFilters(),
                                         mainApkInfo.getVersionCode(),
-                                        BuildableArtifactUtil.singleFile(
+                                        new File(
                                                 variantScope
                                                         .getArtifacts()
-                                                        .getFinalArtifactFiles(
-                                                                InternalArtifactType.AAR)))));
+                                                        .getFinalProduct(InternalArtifactType.AAR)
+                                                        .get()
+                                                        .getAsFile(),
+                                                variantScope
+                                                        .getOutputScope()
+                                                        .getMainSplit()
+                                                        .getOutputFileName()))));
             case ANDROID_TEST:
                 return new BuildOutputsSupplier(
                         ImmutableList.of(InternalArtifactType.APK),
@@ -1177,9 +1191,9 @@ public class ModelBuilder<Extension extends AndroidConfig>
 
         folders.add(
                 scope.getArtifacts()
-                        .getFinalArtifactFiles(InternalArtifactType.AIDL_SOURCE_OUTPUT_DIR)
+                        .getFinalProduct(InternalArtifactType.AIDL_SOURCE_OUTPUT_DIR)
                         .get()
-                        .getSingleFile());
+                        .getAsFile());
         folders.add(scope.getBuildConfigSourceOutputDir());
         Boolean ndkMode = variantData.getVariantConfiguration().getMergedFlavor().getRenderscriptNdkModeEnabled();
         if (ndkMode == null || !ndkMode) {
@@ -1218,7 +1232,6 @@ public class ModelBuilder<Extension extends AndroidConfig>
         VariantScope scope = variantData.getScope();
 
         result.add(scope.getRenderscriptResOutputDir());
-        result.add(scope.getGeneratedResOutputDir());
 
         return result;
     }

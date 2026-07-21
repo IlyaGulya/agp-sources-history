@@ -24,7 +24,6 @@ import java.time.Clock
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
-import javax.annotation.concurrent.GuardedBy
 
 /**
  * Book keeping object for a Gradle [org.gradle.api.Task] execution.
@@ -32,28 +31,18 @@ import javax.annotation.concurrent.GuardedBy
  * Information contained in each instance will be use to upload our performance data per task
  * once optional workers profiling information has been gathered.
  */
-open class TaskProfilingRecord
-/**
- * Construct a new task profiling record with the [GradleBuildProfileSpan] and decorations like
- * project path and variant name.
- */(
-    private val recordWriter: ProfileRecordWriter,
-    span: GradleBuildProfileSpan.Builder,
-    private val taskPath: String,
-    internal val projectPath: String,
-    internal val variant: String?
-) {
+open class TaskProfilingRecord {
 
-    val spanBuilder: GradleBuildProfileSpan.Builder = span
+    private val taskPath: String
+    internal val projectPath: String
+    internal val variant: String?
+    private val recordWriter: ProfileRecordWriter
+    val spanBuilder: GradleBuildProfileSpan.Builder
     private val workerRecordList: MutableMap<String, WorkerProfilingRecord> = mutableMapOf()
     private val startTime = clock.instant()
     private var endTime = Instant.MIN
     private var closeTime = Instant.MIN
     internal val status = AtomicReference(Status.RUNNING)
-
-    // taskSpan is modified by addSpan() and passed to the writer in writeTaskSpan, we need to make
-    // sure we are not modifying them while they are being used by the recordWriter.
-    @get:GuardedBy("this")
     val taskSpans = mutableListOf<GradleBuildProfileSpan>()
 
     /**
@@ -90,6 +79,24 @@ open class TaskProfilingRecord
         SPAN_CLOSED
     }
 
+    /**
+     * Construct a new task profiling record with the [GradleBuildProfileSpan] and decorations like
+     * project path and variant name.
+     */
+    constructor(
+        recordWriter: ProfileRecordWriter,
+        span: GradleBuildProfileSpan.Builder,
+        taskPath: String,
+        projectPath: String,
+        variant: String?
+    ) {
+        this.taskPath = taskPath
+        this.recordWriter = recordWriter
+        this.projectPath = projectPath
+        this.spanBuilder = span
+        this.variant = variant
+    }
+
     fun setTaskWaiting() {
         status.set(Status.AWAIT)
     }
@@ -122,7 +129,8 @@ open class TaskProfilingRecord
     }
 
     @Synchronized
-    open fun get(key: String): WorkerProfilingRecord? = workerRecordList[key]
+    open fun get(key: String): WorkerProfilingRecord = workerRecordList[key]
+        ?: dummyTaskRecord.get(key)
 
     @Synchronized
     fun allWorkersFinished(): Boolean {
@@ -193,10 +201,17 @@ open class TaskProfilingRecord
             else endTime
         )
 
-    @Synchronized
     fun addSpan(builder: GradleBuildProfileSpan.Builder) {
         builder.parentId = spanBuilder.id
         taskSpans.add(builder.build())
+    }
+
+    private constructor() {
+        this.recordWriter = ProcessProfileWriter.get()
+        this.taskPath = "dummy"
+        this.projectPath = ":dummy"
+        this.variant = "dummy"
+        this.spanBuilder = GradleBuildProfileSpan.newBuilder()
     }
 
     companion object {
@@ -205,5 +220,22 @@ open class TaskProfilingRecord
          */
         @VisibleForTesting
         var clock: Clock = Clock.systemDefaultZone()
+
+        /**
+         * Singleton object to satisfy usages when [ProfilerInitializer.recordingBuildListener]
+         * does not exist.
+         */
+        val dummyTaskRecord: TaskProfilingRecord = object : TaskProfilingRecord() {
+            override fun addWorker(key: String, type: GradleBuildProfileSpan.ExecutionType) {}
+            override fun get(key: String): WorkerProfilingRecord {
+                val workerProfilingRecord = WorkerProfilingRecord(
+                    "dummy",
+                    GradleBuildProfileSpan.ExecutionType.WORKER_EXECUTION,
+                    clock.instant()
+                )
+                workerProfilingRecord.executionStarted()
+                return workerProfilingRecord
+            }
+        }
     }
 }
