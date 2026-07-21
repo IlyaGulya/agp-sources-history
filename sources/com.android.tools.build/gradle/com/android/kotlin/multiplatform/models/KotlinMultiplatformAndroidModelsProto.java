@@ -96,7 +96,7 @@ public final class KotlinMultiplatformAndroidModelsProto {
       "ith_javaB\022\n\020_resource_prefix\"E\n\016SourcePr" +
       "ovider\022!\n\rmanifest_file\030\001 \001(\0132\005.FileH\000\210\001" +
       "\001B\020\n\016_manifest_file\"1\n\020GeneratedSources\022" +
-      "\035\n\016source_folders\030\001 \003(\0132\005.File\"\217\003\n\017MainV" +
+      "\035\n\016source_folders\030\001 \003(\0132\005.File\"\272\003\n\017MainV" +
       "ariantInfo\022\026\n\tnamespace\030\001 \001(\tH\000\210\001\001\022\037\n\022co" +
       "mpile_sdk_target\030\002 \001(\tH\001\210\001\001\022-\n\017min_sdk_v" +
       "ersion\030\003 \001(\0132\017.AndroidVersionH\002\210\001\001\022\034\n\017ma" +
@@ -104,48 +104,51 @@ public final class KotlinMultiplatformAndroidModelsProto {
       "es\030\005 \003(\0132\005.File\022&\n\027consumer_proguard_fil" +
       "es\030\006 \003(\0132\005.File\022!\n\024minification_enabled\030" +
       "\007 \001(\010H\004\210\001\001\022&\n\027generated_asset_folders\030\010 " +
-      "\003(\0132\005.FileB\014\n\n_namespaceB\025\n\023_compile_sdk" +
-      "_targetB\022\n\020_min_sdk_versionB\022\n\020_max_sdk_" +
-      "versionB\027\n\025_minification_enabled\"\263\001\n\014Uni" +
-      "tTestInfo\022\026\n\tnamespace\030\001 \001(\tH\000\210\001\001\022)\n\025moc" +
-      "kable_platform_jar\030\002 \001(\0132\005.FileH\001\210\001\001\022 \n\023" +
-      "unit_test_task_name\030\003 \001(\tH\002\210\001\001B\014\n\n_names" +
-      "paceB\030\n\026_mockable_platform_jarB\026\n\024_unit_" +
-      "test_task_name\"\204\004\n\024InstrumentedTestInfo\022" +
-      "\026\n\tnamespace\030\001 \001(\tH\000\210\001\001\022(\n\033test_instrume" +
-      "ntation_runner\030\002 \001(\tH\001\210\001\001\022l\n%test_instru" +
-      "mentation_runner_arguments\030\003 \003(\0132=.Instr" +
-      "umentedTestInfo.TestInstrumentationRunne" +
-      "rArgumentsEntry\022+\n\016signing_config\030\004 \001(\0132" +
-      "\016.SigningConfigH\002\210\001\001\0225\n!assemble_task_ou" +
-      "tput_listing_file\030\005 \001(\0132\005.FileH\003\210\001\001\022&\n\027g" +
-      "enerated_asset_folders\030\006 \003(\0132\005.File\032I\n\'T" +
-      "estInstrumentationRunnerArgumentsEntry\022\013" +
-      "\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001B\014\n\n_names" +
-      "paceB\036\n\034_test_instrumentation_runnerB\021\n\017" +
-      "_signing_configB$\n\"_assemble_task_output" +
-      "_listing_file\"\312\004\n\022AndroidCompilation\0226\n\004" +
-      "type\030\001 \001(\0162#.AndroidCompilation.Compilat" +
-      "ionTypeH\000\210\001\001\022(\n\tmain_info\030\002 \001(\0132\020.MainVa" +
-      "riantInfoH\001\210\001\001\022*\n\016unit_test_info\030\003 \001(\0132\r" +
-      ".UnitTestInfoH\002\210\001\001\022:\n\026instrumented_test_" +
-      "info\030\004 \001(\0132\025.InstrumentedTestInfoH\003\210\001\001\022$" +
-      "\n\027default_source_set_name\030\005 \001(\tH\004\210\001\001\022\037\n\022" +
-      "assemble_task_name\030\006 \001(\tH\005\210\001\001\022%\n\030kotlin_" +
-      "compile_task_name\030\007 \001(\tH\006\210\001\001\022$\n\025extra_cl" +
-      "asses_folders\030\010 \003(\0132\005.File\"A\n\017Compilatio" +
-      "nType\022\010\n\004MAIN\020\000\022\r\n\tUNIT_TEST\020\001\022\025\n\021INSTRU" +
-      "MENTED_TEST\020\002B\007\n\005_typeB\014\n\n_main_infoB\021\n\017" +
-      "_unit_test_infoB\031\n\027_instrumented_test_in" +
-      "foB\032\n\030_default_source_set_nameB\025\n\023_assem" +
-      "ble_task_nameB\033\n\031_kotlin_compile_task_na" +
-      "me\"U\n\020AndroidSourceSet\022-\n\017source_provide" +
-      "r\030\001 \001(\0132\017.SourceProviderH\000\210\001\001B\022\n\020_source" +
-      "_provider\"<\n\016DependencyInfo\022\036\n\007library\030\001" +
-      " \001(\0132\010.LibraryH\000\210\001\001B\n\n\010_libraryBR\n\'com.a" +
-      "ndroid.kotlin.multiplatform.modelsB%Kotl" +
-      "inMultiplatformAndroidModelsProtoP\001b\006pro" +
-      "to3"
+      "\003(\0132\005.File\022)\n\032generated_resource_folders" +
+      "\030\t \003(\0132\005.FileB\014\n\n_namespaceB\025\n\023_compile_" +
+      "sdk_targetB\022\n\020_min_sdk_versionB\022\n\020_max_s" +
+      "dk_versionB\027\n\025_minification_enabled\"\263\001\n\014" +
+      "UnitTestInfo\022\026\n\tnamespace\030\001 \001(\tH\000\210\001\001\022)\n\025" +
+      "mockable_platform_jar\030\002 \001(\0132\005.FileH\001\210\001\001\022" +
+      " \n\023unit_test_task_name\030\003 \001(\tH\002\210\001\001B\014\n\n_na" +
+      "mespaceB\030\n\026_mockable_platform_jarB\026\n\024_un" +
+      "it_test_task_name\"\257\004\n\024InstrumentedTestIn" +
+      "fo\022\026\n\tnamespace\030\001 \001(\tH\000\210\001\001\022(\n\033test_instr" +
+      "umentation_runner\030\002 \001(\tH\001\210\001\001\022l\n%test_ins" +
+      "trumentation_runner_arguments\030\003 \003(\0132=.In" +
+      "strumentedTestInfo.TestInstrumentationRu" +
+      "nnerArgumentsEntry\022+\n\016signing_config\030\004 \001" +
+      "(\0132\016.SigningConfigH\002\210\001\001\0225\n!assemble_task" +
+      "_output_listing_file\030\005 \001(\0132\005.FileH\003\210\001\001\022&" +
+      "\n\027generated_asset_folders\030\006 \003(\0132\005.File\022)" +
+      "\n\032generated_resource_folders\030\007 \003(\0132\005.Fil" +
+      "e\032I\n\'TestInstrumentationRunnerArgumentsE" +
+      "ntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001B\014\n\n" +
+      "_namespaceB\036\n\034_test_instrumentation_runn" +
+      "erB\021\n\017_signing_configB$\n\"_assemble_task_" +
+      "output_listing_file\"\363\004\n\022AndroidCompilati" +
+      "on\0226\n\004type\030\001 \001(\0162#.AndroidCompilation.Co" +
+      "mpilationTypeH\000\210\001\001\022(\n\tmain_info\030\002 \001(\0132\020." +
+      "MainVariantInfoH\001\210\001\001\022*\n\016unit_test_info\030\003" +
+      " \001(\0132\r.UnitTestInfoH\002\210\001\001\022:\n\026instrumented" +
+      "_test_info\030\004 \001(\0132\025.InstrumentedTestInfoH" +
+      "\003\210\001\001\022$\n\027default_source_set_name\030\005 \001(\tH\004\210" +
+      "\001\001\022\037\n\022assemble_task_name\030\006 \001(\tH\005\210\001\001\022%\n\030k" +
+      "otlin_compile_task_name\030\007 \001(\tH\006\210\001\001\022$\n\025ex" +
+      "tra_classes_folders\030\010 \003(\0132\005.File\022\'\n\030gene" +
+      "rated_source_folders\030\t \003(\0132\005.File\"A\n\017Com" +
+      "pilationType\022\010\n\004MAIN\020\000\022\r\n\tUNIT_TEST\020\001\022\025\n" +
+      "\021INSTRUMENTED_TEST\020\002B\007\n\005_typeB\014\n\n_main_i" +
+      "nfoB\021\n\017_unit_test_infoB\031\n\027_instrumented_" +
+      "test_infoB\032\n\030_default_source_set_nameB\025\n" +
+      "\023_assemble_task_nameB\033\n\031_kotlin_compile_" +
+      "task_name\"U\n\020AndroidSourceSet\022-\n\017source_" +
+      "provider\030\001 \001(\0132\017.SourceProviderH\000\210\001\001B\022\n\020" +
+      "_source_provider\"<\n\016DependencyInfo\022\036\n\007li" +
+      "brary\030\001 \001(\0132\010.LibraryH\000\210\001\001B\n\n\010_libraryBR" +
+      "\n\'com.android.kotlin.multiplatform.model" +
+      "sB%KotlinMultiplatformAndroidModelsProto" +
+      "P\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -175,7 +178,7 @@ public final class KotlinMultiplatformAndroidModelsProto {
     internal_static_MainVariantInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_MainVariantInfo_descriptor,
-        new java.lang.String[] { "Namespace", "CompileSdkTarget", "MinSdkVersion", "MaxSdkVersion", "ProguardFiles", "ConsumerProguardFiles", "MinificationEnabled", "GeneratedAssetFolders", "Namespace", "CompileSdkTarget", "MinSdkVersion", "MaxSdkVersion", "MinificationEnabled", });
+        new java.lang.String[] { "Namespace", "CompileSdkTarget", "MinSdkVersion", "MaxSdkVersion", "ProguardFiles", "ConsumerProguardFiles", "MinificationEnabled", "GeneratedAssetFolders", "GeneratedResourceFolders", "Namespace", "CompileSdkTarget", "MinSdkVersion", "MaxSdkVersion", "MinificationEnabled", });
     internal_static_UnitTestInfo_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_UnitTestInfo_fieldAccessorTable = new
@@ -187,7 +190,7 @@ public final class KotlinMultiplatformAndroidModelsProto {
     internal_static_InstrumentedTestInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_InstrumentedTestInfo_descriptor,
-        new java.lang.String[] { "Namespace", "TestInstrumentationRunner", "TestInstrumentationRunnerArguments", "SigningConfig", "AssembleTaskOutputListingFile", "GeneratedAssetFolders", "Namespace", "TestInstrumentationRunner", "SigningConfig", "AssembleTaskOutputListingFile", });
+        new java.lang.String[] { "Namespace", "TestInstrumentationRunner", "TestInstrumentationRunnerArguments", "SigningConfig", "AssembleTaskOutputListingFile", "GeneratedAssetFolders", "GeneratedResourceFolders", "Namespace", "TestInstrumentationRunner", "SigningConfig", "AssembleTaskOutputListingFile", });
     internal_static_InstrumentedTestInfo_TestInstrumentationRunnerArgumentsEntry_descriptor =
       internal_static_InstrumentedTestInfo_descriptor.getNestedTypes().get(0);
     internal_static_InstrumentedTestInfo_TestInstrumentationRunnerArgumentsEntry_fieldAccessorTable = new
@@ -199,7 +202,7 @@ public final class KotlinMultiplatformAndroidModelsProto {
     internal_static_AndroidCompilation_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_AndroidCompilation_descriptor,
-        new java.lang.String[] { "Type", "MainInfo", "UnitTestInfo", "InstrumentedTestInfo", "DefaultSourceSetName", "AssembleTaskName", "KotlinCompileTaskName", "ExtraClassesFolders", "Type", "MainInfo", "UnitTestInfo", "InstrumentedTestInfo", "DefaultSourceSetName", "AssembleTaskName", "KotlinCompileTaskName", });
+        new java.lang.String[] { "Type", "MainInfo", "UnitTestInfo", "InstrumentedTestInfo", "DefaultSourceSetName", "AssembleTaskName", "KotlinCompileTaskName", "ExtraClassesFolders", "GeneratedSourceFolders", "Type", "MainInfo", "UnitTestInfo", "InstrumentedTestInfo", "DefaultSourceSetName", "AssembleTaskName", "KotlinCompileTaskName", });
     internal_static_AndroidSourceSet_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_AndroidSourceSet_fieldAccessorTable = new

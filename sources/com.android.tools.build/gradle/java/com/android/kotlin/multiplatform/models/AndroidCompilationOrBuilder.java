@@ -246,4 +246,48 @@ public interface AndroidCompilationOrBuilder extends
    */
   com.android.builder.model.proto.ide.FileOrBuilder getExtraClassesFoldersOrBuilder(
       int index);
+
+  /**
+   * <pre>
+   * Folders containing generated source files.
+   * </pre>
+   *
+   * <code>repeated .File generated_source_folders = 9;</code>
+   */
+  java.util.List<com.android.builder.model.proto.ide.File> 
+      getGeneratedSourceFoldersList();
+  /**
+   * <pre>
+   * Folders containing generated source files.
+   * </pre>
+   *
+   * <code>repeated .File generated_source_folders = 9;</code>
+   */
+  com.android.builder.model.proto.ide.File getGeneratedSourceFolders(int index);
+  /**
+   * <pre>
+   * Folders containing generated source files.
+   * </pre>
+   *
+   * <code>repeated .File generated_source_folders = 9;</code>
+   */
+  int getGeneratedSourceFoldersCount();
+  /**
+   * <pre>
+   * Folders containing generated source files.
+   * </pre>
+   *
+   * <code>repeated .File generated_source_folders = 9;</code>
+   */
+  java.util.List<? extends com.android.builder.model.proto.ide.FileOrBuilder> 
+      getGeneratedSourceFoldersOrBuilderList();
+  /**
+   * <pre>
+   * Folders containing generated source files.
+   * </pre>
+   *
+   * <code>repeated .File generated_source_folders = 9;</code>
+   */
+  com.android.builder.model.proto.ide.FileOrBuilder getGeneratedSourceFoldersOrBuilder(
+      int index);
 }

@@ -175,4 +175,48 @@ java.lang.String defaultValue);
    */
   com.android.builder.model.proto.ide.FileOrBuilder getGeneratedAssetFoldersOrBuilder(
       int index);
+
+  /**
+   * <pre>
+   * Folders containing resources generated during the build and should be included in the test APK.
+   * </pre>
+   *
+   * <code>repeated .File generated_resource_folders = 7;</code>
+   */
+  java.util.List<com.android.builder.model.proto.ide.File> 
+      getGeneratedResourceFoldersList();
+  /**
+   * <pre>
+   * Folders containing resources generated during the build and should be included in the test APK.
+   * </pre>
+   *
+   * <code>repeated .File generated_resource_folders = 7;</code>
+   */
+  com.android.builder.model.proto.ide.File getGeneratedResourceFolders(int index);
+  /**
+   * <pre>
+   * Folders containing resources generated during the build and should be included in the test APK.
+   * </pre>
+   *
+   * <code>repeated .File generated_resource_folders = 7;</code>
+   */
+  int getGeneratedResourceFoldersCount();
+  /**
+   * <pre>
+   * Folders containing resources generated during the build and should be included in the test APK.
+   * </pre>
+   *
+   * <code>repeated .File generated_resource_folders = 7;</code>
+   */
+  java.util.List<? extends com.android.builder.model.proto.ide.FileOrBuilder> 
+      getGeneratedResourceFoldersOrBuilderList();
+  /**
+   * <pre>
+   * Folders containing resources generated during the build and should be included in the test APK.
+   * </pre>
+   *
+   * <code>repeated .File generated_resource_folders = 7;</code>
+   */
+  com.android.builder.model.proto.ide.FileOrBuilder getGeneratedResourceFoldersOrBuilder(
+      int index);
 }
