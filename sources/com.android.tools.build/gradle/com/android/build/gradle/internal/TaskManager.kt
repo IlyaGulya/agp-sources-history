@@ -139,7 +139,6 @@ import com.android.build.gradle.internal.tasks.featuresplit.getFeatureName
 import com.android.build.gradle.internal.tasks.mlkit.GenerateMlModelClass
 import com.android.build.gradle.internal.tasks.runResourceShrinking
 import com.android.build.gradle.internal.test.AbstractTestDataImpl
-import com.android.build.gradle.internal.testing.utp.TEST_RESULT_PB_FILE_NAME
 import com.android.build.gradle.internal.transforms.ShrinkAppBundleResourcesTask
 import com.android.build.gradle.internal.transforms.ShrinkResourcesNewShrinkerTask
 import com.android.build.gradle.internal.utils.COMPOSE_COMPILER_PLUGIN_ID
@@ -869,7 +868,7 @@ abstract class TaskManager(
                 .artifacts
                 .forScope(ScopedArtifacts.Scope.PROJECT)
                 .setInitialContent(
-                    ScopedArtifact.CLASSES,
+                    ScopedArtifact.POST_COMPILATION_CLASSES,
                     variantData.allPreJavacGeneratedBytecode
                 )
 
@@ -877,7 +876,7 @@ abstract class TaskManager(
                 .artifacts
                 .forScope(ScopedArtifacts.Scope.PROJECT)
                 .setInitialContent(
-                    ScopedArtifact.CLASSES,
+                    ScopedArtifact.POST_COMPILATION_CLASSES,
                     variantData.allPostJavacGeneratedBytecode
                 )
         }
@@ -887,7 +886,7 @@ abstract class TaskManager(
                 .artifacts
                 .forScope(ScopedArtifacts.Scope.PROJECT)
                 .setInitialContent(
-                    ScopedArtifact.CLASSES,
+                    ScopedArtifact.POST_COMPILATION_CLASSES,
                     creationConfig.artifacts,
                     InternalArtifactType.BUILT_IN_KOTLINC
                 )
@@ -898,7 +897,7 @@ abstract class TaskManager(
                 .artifacts
                 .forScope(ScopedArtifacts.Scope.PROJECT)
                 .setInitialContent(
-                    ScopedArtifact.CLASSES,
+                    ScopedArtifact.POST_COMPILATION_CLASSES,
                     creationConfig.artifacts,
                     InternalArtifactType.BUILT_IN_KAPT_CLASSES_DIR
                 )
@@ -908,7 +907,7 @@ abstract class TaskManager(
             .artifacts
             .forScope(ScopedArtifacts.Scope.PROJECT)
             .setInitialContent(
-                ScopedArtifact.CLASSES,
+                ScopedArtifact.POST_COMPILATION_CLASSES,
                 creationConfig.services.fileCollection().from(
                     creationConfig.artifacts.getAll(MultipleArtifact.PRE_COMPILATION_CLASSES)
                 )
@@ -918,10 +917,19 @@ abstract class TaskManager(
            .artifacts
            .forScope(ScopedArtifacts.Scope.PROJECT)
            .setInitialContent(
-               ScopedArtifact.CLASSES,
+               ScopedArtifact.POST_COMPILATION_CLASSES,
                creationConfig.artifacts,
                JAVAC
            )
+
+        creationConfig
+            .artifacts
+            .forScope(ScopedArtifacts.Scope.PROJECT)
+            .setInitialContent(
+                ScopedArtifact.CLASSES,
+                creationConfig.artifacts.forScope(ScopedArtifacts.Scope.PROJECT)
+                    .getFinalArtifacts(ScopedArtifact.POST_COMPILATION_CLASSES)
+            )
     }
 
     /**
@@ -1254,12 +1262,11 @@ abstract class TaskManager(
             deviceToProvider[managedDevice.name] = managedDeviceTestTask
         }
 
-        // Register a task to aggregate test suite result protos.
+        // Register a task to aggregate test suite results.
         val testResultAggregationTask = taskFactory.register(
             ManagedDeviceInstrumentationTestResultAggregationTask.CreationAction(
                 creationConfig,
-                managedDevices.map { File(File(resultsDir, it.name), TEST_RESULT_PB_FILE_NAME) },
-                File(resultsDir, TEST_RESULT_PB_FILE_NAME),
+                managedDevices.map { File(resultsDir, it.name) },
                 reportDir,
             )
         )
@@ -1416,7 +1423,27 @@ abstract class TaskManager(
      * libraries.
      */
     internal fun initializeAllScope(artifacts: ArtifactsImpl) {
-        // initialize the all classes scope
+        // initialize the all scoped post_compilation_classes, which still uses classes from
+        // external libraries and sub projects.
+        artifacts.forScope(ScopedArtifacts.Scope.ALL)
+            .getScopedArtifactsContainer(ScopedArtifact.POST_COMPILATION_CLASSES)
+            .initialScopedContent
+            .run {
+                from(
+                    artifacts.forScope(ScopedArtifacts.Scope.PROJECT)
+                        .getFinalArtifacts(ScopedArtifact.POST_COMPILATION_CLASSES)
+                )
+                from(
+                    artifacts.forScope(InternalScopedArtifacts.InternalScope.SUB_PROJECTS)
+                        .getFinalArtifacts(ScopedArtifact.CLASSES)
+                )
+                from(
+                    artifacts.forScope(InternalScopedArtifacts.InternalScope.EXTERNAL_LIBS)
+                        .getFinalArtifacts(ScopedArtifact.CLASSES)
+                )
+            }
+
+        // initialize the all scoped classes
         artifacts.forScope(ScopedArtifacts.Scope.ALL)
             .getScopedArtifactsContainer(ScopedArtifact.CLASSES)
             .initialScopedContent
