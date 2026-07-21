@@ -454,8 +454,15 @@ public class ModelBuilder<Extension extends BaseExtension>
                                 variantProperties ->
                                         variantProperties.getBuildFeatures().getCompose()));
 
+        flags.put(
+                AndroidGradlePluginProjectFlags.BooleanFlag.ML_MODEL_BINDING,
+                variantModel.getVariants().stream()
+                        .anyMatch(
+                                variantProperties ->
+                                        variantProperties.getBuildFeatures().getMlModelBinding()));
+
         boolean transitiveRClass =
-                !globalScope.getProjectOptions().get(BooleanOption.NAMESPACED_R_CLASS);
+                !globalScope.getProjectOptions().get(BooleanOption.NON_TRANSITIVE_R_CLASS);
         flags.put(AndroidGradlePluginProjectFlags.BooleanFlag.TRANSITIVE_R_CLASS, transitiveRClass);
 
         return new AndroidGradlePluginProjectFlagsImpl(flags.build());
@@ -887,7 +894,7 @@ public class ModelBuilder<Extension extends BaseExtension>
                             testOptionsDsl.getExecutionEnum());
         }
 
-
+        // FIXME: Remove appId from the model
         String applicationId;
         try {
             // This can throw an exception if no package name can be found.
@@ -898,6 +905,7 @@ public class ModelBuilder<Extension extends BaseExtension>
             applicationId = "";
             syncIssueReporter.reportError(Type.GENERIC, e);
         }
+
         MutableTaskContainer taskContainer = componentProperties.getTaskContainer();
         BuildArtifactsHolder artifacts = componentProperties.getArtifacts();
 

@@ -108,15 +108,6 @@ class VariantPathHelper(
     val coverageReportDir: File
         get() = FileUtils.join(reportsDir, "coverage", variantDslInfo.dirName)
 
-    val classOutputForDataBinding: File
-        get() = FileUtils.join(
-            generatedDir,
-            "source",
-            "dataBinding",
-            "trigger",
-            variantDslInfo.dirName
-        )
-
     /**
      * Obtains the location where APKs should be placed.
      *
@@ -161,13 +152,6 @@ class VariantPathHelper(
             throw RuntimeException("getManifestOutputDirectory called for an unexpected variant.")
         }
 
-    val generatedClassListOutputFileForDataBinding: File
-        get() = File(dataBindingIntermediate("class-list"), "_generated.txt")
-
-    private fun dataBindingIntermediate(name: String): File? {
-        return intermediate("data-binding", name)
-    }
-
     /**
      * Returns a place to store incremental build data. The {@code name} argument has to be unique
      * per task, ideally generated with [TaskInformation.name].
@@ -196,17 +180,4 @@ class VariantPathHelper(
     private fun intermediate(directoryName: String): File {
         return FileUtils.join(intermediatesDir, directoryName, variantDslInfo.dirName)
     }
-
-    /**
-     * An intermediate file for this variant.
-     *
-     *
-     * Of the form build/intermediates/directoryName/variant/filename
-     */
-    private fun intermediate(
-        directoryName: String,
-        fileName: String
-    ): File = FileUtils.join(intermediatesDir, directoryName, variantDslInfo.dirName, fileName)
-
-
 }

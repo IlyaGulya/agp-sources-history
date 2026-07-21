@@ -19,7 +19,10 @@ package com.android.build.gradle.internal.dependency;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ARTIFACT_TYPE;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.ALL;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.PROJECT;
+import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.PROVIDED_CLASSPATH;
+import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.REVERSE_METADATA_VALUES;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
@@ -29,7 +32,6 @@ import com.android.build.gradle.internal.publishing.AndroidArtifacts.PublishedCo
 import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.builder.core.VariantType;
-import com.android.builder.core.VariantTypeImpl;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -88,6 +90,8 @@ public class VariantDependencies {
 
     @NonNull private final Configuration compileClasspath;
     @NonNull private final Configuration runtimeClasspath;
+    @NonNull private final Configuration providedClasspath;
+
     @NonNull private final Collection<Configuration> sourceSetRuntimeConfigurations;
     @NonNull private final Collection<Configuration> sourceSetImplementationConfigurations;
 
@@ -108,6 +112,7 @@ public class VariantDependencies {
             @NonNull Collection<Configuration> sourceSetRuntimeConfigurations,
             @NonNull Collection<Configuration> sourceSetImplementationConfigurations,
             @NonNull Map<PublishedConfigType, Configuration> elements,
+            @NonNull Configuration providedClasspath,
             @NonNull Configuration annotationProcessorConfiguration,
             @Nullable Configuration reverseMetadataValuesConfiguration,
             @Nullable Configuration wearAppConfiguration,
@@ -125,6 +130,7 @@ public class VariantDependencies {
         this.sourceSetRuntimeConfigurations = sourceSetRuntimeConfigurations;
         this.sourceSetImplementationConfigurations = sourceSetImplementationConfigurations;
         this.elements = Maps.immutableEnumMap(elements);
+        this.providedClasspath = providedClasspath;
         this.annotationProcessorConfiguration = annotationProcessorConfiguration;
         this.reverseMetadataValuesConfiguration = reverseMetadataValuesConfiguration;
         this.wearAppConfiguration = wearAppConfiguration;
@@ -218,7 +224,7 @@ public class VariantDependencies {
 
             FileCollection excludedDirectories =
                     computeArtifactCollection(
-                                    RUNTIME_CLASSPATH,
+                                    PROVIDED_CLASSPATH,
                                     PROJECT,
                                     AndroidArtifacts.ArtifactType.PACKAGED_DEPENDENCIES,
                                     attributeMap)
@@ -256,7 +262,7 @@ public class VariantDependencies {
 
             FileCollection excludedDirectories =
                     computeArtifactCollection(
-                                    RUNTIME_CLASSPATH,
+                                    PROVIDED_CLASSPATH,
                                     PROJECT,
                                     AndroidArtifacts.ArtifactType.PACKAGED_DEPENDENCIES,
                                     null)
@@ -275,35 +281,68 @@ public class VariantDependencies {
             return artifacts;
         }
 
-        // We remove the transitive dependencies coming from the
-        // tested app to avoid having the same artifact on each app and tested app.
-        // This applies only to the package scope since we do want these in the compile
-        // scope in order to compile.
-        // We only do this for the AndroidTest.
-        // We do have to however keep the Android resources.
-        if (testedVariant.getVariantType() == VariantTypeImpl.BASE_APK
-                && configType == RUNTIME_CLASSPATH
-                && variantType.isApk()) {
-            if (artifactType != AndroidArtifacts.ArtifactType.ANDROID_RES
-                    && artifactType
-                            != AndroidArtifacts.ArtifactType.COMPILED_DEPENDENCIES_RESOURCES) {
-                ArtifactCollection testedArtifactCollection =
-                        testedVariant
-                                .getVariantDependencies()
-                                .getArtifactCollection(
-                                        configType, scope, artifactType, attributeMap);
-                artifacts = new SubtractingArtifactCollection(artifacts, testedArtifactCollection);
-            }
+        // For artifact that should not be duplicated between test APk and tested APK (e.g. classes)
+        // we remove duplicates from test APK. More specifically, for androidTest variants for base
+        // and dynamic features, we need to remove artifacts that are already packaged in the tested
+        // variant. Also, we remove artifacts already packaged in base/features that the tested
+        // feature depends on.
+        if (!variantType.isApk()) {
+            // Don't filter unit tests.
+            return artifacts;
+        }
+        if (configType != RUNTIME_CLASSPATH) {
+            // Only filter runtime classpath.
+            return artifacts;
+        }
+        if (testedVariant.getVariantType().isAar()) {
+            // Don't filter test APKs for library projects, as there is no tested APK.
+            return artifacts;
+        }
+        if (!isArtifactTypeSubtractedForInstrumentationTests(artifactType)) {
+            return artifacts;
+        }
+        if (testedVariant.getVariantType().isDynamicFeature()) {
+            // If we're in an androidTest for a dynamic feature we need to filter out artifacts from
+            // the base and dynamic features this dynamic feature depends on.
+            FileCollection excludedDirectories =
+                    testedVariant
+                            .getVariantDependencies()
+                            .computeArtifactCollection(
+                                    PROVIDED_CLASSPATH,
+                                    PROJECT,
+                                    AndroidArtifacts.ArtifactType.PACKAGED_DEPENDENCIES,
+                                    null)
+                            .getArtifactFiles();
+
+            artifacts =
+                    new FilteredArtifactCollection(
+                            project, new FilteringSpec(artifacts, excludedDirectories));
         }
 
+        ArtifactCollection testedArtifactCollection =
+                testedVariant
+                        .getVariantDependencies()
+                        .getArtifactCollection(configType, scope, artifactType, attributeMap);
+        artifacts = new SubtractingArtifactCollection(artifacts, testedArtifactCollection);
         return artifacts;
     }
 
     private boolean isArtifactTypeExcluded(@NonNull AndroidArtifacts.ArtifactType artifactType) {
-        return variantType.isDynamicFeature()
-                && artifactType != AndroidArtifacts.ArtifactType.PACKAGED_DEPENDENCIES
-                && artifactType != AndroidArtifacts.ArtifactType.FEATURE_DEX
-                && artifactType != AndroidArtifacts.ArtifactType.FEATURE_NAME;
+        if (variantType.isDynamicFeature()) {
+            return artifactType != AndroidArtifacts.ArtifactType.PACKAGED_DEPENDENCIES
+                    && artifactType != AndroidArtifacts.ArtifactType.FEATURE_DEX
+                    && artifactType != AndroidArtifacts.ArtifactType.FEATURE_NAME;
+        }
+        if (variantType.isSeparateTestProject()) {
+            return isArtifactTypeSubtractedForInstrumentationTests(artifactType);
+        }
+        return false;
+    }
+
+    private static boolean isArtifactTypeSubtractedForInstrumentationTests(
+            @NonNull AndroidArtifacts.ArtifactType artifactType) {
+        return artifactType != AndroidArtifacts.ArtifactType.ANDROID_RES
+                && artifactType != AndroidArtifacts.ArtifactType.COMPILED_DEPENDENCIES_RESOURCES;
     }
 
     @NonNull
@@ -314,6 +353,8 @@ public class VariantDependencies {
                 return getCompileClasspath();
             case RUNTIME_CLASSPATH:
                 return getRuntimeClasspath();
+            case PROVIDED_CLASSPATH:
+                return providedClasspath;
             case ANNOTATION_PROCESSOR:
                 return getAnnotationProcessorConfiguration();
             case REVERSE_METADATA_VALUES:
@@ -337,6 +378,7 @@ public class VariantDependencies {
             @NonNull AndroidArtifacts.ArtifactScope scope,
             @NonNull AndroidArtifacts.ArtifactType artifactType,
             @Nullable Map<Attribute<String>, String> attributeMap) {
+        checkComputeArtifactCollectionArguments(configType, scope, artifactType);
 
         Configuration configuration = getConfiguration(configType);
 
@@ -367,6 +409,31 @@ public class VariantDependencies {
                             config.lenient(lenientMode);
                         })
                 .getArtifacts();
+    }
+
+    private static void checkComputeArtifactCollectionArguments(
+            @NonNull AndroidArtifacts.ConsumedConfigType configType,
+            @NonNull AndroidArtifacts.ArtifactScope scope,
+            @NonNull AndroidArtifacts.ArtifactType artifactType) {
+        switch (artifactType) {
+            case PACKAGED_DEPENDENCIES:
+                checkArgument(
+                        configType == PROVIDED_CLASSPATH || configType == REVERSE_METADATA_VALUES,
+                        "Packaged dependencies must only be requested from the PROVIDED_CLASSPATH or REVERSE_METADATA_VALUES");
+                break;
+            default:
+                break; // No validation
+        }
+        switch (configType) {
+            case PROVIDED_CLASSPATH:
+                checkArgument(
+                        artifactType == AndroidArtifacts.ArtifactType.PACKAGED_DEPENDENCIES
+                                || artifactType == AndroidArtifacts.ArtifactType.APK,
+                        "Provided classpath must only be used for from the PACKAGED_DEPENDENCIES and APKS");
+                break;
+            default:
+                break; // No validation
+        }
     }
 
     @Nullable

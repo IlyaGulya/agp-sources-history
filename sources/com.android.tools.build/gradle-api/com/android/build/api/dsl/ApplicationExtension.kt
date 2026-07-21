@@ -33,7 +33,7 @@ interface ApplicationExtension<
         AdbOptionsT : AdbOptions,
         AndroidSourceSetT : AndroidSourceSet,
         AnnotationProcessorOptionsT : AnnotationProcessorOptions,
-        BuildTypeT : BuildType<AnnotationProcessorOptionsT>,
+        BuildTypeT : BuildType<AnnotationProcessorOptionsT, SigningConfigT>,
         CMakeT : Cmake,
         CompileOptionsT : CompileOptions,
         DataBindingT : DataBinding,
@@ -87,4 +87,11 @@ interface ApplicationExtension<
     val bundle: Bundle
 
     fun bundle(action: Bundle.() -> Unit)
+
+    var dynamicFeatures: MutableSet<String>
+
+    /**
+     * Set of asset pack subprojects to be included in the app's bundle.
+     */
+    var assetPacks: MutableSet<String>
 }

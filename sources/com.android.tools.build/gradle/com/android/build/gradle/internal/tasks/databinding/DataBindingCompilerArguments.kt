@@ -18,16 +18,18 @@ package com.android.build.gradle.internal.tasks.databinding
 
 import android.databinding.tool.CompilerArguments
 import com.android.build.api.component.impl.ComponentPropertiesImpl
+import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.InternalArtifactType.DATA_BINDING_BASE_CLASS_LOG_ARTIFACT
 import com.android.build.gradle.internal.scope.InternalArtifactType.DATA_BINDING_DEPENDENCY_ARTIFACTS
 import com.android.build.gradle.internal.scope.InternalArtifactType.DATA_BINDING_LAYOUT_INFO_TYPE_MERGE
 import com.android.build.gradle.internal.scope.InternalArtifactType.DATA_BINDING_LAYOUT_INFO_TYPE_PACKAGE
 import com.android.build.gradle.internal.scope.InternalArtifactType.FEATURE_DATA_BINDING_BASE_FEATURE_INFO
 import com.android.build.gradle.internal.scope.InternalArtifactType.FEATURE_DATA_BINDING_FEATURE_INFO
-import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
+import com.android.build.gradle.internal.scope.InternalArtifactType.DATA_BINDING_EXPORT_CLASS_LIST
+import com.android.build.gradle.internal.scope.InternalArtifactType.DATA_BINDING_ARTIFACT
 import com.android.build.gradle.options.BooleanOption
 import org.gradle.api.file.Directory
+import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
@@ -96,7 +98,7 @@ class DataBindingCompilerArguments constructor(
 
     @get:Optional
     @get:OutputFile
-    val exportClassListOutFile: File?,
+    val exportClassListOutFile: Provider<RegularFile>,
 
     @get:Input
     val enableDebugLogs: Boolean,
@@ -134,7 +136,7 @@ class DataBindingCompilerArguments constructor(
             baseFeatureInfoDir = baseFeatureInfoDir.orNull?.asFile,
             featureInfoDir = featureInfoDir.orNull?.asFile,
             aarOutDir = aarOutDir.orNull?.asFile,
-            exportClassListOutFile = exportClassListOutFile,
+            exportClassListOutFile = exportClassListOutFile.orNull?.asFile,
             enableDebugLogs = enableDebugLogs,
             printEncodedErrorLogs = printEncodedErrorLogs,
             isTestVariant = isTestVariant,
@@ -175,9 +177,16 @@ class DataBindingCompilerArguments constructor(
                     FEATURE_DATA_BINDING_BASE_FEATURE_INFO
                 ),
                 featureInfoDir = artifacts.getFinalProduct(FEATURE_DATA_BINDING_FEATURE_INFO),
-                aarOutDir = artifacts.getFinalProduct(InternalArtifactType.DATA_BINDING_ARTIFACT),
-                exportClassListOutFile = componentProperties.paths.generatedClassListOutputFileForDataBinding
-                    .takeIf { componentProperties.variantType.isExportDataBindingClassList },
+                // Note that aarOurDir and exportClassListOutFile below are outputs. In the usual
+                // pattern, they need to be a DirectoryProperty or RegularFileProperty and should
+                // be created by calling project.objects.directoryProperty() or fileProperty().
+                // However, we currently create these properties in JavaCompile.kt to register them
+                // as artifacts in AGP, so it is not possible here. Instead, we have to call
+                // getFinalProduct() to get the artifacts' locations.
+                // This is a non-standard pattern, but we've used it only for data binding so far,
+                // so it's probably acceptable for now.
+                aarOutDir = artifacts.getFinalProduct(DATA_BINDING_ARTIFACT),
+                exportClassListOutFile = artifacts.getFinalProduct(DATA_BINDING_EXPORT_CLASS_LIST),
                 enableDebugLogs = enableDebugLogs,
                 printEncodedErrorLogs = printEncodedErrorLogs,
                 isTestVariant = componentProperties.variantType.isTestComponent,

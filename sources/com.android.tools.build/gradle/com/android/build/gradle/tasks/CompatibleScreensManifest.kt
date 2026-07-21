@@ -82,8 +82,8 @@ abstract class CompatibleScreensManifest : NonIncrementalTask() {
                 if (generatedManifest != null)
                     BuiltArtifactImpl.make(
                         outputFile = generatedManifest.absolutePath,
-                        versionCode = it.versionCode.get(),
-                        versionName = it.versionName.get(),
+                        versionCode = it.versionCode.orNull,
+                        versionName = it.versionName.orNull,
                         variantOutputConfiguration = it.variantOutputConfiguration
                     )
                 else
@@ -98,8 +98,7 @@ abstract class CompatibleScreensManifest : NonIncrementalTask() {
 
         val content = StringBuilder()
         content.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n")
-            .append("<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n")
-            .append("    package=\"\${packageName}\">\n")
+            .append("<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">\n")
             .append("\n")
         if (minSdkVersion.isPresent) {
             content.append("    <uses-sdk android:minSdkVersion=\"")

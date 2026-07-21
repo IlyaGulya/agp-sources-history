@@ -35,18 +35,18 @@ fun mergeManifestsForApplication(
     mainManifest: File,
     manifestOverlays: List<File>,
     dependencies: List<ManifestProvider>,
-    navigationJsons: List<File>,
+    navigationJsons: Collection<File>,
     featureName: String?,
     packageOverride: String?,
-    versionCode: Int,
+    versionCode: Int?,
     versionName: String?,
     minSdkVersion: String?,
     targetSdkVersion: String?,
     maxSdkVersion: Int?,
-    outManifestLocation: String,
+    outMergedManifestLocation: String?,
+    outPackagedManifestLocation: String,
     outAaptSafeManifestLocation: String?,
     outMetadataFeatureManifestLocation: String?,
-    outBundleManifestLocation: String?,
     outInstantAppManifestLocation: String?,
     mergeType: ManifestMerger2.MergeType,
     placeHolders: Map<String, Any>,
@@ -85,104 +85,49 @@ fun mergeManifestsForApplication(
 
         val mergingReport = manifestMergerInvoker.merge()
         logger.verbose("Merging result: %1\$s", mergingReport.result)
-        when (mergingReport.result) {
-            MergingReport.Result.WARNING -> {
-                mergingReport.log(logger)
-                val xmlDocument = mergingReport.getMergedDocument(
-                    MergingReport.MergedManifestKind.MERGED
+        if (mergingReport.result == MergingReport.Result.ERROR) {
+            mergingReport.log(logger)
+            throw RuntimeException(mergingReport.reportString)
+        }
+        if (mergingReport.result == MergingReport.Result.WARNING) {
+            mergingReport.log(logger)
+        }
+
+        val xmlDocument =
+            mergingReport.getMergedDocument(MergingReport.MergedManifestKind.MERGED)
+        val annotatedDocument =
+            mergingReport.getMergedDocument(MergingReport.MergedManifestKind.BLAME)
+        if (annotatedDocument != null) {
+            logger.verbose(annotatedDocument)
+        }
+        save(xmlDocument, File(outPackagedManifestLocation))
+        logger.verbose("Merged manifest saved to $outPackagedManifestLocation")
+        if (outMergedManifestLocation != null) {
+            save(mergingReport.getMergedDocument(MergingReport.MergedManifestKind.INTERNAL_MERGED),
+                File(outMergedManifestLocation))
+        }
+
+        if (outAaptSafeManifestLocation != null) {
+            save(
+                mergingReport.getMergedDocument(MergingReport.MergedManifestKind.AAPT_SAFE),
+                File(
+                    outAaptSafeManifestLocation
                 )
-                val annotatedDocument =
-                    mergingReport.getMergedDocument(MergingReport.MergedManifestKind.BLAME)
-                if (annotatedDocument != null) {
-                    logger.verbose(annotatedDocument)
-                }
-                save(xmlDocument, File(outManifestLocation))
-                logger.verbose("Merged manifest saved to $outManifestLocation")
-
-                if (outAaptSafeManifestLocation != null) {
-                    save(
-                        mergingReport.getMergedDocument(
-                            MergingReport.MergedManifestKind.AAPT_SAFE
-                        ),
-                        File(outAaptSafeManifestLocation)
-                    )
-                }
-
-                if (outMetadataFeatureManifestLocation != null) {
-                    // This is the manifest used for merging back to the base. This is created
-                    // by both dynamic-features and normal features.
-                    val featureManifest = mergingReport.getMergedDocument(
-                        MergingReport.MergedManifestKind.METADATA_FEATURE
-                    )
-                    if (featureManifest != null) {
-                        save(featureManifest, File(outMetadataFeatureManifestLocation))
-                    }
-                }
-
-                if (outBundleManifestLocation != null) {
-                    val bundleMergedManifest = mergingReport.getMergedDocument(
-                        MergingReport.MergedManifestKind.BUNDLE
-                    )
-                    if (bundleMergedManifest != null) {
-                        save(bundleMergedManifest, File(outBundleManifestLocation))
-                    }
-                }
-
-                if (outInstantAppManifestLocation != null) {
-                    val instantAppManifest = mergingReport.getMergedDocument(
-                        MergingReport.MergedManifestKind.INSTANT_APP
-                    )
-                    if (instantAppManifest != null) {
-                        save(instantAppManifest, File(outInstantAppManifestLocation))
-                    }
-                }
+            )
+        }
+        if (outMetadataFeatureManifestLocation != null) {
+            val featureManifest =
+                mergingReport.getMergedDocument(MergingReport.MergedManifestKind.METADATA_FEATURE)
+            if (featureManifest != null) {
+                save(featureManifest, File(outMetadataFeatureManifestLocation))
             }
-            // fall through since these are just warnings.
-            MergingReport.Result.SUCCESS -> {
-                val xmlDocument =
-                    mergingReport.getMergedDocument(MergingReport.MergedManifestKind.MERGED)
-                val annotatedDocument =
-                    mergingReport.getMergedDocument(MergingReport.MergedManifestKind.BLAME)
-                if (annotatedDocument != null) {
-                    logger.verbose(annotatedDocument)
-                }
-                save(xmlDocument, File(outManifestLocation))
-                logger.verbose("Merged manifest saved to $outManifestLocation")
-                if (outAaptSafeManifestLocation != null) {
-                    save(
-                        mergingReport.getMergedDocument(MergingReport.MergedManifestKind.AAPT_SAFE),
-                        File(
-                            outAaptSafeManifestLocation
-                        )
-                    )
-                }
-                if (outMetadataFeatureManifestLocation != null) {
-                    val featureManifest =
-                        mergingReport.getMergedDocument(MergingReport.MergedManifestKind.METADATA_FEATURE)
-                    if (featureManifest != null) {
-                        save(featureManifest, File(outMetadataFeatureManifestLocation))
-                    }
-                }
-                if (outBundleManifestLocation != null) {
-                    val bundleMergedManifest =
-                        mergingReport.getMergedDocument(MergingReport.MergedManifestKind.BUNDLE)
-                    if (bundleMergedManifest != null) {
-                        save(bundleMergedManifest, File(outBundleManifestLocation))
-                    }
-                }
-                if (outInstantAppManifestLocation != null) {
-                    val instantAppManifest =
-                        mergingReport.getMergedDocument(MergingReport.MergedManifestKind.INSTANT_APP)
-                    if (instantAppManifest != null) {
-                        save(instantAppManifest, File(outInstantAppManifestLocation))
-                    }
-                }
+        }
+        if (outInstantAppManifestLocation != null) {
+            val instantAppManifest =
+                mergingReport.getMergedDocument(MergingReport.MergedManifestKind.INSTANT_APP)
+            if (instantAppManifest != null) {
+                save(instantAppManifest, File(outInstantAppManifestLocation))
             }
-            MergingReport.Result.ERROR -> {
-                mergingReport.log(logger)
-                throw RuntimeException(mergingReport.reportString)
-            }
-            else -> throw RuntimeException("Unhandled result type : " + mergingReport.result)
         }
         return mergingReport
     } catch (e: ManifestMerger2.MergeFailureException) {
@@ -203,7 +148,7 @@ fun findOriginalManifestFilePosition(
     mergedFilePosition: SourceFilePosition
 ): SourceFilePosition {
     if (mergedFilePosition.file == SourceFile.UNKNOWN || mergedFilePosition.file.sourceFile?.absolutePath?.contains(
-            "merged_manifests"
+            "packaged_manifests"
         ) == false
     ) {
         return mergedFilePosition
@@ -245,7 +190,7 @@ fun findOriginalManifestFilePosition(
 private fun setInjectableValues(
     invoker: ManifestMerger2.Invoker<*>,
     packageOverride: String?,
-    versionCode: Int,
+    versionCode: Int?,
     versionName: String?,
     minSdkVersion: String?,
     targetSdkVersion: String?,
@@ -255,12 +200,13 @@ private fun setInjectableValues(
     if (packageOverride != null && packageOverride.isNotEmpty()) {
         invoker.setOverride(ManifestSystemProperty.PACKAGE, packageOverride)
     }
-    if (versionCode > 0) {
-        invoker.setOverride(
-            ManifestSystemProperty.VERSION_CODE,
-            versionCode.toString()
-        )
+
+    versionCode?.let {
+        if (it > 0) {
+            invoker.setOverride(ManifestSystemProperty.VERSION_CODE, it.toString())
+        }
     }
+
     if (versionName != null && versionName.isNotEmpty()) {
         invoker.setOverride(ManifestSystemProperty.VERSION_NAME, versionName)
     }

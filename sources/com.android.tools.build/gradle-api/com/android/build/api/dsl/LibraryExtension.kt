@@ -33,7 +33,7 @@ interface LibraryExtension<
         AdbOptionsT : AdbOptions,
         AndroidSourceSetT : AndroidSourceSet,
         AnnotationProcessorOptionsT : AnnotationProcessorOptions,
-        BuildTypeT : BuildType<AnnotationProcessorOptionsT>,
+        BuildTypeT : BuildType<AnnotationProcessorOptionsT, SigningConfigT>,
         CMakeT : Cmake,
         CompileOptionsT : CompileOptions,
         DataBindingT : DataBinding,
@@ -76,5 +76,6 @@ interface LibraryExtension<
         LibraryVariantProperties>,
     TestedExtension {
     // TODO(b/140406102)
-
+    /** Aidl files to package in the aar. */
+    var aidlPackageWhiteList: MutableCollection<String>
 }

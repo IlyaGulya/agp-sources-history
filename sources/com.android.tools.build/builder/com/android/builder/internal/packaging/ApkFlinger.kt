@@ -26,6 +26,7 @@ import com.android.tools.build.apkzlib.zfile.NativeLibrariesPackagingMode
 import com.android.zipflinger.BytesSource
 import com.android.zipflinger.StableArchive
 import com.android.zipflinger.SynchronizedArchive
+import com.android.zipflinger.Zip64
 import com.android.zipflinger.ZipArchive
 import com.android.zipflinger.ZipSource
 import com.google.common.base.Function
@@ -91,7 +92,7 @@ class ApkFlinger(
         val signingOptions: SigningOptions? = creationData.signingOptions.orNull()
         val innerArchive =
             if (signingOptions == null) {
-                ZipArchive(creationData.apkPath)
+                ZipArchive(creationData.apkPath, Zip64.Policy.FORBID)
             } else {
                 SignedApk(
                     creationData.apkPath,
@@ -99,6 +100,7 @@ class ApkFlinger(
                         .setCertificates(signingOptions.certificates)
                         .setMinSdkVersion(signingOptions.minSdkVersion)
                         .setPrivateKey(signingOptions.key)
+                        .setSdkDependencies(signingOptions.sdkDependencyData)
                         .setV1Enabled(signingOptions.isV1SigningEnabled)
                         .setV2Enabled(signingOptions.isV2SigningEnabled)
                         .setV1CreatedBy(creationData.createdBy ?: DEFAULT_CREATED_BY)
