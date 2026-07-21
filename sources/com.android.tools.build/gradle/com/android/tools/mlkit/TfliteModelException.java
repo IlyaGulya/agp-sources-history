@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.tools.mlkit.exception;
+package com.android.tools.mlkit;
 
-/**
- * Exception to throw when TensorFlow Lite Model is valid, however metadata inside prevents it from
- * having codegen support but is able to be displayed.. One example is multiple tensors have same
- * tensor name.
- */
-public class UnsupportedTfliteMetadataException extends TfliteModelException {
-    public UnsupportedTfliteMetadataException(String errorMessage) {
+/** Exception to throw if TensorFlow Lite Model is invalid or unsupported. */
+public class TfliteModelException extends Exception {
+
+    public TfliteModelException(String errorMessage) {
         super(errorMessage);
     }
 }

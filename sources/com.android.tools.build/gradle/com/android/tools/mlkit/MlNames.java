@@ -28,9 +28,8 @@ import java.nio.file.Paths;
 import javax.lang.model.SourceVersion;
 
 /** Store names that used by both light class and gradle task. */
-public class MlkitNames {
+public class MlNames {
     public static final String OUTPUTS = "Outputs";
-
     public static final String PACKAGE_SUFFIX = ".ml";
 
     private static final String MODEL_NAME_PREFIX = "AutoModel";

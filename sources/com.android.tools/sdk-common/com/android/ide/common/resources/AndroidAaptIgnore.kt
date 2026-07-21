@@ -13,15 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.android.tools.mlkit.exception;
+package com.android.ide.common.resources
 
 /**
- * Exception to throw when TensorFlow Lite Model is valid, however data inside prevents it from
- * having the support in UI or codegen. One example is model has multiple subgraphs.
+ * A Wrapper class which contains the value of "ANDROID_AAPT_IGNORE" environment variable.
  */
-public class UnsupportedTfliteException extends TfliteModelException {
-    public UnsupportedTfliteException(String errorMessage) {
-        super(errorMessage);
-    }
-}
+class AndroidAaptIgnore(val aaptIgnoreValue: String?)
+
+const val ANDROID_AAPT_IGNORE: String = "ANDROID_AAPT_IGNORE"
