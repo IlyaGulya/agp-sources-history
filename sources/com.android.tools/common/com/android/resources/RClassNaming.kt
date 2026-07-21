@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:JvmName("RClassNaming")
+package com.android.resources
 
-package com.android.build.api.variant
-
-/**
- * Marker type for [Variant] extension objects.
- *
- * Variant extension must be registered using the
- * [AndroidComponentsExtension.registerExtension] API and can be
- * retrieved from a [Variant] instance using the [Variant.getExtension] API.
- *
- * Since this type will most likely be used as [org.gradle.api.Task]'s input, your subtype
- * should also extend [java.io.Serializable]
- */
-interface VariantExtension
+/** Returns the name of the field in an RClass based on the resource name. */
+fun getFieldNameByResourceName(styleName: String): String {
+    var i = 0
+    val n = styleName.length
+    while (i < n) {
+        val c = styleName[i]
+        if (c == '.' || c == '-' || c == ':') {
+            return styleName.replace('.', '_').replace('-', '_').replace(':', '_')
+        }
+        i++
+    }
+    return styleName
+}
