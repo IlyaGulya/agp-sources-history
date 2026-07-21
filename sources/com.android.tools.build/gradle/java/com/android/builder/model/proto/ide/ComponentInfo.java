@@ -21,7 +21,8 @@ private static final long serialVersionUID = 0L;
   }
   private ComponentInfo() {
     buildType_ = "";
-    capabilities_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    capabilities_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
   }
 
   @java.lang.Override
@@ -31,11 +32,6 @@ private static final long serialVersionUID = 0L;
     return new ComponentInfo();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.builder.model.proto.ide.IdeModelsProto.internal_static_ComponentInfo_descriptor;
@@ -65,7 +61,8 @@ private static final long serialVersionUID = 0L;
 
   private int bitField0_;
   public static final int BUILD_TYPE_FIELD_NUMBER = 1;
-  private volatile java.lang.Object buildType_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object buildType_ = "";
   /**
    * <pre>
    * The build type attribute of this component.
@@ -137,6 +134,7 @@ private static final long serialVersionUID = 0L;
                 com.google.protobuf.WireFormat.FieldType.STRING,
                 "");
   }
+  @SuppressWarnings("serial")
   private com.google.protobuf.MapField<
       java.lang.String, java.lang.String> productFlavors_;
   private com.google.protobuf.MapField<java.lang.String, java.lang.String>
@@ -147,7 +145,6 @@ private static final long serialVersionUID = 0L;
     }
     return productFlavors_;
   }
-
   public int getProductFlavorsCount() {
     return internalGetProductFlavors().getMap().size();
   }
@@ -159,7 +156,6 @@ private static final long serialVersionUID = 0L;
    *
    * <code>map&lt;string, string&gt; product_flavors = 2;</code>
    */
-
   @java.lang.Override
   public boolean containsProductFlavors(
       java.lang.String key) {
@@ -183,7 +179,6 @@ private static final long serialVersionUID = 0L;
    * <code>map&lt;string, string&gt; product_flavors = 2;</code>
    */
   @java.lang.Override
-
   public java.util.Map<java.lang.String, java.lang.String> getProductFlavorsMap() {
     return internalGetProductFlavors().getMap();
   }
@@ -196,10 +191,11 @@ private static final long serialVersionUID = 0L;
    * <code>map&lt;string, string&gt; product_flavors = 2;</code>
    */
   @java.lang.Override
-
-  public java.lang.String getProductFlavorsOrDefault(
+  public /* nullable */
+java.lang.String getProductFlavorsOrDefault(
       java.lang.String key,
-      java.lang.String defaultValue) {
+      /* nullable */
+java.lang.String defaultValue) {
     if (key == null) { throw new NullPointerException("map key"); }
     java.util.Map<java.lang.String, java.lang.String> map =
         internalGetProductFlavors().getMap();
@@ -214,7 +210,6 @@ private static final long serialVersionUID = 0L;
    * <code>map&lt;string, string&gt; product_flavors = 2;</code>
    */
   @java.lang.Override
-
   public java.lang.String getProductFlavorsOrThrow(
       java.lang.String key) {
     if (key == null) { throw new NullPointerException("map key"); }
@@ -238,6 +233,7 @@ private static final long serialVersionUID = 0L;
                 com.google.protobuf.WireFormat.FieldType.STRING,
                 "");
   }
+  @SuppressWarnings("serial")
   private com.google.protobuf.MapField<
       java.lang.String, java.lang.String> attributes_;
   private com.google.protobuf.MapField<java.lang.String, java.lang.String>
@@ -248,7 +244,6 @@ private static final long serialVersionUID = 0L;
     }
     return attributes_;
   }
-
   public int getAttributesCount() {
     return internalGetAttributes().getMap().size();
   }
@@ -261,7 +256,6 @@ private static final long serialVersionUID = 0L;
    *
    * <code>map&lt;string, string&gt; attributes = 3;</code>
    */
-
   @java.lang.Override
   public boolean containsAttributes(
       java.lang.String key) {
@@ -286,7 +280,6 @@ private static final long serialVersionUID = 0L;
    * <code>map&lt;string, string&gt; attributes = 3;</code>
    */
   @java.lang.Override
-
   public java.util.Map<java.lang.String, java.lang.String> getAttributesMap() {
     return internalGetAttributes().getMap();
   }
@@ -300,10 +293,11 @@ private static final long serialVersionUID = 0L;
    * <code>map&lt;string, string&gt; attributes = 3;</code>
    */
   @java.lang.Override
-
-  public java.lang.String getAttributesOrDefault(
+  public /* nullable */
+java.lang.String getAttributesOrDefault(
       java.lang.String key,
-      java.lang.String defaultValue) {
+      /* nullable */
+java.lang.String defaultValue) {
     if (key == null) { throw new NullPointerException("map key"); }
     java.util.Map<java.lang.String, java.lang.String> map =
         internalGetAttributes().getMap();
@@ -319,7 +313,6 @@ private static final long serialVersionUID = 0L;
    * <code>map&lt;string, string&gt; attributes = 3;</code>
    */
   @java.lang.Override
-
   public java.lang.String getAttributesOrThrow(
       java.lang.String key) {
     if (key == null) { throw new NullPointerException("map key"); }
@@ -332,7 +325,9 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int CAPABILITIES_FIELD_NUMBER = 4;
-  private com.google.protobuf.LazyStringList capabilities_;
+  @SuppressWarnings("serial")
+  private com.google.protobuf.LazyStringArrayList capabilities_ =
+      com.google.protobuf.LazyStringArrayList.emptyList();
   /**
    * <pre>
    * The list of capabilities associated with the component
@@ -383,7 +378,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int IS_TEST_FIXTURES_FIELD_NUMBER = 5;
-  private boolean isTestFixtures_;
+  private boolean isTestFixtures_ = false;
   /**
    * <pre>
    * Indicates whether this component (library or module) is a test fixtures component (i.e. has
@@ -693,14 +688,13 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       buildType_ = "";
-      bitField0_ = (bitField0_ & ~0x00000001);
       internalGetMutableProductFlavors().clear();
       internalGetMutableAttributes().clear();
-      capabilities_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000008);
+      capabilities_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
       isTestFixtures_ = false;
-
       return this;
     }
 
@@ -727,59 +721,36 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.builder.model.proto.ide.ComponentInfo buildPartial() {
       com.android.builder.model.proto.ide.ComponentInfo result = new com.android.builder.model.proto.ide.ComponentInfo(this);
-      int from_bitField0_ = bitField0_;
-      int to_bitField0_ = 0;
-      if (((from_bitField0_ & 0x00000001) != 0)) {
-        to_bitField0_ |= 0x00000001;
-      }
-      result.buildType_ = buildType_;
-      result.productFlavors_ = internalGetProductFlavors();
-      result.productFlavors_.makeImmutable();
-      result.attributes_ = internalGetAttributes();
-      result.attributes_.makeImmutable();
-      if (((bitField0_ & 0x00000008) != 0)) {
-        capabilities_ = capabilities_.getUnmodifiableView();
-        bitField0_ = (bitField0_ & ~0x00000008);
-      }
-      result.capabilities_ = capabilities_;
-      result.isTestFixtures_ = isTestFixtures_;
-      result.bitField0_ = to_bitField0_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.builder.model.proto.ide.ComponentInfo result) {
+      int from_bitField0_ = bitField0_;
+      int to_bitField0_ = 0;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.buildType_ = buildType_;
+        to_bitField0_ |= 0x00000001;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.productFlavors_ = internalGetProductFlavors();
+        result.productFlavors_.makeImmutable();
+      }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.attributes_ = internalGetAttributes();
+        result.attributes_.makeImmutable();
+      }
+      if (((from_bitField0_ & 0x00000008) != 0)) {
+        capabilities_.makeImmutable();
+        result.capabilities_ = capabilities_;
+      }
+      if (((from_bitField0_ & 0x00000010) != 0)) {
+        result.isTestFixtures_ = isTestFixtures_;
+      }
+      result.bitField0_ |= to_bitField0_;
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.builder.model.proto.ide.ComponentInfo) {
@@ -793,18 +764,20 @@ private static final long serialVersionUID = 0L;
     public Builder mergeFrom(com.android.builder.model.proto.ide.ComponentInfo other) {
       if (other == com.android.builder.model.proto.ide.ComponentInfo.getDefaultInstance()) return this;
       if (other.hasBuildType()) {
-        bitField0_ |= 0x00000001;
         buildType_ = other.buildType_;
+        bitField0_ |= 0x00000001;
         onChanged();
       }
       internalGetMutableProductFlavors().mergeFrom(
           other.internalGetProductFlavors());
+      bitField0_ |= 0x00000002;
       internalGetMutableAttributes().mergeFrom(
           other.internalGetAttributes());
+      bitField0_ |= 0x00000004;
       if (!other.capabilities_.isEmpty()) {
         if (capabilities_.isEmpty()) {
           capabilities_ = other.capabilities_;
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ |= 0x00000008;
         } else {
           ensureCapabilitiesIsMutable();
           capabilities_.addAll(other.capabilities_);
@@ -851,6 +824,7 @@ private static final long serialVersionUID = 0L;
                   ProductFlavorsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
               internalGetMutableProductFlavors().getMutableMap().put(
                   productFlavors__.getKey(), productFlavors__.getValue());
+              bitField0_ |= 0x00000002;
               break;
             } // case 18
             case 26: {
@@ -859,6 +833,7 @@ private static final long serialVersionUID = 0L;
                   AttributesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
               internalGetMutableAttributes().getMutableMap().put(
                   attributes__.getKey(), attributes__.getValue());
+              bitField0_ |= 0x00000004;
               break;
             } // case 26
             case 34: {
@@ -869,7 +844,7 @@ private static final long serialVersionUID = 0L;
             } // case 34
             case 40: {
               isTestFixtures_ = input.readBool();
-
+              bitField0_ |= 0x00000010;
               break;
             } // case 40
             default: {
@@ -957,11 +932,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setBuildType(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+      if (value == null) { throw new NullPointerException(); }
       buildType_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -975,8 +948,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearBuildType() {
-      bitField0_ = (bitField0_ & ~0x00000001);
       buildType_ = getDefaultInstance().getBuildType();
+      bitField0_ = (bitField0_ & ~0x00000001);
       onChanged();
       return this;
     }
@@ -992,12 +965,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setBuildTypeBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000001;
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       buildType_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -1005,7 +976,7 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.MapField<
         java.lang.String, java.lang.String> productFlavors_;
     private com.google.protobuf.MapField<java.lang.String, java.lang.String>
-    internalGetProductFlavors() {
+        internalGetProductFlavors() {
       if (productFlavors_ == null) {
         return com.google.protobuf.MapField.emptyMapField(
             ProductFlavorsDefaultEntryHolder.defaultEntry);
@@ -1013,8 +984,7 @@ private static final long serialVersionUID = 0L;
       return productFlavors_;
     }
     private com.google.protobuf.MapField<java.lang.String, java.lang.String>
-    internalGetMutableProductFlavors() {
-      onChanged();;
+        internalGetMutableProductFlavors() {
       if (productFlavors_ == null) {
         productFlavors_ = com.google.protobuf.MapField.newMapField(
             ProductFlavorsDefaultEntryHolder.defaultEntry);
@@ -1022,9 +992,10 @@ private static final long serialVersionUID = 0L;
       if (!productFlavors_.isMutable()) {
         productFlavors_ = productFlavors_.copy();
       }
+      bitField0_ |= 0x00000002;
+      onChanged();
       return productFlavors_;
     }
-
     public int getProductFlavorsCount() {
       return internalGetProductFlavors().getMap().size();
     }
@@ -1036,7 +1007,6 @@ private static final long serialVersionUID = 0L;
      *
      * <code>map&lt;string, string&gt; product_flavors = 2;</code>
      */
-
     @java.lang.Override
     public boolean containsProductFlavors(
         java.lang.String key) {
@@ -1060,7 +1030,6 @@ private static final long serialVersionUID = 0L;
      * <code>map&lt;string, string&gt; product_flavors = 2;</code>
      */
     @java.lang.Override
-
     public java.util.Map<java.lang.String, java.lang.String> getProductFlavorsMap() {
       return internalGetProductFlavors().getMap();
     }
@@ -1073,10 +1042,11 @@ private static final long serialVersionUID = 0L;
      * <code>map&lt;string, string&gt; product_flavors = 2;</code>
      */
     @java.lang.Override
-
-    public java.lang.String getProductFlavorsOrDefault(
+    public /* nullable */
+java.lang.String getProductFlavorsOrDefault(
         java.lang.String key,
-        java.lang.String defaultValue) {
+        /* nullable */
+java.lang.String defaultValue) {
       if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetProductFlavors().getMap();
@@ -1091,7 +1061,6 @@ private static final long serialVersionUID = 0L;
      * <code>map&lt;string, string&gt; product_flavors = 2;</code>
      */
     @java.lang.Override
-
     public java.lang.String getProductFlavorsOrThrow(
         java.lang.String key) {
       if (key == null) { throw new NullPointerException("map key"); }
@@ -1102,8 +1071,8 @@ private static final long serialVersionUID = 0L;
       }
       return map.get(key);
     }
-
     public Builder clearProductFlavors() {
+      bitField0_ = (bitField0_ & ~0x00000002);
       internalGetMutableProductFlavors().getMutableMap()
           .clear();
       return this;
@@ -1116,7 +1085,6 @@ private static final long serialVersionUID = 0L;
      *
      * <code>map&lt;string, string&gt; product_flavors = 2;</code>
      */
-
     public Builder removeProductFlavors(
         java.lang.String key) {
       if (key == null) { throw new NullPointerException("map key"); }
@@ -1129,7 +1097,8 @@ private static final long serialVersionUID = 0L;
      */
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String>
-    getMutableProductFlavors() {
+        getMutableProductFlavors() {
+      bitField0_ |= 0x00000002;
       return internalGetMutableProductFlavors().getMutableMap();
     }
     /**
@@ -1144,12 +1113,10 @@ private static final long serialVersionUID = 0L;
         java.lang.String key,
         java.lang.String value) {
       if (key == null) { throw new NullPointerException("map key"); }
-      if (value == null) {
-  throw new NullPointerException("map value");
-}
-
+      if (value == null) { throw new NullPointerException("map value"); }
       internalGetMutableProductFlavors().getMutableMap()
           .put(key, value);
+      bitField0_ |= 0x00000002;
       return this;
     }
     /**
@@ -1160,18 +1127,18 @@ private static final long serialVersionUID = 0L;
      *
      * <code>map&lt;string, string&gt; product_flavors = 2;</code>
      */
-
     public Builder putAllProductFlavors(
         java.util.Map<java.lang.String, java.lang.String> values) {
       internalGetMutableProductFlavors().getMutableMap()
           .putAll(values);
+      bitField0_ |= 0x00000002;
       return this;
     }
 
     private com.google.protobuf.MapField<
         java.lang.String, java.lang.String> attributes_;
     private com.google.protobuf.MapField<java.lang.String, java.lang.String>
-    internalGetAttributes() {
+        internalGetAttributes() {
       if (attributes_ == null) {
         return com.google.protobuf.MapField.emptyMapField(
             AttributesDefaultEntryHolder.defaultEntry);
@@ -1179,8 +1146,7 @@ private static final long serialVersionUID = 0L;
       return attributes_;
     }
     private com.google.protobuf.MapField<java.lang.String, java.lang.String>
-    internalGetMutableAttributes() {
-      onChanged();;
+        internalGetMutableAttributes() {
       if (attributes_ == null) {
         attributes_ = com.google.protobuf.MapField.newMapField(
             AttributesDefaultEntryHolder.defaultEntry);
@@ -1188,9 +1154,10 @@ private static final long serialVersionUID = 0L;
       if (!attributes_.isMutable()) {
         attributes_ = attributes_.copy();
       }
+      bitField0_ |= 0x00000004;
+      onChanged();
       return attributes_;
     }
-
     public int getAttributesCount() {
       return internalGetAttributes().getMap().size();
     }
@@ -1203,7 +1170,6 @@ private static final long serialVersionUID = 0L;
      *
      * <code>map&lt;string, string&gt; attributes = 3;</code>
      */
-
     @java.lang.Override
     public boolean containsAttributes(
         java.lang.String key) {
@@ -1228,7 +1194,6 @@ private static final long serialVersionUID = 0L;
      * <code>map&lt;string, string&gt; attributes = 3;</code>
      */
     @java.lang.Override
-
     public java.util.Map<java.lang.String, java.lang.String> getAttributesMap() {
       return internalGetAttributes().getMap();
     }
@@ -1242,10 +1207,11 @@ private static final long serialVersionUID = 0L;
      * <code>map&lt;string, string&gt; attributes = 3;</code>
      */
     @java.lang.Override
-
-    public java.lang.String getAttributesOrDefault(
+    public /* nullable */
+java.lang.String getAttributesOrDefault(
         java.lang.String key,
-        java.lang.String defaultValue) {
+        /* nullable */
+java.lang.String defaultValue) {
       if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetAttributes().getMap();
@@ -1261,7 +1227,6 @@ private static final long serialVersionUID = 0L;
      * <code>map&lt;string, string&gt; attributes = 3;</code>
      */
     @java.lang.Override
-
     public java.lang.String getAttributesOrThrow(
         java.lang.String key) {
       if (key == null) { throw new NullPointerException("map key"); }
@@ -1272,8 +1237,8 @@ private static final long serialVersionUID = 0L;
       }
       return map.get(key);
     }
-
     public Builder clearAttributes() {
+      bitField0_ = (bitField0_ & ~0x00000004);
       internalGetMutableAttributes().getMutableMap()
           .clear();
       return this;
@@ -1287,7 +1252,6 @@ private static final long serialVersionUID = 0L;
      *
      * <code>map&lt;string, string&gt; attributes = 3;</code>
      */
-
     public Builder removeAttributes(
         java.lang.String key) {
       if (key == null) { throw new NullPointerException("map key"); }
@@ -1300,7 +1264,8 @@ private static final long serialVersionUID = 0L;
      */
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String>
-    getMutableAttributes() {
+        getMutableAttributes() {
+      bitField0_ |= 0x00000004;
       return internalGetMutableAttributes().getMutableMap();
     }
     /**
@@ -1316,12 +1281,10 @@ private static final long serialVersionUID = 0L;
         java.lang.String key,
         java.lang.String value) {
       if (key == null) { throw new NullPointerException("map key"); }
-      if (value == null) {
-  throw new NullPointerException("map value");
-}
-
+      if (value == null) { throw new NullPointerException("map value"); }
       internalGetMutableAttributes().getMutableMap()
           .put(key, value);
+      bitField0_ |= 0x00000004;
       return this;
     }
     /**
@@ -1333,20 +1296,21 @@ private static final long serialVersionUID = 0L;
      *
      * <code>map&lt;string, string&gt; attributes = 3;</code>
      */
-
     public Builder putAllAttributes(
         java.util.Map<java.lang.String, java.lang.String> values) {
       internalGetMutableAttributes().getMutableMap()
           .putAll(values);
+      bitField0_ |= 0x00000004;
       return this;
     }
 
-    private com.google.protobuf.LazyStringList capabilities_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    private com.google.protobuf.LazyStringArrayList capabilities_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
     private void ensureCapabilitiesIsMutable() {
-      if (!((bitField0_ & 0x00000008) != 0)) {
+      if (!capabilities_.isModifiable()) {
         capabilities_ = new com.google.protobuf.LazyStringArrayList(capabilities_);
-        bitField0_ |= 0x00000008;
-       }
+      }
+      bitField0_ |= 0x00000008;
     }
     /**
      * <pre>
@@ -1358,7 +1322,8 @@ private static final long serialVersionUID = 0L;
      */
     public com.google.protobuf.ProtocolStringList
         getCapabilitiesList() {
-      return capabilities_.getUnmodifiableView();
+      capabilities_.makeImmutable();
+      return capabilities_;
     }
     /**
      * <pre>
@@ -1408,11 +1373,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setCapabilities(
         int index, java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureCapabilitiesIsMutable();
+      if (value == null) { throw new NullPointerException(); }
+      ensureCapabilitiesIsMutable();
       capabilities_.set(index, value);
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -1427,11 +1391,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder addCapabilities(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureCapabilitiesIsMutable();
+      if (value == null) { throw new NullPointerException(); }
+      ensureCapabilitiesIsMutable();
       capabilities_.add(value);
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -1449,6 +1412,7 @@ private static final long serialVersionUID = 0L;
       ensureCapabilitiesIsMutable();
       com.google.protobuf.AbstractMessageLite.Builder.addAll(
           values, capabilities_);
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -1461,8 +1425,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearCapabilities() {
-      capabilities_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000008);
+      capabilities_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
+      bitField0_ = (bitField0_ & ~0x00000008);;
       onChanged();
       return this;
     }
@@ -1477,12 +1442,11 @@ private static final long serialVersionUID = 0L;
      */
     public Builder addCapabilitiesBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       ensureCapabilitiesIsMutable();
       capabilities_.add(value);
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -1512,8 +1476,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setIsTestFixtures(boolean value) {
-      
+
       isTestFixtures_ = value;
+      bitField0_ |= 0x00000010;
       onChanged();
       return this;
     }
@@ -1527,7 +1492,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearIsTestFixtures() {
-      
+      bitField0_ = (bitField0_ & ~0x00000010);
       isTestFixtures_ = false;
       onChanged();
       return this;

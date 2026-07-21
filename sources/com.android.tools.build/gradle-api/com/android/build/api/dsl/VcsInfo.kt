@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.build.api.variant
+package com.android.build.api.dsl
+
+import org.gradle.api.Incubating
 
 /**
- * Build-time properties for APK packaging inside a [Component].
- *
- * This is accessed via [GeneratesApk.packaging]
+ * DSL object for configuring Version Control information
  */
-interface ApkPackaging : Packaging {
+interface VcsInfo {
 
-    /** PackagingOptions for dex files. Initialized from the corresponding DSL. */
-    val dex: DexPackagingOptions
-
-    override val jniLibs: JniLibsApkPackaging
+    /**
+     * Determines whether to include VCS info in the build.
+     *
+     * When the value is not set/null, the feature will be enabled by default in release builds.
+     * However, in the case that it is not successful, the build will not fail but will log the
+     * error message.
+     */
+    @get:Incubating
+    @set:Incubating
+    var include: Boolean?
 }

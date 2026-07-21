@@ -25,11 +25,6 @@ private static final long serialVersionUID = 0L;
     return new Library();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.tools.build.libraries.metadata.AppBundleDependenciesMetadata.internal_static_Library_descriptor;
@@ -84,11 +79,6 @@ private static final long serialVersionUID = 0L;
       return new Digests();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.android.tools.build.libraries.metadata.AppBundleDependenciesMetadata.internal_static_Library_Digests_descriptor;
@@ -103,7 +93,7 @@ private static final long serialVersionUID = 0L;
     }
 
     public static final int SHA256_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString sha256_;
+    private com.google.protobuf.ByteString sha256_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <pre>
      * SHA256 hash value of the file contents.
@@ -309,8 +299,8 @@ private static final long serialVersionUID = 0L;
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         sha256_ = com.google.protobuf.ByteString.EMPTY;
-
         return this;
       }
 
@@ -337,43 +327,18 @@ private static final long serialVersionUID = 0L;
       @java.lang.Override
       public com.android.tools.build.libraries.metadata.Library.Digests buildPartial() {
         com.android.tools.build.libraries.metadata.Library.Digests result = new com.android.tools.build.libraries.metadata.Library.Digests(this);
-        result.sha256_ = sha256_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
+      private void buildPartial0(com.android.tools.build.libraries.metadata.Library.Digests result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.sha256_ = sha256_;
+        }
       }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.android.tools.build.libraries.metadata.Library.Digests) {
@@ -417,7 +382,7 @@ private static final long serialVersionUID = 0L;
                 break;
               case 10: {
                 sha256_ = input.readBytes();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               default: {
@@ -435,6 +400,7 @@ private static final long serialVersionUID = 0L;
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private com.google.protobuf.ByteString sha256_ = com.google.protobuf.ByteString.EMPTY;
       /**
@@ -459,11 +425,9 @@ private static final long serialVersionUID = 0L;
        * @return This builder for chaining.
        */
       public Builder setSha256(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         sha256_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -476,7 +440,7 @@ private static final long serialVersionUID = 0L;
        * @return This builder for chaining.
        */
       public Builder clearSha256() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         sha256_ = getDefaultInstance().getSha256();
         onChanged();
         return this;
@@ -546,6 +510,7 @@ private static final long serialVersionUID = 0L;
   }
 
   private int libraryOneofCase_ = 0;
+  @SuppressWarnings("serial")
   private java.lang.Object libraryOneof_;
   public enum LibraryOneofCase
       implements com.google.protobuf.Internal.EnumLite,
@@ -638,7 +603,7 @@ private static final long serialVersionUID = 0L;
    */
   @java.lang.Override
   public com.android.tools.build.libraries.metadata.Library.DigestsOrBuilder getDigestsOrBuilder() {
-    return getDigests();
+    return digests_ == null ? com.android.tools.build.libraries.metadata.Library.Digests.getDefaultInstance() : digests_;
   }
 
   public static final int REPO_INDEX_FIELD_NUMBER = 3;
@@ -679,7 +644,7 @@ private static final long serialVersionUID = 0L;
    */
   @java.lang.Override
   public com.google.protobuf.Int32ValueOrBuilder getRepoIndexOrBuilder() {
-    return getRepoIndex();
+    return repoIndex_ == null ? com.google.protobuf.Int32Value.getDefaultInstance() : repoIndex_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -915,19 +880,18 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       if (mavenLibraryBuilder_ != null) {
         mavenLibraryBuilder_.clear();
       }
-      if (digestsBuilder_ == null) {
-        digests_ = null;
-      } else {
-        digests_ = null;
+      digests_ = null;
+      if (digestsBuilder_ != null) {
+        digestsBuilder_.dispose();
         digestsBuilder_ = null;
       }
-      if (repoIndexBuilder_ == null) {
-        repoIndex_ = null;
-      } else {
-        repoIndex_ = null;
+      repoIndex_ = null;
+      if (repoIndexBuilder_ != null) {
+        repoIndexBuilder_.dispose();
         repoIndexBuilder_ = null;
       }
       libraryOneofCase_ = 0;
@@ -958,60 +922,35 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.tools.build.libraries.metadata.Library buildPartial() {
       com.android.tools.build.libraries.metadata.Library result = new com.android.tools.build.libraries.metadata.Library(this);
-      if (libraryOneofCase_ == 1) {
-        if (mavenLibraryBuilder_ == null) {
-          result.libraryOneof_ = libraryOneof_;
-        } else {
-          result.libraryOneof_ = mavenLibraryBuilder_.build();
-        }
-      }
-      if (digestsBuilder_ == null) {
-        result.digests_ = digests_;
-      } else {
-        result.digests_ = digestsBuilder_.build();
-      }
-      if (repoIndexBuilder_ == null) {
-        result.repoIndex_ = repoIndex_;
-      } else {
-        result.repoIndex_ = repoIndexBuilder_.build();
-      }
-      result.libraryOneofCase_ = libraryOneofCase_;
+      if (bitField0_ != 0) { buildPartial0(result); }
+      buildPartialOneofs(result);
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.tools.build.libraries.metadata.Library result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.digests_ = digestsBuilder_ == null
+            ? digests_
+            : digestsBuilder_.build();
+      }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.repoIndex_ = repoIndexBuilder_ == null
+            ? repoIndex_
+            : repoIndexBuilder_.build();
+      }
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
+
+    private void buildPartialOneofs(com.android.tools.build.libraries.metadata.Library result) {
+      result.libraryOneofCase_ = libraryOneofCase_;
+      result.libraryOneof_ = this.libraryOneof_;
+      if (libraryOneofCase_ == 1 &&
+          mavenLibraryBuilder_ != null) {
+        result.libraryOneof_ = mavenLibraryBuilder_.build();
+      }
     }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.tools.build.libraries.metadata.Library) {
@@ -1076,14 +1015,14 @@ private static final long serialVersionUID = 0L;
               input.readMessage(
                   getDigestsFieldBuilder().getBuilder(),
                   extensionRegistry);
-
+              bitField0_ |= 0x00000002;
               break;
             } // case 18
             case 26: {
               input.readMessage(
                   getRepoIndexFieldBuilder().getBuilder(),
                   extensionRegistry);
-
+              bitField0_ |= 0x00000004;
               break;
             } // case 26
             default: {
@@ -1116,6 +1055,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
+    private int bitField0_;
 
     private com.google.protobuf.SingleFieldBuilderV3<
         com.android.tools.build.libraries.metadata.MavenLibrary, com.android.tools.build.libraries.metadata.MavenLibrary.Builder, com.android.tools.build.libraries.metadata.MavenLibraryOrBuilder> mavenLibraryBuilder_;
@@ -1191,8 +1131,9 @@ private static final long serialVersionUID = 0L;
       } else {
         if (libraryOneofCase_ == 1) {
           mavenLibraryBuilder_.mergeFrom(value);
+        } else {
+          mavenLibraryBuilder_.setMessage(value);
         }
-        mavenLibraryBuilder_.setMessage(value);
       }
       libraryOneofCase_ = 1;
       return this;
@@ -1254,7 +1195,7 @@ private static final long serialVersionUID = 0L;
         libraryOneof_ = null;
       }
       libraryOneofCase_ = 1;
-      onChanged();;
+      onChanged();
       return mavenLibraryBuilder_;
     }
 
@@ -1266,7 +1207,7 @@ private static final long serialVersionUID = 0L;
      * @return Whether the digests field is set.
      */
     public boolean hasDigests() {
-      return digestsBuilder_ != null || digests_ != null;
+      return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <code>.Library.Digests digests = 2;</code>
@@ -1288,11 +1229,11 @@ private static final long serialVersionUID = 0L;
           throw new NullPointerException();
         }
         digests_ = value;
-        onChanged();
       } else {
         digestsBuilder_.setMessage(value);
       }
-
+      bitField0_ |= 0x00000002;
+      onChanged();
       return this;
     }
     /**
@@ -1302,11 +1243,11 @@ private static final long serialVersionUID = 0L;
         com.android.tools.build.libraries.metadata.Library.Digests.Builder builderForValue) {
       if (digestsBuilder_ == null) {
         digests_ = builderForValue.build();
-        onChanged();
       } else {
         digestsBuilder_.setMessage(builderForValue.build());
       }
-
+      bitField0_ |= 0x00000002;
+      onChanged();
       return this;
     }
     /**
@@ -1314,38 +1255,38 @@ private static final long serialVersionUID = 0L;
      */
     public Builder mergeDigests(com.android.tools.build.libraries.metadata.Library.Digests value) {
       if (digestsBuilder_ == null) {
-        if (digests_ != null) {
-          digests_ =
-            com.android.tools.build.libraries.metadata.Library.Digests.newBuilder(digests_).mergeFrom(value).buildPartial();
+        if (((bitField0_ & 0x00000002) != 0) &&
+          digests_ != null &&
+          digests_ != com.android.tools.build.libraries.metadata.Library.Digests.getDefaultInstance()) {
+          getDigestsBuilder().mergeFrom(value);
         } else {
           digests_ = value;
         }
-        onChanged();
       } else {
         digestsBuilder_.mergeFrom(value);
       }
-
+      bitField0_ |= 0x00000002;
+      onChanged();
       return this;
     }
     /**
      * <code>.Library.Digests digests = 2;</code>
      */
     public Builder clearDigests() {
-      if (digestsBuilder_ == null) {
-        digests_ = null;
-        onChanged();
-      } else {
-        digests_ = null;
+      bitField0_ = (bitField0_ & ~0x00000002);
+      digests_ = null;
+      if (digestsBuilder_ != null) {
+        digestsBuilder_.dispose();
         digestsBuilder_ = null;
       }
-
+      onChanged();
       return this;
     }
     /**
      * <code>.Library.Digests digests = 2;</code>
      */
     public com.android.tools.build.libraries.metadata.Library.Digests.Builder getDigestsBuilder() {
-      
+      bitField0_ |= 0x00000002;
       onChanged();
       return getDigestsFieldBuilder().getBuilder();
     }
@@ -1390,7 +1331,7 @@ private static final long serialVersionUID = 0L;
      * @return Whether the repoIndex field is set.
      */
     public boolean hasRepoIndex() {
-      return repoIndexBuilder_ != null || repoIndex_ != null;
+      return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <pre>
@@ -1422,11 +1363,11 @@ private static final long serialVersionUID = 0L;
           throw new NullPointerException();
         }
         repoIndex_ = value;
-        onChanged();
       } else {
         repoIndexBuilder_.setMessage(value);
       }
-
+      bitField0_ |= 0x00000004;
+      onChanged();
       return this;
     }
     /**
@@ -1441,11 +1382,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.Int32Value.Builder builderForValue) {
       if (repoIndexBuilder_ == null) {
         repoIndex_ = builderForValue.build();
-        onChanged();
       } else {
         repoIndexBuilder_.setMessage(builderForValue.build());
       }
-
+      bitField0_ |= 0x00000004;
+      onChanged();
       return this;
     }
     /**
@@ -1458,17 +1399,18 @@ private static final long serialVersionUID = 0L;
      */
     public Builder mergeRepoIndex(com.google.protobuf.Int32Value value) {
       if (repoIndexBuilder_ == null) {
-        if (repoIndex_ != null) {
-          repoIndex_ =
-            com.google.protobuf.Int32Value.newBuilder(repoIndex_).mergeFrom(value).buildPartial();
+        if (((bitField0_ & 0x00000004) != 0) &&
+          repoIndex_ != null &&
+          repoIndex_ != com.google.protobuf.Int32Value.getDefaultInstance()) {
+          getRepoIndexBuilder().mergeFrom(value);
         } else {
           repoIndex_ = value;
         }
-        onChanged();
       } else {
         repoIndexBuilder_.mergeFrom(value);
       }
-
+      bitField0_ |= 0x00000004;
+      onChanged();
       return this;
     }
     /**
@@ -1480,14 +1422,13 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.Int32Value repo_index = 3;</code>
      */
     public Builder clearRepoIndex() {
-      if (repoIndexBuilder_ == null) {
-        repoIndex_ = null;
-        onChanged();
-      } else {
-        repoIndex_ = null;
+      bitField0_ = (bitField0_ & ~0x00000004);
+      repoIndex_ = null;
+      if (repoIndexBuilder_ != null) {
+        repoIndexBuilder_.dispose();
         repoIndexBuilder_ = null;
       }
-
+      onChanged();
       return this;
     }
     /**
@@ -1499,7 +1440,7 @@ private static final long serialVersionUID = 0L;
      * <code>.google.protobuf.Int32Value repo_index = 3;</code>
      */
     public com.google.protobuf.Int32Value.Builder getRepoIndexBuilder() {
-      
+      bitField0_ |= 0x00000004;
       onChanged();
       return getRepoIndexFieldBuilder().getBuilder();
     }

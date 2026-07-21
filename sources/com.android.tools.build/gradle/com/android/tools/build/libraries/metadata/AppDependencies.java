@@ -29,11 +29,6 @@ private static final long serialVersionUID = 0L;
     return new AppDependencies();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.tools.build.libraries.metadata.AppBundleDependenciesMetadata.internal_static_AppDependencies_descriptor;
@@ -48,6 +43,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int LIBRARY_FIELD_NUMBER = 1;
+  @SuppressWarnings("serial")
   private java.util.List<com.android.tools.build.libraries.metadata.Library> library_;
   /**
    * <pre>
@@ -108,6 +104,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int LIBRARY_DEPENDENCIES_FIELD_NUMBER = 2;
+  @SuppressWarnings("serial")
   private java.util.List<com.android.tools.build.libraries.metadata.LibraryDependencies> libraryDependencies_;
   /**
    * <pre>
@@ -168,6 +165,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int MODULE_DEPENDENCIES_FIELD_NUMBER = 3;
+  @SuppressWarnings("serial")
   private java.util.List<com.android.tools.build.libraries.metadata.ModuleDependencies> moduleDependencies_;
   /**
    * <pre>
@@ -228,6 +226,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int REPOSITORIES_FIELD_NUMBER = 4;
+  @SuppressWarnings("serial")
   private java.util.List<com.android.tools.build.libraries.metadata.Repository> repositories_;
   /**
    * <pre>
@@ -516,6 +515,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       if (libraryBuilder_ == null) {
         library_ = java.util.Collections.emptyList();
       } else {
@@ -570,7 +570,13 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.tools.build.libraries.metadata.AppDependencies buildPartial() {
       com.android.tools.build.libraries.metadata.AppDependencies result = new com.android.tools.build.libraries.metadata.AppDependencies(this);
-      int from_bitField0_ = bitField0_;
+      buildPartialRepeatedFields(result);
+      if (bitField0_ != 0) { buildPartial0(result); }
+      onBuilt();
+      return result;
+    }
+
+    private void buildPartialRepeatedFields(com.android.tools.build.libraries.metadata.AppDependencies result) {
       if (libraryBuilder_ == null) {
         if (((bitField0_ & 0x00000001) != 0)) {
           library_ = java.util.Collections.unmodifiableList(library_);
@@ -607,42 +613,12 @@ private static final long serialVersionUID = 0L;
       } else {
         result.repositories_ = repositoriesBuilder_.build();
       }
-      onBuilt();
-      return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.tools.build.libraries.metadata.AppDependencies result) {
+      int from_bitField0_ = bitField0_;
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.tools.build.libraries.metadata.AppDependencies) {

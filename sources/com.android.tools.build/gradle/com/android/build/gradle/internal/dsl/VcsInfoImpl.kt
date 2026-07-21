@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.build.api.variant
+package com.android.build.gradle.internal.dsl
 
-/**
- * Build-time properties for APK packaging inside a [Component].
- *
- * This is accessed via [GeneratesApk.packaging]
- */
-interface ApkPackaging : Packaging {
+import com.android.build.api.dsl.VcsInfo
 
-    /** PackagingOptions for dex files. Initialized from the corresponding DSL. */
-    val dex: DexPackagingOptions
+abstract class VcsInfoImpl: VcsInfo {
 
-    override val jniLibs: JniLibsApkPackaging
+    abstract override var include: Boolean?
+
+    fun initWith(that: VcsInfoImpl) {
+        include = that.include
+    }
 }

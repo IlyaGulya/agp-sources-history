@@ -31,11 +31,6 @@ private static final long serialVersionUID = 0L;
     return new NewList();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.build.gradle.internal.cxx.logging.CxxLogging.internal_static_NewList_descriptor;
@@ -50,6 +45,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int DATA_FIELD_NUMBER = 1;
+  @SuppressWarnings("serial")
   private com.google.protobuf.Internal.IntList data_;
   /**
    * <code>repeated int32 data = 1;</code>
@@ -287,8 +283,8 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       data_ = emptyIntList();
-      bitField0_ = (bitField0_ & ~0x00000001);
       return this;
     }
 
@@ -315,48 +311,24 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.build.gradle.internal.cxx.logging.NewList buildPartial() {
       com.android.build.gradle.internal.cxx.logging.NewList result = new com.android.build.gradle.internal.cxx.logging.NewList(this);
-      int from_bitField0_ = bitField0_;
+      buildPartialRepeatedFields(result);
+      if (bitField0_ != 0) { buildPartial0(result); }
+      onBuilt();
+      return result;
+    }
+
+    private void buildPartialRepeatedFields(com.android.build.gradle.internal.cxx.logging.NewList result) {
       if (((bitField0_ & 0x00000001) != 0)) {
         data_.makeImmutable();
         bitField0_ = (bitField0_ & ~0x00000001);
       }
       result.data_ = data_;
-      onBuilt();
-      return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.build.gradle.internal.cxx.logging.NewList result) {
+      int from_bitField0_ = bitField0_;
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.build.gradle.internal.cxx.logging.NewList) {
@@ -443,7 +415,7 @@ private static final long serialVersionUID = 0L;
       if (!((bitField0_ & 0x00000001) != 0)) {
         data_ = mutableCopy(data_);
         bitField0_ |= 0x00000001;
-       }
+      }
     }
     /**
      * <code>repeated int32 data = 1;</code>
@@ -477,6 +449,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setData(
         int index, int value) {
+
       ensureDataIsMutable();
       data_.setInt(index, value);
       onChanged();
@@ -488,6 +461,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder addData(int value) {
+
       ensureDataIsMutable();
       data_.addInt(value);
       onChanged();

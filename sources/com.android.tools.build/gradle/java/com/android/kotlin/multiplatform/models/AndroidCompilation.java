@@ -29,11 +29,6 @@ private static final long serialVersionUID = 0L;
     return new AndroidCompilation();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_AndroidCompilation_descriptor;
@@ -166,7 +161,7 @@ private static final long serialVersionUID = 0L;
 
   private int bitField0_;
   public static final int TYPE_FIELD_NUMBER = 1;
-  private int type_;
+  private int type_ = 0;
   /**
    * <pre>
    * The type of the compilation.
@@ -198,8 +193,7 @@ private static final long serialVersionUID = 0L;
    * @return The type.
    */
   @java.lang.Override public com.android.kotlin.multiplatform.models.AndroidCompilation.CompilationType getType() {
-    @SuppressWarnings("deprecation")
-    com.android.kotlin.multiplatform.models.AndroidCompilation.CompilationType result = com.android.kotlin.multiplatform.models.AndroidCompilation.CompilationType.valueOf(type_);
+    com.android.kotlin.multiplatform.models.AndroidCompilation.CompilationType result = com.android.kotlin.multiplatform.models.AndroidCompilation.CompilationType.forNumber(type_);
     return result == null ? com.android.kotlin.multiplatform.models.AndroidCompilation.CompilationType.UNRECOGNIZED : result;
   }
 
@@ -318,7 +312,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int DEFAULT_SOURCE_SET_NAME_FIELD_NUMBER = 5;
-  private volatile java.lang.Object defaultSourceSetName_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object defaultSourceSetName_ = "";
   /**
    * <pre>
    * The name of the default sourceSet of the compilation.
@@ -376,7 +371,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int ASSEMBLE_TASK_NAME_FIELD_NUMBER = 6;
-  private volatile java.lang.Object assembleTaskName_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object assembleTaskName_ = "";
   /**
    * <pre>
    * The gradle assemble task name.
@@ -434,7 +430,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int KOTLIN_COMPILE_TASK_NAME_FIELD_NUMBER = 7;
-  private volatile java.lang.Object kotlinCompileTaskName_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object kotlinCompileTaskName_ = "";
   /**
    * <pre>
    * The kotlin gradle compilation task name.
@@ -784,32 +781,26 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       type_ = 0;
-      bitField0_ = (bitField0_ & ~0x00000001);
-      if (mainInfoBuilder_ == null) {
-        mainInfo_ = null;
-      } else {
-        mainInfoBuilder_.clear();
+      mainInfo_ = null;
+      if (mainInfoBuilder_ != null) {
+        mainInfoBuilder_.dispose();
+        mainInfoBuilder_ = null;
       }
-      bitField0_ = (bitField0_ & ~0x00000002);
-      if (unitTestInfoBuilder_ == null) {
-        unitTestInfo_ = null;
-      } else {
-        unitTestInfoBuilder_.clear();
+      unitTestInfo_ = null;
+      if (unitTestInfoBuilder_ != null) {
+        unitTestInfoBuilder_.dispose();
+        unitTestInfoBuilder_ = null;
       }
-      bitField0_ = (bitField0_ & ~0x00000004);
-      if (instrumentedTestInfoBuilder_ == null) {
-        instrumentedTestInfo_ = null;
-      } else {
-        instrumentedTestInfoBuilder_.clear();
+      instrumentedTestInfo_ = null;
+      if (instrumentedTestInfoBuilder_ != null) {
+        instrumentedTestInfoBuilder_.dispose();
+        instrumentedTestInfoBuilder_ = null;
       }
-      bitField0_ = (bitField0_ & ~0x00000008);
       defaultSourceSetName_ = "";
-      bitField0_ = (bitField0_ & ~0x00000010);
       assembleTaskName_ = "";
-      bitField0_ = (bitField0_ & ~0x00000020);
       kotlinCompileTaskName_ = "";
-      bitField0_ = (bitField0_ & ~0x00000040);
       return this;
     }
 
@@ -836,85 +827,51 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.kotlin.multiplatform.models.AndroidCompilation buildPartial() {
       com.android.kotlin.multiplatform.models.AndroidCompilation result = new com.android.kotlin.multiplatform.models.AndroidCompilation(this);
-      int from_bitField0_ = bitField0_;
-      int to_bitField0_ = 0;
-      if (((from_bitField0_ & 0x00000001) != 0)) {
-        to_bitField0_ |= 0x00000001;
-      }
-      result.type_ = type_;
-      if (((from_bitField0_ & 0x00000002) != 0)) {
-        if (mainInfoBuilder_ == null) {
-          result.mainInfo_ = mainInfo_;
-        } else {
-          result.mainInfo_ = mainInfoBuilder_.build();
-        }
-        to_bitField0_ |= 0x00000002;
-      }
-      if (((from_bitField0_ & 0x00000004) != 0)) {
-        if (unitTestInfoBuilder_ == null) {
-          result.unitTestInfo_ = unitTestInfo_;
-        } else {
-          result.unitTestInfo_ = unitTestInfoBuilder_.build();
-        }
-        to_bitField0_ |= 0x00000004;
-      }
-      if (((from_bitField0_ & 0x00000008) != 0)) {
-        if (instrumentedTestInfoBuilder_ == null) {
-          result.instrumentedTestInfo_ = instrumentedTestInfo_;
-        } else {
-          result.instrumentedTestInfo_ = instrumentedTestInfoBuilder_.build();
-        }
-        to_bitField0_ |= 0x00000008;
-      }
-      if (((from_bitField0_ & 0x00000010) != 0)) {
-        to_bitField0_ |= 0x00000010;
-      }
-      result.defaultSourceSetName_ = defaultSourceSetName_;
-      if (((from_bitField0_ & 0x00000020) != 0)) {
-        to_bitField0_ |= 0x00000020;
-      }
-      result.assembleTaskName_ = assembleTaskName_;
-      if (((from_bitField0_ & 0x00000040) != 0)) {
-        to_bitField0_ |= 0x00000040;
-      }
-      result.kotlinCompileTaskName_ = kotlinCompileTaskName_;
-      result.bitField0_ = to_bitField0_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.kotlin.multiplatform.models.AndroidCompilation result) {
+      int from_bitField0_ = bitField0_;
+      int to_bitField0_ = 0;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.type_ = type_;
+        to_bitField0_ |= 0x00000001;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.mainInfo_ = mainInfoBuilder_ == null
+            ? mainInfo_
+            : mainInfoBuilder_.build();
+        to_bitField0_ |= 0x00000002;
+      }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.unitTestInfo_ = unitTestInfoBuilder_ == null
+            ? unitTestInfo_
+            : unitTestInfoBuilder_.build();
+        to_bitField0_ |= 0x00000004;
+      }
+      if (((from_bitField0_ & 0x00000008) != 0)) {
+        result.instrumentedTestInfo_ = instrumentedTestInfoBuilder_ == null
+            ? instrumentedTestInfo_
+            : instrumentedTestInfoBuilder_.build();
+        to_bitField0_ |= 0x00000008;
+      }
+      if (((from_bitField0_ & 0x00000010) != 0)) {
+        result.defaultSourceSetName_ = defaultSourceSetName_;
+        to_bitField0_ |= 0x00000010;
+      }
+      if (((from_bitField0_ & 0x00000020) != 0)) {
+        result.assembleTaskName_ = assembleTaskName_;
+        to_bitField0_ |= 0x00000020;
+      }
+      if (((from_bitField0_ & 0x00000040) != 0)) {
+        result.kotlinCompileTaskName_ = kotlinCompileTaskName_;
+        to_bitField0_ |= 0x00000040;
+      }
+      result.bitField0_ |= to_bitField0_;
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.kotlin.multiplatform.models.AndroidCompilation) {
@@ -940,18 +897,18 @@ private static final long serialVersionUID = 0L;
         mergeInstrumentedTestInfo(other.getInstrumentedTestInfo());
       }
       if (other.hasDefaultSourceSetName()) {
-        bitField0_ |= 0x00000010;
         defaultSourceSetName_ = other.defaultSourceSetName_;
+        bitField0_ |= 0x00000010;
         onChanged();
       }
       if (other.hasAssembleTaskName()) {
-        bitField0_ |= 0x00000020;
         assembleTaskName_ = other.assembleTaskName_;
+        bitField0_ |= 0x00000020;
         onChanged();
       }
       if (other.hasKotlinCompileTaskName()) {
-        bitField0_ |= 0x00000040;
         kotlinCompileTaskName_ = other.kotlinCompileTaskName_;
+        bitField0_ |= 0x00000040;
         onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
@@ -1071,8 +1028,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setTypeValue(int value) {
-      bitField0_ |= 0x00000001;
       type_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -1086,8 +1043,7 @@ private static final long serialVersionUID = 0L;
      */
     @java.lang.Override
     public com.android.kotlin.multiplatform.models.AndroidCompilation.CompilationType getType() {
-      @SuppressWarnings("deprecation")
-      com.android.kotlin.multiplatform.models.AndroidCompilation.CompilationType result = com.android.kotlin.multiplatform.models.AndroidCompilation.CompilationType.valueOf(type_);
+      com.android.kotlin.multiplatform.models.AndroidCompilation.CompilationType result = com.android.kotlin.multiplatform.models.AndroidCompilation.CompilationType.forNumber(type_);
       return result == null ? com.android.kotlin.multiplatform.models.AndroidCompilation.CompilationType.UNRECOGNIZED : result;
     }
     /**
@@ -1165,11 +1121,11 @@ private static final long serialVersionUID = 0L;
           throw new NullPointerException();
         }
         mainInfo_ = value;
-        onChanged();
       } else {
         mainInfoBuilder_.setMessage(value);
       }
       bitField0_ |= 0x00000002;
+      onChanged();
       return this;
     }
     /**
@@ -1183,11 +1139,11 @@ private static final long serialVersionUID = 0L;
         com.android.kotlin.multiplatform.models.MainVariantInfo.Builder builderForValue) {
       if (mainInfoBuilder_ == null) {
         mainInfo_ = builderForValue.build();
-        onChanged();
       } else {
         mainInfoBuilder_.setMessage(builderForValue.build());
       }
       bitField0_ |= 0x00000002;
+      onChanged();
       return this;
     }
     /**
@@ -1200,18 +1156,17 @@ private static final long serialVersionUID = 0L;
     public Builder mergeMainInfo(com.android.kotlin.multiplatform.models.MainVariantInfo value) {
       if (mainInfoBuilder_ == null) {
         if (((bitField0_ & 0x00000002) != 0) &&
-            mainInfo_ != null &&
-            mainInfo_ != com.android.kotlin.multiplatform.models.MainVariantInfo.getDefaultInstance()) {
-          mainInfo_ =
-            com.android.kotlin.multiplatform.models.MainVariantInfo.newBuilder(mainInfo_).mergeFrom(value).buildPartial();
+          mainInfo_ != null &&
+          mainInfo_ != com.android.kotlin.multiplatform.models.MainVariantInfo.getDefaultInstance()) {
+          getMainInfoBuilder().mergeFrom(value);
         } else {
           mainInfo_ = value;
         }
-        onChanged();
       } else {
         mainInfoBuilder_.mergeFrom(value);
       }
       bitField0_ |= 0x00000002;
+      onChanged();
       return this;
     }
     /**
@@ -1222,13 +1177,13 @@ private static final long serialVersionUID = 0L;
      * <code>optional .MainVariantInfo main_info = 2;</code>
      */
     public Builder clearMainInfo() {
-      if (mainInfoBuilder_ == null) {
-        mainInfo_ = null;
-        onChanged();
-      } else {
-        mainInfoBuilder_.clear();
-      }
       bitField0_ = (bitField0_ & ~0x00000002);
+      mainInfo_ = null;
+      if (mainInfoBuilder_ != null) {
+        mainInfoBuilder_.dispose();
+        mainInfoBuilder_ = null;
+      }
+      onChanged();
       return this;
     }
     /**
@@ -1321,11 +1276,11 @@ private static final long serialVersionUID = 0L;
           throw new NullPointerException();
         }
         unitTestInfo_ = value;
-        onChanged();
       } else {
         unitTestInfoBuilder_.setMessage(value);
       }
       bitField0_ |= 0x00000004;
+      onChanged();
       return this;
     }
     /**
@@ -1339,11 +1294,11 @@ private static final long serialVersionUID = 0L;
         com.android.kotlin.multiplatform.models.UnitTestInfo.Builder builderForValue) {
       if (unitTestInfoBuilder_ == null) {
         unitTestInfo_ = builderForValue.build();
-        onChanged();
       } else {
         unitTestInfoBuilder_.setMessage(builderForValue.build());
       }
       bitField0_ |= 0x00000004;
+      onChanged();
       return this;
     }
     /**
@@ -1356,18 +1311,17 @@ private static final long serialVersionUID = 0L;
     public Builder mergeUnitTestInfo(com.android.kotlin.multiplatform.models.UnitTestInfo value) {
       if (unitTestInfoBuilder_ == null) {
         if (((bitField0_ & 0x00000004) != 0) &&
-            unitTestInfo_ != null &&
-            unitTestInfo_ != com.android.kotlin.multiplatform.models.UnitTestInfo.getDefaultInstance()) {
-          unitTestInfo_ =
-            com.android.kotlin.multiplatform.models.UnitTestInfo.newBuilder(unitTestInfo_).mergeFrom(value).buildPartial();
+          unitTestInfo_ != null &&
+          unitTestInfo_ != com.android.kotlin.multiplatform.models.UnitTestInfo.getDefaultInstance()) {
+          getUnitTestInfoBuilder().mergeFrom(value);
         } else {
           unitTestInfo_ = value;
         }
-        onChanged();
       } else {
         unitTestInfoBuilder_.mergeFrom(value);
       }
       bitField0_ |= 0x00000004;
+      onChanged();
       return this;
     }
     /**
@@ -1378,13 +1332,13 @@ private static final long serialVersionUID = 0L;
      * <code>optional .UnitTestInfo unit_test_info = 3;</code>
      */
     public Builder clearUnitTestInfo() {
-      if (unitTestInfoBuilder_ == null) {
-        unitTestInfo_ = null;
-        onChanged();
-      } else {
-        unitTestInfoBuilder_.clear();
-      }
       bitField0_ = (bitField0_ & ~0x00000004);
+      unitTestInfo_ = null;
+      if (unitTestInfoBuilder_ != null) {
+        unitTestInfoBuilder_.dispose();
+        unitTestInfoBuilder_ = null;
+      }
+      onChanged();
       return this;
     }
     /**
@@ -1477,11 +1431,11 @@ private static final long serialVersionUID = 0L;
           throw new NullPointerException();
         }
         instrumentedTestInfo_ = value;
-        onChanged();
       } else {
         instrumentedTestInfoBuilder_.setMessage(value);
       }
       bitField0_ |= 0x00000008;
+      onChanged();
       return this;
     }
     /**
@@ -1495,11 +1449,11 @@ private static final long serialVersionUID = 0L;
         com.android.kotlin.multiplatform.models.InstrumentedTestInfo.Builder builderForValue) {
       if (instrumentedTestInfoBuilder_ == null) {
         instrumentedTestInfo_ = builderForValue.build();
-        onChanged();
       } else {
         instrumentedTestInfoBuilder_.setMessage(builderForValue.build());
       }
       bitField0_ |= 0x00000008;
+      onChanged();
       return this;
     }
     /**
@@ -1512,18 +1466,17 @@ private static final long serialVersionUID = 0L;
     public Builder mergeInstrumentedTestInfo(com.android.kotlin.multiplatform.models.InstrumentedTestInfo value) {
       if (instrumentedTestInfoBuilder_ == null) {
         if (((bitField0_ & 0x00000008) != 0) &&
-            instrumentedTestInfo_ != null &&
-            instrumentedTestInfo_ != com.android.kotlin.multiplatform.models.InstrumentedTestInfo.getDefaultInstance()) {
-          instrumentedTestInfo_ =
-            com.android.kotlin.multiplatform.models.InstrumentedTestInfo.newBuilder(instrumentedTestInfo_).mergeFrom(value).buildPartial();
+          instrumentedTestInfo_ != null &&
+          instrumentedTestInfo_ != com.android.kotlin.multiplatform.models.InstrumentedTestInfo.getDefaultInstance()) {
+          getInstrumentedTestInfoBuilder().mergeFrom(value);
         } else {
           instrumentedTestInfo_ = value;
         }
-        onChanged();
       } else {
         instrumentedTestInfoBuilder_.mergeFrom(value);
       }
       bitField0_ |= 0x00000008;
+      onChanged();
       return this;
     }
     /**
@@ -1534,13 +1487,13 @@ private static final long serialVersionUID = 0L;
      * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
      */
     public Builder clearInstrumentedTestInfo() {
-      if (instrumentedTestInfoBuilder_ == null) {
-        instrumentedTestInfo_ = null;
-        onChanged();
-      } else {
-        instrumentedTestInfoBuilder_.clear();
-      }
       bitField0_ = (bitField0_ & ~0x00000008);
+      instrumentedTestInfo_ = null;
+      if (instrumentedTestInfoBuilder_ != null) {
+        instrumentedTestInfoBuilder_.dispose();
+        instrumentedTestInfoBuilder_ = null;
+      }
+      onChanged();
       return this;
     }
     /**
@@ -1655,11 +1608,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setDefaultSourceSetName(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000010;
+      if (value == null) { throw new NullPointerException(); }
       defaultSourceSetName_ = value;
+      bitField0_ |= 0x00000010;
       onChanged();
       return this;
     }
@@ -1672,8 +1623,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearDefaultSourceSetName() {
-      bitField0_ = (bitField0_ & ~0x00000010);
       defaultSourceSetName_ = getDefaultInstance().getDefaultSourceSetName();
+      bitField0_ = (bitField0_ & ~0x00000010);
       onChanged();
       return this;
     }
@@ -1688,12 +1639,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setDefaultSourceSetNameBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000010;
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       defaultSourceSetName_ = value;
+      bitField0_ |= 0x00000010;
       onChanged();
       return this;
     }
@@ -1762,11 +1711,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setAssembleTaskName(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000020;
+      if (value == null) { throw new NullPointerException(); }
       assembleTaskName_ = value;
+      bitField0_ |= 0x00000020;
       onChanged();
       return this;
     }
@@ -1779,8 +1726,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearAssembleTaskName() {
-      bitField0_ = (bitField0_ & ~0x00000020);
       assembleTaskName_ = getDefaultInstance().getAssembleTaskName();
+      bitField0_ = (bitField0_ & ~0x00000020);
       onChanged();
       return this;
     }
@@ -1795,12 +1742,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setAssembleTaskNameBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000020;
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       assembleTaskName_ = value;
+      bitField0_ |= 0x00000020;
       onChanged();
       return this;
     }
@@ -1869,11 +1814,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setKotlinCompileTaskName(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000040;
+      if (value == null) { throw new NullPointerException(); }
       kotlinCompileTaskName_ = value;
+      bitField0_ |= 0x00000040;
       onChanged();
       return this;
     }
@@ -1886,8 +1829,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearKotlinCompileTaskName() {
-      bitField0_ = (bitField0_ & ~0x00000040);
       kotlinCompileTaskName_ = getDefaultInstance().getKotlinCompileTaskName();
+      bitField0_ = (bitField0_ & ~0x00000040);
       onChanged();
       return this;
     }
@@ -1902,12 +1845,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setKotlinCompileTaskNameBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000040;
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       kotlinCompileTaskName_ = value;
+      bitField0_ |= 0x00000040;
       onChanged();
       return this;
     }

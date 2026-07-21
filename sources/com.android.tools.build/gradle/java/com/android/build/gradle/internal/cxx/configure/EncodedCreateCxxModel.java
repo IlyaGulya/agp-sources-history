@@ -25,11 +25,6 @@ private static final long serialVersionUID = 0L;
     return new EncodedCreateCxxModel();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.build.gradle.internal.cxx.configure.CxxConfigure.internal_static_EncodedCreateCxxModel_descriptor;
@@ -44,7 +39,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int GRADLE_PATH_FIELD_NUMBER = 1;
-  private int gradlePath_;
+  private int gradlePath_ = 0;
   /**
    * <code>int32 gradle_path = 1;</code>
    * @return The gradlePath.
@@ -55,7 +50,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int VARIANT_NAME_FIELD_NUMBER = 2;
-  private int variantName_;
+  private int variantName_ = 0;
   /**
    * <code>int32 variant_name = 2;</code>
    * @return The variantName.
@@ -264,10 +259,9 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       gradlePath_ = 0;
-
       variantName_ = 0;
-
       return this;
     }
 
@@ -294,44 +288,21 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.build.gradle.internal.cxx.configure.EncodedCreateCxxModel buildPartial() {
       com.android.build.gradle.internal.cxx.configure.EncodedCreateCxxModel result = new com.android.build.gradle.internal.cxx.configure.EncodedCreateCxxModel(this);
-      result.gradlePath_ = gradlePath_;
-      result.variantName_ = variantName_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.build.gradle.internal.cxx.configure.EncodedCreateCxxModel result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.gradlePath_ = gradlePath_;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.variantName_ = variantName_;
+      }
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.build.gradle.internal.cxx.configure.EncodedCreateCxxModel) {
@@ -378,12 +349,12 @@ private static final long serialVersionUID = 0L;
               break;
             case 8: {
               gradlePath_ = input.readInt32();
-
+              bitField0_ |= 0x00000001;
               break;
             } // case 8
             case 16: {
               variantName_ = input.readInt32();
-
+              bitField0_ |= 0x00000002;
               break;
             } // case 16
             default: {
@@ -401,6 +372,7 @@ private static final long serialVersionUID = 0L;
       } // finally
       return this;
     }
+    private int bitField0_;
 
     private int gradlePath_ ;
     /**
@@ -417,8 +389,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setGradlePath(int value) {
-      
+
       gradlePath_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -427,7 +400,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearGradlePath() {
-      
+      bitField0_ = (bitField0_ & ~0x00000001);
       gradlePath_ = 0;
       onChanged();
       return this;
@@ -448,8 +421,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setVariantName(int value) {
-      
+
       variantName_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -458,7 +432,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearVariantName() {
-      
+      bitField0_ = (bitField0_ & ~0x00000002);
       variantName_ = 0;
       onChanged();
       return this;

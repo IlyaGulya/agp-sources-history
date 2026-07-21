@@ -30,11 +30,6 @@ private static final long serialVersionUID = 0L;
     return new EncodedDependenciesKey();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.build.gradle.internal.cxx.caching.CxxCaching.internal_static_EncodedDependenciesKey_descriptor;
@@ -49,7 +44,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int SOURCE_FILE_ID_FIELD_NUMBER = 1;
-  private int sourceFileId_;
+  private int sourceFileId_ = 0;
   /**
    * <pre>
    * String ID of source file
@@ -64,7 +59,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int COMPILER_FLAGS_ID_FIELD_NUMBER = 2;
-  private int compilerFlagsId_;
+  private int compilerFlagsId_ = 0;
   /**
    * <pre>
    * List ID of compiler flags
@@ -282,10 +277,9 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       sourceFileId_ = 0;
-
       compilerFlagsId_ = 0;
-
       return this;
     }
 
@@ -312,44 +306,21 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.build.gradle.internal.cxx.caching.EncodedDependenciesKey buildPartial() {
       com.android.build.gradle.internal.cxx.caching.EncodedDependenciesKey result = new com.android.build.gradle.internal.cxx.caching.EncodedDependenciesKey(this);
-      result.sourceFileId_ = sourceFileId_;
-      result.compilerFlagsId_ = compilerFlagsId_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.build.gradle.internal.cxx.caching.EncodedDependenciesKey result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.sourceFileId_ = sourceFileId_;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.compilerFlagsId_ = compilerFlagsId_;
+      }
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.build.gradle.internal.cxx.caching.EncodedDependenciesKey) {
@@ -396,12 +367,12 @@ private static final long serialVersionUID = 0L;
               break;
             case 8: {
               sourceFileId_ = input.readInt32();
-
+              bitField0_ |= 0x00000001;
               break;
             } // case 8
             case 16: {
               compilerFlagsId_ = input.readInt32();
-
+              bitField0_ |= 0x00000002;
               break;
             } // case 16
             default: {
@@ -419,6 +390,7 @@ private static final long serialVersionUID = 0L;
       } // finally
       return this;
     }
+    private int bitField0_;
 
     private int sourceFileId_ ;
     /**
@@ -443,8 +415,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setSourceFileId(int value) {
-      
+
       sourceFileId_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -457,7 +430,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearSourceFileId() {
-      
+      bitField0_ = (bitField0_ & ~0x00000001);
       sourceFileId_ = 0;
       onChanged();
       return this;
@@ -486,8 +459,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setCompilerFlagsId(int value) {
-      
+
       compilerFlagsId_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -500,7 +474,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearCompilerFlagsId() {
-      
+      bitField0_ = (bitField0_ & ~0x00000002);
       compilerFlagsId_ = 0;
       onChanged();
       return this;

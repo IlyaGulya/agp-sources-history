@@ -29,11 +29,6 @@ private static final long serialVersionUID = 0L;
     return new Repository();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.tools.build.libraries.metadata.AppBundleDependenciesMetadata.internal_static_Repository_descriptor;
@@ -48,6 +43,7 @@ private static final long serialVersionUID = 0L;
   }
 
   private int repoOneofCase_ = 0;
+  @SuppressWarnings("serial")
   private java.lang.Object repoOneof_;
   public enum RepoOneofCase
       implements com.google.protobuf.Internal.EnumLite,
@@ -370,6 +366,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       if (mavenRepoBuilder_ != null) {
         mavenRepoBuilder_.clear();
       }
@@ -404,57 +401,29 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.tools.build.libraries.metadata.Repository buildPartial() {
       com.android.tools.build.libraries.metadata.Repository result = new com.android.tools.build.libraries.metadata.Repository(this);
-      if (repoOneofCase_ == 1) {
-        if (mavenRepoBuilder_ == null) {
-          result.repoOneof_ = repoOneof_;
-        } else {
-          result.repoOneof_ = mavenRepoBuilder_.build();
-        }
-      }
-      if (repoOneofCase_ == 2) {
-        if (ivyRepoBuilder_ == null) {
-          result.repoOneof_ = repoOneof_;
-        } else {
-          result.repoOneof_ = ivyRepoBuilder_.build();
-        }
-      }
-      result.repoOneofCase_ = repoOneofCase_;
+      if (bitField0_ != 0) { buildPartial0(result); }
+      buildPartialOneofs(result);
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.tools.build.libraries.metadata.Repository result) {
+      int from_bitField0_ = bitField0_;
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
+
+    private void buildPartialOneofs(com.android.tools.build.libraries.metadata.Repository result) {
+      result.repoOneofCase_ = repoOneofCase_;
+      result.repoOneof_ = this.repoOneof_;
+      if (repoOneofCase_ == 1 &&
+          mavenRepoBuilder_ != null) {
+        result.repoOneof_ = mavenRepoBuilder_.build();
+      }
+      if (repoOneofCase_ == 2 &&
+          ivyRepoBuilder_ != null) {
+        result.repoOneof_ = ivyRepoBuilder_.build();
+      }
     }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.tools.build.libraries.metadata.Repository) {
@@ -550,6 +519,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
+    private int bitField0_;
 
     private com.google.protobuf.SingleFieldBuilderV3<
         com.android.tools.build.libraries.metadata.MavenRepo, com.android.tools.build.libraries.metadata.MavenRepo.Builder, com.android.tools.build.libraries.metadata.MavenRepoOrBuilder> mavenRepoBuilder_;
@@ -625,8 +595,9 @@ private static final long serialVersionUID = 0L;
       } else {
         if (repoOneofCase_ == 1) {
           mavenRepoBuilder_.mergeFrom(value);
+        } else {
+          mavenRepoBuilder_.setMessage(value);
         }
-        mavenRepoBuilder_.setMessage(value);
       }
       repoOneofCase_ = 1;
       return this;
@@ -688,7 +659,7 @@ private static final long serialVersionUID = 0L;
         repoOneof_ = null;
       }
       repoOneofCase_ = 1;
-      onChanged();;
+      onChanged();
       return mavenRepoBuilder_;
     }
 
@@ -766,8 +737,9 @@ private static final long serialVersionUID = 0L;
       } else {
         if (repoOneofCase_ == 2) {
           ivyRepoBuilder_.mergeFrom(value);
+        } else {
+          ivyRepoBuilder_.setMessage(value);
         }
-        ivyRepoBuilder_.setMessage(value);
       }
       repoOneofCase_ = 2;
       return this;
@@ -829,7 +801,7 @@ private static final long serialVersionUID = 0L;
         repoOneof_ = null;
       }
       repoOneofCase_ = 2;
-      onChanged();;
+      onChanged();
       return ivyRepoBuilder_;
     }
     @java.lang.Override

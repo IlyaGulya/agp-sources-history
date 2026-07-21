@@ -27,11 +27,6 @@ private static final long serialVersionUID = 0L;
     return new ModuleDependencies();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.tools.build.libraries.metadata.AppBundleDependenciesMetadata.internal_static_ModuleDependencies_descriptor;
@@ -46,7 +41,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int MODULE_NAME_FIELD_NUMBER = 1;
-  private volatile java.lang.Object moduleName_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object moduleName_ = "";
   /**
    * <code>string module_name = 1;</code>
    * @return The moduleName.
@@ -84,6 +80,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int DEPENDENCY_INDEX_FIELD_NUMBER = 2;
+  @SuppressWarnings("serial")
   private com.google.protobuf.Internal.IntList dependencyIndex_;
   /**
    * <pre>
@@ -341,10 +338,9 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       moduleName_ = "";
-
       dependencyIndex_ = emptyIntList();
-      bitField0_ = (bitField0_ & ~0x00000001);
       return this;
     }
 
@@ -371,49 +367,27 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.tools.build.libraries.metadata.ModuleDependencies buildPartial() {
       com.android.tools.build.libraries.metadata.ModuleDependencies result = new com.android.tools.build.libraries.metadata.ModuleDependencies(this);
-      int from_bitField0_ = bitField0_;
-      result.moduleName_ = moduleName_;
-      if (((bitField0_ & 0x00000001) != 0)) {
-        dependencyIndex_.makeImmutable();
-        bitField0_ = (bitField0_ & ~0x00000001);
-      }
-      result.dependencyIndex_ = dependencyIndex_;
+      buildPartialRepeatedFields(result);
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartialRepeatedFields(com.android.tools.build.libraries.metadata.ModuleDependencies result) {
+      if (((bitField0_ & 0x00000002) != 0)) {
+        dependencyIndex_.makeImmutable();
+        bitField0_ = (bitField0_ & ~0x00000002);
+      }
+      result.dependencyIndex_ = dependencyIndex_;
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
+
+    private void buildPartial0(com.android.tools.build.libraries.metadata.ModuleDependencies result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.moduleName_ = moduleName_;
+      }
     }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.tools.build.libraries.metadata.ModuleDependencies) {
@@ -428,12 +402,13 @@ private static final long serialVersionUID = 0L;
       if (other == com.android.tools.build.libraries.metadata.ModuleDependencies.getDefaultInstance()) return this;
       if (!other.getModuleName().isEmpty()) {
         moduleName_ = other.moduleName_;
+        bitField0_ |= 0x00000001;
         onChanged();
       }
       if (!other.dependencyIndex_.isEmpty()) {
         if (dependencyIndex_.isEmpty()) {
           dependencyIndex_ = other.dependencyIndex_;
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000002);
         } else {
           ensureDependencyIndexIsMutable();
           dependencyIndex_.addAll(other.dependencyIndex_);
@@ -468,7 +443,7 @@ private static final long serialVersionUID = 0L;
               break;
             case 10: {
               moduleName_ = input.readStringRequireUtf8();
-
+              bitField0_ |= 0x00000001;
               break;
             } // case 10
             case 16: {
@@ -545,11 +520,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setModuleName(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      if (value == null) { throw new NullPointerException(); }
       moduleName_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -558,8 +531,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearModuleName() {
-      
       moduleName_ = getDefaultInstance().getModuleName();
+      bitField0_ = (bitField0_ & ~0x00000001);
       onChanged();
       return this;
     }
@@ -570,22 +543,20 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setModuleNameBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       moduleName_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
 
     private com.google.protobuf.Internal.IntList dependencyIndex_ = emptyIntList();
     private void ensureDependencyIndexIsMutable() {
-      if (!((bitField0_ & 0x00000001) != 0)) {
+      if (!((bitField0_ & 0x00000002) != 0)) {
         dependencyIndex_ = mutableCopy(dependencyIndex_);
-        bitField0_ |= 0x00000001;
-       }
+        bitField0_ |= 0x00000002;
+      }
     }
     /**
      * <pre>
@@ -598,7 +569,7 @@ private static final long serialVersionUID = 0L;
      */
     public java.util.List<java.lang.Integer>
         getDependencyIndexList() {
-      return ((bitField0_ & 0x00000001) != 0) ?
+      return ((bitField0_ & 0x00000002) != 0) ?
                java.util.Collections.unmodifiableList(dependencyIndex_) : dependencyIndex_;
     }
     /**
@@ -639,6 +610,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setDependencyIndex(
         int index, int value) {
+
       ensureDependencyIndexIsMutable();
       dependencyIndex_.setInt(index, value);
       onChanged();
@@ -655,6 +627,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder addDependencyIndex(int value) {
+
       ensureDependencyIndexIsMutable();
       dependencyIndex_.addInt(value);
       onChanged();
@@ -689,7 +662,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder clearDependencyIndex() {
       dependencyIndex_ = emptyIntList();
-      bitField0_ = (bitField0_ & ~0x00000001);
+      bitField0_ = (bitField0_ & ~0x00000002);
       onChanged();
       return this;
     }

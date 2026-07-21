@@ -29,11 +29,6 @@ private static final long serialVersionUID = 0L;
     return new SourceProvider();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_SourceProvider_descriptor;
@@ -277,12 +272,12 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      if (manifestFileBuilder_ == null) {
-        manifestFile_ = null;
-      } else {
-        manifestFileBuilder_.clear();
+      bitField0_ = 0;
+      manifestFile_ = null;
+      if (manifestFileBuilder_ != null) {
+        manifestFileBuilder_.dispose();
+        manifestFileBuilder_ = null;
       }
-      bitField0_ = (bitField0_ & ~0x00000001);
       return this;
     }
 
@@ -309,53 +304,23 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.kotlin.multiplatform.models.SourceProvider buildPartial() {
       com.android.kotlin.multiplatform.models.SourceProvider result = new com.android.kotlin.multiplatform.models.SourceProvider(this);
-      int from_bitField0_ = bitField0_;
-      int to_bitField0_ = 0;
-      if (((from_bitField0_ & 0x00000001) != 0)) {
-        if (manifestFileBuilder_ == null) {
-          result.manifestFile_ = manifestFile_;
-        } else {
-          result.manifestFile_ = manifestFileBuilder_.build();
-        }
-        to_bitField0_ |= 0x00000001;
-      }
-      result.bitField0_ = to_bitField0_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.kotlin.multiplatform.models.SourceProvider result) {
+      int from_bitField0_ = bitField0_;
+      int to_bitField0_ = 0;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.manifestFile_ = manifestFileBuilder_ == null
+            ? manifestFile_
+            : manifestFileBuilder_.build();
+        to_bitField0_ |= 0x00000001;
+      }
+      result.bitField0_ |= to_bitField0_;
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.kotlin.multiplatform.models.SourceProvider) {
@@ -451,11 +416,11 @@ private static final long serialVersionUID = 0L;
           throw new NullPointerException();
         }
         manifestFile_ = value;
-        onChanged();
       } else {
         manifestFileBuilder_.setMessage(value);
       }
       bitField0_ |= 0x00000001;
+      onChanged();
       return this;
     }
     /**
@@ -465,11 +430,11 @@ private static final long serialVersionUID = 0L;
         com.android.builder.model.proto.ide.File.Builder builderForValue) {
       if (manifestFileBuilder_ == null) {
         manifestFile_ = builderForValue.build();
-        onChanged();
       } else {
         manifestFileBuilder_.setMessage(builderForValue.build());
       }
       bitField0_ |= 0x00000001;
+      onChanged();
       return this;
     }
     /**
@@ -478,31 +443,30 @@ private static final long serialVersionUID = 0L;
     public Builder mergeManifestFile(com.android.builder.model.proto.ide.File value) {
       if (manifestFileBuilder_ == null) {
         if (((bitField0_ & 0x00000001) != 0) &&
-            manifestFile_ != null &&
-            manifestFile_ != com.android.builder.model.proto.ide.File.getDefaultInstance()) {
-          manifestFile_ =
-            com.android.builder.model.proto.ide.File.newBuilder(manifestFile_).mergeFrom(value).buildPartial();
+          manifestFile_ != null &&
+          manifestFile_ != com.android.builder.model.proto.ide.File.getDefaultInstance()) {
+          getManifestFileBuilder().mergeFrom(value);
         } else {
           manifestFile_ = value;
         }
-        onChanged();
       } else {
         manifestFileBuilder_.mergeFrom(value);
       }
       bitField0_ |= 0x00000001;
+      onChanged();
       return this;
     }
     /**
      * <code>optional .File manifest_file = 1;</code>
      */
     public Builder clearManifestFile() {
-      if (manifestFileBuilder_ == null) {
-        manifestFile_ = null;
-        onChanged();
-      } else {
-        manifestFileBuilder_.clear();
-      }
       bitField0_ = (bitField0_ & ~0x00000001);
+      manifestFile_ = null;
+      if (manifestFileBuilder_ != null) {
+        manifestFileBuilder_.dispose();
+        manifestFileBuilder_ = null;
+      }
+      onChanged();
       return this;
     }
     /**

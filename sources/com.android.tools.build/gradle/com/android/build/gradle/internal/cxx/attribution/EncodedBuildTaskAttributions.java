@@ -35,11 +35,6 @@ private static final long serialVersionUID = 0L;
     return new EncodedBuildTaskAttributions();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.build.gradle.internal.cxx.attribution.CxxAttribution.internal_static_EncodedBuildTaskAttributions_descriptor;
@@ -76,11 +71,11 @@ private static final long serialVersionUID = 0L;
    */
   @java.lang.Override
   public com.android.build.gradle.internal.cxx.attribution.EncodedAttributionKeyOrBuilder getKeyOrBuilder() {
-    return getKey();
+    return key_ == null ? com.android.build.gradle.internal.cxx.attribution.EncodedAttributionKey.getDefaultInstance() : key_;
   }
 
   public static final int BUILD_FOLDER_ID_FIELD_NUMBER = 2;
-  private int buildFolderId_;
+  private int buildFolderId_ = 0;
   /**
    * <code>int32 build_folder_id = 2;</code>
    * @return The buildFolderId.
@@ -91,6 +86,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int LIBRARY_ID_FIELD_NUMBER = 3;
+  @SuppressWarnings("serial")
   private com.google.protobuf.Internal.IntList libraryId_;
   /**
    * <code>repeated int32 library_id = 3;</code>
@@ -119,7 +115,7 @@ private static final long serialVersionUID = 0L;
   private int libraryIdMemoizedSerializedSize = -1;
 
   public static final int NINJA_LOG_START_LINE_FIELD_NUMBER = 4;
-  private int ninjaLogStartLine_;
+  private int ninjaLogStartLine_ = 0;
   /**
    * <code>int32 ninja_log_start_line = 4;</code>
    * @return The ninjaLogStartLine.
@@ -130,7 +126,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int BUILD_START_TIME_MS_FIELD_NUMBER = 5;
-  private long buildStartTimeMs_;
+  private long buildStartTimeMs_ = 0L;
   /**
    * <code>int64 build_start_time_ms = 5;</code>
    * @return The buildStartTimeMs.
@@ -141,6 +137,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int ATTRIBUTION_FIELD_NUMBER = 6;
+  @SuppressWarnings("serial")
   private java.util.List<com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttribution> attribution_;
   /**
    * <code>repeated .EncodedBuildTaskAttribution attribution = 6;</code>
@@ -456,27 +453,23 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      if (keyBuilder_ == null) {
-        key_ = null;
-      } else {
-        key_ = null;
+      bitField0_ = 0;
+      key_ = null;
+      if (keyBuilder_ != null) {
+        keyBuilder_.dispose();
         keyBuilder_ = null;
       }
       buildFolderId_ = 0;
-
       libraryId_ = emptyIntList();
-      bitField0_ = (bitField0_ & ~0x00000001);
       ninjaLogStartLine_ = 0;
-
       buildStartTimeMs_ = 0L;
-
       if (attributionBuilder_ == null) {
         attribution_ = java.util.Collections.emptyList();
       } else {
         attribution_ = null;
         attributionBuilder_.clear();
       }
-      bitField0_ = (bitField0_ & ~0x00000002);
+      bitField0_ = (bitField0_ & ~0x00000020);
       return this;
     }
 
@@ -503,65 +496,47 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttributions buildPartial() {
       com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttributions result = new com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttributions(this);
-      int from_bitField0_ = bitField0_;
-      if (keyBuilder_ == null) {
-        result.key_ = key_;
-      } else {
-        result.key_ = keyBuilder_.build();
-      }
-      result.buildFolderId_ = buildFolderId_;
-      if (((bitField0_ & 0x00000001) != 0)) {
+      buildPartialRepeatedFields(result);
+      if (bitField0_ != 0) { buildPartial0(result); }
+      onBuilt();
+      return result;
+    }
+
+    private void buildPartialRepeatedFields(com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttributions result) {
+      if (((bitField0_ & 0x00000004) != 0)) {
         libraryId_.makeImmutable();
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000004);
       }
       result.libraryId_ = libraryId_;
-      result.ninjaLogStartLine_ = ninjaLogStartLine_;
-      result.buildStartTimeMs_ = buildStartTimeMs_;
       if (attributionBuilder_ == null) {
-        if (((bitField0_ & 0x00000002) != 0)) {
+        if (((bitField0_ & 0x00000020) != 0)) {
           attribution_ = java.util.Collections.unmodifiableList(attribution_);
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000020);
         }
         result.attribution_ = attribution_;
       } else {
         result.attribution_ = attributionBuilder_.build();
       }
-      onBuilt();
-      return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttributions result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.key_ = keyBuilder_ == null
+            ? key_
+            : keyBuilder_.build();
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.buildFolderId_ = buildFolderId_;
+      }
+      if (((from_bitField0_ & 0x00000008) != 0)) {
+        result.ninjaLogStartLine_ = ninjaLogStartLine_;
+      }
+      if (((from_bitField0_ & 0x00000010) != 0)) {
+        result.buildStartTimeMs_ = buildStartTimeMs_;
+      }
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttributions) {
@@ -583,7 +558,7 @@ private static final long serialVersionUID = 0L;
       if (!other.libraryId_.isEmpty()) {
         if (libraryId_.isEmpty()) {
           libraryId_ = other.libraryId_;
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000004);
         } else {
           ensureLibraryIdIsMutable();
           libraryId_.addAll(other.libraryId_);
@@ -600,7 +575,7 @@ private static final long serialVersionUID = 0L;
         if (!other.attribution_.isEmpty()) {
           if (attribution_.isEmpty()) {
             attribution_ = other.attribution_;
-            bitField0_ = (bitField0_ & ~0x00000002);
+            bitField0_ = (bitField0_ & ~0x00000020);
           } else {
             ensureAttributionIsMutable();
             attribution_.addAll(other.attribution_);
@@ -613,7 +588,7 @@ private static final long serialVersionUID = 0L;
             attributionBuilder_.dispose();
             attributionBuilder_ = null;
             attribution_ = other.attribution_;
-            bitField0_ = (bitField0_ & ~0x00000002);
+            bitField0_ = (bitField0_ & ~0x00000020);
             attributionBuilder_ = 
               com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                  getAttributionFieldBuilder() : null;
@@ -652,12 +627,12 @@ private static final long serialVersionUID = 0L;
               input.readMessage(
                   getKeyFieldBuilder().getBuilder(),
                   extensionRegistry);
-
+              bitField0_ |= 0x00000001;
               break;
             } // case 10
             case 16: {
               buildFolderId_ = input.readInt32();
-
+              bitField0_ |= 0x00000002;
               break;
             } // case 16
             case 24: {
@@ -678,12 +653,12 @@ private static final long serialVersionUID = 0L;
             } // case 26
             case 32: {
               ninjaLogStartLine_ = input.readInt32();
-
+              bitField0_ |= 0x00000008;
               break;
             } // case 32
             case 40: {
               buildStartTimeMs_ = input.readInt64();
-
+              bitField0_ |= 0x00000010;
               break;
             } // case 40
             case 50: {
@@ -724,7 +699,7 @@ private static final long serialVersionUID = 0L;
      * @return Whether the key field is set.
      */
     public boolean hasKey() {
-      return keyBuilder_ != null || key_ != null;
+      return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>.EncodedAttributionKey key = 1;</code>
@@ -746,11 +721,11 @@ private static final long serialVersionUID = 0L;
           throw new NullPointerException();
         }
         key_ = value;
-        onChanged();
       } else {
         keyBuilder_.setMessage(value);
       }
-
+      bitField0_ |= 0x00000001;
+      onChanged();
       return this;
     }
     /**
@@ -760,11 +735,11 @@ private static final long serialVersionUID = 0L;
         com.android.build.gradle.internal.cxx.attribution.EncodedAttributionKey.Builder builderForValue) {
       if (keyBuilder_ == null) {
         key_ = builderForValue.build();
-        onChanged();
       } else {
         keyBuilder_.setMessage(builderForValue.build());
       }
-
+      bitField0_ |= 0x00000001;
+      onChanged();
       return this;
     }
     /**
@@ -772,38 +747,38 @@ private static final long serialVersionUID = 0L;
      */
     public Builder mergeKey(com.android.build.gradle.internal.cxx.attribution.EncodedAttributionKey value) {
       if (keyBuilder_ == null) {
-        if (key_ != null) {
-          key_ =
-            com.android.build.gradle.internal.cxx.attribution.EncodedAttributionKey.newBuilder(key_).mergeFrom(value).buildPartial();
+        if (((bitField0_ & 0x00000001) != 0) &&
+          key_ != null &&
+          key_ != com.android.build.gradle.internal.cxx.attribution.EncodedAttributionKey.getDefaultInstance()) {
+          getKeyBuilder().mergeFrom(value);
         } else {
           key_ = value;
         }
-        onChanged();
       } else {
         keyBuilder_.mergeFrom(value);
       }
-
+      bitField0_ |= 0x00000001;
+      onChanged();
       return this;
     }
     /**
      * <code>.EncodedAttributionKey key = 1;</code>
      */
     public Builder clearKey() {
-      if (keyBuilder_ == null) {
-        key_ = null;
-        onChanged();
-      } else {
-        key_ = null;
+      bitField0_ = (bitField0_ & ~0x00000001);
+      key_ = null;
+      if (keyBuilder_ != null) {
+        keyBuilder_.dispose();
         keyBuilder_ = null;
       }
-
+      onChanged();
       return this;
     }
     /**
      * <code>.EncodedAttributionKey key = 1;</code>
      */
     public com.android.build.gradle.internal.cxx.attribution.EncodedAttributionKey.Builder getKeyBuilder() {
-      
+      bitField0_ |= 0x00000001;
       onChanged();
       return getKeyFieldBuilder().getBuilder();
     }
@@ -850,8 +825,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setBuildFolderId(int value) {
-      
+
       buildFolderId_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -860,7 +836,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearBuildFolderId() {
-      
+      bitField0_ = (bitField0_ & ~0x00000002);
       buildFolderId_ = 0;
       onChanged();
       return this;
@@ -868,10 +844,10 @@ private static final long serialVersionUID = 0L;
 
     private com.google.protobuf.Internal.IntList libraryId_ = emptyIntList();
     private void ensureLibraryIdIsMutable() {
-      if (!((bitField0_ & 0x00000001) != 0)) {
+      if (!((bitField0_ & 0x00000004) != 0)) {
         libraryId_ = mutableCopy(libraryId_);
-        bitField0_ |= 0x00000001;
-       }
+        bitField0_ |= 0x00000004;
+      }
     }
     /**
      * <code>repeated int32 library_id = 3;</code>
@@ -879,7 +855,7 @@ private static final long serialVersionUID = 0L;
      */
     public java.util.List<java.lang.Integer>
         getLibraryIdList() {
-      return ((bitField0_ & 0x00000001) != 0) ?
+      return ((bitField0_ & 0x00000004) != 0) ?
                java.util.Collections.unmodifiableList(libraryId_) : libraryId_;
     }
     /**
@@ -905,6 +881,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setLibraryId(
         int index, int value) {
+
       ensureLibraryIdIsMutable();
       libraryId_.setInt(index, value);
       onChanged();
@@ -916,6 +893,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder addLibraryId(int value) {
+
       ensureLibraryIdIsMutable();
       libraryId_.addInt(value);
       onChanged();
@@ -940,7 +918,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder clearLibraryId() {
       libraryId_ = emptyIntList();
-      bitField0_ = (bitField0_ & ~0x00000001);
+      bitField0_ = (bitField0_ & ~0x00000004);
       onChanged();
       return this;
     }
@@ -960,8 +938,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setNinjaLogStartLine(int value) {
-      
+
       ninjaLogStartLine_ = value;
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -970,7 +949,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearNinjaLogStartLine() {
-      
+      bitField0_ = (bitField0_ & ~0x00000008);
       ninjaLogStartLine_ = 0;
       onChanged();
       return this;
@@ -991,8 +970,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setBuildStartTimeMs(long value) {
-      
+
       buildStartTimeMs_ = value;
+      bitField0_ |= 0x00000010;
       onChanged();
       return this;
     }
@@ -1001,7 +981,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearBuildStartTimeMs() {
-      
+      bitField0_ = (bitField0_ & ~0x00000010);
       buildStartTimeMs_ = 0L;
       onChanged();
       return this;
@@ -1010,9 +990,9 @@ private static final long serialVersionUID = 0L;
     private java.util.List<com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttribution> attribution_ =
       java.util.Collections.emptyList();
     private void ensureAttributionIsMutable() {
-      if (!((bitField0_ & 0x00000002) != 0)) {
+      if (!((bitField0_ & 0x00000020) != 0)) {
         attribution_ = new java.util.ArrayList<com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttribution>(attribution_);
-        bitField0_ |= 0x00000002;
+        bitField0_ |= 0x00000020;
        }
     }
 
@@ -1162,7 +1142,7 @@ private static final long serialVersionUID = 0L;
     public Builder clearAttribution() {
       if (attributionBuilder_ == null) {
         attribution_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000020);
         onChanged();
       } else {
         attributionBuilder_.clear();
@@ -1239,7 +1219,7 @@ private static final long serialVersionUID = 0L;
         attributionBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
             com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttribution, com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttribution.Builder, com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttributionOrBuilder>(
                 attribution_,
-                ((bitField0_ & 0x00000002) != 0),
+                ((bitField0_ & 0x00000020) != 0),
                 getParentForChildren(),
                 isClean());
         attribution_ = null;

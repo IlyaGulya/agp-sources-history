@@ -31,11 +31,6 @@ private static final long serialVersionUID = 0L;
     return new EncodedObjectFileKey();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.build.gradle.internal.cxx.caching.CxxCaching.internal_static_EncodedObjectFileKey_descriptor;
@@ -72,10 +67,11 @@ private static final long serialVersionUID = 0L;
    */
   @java.lang.Override
   public com.android.build.gradle.internal.cxx.caching.EncodedDependenciesKeyOrBuilder getDependencyKeyOrBuilder() {
-    return getDependencyKey();
+    return dependencyKey_ == null ? com.android.build.gradle.internal.cxx.caching.EncodedDependenciesKey.getDefaultInstance() : dependencyKey_;
   }
 
   public static final int DEPENDENCY_IDS_FIELD_NUMBER = 2;
+  @SuppressWarnings("serial")
   private com.google.protobuf.Internal.IntList dependencyIds_;
   /**
    * <code>repeated int32 dependency_ids = 2;</code>
@@ -329,14 +325,13 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      if (dependencyKeyBuilder_ == null) {
-        dependencyKey_ = null;
-      } else {
-        dependencyKey_ = null;
+      bitField0_ = 0;
+      dependencyKey_ = null;
+      if (dependencyKeyBuilder_ != null) {
+        dependencyKeyBuilder_.dispose();
         dependencyKeyBuilder_ = null;
       }
       dependencyIds_ = emptyIntList();
-      bitField0_ = (bitField0_ & ~0x00000001);
       return this;
     }
 
@@ -363,53 +358,29 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.build.gradle.internal.cxx.caching.EncodedObjectFileKey buildPartial() {
       com.android.build.gradle.internal.cxx.caching.EncodedObjectFileKey result = new com.android.build.gradle.internal.cxx.caching.EncodedObjectFileKey(this);
-      int from_bitField0_ = bitField0_;
-      if (dependencyKeyBuilder_ == null) {
-        result.dependencyKey_ = dependencyKey_;
-      } else {
-        result.dependencyKey_ = dependencyKeyBuilder_.build();
-      }
-      if (((bitField0_ & 0x00000001) != 0)) {
-        dependencyIds_.makeImmutable();
-        bitField0_ = (bitField0_ & ~0x00000001);
-      }
-      result.dependencyIds_ = dependencyIds_;
+      buildPartialRepeatedFields(result);
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartialRepeatedFields(com.android.build.gradle.internal.cxx.caching.EncodedObjectFileKey result) {
+      if (((bitField0_ & 0x00000002) != 0)) {
+        dependencyIds_.makeImmutable();
+        bitField0_ = (bitField0_ & ~0x00000002);
+      }
+      result.dependencyIds_ = dependencyIds_;
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
+
+    private void buildPartial0(com.android.build.gradle.internal.cxx.caching.EncodedObjectFileKey result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.dependencyKey_ = dependencyKeyBuilder_ == null
+            ? dependencyKey_
+            : dependencyKeyBuilder_.build();
+      }
     }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.build.gradle.internal.cxx.caching.EncodedObjectFileKey) {
@@ -428,7 +399,7 @@ private static final long serialVersionUID = 0L;
       if (!other.dependencyIds_.isEmpty()) {
         if (dependencyIds_.isEmpty()) {
           dependencyIds_ = other.dependencyIds_;
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000002);
         } else {
           ensureDependencyIdsIsMutable();
           dependencyIds_.addAll(other.dependencyIds_);
@@ -465,7 +436,7 @@ private static final long serialVersionUID = 0L;
               input.readMessage(
                   getDependencyKeyFieldBuilder().getBuilder(),
                   extensionRegistry);
-
+              bitField0_ |= 0x00000001;
               break;
             } // case 10
             case 16: {
@@ -509,7 +480,7 @@ private static final long serialVersionUID = 0L;
      * @return Whether the dependencyKey field is set.
      */
     public boolean hasDependencyKey() {
-      return dependencyKeyBuilder_ != null || dependencyKey_ != null;
+      return ((bitField0_ & 0x00000001) != 0);
     }
     /**
      * <code>.EncodedDependenciesKey dependency_key = 1;</code>
@@ -531,11 +502,11 @@ private static final long serialVersionUID = 0L;
           throw new NullPointerException();
         }
         dependencyKey_ = value;
-        onChanged();
       } else {
         dependencyKeyBuilder_.setMessage(value);
       }
-
+      bitField0_ |= 0x00000001;
+      onChanged();
       return this;
     }
     /**
@@ -545,11 +516,11 @@ private static final long serialVersionUID = 0L;
         com.android.build.gradle.internal.cxx.caching.EncodedDependenciesKey.Builder builderForValue) {
       if (dependencyKeyBuilder_ == null) {
         dependencyKey_ = builderForValue.build();
-        onChanged();
       } else {
         dependencyKeyBuilder_.setMessage(builderForValue.build());
       }
-
+      bitField0_ |= 0x00000001;
+      onChanged();
       return this;
     }
     /**
@@ -557,38 +528,38 @@ private static final long serialVersionUID = 0L;
      */
     public Builder mergeDependencyKey(com.android.build.gradle.internal.cxx.caching.EncodedDependenciesKey value) {
       if (dependencyKeyBuilder_ == null) {
-        if (dependencyKey_ != null) {
-          dependencyKey_ =
-            com.android.build.gradle.internal.cxx.caching.EncodedDependenciesKey.newBuilder(dependencyKey_).mergeFrom(value).buildPartial();
+        if (((bitField0_ & 0x00000001) != 0) &&
+          dependencyKey_ != null &&
+          dependencyKey_ != com.android.build.gradle.internal.cxx.caching.EncodedDependenciesKey.getDefaultInstance()) {
+          getDependencyKeyBuilder().mergeFrom(value);
         } else {
           dependencyKey_ = value;
         }
-        onChanged();
       } else {
         dependencyKeyBuilder_.mergeFrom(value);
       }
-
+      bitField0_ |= 0x00000001;
+      onChanged();
       return this;
     }
     /**
      * <code>.EncodedDependenciesKey dependency_key = 1;</code>
      */
     public Builder clearDependencyKey() {
-      if (dependencyKeyBuilder_ == null) {
-        dependencyKey_ = null;
-        onChanged();
-      } else {
-        dependencyKey_ = null;
+      bitField0_ = (bitField0_ & ~0x00000001);
+      dependencyKey_ = null;
+      if (dependencyKeyBuilder_ != null) {
+        dependencyKeyBuilder_.dispose();
         dependencyKeyBuilder_ = null;
       }
-
+      onChanged();
       return this;
     }
     /**
      * <code>.EncodedDependenciesKey dependency_key = 1;</code>
      */
     public com.android.build.gradle.internal.cxx.caching.EncodedDependenciesKey.Builder getDependencyKeyBuilder() {
-      
+      bitField0_ |= 0x00000001;
       onChanged();
       return getDependencyKeyFieldBuilder().getBuilder();
     }
@@ -622,10 +593,10 @@ private static final long serialVersionUID = 0L;
 
     private com.google.protobuf.Internal.IntList dependencyIds_ = emptyIntList();
     private void ensureDependencyIdsIsMutable() {
-      if (!((bitField0_ & 0x00000001) != 0)) {
+      if (!((bitField0_ & 0x00000002) != 0)) {
         dependencyIds_ = mutableCopy(dependencyIds_);
-        bitField0_ |= 0x00000001;
-       }
+        bitField0_ |= 0x00000002;
+      }
     }
     /**
      * <code>repeated int32 dependency_ids = 2;</code>
@@ -633,7 +604,7 @@ private static final long serialVersionUID = 0L;
      */
     public java.util.List<java.lang.Integer>
         getDependencyIdsList() {
-      return ((bitField0_ & 0x00000001) != 0) ?
+      return ((bitField0_ & 0x00000002) != 0) ?
                java.util.Collections.unmodifiableList(dependencyIds_) : dependencyIds_;
     }
     /**
@@ -659,6 +630,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setDependencyIds(
         int index, int value) {
+
       ensureDependencyIdsIsMutable();
       dependencyIds_.setInt(index, value);
       onChanged();
@@ -670,6 +642,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder addDependencyIds(int value) {
+
       ensureDependencyIdsIsMutable();
       dependencyIds_.addInt(value);
       onChanged();
@@ -694,7 +667,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder clearDependencyIds() {
       dependencyIds_ = emptyIntList();
-      bitField0_ = (bitField0_ & ~0x00000001);
+      bitField0_ = (bitField0_ & ~0x00000002);
       onChanged();
       return this;
     }

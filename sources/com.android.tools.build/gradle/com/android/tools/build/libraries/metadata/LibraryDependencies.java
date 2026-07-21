@@ -30,11 +30,6 @@ private static final long serialVersionUID = 0L;
     return new LibraryDependencies();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.tools.build.libraries.metadata.AppBundleDependenciesMetadata.internal_static_LibraryDependencies_descriptor;
@@ -49,7 +44,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int LIBRARY_INDEX_FIELD_NUMBER = 1;
-  private int libraryIndex_;
+  private int libraryIndex_ = 0;
   /**
    * <pre>
    * Indices correspond to the pool of libraries defined in AppDependencies.
@@ -64,6 +59,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int LIBRARY_DEP_INDEX_FIELD_NUMBER = 2;
+  @SuppressWarnings("serial")
   private com.google.protobuf.Internal.IntList libraryDepIndex_;
   /**
    * <code>repeated int32 library_dep_index = 2;</code>
@@ -311,10 +307,9 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       libraryIndex_ = 0;
-
       libraryDepIndex_ = emptyIntList();
-      bitField0_ = (bitField0_ & ~0x00000001);
       return this;
     }
 
@@ -341,49 +336,27 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.tools.build.libraries.metadata.LibraryDependencies buildPartial() {
       com.android.tools.build.libraries.metadata.LibraryDependencies result = new com.android.tools.build.libraries.metadata.LibraryDependencies(this);
-      int from_bitField0_ = bitField0_;
-      result.libraryIndex_ = libraryIndex_;
-      if (((bitField0_ & 0x00000001) != 0)) {
-        libraryDepIndex_.makeImmutable();
-        bitField0_ = (bitField0_ & ~0x00000001);
-      }
-      result.libraryDepIndex_ = libraryDepIndex_;
+      buildPartialRepeatedFields(result);
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartialRepeatedFields(com.android.tools.build.libraries.metadata.LibraryDependencies result) {
+      if (((bitField0_ & 0x00000002) != 0)) {
+        libraryDepIndex_.makeImmutable();
+        bitField0_ = (bitField0_ & ~0x00000002);
+      }
+      result.libraryDepIndex_ = libraryDepIndex_;
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
+
+    private void buildPartial0(com.android.tools.build.libraries.metadata.LibraryDependencies result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.libraryIndex_ = libraryIndex_;
+      }
     }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.tools.build.libraries.metadata.LibraryDependencies) {
@@ -402,7 +375,7 @@ private static final long serialVersionUID = 0L;
       if (!other.libraryDepIndex_.isEmpty()) {
         if (libraryDepIndex_.isEmpty()) {
           libraryDepIndex_ = other.libraryDepIndex_;
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000002);
         } else {
           ensureLibraryDepIndexIsMutable();
           libraryDepIndex_.addAll(other.libraryDepIndex_);
@@ -437,7 +410,7 @@ private static final long serialVersionUID = 0L;
               break;
             case 8: {
               libraryIndex_ = input.readInt32();
-
+              bitField0_ |= 0x00000001;
               break;
             } // case 8
             case 16: {
@@ -496,8 +469,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setLibraryIndex(int value) {
-      
+
       libraryIndex_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -510,7 +484,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearLibraryIndex() {
-      
+      bitField0_ = (bitField0_ & ~0x00000001);
       libraryIndex_ = 0;
       onChanged();
       return this;
@@ -518,10 +492,10 @@ private static final long serialVersionUID = 0L;
 
     private com.google.protobuf.Internal.IntList libraryDepIndex_ = emptyIntList();
     private void ensureLibraryDepIndexIsMutable() {
-      if (!((bitField0_ & 0x00000001) != 0)) {
+      if (!((bitField0_ & 0x00000002) != 0)) {
         libraryDepIndex_ = mutableCopy(libraryDepIndex_);
-        bitField0_ |= 0x00000001;
-       }
+        bitField0_ |= 0x00000002;
+      }
     }
     /**
      * <code>repeated int32 library_dep_index = 2;</code>
@@ -529,7 +503,7 @@ private static final long serialVersionUID = 0L;
      */
     public java.util.List<java.lang.Integer>
         getLibraryDepIndexList() {
-      return ((bitField0_ & 0x00000001) != 0) ?
+      return ((bitField0_ & 0x00000002) != 0) ?
                java.util.Collections.unmodifiableList(libraryDepIndex_) : libraryDepIndex_;
     }
     /**
@@ -555,6 +529,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setLibraryDepIndex(
         int index, int value) {
+
       ensureLibraryDepIndexIsMutable();
       libraryDepIndex_.setInt(index, value);
       onChanged();
@@ -566,6 +541,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder addLibraryDepIndex(int value) {
+
       ensureLibraryDepIndexIsMutable();
       libraryDepIndex_.addInt(value);
       onChanged();
@@ -590,7 +566,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder clearLibraryDepIndex() {
       libraryDepIndex_ = emptyIntList();
-      bitField0_ = (bitField0_ & ~0x00000001);
+      bitField0_ = (bitField0_ & ~0x00000002);
       onChanged();
       return this;
     }

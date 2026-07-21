@@ -33,11 +33,6 @@ private static final long serialVersionUID = 0L;
     return new AttributionKey();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.build.gradle.internal.cxx.attribution.CxxAttribution.internal_static_AttributionKey_descriptor;
@@ -52,7 +47,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int MODULE_FIELD_NUMBER = 1;
-  private volatile java.lang.Object module_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object module_ = "";
   /**
    * <code>string module = 1;</code>
    * @return The module.
@@ -90,7 +86,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int VARIANT_FIELD_NUMBER = 2;
-  private volatile java.lang.Object variant_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object variant_ = "";
   /**
    * <code>string variant = 2;</code>
    * @return The variant.
@@ -128,7 +125,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int ABI_FIELD_NUMBER = 3;
-  private volatile java.lang.Object abi_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object abi_ = "";
   /**
    * <code>string abi = 3;</code>
    * @return The abi.
@@ -377,12 +375,10 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       module_ = "";
-
       variant_ = "";
-
       abi_ = "";
-
       return this;
     }
 
@@ -409,45 +405,24 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.build.gradle.internal.cxx.attribution.AttributionKey buildPartial() {
       com.android.build.gradle.internal.cxx.attribution.AttributionKey result = new com.android.build.gradle.internal.cxx.attribution.AttributionKey(this);
-      result.module_ = module_;
-      result.variant_ = variant_;
-      result.abi_ = abi_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.build.gradle.internal.cxx.attribution.AttributionKey result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.module_ = module_;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.variant_ = variant_;
+      }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.abi_ = abi_;
+      }
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.build.gradle.internal.cxx.attribution.AttributionKey) {
@@ -462,14 +437,17 @@ private static final long serialVersionUID = 0L;
       if (other == com.android.build.gradle.internal.cxx.attribution.AttributionKey.getDefaultInstance()) return this;
       if (!other.getModule().isEmpty()) {
         module_ = other.module_;
+        bitField0_ |= 0x00000001;
         onChanged();
       }
       if (!other.getVariant().isEmpty()) {
         variant_ = other.variant_;
+        bitField0_ |= 0x00000002;
         onChanged();
       }
       if (!other.getAbi().isEmpty()) {
         abi_ = other.abi_;
+        bitField0_ |= 0x00000004;
         onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
@@ -500,17 +478,17 @@ private static final long serialVersionUID = 0L;
               break;
             case 10: {
               module_ = input.readStringRequireUtf8();
-
+              bitField0_ |= 0x00000001;
               break;
             } // case 10
             case 18: {
               variant_ = input.readStringRequireUtf8();
-
+              bitField0_ |= 0x00000002;
               break;
             } // case 18
             case 26: {
               abi_ = input.readStringRequireUtf8();
-
+              bitField0_ |= 0x00000004;
               break;
             } // case 26
             default: {
@@ -528,6 +506,7 @@ private static final long serialVersionUID = 0L;
       } // finally
       return this;
     }
+    private int bitField0_;
 
     private java.lang.Object module_ = "";
     /**
@@ -570,11 +549,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setModule(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      if (value == null) { throw new NullPointerException(); }
       module_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -583,8 +560,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearModule() {
-      
       module_ = getDefaultInstance().getModule();
+      bitField0_ = (bitField0_ & ~0x00000001);
       onChanged();
       return this;
     }
@@ -595,12 +572,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setModuleBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       module_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -646,11 +621,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setVariant(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      if (value == null) { throw new NullPointerException(); }
       variant_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -659,8 +632,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearVariant() {
-      
       variant_ = getDefaultInstance().getVariant();
+      bitField0_ = (bitField0_ & ~0x00000002);
       onChanged();
       return this;
     }
@@ -671,12 +644,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setVariantBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       variant_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -722,11 +693,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setAbi(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      if (value == null) { throw new NullPointerException(); }
       abi_ = value;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
@@ -735,8 +704,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearAbi() {
-      
       abi_ = getDefaultInstance().getAbi();
+      bitField0_ = (bitField0_ & ~0x00000004);
       onChanged();
       return this;
     }
@@ -747,12 +716,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setAbiBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       abi_ = value;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }

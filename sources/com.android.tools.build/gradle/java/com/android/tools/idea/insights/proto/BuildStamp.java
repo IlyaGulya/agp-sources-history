@@ -32,11 +32,6 @@ private static final long serialVersionUID = 0L;
     return new BuildStamp();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.tools.idea.insights.proto.VersionControlMetadata.internal_static_BuildStamp_descriptor;
@@ -169,6 +164,7 @@ private static final long serialVersionUID = 0L;
 
   private int bitField0_;
   public static final int REPOSITORIES_FIELD_NUMBER = 1;
+  @SuppressWarnings("serial")
   private java.util.List<com.android.tools.idea.insights.proto.RepositoryInfo> repositories_;
   /**
    * <pre>
@@ -267,7 +263,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int GENERATE_ERROR_REASON_FIELD_NUMBER = 3;
-  private int generateErrorReason_;
+  private int generateErrorReason_ = 0;
   /**
    * <pre>
    * Extra debug info which will help users identify issues
@@ -299,8 +295,7 @@ private static final long serialVersionUID = 0L;
    * @return The generateErrorReason.
    */
   @java.lang.Override public com.android.tools.idea.insights.proto.BuildStamp.GenerateErrorReason getGenerateErrorReason() {
-    @SuppressWarnings("deprecation")
-    com.android.tools.idea.insights.proto.BuildStamp.GenerateErrorReason result = com.android.tools.idea.insights.proto.BuildStamp.GenerateErrorReason.valueOf(generateErrorReason_);
+    com.android.tools.idea.insights.proto.BuildStamp.GenerateErrorReason result = com.android.tools.idea.insights.proto.BuildStamp.GenerateErrorReason.forNumber(generateErrorReason_);
     return result == null ? com.android.tools.idea.insights.proto.BuildStamp.GenerateErrorReason.UNRECOGNIZED : result;
   }
 
@@ -537,6 +532,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       if (repositoriesBuilder_ == null) {
         repositories_ = java.util.Collections.emptyList();
       } else {
@@ -544,14 +540,12 @@ private static final long serialVersionUID = 0L;
         repositoriesBuilder_.clear();
       }
       bitField0_ = (bitField0_ & ~0x00000001);
-      if (buildInfoBuilder_ == null) {
-        buildInfo_ = null;
-      } else {
-        buildInfoBuilder_.clear();
+      buildInfo_ = null;
+      if (buildInfoBuilder_ != null) {
+        buildInfoBuilder_.dispose();
+        buildInfoBuilder_ = null;
       }
-      bitField0_ = (bitField0_ & ~0x00000002);
       generateErrorReason_ = 0;
-      bitField0_ = (bitField0_ & ~0x00000004);
       return this;
     }
 
@@ -578,8 +572,13 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.tools.idea.insights.proto.BuildStamp buildPartial() {
       com.android.tools.idea.insights.proto.BuildStamp result = new com.android.tools.idea.insights.proto.BuildStamp(this);
-      int from_bitField0_ = bitField0_;
-      int to_bitField0_ = 0;
+      buildPartialRepeatedFields(result);
+      if (bitField0_ != 0) { buildPartial0(result); }
+      onBuilt();
+      return result;
+    }
+
+    private void buildPartialRepeatedFields(com.android.tools.idea.insights.proto.BuildStamp result) {
       if (repositoriesBuilder_ == null) {
         if (((bitField0_ & 0x00000001) != 0)) {
           repositories_ = java.util.Collections.unmodifiableList(repositories_);
@@ -589,55 +588,24 @@ private static final long serialVersionUID = 0L;
       } else {
         result.repositories_ = repositoriesBuilder_.build();
       }
+    }
+
+    private void buildPartial0(com.android.tools.idea.insights.proto.BuildStamp result) {
+      int from_bitField0_ = bitField0_;
+      int to_bitField0_ = 0;
       if (((from_bitField0_ & 0x00000002) != 0)) {
-        if (buildInfoBuilder_ == null) {
-          result.buildInfo_ = buildInfo_;
-        } else {
-          result.buildInfo_ = buildInfoBuilder_.build();
-        }
+        result.buildInfo_ = buildInfoBuilder_ == null
+            ? buildInfo_
+            : buildInfoBuilder_.build();
         to_bitField0_ |= 0x00000001;
       }
       if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.generateErrorReason_ = generateErrorReason_;
         to_bitField0_ |= 0x00000002;
       }
-      result.generateErrorReason_ = generateErrorReason_;
-      result.bitField0_ = to_bitField0_;
-      onBuilt();
-      return result;
+      result.bitField0_ |= to_bitField0_;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
-    }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.tools.idea.insights.proto.BuildStamp) {
@@ -1104,11 +1072,11 @@ private static final long serialVersionUID = 0L;
           throw new NullPointerException();
         }
         buildInfo_ = value;
-        onChanged();
       } else {
         buildInfoBuilder_.setMessage(value);
       }
       bitField0_ |= 0x00000002;
+      onChanged();
       return this;
     }
     /**
@@ -1122,11 +1090,11 @@ private static final long serialVersionUID = 0L;
         com.android.tools.idea.insights.proto.BuildInfo.Builder builderForValue) {
       if (buildInfoBuilder_ == null) {
         buildInfo_ = builderForValue.build();
-        onChanged();
       } else {
         buildInfoBuilder_.setMessage(builderForValue.build());
       }
       bitField0_ |= 0x00000002;
+      onChanged();
       return this;
     }
     /**
@@ -1139,18 +1107,17 @@ private static final long serialVersionUID = 0L;
     public Builder mergeBuildInfo(com.android.tools.idea.insights.proto.BuildInfo value) {
       if (buildInfoBuilder_ == null) {
         if (((bitField0_ & 0x00000002) != 0) &&
-            buildInfo_ != null &&
-            buildInfo_ != com.android.tools.idea.insights.proto.BuildInfo.getDefaultInstance()) {
-          buildInfo_ =
-            com.android.tools.idea.insights.proto.BuildInfo.newBuilder(buildInfo_).mergeFrom(value).buildPartial();
+          buildInfo_ != null &&
+          buildInfo_ != com.android.tools.idea.insights.proto.BuildInfo.getDefaultInstance()) {
+          getBuildInfoBuilder().mergeFrom(value);
         } else {
           buildInfo_ = value;
         }
-        onChanged();
       } else {
         buildInfoBuilder_.mergeFrom(value);
       }
       bitField0_ |= 0x00000002;
+      onChanged();
       return this;
     }
     /**
@@ -1161,13 +1128,13 @@ private static final long serialVersionUID = 0L;
      * <code>optional .BuildInfo build_info = 2;</code>
      */
     public Builder clearBuildInfo() {
-      if (buildInfoBuilder_ == null) {
-        buildInfo_ = null;
-        onChanged();
-      } else {
-        buildInfoBuilder_.clear();
-      }
       bitField0_ = (bitField0_ & ~0x00000002);
+      buildInfo_ = null;
+      if (buildInfoBuilder_ != null) {
+        buildInfoBuilder_.dispose();
+        buildInfoBuilder_ = null;
+      }
+      onChanged();
       return this;
     }
     /**
@@ -1251,8 +1218,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setGenerateErrorReasonValue(int value) {
-      bitField0_ |= 0x00000004;
       generateErrorReason_ = value;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
@@ -1266,8 +1233,7 @@ private static final long serialVersionUID = 0L;
      */
     @java.lang.Override
     public com.android.tools.idea.insights.proto.BuildStamp.GenerateErrorReason getGenerateErrorReason() {
-      @SuppressWarnings("deprecation")
-      com.android.tools.idea.insights.proto.BuildStamp.GenerateErrorReason result = com.android.tools.idea.insights.proto.BuildStamp.GenerateErrorReason.valueOf(generateErrorReason_);
+      com.android.tools.idea.insights.proto.BuildStamp.GenerateErrorReason result = com.android.tools.idea.insights.proto.BuildStamp.GenerateErrorReason.forNumber(generateErrorReason_);
       return result == null ? com.android.tools.idea.insights.proto.BuildStamp.GenerateErrorReason.UNRECOGNIZED : result;
     }
     /**

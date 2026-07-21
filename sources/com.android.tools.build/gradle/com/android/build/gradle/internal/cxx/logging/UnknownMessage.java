@@ -32,11 +32,6 @@ private static final long serialVersionUID = 0L;
     return new UnknownMessage();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.build.gradle.internal.cxx.logging.CxxLogging.internal_static_UnknownMessage_descriptor;
@@ -51,7 +46,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int TYPE_ID_FIELD_NUMBER = 1;
-  private int typeId_;
+  private int typeId_ = 0;
   /**
    * <code>int32 type_id = 1;</code>
    * @return The typeId.
@@ -62,7 +57,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int SIZE_BYTES_FIELD_NUMBER = 2;
-  private int sizeBytes_;
+  private int sizeBytes_ = 0;
   /**
    * <code>int32 size_bytes = 2;</code>
    * @return The sizeBytes.
@@ -278,10 +273,9 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       typeId_ = 0;
-
       sizeBytes_ = 0;
-
       return this;
     }
 
@@ -308,44 +302,21 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.build.gradle.internal.cxx.logging.UnknownMessage buildPartial() {
       com.android.build.gradle.internal.cxx.logging.UnknownMessage result = new com.android.build.gradle.internal.cxx.logging.UnknownMessage(this);
-      result.typeId_ = typeId_;
-      result.sizeBytes_ = sizeBytes_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.build.gradle.internal.cxx.logging.UnknownMessage result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.typeId_ = typeId_;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.sizeBytes_ = sizeBytes_;
+      }
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.build.gradle.internal.cxx.logging.UnknownMessage) {
@@ -392,12 +363,12 @@ private static final long serialVersionUID = 0L;
               break;
             case 8: {
               typeId_ = input.readInt32();
-
+              bitField0_ |= 0x00000001;
               break;
             } // case 8
             case 16: {
               sizeBytes_ = input.readInt32();
-
+              bitField0_ |= 0x00000002;
               break;
             } // case 16
             default: {
@@ -415,6 +386,7 @@ private static final long serialVersionUID = 0L;
       } // finally
       return this;
     }
+    private int bitField0_;
 
     private int typeId_ ;
     /**
@@ -431,8 +403,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setTypeId(int value) {
-      
+
       typeId_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -441,7 +414,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearTypeId() {
-      
+      bitField0_ = (bitField0_ & ~0x00000001);
       typeId_ = 0;
       onChanged();
       return this;
@@ -462,8 +435,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setSizeBytes(int value) {
-      
+
       sizeBytes_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -472,7 +446,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearSizeBytes() {
-      
+      bitField0_ = (bitField0_ & ~0x00000002);
       sizeBytes_ = 0;
       onChanged();
       return this;

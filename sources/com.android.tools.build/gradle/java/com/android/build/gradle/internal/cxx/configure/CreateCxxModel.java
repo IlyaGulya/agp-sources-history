@@ -31,11 +31,6 @@ private static final long serialVersionUID = 0L;
     return new CreateCxxModel();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.build.gradle.internal.cxx.configure.CxxConfigure.internal_static_CreateCxxModel_descriptor;
@@ -50,7 +45,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int GRADLE_PATH_FIELD_NUMBER = 1;
-  private volatile java.lang.Object gradlePath_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object gradlePath_ = "";
   /**
    * <code>string gradle_path = 1;</code>
    * @return The gradlePath.
@@ -88,7 +84,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int VARIANT_NAME_FIELD_NUMBER = 2;
-  private volatile java.lang.Object variantName_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object variantName_ = "";
   /**
    * <code>string variant_name = 2;</code>
    * @return The variantName.
@@ -326,10 +323,9 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       gradlePath_ = "";
-
       variantName_ = "";
-
       return this;
     }
 
@@ -356,44 +352,21 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.build.gradle.internal.cxx.configure.CreateCxxModel buildPartial() {
       com.android.build.gradle.internal.cxx.configure.CreateCxxModel result = new com.android.build.gradle.internal.cxx.configure.CreateCxxModel(this);
-      result.gradlePath_ = gradlePath_;
-      result.variantName_ = variantName_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.build.gradle.internal.cxx.configure.CreateCxxModel result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.gradlePath_ = gradlePath_;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.variantName_ = variantName_;
+      }
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.build.gradle.internal.cxx.configure.CreateCxxModel) {
@@ -408,10 +381,12 @@ private static final long serialVersionUID = 0L;
       if (other == com.android.build.gradle.internal.cxx.configure.CreateCxxModel.getDefaultInstance()) return this;
       if (!other.getGradlePath().isEmpty()) {
         gradlePath_ = other.gradlePath_;
+        bitField0_ |= 0x00000001;
         onChanged();
       }
       if (!other.getVariantName().isEmpty()) {
         variantName_ = other.variantName_;
+        bitField0_ |= 0x00000002;
         onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
@@ -442,12 +417,12 @@ private static final long serialVersionUID = 0L;
               break;
             case 10: {
               gradlePath_ = input.readStringRequireUtf8();
-
+              bitField0_ |= 0x00000001;
               break;
             } // case 10
             case 18: {
               variantName_ = input.readStringRequireUtf8();
-
+              bitField0_ |= 0x00000002;
               break;
             } // case 18
             default: {
@@ -465,6 +440,7 @@ private static final long serialVersionUID = 0L;
       } // finally
       return this;
     }
+    private int bitField0_;
 
     private java.lang.Object gradlePath_ = "";
     /**
@@ -507,11 +483,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setGradlePath(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      if (value == null) { throw new NullPointerException(); }
       gradlePath_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -520,8 +494,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearGradlePath() {
-      
       gradlePath_ = getDefaultInstance().getGradlePath();
+      bitField0_ = (bitField0_ & ~0x00000001);
       onChanged();
       return this;
     }
@@ -532,12 +506,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setGradlePathBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       gradlePath_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -583,11 +555,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setVariantName(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      if (value == null) { throw new NullPointerException(); }
       variantName_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -596,8 +566,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearVariantName() {
-      
       variantName_ = getDefaultInstance().getVariantName();
+      bitField0_ = (bitField0_ & ~0x00000002);
       onChanged();
       return this;
     }
@@ -608,12 +578,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setVariantNameBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       variantName_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }

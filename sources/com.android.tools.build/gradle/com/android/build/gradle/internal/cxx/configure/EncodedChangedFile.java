@@ -26,11 +26,6 @@ private static final long serialVersionUID = 0L;
     return new EncodedChangedFile();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.build.gradle.internal.cxx.configure.CxxConfigure.internal_static_EncodedChangedFile_descriptor;
@@ -45,7 +40,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int FILE_NAME_FIELD_NUMBER = 1;
-  private int fileName_;
+  private int fileName_ = 0;
   /**
    * <code>int32 file_name = 1;</code>
    * @return The fileName.
@@ -56,7 +51,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int TYPE_FIELD_NUMBER = 2;
-  private int type_;
+  private int type_ = 0;
   /**
    * <code>.ChangedFile.Type type = 2;</code>
    * @return The enum numeric value on the wire for type.
@@ -69,8 +64,7 @@ private static final long serialVersionUID = 0L;
    * @return The type.
    */
   @java.lang.Override public com.android.build.gradle.internal.cxx.configure.ChangedFile.Type getType() {
-    @SuppressWarnings("deprecation")
-    com.android.build.gradle.internal.cxx.configure.ChangedFile.Type result = com.android.build.gradle.internal.cxx.configure.ChangedFile.Type.valueOf(type_);
+    com.android.build.gradle.internal.cxx.configure.ChangedFile.Type result = com.android.build.gradle.internal.cxx.configure.ChangedFile.Type.forNumber(type_);
     return result == null ? com.android.build.gradle.internal.cxx.configure.ChangedFile.Type.UNRECOGNIZED : result;
   }
 
@@ -272,10 +266,9 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       fileName_ = 0;
-
       type_ = 0;
-
       return this;
     }
 
@@ -302,44 +295,21 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.build.gradle.internal.cxx.configure.EncodedChangedFile buildPartial() {
       com.android.build.gradle.internal.cxx.configure.EncodedChangedFile result = new com.android.build.gradle.internal.cxx.configure.EncodedChangedFile(this);
-      result.fileName_ = fileName_;
-      result.type_ = type_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.build.gradle.internal.cxx.configure.EncodedChangedFile result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.fileName_ = fileName_;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.type_ = type_;
+      }
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.build.gradle.internal.cxx.configure.EncodedChangedFile) {
@@ -386,12 +356,12 @@ private static final long serialVersionUID = 0L;
               break;
             case 8: {
               fileName_ = input.readInt32();
-
+              bitField0_ |= 0x00000001;
               break;
             } // case 8
             case 16: {
               type_ = input.readEnum();
-
+              bitField0_ |= 0x00000002;
               break;
             } // case 16
             default: {
@@ -409,6 +379,7 @@ private static final long serialVersionUID = 0L;
       } // finally
       return this;
     }
+    private int bitField0_;
 
     private int fileName_ ;
     /**
@@ -425,8 +396,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setFileName(int value) {
-      
+
       fileName_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -435,7 +407,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearFileName() {
-      
+      bitField0_ = (bitField0_ & ~0x00000001);
       fileName_ = 0;
       onChanged();
       return this;
@@ -455,8 +427,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setTypeValue(int value) {
-      
       type_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -466,8 +438,7 @@ private static final long serialVersionUID = 0L;
      */
     @java.lang.Override
     public com.android.build.gradle.internal.cxx.configure.ChangedFile.Type getType() {
-      @SuppressWarnings("deprecation")
-      com.android.build.gradle.internal.cxx.configure.ChangedFile.Type result = com.android.build.gradle.internal.cxx.configure.ChangedFile.Type.valueOf(type_);
+      com.android.build.gradle.internal.cxx.configure.ChangedFile.Type result = com.android.build.gradle.internal.cxx.configure.ChangedFile.Type.forNumber(type_);
       return result == null ? com.android.build.gradle.internal.cxx.configure.ChangedFile.Type.UNRECOGNIZED : result;
     }
     /**
@@ -479,7 +450,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
         throw new NullPointerException();
       }
-      
+      bitField0_ |= 0x00000002;
       type_ = value.getNumber();
       onChanged();
       return this;
@@ -489,7 +460,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearType() {
-      
+      bitField0_ = (bitField0_ & ~0x00000002);
       type_ = 0;
       onChanged();
       return this;

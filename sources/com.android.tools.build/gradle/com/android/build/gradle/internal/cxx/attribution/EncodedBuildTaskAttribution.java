@@ -33,11 +33,6 @@ private static final long serialVersionUID = 0L;
     return new EncodedBuildTaskAttribution();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.build.gradle.internal.cxx.attribution.CxxAttribution.internal_static_EncodedBuildTaskAttribution_descriptor;
@@ -52,7 +47,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int OUTPUT_FILE_ID_FIELD_NUMBER = 1;
-  private int outputFileId_;
+  private int outputFileId_ = 0;
   /**
    * <code>int32 output_file_id = 1;</code>
    * @return The outputFileId.
@@ -63,7 +58,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int START_TIME_OFFSET_MS_FIELD_NUMBER = 3;
-  private int startTimeOffsetMs_;
+  private int startTimeOffsetMs_ = 0;
   /**
    * <code>int32 start_time_offset_ms = 3;</code>
    * @return The startTimeOffsetMs.
@@ -74,7 +69,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int END_TIME_OFFSET_MS_FIELD_NUMBER = 4;
-  private int endTimeOffsetMs_;
+  private int endTimeOffsetMs_ = 0;
   /**
    * <code>int32 end_time_offset_ms = 4;</code>
    * @return The endTimeOffsetMs.
@@ -302,12 +297,10 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       outputFileId_ = 0;
-
       startTimeOffsetMs_ = 0;
-
       endTimeOffsetMs_ = 0;
-
       return this;
     }
 
@@ -334,45 +327,24 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttribution buildPartial() {
       com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttribution result = new com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttribution(this);
-      result.outputFileId_ = outputFileId_;
-      result.startTimeOffsetMs_ = startTimeOffsetMs_;
-      result.endTimeOffsetMs_ = endTimeOffsetMs_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttribution result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.outputFileId_ = outputFileId_;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.startTimeOffsetMs_ = startTimeOffsetMs_;
+      }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.endTimeOffsetMs_ = endTimeOffsetMs_;
+      }
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.build.gradle.internal.cxx.attribution.EncodedBuildTaskAttribution) {
@@ -422,17 +394,17 @@ private static final long serialVersionUID = 0L;
               break;
             case 8: {
               outputFileId_ = input.readInt32();
-
+              bitField0_ |= 0x00000001;
               break;
             } // case 8
             case 24: {
               startTimeOffsetMs_ = input.readInt32();
-
+              bitField0_ |= 0x00000002;
               break;
             } // case 24
             case 32: {
               endTimeOffsetMs_ = input.readInt32();
-
+              bitField0_ |= 0x00000004;
               break;
             } // case 32
             default: {
@@ -450,6 +422,7 @@ private static final long serialVersionUID = 0L;
       } // finally
       return this;
     }
+    private int bitField0_;
 
     private int outputFileId_ ;
     /**
@@ -466,8 +439,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setOutputFileId(int value) {
-      
+
       outputFileId_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -476,7 +450,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearOutputFileId() {
-      
+      bitField0_ = (bitField0_ & ~0x00000001);
       outputFileId_ = 0;
       onChanged();
       return this;
@@ -497,8 +471,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setStartTimeOffsetMs(int value) {
-      
+
       startTimeOffsetMs_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -507,7 +482,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearStartTimeOffsetMs() {
-      
+      bitField0_ = (bitField0_ & ~0x00000002);
       startTimeOffsetMs_ = 0;
       onChanged();
       return this;
@@ -528,8 +503,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setEndTimeOffsetMs(int value) {
-      
+
       endTimeOffsetMs_ = value;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
@@ -538,7 +514,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearEndTimeOffsetMs() {
-      
+      bitField0_ = (bitField0_ & ~0x00000004);
       endTimeOffsetMs_ = 0;
       onChanged();
       return this;

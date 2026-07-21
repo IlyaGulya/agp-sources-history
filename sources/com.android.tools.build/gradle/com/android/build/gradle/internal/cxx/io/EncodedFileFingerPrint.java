@@ -25,11 +25,6 @@ private static final long serialVersionUID = 0L;
     return new EncodedFileFingerPrint();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.build.gradle.internal.cxx.io.CxxIo.internal_static_EncodedFileFingerPrint_descriptor;
@@ -44,7 +39,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int FILE_NAME_FIELD_NUMBER = 1;
-  private int fileName_;
+  private int fileName_ = 0;
   /**
    * <code>int32 file_name = 1;</code>
    * @return The fileName.
@@ -55,7 +50,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int IS_FILE_FIELD_NUMBER = 2;
-  private boolean isFile_;
+  private boolean isFile_ = false;
   /**
    * <code>bool is_file = 2;</code>
    * @return The isFile.
@@ -66,7 +61,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int LENGTH_FIELD_NUMBER = 3;
-  private long length_;
+  private long length_ = 0L;
   /**
    * <code>int64 length = 3;</code>
    * @return The length.
@@ -77,7 +72,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int LAST_MODIFIED_FIELD_NUMBER = 4;
-  private long lastModified_;
+  private long lastModified_ = 0L;
   /**
    * <code>int64 last_modified = 4;</code>
    * @return The lastModified.
@@ -311,14 +306,11 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       fileName_ = 0;
-
       isFile_ = false;
-
       length_ = 0L;
-
       lastModified_ = 0L;
-
       return this;
     }
 
@@ -345,46 +337,27 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.build.gradle.internal.cxx.io.EncodedFileFingerPrint buildPartial() {
       com.android.build.gradle.internal.cxx.io.EncodedFileFingerPrint result = new com.android.build.gradle.internal.cxx.io.EncodedFileFingerPrint(this);
-      result.fileName_ = fileName_;
-      result.isFile_ = isFile_;
-      result.length_ = length_;
-      result.lastModified_ = lastModified_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.build.gradle.internal.cxx.io.EncodedFileFingerPrint result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.fileName_ = fileName_;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.isFile_ = isFile_;
+      }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.length_ = length_;
+      }
+      if (((from_bitField0_ & 0x00000008) != 0)) {
+        result.lastModified_ = lastModified_;
+      }
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.build.gradle.internal.cxx.io.EncodedFileFingerPrint) {
@@ -437,22 +410,22 @@ private static final long serialVersionUID = 0L;
               break;
             case 8: {
               fileName_ = input.readInt32();
-
+              bitField0_ |= 0x00000001;
               break;
             } // case 8
             case 16: {
               isFile_ = input.readBool();
-
+              bitField0_ |= 0x00000002;
               break;
             } // case 16
             case 24: {
               length_ = input.readInt64();
-
+              bitField0_ |= 0x00000004;
               break;
             } // case 24
             case 32: {
               lastModified_ = input.readInt64();
-
+              bitField0_ |= 0x00000008;
               break;
             } // case 32
             default: {
@@ -470,6 +443,7 @@ private static final long serialVersionUID = 0L;
       } // finally
       return this;
     }
+    private int bitField0_;
 
     private int fileName_ ;
     /**
@@ -486,8 +460,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setFileName(int value) {
-      
+
       fileName_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -496,7 +471,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearFileName() {
-      
+      bitField0_ = (bitField0_ & ~0x00000001);
       fileName_ = 0;
       onChanged();
       return this;
@@ -517,8 +492,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setIsFile(boolean value) {
-      
+
       isFile_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -527,7 +503,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearIsFile() {
-      
+      bitField0_ = (bitField0_ & ~0x00000002);
       isFile_ = false;
       onChanged();
       return this;
@@ -548,8 +524,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setLength(long value) {
-      
+
       length_ = value;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
@@ -558,7 +535,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearLength() {
-      
+      bitField0_ = (bitField0_ & ~0x00000004);
       length_ = 0L;
       onChanged();
       return this;
@@ -579,8 +556,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setLastModified(long value) {
-      
+
       lastModified_ = value;
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -589,7 +567,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearLastModified() {
-      
+      bitField0_ = (bitField0_ & ~0x00000008);
       lastModified_ = 0L;
       onChanged();
       return this;

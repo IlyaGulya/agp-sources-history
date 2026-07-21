@@ -71,11 +71,6 @@ public final class AppProcessesProto {
       return new ProcessEntry();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.android.server.adb.protos.AppProcessesProto.internal_static_adb_proto_ProcessEntry_descriptor;
@@ -90,7 +85,7 @@ public final class AppProcessesProto {
     }
 
     public static final int PID_FIELD_NUMBER = 1;
-    private long pid_;
+    private long pid_ = 0L;
     /**
      * <code>int64 pid = 1;</code>
      * @return The pid.
@@ -101,7 +96,7 @@ public final class AppProcessesProto {
     }
 
     public static final int DEBUGGABLE_FIELD_NUMBER = 2;
-    private boolean debuggable_;
+    private boolean debuggable_ = false;
     /**
      * <code>bool debuggable = 2;</code>
      * @return The debuggable.
@@ -112,7 +107,7 @@ public final class AppProcessesProto {
     }
 
     public static final int PROFILEABLE_FIELD_NUMBER = 3;
-    private boolean profileable_;
+    private boolean profileable_ = false;
     /**
      * <code>bool profileable = 3;</code>
      * @return The profileable.
@@ -123,7 +118,8 @@ public final class AppProcessesProto {
     }
 
     public static final int ARCHITECTURE_FIELD_NUMBER = 4;
-    private volatile java.lang.Object architecture_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object architecture_ = "";
     /**
      * <code>string architecture = 4;</code>
      * @return The architecture.
@@ -383,14 +379,11 @@ public final class AppProcessesProto {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         pid_ = 0L;
-
         debuggable_ = false;
-
         profileable_ = false;
-
         architecture_ = "";
-
         return this;
       }
 
@@ -417,46 +410,27 @@ public final class AppProcessesProto {
       @java.lang.Override
       public com.android.server.adb.protos.AppProcessesProto.ProcessEntry buildPartial() {
         com.android.server.adb.protos.AppProcessesProto.ProcessEntry result = new com.android.server.adb.protos.AppProcessesProto.ProcessEntry(this);
-        result.pid_ = pid_;
-        result.debuggable_ = debuggable_;
-        result.profileable_ = profileable_;
-        result.architecture_ = architecture_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
+      private void buildPartial0(com.android.server.adb.protos.AppProcessesProto.ProcessEntry result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.pid_ = pid_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.debuggable_ = debuggable_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.profileable_ = profileable_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.architecture_ = architecture_;
+        }
       }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.android.server.adb.protos.AppProcessesProto.ProcessEntry) {
@@ -480,6 +454,7 @@ public final class AppProcessesProto {
         }
         if (!other.getArchitecture().isEmpty()) {
           architecture_ = other.architecture_;
+          bitField0_ |= 0x00000008;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -510,22 +485,22 @@ public final class AppProcessesProto {
                 break;
               case 8: {
                 pid_ = input.readInt64();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 16: {
                 debuggable_ = input.readBool();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               case 24: {
                 profileable_ = input.readBool();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 24
               case 34: {
                 architecture_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 34
               default: {
@@ -543,6 +518,7 @@ public final class AppProcessesProto {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private long pid_ ;
       /**
@@ -559,8 +535,9 @@ public final class AppProcessesProto {
        * @return This builder for chaining.
        */
       public Builder setPid(long value) {
-        
+
         pid_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -569,7 +546,7 @@ public final class AppProcessesProto {
        * @return This builder for chaining.
        */
       public Builder clearPid() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         pid_ = 0L;
         onChanged();
         return this;
@@ -590,8 +567,9 @@ public final class AppProcessesProto {
        * @return This builder for chaining.
        */
       public Builder setDebuggable(boolean value) {
-        
+
         debuggable_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -600,7 +578,7 @@ public final class AppProcessesProto {
        * @return This builder for chaining.
        */
       public Builder clearDebuggable() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         debuggable_ = false;
         onChanged();
         return this;
@@ -621,8 +599,9 @@ public final class AppProcessesProto {
        * @return This builder for chaining.
        */
       public Builder setProfileable(boolean value) {
-        
+
         profileable_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -631,7 +610,7 @@ public final class AppProcessesProto {
        * @return This builder for chaining.
        */
       public Builder clearProfileable() {
-        
+        bitField0_ = (bitField0_ & ~0x00000004);
         profileable_ = false;
         onChanged();
         return this;
@@ -678,11 +657,9 @@ public final class AppProcessesProto {
        */
       public Builder setArchitecture(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         architecture_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -691,8 +668,8 @@ public final class AppProcessesProto {
        * @return This builder for chaining.
        */
       public Builder clearArchitecture() {
-        
         architecture_ = getDefaultInstance().getArchitecture();
+        bitField0_ = (bitField0_ & ~0x00000008);
         onChanged();
         return this;
       }
@@ -703,12 +680,10 @@ public final class AppProcessesProto {
        */
       public Builder setArchitectureBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         architecture_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -827,11 +802,6 @@ public final class AppProcessesProto {
       return new AppProcesses();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.android.server.adb.protos.AppProcessesProto.internal_static_adb_proto_AppProcesses_descriptor;
@@ -846,6 +816,7 @@ public final class AppProcessesProto {
     }
 
     public static final int PROCESS_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<com.android.server.adb.protos.AppProcessesProto.ProcessEntry> process_;
     /**
      * <code>repeated .adb.proto.ProcessEntry process = 1;</code>
@@ -1075,6 +1046,7 @@ public final class AppProcessesProto {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (processBuilder_ == null) {
           process_ = java.util.Collections.emptyList();
         } else {
@@ -1108,7 +1080,13 @@ public final class AppProcessesProto {
       @java.lang.Override
       public com.android.server.adb.protos.AppProcessesProto.AppProcesses buildPartial() {
         com.android.server.adb.protos.AppProcessesProto.AppProcesses result = new com.android.server.adb.protos.AppProcessesProto.AppProcesses(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(com.android.server.adb.protos.AppProcessesProto.AppProcesses result) {
         if (processBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             process_ = java.util.Collections.unmodifiableList(process_);
@@ -1118,42 +1096,12 @@ public final class AppProcessesProto {
         } else {
           result.process_ = processBuilder_.build();
         }
-        onBuilt();
-        return result;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
+      private void buildPartial0(com.android.server.adb.protos.AppProcessesProto.AppProcesses result) {
+        int from_bitField0_ = bitField0_;
       }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.android.server.adb.protos.AppProcessesProto.AppProcesses) {

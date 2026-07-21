@@ -34,11 +34,6 @@ private static final long serialVersionUID = 0L;
     return new TestInfo();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.builder.model.proto.ide.IdeModelsProto.internal_static_TestInfo_descriptor;
@@ -195,7 +190,7 @@ private static final long serialVersionUID = 0L;
 
   private int bitField0_;
   public static final int ANIMATIONS_DISABLED_FIELD_NUMBER = 1;
-  private boolean animationsDisabled_;
+  private boolean animationsDisabled_ = false;
   /**
    * <code>optional bool animations_disabled = 1;</code>
    * @return Whether the animationsDisabled field is set.
@@ -214,7 +209,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int EXECUTION_FIELD_NUMBER = 2;
-  private int execution_;
+  private int execution_ = 0;
   /**
    * <code>optional .TestInfo.Execution execution = 2;</code>
    * @return Whether the execution field is set.
@@ -234,12 +229,12 @@ private static final long serialVersionUID = 0L;
    * @return The execution.
    */
   @java.lang.Override public com.android.builder.model.proto.ide.TestInfo.Execution getExecution() {
-    @SuppressWarnings("deprecation")
-    com.android.builder.model.proto.ide.TestInfo.Execution result = com.android.builder.model.proto.ide.TestInfo.Execution.valueOf(execution_);
+    com.android.builder.model.proto.ide.TestInfo.Execution result = com.android.builder.model.proto.ide.TestInfo.Execution.forNumber(execution_);
     return result == null ? com.android.builder.model.proto.ide.TestInfo.Execution.UNRECOGNIZED : result;
   }
 
   public static final int ADDITIONAL_RUNTIME_APKS_FIELD_NUMBER = 3;
+  @SuppressWarnings("serial")
   private java.util.List<com.android.builder.model.proto.ide.File> additionalRuntimeApks_;
   /**
    * <pre>
@@ -315,7 +310,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int INSTRUMENTED_TEST_TASK_NAME_FIELD_NUMBER = 4;
-  private volatile java.lang.Object instrumentedTestTaskName_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object instrumentedTestTaskName_ = "";
   /**
    * <pre>
    * Returns the name of the task used to run instrumented tests or null if the variant is not a
@@ -618,10 +614,9 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       animationsDisabled_ = false;
-      bitField0_ = (bitField0_ & ~0x00000001);
       execution_ = 0;
-      bitField0_ = (bitField0_ & ~0x00000002);
       if (additionalRuntimeApksBuilder_ == null) {
         additionalRuntimeApks_ = java.util.Collections.emptyList();
       } else {
@@ -630,7 +625,6 @@ private static final long serialVersionUID = 0L;
       }
       bitField0_ = (bitField0_ & ~0x00000004);
       instrumentedTestTaskName_ = "";
-      bitField0_ = (bitField0_ & ~0x00000008);
       return this;
     }
 
@@ -657,16 +651,13 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.builder.model.proto.ide.TestInfo buildPartial() {
       com.android.builder.model.proto.ide.TestInfo result = new com.android.builder.model.proto.ide.TestInfo(this);
-      int from_bitField0_ = bitField0_;
-      int to_bitField0_ = 0;
-      if (((from_bitField0_ & 0x00000001) != 0)) {
-        result.animationsDisabled_ = animationsDisabled_;
-        to_bitField0_ |= 0x00000001;
-      }
-      if (((from_bitField0_ & 0x00000002) != 0)) {
-        to_bitField0_ |= 0x00000002;
-      }
-      result.execution_ = execution_;
+      buildPartialRepeatedFields(result);
+      if (bitField0_ != 0) { buildPartial0(result); }
+      onBuilt();
+      return result;
+    }
+
+    private void buildPartialRepeatedFields(com.android.builder.model.proto.ide.TestInfo result) {
       if (additionalRuntimeApksBuilder_ == null) {
         if (((bitField0_ & 0x00000004) != 0)) {
           additionalRuntimeApks_ = java.util.Collections.unmodifiableList(additionalRuntimeApks_);
@@ -676,47 +667,26 @@ private static final long serialVersionUID = 0L;
       } else {
         result.additionalRuntimeApks_ = additionalRuntimeApksBuilder_.build();
       }
-      if (((from_bitField0_ & 0x00000008) != 0)) {
-        to_bitField0_ |= 0x00000004;
-      }
-      result.instrumentedTestTaskName_ = instrumentedTestTaskName_;
-      result.bitField0_ = to_bitField0_;
-      onBuilt();
-      return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.builder.model.proto.ide.TestInfo result) {
+      int from_bitField0_ = bitField0_;
+      int to_bitField0_ = 0;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.animationsDisabled_ = animationsDisabled_;
+        to_bitField0_ |= 0x00000001;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.execution_ = execution_;
+        to_bitField0_ |= 0x00000002;
+      }
+      if (((from_bitField0_ & 0x00000008) != 0)) {
+        result.instrumentedTestTaskName_ = instrumentedTestTaskName_;
+        to_bitField0_ |= 0x00000004;
+      }
+      result.bitField0_ |= to_bitField0_;
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.builder.model.proto.ide.TestInfo) {
@@ -762,8 +732,8 @@ private static final long serialVersionUID = 0L;
         }
       }
       if (other.hasInstrumentedTestTaskName()) {
-        bitField0_ |= 0x00000008;
         instrumentedTestTaskName_ = other.instrumentedTestTaskName_;
+        bitField0_ |= 0x00000008;
         onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
@@ -860,8 +830,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setAnimationsDisabled(boolean value) {
-      bitField0_ |= 0x00000001;
+
       animationsDisabled_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -897,8 +868,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setExecutionValue(int value) {
-      bitField0_ |= 0x00000002;
       execution_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -908,8 +879,7 @@ private static final long serialVersionUID = 0L;
      */
     @java.lang.Override
     public com.android.builder.model.proto.ide.TestInfo.Execution getExecution() {
-      @SuppressWarnings("deprecation")
-      com.android.builder.model.proto.ide.TestInfo.Execution result = com.android.builder.model.proto.ide.TestInfo.Execution.valueOf(execution_);
+      com.android.builder.model.proto.ide.TestInfo.Execution result = com.android.builder.model.proto.ide.TestInfo.Execution.forNumber(execution_);
       return result == null ? com.android.builder.model.proto.ide.TestInfo.Execution.UNRECOGNIZED : result;
     }
     /**
@@ -1371,11 +1341,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setInstrumentedTestTaskName(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
+      if (value == null) { throw new NullPointerException(); }
       instrumentedTestTaskName_ = value;
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -1389,8 +1357,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearInstrumentedTestTaskName() {
-      bitField0_ = (bitField0_ & ~0x00000008);
       instrumentedTestTaskName_ = getDefaultInstance().getInstrumentedTestTaskName();
+      bitField0_ = (bitField0_ & ~0x00000008);
       onChanged();
       return this;
     }
@@ -1406,12 +1374,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setInstrumentedTestTaskNameBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000008;
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       instrumentedTestTaskName_ = value;
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }

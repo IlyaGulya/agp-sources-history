@@ -27,11 +27,6 @@ private static final long serialVersionUID = 0L;
     return new EncodedSynchronizeFile();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.build.gradle.internal.cxx.io.CxxIo.internal_static_EncodedSynchronizeFile_descriptor;
@@ -46,7 +41,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int WORKING_DIRECTORY_ID_FIELD_NUMBER = 1;
-  private int workingDirectoryId_;
+  private int workingDirectoryId_ = 0;
   /**
    * <code>int32 working_directory_id = 1;</code>
    * @return The workingDirectoryId.
@@ -57,7 +52,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int SOURCE_FILE_ID_FIELD_NUMBER = 2;
-  private int sourceFileId_;
+  private int sourceFileId_ = 0;
   /**
    * <code>int32 source_file_id = 2;</code>
    * @return The sourceFileId.
@@ -68,7 +63,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int DESTINATION_FILE_ID_FIELD_NUMBER = 3;
-  private int destinationFileId_;
+  private int destinationFileId_ = 0;
   /**
    * <code>int32 destination_file_id = 3;</code>
    * @return The destinationFileId.
@@ -79,7 +74,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int INITIAL_FILE_COMPARISON_FIELD_NUMBER = 4;
-  private int initialFileComparison_;
+  private int initialFileComparison_ = 0;
   /**
    * <code>.SynchronizeFile.Comparison initial_file_comparison = 4;</code>
    * @return The enum numeric value on the wire for initialFileComparison.
@@ -92,13 +87,12 @@ private static final long serialVersionUID = 0L;
    * @return The initialFileComparison.
    */
   @java.lang.Override public com.android.build.gradle.internal.cxx.io.SynchronizeFile.Comparison getInitialFileComparison() {
-    @SuppressWarnings("deprecation")
-    com.android.build.gradle.internal.cxx.io.SynchronizeFile.Comparison result = com.android.build.gradle.internal.cxx.io.SynchronizeFile.Comparison.valueOf(initialFileComparison_);
+    com.android.build.gradle.internal.cxx.io.SynchronizeFile.Comparison result = com.android.build.gradle.internal.cxx.io.SynchronizeFile.Comparison.forNumber(initialFileComparison_);
     return result == null ? com.android.build.gradle.internal.cxx.io.SynchronizeFile.Comparison.UNRECOGNIZED : result;
   }
 
   public static final int OUTCOME_FIELD_NUMBER = 5;
-  private int outcome_;
+  private int outcome_ = 0;
   /**
    * <code>.SynchronizeFile.Outcome outcome = 5;</code>
    * @return The enum numeric value on the wire for outcome.
@@ -111,8 +105,7 @@ private static final long serialVersionUID = 0L;
    * @return The outcome.
    */
   @java.lang.Override public com.android.build.gradle.internal.cxx.io.SynchronizeFile.Outcome getOutcome() {
-    @SuppressWarnings("deprecation")
-    com.android.build.gradle.internal.cxx.io.SynchronizeFile.Outcome result = com.android.build.gradle.internal.cxx.io.SynchronizeFile.Outcome.valueOf(outcome_);
+    com.android.build.gradle.internal.cxx.io.SynchronizeFile.Outcome result = com.android.build.gradle.internal.cxx.io.SynchronizeFile.Outcome.forNumber(outcome_);
     return result == null ? com.android.build.gradle.internal.cxx.io.SynchronizeFile.Outcome.UNRECOGNIZED : result;
   }
 
@@ -346,16 +339,12 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       workingDirectoryId_ = 0;
-
       sourceFileId_ = 0;
-
       destinationFileId_ = 0;
-
       initialFileComparison_ = 0;
-
       outcome_ = 0;
-
       return this;
     }
 
@@ -382,47 +371,30 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.build.gradle.internal.cxx.io.EncodedSynchronizeFile buildPartial() {
       com.android.build.gradle.internal.cxx.io.EncodedSynchronizeFile result = new com.android.build.gradle.internal.cxx.io.EncodedSynchronizeFile(this);
-      result.workingDirectoryId_ = workingDirectoryId_;
-      result.sourceFileId_ = sourceFileId_;
-      result.destinationFileId_ = destinationFileId_;
-      result.initialFileComparison_ = initialFileComparison_;
-      result.outcome_ = outcome_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.build.gradle.internal.cxx.io.EncodedSynchronizeFile result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.workingDirectoryId_ = workingDirectoryId_;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.sourceFileId_ = sourceFileId_;
+      }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.destinationFileId_ = destinationFileId_;
+      }
+      if (((from_bitField0_ & 0x00000008) != 0)) {
+        result.initialFileComparison_ = initialFileComparison_;
+      }
+      if (((from_bitField0_ & 0x00000010) != 0)) {
+        result.outcome_ = outcome_;
+      }
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.build.gradle.internal.cxx.io.EncodedSynchronizeFile) {
@@ -478,27 +450,27 @@ private static final long serialVersionUID = 0L;
               break;
             case 8: {
               workingDirectoryId_ = input.readInt32();
-
+              bitField0_ |= 0x00000001;
               break;
             } // case 8
             case 16: {
               sourceFileId_ = input.readInt32();
-
+              bitField0_ |= 0x00000002;
               break;
             } // case 16
             case 24: {
               destinationFileId_ = input.readInt32();
-
+              bitField0_ |= 0x00000004;
               break;
             } // case 24
             case 32: {
               initialFileComparison_ = input.readEnum();
-
+              bitField0_ |= 0x00000008;
               break;
             } // case 32
             case 40: {
               outcome_ = input.readEnum();
-
+              bitField0_ |= 0x00000010;
               break;
             } // case 40
             default: {
@@ -516,6 +488,7 @@ private static final long serialVersionUID = 0L;
       } // finally
       return this;
     }
+    private int bitField0_;
 
     private int workingDirectoryId_ ;
     /**
@@ -532,8 +505,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setWorkingDirectoryId(int value) {
-      
+
       workingDirectoryId_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -542,7 +516,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearWorkingDirectoryId() {
-      
+      bitField0_ = (bitField0_ & ~0x00000001);
       workingDirectoryId_ = 0;
       onChanged();
       return this;
@@ -563,8 +537,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setSourceFileId(int value) {
-      
+
       sourceFileId_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -573,7 +548,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearSourceFileId() {
-      
+      bitField0_ = (bitField0_ & ~0x00000002);
       sourceFileId_ = 0;
       onChanged();
       return this;
@@ -594,8 +569,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setDestinationFileId(int value) {
-      
+
       destinationFileId_ = value;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
@@ -604,7 +580,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearDestinationFileId() {
-      
+      bitField0_ = (bitField0_ & ~0x00000004);
       destinationFileId_ = 0;
       onChanged();
       return this;
@@ -624,8 +600,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setInitialFileComparisonValue(int value) {
-      
       initialFileComparison_ = value;
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -635,8 +611,7 @@ private static final long serialVersionUID = 0L;
      */
     @java.lang.Override
     public com.android.build.gradle.internal.cxx.io.SynchronizeFile.Comparison getInitialFileComparison() {
-      @SuppressWarnings("deprecation")
-      com.android.build.gradle.internal.cxx.io.SynchronizeFile.Comparison result = com.android.build.gradle.internal.cxx.io.SynchronizeFile.Comparison.valueOf(initialFileComparison_);
+      com.android.build.gradle.internal.cxx.io.SynchronizeFile.Comparison result = com.android.build.gradle.internal.cxx.io.SynchronizeFile.Comparison.forNumber(initialFileComparison_);
       return result == null ? com.android.build.gradle.internal.cxx.io.SynchronizeFile.Comparison.UNRECOGNIZED : result;
     }
     /**
@@ -648,7 +623,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
         throw new NullPointerException();
       }
-      
+      bitField0_ |= 0x00000008;
       initialFileComparison_ = value.getNumber();
       onChanged();
       return this;
@@ -658,7 +633,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearInitialFileComparison() {
-      
+      bitField0_ = (bitField0_ & ~0x00000008);
       initialFileComparison_ = 0;
       onChanged();
       return this;
@@ -678,8 +653,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setOutcomeValue(int value) {
-      
       outcome_ = value;
+      bitField0_ |= 0x00000010;
       onChanged();
       return this;
     }
@@ -689,8 +664,7 @@ private static final long serialVersionUID = 0L;
      */
     @java.lang.Override
     public com.android.build.gradle.internal.cxx.io.SynchronizeFile.Outcome getOutcome() {
-      @SuppressWarnings("deprecation")
-      com.android.build.gradle.internal.cxx.io.SynchronizeFile.Outcome result = com.android.build.gradle.internal.cxx.io.SynchronizeFile.Outcome.valueOf(outcome_);
+      com.android.build.gradle.internal.cxx.io.SynchronizeFile.Outcome result = com.android.build.gradle.internal.cxx.io.SynchronizeFile.Outcome.forNumber(outcome_);
       return result == null ? com.android.build.gradle.internal.cxx.io.SynchronizeFile.Outcome.UNRECOGNIZED : result;
     }
     /**
@@ -702,7 +676,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
         throw new NullPointerException();
       }
-      
+      bitField0_ |= 0x00000010;
       outcome_ = value.getNumber();
       onChanged();
       return this;
@@ -712,7 +686,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearOutcome() {
-      
+      bitField0_ = (bitField0_ & ~0x00000010);
       outcome_ = 0;
       onChanged();
       return this;

@@ -32,11 +32,6 @@ private static final long serialVersionUID = 0L;
     return new AndroidGradlePluginProjectFlags();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.builder.model.proto.ide.IdeModelsProto.internal_static_AndroidGradlePluginProjectFlags_descriptor;
@@ -54,7 +49,9 @@ private static final long serialVersionUID = 0L;
    * <pre>
    **
    * Boolean flags for behavior changes in AGP that Android Studio needs to know about.
+   *
    * Studio uses the legacy default for AGPs that do not specify that flag.
+   *
    * Flags **must** never be removed from here. This is to avoid issues when the
    * current version of studio fetches models from a project that has a legacy flag set. They can
    * be marked as `&#64;Deprecated` and the getter removed from `IdeAndroidGradlePluginProjectFlags`
@@ -343,11 +340,6 @@ private static final long serialVersionUID = 0L;
       return new BooleanFlagValue();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.android.builder.model.proto.ide.IdeModelsProto.internal_static_AndroidGradlePluginProjectFlags_BooleanFlagValue_descriptor;
@@ -362,7 +354,7 @@ private static final long serialVersionUID = 0L;
     }
 
     public static final int FLAG_FIELD_NUMBER = 1;
-    private int flag_;
+    private int flag_ = 0;
     /**
      * <code>.AndroidGradlePluginProjectFlags.BooleanFlag flag = 1;</code>
      * @return The enum numeric value on the wire for flag.
@@ -375,13 +367,12 @@ private static final long serialVersionUID = 0L;
      * @return The flag.
      */
     @java.lang.Override public com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlag getFlag() {
-      @SuppressWarnings("deprecation")
-      com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlag result = com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlag.valueOf(flag_);
+      com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlag result = com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlag.forNumber(flag_);
       return result == null ? com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlag.UNRECOGNIZED : result;
     }
 
     public static final int VALUE_FIELD_NUMBER = 2;
-    private boolean value_;
+    private boolean value_ = false;
     /**
      * <code>bool value = 2;</code>
      * @return The value.
@@ -590,10 +581,9 @@ private static final long serialVersionUID = 0L;
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         flag_ = 0;
-
         value_ = false;
-
         return this;
       }
 
@@ -620,44 +610,21 @@ private static final long serialVersionUID = 0L;
       @java.lang.Override
       public com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlagValue buildPartial() {
         com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlagValue result = new com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlagValue(this);
-        result.flag_ = flag_;
-        result.value_ = value_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
+      private void buildPartial0(com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlagValue result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.flag_ = flag_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.value_ = value_;
+        }
       }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlagValue) {
@@ -704,12 +671,12 @@ private static final long serialVersionUID = 0L;
                 break;
               case 8: {
                 flag_ = input.readEnum();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 16: {
                 value_ = input.readBool();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               default: {
@@ -727,6 +694,7 @@ private static final long serialVersionUID = 0L;
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private int flag_ = 0;
       /**
@@ -742,8 +710,8 @@ private static final long serialVersionUID = 0L;
        * @return This builder for chaining.
        */
       public Builder setFlagValue(int value) {
-        
         flag_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -753,8 +721,7 @@ private static final long serialVersionUID = 0L;
        */
       @java.lang.Override
       public com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlag getFlag() {
-        @SuppressWarnings("deprecation")
-        com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlag result = com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlag.valueOf(flag_);
+        com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlag result = com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlag.forNumber(flag_);
         return result == null ? com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlag.UNRECOGNIZED : result;
       }
       /**
@@ -766,7 +733,7 @@ private static final long serialVersionUID = 0L;
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000001;
         flag_ = value.getNumber();
         onChanged();
         return this;
@@ -776,7 +743,7 @@ private static final long serialVersionUID = 0L;
        * @return This builder for chaining.
        */
       public Builder clearFlag() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         flag_ = 0;
         onChanged();
         return this;
@@ -797,8 +764,9 @@ private static final long serialVersionUID = 0L;
        * @return This builder for chaining.
        */
       public Builder setValue(boolean value) {
-        
+
         value_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -807,7 +775,7 @@ private static final long serialVersionUID = 0L;
        * @return This builder for chaining.
        */
       public Builder clearValue() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         value_ = false;
         onChanged();
         return this;
@@ -877,6 +845,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int BOOLEAN_FLAG_VALUES_FIELD_NUMBER = 1;
+  @SuppressWarnings("serial")
   private java.util.List<com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.BooleanFlagValue> booleanFlagValues_;
   /**
    * <code>repeated .AndroidGradlePluginProjectFlags.BooleanFlagValue boolean_flag_values = 1;</code>
@@ -1112,6 +1081,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       if (booleanFlagValuesBuilder_ == null) {
         booleanFlagValues_ = java.util.Collections.emptyList();
       } else {
@@ -1145,7 +1115,13 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags buildPartial() {
       com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags result = new com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags(this);
-      int from_bitField0_ = bitField0_;
+      buildPartialRepeatedFields(result);
+      if (bitField0_ != 0) { buildPartial0(result); }
+      onBuilt();
+      return result;
+    }
+
+    private void buildPartialRepeatedFields(com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags result) {
       if (booleanFlagValuesBuilder_ == null) {
         if (((bitField0_ & 0x00000001) != 0)) {
           booleanFlagValues_ = java.util.Collections.unmodifiableList(booleanFlagValues_);
@@ -1155,42 +1131,12 @@ private static final long serialVersionUID = 0L;
       } else {
         result.booleanFlagValues_ = booleanFlagValuesBuilder_.build();
       }
-      onBuilt();
-      return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags result) {
+      int from_bitField0_ = bitField0_;
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags) {
