@@ -97,6 +97,7 @@ import com.android.build.gradle.internal.res.LinkAndroidResForBundleTask;
 import com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask;
 import com.android.build.gradle.internal.res.namespaced.NamespacedResourcesTaskManager;
 import com.android.build.gradle.internal.scope.AnchorOutputType;
+import com.android.build.gradle.internal.scope.ApkData;
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
 import com.android.build.gradle.internal.scope.CodeShrinker;
 import com.android.build.gradle.internal.scope.GlobalScope;
@@ -223,7 +224,6 @@ import com.android.builder.testing.ConnectedDeviceProvider;
 import com.android.builder.testing.api.DeviceProvider;
 import com.android.builder.testing.api.TestServer;
 import com.android.builder.utils.FileCache;
-import com.android.ide.common.build.ApkData;
 import com.android.ide.common.repository.GradleVersion;
 import com.android.sdklib.AndroidVersion;
 import com.android.sdklib.IAndroidTarget;
@@ -1761,9 +1761,8 @@ public abstract class TaskManager {
         createPostCompilationTasks(variantScope);
 
         // Add a task to produce the signing config file
-        taskFactory.register(
-                new SigningConfigWriterTask.CreationAction(
-                        variantScope, getValidateSigningTask(variantScope)));
+        createValidateSigningTask(variantScope);
+        taskFactory.register(new SigningConfigWriterTask.CreationAction(variantScope));
 
         createPackagingTask(variantScope, null /* buildInfoGeneratorTask */);
 
@@ -2335,7 +2334,8 @@ public abstract class TaskManager {
                         && extension.getTransforms().isEmpty()
                         && !minified
                         && !variantScope.getInstantRunBuildContext().isInInstantRunMode()
-                        && variantScope.getJava8LangSupportType() == Java8LangSupport.UNUSED;
+                        && variantScope.getJava8LangSupportType() == Java8LangSupport.UNUSED
+                        && getAdvancedProfilingTransforms(projectOptions).isEmpty();
         FileCache userLevelCache = getUserDexCache(minified, dexOptions.getPreDexLibraries());
         DexArchiveBuilderTransform preDexTransform =
                 new DexArchiveBuilderTransformBuilder()
@@ -2929,24 +2929,15 @@ public abstract class TaskManager {
     }
 
     @Nullable
-    protected TaskProvider<? extends Task> getValidateSigningTask(
-            @NonNull VariantScope variantScope) {
+    protected void createValidateSigningTask(@NonNull VariantScope variantScope) {
         if (variantScope.getVariantConfiguration().getSigningConfig() == null) {
-            return null;
+            return;
         }
 
         // FIXME create one per signing config instead of one per variant.
-        TaskProvider<? extends ValidateSigningTask> validateSigningTask =
-                variantScope.getTaskContainer().getValidateSigningTask();
-        if (validateSigningTask == null) {
-            validateSigningTask =
-                    taskFactory.register(
-                            new ValidateSigningTask.CreationAction(
-                                    variantScope,
-                                    GradleKeystoreHelper.getDefaultDebugKeystoreLocation()));
-            variantScope.getTaskContainer().setValidateSigningTask(validateSigningTask);
-        }
-        return validateSigningTask;
+        taskFactory.register(
+                new ValidateSigningTask.CreationAction(
+                        variantScope, GradleKeystoreHelper.getDefaultDebugKeystoreLocation()));
     }
 
     /**
@@ -3780,7 +3771,10 @@ public abstract class TaskManager {
                 .setSourceGenTask(
                         taskFactory.register(
                                 scope.getTaskName("generate", "Sources"),
-                                task -> task.dependsOn(PrepareLintJar.NAME)));
+                                task -> {
+                                    task.dependsOn(PrepareLintJar.NAME);
+                                    task.dependsOn(variantData.getExtraGeneratedResFolders());
+                                }));
         // and resGenTask
         scope.getTaskContainer()
                 .setResourceGenTask(
