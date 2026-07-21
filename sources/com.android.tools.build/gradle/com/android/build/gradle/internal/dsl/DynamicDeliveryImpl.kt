@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.model;
+package com.android.build.gradle.internal.dsl
 
-import com.android.annotations.NonNull;
-import com.android.build.api.dsl.ExternalNativeBuild;
+import com.android.build.api.dsl.DynamicDelivery
 
-/** @deprecated Use {@link ExternalNativeBuild} */
-@Deprecated
-public interface CoreExternalNativeBuild {
-    @NonNull
-    CoreNdkBuildOptions getNdkBuild();
-
-    @NonNull
-    CoreCmakeOptions getCmake();
-}
+abstract class DynamicDeliveryImpl : DynamicDelivery
