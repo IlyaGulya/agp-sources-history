@@ -99,21 +99,21 @@ abstract class CmakeExternalNativeJsonGenerator extends ExternalNativeJsonGenera
      *
      * @param abi - ABI for which JSON generation process needs to be executed
      * @param abiPlatformVersion - ABI's platform version
-     * @param outputJsonDir - directory where the JSON file and other information needs to be
+     * @param outputJsonFile - directory where the JSON file and other information needs to be
      *     created
      * @return Returns the combination of STDIO and STDERR from running the process.
      */
     @NonNull
     public abstract String executeProcessAndGetOutput(
-            @NonNull String abi, int abiPlatformVersion, @NonNull File outputJsonDir)
+            @NonNull String abi, int abiPlatformVersion, @NonNull File outputJsonFile)
             throws ProcessException, IOException;
 
     @NonNull
     @Override
     public String executeProcess(
-            @NonNull String abi, int abiPlatformVersion, @NonNull File outputJsonDir)
+            @NonNull String abi, int abiPlatformVersion, @NonNull File outputJsonFile)
             throws ProcessException, IOException {
-        String output = executeProcessAndGetOutput(abi, abiPlatformVersion, outputJsonDir);
+        String output = executeProcessAndGetOutput(abi, abiPlatformVersion, outputJsonFile);
         return correctMakefilePaths(output, getMakefile().getParentFile());
     }
 

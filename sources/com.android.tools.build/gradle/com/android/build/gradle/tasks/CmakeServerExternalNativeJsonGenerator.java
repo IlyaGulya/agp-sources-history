@@ -157,7 +157,7 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
     @NonNull
     @Override
     public String executeProcessAndGetOutput(
-            @NonNull String abi, int abiPlatformVersion, @NonNull File outputJsonDir)
+            @NonNull String abi, int abiPlatformVersion, @NonNull File outputJsonFile)
             throws ProcessException, IOException {
         // Once a Cmake server object is created
         // - connect to the server
@@ -165,6 +165,7 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
         // - configure and compute.
         // Create the NativeBuildConfigValue and write the required JSON file.
         PrintWriter serverLogWriter = null;
+        File outputJsonDir = outputJsonFile.getParentFile();
 
         try {
             serverLogWriter = getCmakeServerLogWriter(getOutputFolder(getJsonFolder(), abi));
@@ -189,7 +190,7 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
                                 + configureCommandResult.interactiveMessages);
             }
 
-            generateAndroidGradleBuild(abi, cmakeServer);
+            generateAndroidGradleBuild(abi, cmakeServer, outputJsonDir);
             return configureCommandResult.interactiveMessages;
         } finally {
             if (serverLogWriter != null) {
@@ -351,7 +352,7 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
         handshakeRequest.cookie = "gradle-cmake-cookie";
         handshakeRequest.generator = getGenerator(getBuildArguments());
         handshakeRequest.protocolVersion = cmakeServerProtocolVersion;
-        handshakeRequest.buildDirectory = normalizeFilePath(outputDir.getParentFile());
+        handshakeRequest.buildDirectory = normalizeFilePath(outputDir);
         handshakeRequest.sourceDirectory = normalizeFilePath(getMakefile().getParentFile());
 
         return handshakeRequest;
@@ -419,9 +420,11 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
      *     should be successfully computed and configured.
      * @throws IOException I/O failure
      */
-    private void generateAndroidGradleBuild(@NonNull String abi, @NonNull Server cmakeServer)
+    private void generateAndroidGradleBuild(
+            @NonNull String abi, @NonNull Server cmakeServer, File workingDirectory)
             throws IOException {
-        NativeBuildConfigValue nativeBuildConfigValue = getNativeBuildConfigValue(abi, cmakeServer);
+        NativeBuildConfigValue nativeBuildConfigValue =
+                getNativeBuildConfigValue(abi, cmakeServer, workingDirectory);
         AndroidBuildGradleJsons.writeNativeBuildConfigValueToJsonFile(
                 getOutputJson(getJsonFolder(), abi), nativeBuildConfigValue);
     }
@@ -437,7 +440,8 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
      */
     @VisibleForTesting
     protected NativeBuildConfigValue getNativeBuildConfigValue(
-            @NonNull String abi, @NonNull Server cmakeServer) throws IOException {
+            @NonNull String abi, @NonNull Server cmakeServer, File workingDirectory)
+            throws IOException {
         NativeBuildConfigValue nativeBuildConfigValue = createDefaultNativeBuildConfigValue();
 
         assert nativeBuildConfigValue.stringTable != null;
@@ -488,7 +492,7 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
                     }
 
                     NativeLibraryValue nativeLibraryValue =
-                            getNativeLibraryValue(abi, project.buildDirectory, target, strings);
+                            getNativeLibraryValue(abi, workingDirectory, target, strings);
                     nativeLibraryValue.toolchain = toolchainHashString;
                     String libraryName = target.name + "-" + config.name + "-" + abi;
                     assert nativeBuildConfigValue.libraries != null;
@@ -502,7 +506,7 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
     @VisibleForTesting
     protected NativeLibraryValue getNativeLibraryValue(
             @NonNull String abi,
-            @NonNull String workingDirectory,
+            @NonNull File workingDirectory,
             @NonNull Target target,
             StringTable strings)
             throws FileNotFoundException {
@@ -524,7 +528,7 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
             boolean isDebuggable,
             @NonNull JsonReader compileCommandsJson,
             @NonNull String abi,
-            @NonNull String workingDirectory,
+            @NonNull File workingDirectory,
             @NonNull Target target,
             @NonNull StringTable strings) {
         NativeLibraryValue nativeLibraryValue = new NativeLibraryValue();
@@ -542,10 +546,20 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
         nativeLibraryValue.headers = new ArrayList<>();
         Map<String, Integer> compilationDatabaseFlags = Maps.newHashMap();
 
-        int workingDirectoryOrdinal = strings.intern(workingDirectory);
+        int workingDirectoryOrdinal = strings.intern(normalizeFilePath(workingDirectory));
         for (FileGroup fileGroup : target.fileGroups) {
             for (String source : fileGroup.sources) {
-                File sourceFile = new File(target.sourceDirectory, source);
+                Path sourceFilePath = Paths.get(target.sourceDirectory, source).normalize();
+                // It is important to not use sourceFile as the key to any dictionary, but instead
+                // use its normalized path, because the the File object may contain "../" or "./" in
+                // it (b/123123307).
+                if (sourceFilePath.toString().isEmpty()) {
+                    // If the normalized path is empty, use the non-normalized path to protect the
+                    // rest of the code and also make it more debuggable.
+                    sourceFilePath = Paths.get(target.sourceDirectory, source);
+                }
+                File sourceFile = sourceFilePath.toFile();
+
                 if (hasCmakeHeaderFileExtensions(sourceFile)) {
                     nativeLibraryValue.headers.add(
                             new NativeHeaderFileValue(sourceFile, workingDirectoryOrdinal));
@@ -562,9 +576,9 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
                         compilationDatabaseFlags =
                                 indexCompilationDatabase(compileCommandsJson, strings);
                     }
-                    if (compilationDatabaseFlags.containsKey(sourceFile.getPath())) {
+                    if (compilationDatabaseFlags.containsKey(sourceFilePath.toString())) {
                         nativeSourceFileValue.flagsOrdinal =
-                                compilationDatabaseFlags.get(sourceFile.getPath());
+                                compilationDatabaseFlags.get(sourceFilePath.toString());
                     } else {
                         // TODO I think this path is always wrong because it won't have --targets
                         // I don't want to make it an exception this late in 3.3 cycle so I'm
