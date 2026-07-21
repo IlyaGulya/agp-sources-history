@@ -75,6 +75,19 @@ private static final long serialVersionUID = 0L;
 
             break;
           }
+          case 26: {
+            com.google.protobuf.Int32Value.Builder subBuilder = null;
+            if (repoIndex_ != null) {
+              subBuilder = repoIndex_.toBuilder();
+            }
+            repoIndex_ = input.readMessage(com.google.protobuf.Int32Value.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(repoIndex_);
+              repoIndex_ = subBuilder.buildPartial();
+            }
+
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -715,6 +728,44 @@ private static final long serialVersionUID = 0L;
     return getDigests();
   }
 
+  public static final int REPO_INDEX_FIELD_NUMBER = 3;
+  private com.google.protobuf.Int32Value repoIndex_;
+  /**
+   * <pre>
+   * Repository from which the artifact was retrieved (if known)
+   * Index is from pool of repositories defined in AppDependencies
+   * </pre>
+   *
+   * <code>.google.protobuf.Int32Value repo_index = 3;</code>
+   * @return Whether the repoIndex field is set.
+   */
+  public boolean hasRepoIndex() {
+    return repoIndex_ != null;
+  }
+  /**
+   * <pre>
+   * Repository from which the artifact was retrieved (if known)
+   * Index is from pool of repositories defined in AppDependencies
+   * </pre>
+   *
+   * <code>.google.protobuf.Int32Value repo_index = 3;</code>
+   * @return The repoIndex.
+   */
+  public com.google.protobuf.Int32Value getRepoIndex() {
+    return repoIndex_ == null ? com.google.protobuf.Int32Value.getDefaultInstance() : repoIndex_;
+  }
+  /**
+   * <pre>
+   * Repository from which the artifact was retrieved (if known)
+   * Index is from pool of repositories defined in AppDependencies
+   * </pre>
+   *
+   * <code>.google.protobuf.Int32Value repo_index = 3;</code>
+   */
+  public com.google.protobuf.Int32ValueOrBuilder getRepoIndexOrBuilder() {
+    return getRepoIndex();
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -735,6 +786,9 @@ private static final long serialVersionUID = 0L;
     if (digests_ != null) {
       output.writeMessage(2, getDigests());
     }
+    if (repoIndex_ != null) {
+      output.writeMessage(3, getRepoIndex());
+    }
     unknownFields.writeTo(output);
   }
 
@@ -751,6 +805,10 @@ private static final long serialVersionUID = 0L;
     if (digests_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(2, getDigests());
+    }
+    if (repoIndex_ != null) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(3, getRepoIndex());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -771,6 +829,11 @@ private static final long serialVersionUID = 0L;
     if (hasDigests()) {
       if (!getDigests()
           .equals(other.getDigests())) return false;
+    }
+    if (hasRepoIndex() != other.hasRepoIndex()) return false;
+    if (hasRepoIndex()) {
+      if (!getRepoIndex()
+          .equals(other.getRepoIndex())) return false;
     }
     if (!getLibraryOneofCase().equals(other.getLibraryOneofCase())) return false;
     switch (libraryOneofCase_) {
@@ -795,6 +858,10 @@ private static final long serialVersionUID = 0L;
     if (hasDigests()) {
       hash = (37 * hash) + DIGESTS_FIELD_NUMBER;
       hash = (53 * hash) + getDigests().hashCode();
+    }
+    if (hasRepoIndex()) {
+      hash = (37 * hash) + REPO_INDEX_FIELD_NUMBER;
+      hash = (53 * hash) + getRepoIndex().hashCode();
     }
     switch (libraryOneofCase_) {
       case 1:
@@ -943,6 +1010,12 @@ private static final long serialVersionUID = 0L;
         digests_ = null;
         digestsBuilder_ = null;
       }
+      if (repoIndexBuilder_ == null) {
+        repoIndex_ = null;
+      } else {
+        repoIndex_ = null;
+        repoIndexBuilder_ = null;
+      }
       libraryOneofCase_ = 0;
       libraryOneof_ = null;
       return this;
@@ -982,6 +1055,11 @@ private static final long serialVersionUID = 0L;
         result.digests_ = digests_;
       } else {
         result.digests_ = digestsBuilder_.build();
+      }
+      if (repoIndexBuilder_ == null) {
+        result.repoIndex_ = repoIndex_;
+      } else {
+        result.repoIndex_ = repoIndexBuilder_.build();
       }
       result.libraryOneofCase_ = libraryOneofCase_;
       onBuilt();
@@ -1034,6 +1112,9 @@ private static final long serialVersionUID = 0L;
       if (other == com.android.tools.build.libraries.metadata.Library.getDefaultInstance()) return this;
       if (other.hasDigests()) {
         mergeDigests(other.getDigests());
+      }
+      if (other.hasRepoIndex()) {
+        mergeRepoIndex(other.getRepoIndex());
       }
       switch (other.getLibraryOneofCase()) {
         case MAVEN_LIBRARY: {
@@ -1343,6 +1424,170 @@ private static final long serialVersionUID = 0L;
         digests_ = null;
       }
       return digestsBuilder_;
+    }
+
+    private com.google.protobuf.Int32Value repoIndex_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder> repoIndexBuilder_;
+    /**
+     * <pre>
+     * Repository from which the artifact was retrieved (if known)
+     * Index is from pool of repositories defined in AppDependencies
+     * </pre>
+     *
+     * <code>.google.protobuf.Int32Value repo_index = 3;</code>
+     * @return Whether the repoIndex field is set.
+     */
+    public boolean hasRepoIndex() {
+      return repoIndexBuilder_ != null || repoIndex_ != null;
+    }
+    /**
+     * <pre>
+     * Repository from which the artifact was retrieved (if known)
+     * Index is from pool of repositories defined in AppDependencies
+     * </pre>
+     *
+     * <code>.google.protobuf.Int32Value repo_index = 3;</code>
+     * @return The repoIndex.
+     */
+    public com.google.protobuf.Int32Value getRepoIndex() {
+      if (repoIndexBuilder_ == null) {
+        return repoIndex_ == null ? com.google.protobuf.Int32Value.getDefaultInstance() : repoIndex_;
+      } else {
+        return repoIndexBuilder_.getMessage();
+      }
+    }
+    /**
+     * <pre>
+     * Repository from which the artifact was retrieved (if known)
+     * Index is from pool of repositories defined in AppDependencies
+     * </pre>
+     *
+     * <code>.google.protobuf.Int32Value repo_index = 3;</code>
+     */
+    public Builder setRepoIndex(com.google.protobuf.Int32Value value) {
+      if (repoIndexBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        repoIndex_ = value;
+        onChanged();
+      } else {
+        repoIndexBuilder_.setMessage(value);
+      }
+
+      return this;
+    }
+    /**
+     * <pre>
+     * Repository from which the artifact was retrieved (if known)
+     * Index is from pool of repositories defined in AppDependencies
+     * </pre>
+     *
+     * <code>.google.protobuf.Int32Value repo_index = 3;</code>
+     */
+    public Builder setRepoIndex(
+        com.google.protobuf.Int32Value.Builder builderForValue) {
+      if (repoIndexBuilder_ == null) {
+        repoIndex_ = builderForValue.build();
+        onChanged();
+      } else {
+        repoIndexBuilder_.setMessage(builderForValue.build());
+      }
+
+      return this;
+    }
+    /**
+     * <pre>
+     * Repository from which the artifact was retrieved (if known)
+     * Index is from pool of repositories defined in AppDependencies
+     * </pre>
+     *
+     * <code>.google.protobuf.Int32Value repo_index = 3;</code>
+     */
+    public Builder mergeRepoIndex(com.google.protobuf.Int32Value value) {
+      if (repoIndexBuilder_ == null) {
+        if (repoIndex_ != null) {
+          repoIndex_ =
+            com.google.protobuf.Int32Value.newBuilder(repoIndex_).mergeFrom(value).buildPartial();
+        } else {
+          repoIndex_ = value;
+        }
+        onChanged();
+      } else {
+        repoIndexBuilder_.mergeFrom(value);
+      }
+
+      return this;
+    }
+    /**
+     * <pre>
+     * Repository from which the artifact was retrieved (if known)
+     * Index is from pool of repositories defined in AppDependencies
+     * </pre>
+     *
+     * <code>.google.protobuf.Int32Value repo_index = 3;</code>
+     */
+    public Builder clearRepoIndex() {
+      if (repoIndexBuilder_ == null) {
+        repoIndex_ = null;
+        onChanged();
+      } else {
+        repoIndex_ = null;
+        repoIndexBuilder_ = null;
+      }
+
+      return this;
+    }
+    /**
+     * <pre>
+     * Repository from which the artifact was retrieved (if known)
+     * Index is from pool of repositories defined in AppDependencies
+     * </pre>
+     *
+     * <code>.google.protobuf.Int32Value repo_index = 3;</code>
+     */
+    public com.google.protobuf.Int32Value.Builder getRepoIndexBuilder() {
+      
+      onChanged();
+      return getRepoIndexFieldBuilder().getBuilder();
+    }
+    /**
+     * <pre>
+     * Repository from which the artifact was retrieved (if known)
+     * Index is from pool of repositories defined in AppDependencies
+     * </pre>
+     *
+     * <code>.google.protobuf.Int32Value repo_index = 3;</code>
+     */
+    public com.google.protobuf.Int32ValueOrBuilder getRepoIndexOrBuilder() {
+      if (repoIndexBuilder_ != null) {
+        return repoIndexBuilder_.getMessageOrBuilder();
+      } else {
+        return repoIndex_ == null ?
+            com.google.protobuf.Int32Value.getDefaultInstance() : repoIndex_;
+      }
+    }
+    /**
+     * <pre>
+     * Repository from which the artifact was retrieved (if known)
+     * Index is from pool of repositories defined in AppDependencies
+     * </pre>
+     *
+     * <code>.google.protobuf.Int32Value repo_index = 3;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder> 
+        getRepoIndexFieldBuilder() {
+      if (repoIndexBuilder_ == null) {
+        repoIndexBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.Int32Value, com.google.protobuf.Int32Value.Builder, com.google.protobuf.Int32ValueOrBuilder>(
+                getRepoIndex(),
+                getParentForChildren(),
+                isClean());
+        repoIndex_ = null;
+      }
+      return repoIndexBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

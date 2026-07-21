@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.build.api.component
+package com.android.build.gradle.internal.attributes
 
-import org.gradle.api.Incubating
+import org.gradle.api.attributes.Attribute
 
-@Incubating
-interface TestFixturesComponentBuilder: ComponentBuilder
+/**
+ * Type for the attribute holding the variant name information.
+ *
+ * The key should be [ATTRIBUTE].
+ */
+interface VariantAttr : org.gradle.api.Named {
+    companion object {
+        @JvmField
+        val ATTRIBUTE: Attribute<VariantAttr> = Attribute.of(VariantAttr::class.java)
+    }
+}

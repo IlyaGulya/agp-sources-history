@@ -19,6 +19,7 @@ private static final long serialVersionUID = 0L;
     library_ = java.util.Collections.emptyList();
     libraryDependencies_ = java.util.Collections.emptyList();
     moduleDependencies_ = java.util.Collections.emptyList();
+    repositories_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -79,6 +80,15 @@ private static final long serialVersionUID = 0L;
                 input.readMessage(com.android.tools.build.libraries.metadata.ModuleDependencies.parser(), extensionRegistry));
             break;
           }
+          case 34: {
+            if (!((mutable_bitField0_ & 0x00000008) != 0)) {
+              repositories_ = new java.util.ArrayList<com.android.tools.build.libraries.metadata.Repository>();
+              mutable_bitField0_ |= 0x00000008;
+            }
+            repositories_.add(
+                input.readMessage(com.android.tools.build.libraries.metadata.Repository.parser(), extensionRegistry));
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -102,6 +112,9 @@ private static final long serialVersionUID = 0L;
       }
       if (((mutable_bitField0_ & 0x00000004) != 0)) {
         moduleDependencies_ = java.util.Collections.unmodifiableList(moduleDependencies_);
+      }
+      if (((mutable_bitField0_ & 0x00000008) != 0)) {
+        repositories_ = java.util.Collections.unmodifiableList(repositories_);
       }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
@@ -285,6 +298,61 @@ private static final long serialVersionUID = 0L;
     return moduleDependencies_.get(index);
   }
 
+  public static final int REPOSITORIES_FIELD_NUMBER = 4;
+  private java.util.List<com.android.tools.build.libraries.metadata.Repository> repositories_;
+  /**
+   * <pre>
+   * List of repositories where dependencies were found
+   * </pre>
+   *
+   * <code>repeated .Repository repositories = 4;</code>
+   */
+  public java.util.List<com.android.tools.build.libraries.metadata.Repository> getRepositoriesList() {
+    return repositories_;
+  }
+  /**
+   * <pre>
+   * List of repositories where dependencies were found
+   * </pre>
+   *
+   * <code>repeated .Repository repositories = 4;</code>
+   */
+  public java.util.List<? extends com.android.tools.build.libraries.metadata.RepositoryOrBuilder> 
+      getRepositoriesOrBuilderList() {
+    return repositories_;
+  }
+  /**
+   * <pre>
+   * List of repositories where dependencies were found
+   * </pre>
+   *
+   * <code>repeated .Repository repositories = 4;</code>
+   */
+  public int getRepositoriesCount() {
+    return repositories_.size();
+  }
+  /**
+   * <pre>
+   * List of repositories where dependencies were found
+   * </pre>
+   *
+   * <code>repeated .Repository repositories = 4;</code>
+   */
+  public com.android.tools.build.libraries.metadata.Repository getRepositories(int index) {
+    return repositories_.get(index);
+  }
+  /**
+   * <pre>
+   * List of repositories where dependencies were found
+   * </pre>
+   *
+   * <code>repeated .Repository repositories = 4;</code>
+   */
+  public com.android.tools.build.libraries.metadata.RepositoryOrBuilder getRepositoriesOrBuilder(
+      int index) {
+    return repositories_.get(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -308,6 +376,9 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < moduleDependencies_.size(); i++) {
       output.writeMessage(3, moduleDependencies_.get(i));
     }
+    for (int i = 0; i < repositories_.size(); i++) {
+      output.writeMessage(4, repositories_.get(i));
+    }
     unknownFields.writeTo(output);
   }
 
@@ -328,6 +399,10 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < moduleDependencies_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(3, moduleDependencies_.get(i));
+    }
+    for (int i = 0; i < repositories_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(4, repositories_.get(i));
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -350,6 +425,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getLibraryDependenciesList())) return false;
     if (!getModuleDependenciesList()
         .equals(other.getModuleDependenciesList())) return false;
+    if (!getRepositoriesList()
+        .equals(other.getRepositoriesList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -372,6 +449,10 @@ private static final long serialVersionUID = 0L;
     if (getModuleDependenciesCount() > 0) {
       hash = (37 * hash) + MODULE_DEPENDENCIES_FIELD_NUMBER;
       hash = (53 * hash) + getModuleDependenciesList().hashCode();
+    }
+    if (getRepositoriesCount() > 0) {
+      hash = (37 * hash) + REPOSITORIES_FIELD_NUMBER;
+      hash = (53 * hash) + getRepositoriesList().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -504,6 +585,7 @@ private static final long serialVersionUID = 0L;
         getLibraryFieldBuilder();
         getLibraryDependenciesFieldBuilder();
         getModuleDependenciesFieldBuilder();
+        getRepositoriesFieldBuilder();
       }
     }
     @java.lang.Override
@@ -526,6 +608,12 @@ private static final long serialVersionUID = 0L;
         bitField0_ = (bitField0_ & ~0x00000004);
       } else {
         moduleDependenciesBuilder_.clear();
+      }
+      if (repositoriesBuilder_ == null) {
+        repositories_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+      } else {
+        repositoriesBuilder_.clear();
       }
       return this;
     }
@@ -580,6 +668,15 @@ private static final long serialVersionUID = 0L;
         result.moduleDependencies_ = moduleDependencies_;
       } else {
         result.moduleDependencies_ = moduleDependenciesBuilder_.build();
+      }
+      if (repositoriesBuilder_ == null) {
+        if (((bitField0_ & 0x00000008) != 0)) {
+          repositories_ = java.util.Collections.unmodifiableList(repositories_);
+          bitField0_ = (bitField0_ & ~0x00000008);
+        }
+        result.repositories_ = repositories_;
+      } else {
+        result.repositories_ = repositoriesBuilder_.build();
       }
       onBuilt();
       return result;
@@ -704,6 +801,32 @@ private static final long serialVersionUID = 0L;
                  getModuleDependenciesFieldBuilder() : null;
           } else {
             moduleDependenciesBuilder_.addAllMessages(other.moduleDependencies_);
+          }
+        }
+      }
+      if (repositoriesBuilder_ == null) {
+        if (!other.repositories_.isEmpty()) {
+          if (repositories_.isEmpty()) {
+            repositories_ = other.repositories_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+          } else {
+            ensureRepositoriesIsMutable();
+            repositories_.addAll(other.repositories_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.repositories_.isEmpty()) {
+          if (repositoriesBuilder_.isEmpty()) {
+            repositoriesBuilder_.dispose();
+            repositoriesBuilder_ = null;
+            repositories_ = other.repositories_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+            repositoriesBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getRepositoriesFieldBuilder() : null;
+          } else {
+            repositoriesBuilder_.addAllMessages(other.repositories_);
           }
         }
       }
@@ -1671,6 +1794,318 @@ private static final long serialVersionUID = 0L;
         moduleDependencies_ = null;
       }
       return moduleDependenciesBuilder_;
+    }
+
+    private java.util.List<com.android.tools.build.libraries.metadata.Repository> repositories_ =
+      java.util.Collections.emptyList();
+    private void ensureRepositoriesIsMutable() {
+      if (!((bitField0_ & 0x00000008) != 0)) {
+        repositories_ = new java.util.ArrayList<com.android.tools.build.libraries.metadata.Repository>(repositories_);
+        bitField0_ |= 0x00000008;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        com.android.tools.build.libraries.metadata.Repository, com.android.tools.build.libraries.metadata.Repository.Builder, com.android.tools.build.libraries.metadata.RepositoryOrBuilder> repositoriesBuilder_;
+
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public java.util.List<com.android.tools.build.libraries.metadata.Repository> getRepositoriesList() {
+      if (repositoriesBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(repositories_);
+      } else {
+        return repositoriesBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public int getRepositoriesCount() {
+      if (repositoriesBuilder_ == null) {
+        return repositories_.size();
+      } else {
+        return repositoriesBuilder_.getCount();
+      }
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public com.android.tools.build.libraries.metadata.Repository getRepositories(int index) {
+      if (repositoriesBuilder_ == null) {
+        return repositories_.get(index);
+      } else {
+        return repositoriesBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public Builder setRepositories(
+        int index, com.android.tools.build.libraries.metadata.Repository value) {
+      if (repositoriesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureRepositoriesIsMutable();
+        repositories_.set(index, value);
+        onChanged();
+      } else {
+        repositoriesBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public Builder setRepositories(
+        int index, com.android.tools.build.libraries.metadata.Repository.Builder builderForValue) {
+      if (repositoriesBuilder_ == null) {
+        ensureRepositoriesIsMutable();
+        repositories_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        repositoriesBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public Builder addRepositories(com.android.tools.build.libraries.metadata.Repository value) {
+      if (repositoriesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureRepositoriesIsMutable();
+        repositories_.add(value);
+        onChanged();
+      } else {
+        repositoriesBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public Builder addRepositories(
+        int index, com.android.tools.build.libraries.metadata.Repository value) {
+      if (repositoriesBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureRepositoriesIsMutable();
+        repositories_.add(index, value);
+        onChanged();
+      } else {
+        repositoriesBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public Builder addRepositories(
+        com.android.tools.build.libraries.metadata.Repository.Builder builderForValue) {
+      if (repositoriesBuilder_ == null) {
+        ensureRepositoriesIsMutable();
+        repositories_.add(builderForValue.build());
+        onChanged();
+      } else {
+        repositoriesBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public Builder addRepositories(
+        int index, com.android.tools.build.libraries.metadata.Repository.Builder builderForValue) {
+      if (repositoriesBuilder_ == null) {
+        ensureRepositoriesIsMutable();
+        repositories_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        repositoriesBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public Builder addAllRepositories(
+        java.lang.Iterable<? extends com.android.tools.build.libraries.metadata.Repository> values) {
+      if (repositoriesBuilder_ == null) {
+        ensureRepositoriesIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, repositories_);
+        onChanged();
+      } else {
+        repositoriesBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public Builder clearRepositories() {
+      if (repositoriesBuilder_ == null) {
+        repositories_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+      } else {
+        repositoriesBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public Builder removeRepositories(int index) {
+      if (repositoriesBuilder_ == null) {
+        ensureRepositoriesIsMutable();
+        repositories_.remove(index);
+        onChanged();
+      } else {
+        repositoriesBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public com.android.tools.build.libraries.metadata.Repository.Builder getRepositoriesBuilder(
+        int index) {
+      return getRepositoriesFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public com.android.tools.build.libraries.metadata.RepositoryOrBuilder getRepositoriesOrBuilder(
+        int index) {
+      if (repositoriesBuilder_ == null) {
+        return repositories_.get(index);  } else {
+        return repositoriesBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public java.util.List<? extends com.android.tools.build.libraries.metadata.RepositoryOrBuilder> 
+         getRepositoriesOrBuilderList() {
+      if (repositoriesBuilder_ != null) {
+        return repositoriesBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(repositories_);
+      }
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public com.android.tools.build.libraries.metadata.Repository.Builder addRepositoriesBuilder() {
+      return getRepositoriesFieldBuilder().addBuilder(
+          com.android.tools.build.libraries.metadata.Repository.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public com.android.tools.build.libraries.metadata.Repository.Builder addRepositoriesBuilder(
+        int index) {
+      return getRepositoriesFieldBuilder().addBuilder(
+          index, com.android.tools.build.libraries.metadata.Repository.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * List of repositories where dependencies were found
+     * </pre>
+     *
+     * <code>repeated .Repository repositories = 4;</code>
+     */
+    public java.util.List<com.android.tools.build.libraries.metadata.Repository.Builder> 
+         getRepositoriesBuilderList() {
+      return getRepositoriesFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        com.android.tools.build.libraries.metadata.Repository, com.android.tools.build.libraries.metadata.Repository.Builder, com.android.tools.build.libraries.metadata.RepositoryOrBuilder> 
+        getRepositoriesFieldBuilder() {
+      if (repositoriesBuilder_ == null) {
+        repositoriesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            com.android.tools.build.libraries.metadata.Repository, com.android.tools.build.libraries.metadata.Repository.Builder, com.android.tools.build.libraries.metadata.RepositoryOrBuilder>(
+                repositories_,
+                ((bitField0_ & 0x00000008) != 0),
+                getParentForChildren(),
+                isClean());
+        repositories_ = null;
+      }
+      return repositoriesBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

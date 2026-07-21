@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.build.api.artifact
+package com.android.build.gradle
 
-/**
- * Known file names for artifacts that will be stored in the final APK.
- *
- * @since 4.1
- */
-enum class FileNames(val fileName: String) {
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.api.plugins.BasePlugin
 
-    ANDROID_MANIFEST_XML("AndroidManifest.xml"),
-    OBFUSCATION_MAPPING_FILE("mapping.txt")
+class AssetPackBundlePlugin : Plugin<Project> {
+    override fun apply(project: Project) {
+        project.apply(VERSION_CHECK_PLUGIN_ID)
+        project.plugins.apply(BasePlugin::class.java)
+        project.apply(INTERNAL_PLUGIN_ID)
+    }
 }
+
+private val INTERNAL_PLUGIN_ID = mapOf("plugin" to "com.android.internal.asset-pack-bundle")

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.build.api.attributes
+package com.android.build.api.variant.impl
 
-import org.gradle.api.attributes.Attribute
+import com.android.build.api.variant.ResValue
 
-/**
- * Type for the attribute holding the variant name information.
- *
- * The key should be [ATTRIBUTE].
- */
-interface VariantAttr : org.gradle.api.Named {
-    companion object {
-        @JvmField
-        val ATTRIBUTE: Attribute<VariantAttr> = Attribute.of(VariantAttr::class.java)
-    }
-}
+data class ResValueKeyImpl(
+    override val type: String,
+    override val name: String
+): ResValue.Key

@@ -138,4 +138,48 @@ public interface AppDependenciesOrBuilder extends
    */
   com.android.tools.build.libraries.metadata.ModuleDependenciesOrBuilder getModuleDependenciesOrBuilder(
       int index);
+
+  /**
+   * <pre>
+   * List of repositories where dependencies were found
+   * </pre>
+   *
+   * <code>repeated .Repository repositories = 4;</code>
+   */
+  java.util.List<com.android.tools.build.libraries.metadata.Repository> 
+      getRepositoriesList();
+  /**
+   * <pre>
+   * List of repositories where dependencies were found
+   * </pre>
+   *
+   * <code>repeated .Repository repositories = 4;</code>
+   */
+  com.android.tools.build.libraries.metadata.Repository getRepositories(int index);
+  /**
+   * <pre>
+   * List of repositories where dependencies were found
+   * </pre>
+   *
+   * <code>repeated .Repository repositories = 4;</code>
+   */
+  int getRepositoriesCount();
+  /**
+   * <pre>
+   * List of repositories where dependencies were found
+   * </pre>
+   *
+   * <code>repeated .Repository repositories = 4;</code>
+   */
+  java.util.List<? extends com.android.tools.build.libraries.metadata.RepositoryOrBuilder> 
+      getRepositoriesOrBuilderList();
+  /**
+   * <pre>
+   * List of repositories where dependencies were found
+   * </pre>
+   *
+   * <code>repeated .Repository repositories = 4;</code>
+   */
+  com.android.tools.build.libraries.metadata.RepositoryOrBuilder getRepositoriesOrBuilder(
+      int index);
 }

@@ -37,5 +37,35 @@ public interface LibraryOrBuilder extends
    */
   com.android.tools.build.libraries.metadata.Library.DigestsOrBuilder getDigestsOrBuilder();
 
+  /**
+   * <pre>
+   * Repository from which the artifact was retrieved (if known)
+   * Index is from pool of repositories defined in AppDependencies
+   * </pre>
+   *
+   * <code>.google.protobuf.Int32Value repo_index = 3;</code>
+   * @return Whether the repoIndex field is set.
+   */
+  boolean hasRepoIndex();
+  /**
+   * <pre>
+   * Repository from which the artifact was retrieved (if known)
+   * Index is from pool of repositories defined in AppDependencies
+   * </pre>
+   *
+   * <code>.google.protobuf.Int32Value repo_index = 3;</code>
+   * @return The repoIndex.
+   */
+  com.google.protobuf.Int32Value getRepoIndex();
+  /**
+   * <pre>
+   * Repository from which the artifact was retrieved (if known)
+   * Index is from pool of repositories defined in AppDependencies
+   * </pre>
+   *
+   * <code>.google.protobuf.Int32Value repo_index = 3;</code>
+   */
+  com.google.protobuf.Int32ValueOrBuilder getRepoIndexOrBuilder();
+
   public com.android.tools.build.libraries.metadata.Library.LibraryOneofCase getLibraryOneofCase();
 }

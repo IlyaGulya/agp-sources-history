@@ -122,6 +122,123 @@ public final class IceboxPluginProto {
     // @@protoc_insertion_point(enum_scope:com.android.tools.utp.plugins.host.icebox.proto.Compression)
   }
 
+  /**
+   * <pre>
+   * The behavior of the test driver.
+   * </pre>
+   *
+   * Protobuf enum {@code com.android.tools.utp.plugins.host.icebox.proto.IceboxSetupStrategy}
+   */
+  public enum IceboxSetupStrategy
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>UNSPECIFIED = 0;</code>
+     */
+    UNSPECIFIED(0),
+    /**
+     * <code>CONNECT_BEFORE_ALL_TEST = 1;</code>
+     */
+    CONNECT_BEFORE_ALL_TEST(1),
+    /**
+     * <code>RECONNECT_BETWEEN_TEST_CASES = 2;</code>
+     */
+    RECONNECT_BETWEEN_TEST_CASES(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>UNSPECIFIED = 0;</code>
+     */
+    public static final int UNSPECIFIED_VALUE = 0;
+    /**
+     * <code>CONNECT_BEFORE_ALL_TEST = 1;</code>
+     */
+    public static final int CONNECT_BEFORE_ALL_TEST_VALUE = 1;
+    /**
+     * <code>RECONNECT_BETWEEN_TEST_CASES = 2;</code>
+     */
+    public static final int RECONNECT_BETWEEN_TEST_CASES_VALUE = 2;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static IceboxSetupStrategy valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static IceboxSetupStrategy forNumber(int value) {
+      switch (value) {
+        case 0: return UNSPECIFIED;
+        case 1: return CONNECT_BEFORE_ALL_TEST;
+        case 2: return RECONNECT_BETWEEN_TEST_CASES;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<IceboxSetupStrategy>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        IceboxSetupStrategy> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<IceboxSetupStrategy>() {
+            public IceboxSetupStrategy findValueByNumber(int number) {
+              return IceboxSetupStrategy.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.getDescriptor().getEnumTypes().get(1);
+    }
+
+    private static final IceboxSetupStrategy[] VALUES = values();
+
+    public static IceboxSetupStrategy valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private IceboxSetupStrategy(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:com.android.tools.utp.plugins.host.icebox.proto.IceboxSetupStrategy)
+  }
+
   public interface IceboxPluginOrBuilder extends
       // @@protoc_insertion_point(interface_extends:com.android.tools.utp.plugins.host.icebox.proto.IceboxPlugin)
       com.google.protobuf.MessageOrBuilder {
@@ -246,6 +363,25 @@ public final class IceboxPluginProto {
      */
     com.google.protobuf.ByteString
         getEmulatorGrpcTokenBytes();
+
+    /**
+     * <pre>
+     * The behavior of the test driver.
+     * </pre>
+     *
+     * <code>.com.android.tools.utp.plugins.host.icebox.proto.IceboxSetupStrategy setup_strategy = 9;</code>
+     * @return The enum numeric value on the wire for setupStrategy.
+     */
+    int getSetupStrategyValue();
+    /**
+     * <pre>
+     * The behavior of the test driver.
+     * </pre>
+     *
+     * <code>.com.android.tools.utp.plugins.host.icebox.proto.IceboxSetupStrategy setup_strategy = 9;</code>
+     * @return The setupStrategy.
+     */
+    com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy getSetupStrategy();
   }
   /**
    * <pre>
@@ -270,6 +406,7 @@ public final class IceboxPluginProto {
       emulatorGrpcAddress_ = "";
       snapshotCompression_ = 0;
       emulatorGrpcToken_ = "";
+      setupStrategy_ = 0;
     }
 
     @java.lang.Override
@@ -344,6 +481,12 @@ public final class IceboxPluginProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               emulatorGrpcToken_ = s;
+              break;
+            }
+            case 72: {
+              int rawValue = input.readEnum();
+
+              setupStrategy_ = rawValue;
               break;
             }
             default: {
@@ -595,6 +738,33 @@ public final class IceboxPluginProto {
       }
     }
 
+    public static final int SETUP_STRATEGY_FIELD_NUMBER = 9;
+    private int setupStrategy_;
+    /**
+     * <pre>
+     * The behavior of the test driver.
+     * </pre>
+     *
+     * <code>.com.android.tools.utp.plugins.host.icebox.proto.IceboxSetupStrategy setup_strategy = 9;</code>
+     * @return The enum numeric value on the wire for setupStrategy.
+     */
+    public int getSetupStrategyValue() {
+      return setupStrategy_;
+    }
+    /**
+     * <pre>
+     * The behavior of the test driver.
+     * </pre>
+     *
+     * <code>.com.android.tools.utp.plugins.host.icebox.proto.IceboxSetupStrategy setup_strategy = 9;</code>
+     * @return The setupStrategy.
+     */
+    public com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy getSetupStrategy() {
+      @SuppressWarnings("deprecation")
+      com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy result = com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy.valueOf(setupStrategy_);
+      return result == null ? com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy.UNRECOGNIZED : result;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -632,6 +802,9 @@ public final class IceboxPluginProto {
       }
       if (!getEmulatorGrpcTokenBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, emulatorGrpcToken_);
+      }
+      if (setupStrategy_ != com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy.UNSPECIFIED.getNumber()) {
+        output.writeEnum(9, setupStrategy_);
       }
       unknownFields.writeTo(output);
     }
@@ -671,6 +844,10 @@ public final class IceboxPluginProto {
       if (!getEmulatorGrpcTokenBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, emulatorGrpcToken_);
       }
+      if (setupStrategy_ != com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy.UNSPECIFIED.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(9, setupStrategy_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -701,6 +878,7 @@ public final class IceboxPluginProto {
       if (snapshotCompression_ != other.snapshotCompression_) return false;
       if (!getEmulatorGrpcToken()
           .equals(other.getEmulatorGrpcToken())) return false;
+      if (setupStrategy_ != other.setupStrategy_) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -729,6 +907,8 @@ public final class IceboxPluginProto {
       hash = (53 * hash) + snapshotCompression_;
       hash = (37 * hash) + EMULATOR_GRPC_TOKEN_FIELD_NUMBER;
       hash = (53 * hash) + getEmulatorGrpcToken().hashCode();
+      hash = (37 * hash) + SETUP_STRATEGY_FIELD_NUMBER;
+      hash = (53 * hash) + setupStrategy_;
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -884,6 +1064,8 @@ public final class IceboxPluginProto {
 
         emulatorGrpcToken_ = "";
 
+        setupStrategy_ = 0;
+
         return this;
       }
 
@@ -918,6 +1100,7 @@ public final class IceboxPluginProto {
         result.androidStudioDdmlibPort_ = androidStudioDdmlibPort_;
         result.snapshotCompression_ = snapshotCompression_;
         result.emulatorGrpcToken_ = emulatorGrpcToken_;
+        result.setupStrategy_ = setupStrategy_;
         onBuilt();
         return result;
       }
@@ -992,6 +1175,9 @@ public final class IceboxPluginProto {
         if (!other.getEmulatorGrpcToken().isEmpty()) {
           emulatorGrpcToken_ = other.emulatorGrpcToken_;
           onChanged();
+        }
+        if (other.setupStrategy_ != 0) {
+          setSetupStrategyValue(other.getSetupStrategyValue());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -1555,6 +1741,78 @@ public final class IceboxPluginProto {
         onChanged();
         return this;
       }
+
+      private int setupStrategy_ = 0;
+      /**
+       * <pre>
+       * The behavior of the test driver.
+       * </pre>
+       *
+       * <code>.com.android.tools.utp.plugins.host.icebox.proto.IceboxSetupStrategy setup_strategy = 9;</code>
+       * @return The enum numeric value on the wire for setupStrategy.
+       */
+      public int getSetupStrategyValue() {
+        return setupStrategy_;
+      }
+      /**
+       * <pre>
+       * The behavior of the test driver.
+       * </pre>
+       *
+       * <code>.com.android.tools.utp.plugins.host.icebox.proto.IceboxSetupStrategy setup_strategy = 9;</code>
+       * @param value The enum numeric value on the wire for setupStrategy to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSetupStrategyValue(int value) {
+        setupStrategy_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The behavior of the test driver.
+       * </pre>
+       *
+       * <code>.com.android.tools.utp.plugins.host.icebox.proto.IceboxSetupStrategy setup_strategy = 9;</code>
+       * @return The setupStrategy.
+       */
+      public com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy getSetupStrategy() {
+        @SuppressWarnings("deprecation")
+        com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy result = com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy.valueOf(setupStrategy_);
+        return result == null ? com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The behavior of the test driver.
+       * </pre>
+       *
+       * <code>.com.android.tools.utp.plugins.host.icebox.proto.IceboxSetupStrategy setup_strategy = 9;</code>
+       * @param value The setupStrategy to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSetupStrategy(com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        setupStrategy_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The behavior of the test driver.
+       * </pre>
+       *
+       * <code>.com.android.tools.utp.plugins.host.icebox.proto.IceboxSetupStrategy setup_strategy = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSetupStrategy() {
+        
+        setupStrategy_ = 0;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -1623,7 +1881,7 @@ public final class IceboxPluginProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\023icebox_plugin.proto\022/com.android.tools" +
-      ".utp.plugins.host.icebox.proto\"\257\002\n\014Icebo" +
+      ".utp.plugins.host.icebox.proto\"\215\003\n\014Icebo" +
       "xPlugin\022\023\n\013app_package\030\001 \001(\t\022\035\n\025emulator" +
       "_grpc_address\030\002 \001(\t\022\032\n\022emulator_grpc_por" +
       "t\030\003 \001(\005\022\025\n\rskip_snapshot\030\004 \001(\010\022\033\n\023max_sn" +
@@ -1631,10 +1889,15 @@ public final class IceboxPluginProto {
       "mlib_port\030\006 \001(\005\022Z\n\024snapshot_compression\030" +
       "\007 \001(\0162<.com.android.tools.utp.plugins.ho" +
       "st.icebox.proto.Compression\022\033\n\023emulator_" +
-      "grpc_token\030\010 \001(\t*\"\n\013Compression\022\010\n\004NONE\020" +
-      "\000\022\t\n\005TARGZ\020\001BD\n/com.android.tools.utp.pl" +
-      "ugins.host.icebox.protoB\021IceboxPluginPro" +
-      "tob\006proto3"
+      "grpc_token\030\010 \001(\t\022\\\n\016setup_strategy\030\t \001(\016" +
+      "2D.com.android.tools.utp.plugins.host.ic" +
+      "ebox.proto.IceboxSetupStrategy*\"\n\013Compre" +
+      "ssion\022\010\n\004NONE\020\000\022\t\n\005TARGZ\020\001*e\n\023IceboxSetu" +
+      "pStrategy\022\017\n\013UNSPECIFIED\020\000\022\033\n\027CONNECT_BE" +
+      "FORE_ALL_TEST\020\001\022 \n\034RECONNECT_BETWEEN_TES" +
+      "T_CASES\020\002BD\n/com.android.tools.utp.plugi" +
+      "ns.host.icebox.protoB\021IceboxPluginProtob" +
+      "\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -1645,7 +1908,7 @@ public final class IceboxPluginProto {
     internal_static_com_android_tools_utp_plugins_host_icebox_proto_IceboxPlugin_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_android_tools_utp_plugins_host_icebox_proto_IceboxPlugin_descriptor,
-        new java.lang.String[] { "AppPackage", "EmulatorGrpcAddress", "EmulatorGrpcPort", "SkipSnapshot", "MaxSnapshotNumber", "AndroidStudioDdmlibPort", "SnapshotCompression", "EmulatorGrpcToken", });
+        new java.lang.String[] { "AppPackage", "EmulatorGrpcAddress", "EmulatorGrpcPort", "SkipSnapshot", "MaxSnapshotNumber", "AndroidStudioDdmlibPort", "SnapshotCompression", "EmulatorGrpcToken", "SetupStrategy", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
