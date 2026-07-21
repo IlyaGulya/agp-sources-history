@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal
+package com.android.build.api.dsl
 
-import org.gradle.api.artifacts.dsl.DependencyCollector
-import org.gradle.api.artifacts.dsl.GradleDependencies
+/**
+ * DSL object for configuring beta compile SDK version.
+ *
+ * See [CompileSdkSpec.beta]
+ */
+interface CompileSdkBetaSpec {
+  /** The minor API level of the SDK. */
+  var minorApiLevel: Int?
 
-interface DependenciesExtension : GradleDependencies {
-  // main configurations
-  val api: DependencyCollector
-  val implementation: DependencyCollector
-
-  // test configurations
-  val testImplementation: DependencyCollector
-
-  // android test configurations
-  val androidTestImplementation: DependencyCollector
+  /** The beta version of the SDK. */
+  var betaVersion: Int?
 }
