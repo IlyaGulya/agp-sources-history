@@ -41,9 +41,6 @@ public interface TaskOutputHolder {
         JAVAC,
         // packaged classes for AAR intermediate publishing
         LIBRARY_CLASSES,
-        // same as LIBRARY_CLASSES but published as a jar.
-        // FIXME remove when we can get the model w/o querying for jars.
-        LIBRARY_CLASSES_AS_JAR,
         // the packaged classes published by APK modules.
         APP_CLASSES,
 
@@ -52,6 +49,9 @@ public interface TaskOutputHolder {
         JAVA_RES,
         // packaged java res for aar intermediate publishing
         LIBRARY_JAVA_RES,
+
+        // Full jar with both classes and java res.
+        FULL_JAR,
 
         // --- android res ---
         // output of the resource merger ready for aapt.
@@ -94,7 +94,12 @@ public interface TaskOutputHolder {
 
         // the file that consumers of an AAR can use for additional proguard rules.
         CONSUMER_PROGUARD_FILE,
-        DATA_BINDING,
+
+        // the data binding artifact for a library that gets published with the aar
+        DATA_BINDING_ARTIFACT,
+        // the merged data binding artifacts from all the dependencies
+        DATA_BINDING_DEPENDENCY_ARTIFACTS,
+
         LINT_JAR,
 
         // the zip file output of the extract annotation class.

@@ -23,6 +23,7 @@ import android.databinding.tool.store.LayoutFileParser;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.gradle.AndroidConfig;
+import com.android.build.gradle.internal.LoggerWrapper;
 import com.android.build.gradle.internal.aapt.AaptGeneration;
 import com.android.build.gradle.internal.aapt.AaptGradleFactory;
 import com.android.build.gradle.internal.scope.TaskConfigAction;
@@ -34,6 +35,7 @@ import com.android.build.gradle.options.BooleanOption;
 import com.android.builder.core.BuilderConstants;
 import com.android.builder.model.VectorDrawablesOptions;
 import com.android.builder.png.VectorDrawableRenderer;
+import com.android.ide.common.blame.MergingLog;
 import com.android.ide.common.res2.FileStatus;
 import com.android.ide.common.res2.FileValidity;
 import com.android.ide.common.res2.GeneratedResourceSet;
@@ -46,10 +48,12 @@ import com.android.ide.common.res2.ResourcePreprocessor;
 import com.android.ide.common.res2.ResourceSet;
 import com.android.ide.common.res2.SingleFileProcessor;
 import com.android.ide.common.vectordrawable.ResourcesNotSupportedException;
+import com.android.ide.common.workers.WorkerExecutorFacade;
 import com.android.resources.Density;
 import com.android.utils.FileUtils;
+import com.android.utils.ILogger;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.io.File;
@@ -61,6 +65,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.ArtifactCollection;
@@ -75,6 +80,7 @@ import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.ParallelizableTask;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
+import org.gradle.workers.WorkerExecutor;
 
 @CacheableTask
 @ParallelizableTask
@@ -145,6 +151,15 @@ public class MergeResources extends IncrementalTask {
         return true;
     }
 
+    private final WorkerExecutorFacade<MergedResourceWriter.FileGenerationParameters>
+            workerExecutorFacade;
+
+    @Inject
+    public MergeResources(WorkerExecutor workerExecutor) {
+        this.workerExecutorFacade =
+                new WorkerExecutorAdapter<>(workerExecutor, FileGenerationWorkAction.class);
+    }
+
     @Override
     protected void doFullTaskAction() throws IOException {
         ResourcePreprocessor preprocessor = getPreprocessor();
@@ -166,6 +181,9 @@ public class MergeResources extends IncrementalTask {
 
             // get the merged set and write it down.
             QueueableResourceCompiler resourceCompiler;
+            MergingLog mergingLog =
+                    getBlameLogFolder() != null ? new MergingLog(getBlameLogFolder()) : null;
+
             if (processResources) {
                 resourceCompiler =
                         AaptGradleFactory.make(
@@ -173,15 +191,20 @@ public class MergeResources extends IncrementalTask {
                                 getBuilder(),
                                 crunchPng,
                                 variantScope,
-                                getAaptTempDir());
+                                getAaptTempDir(),
+                                mergingLog);
             } else {
                 resourceCompiler = QueueableResourceCompiler.NONE;
             }
+
+
+
             MergedResourceWriter writer =
                     new MergedResourceWriter(
+                            workerExecutorFacade,
                             destinationDir,
                             getPublicFile(),
-                            getBlameLogFolder(),
+                            mergingLog,
                             preprocessor,
                             resourceCompiler,
                             getIncrementalFolder(),
@@ -254,6 +277,9 @@ public class MergeResources extends IncrementalTask {
 
 
             QueueableResourceCompiler resourceCompiler;
+            MergingLog mergingLog =
+                    getBlameLogFolder() != null ? new MergingLog(getBlameLogFolder()) : null;
+
             if (processResources) {
                 resourceCompiler =
                         AaptGradleFactory.make(
@@ -261,16 +287,18 @@ public class MergeResources extends IncrementalTask {
                                 getBuilder(),
                                 crunchPng,
                                 variantScope,
-                                getAaptTempDir());
+                                getAaptTempDir(),
+                                mergingLog);
             } else {
                 resourceCompiler = QueueableResourceCompiler.NONE;
             }
 
             MergedResourceWriter writer =
                     new MergedResourceWriter(
+                            workerExecutorFacade,
                             getOutputDir(),
                             getPublicFile(),
-                            getBlameLogFolder(),
+                            mergingLog,
                             preprocessor,
                             resourceCompiler,
                             getIncrementalFolder(),
@@ -292,6 +320,49 @@ public class MergeResources extends IncrementalTask {
         }
     }
 
+    public static class FileGenerationWorkAction implements Runnable {
+
+        private final MergedResourceWriter.FileGenerationWorkAction workAction;
+
+        @Inject
+        public FileGenerationWorkAction(MergedResourceWriter.FileGenerationParameters workItem) {
+            this.workAction = new MergedResourceWriter.FileGenerationWorkAction(workItem);
+        }
+
+        @Override
+        public void run() {
+            workAction.run();
+        }
+    }
+
+    private static class MergeResourcesVectorDrawableRenderer extends VectorDrawableRenderer {
+
+        public MergeResourcesVectorDrawableRenderer(
+                int minSdk,
+                File outputDir,
+                Collection<Density> densities,
+                Supplier<ILogger> loggerSupplier) {
+            super(minSdk, outputDir, densities, loggerSupplier);
+        }
+
+        @Override
+        public void generateFile(File toBeGenerated, File original) throws IOException {
+            try {
+                super.generateFile(toBeGenerated, original);
+            } catch (ResourcesNotSupportedException e) {
+                // Add gradle-specific error message.
+                throw new GradleException(
+                        String.format(
+                                "Can't process attribute %1$s=\"%2$s\": "
+                                        + "references to other resources are not supported by "
+                                        + "build-time PNG generation. "
+                                        + "See http://developer.android.com/tools/help/vector-asset-studio.html "
+                                        + "for details.",
+                                e.getName(), e.getValue()));
+            }
+        }
+    }
+
     @NonNull
     private ResourcePreprocessor getPreprocessor() {
         // Only one pre-processor for now. The code will need slight changes when we add more.
@@ -304,25 +375,11 @@ public class MergeResources extends IncrementalTask {
         Collection<Density> densities =
                 getGeneratedDensities().stream().map(Density::getEnum).collect(Collectors.toList());
 
-        return new VectorDrawableRenderer(
-                getMinSdk(), getGeneratedPngsOutputDir(), densities, getILogger()) {
-            @Override
-            public void generateFile(File toBeGenerated, File original) throws IOException {
-                try {
-                    super.generateFile(toBeGenerated, original);
-                } catch (ResourcesNotSupportedException e) {
-                    // Add gradle-specific error message.
-                    throw new GradleException(
-                            String.format(
-                                    "Can't process attribute %1$s=\"%2$s\": "
-                                            + "references to other resources are not supported by "
-                                            + "build-time PNG generation. "
-                                            + "See http://developer.android.com/tools/help/vector-asset-studio.html "
-                                            + "for details.",
-                                    e.getName(), e.getValue()));
-                }
-            }
-        };
+        return new MergeResourcesVectorDrawableRenderer(
+                getMinSdk(),
+                getGeneratedPngsOutputDir(),
+                densities,
+                LoggerWrapper.supplierFor(MergeResources.class));
     }
 
     @NonNull
@@ -341,8 +398,20 @@ public class MergeResources extends IncrementalTask {
                 generatedSets.add(generatedSet);
             }
 
-            // Put all generated sets at the start of the list.
-            processedInputs.addAll(0, generatedSets);
+            // We want to keep the order of the inputs. Given inputs:
+            // (A, B, C, D)
+            // We want to get:
+            // (A-generated, A, B-generated, B, C-generated, C, D-generated, D).
+            // Therefore, when later in {@link DataMerger} we look for sources going through the
+            // list backwards, B-generated will take priority over A (but not B).
+            // A real life use-case would be if an app module generated resource overrode a library
+            // module generated resource (existing not in generated but bundled dir at this stage):
+            // (lib, app debug, app main)
+            // We will get:
+            // (lib generated, lib, app debug generated, app debug, app main generated, app main)
+            for (int i = 0; i < generatedSets.size(); ++i) {
+                processedInputs.add(2 * i, generatedSets.get(i));
+            }
         }
 
         return processedInputs;
@@ -518,12 +587,14 @@ public class MergeResources extends IncrementalTask {
         return aaptGeneration.name();
     }
 
+    @Nullable
     @OutputDirectory
     @Optional
     public File getDataBindingLayoutOutputFolder() {
         return dataBindingLayoutOutputFolder;
     }
 
+    @Nullable
     @OutputDirectory
     @Optional
     public File getResourceShrinkerOutputFolder() {
@@ -677,10 +748,11 @@ public class MergeResources extends IncrementalTask {
             Set<String> generatedDensities = vectorDrawablesOptions.getGeneratedDensities();
 
             mergeResourcesTask.setGeneratedDensities(
-                    Objects.firstNonNull(generatedDensities, Collections.<String>emptySet()));
+                    MoreObjects.firstNonNull(generatedDensities, Collections.<String>emptySet()));
 
             mergeResourcesTask.setDisableVectorDrawables(
-                    vectorDrawablesOptions.getUseSupportLibrary()
+                    (vectorDrawablesOptions.getUseSupportLibrary() != null
+                                    && vectorDrawablesOptions.getUseSupportLibrary())
                             || mergeResourcesTask.getGeneratedDensities().isEmpty());
 
             final boolean validateEnabled =
@@ -712,7 +784,7 @@ public class MergeResources extends IncrementalTask {
 
             if (scope.getGlobalScope().getExtension().getDataBinding().isEnabled()) {
                 mergeResourcesTask.dataBindingExpressionRemover =
-                        (file, out) -> LayoutFileParser.stripSingleLayoutFile(file, out);
+                        LayoutFileParser::stripSingleLayoutFile;
                 // Output for the merge resources task to pass the layouts to data binding tasks.
                 mergeResourcesTask.dataBindingLayoutOutputFolder =
                         scope.getLayoutInputFolderForDataBinding();

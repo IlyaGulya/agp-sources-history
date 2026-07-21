@@ -488,15 +488,29 @@ public class ModelBuilder implements ToolingModelBuilder {
             result = Pair.of(EMPTY_DEPENDENCIES_IMPL, EMPTY_DEPENDENCY_GRAPH);
 
         } else {
+            final Project project = globalScope.getProject();
             ArtifactDependencyGraph graph = new ArtifactDependencyGraph();
+            // can't use ProjectOptions as this is likely to change from the initialization of
+            // ProjectOptions due to how lint dynamically add/remove this property.
+            boolean downloadSources =
+                    !project.hasProperty(AndroidProject.PROPERTY_BUILD_MODEL_DISABLE_SRC_DOWNLOAD)
+                            || !Boolean.TRUE.equals(
+                                    project.getProperties()
+                                            .get(
+                                                    AndroidProject
+                                                            .PROPERTY_BUILD_MODEL_DISABLE_SRC_DOWNLOAD));
 
             if (modelLevel >= AndroidProject.MODEL_LEVEL_4_NEW_DEP_MODEL) {
                 result =
                         Pair.of(
                                 EMPTY_DEPENDENCIES_IMPL,
-                                graph.createLevel2DependencyGraph(scope, modelWithFullDependency));
+                                graph.createLevel2DependencyGraph(
+                                        scope, modelWithFullDependency, downloadSources));
             } else {
-                result = Pair.of(graph.createDependencies(scope), EMPTY_DEPENDENCY_GRAPH);
+                result =
+                        Pair.of(
+                                graph.createDependencies(scope, downloadSources),
+                                EMPTY_DEPENDENCY_GRAPH);
             }
 
             List<String> failures = graph.collectFailures();
@@ -639,17 +653,11 @@ public class ModelBuilder implements ToolingModelBuilder {
                                 VariantScope.TaskOutputType.APK,
                                 VariantScope.TaskOutputType.ABI_PACKAGED_SPLIT,
                                 VariantScope.TaskOutputType.DENSITY_OR_LANGUAGE_PACKAGED_SPLIT),
-                        ImmutableList.of(
-                                new File(
-                                        variantData.getScope().getGlobalScope().getApkLocation(),
-                                        variantData.getVariantConfiguration().getDirName())));
+                        ImmutableList.of(variantData.getScope().getApkLocation()));
             case INSTANTAPP:
                 return new BuildOutputsSupplier(
                         ImmutableList.of(VariantScope.TaskOutputType.INSTANTAPP_BUNDLE),
-                        ImmutableList.of(
-                                new File(
-                                        variantData.getScope().getGlobalScope().getApkLocation(),
-                                        variantData.getVariantConfiguration().getDirName())));
+                        ImmutableList.of(variantData.getScope().getApkLocation()));
             case LIBRARY:
                 ApkInfo mainApkInfo =
                         ApkInfo.of(VariantOutput.OutputType.MAIN, ImmutableList.of(), 0);
@@ -662,10 +670,7 @@ public class ModelBuilder implements ToolingModelBuilder {
             case ANDROID_TEST:
                 return new BuildOutputsSupplier(
                         ImmutableList.of(VariantScope.TaskOutputType.APK),
-                        ImmutableList.of(
-                                new File(
-                                        variantData.getScope().getGlobalScope().getApkLocation(),
-                                        variantData.getVariantConfiguration().getDirName())));
+                        ImmutableList.of(variantData.getScope().getApkLocation()));
             case UNIT_TEST:
                 return (BuildOutputSupplier<Collection<BuildOutput>>)
                         () ->

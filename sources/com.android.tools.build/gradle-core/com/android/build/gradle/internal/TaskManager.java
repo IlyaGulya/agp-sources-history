@@ -25,7 +25,7 @@ import static com.android.build.gradle.internal.publishing.AndroidArtifacts.Arti
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.EXTERNAL;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.MODULE;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.CLASSES;
-import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.DATA_BINDING;
+import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.DATA_BINDING_ARTIFACT;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.JAVA_RES;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.JNI;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.PROGUARD_RULES;
@@ -54,7 +54,6 @@ import com.android.build.api.transform.QualifiedContent.DefaultContentType;
 import com.android.build.api.transform.QualifiedContent.Scope;
 import com.android.build.api.transform.Transform;
 import com.android.build.gradle.AndroidConfig;
-import com.android.build.gradle.ProguardFiles;
 import com.android.build.gradle.api.AnnotationProcessorOptions;
 import com.android.build.gradle.api.JavaCompileOptions;
 import com.android.build.gradle.internal.aapt.AaptGeneration;
@@ -97,7 +96,6 @@ import com.android.build.gradle.internal.tasks.GenerateApkDataTask;
 import com.android.build.gradle.internal.tasks.InstallVariantTask;
 import com.android.build.gradle.internal.tasks.LintCompile;
 import com.android.build.gradle.internal.tasks.MockableAndroidJarTask;
-import com.android.build.gradle.internal.tasks.ProcessAnalyticsTask;
 import com.android.build.gradle.internal.tasks.SigningReportTask;
 import com.android.build.gradle.internal.tasks.SourceSetsTask;
 import com.android.build.gradle.internal.tasks.TaskInputHelper;
@@ -193,7 +191,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import groovy.lang.Closure;
+import com.google.common.collect.Sets;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
@@ -204,7 +202,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
@@ -214,8 +211,6 @@ import org.gradle.api.artifacts.ConfigurationVariant;
 import org.gradle.api.artifacts.PublishArtifact;
 import org.gradle.api.attributes.Attribute;
 import org.gradle.api.attributes.AttributeContainer;
-import org.gradle.api.execution.TaskExecutionGraph;
-import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.api.logging.Logger;
@@ -223,7 +218,6 @@ import org.gradle.api.logging.Logging;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.compile.JavaCompile;
@@ -234,7 +228,6 @@ import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
  */
 public abstract class TaskManager {
 
-    public static final String DEFAULT_PROGUARD_CONFIG_FILE = "proguard-android.txt";
     public static final String DIR_BUNDLES = "bundles";
     public static final String INSTALL_GROUP = "Install";
     public static final String BUILD_GROUP = BasePlugin.BUILD_GROUP;
@@ -268,7 +261,6 @@ public abstract class TaskManager {
     @Nullable private final FileCache buildCache;
 
     // Tasks. TODO: remove the mutable state from here.
-    private AndroidTask<Copy> jacocoAgentTask;
     public AndroidTask<MockableAndroidJarTask> createMockableJar;
 
     public TaskManager(
@@ -302,6 +294,7 @@ public abstract class TaskManager {
         return false;
     }
 
+    @NonNull
     public DataBindingBuilder getDataBindingBuilder() {
         return dataBindingBuilder;
     }
@@ -522,20 +515,20 @@ public abstract class TaskManager {
         // data binding related artifacts for external libs
         if (extension.getDataBinding().isEnabled()) {
             transformManager.addStream(
-                    OriginalStream.builder(project, "ext-libs-data-binding")
+                    OriginalStream.builder(project, "sub-project-data-binding")
                             .addContentTypes(TransformManager.DATA_BINDING_ARTIFACT)
                             .addScope(Scope.SUB_PROJECTS)
                             .setArtifactCollection(
                                     variantScope.getArtifactCollection(
-                                            COMPILE_CLASSPATH, MODULE, DATA_BINDING))
+                                            COMPILE_CLASSPATH, MODULE, DATA_BINDING_ARTIFACT))
                             .build());
             transformManager.addStream(
-                    OriginalStream.builder(project, "ext-libs-databinding")
+                    OriginalStream.builder(project, "ext-libs-data-binding")
                             .addContentTypes(TransformManager.DATA_BINDING_ARTIFACT)
                             .addScope(Scope.EXTERNAL_LIBRARIES)
                             .setArtifactCollection(
                                     variantScope.getArtifactCollection(
-                                            COMPILE_CLASSPATH, EXTERNAL, DATA_BINDING))
+                                            COMPILE_CLASSPATH, EXTERNAL, DATA_BINDING_ARTIFACT))
                             .build());
         }
 
@@ -1352,19 +1345,11 @@ public abstract class TaskManager {
                 androidTasks.create(
                         tasks, new JavaPreCompileTask.ConfigAction(scope, processorListFile));
         preCompileTask.dependsOn(tasks, scope.getPreBuildTask());
-        FileCollection processorListFileCollection =
-                scope.addTaskOutput(
-                        ANNOTATION_PROCESSOR_LIST, processorListFile, preCompileTask.getName());
-
-        AndroidTask<ProcessAnalyticsTask> processAnalyticsTask =
-                androidTasks.create(
-                        tasks,
-                        new ProcessAnalyticsTask.ConfigAction(scope, processorListFileCollection));
+        scope.addTaskOutput(ANNOTATION_PROCESSOR_LIST, processorListFile, preCompileTask.getName());
 
         final AndroidTask<? extends JavaCompile> javacTask =
                 androidTasks.create(tasks, new JavaCompileConfigAction(scope));
         scope.setJavacTask(javacTask);
-        javacTask.dependsOn(tasks, preCompileTask, processAnalyticsTask);
 
         setupCompileTaskDependencies(tasks, scope, javacTask);
 
@@ -1373,7 +1358,12 @@ public abstract class TaskManager {
         postJavacCreation(tasks, scope);
 
         if (extension.getDataBinding().isEnabled()) {
-            javacTask.optionalDependsOn(tasks, scope.getDataBindingMergeArtifactsTask());
+            // the data binding artifact is created by the annotation processor, so we register this
+            // task output (which also publishes it) with javac as the generating task.
+            scope.addTaskOutput(
+                    TaskOutputHolder.TaskOutputType.DATA_BINDING_ARTIFACT,
+                    scope.getBundleFolderForDataBinding(),
+                    javacTask.getName());
         }
 
         return javacTask;
@@ -1628,9 +1618,6 @@ public abstract class TaskManager {
             @NonNull TestVariantData variantData) {
         VariantScope variantScope = variantData.getScope();
 
-        final BaseVariantData testedVariantData =
-                (BaseVariantData) variantData.getTestedVariantData();
-
         createAnchorTasks(tasks, variantScope);
 
         // Create all current streams (dependencies mostly at this point)
@@ -1722,6 +1709,13 @@ public abstract class TaskManager {
         variantLintCheck.dependsOn(tasks, LINT_COMPILE, scope.getJavacTask());
     }
 
+    /** Returns the full path of a task given its name. */
+    private String getTaskPath(String taskName) {
+        return project.getRootProject() == project
+                ? ':' + taskName
+                : project.getPath() + ':' + taskName;
+    }
+
     private void maybeCreateLintVitalTask(
             @NonNull TaskFactory tasks, @NonNull ApkVariantData variantData) {
         if (variantData.getVariantConfiguration().getBuildType().isDebuggable()
@@ -1740,7 +1734,7 @@ public abstract class TaskManager {
                 .getTaskGraph()
                 .whenReady(
                         taskGraph -> {
-                            if (taskGraph.hasTask(LINT)) {
+                            if (taskGraph.hasTask(getTaskPath(LINT))) {
                                 project.getTasks()
                                         .getByName(lintReleaseCheck.getName())
                                         .setEnabled(false);
@@ -1831,20 +1825,18 @@ public abstract class TaskManager {
         //TODO: move to mustRunAfter once is stable.
         if (!reportTasks.isEmpty() && project.getGradle().getStartParameter()
                 .isContinueOnFailure()) {
-            project.getGradle().getTaskGraph().whenReady(new Closure<Void>(this, this) {
-                public void doCall(TaskExecutionGraph taskGraph) {
-                    for (String reportTask : reportTasks) {
-                        if (taskGraph.hasTask(reportTask)) {
-                            tasks.named(reportTask, new Action<Task>() {
-                                @Override
-                                public void execute(Task task) {
-                                    ((AndroidReportTask) task).setWillRun();
+            project.getGradle()
+                    .getTaskGraph()
+                    .whenReady(
+                            taskGraph -> {
+                                for (String reportTask : reportTasks) {
+                                    if (taskGraph.hasTask(getTaskPath(reportTask))) {
+                                        tasks.named(
+                                                reportTask,
+                                                task -> ((AndroidReportTask) task).setWillRun());
+                                    }
                                 }
                             });
-                        }
-                    }
-                }
-            });
         }
     }
 
@@ -2420,25 +2412,28 @@ public abstract class TaskManager {
             }
         }
         setDataBindingAnnotationProcessorParams(variantScope);
-        AndroidTask<TransformTask> existing = variantScope
-                .getDataBindingMergeArtifactsTask();
-        if (existing != null) {
-            return;
-        }
-        Optional<AndroidTask<TransformTask>> dataBindingMergeTask;
-        dataBindingMergeTask = variantScope
-                .getTransformManager()
-                .addTransform(tasks, variantScope,
-                        new DataBindingMergeArtifactsTransform(getLogger(), variantScope));
-        if (dataBindingMergeTask.isPresent()) {
-            final AndroidTask<TransformTask> task = dataBindingMergeTask.get();
-            variantScope.setDataBindingMergeArtifactsTask(task);
 
-            variantScope.addTaskOutput(
-                    TaskOutputHolder.TaskOutputType.DATA_BINDING,
-                    variantScope.getBundleFolderForDataBinding(),
-                    task.getName());
-        }
+        File outFolder =
+                new File(
+                        variantScope.getBuildFolderForDataBindingCompiler(),
+                        DataBindingBuilder.ARTIFACT_FILES_DIR_FROM_LIBS);
+
+
+        Optional<AndroidTask<TransformTask>> dataBindingMergeTask;
+        dataBindingMergeTask =
+                variantScope
+                        .getTransformManager()
+                        .addTransform(
+                                tasks,
+                                variantScope,
+                                new DataBindingMergeArtifactsTransform(getLogger(), outFolder));
+
+        dataBindingMergeTask.ifPresent(
+                task ->
+                        variantScope.addTaskOutput(
+                                TaskOutputHolder.TaskOutputType.DATA_BINDING_DEPENDENCY_ARTIFACTS,
+                                outFolder,
+                                task.getName()));
     }
 
     protected void createDataBindingTasksIfNecessary(@NonNull TaskFactory tasks,
@@ -2548,7 +2543,8 @@ public abstract class TaskManager {
         boolean signedApk = variantData.isSigned();
 
         GradleVariantConfiguration variantConfiguration = variantScope.getVariantConfiguration();
-        /**
+
+        /*
          * PrePackaging step class that will look if the packaging of the main FULL_APK split is
          * necessary when running in InstantRun mode. In InstantRun mode targeting an api 23 or
          * above device, resources are packaged in the main split FULL_APK. However when a warm swap
@@ -2573,8 +2569,7 @@ public abstract class TaskManager {
 
         FileCollection manifests = variantScope.getOutput(manifestType);
         // this is where the final APKs will be located.
-        File finalApkLocation =
-                new File(globalScope.getApkLocation(), variantConfiguration.getDirName());
+        File finalApkLocation = variantScope.getApkLocation();
         // if we are not dealing with possible splits, we can generate in the final folder
         // directly.
         File outputDirectory =
@@ -2605,8 +2600,7 @@ public abstract class TaskManager {
                                 manifestType,
                                 variantScope.getSplitScope(),
                                 taskOutputType));
-        ConfigurableFileCollection apks =
-                variantScope.addTaskOutput(taskOutputType, outputDirectory, packageApp.getName());
+        variantScope.addTaskOutput(taskOutputType, outputDirectory, packageApp.getName());
 
         AndroidTask<PackageApplication> packageInstantRunResources = null;
 
@@ -2684,11 +2678,10 @@ public abstract class TaskManager {
                             new CopyOutputs.ConfigAction(
                                     new DefaultGradlePackagingScope(variantScope),
                                     finalApkLocation));
-            apks =
-                    variantScope.addTaskOutput(
-                            TaskOutputHolder.TaskOutputType.APK,
-                            finalApkLocation,
-                            copyOutputsTask.getName());
+            variantScope.addTaskOutput(
+                    TaskOutputHolder.TaskOutputType.APK,
+                    finalApkLocation,
+                    copyOutputsTask.getName());
             variantScope.getAssembleTask().dependsOn(tasks, copyOutputsTask);
         }
 
@@ -2828,8 +2821,7 @@ public abstract class TaskManager {
             transform.setConfigurationFiles(
                     project.files(
                             TaskInputHelper.bypassFileCallable(
-                                    testedVariantData.getVariantConfiguration()
-                                            ::getTestProguardFiles)));
+                                    testedVariantData.getScope()::getTestProguardFiles)));
 
             // register the mapping file which may or may not exists (only exist if obfuscation)
             // is enabled.
@@ -2842,7 +2834,7 @@ public abstract class TaskManager {
             transform.setConfigurationFiles(
                     project.files(
                             TaskInputHelper.bypassFileCallable(
-                                    variantConfig::getTestProguardFiles)));
+                                    variantScope::getTestProguardFiles)));
             transform.applyTestedMapping(mappingFileCollection);
         } else {
             applyProguardConfig(transform, variantScope);
@@ -2876,8 +2868,7 @@ public abstract class TaskManager {
 
     private static void applyProguardDefaultsForTest(ProGuardTransform transform) {
         // Don't remove any code in tested app.
-        transform.dontshrink();
-        transform.dontoptimize();
+        transform.setActions(PostprocessingActions.create(false, true, false));
 
         // We can't call dontobfuscate, since that would make ProGuard ignore the mapping file.
         transform.keep("class * {*;}");
@@ -2930,37 +2921,35 @@ public abstract class TaskManager {
     private void applyProguardConfig(
             ProguardConfigurable transform,
             VariantScope scope) {
-        final BaseVariantData variantData = scope.getVariantData();
-        final GradleVariantConfiguration variantConfig = scope.getVariantConfiguration();
+        GradleVariantConfiguration variantConfig = scope.getVariantConfiguration();
+
+        PostprocessingActions postprocessingActions = scope.getPostprocessingActions();
+        if (postprocessingActions != null) {
+            transform.setActions(postprocessingActions);
+        }
+
+        Supplier<Collection<File>> proguardConfigFiles =
+                () -> {
+                    Set<File> proguardFiles = Sets.newHashSet(scope.getProguardFiles());
+
+                    // Use the first output when looking for the proguard rule output of
+                    // the aapt task. The different outputs are not different in a way that
+                    // makes this rule file different per output.
+                    proguardFiles.add(scope.getProcessAndroidResourcesProguardOutputFile());
+                    return proguardFiles;
+                };
+
         transform.setConfigurationFiles(
                 project.files(
-                        TaskInputHelper.bypassFileCallable(
-                                () -> {
-                                    Set<File> proguardFiles =
-                                            variantConfig.getProguardFiles(
-                                                    Collections.singletonList(
-                                                            ProguardFiles.getDefaultProguardFile(
-                                                                    TaskManager
-                                                                            .DEFAULT_PROGUARD_CONFIG_FILE,
-                                                                    project)));
-
-                                    // use the first output when looking for the proguard rule output of
-                                    // the aapt task. The different outputs are not different in a way that
-                                    // makes this rule file different per output.
-                                    proguardFiles.add(
-                                            variantData
-                                                    .getScope()
-                                                    .getProcessAndroidResourcesProguardOutputFile());
-                                    return proguardFiles;
-                                }),
+                        TaskInputHelper.bypassFileCallable(proguardConfigFiles),
                         scope.getArtifactFileCollection(RUNTIME_CLASSPATH, ALL, PROGUARD_RULES)));
 
-        if (variantData.getType() == LIBRARY) {
+        if (scope.getVariantData().getType() == LIBRARY) {
             transform.keep("class **.R");
             transform.keep("class **.R$*");
         }
 
-        if (variantData.getVariantConfiguration().isTestCoverageEnabled()) {
+        if (variantConfig.isTestCoverageEnabled()) {
             // when collecting coverage, don't remove the JaCoCo runtime
             transform.keep("class com.vladium.** {*;}");
             transform.keep("class org.jacoco.** {*;}");
@@ -2970,17 +2959,15 @@ public abstract class TaskManager {
     }
 
     public void createReportTasks(TaskFactory tasks, final List<VariantScope> variantScopes) {
-        AndroidTask<DependencyReportTask> dependencyReportTask =
-                androidTasks.create(
-                        tasks,
-                        "androidDependencies",
-                        DependencyReportTask.class,
-                        task -> {
-                            task.setDescription(
-                                    "Displays the Android dependencies of the project.");
-                            task.setVariants(variantScopes);
-                            task.setGroup(ANDROID_GROUP);
-                        });
+        androidTasks.create(
+                tasks,
+                "androidDependencies",
+                DependencyReportTask.class,
+                task -> {
+                    task.setDescription("Displays the Android dependencies of the project.");
+                    task.setVariants(variantScopes);
+                    task.setGroup(ANDROID_GROUP);
+                });
 
         androidTasks.create(
                 tasks,

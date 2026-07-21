@@ -27,7 +27,6 @@ import com.android.build.api.transform.TransformInput;
 import com.android.build.api.transform.TransformInvocation;
 import com.android.build.gradle.internal.LoggerWrapper;
 import com.android.build.gradle.internal.pipeline.TransformManager;
-import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.utils.ILogger;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
@@ -57,10 +56,9 @@ public class DataBindingMergeArtifactsTransform extends Transform {
     @NonNull
     private final ILogger logger;
     private final File outFolder;
-    public DataBindingMergeArtifactsTransform(@NonNull Logger logger, VariantScope variantScope) {
+    public DataBindingMergeArtifactsTransform(@NonNull Logger logger, @NonNull File outFolder) {
         this.logger = new LoggerWrapper(logger);
-        outFolder = new File(variantScope.getBuildFolderForDataBindingCompiler(),
-                DataBindingBuilder.ARTIFACT_FILES_DIR_FROM_LIBS);
+        this.outFolder = outFolder;
     }
 
     @NonNull
@@ -93,6 +91,9 @@ public class DataBindingMergeArtifactsTransform extends Transform {
             directoryInput.getChangedFiles().forEach((file, status) -> {
                 if (isResource(file.getName())) {
                     switch (status) {
+                        case NOTCHANGED:
+                            // Ignore
+                            break;
                         case ADDED:
                         case CHANGED:
                             try {
@@ -111,6 +112,9 @@ public class DataBindingMergeArtifactsTransform extends Transform {
         }));
         inputs.forEach(input -> input.getJarInputs().forEach(jarInput -> {
             switch (jarInput.getStatus()) {
+                case NOTCHANGED:
+                    // Ignore
+                    break;
                 case ADDED:
                 case CHANGED:
                     try {

@@ -30,6 +30,7 @@ import com.android.ide.common.blame.SourceFile;
 import com.android.ide.common.blame.SourceFilePosition;
 import com.android.ide.common.blame.SourcePosition;
 import com.android.ide.common.internal.PngException;
+import com.android.ide.common.workers.WorkerExecutorFacade;
 import com.android.resources.ResourceFolderType;
 import com.android.resources.ResourceType;
 import com.android.utils.FileUtils;
@@ -46,6 +47,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -66,7 +68,8 @@ import org.w3c.dom.Node;
  * A {@link MergeWriter} for assets, using {@link ResourceItem}. Also takes care of compiling
  * resources and stripping data binding from layout files.
  */
-public class MergedResourceWriter extends MergeWriter<ResourceItem> {
+public class MergedResourceWriter
+        extends MergeWriter<ResourceItem, MergedResourceWriter.FileGenerationParameters> {
 
     @NonNull
     private final ResourcePreprocessor mPreprocessor;
@@ -144,7 +147,7 @@ public class MergedResourceWriter extends MergeWriter<ResourceItem> {
      * @param rootFolder merged resources directory to write to (e.g. {@code
      *     intermediates/res/merged/debug})
      * @param publicFile File that we should write public.txt to
-     * @param blameLogFolder folder containing merging log
+     * @param blameLog merging log for rewriting error messages
      * @param preprocessor preprocessor for merged resources, such as vector drawable rendering
      * @param resourceCompiler resource compiler, i.e. AAPT
      * @param temporaryDirectory temporary directory for intermediate merged files
@@ -156,9 +159,10 @@ public class MergedResourceWriter extends MergeWriter<ResourceItem> {
      * @param crunchPng should we crunch PNG files
      */
     public MergedResourceWriter(
+            @NonNull WorkerExecutorFacade<FileGenerationParameters> workerExecutor,
             @NonNull File rootFolder,
             @Nullable File publicFile,
-            @Nullable File blameLogFolder,
+            @Nullable MergingLog blameLog,
             @NonNull ResourcePreprocessor preprocessor,
             @NonNull QueueableResourceCompiler resourceCompiler,
             @NonNull File temporaryDirectory,
@@ -167,7 +171,7 @@ public class MergedResourceWriter extends MergeWriter<ResourceItem> {
             @Nullable File resourceShrinkerOutputFolder,
             boolean pseudoLocalesEnabled,
             boolean crunchPng) {
-        super(rootFolder);
+        super(rootFolder, workerExecutor);
         Preconditions.checkState(
                 (dataBindingExpressionRemover == null) == (dataBindingLayoutOutputFolder == null),
                 "Both dataBindingExpressionRemover and dataBindingLayoutOutputFolder need to be "
@@ -175,7 +179,7 @@ public class MergedResourceWriter extends MergeWriter<ResourceItem> {
 
         mResourceCompiler = resourceCompiler;
         mPublicFile = publicFile;
-        mMergingLog = blameLogFolder != null ? new MergingLog(blameLogFolder) : null;
+        mMergingLog = blameLog;
         mPreprocessor = preprocessor;
         mCompiling = new ConcurrentLinkedDeque<>();
         mTemporaryDirectory = temporaryDirectory;
@@ -210,9 +214,18 @@ public class MergedResourceWriter extends MergeWriter<ResourceItem> {
             @NonNull ResourcePreprocessor preprocessor,
             @NonNull File temporaryDirectory) {
         return new MergedResourceWriter(
+                new WorkerExecutorFacade<FileGenerationParameters>() {
+                    @Override
+                    public void submit(FileGenerationParameters parameter) {
+                        new FileGenerationWorkAction(parameter).run();
+                    }
+
+                    @Override
+                    public void await() {}
+                },
                 rootFolder,
                 publicFile,
-                blameLogFolder,
+                blameLogFolder != null ? new MergingLog(blameLogFolder) : null,
                 preprocessor,
                 QueueableResourceCompiler.NONE,
                 temporaryDirectory,
@@ -257,8 +270,6 @@ public class MergedResourceWriter extends MergeWriter<ResourceItem> {
                                 request.getInput(), mResourceCompiler.compileOutputFor(request));
                     }
 
-
-
                     if (dataBindingExpressionRemover != null
                             && request.getFolderName().startsWith("layout")
                             && request.getInput().getName().endsWith(".xml")) {
@@ -286,6 +297,8 @@ public class MergedResourceWriter extends MergeWriter<ResourceItem> {
                             FileUtils.copyFileToDirectory(request.getInput(), databindingLayoutDir);
 
                             if (mMergingLog != null) {
+                                mMergingLog.logCopy(request.getInput(), strippedLayout);
+
                                 mMergingLog.logCopy(
                                         request.getInput(),
                                         new File(
@@ -383,29 +396,61 @@ public class MergedResourceWriter extends MergeWriter<ResourceItem> {
             // This is a single value file or a set of generated files. Only write it if the state
             // is TOUCHED.
             if (item.isTouched()) {
-                getExecutor()
-                        .execute(
-                                () -> {
-                                    File file = item.getFile();
-                                    String folderName = getFolderName(item);
+                File file = item.getFile();
+                String folderName = getFolderName(item);
 
-                                    // TODO : make this also a request and use multi-threading for generation.
-                                    if (type == DataFile.FileType.GENERATED_FILES) {
-                                        try {
-                                            mPreprocessor.generateFile(
-                                                    file, item.getSource().getFile());
-                                        } catch (Exception e) {
-                                            throw new ConsumerException(
-                                                    e, item.getSource().getFile());
-                                        }
-                                    }
+                // TODO : make this also a request and use multi-threading for generation.
+                if (type == DataFile.FileType.GENERATED_FILES) {
+                    try {
+                        FileGenerationParameters workItem =
+                                new FileGenerationParameters(item, mPreprocessor);
+                        if (workItem.resourceItem.getSource() != null) {
+                            getExecutor().submit(workItem);
+                        }
+                    } catch (Exception e) {
+                        throw new ConsumerException(e, item.getSource().getFile());
+                    }
+                }
 
-                                    // enlist a new crunching request.
-                                    mCompileResourceRequests.add(
-                                            new CompileResourceRequest(
-                                                    file, getRootFolder(), folderName));
-                                    return null;
-                                });
+                // enlist a new crunching request.
+                mCompileResourceRequests.add(
+                        new CompileResourceRequest(file, getRootFolder(), folderName));
+            }
+        }
+    }
+
+    public static class FileGenerationParameters implements Serializable {
+        public final ResourceItem resourceItem;
+        public final ResourcePreprocessor resourcePreprocessor;
+
+        private FileGenerationParameters(
+                ResourceItem resourceItem, ResourcePreprocessor resourcePreprocessor) {
+            this.resourceItem = resourceItem;
+            this.resourcePreprocessor = resourcePreprocessor;
+        }
+    }
+
+    public static class FileGenerationWorkAction implements Runnable {
+
+        private final FileGenerationParameters workItem;
+
+        public FileGenerationWorkAction(FileGenerationParameters workItem) {
+            this.workItem = workItem;
+        }
+
+        @Override
+        public void run() {
+            try {
+                workItem.resourcePreprocessor.generateFile(
+                        workItem.resourceItem.getFile(),
+                        workItem.resourceItem.getSource().getFile());
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        "Error while processing "
+                                + workItem.resourceItem.getSource().getFile()
+                                + " : "
+                                + e.getMessage(),
+                        e);
             }
         }
     }
@@ -552,20 +597,31 @@ public class MergedResourceWriter extends MergeWriter<ResourceItem> {
 
                     Files.write(content, outFile, Charsets.UTF_8);
 
-                    Future<File> f =
-                            mResourceCompiler.compile(
-                                    new CompileResourceRequest(
-                                            outFile,
-                                            getRootFolder(),
-                                            folderName,
-                                            pseudoLocalesEnabled,
-                                            crunchPng));
+                    CompileResourceRequest request =
+                            new CompileResourceRequest(
+                                    outFile,
+                                    getRootFolder(),
+                                    folderName,
+                                    pseudoLocalesEnabled,
+                                    crunchPng);
 
-                    File copyOutput = f.get();
+                    // If we are going to shrink resources, the resource shrinker needs to have the
+                    // final merged uncompiled file.
+                    if (resourceShrinkerOutputFolder != null) {
+                        File typeDir = new File(resourceShrinkerOutputFolder, folderName);
+                        FileUtils.mkdirs(typeDir);
+                        FileUtils.copyFileToDirectory(outFile, typeDir);
+                    }
 
                     if (blame != null) {
-                        mMergingLog.logSource(new SourceFile(copyOutput), blame);
+                        mMergingLog.logSource(
+                                new SourceFile(mResourceCompiler.compileOutputFor(request)), blame);
+
+                        mMergingLog.logSource(new SourceFile(outFile), blame);
                     }
+
+                    mResourceCompiler.compile(request).get();
+
 
                     if (publicNodes != null && mPublicFile != null) {
                         // Generate public.txt:
@@ -604,7 +660,20 @@ public class MergedResourceWriter extends MergeWriter<ResourceItem> {
                     ResourceFolderType.VALUES.getName() + RES_QUALIFIER_SEP + key :
                     ResourceFolderType.VALUES.getName();
 
-            removeOutFile(FileUtils.join(getRootFolder(), folderName, folderName + DOT_XML));
+            if (resourceShrinkerOutputFolder != null) {
+                removeOutFile(
+                        FileUtils.join(
+                                resourceShrinkerOutputFolder, folderName, folderName + DOT_XML));
+            }
+
+            // Remove the intermediate (compiled) values file.
+            removeOutFile(
+                    mResourceCompiler.compileOutputFor(
+                            new CompileResourceRequest(
+                                    FileUtils.join(
+                                            getRootFolder(), folderName, folderName + DOT_XML),
+                                    getRootFolder(),
+                                    folderName)));
         }
     }
 
@@ -621,7 +690,8 @@ public class MergedResourceWriter extends MergeWriter<ResourceItem> {
         if (compiledFilePath != null) {
             return new File(compiledFilePath);
         } else {
-            return FileUtils.join(getRootFolder(), getFolderName(resourceItem), file.getName());
+            return mResourceCompiler.compileOutputFor(
+                    new CompileResourceRequest(file, getRootFolder(), getFolderName(resourceItem)));
         }
     }
 
@@ -645,6 +715,14 @@ public class MergedResourceWriter extends MergeWriter<ResourceItem> {
         removeOutFile(toRemove);
     }
 
+    private void removeFileFromResourceShrinkerOutputFolder(@NonNull ResourceItem resourceItem) {
+        File originalFile = resourceItem.getFile();
+        File resTypeDir =
+                new File(resourceShrinkerOutputFolder, originalFile.getParentFile().getName());
+        File toRemove = new File(resTypeDir, originalFile.getName());
+        removeOutFile(toRemove);
+    }
+
     /**
      * Removes a file that already exists in the out res folder. This has to be a non value file.
      *
@@ -657,6 +735,10 @@ public class MergedResourceWriter extends MergeWriter<ResourceItem> {
         if (dataBindingExpressionRemover != null) {
             // The file could have possibly been a layout file with data binding.
             removeLayoutFileFromDataBindingOutputFolder(resourceItem);
+        }
+        if (resourceShrinkerOutputFolder != null) {
+            // The file was copied for the resource shrinking and needs to be removed from there.
+            removeFileFromResourceShrinkerOutputFolder(resourceItem);
         }
         return removeOutFile(fileToRemove);
     }

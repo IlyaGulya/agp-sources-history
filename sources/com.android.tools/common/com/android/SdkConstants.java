@@ -87,6 +87,7 @@ public final class SdkConstants {
 
     /** intermediate publishing between projects */
     public static final String FN_INTERMEDIATE_RES_JAR = "res.jar";                   //$NON-NLS-1$
+    public static final String FN_INTERMEDIATE_FULL_JAR = "full.jar"; //$NON-NLS-1$
 
     /** list of splits for a variant */
     public static final String FN_SPLIT_LIST = "split-list.gson";                     //$NON-NLS-1$
@@ -1168,6 +1169,7 @@ public final class SdkConstants {
     public static final String ATTR_EXTRACT_NATIVE_LIBS = "extractNativeLibs";
     public static final String ATTR_SPLIT_NAME = "splitName";
     public static final String ATTR_FEATURE_SPLIT = "featureSplit";
+    public static final String ATTR_TARGET_SANDBOX_VERSION = "targetSandboxVersion";
 
     // Attributes: Resources
     public static final String ATTR_ATTR = "attr";
@@ -1576,6 +1578,9 @@ public final class SdkConstants {
     // Values: Drawables
     public static final String VALUE_DISABLED = "disabled"; //$NON-NLS-1$
     public static final String VALUE_CLAMP = "clamp"; //$NON-NLS-1$
+
+    // Value delimiters: Manifest
+    public static final String VALUE_DELIMITER_PIPE = "|"; //$NON-NLS-1$
 
     // Menus
     public static final String ATTR_CHECKABLE = "checkable";
@@ -2135,7 +2140,7 @@ public final class SdkConstants {
     public static final String GRADLE_PLUGIN_NAME = "com.android.tools.build:gradle:";
     public static final String GRADLE_EXPERIMENTAL_PLUGIN_NAME =
             "com.android.tools.build:gradle-experimental:";
-    public static final String GRADLE_MINIMUM_VERSION = "4.0-milestone-1";
+    public static final String GRADLE_MINIMUM_VERSION = "4.0-rc-1";
     public static final String GRADLE_LATEST_VERSION = GRADLE_MINIMUM_VERSION;
     public static final String GRADLE_PLUGIN_MINIMUM_VERSION = "1.0.0";
     // Always update GRADLE_PLUGIN_RECOMMENDED_VERSION and GRADLE_EXPERIMENTAL_PLUGIN_RECOMMENDED_VERSION together.
@@ -2153,7 +2158,9 @@ public final class SdkConstants {
     public static final String SUPPORT_LIB_GROUP_ID = "com.android.support";
     public static final String SUPPORT_LIB_ARTIFACT = "com.android.support:support-v4";
     public static final String DESIGN_LIB_ARTIFACT = "com.android.support:design";
-    public static final String APPCOMPAT_LIB_ARTIFACT = "com.android.support:appcompat-v7";
+    public static final String APPCOMPAT_LIB_ARTIFACT_ID = "appcompat-v7";
+    public static final String APPCOMPAT_LIB_ARTIFACT =
+            SUPPORT_LIB_GROUP_ID + ":" + APPCOMPAT_LIB_ARTIFACT_ID;
     public static final String CARD_VIEW_LIB_ARTIFACT = "com.android.support:cardview-v7";
     public static final String GRID_LAYOUT_LIB_ARTIFACT = "com.android.support:gridlayout-v7";
     public static final String RECYCLER_VIEW_LIB_ARTIFACT = "com.android.support:recyclerview-v7";

@@ -69,6 +69,7 @@ import com.android.ide.common.blame.MergingLog;
 import com.android.ide.common.blame.MergingLogRewriter;
 import com.android.ide.common.blame.ParsingProcessOutputHandler;
 import com.android.ide.common.blame.parser.ToolOutputParser;
+import com.android.ide.common.blame.parser.aapt.Aapt2OutputParser;
 import com.android.ide.common.blame.parser.aapt.AaptOutputParser;
 import com.android.ide.common.build.ApkData;
 import com.android.ide.common.build.SplitOutputMatcher;
@@ -415,13 +416,16 @@ public class ProcessAndroidResources extends IncrementalTask {
         AndroidBuilder builder = getBuilder();
         MergingLog mergingLog = new MergingLog(getMergeBlameLogFolder());
 
-        //TODO: get rid of the rewriter
         MergingLogRewriter mergingLogRewriter =
                 new MergingLogRewriter(mergingLog::find, builder.getErrorReporter());
 
         ProcessOutputHandler processOutputHandler =
                 new ParsingProcessOutputHandler(
-                        new ToolOutputParser(new AaptOutputParser(), getILogger()),
+                        new ToolOutputParser(
+                                aaptGeneration == AaptGeneration.AAPT_V1
+                                        ? new AaptOutputParser()
+                                        : new Aapt2OutputParser(),
+                                getILogger()),
                         mergingLogRewriter);
 
         ImmutableList.Builder<File> featurePackagesBuilder = ImmutableList.builder();
@@ -463,7 +467,7 @@ public class ProcessAndroidResources extends IncrementalTask {
                 FileUtils.cleanOutputDir(srcOut);
             }
 
-            symbolOutputDir = getTextSymbolOutputDir();
+            symbolOutputDir = textSymbolOutputDir.get();
             proguardOutputFile = getProguardOutputFile();
             mainDexListProguardOutputFile = getMainDexListProguardOutputFile();
         }
@@ -758,7 +762,7 @@ public class ProcessAndroidResources extends IncrementalTask {
                 // TODO: unify with generateBuilderConfig, compileAidl, and library packaging somehow?
                 processResources
                         .setSourceOutputDir(variantScope.getRClassSourceOutputDir());
-                processResources.setTextSymbolOutputDir(symbolLocation);
+            processResources.textSymbolOutputDir = symbolLocation;
 
             if (variantScope.getCodeShrinker() != null) {
                 processResources.setProguardOutputFile(
@@ -916,15 +920,11 @@ public class ProcessAndroidResources extends IncrementalTask {
         this.sourceOutputDir = sourceOutputDir;
     }
 
-    @OutputDirectory
+    @org.gradle.api.tasks.OutputFile
     @Optional
     @Nullable
-    public File getTextSymbolOutputDir() {
-        return textSymbolOutputDir.get();
-    }
-
-    public void setTextSymbolOutputDir(Supplier<File> textSymbolOutputDir) {
-        this.textSymbolOutputDir = textSymbolOutputDir;
+    public File getTextSymbolOutputFile() {
+        return new File(textSymbolOutputDir.get(), SymbolTable.R_CLASS_NAME + SdkConstants.DOT_TXT);
     }
 
     @org.gradle.api.tasks.OutputFile
