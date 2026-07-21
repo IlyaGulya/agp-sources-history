@@ -5,28 +5,28 @@ package com.android.ide.model.sync;
 
 /**
  * <pre>
- * Library VariantType specific model.
+ * Dynamic Feature VariantType specific model.
  * </pre>
  *
- * Protobuf type {@code LibraryVariantModel}
+ * Protobuf type {@code DynamicFeatureVariantModel}
  */
-public  final class LibraryVariantModel extends
+public  final class DynamicFeatureVariantModel extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:LibraryVariantModel)
-    LibraryVariantModelOrBuilder {
+    // @@protoc_insertion_point(message_implements:DynamicFeatureVariantModel)
+    DynamicFeatureVariantModelOrBuilder {
 private static final long serialVersionUID = 0L;
-  // Use LibraryVariantModel.newBuilder() to construct.
-  private LibraryVariantModel(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+  // Use DynamicFeatureVariantModel.newBuilder() to construct.
+  private DynamicFeatureVariantModel(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
   }
-  private LibraryVariantModel() {
+  private DynamicFeatureVariantModel() {
   }
 
   @java.lang.Override
   @SuppressWarnings({"unused"})
   protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
-    return new LibraryVariantModel();
+    return new DynamicFeatureVariantModel();
   }
 
   @java.lang.Override
@@ -34,7 +34,7 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private LibraryVariantModel(
+  private DynamicFeatureVariantModel(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
@@ -86,15 +86,15 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return com.android.ide.model.sync.SyncVariant.internal_static_LibraryVariantModel_descriptor;
+    return com.android.ide.model.sync.SyncVariant.internal_static_DynamicFeatureVariantModel_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return com.android.ide.model.sync.SyncVariant.internal_static_LibraryVariantModel_fieldAccessorTable
+    return com.android.ide.model.sync.SyncVariant.internal_static_DynamicFeatureVariantModel_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            com.android.ide.model.sync.LibraryVariantModel.class, com.android.ide.model.sync.LibraryVariantModel.Builder.class);
+            com.android.ide.model.sync.DynamicFeatureVariantModel.class, com.android.ide.model.sync.DynamicFeatureVariantModel.Builder.class);
   }
 
   public static final int MODULECOMMONMODEL_FIELD_NUMBER = 1;
@@ -160,10 +160,10 @@ private static final long serialVersionUID = 0L;
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof com.android.ide.model.sync.LibraryVariantModel)) {
+    if (!(obj instanceof com.android.ide.model.sync.DynamicFeatureVariantModel)) {
       return super.equals(obj);
     }
-    com.android.ide.model.sync.LibraryVariantModel other = (com.android.ide.model.sync.LibraryVariantModel) obj;
+    com.android.ide.model.sync.DynamicFeatureVariantModel other = (com.android.ide.model.sync.DynamicFeatureVariantModel) obj;
 
     if (hasModuleCommonModel() != other.hasModuleCommonModel()) return false;
     if (hasModuleCommonModel()) {
@@ -190,69 +190,69 @@ private static final long serialVersionUID = 0L;
     return hash;
   }
 
-  public static com.android.ide.model.sync.LibraryVariantModel parseFrom(
+  public static com.android.ide.model.sync.DynamicFeatureVariantModel parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.android.ide.model.sync.LibraryVariantModel parseFrom(
+  public static com.android.ide.model.sync.DynamicFeatureVariantModel parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.android.ide.model.sync.LibraryVariantModel parseFrom(
+  public static com.android.ide.model.sync.DynamicFeatureVariantModel parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.android.ide.model.sync.LibraryVariantModel parseFrom(
+  public static com.android.ide.model.sync.DynamicFeatureVariantModel parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.android.ide.model.sync.LibraryVariantModel parseFrom(byte[] data)
+  public static com.android.ide.model.sync.DynamicFeatureVariantModel parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.android.ide.model.sync.LibraryVariantModel parseFrom(
+  public static com.android.ide.model.sync.DynamicFeatureVariantModel parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.android.ide.model.sync.LibraryVariantModel parseFrom(java.io.InputStream input)
+  public static com.android.ide.model.sync.DynamicFeatureVariantModel parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static com.android.ide.model.sync.LibraryVariantModel parseFrom(
+  public static com.android.ide.model.sync.DynamicFeatureVariantModel parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static com.android.ide.model.sync.LibraryVariantModel parseDelimitedFrom(java.io.InputStream input)
+  public static com.android.ide.model.sync.DynamicFeatureVariantModel parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static com.android.ide.model.sync.LibraryVariantModel parseDelimitedFrom(
+  public static com.android.ide.model.sync.DynamicFeatureVariantModel parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static com.android.ide.model.sync.LibraryVariantModel parseFrom(
+  public static com.android.ide.model.sync.DynamicFeatureVariantModel parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static com.android.ide.model.sync.LibraryVariantModel parseFrom(
+  public static com.android.ide.model.sync.DynamicFeatureVariantModel parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -265,7 +265,7 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(com.android.ide.model.sync.LibraryVariantModel prototype) {
+  public static Builder newBuilder(com.android.ide.model.sync.DynamicFeatureVariantModel prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
   @java.lang.Override
@@ -282,29 +282,29 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * Library VariantType specific model.
+   * Dynamic Feature VariantType specific model.
    * </pre>
    *
-   * Protobuf type {@code LibraryVariantModel}
+   * Protobuf type {@code DynamicFeatureVariantModel}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:LibraryVariantModel)
-      com.android.ide.model.sync.LibraryVariantModelOrBuilder {
+      // @@protoc_insertion_point(builder_implements:DynamicFeatureVariantModel)
+      com.android.ide.model.sync.DynamicFeatureVariantModelOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.android.ide.model.sync.SyncVariant.internal_static_LibraryVariantModel_descriptor;
+      return com.android.ide.model.sync.SyncVariant.internal_static_DynamicFeatureVariantModel_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.android.ide.model.sync.SyncVariant.internal_static_LibraryVariantModel_fieldAccessorTable
+      return com.android.ide.model.sync.SyncVariant.internal_static_DynamicFeatureVariantModel_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.android.ide.model.sync.LibraryVariantModel.class, com.android.ide.model.sync.LibraryVariantModel.Builder.class);
+              com.android.ide.model.sync.DynamicFeatureVariantModel.class, com.android.ide.model.sync.DynamicFeatureVariantModel.Builder.class);
     }
 
-    // Construct using com.android.ide.model.sync.LibraryVariantModel.newBuilder()
+    // Construct using com.android.ide.model.sync.DynamicFeatureVariantModel.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }
@@ -334,17 +334,17 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return com.android.ide.model.sync.SyncVariant.internal_static_LibraryVariantModel_descriptor;
+      return com.android.ide.model.sync.SyncVariant.internal_static_DynamicFeatureVariantModel_descriptor;
     }
 
     @java.lang.Override
-    public com.android.ide.model.sync.LibraryVariantModel getDefaultInstanceForType() {
-      return com.android.ide.model.sync.LibraryVariantModel.getDefaultInstance();
+    public com.android.ide.model.sync.DynamicFeatureVariantModel getDefaultInstanceForType() {
+      return com.android.ide.model.sync.DynamicFeatureVariantModel.getDefaultInstance();
     }
 
     @java.lang.Override
-    public com.android.ide.model.sync.LibraryVariantModel build() {
-      com.android.ide.model.sync.LibraryVariantModel result = buildPartial();
+    public com.android.ide.model.sync.DynamicFeatureVariantModel build() {
+      com.android.ide.model.sync.DynamicFeatureVariantModel result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
@@ -352,8 +352,8 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public com.android.ide.model.sync.LibraryVariantModel buildPartial() {
-      com.android.ide.model.sync.LibraryVariantModel result = new com.android.ide.model.sync.LibraryVariantModel(this);
+    public com.android.ide.model.sync.DynamicFeatureVariantModel buildPartial() {
+      com.android.ide.model.sync.DynamicFeatureVariantModel result = new com.android.ide.model.sync.DynamicFeatureVariantModel(this);
       if (moduleCommonModelBuilder_ == null) {
         result.moduleCommonModel_ = moduleCommonModel_;
       } else {
@@ -397,16 +397,16 @@ private static final long serialVersionUID = 0L;
     }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof com.android.ide.model.sync.LibraryVariantModel) {
-        return mergeFrom((com.android.ide.model.sync.LibraryVariantModel)other);
+      if (other instanceof com.android.ide.model.sync.DynamicFeatureVariantModel) {
+        return mergeFrom((com.android.ide.model.sync.DynamicFeatureVariantModel)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(com.android.ide.model.sync.LibraryVariantModel other) {
-      if (other == com.android.ide.model.sync.LibraryVariantModel.getDefaultInstance()) return this;
+    public Builder mergeFrom(com.android.ide.model.sync.DynamicFeatureVariantModel other) {
+      if (other == com.android.ide.model.sync.DynamicFeatureVariantModel.getDefaultInstance()) return this;
       if (other.hasModuleCommonModel()) {
         mergeModuleCommonModel(other.getModuleCommonModel());
       }
@@ -425,11 +425,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      com.android.ide.model.sync.LibraryVariantModel parsedMessage = null;
+      com.android.ide.model.sync.DynamicFeatureVariantModel parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (com.android.ide.model.sync.LibraryVariantModel) e.getUnfinishedMessage();
+        parsedMessage = (com.android.ide.model.sync.DynamicFeatureVariantModel) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -570,41 +570,41 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:LibraryVariantModel)
+    // @@protoc_insertion_point(builder_scope:DynamicFeatureVariantModel)
   }
 
-  // @@protoc_insertion_point(class_scope:LibraryVariantModel)
-  private static final com.android.ide.model.sync.LibraryVariantModel DEFAULT_INSTANCE;
+  // @@protoc_insertion_point(class_scope:DynamicFeatureVariantModel)
+  private static final com.android.ide.model.sync.DynamicFeatureVariantModel DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new com.android.ide.model.sync.LibraryVariantModel();
+    DEFAULT_INSTANCE = new com.android.ide.model.sync.DynamicFeatureVariantModel();
   }
 
-  public static com.android.ide.model.sync.LibraryVariantModel getDefaultInstance() {
+  public static com.android.ide.model.sync.DynamicFeatureVariantModel getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
-  private static final com.google.protobuf.Parser<LibraryVariantModel>
-      PARSER = new com.google.protobuf.AbstractParser<LibraryVariantModel>() {
+  private static final com.google.protobuf.Parser<DynamicFeatureVariantModel>
+      PARSER = new com.google.protobuf.AbstractParser<DynamicFeatureVariantModel>() {
     @java.lang.Override
-    public LibraryVariantModel parsePartialFrom(
+    public DynamicFeatureVariantModel parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new LibraryVariantModel(input, extensionRegistry);
+      return new DynamicFeatureVariantModel(input, extensionRegistry);
     }
   };
 
-  public static com.google.protobuf.Parser<LibraryVariantModel> parser() {
+  public static com.google.protobuf.Parser<DynamicFeatureVariantModel> parser() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.google.protobuf.Parser<LibraryVariantModel> getParserForType() {
+  public com.google.protobuf.Parser<DynamicFeatureVariantModel> getParserForType() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.android.ide.model.sync.LibraryVariantModel getDefaultInstanceForType() {
+  public com.android.ide.model.sync.DynamicFeatureVariantModel getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

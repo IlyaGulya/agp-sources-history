@@ -445,6 +445,15 @@ public final class SdkConstants {
     /** jars folder */
     public static final String FD_JARS = "jars";
 
+    /** Intermediates folder under the build directory */
+    public static final String FD_INTERMEDIATES = "intermediates";
+    /** logs folder under the build directory */
+    public static final String FD_LOGS = "logs";
+    /** outputs folder under the build directory */
+    public static final String FD_OUTPUTS = "outputs";
+    /** generated folder under the build directory */
+    public static final String FD_GENERATED = "generated";
+
     /* Folder Names for the Android SDK */
 
     /** Name of the SDK platforms folder. */
@@ -718,14 +727,28 @@ public final class SdkConstants {
 
     /* Android Class Constants */
     public static final String CLASS_ACTIVITY = "android.app.Activity";
+
+    public static final String CLASS_WATCHFACE_WSL
+            = "android.support.wearable.watchface.WatchFaceService";
+
+    public static final String CLASS_WATCHFACE_ANDROIDX = "androidx.wear.watchface.WatchFaceService";
+
+    public static final String CLASS_TILE_SERVICE = "androidx.wear.tiles.TileService";
+
     public static final String CLASS_APPLICATION = "android.app.Application";
+
     public static final String CLASS_SERVICE = "android.app.Service";
+
     public static final String CLASS_BROADCASTRECEIVER =
             "android.content.BroadcastReceiver";
+
     public static final String CLASS_CONTENTPROVIDER =
             "android.content.ContentProvider";
+
     public static final String CLASS_ATTRIBUTE_SET = "android.util.AttributeSet";
+
     public static final String CLASS_INSTRUMENTATION = "android.app.Instrumentation";
+
     public static final String CLASS_INSTRUMENTATION_RUNNER =
             "android.test.InstrumentationTestRunner";
     public static final String CLASS_BUNDLE = "android.os.Bundle";
@@ -770,6 +793,9 @@ public final class SdkConstants {
     public static final String CLASS_ANDROIDX_ACTION_PROVIDER = "androidx.core.view.ActionProvider";
 
     public static final String CLASS_BACKUP_AGENT = "android.app.backup.BackupAgent";
+
+    public static final String CLASS_DRAWABLE = "android.graphics.drawable.Drawable";
+
     /**
      * MockView is part of the layoutlib bridge and used to display classes that have no rendering
      * in the graphical layout editor.
@@ -1625,7 +1651,6 @@ public final class SdkConstants {
     public static final String ATTR_DIAL = "dial";
     public static final String ATTR_HAND_HOUR = "hand_hour";
     public static final String ATTR_HAND_MINUTE = "hand_minute";
-    public static final String ATTR_HAND_SECOND = "hand_second";
 
     // CalendarView
     public static final String ATTR_SELECTED_DATE_VERTICAL_BAR = "selectedDateVerticalBar";

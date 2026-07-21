@@ -3,8 +3,8 @@
 
 package com.android.ide.model.sync;
 
-public interface ApplicationVariantModelOrBuilder extends
-    // @@protoc_insertion_point(interface_extends:ApplicationVariantModel)
+public interface DynamicFeatureVariantModelOrBuilder extends
+    // @@protoc_insertion_point(interface_extends:DynamicFeatureVariantModel)
     com.google.protobuf.MessageOrBuilder {
 
   /**
@@ -21,16 +21,4 @@ public interface ApplicationVariantModelOrBuilder extends
    * <code>.ModuleVariantModel moduleCommonModel = 1;</code>
    */
   com.android.ide.model.sync.ModuleVariantModelOrBuilder getModuleCommonModelOrBuilder();
-
-  /**
-   * <code>string applicationId = 2;</code>
-   * @return The applicationId.
-   */
-  java.lang.String getApplicationId();
-  /**
-   * <code>string applicationId = 2;</code>
-   * @return The bytes for applicationId.
-   */
-  com.google.protobuf.ByteString
-      getApplicationIdBytes();
 }
