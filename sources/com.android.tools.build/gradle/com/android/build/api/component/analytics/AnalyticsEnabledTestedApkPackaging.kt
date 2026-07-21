@@ -16,21 +16,20 @@
 
 package com.android.build.api.component.analytics
 
-import com.android.build.api.variant.TestedApkPackaging
 import com.android.build.api.variant.JniLibsTestedApkPackaging
+import com.android.build.api.variant.TestedApkPackaging
 import com.android.tools.build.gradle.internal.profile.VariantPropertiesMethodType
 import com.google.wireless.android.sdk.stats.GradleBuildVariant
 import javax.inject.Inject
 
-open class AnalyticsEnabledTestedApkPackaging @Inject constructor(
-    override val delegate: TestedApkPackaging,
-    stats: GradleBuildVariant.Builder
-) : AnalyticsEnabledApkPackaging(delegate, stats), TestedApkPackaging {
+open class AnalyticsEnabledTestedApkPackaging
+@Inject
+constructor(override val delegate: TestedApkPackaging, stats: GradleBuildVariant.Builder) :
+  AnalyticsEnabledApkPackaging(delegate, stats), TestedApkPackaging {
 
-    override val jniLibs: JniLibsTestedApkPackaging
-        get() {
-            stats.variantApiAccessBuilder.addVariantPropertiesAccessBuilder().type =
-                VariantPropertiesMethodType.JNI_LIBS_PACKAGING_OPTIONS_VALUE
-            return delegate.jniLibs
-        }
+  override val jniLibs: JniLibsTestedApkPackaging
+    get() {
+      stats.variantApiAccessBuilder.addVariantPropertiesAccessBuilder().type = VariantPropertiesMethodType.JNI_LIBS_PACKAGING_OPTIONS_VALUE
+      return delegate.jniLibs
+    }
 }
