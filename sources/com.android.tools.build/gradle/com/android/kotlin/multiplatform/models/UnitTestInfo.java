@@ -21,6 +21,7 @@ private static final long serialVersionUID = 0L;
   }
   private UnitTestInfo() {
     namespace_ = "";
+    unitTestTaskName_ = "";
   }
 
   @java.lang.Override
@@ -71,6 +72,12 @@ private static final long serialVersionUID = 0L;
               mockablePlatformJar_ = subBuilder.buildPartial();
             }
             bitField0_ |= 0x00000002;
+            break;
+          }
+          case 26: {
+            java.lang.String s = input.readStringRequireUtf8();
+            bitField0_ |= 0x00000004;
+            unitTestTaskName_ = s;
             break;
           }
           default: {
@@ -190,6 +197,64 @@ private static final long serialVersionUID = 0L;
     return mockablePlatformJar_ == null ? com.android.builder.model.proto.ide.File.getDefaultInstance() : mockablePlatformJar_;
   }
 
+  public static final int UNIT_TEST_TASK_NAME_FIELD_NUMBER = 3;
+  private volatile java.lang.Object unitTestTaskName_;
+  /**
+   * <pre>
+   * name of the gradle task that runs the unit tests.
+   * </pre>
+   *
+   * <code>optional string unit_test_task_name = 3;</code>
+   * @return Whether the unitTestTaskName field is set.
+   */
+  @java.lang.Override
+  public boolean hasUnitTestTaskName() {
+    return ((bitField0_ & 0x00000004) != 0);
+  }
+  /**
+   * <pre>
+   * name of the gradle task that runs the unit tests.
+   * </pre>
+   *
+   * <code>optional string unit_test_task_name = 3;</code>
+   * @return The unitTestTaskName.
+   */
+  @java.lang.Override
+  public java.lang.String getUnitTestTaskName() {
+    java.lang.Object ref = unitTestTaskName_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      unitTestTaskName_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * name of the gradle task that runs the unit tests.
+   * </pre>
+   *
+   * <code>optional string unit_test_task_name = 3;</code>
+   * @return The bytes for unitTestTaskName.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getUnitTestTaskNameBytes() {
+    java.lang.Object ref = unitTestTaskName_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      unitTestTaskName_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -210,6 +275,9 @@ private static final long serialVersionUID = 0L;
     if (((bitField0_ & 0x00000002) != 0)) {
       output.writeMessage(2, getMockablePlatformJar());
     }
+    if (((bitField0_ & 0x00000004) != 0)) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, unitTestTaskName_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -225,6 +293,9 @@ private static final long serialVersionUID = 0L;
     if (((bitField0_ & 0x00000002) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(2, getMockablePlatformJar());
+    }
+    if (((bitField0_ & 0x00000004) != 0)) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, unitTestTaskName_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -251,6 +322,11 @@ private static final long serialVersionUID = 0L;
       if (!getMockablePlatformJar()
           .equals(other.getMockablePlatformJar())) return false;
     }
+    if (hasUnitTestTaskName() != other.hasUnitTestTaskName()) return false;
+    if (hasUnitTestTaskName()) {
+      if (!getUnitTestTaskName()
+          .equals(other.getUnitTestTaskName())) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -269,6 +345,10 @@ private static final long serialVersionUID = 0L;
     if (hasMockablePlatformJar()) {
       hash = (37 * hash) + MOCKABLE_PLATFORM_JAR_FIELD_NUMBER;
       hash = (53 * hash) + getMockablePlatformJar().hashCode();
+    }
+    if (hasUnitTestTaskName()) {
+      hash = (37 * hash) + UNIT_TEST_TASK_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getUnitTestTaskName().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -416,6 +496,8 @@ private static final long serialVersionUID = 0L;
         mockablePlatformJarBuilder_.clear();
       }
       bitField0_ = (bitField0_ & ~0x00000002);
+      unitTestTaskName_ = "";
+      bitField0_ = (bitField0_ & ~0x00000004);
       return this;
     }
 
@@ -456,6 +538,10 @@ private static final long serialVersionUID = 0L;
         }
         to_bitField0_ |= 0x00000002;
       }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        to_bitField0_ |= 0x00000004;
+      }
+      result.unitTestTaskName_ = unitTestTaskName_;
       result.bitField0_ = to_bitField0_;
       onBuilt();
       return result;
@@ -512,6 +598,11 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasMockablePlatformJar()) {
         mergeMockablePlatformJar(other.getMockablePlatformJar());
+      }
+      if (other.hasUnitTestTaskName()) {
+        bitField0_ |= 0x00000004;
+        unitTestTaskName_ = other.unitTestTaskName_;
+        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -780,6 +871,113 @@ private static final long serialVersionUID = 0L;
         mockablePlatformJar_ = null;
       }
       return mockablePlatformJarBuilder_;
+    }
+
+    private java.lang.Object unitTestTaskName_ = "";
+    /**
+     * <pre>
+     * name of the gradle task that runs the unit tests.
+     * </pre>
+     *
+     * <code>optional string unit_test_task_name = 3;</code>
+     * @return Whether the unitTestTaskName field is set.
+     */
+    public boolean hasUnitTestTaskName() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <pre>
+     * name of the gradle task that runs the unit tests.
+     * </pre>
+     *
+     * <code>optional string unit_test_task_name = 3;</code>
+     * @return The unitTestTaskName.
+     */
+    public java.lang.String getUnitTestTaskName() {
+      java.lang.Object ref = unitTestTaskName_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        unitTestTaskName_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * name of the gradle task that runs the unit tests.
+     * </pre>
+     *
+     * <code>optional string unit_test_task_name = 3;</code>
+     * @return The bytes for unitTestTaskName.
+     */
+    public com.google.protobuf.ByteString
+        getUnitTestTaskNameBytes() {
+      java.lang.Object ref = unitTestTaskName_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        unitTestTaskName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * name of the gradle task that runs the unit tests.
+     * </pre>
+     *
+     * <code>optional string unit_test_task_name = 3;</code>
+     * @param value The unitTestTaskName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setUnitTestTaskName(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+      unitTestTaskName_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * name of the gradle task that runs the unit tests.
+     * </pre>
+     *
+     * <code>optional string unit_test_task_name = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearUnitTestTaskName() {
+      bitField0_ = (bitField0_ & ~0x00000004);
+      unitTestTaskName_ = getDefaultInstance().getUnitTestTaskName();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * name of the gradle task that runs the unit tests.
+     * </pre>
+     *
+     * <code>optional string unit_test_task_name = 3;</code>
+     * @param value The bytes for unitTestTaskName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setUnitTestTaskNameBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      bitField0_ |= 0x00000004;
+      unitTestTaskName_ = value;
+      onChanged();
+      return this;
     }
     @java.lang.Override
     public final Builder setUnknownFields(
