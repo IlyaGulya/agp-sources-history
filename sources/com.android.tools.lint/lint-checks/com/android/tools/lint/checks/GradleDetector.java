@@ -21,6 +21,7 @@ import static com.android.SdkConstants.GRADLE_PLUGIN_RECOMMENDED_VERSION;
 import static com.android.SdkConstants.SUPPORT_LIB_GROUP_ID;
 import static com.android.ide.common.repository.GoogleMavenRepository.MAVEN_GOOGLE_CACHE_DIR_KEY;
 import static com.android.ide.common.repository.GradleCoordinate.COMPARE_PLUS_HIGHER;
+import static com.android.sdklib.SdkVersionInfo.LOWEST_ACTIVE_API;
 import static com.android.tools.lint.checks.ManifestDetector.TARGET_NEWER;
 import static com.android.tools.lint.detector.api.LintUtils.guessGradleLocation;
 import static com.google.common.base.Charsets.UTF_8;
@@ -61,19 +62,20 @@ import com.android.tools.lint.detector.api.Severity;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Checks Gradle files for potential errors
@@ -243,6 +245,17 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
             Severity.WARNING,
             IMPLEMENTATION).setEnabledByDefault(false);
 
+    /** The API version is set too low. */
+    public static final Issue MIN_SDK_TOO_LOW = Issue.create(
+            "MinSdkTooLow",
+            "API Version Too Low",
+            "The value of the `minSdkVersion` property is too low and can be incremented" +
+                    "without noticeably reducing the number of supported devices.",
+            Category.CORRECTNESS,
+            4,
+            Severity.WARNING,
+            IMPLEMENTATION).setEnabledByDefault(false);
+
     /** Accidentally using octal numbers */
     public static final Issue ACCIDENTAL_OCTAL = Issue.create(
             "AccidentalOctal",
@@ -342,9 +355,11 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
      * that the highest value accepted by Google Play is 2100000000
      */
     private static final int VERSION_CODE_HIGH_THRESHOLD = 2000000000;
+    private static final Pattern DIGITS = Pattern.compile("\\d+");
 
     private int minSdkVersion;
     private int compileSdkVersion;
+    private Object compileSdkVersionCookie;
     private int targetSdkVersion;
 
     // ---- Implements Detector.GradleScanner ----
@@ -406,7 +421,7 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
         if (value.length() >= 2
                 && value.charAt(0) == '0'
                 && (value.length() > 2 || value.charAt(1) >= '8'
-                && isInteger(value))
+                && isNonnegativeInteger(value))
                 && context.isEnabled(ACCIDENTAL_OCTAL)) {
             String message = "The leading 0 turns this number into octal which is probably "
                     + "not what was intended";
@@ -443,12 +458,13 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
 
                     int highest = context.getClient().getHighestKnownApiLevel();
                     String label = "Update targetSdkVersion to " + highest;
-                    LintFix fix = fix().replace().all().with(Integer.toString(highest)).build();
+                    LintFix fix = fix().name(label)
+                            .replace().all().with(Integer.toString(highest)).build();
                     report(context, valueCookie, TARGET_NEWER, message, fix);
                 }
                 if (version > 0) {
                     targetSdkVersion = version;
-                    checkTargetCompatibility(context, valueCookie);
+                    checkTargetCompatibility(context);
                 } else {
                     checkIntegerAsString(context, value, valueCookie);
                 }
@@ -456,6 +472,7 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
                 int version = getSdkVersion(value);
                 if (version > 0) {
                     minSdkVersion = version;
+                    checkMinSdkVersion(context, version, valueCookie);
                 } else {
                     checkIntegerAsString(context, value, valueCookie);
                 }
@@ -466,7 +483,7 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
             }
 
             if (property.equals("versionName") || property.equals("versionCode") &&
-                    !isInteger(value) || !isStringLiteral(value)) {
+                    !isNonnegativeInteger(value) || !isStringLiteral(value)) {
                 // Method call -- make sure it does not match one of the getters in the
                 // configuration!
                 if ((value.equals("getVersionCode") ||
@@ -484,7 +501,7 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
                 report(context, getPropertyKeyCookie(valueCookie), DEPRECATED, message, fix);
             }
             if (property.equals("versionCode") && context.isEnabled(HIGH_APP_VERSION_CODE)
-                    && isInteger(value)) {
+                    && isNonnegativeInteger(value)) {
                 int version = getIntLiteralValue(value, -1);
                 if (version >= VERSION_CODE_HIGH_THRESHOLD) {
                     String message =
@@ -508,7 +525,8 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
             }
             if (version > 0) {
                 compileSdkVersion = version;
-                checkTargetCompatibility(context, valueCookie);
+                compileSdkVersionCookie = valueCookie;
+                checkTargetCompatibility(context);
             } else {
                 checkIntegerAsString(context, value, valueCookie);
             }
@@ -618,6 +636,20 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
             report(context, statementCookie, DEV_MODE_OBSOLETE,
                     "You no longer need a `dev` mode to enable multi-dexing during "
                             + "development, and this can break API version checks");
+        }
+    }
+
+    private void checkMinSdkVersion(Context context, int version, Object valueCookie) {
+        if (version > 0 && version < LOWEST_ACTIVE_API) {
+            String message = ""
+                             + "The value of minSdkVersion is too low. It can be incremented\n"
+                             + "without noticeably reducing the number of supported devices.";
+
+            String label = "Update minSdkVersion to " + LOWEST_ACTIVE_API;
+            LintFix fix = fix().name(label).replace()
+                    .text(Integer.toString(version))
+                    .with(Integer.toString(LOWEST_ACTIVE_API)).build();
+            report(context, valueCookie, MIN_SDK_TOO_LOW, message, fix);
         }
     }
 
@@ -794,7 +826,7 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
         if (major != sMajorBuildTools) {
             sMajorBuildTools = major;
 
-            List<GradleVersion> revisions = Lists.newArrayList();
+            List<GradleVersion> revisions = new ArrayList<>();
             switch (major) {
                 case 25:
                     revisions.add(new GradleVersion(25, 0, 2));
@@ -850,17 +882,17 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
         return sLatestBuildTools;
     }
 
-    private void checkTargetCompatibility(Context context, Object cookie) {
+    private void checkTargetCompatibility(Context context) {
         if (compileSdkVersion > 0 && targetSdkVersion > 0
                 && targetSdkVersion > compileSdkVersion) {
-            String message = "The targetSdkVersion (" + targetSdkVersion
-                    + ") should not be higher than the compileSdkVersion ("
-                    + compileSdkVersion + ")";
+            String message = "The compileSdkVersion (" + compileSdkVersion
+                    + ") should not be lower than the targetSdkVersion ("
+                    + targetSdkVersion + ")";
             LintFix fix = fix()
                     .name("Set compileSdkVersion to " + targetSdkVersion).replace()
                     .text(Integer.toString(compileSdkVersion))
                     .with(Integer.toString(targetSdkVersion)).build();
-            reportNonFatalCompatibilityIssue(context, cookie, message, fix);
+            reportNonFatalCompatibilityIssue(context, compileSdkVersionCookie, message, fix);
         }
     }
 
@@ -882,8 +914,8 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
         }
     }
 
-    private static boolean isInteger(String token) {
-        return token.matches("\\d+");
+    private static boolean isNonnegativeInteger(String token) {
+        return DIGITS.matcher(token).matches();
     }
 
     private static boolean isStringLiteral(String token) {
@@ -1515,8 +1547,8 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
         if (!project.isGradleProject()) {
             return;
         }
-        Set<String> supportVersions = Sets.newHashSet();
-        Set<String> wearableVersions = Sets.newHashSet();
+        Set<String> supportVersions = new HashSet<>();
+        Set<String> wearableVersions = new HashSet<>();
         for (AndroidLibrary library : getAndroidLibraries(project)) {
             MavenCoordinates coordinates = library.getResolvedCoordinates();
             // Claims to be non-null but may not be after a failed gradle sync
@@ -1556,7 +1588,7 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
 
         if (!supportVersions.isEmpty()) {
             if (wearableVersions.isEmpty()) {
-                List<String> list = Lists.newArrayList(supportVersions);
+                List<String> list = new ArrayList<>(supportVersions);
                 String first = Collections.min(list);
                 String message = String.format("Project depends on %1$s:%2$s:%3$s, so it must "
                                 + "also depend (as a provided dependency) on %4$s:%5$s:%6$s",
@@ -1576,9 +1608,9 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
             } else {
                 // Check that they have the same versions
                 if (!supportVersions.equals(wearableVersions)) {
-                    List<String> sortedSupportVersions = Lists.newArrayList(supportVersions);
+                    List<String> sortedSupportVersions = new ArrayList<>(supportVersions);
                     Collections.sort(sortedSupportVersions);
-                    List<String> supportedWearableVersions = Lists.newArrayList(wearableVersions);
+                    List<String> supportedWearableVersions = new ArrayList<>(wearableVersions);
                     Collections.sort(supportedWearableVersions);
                     String message = String.format("The wearable libraries for %1$s and %2$s " +
                                     "must use **exactly** the same versions; found %3$s " +
@@ -1645,7 +1677,7 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
 
         Set<String> versions = versionToCoordinate.keySet();
         if (versions.size() > 1) {
-            List<String> sortedVersions = Lists.newArrayList(versions);
+            List<String> sortedVersions = new ArrayList<>(versions);
             sortedVersions.sort(Collections.reverseOrder());
             MavenCoordinates c1 = findFirst(versionToCoordinate.get(sortedVersions.get(0)));
             MavenCoordinates c2 = findFirst(versionToCoordinate.get(sortedVersions.get(1)));
@@ -1731,7 +1763,7 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
             return Collections.emptyList();
         }
 
-        Set<AndroidLibrary> allLibraries = Sets.newHashSet();
+        Set<AndroidLibrary> allLibraries = new HashSet<>();
         addIndirectAndroidLibraries(compileDependencies.getLibraries(), allLibraries);
         return allLibraries;
     }
@@ -1743,7 +1775,7 @@ public class GradleDetector extends Detector implements Detector.GradleScanner {
             return Collections.emptyList();
         }
 
-        Set<JavaLibrary> allLibraries = Sets.newHashSet();
+        Set<JavaLibrary> allLibraries = new HashSet<>();
         addIndirectJavaLibraries(compileDependencies.getJavaLibraries(), allLibraries);
         return allLibraries;
     }
