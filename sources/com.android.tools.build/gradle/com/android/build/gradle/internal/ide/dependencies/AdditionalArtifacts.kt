@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.tools.lint.model
+package com.android.build.gradle.internal.ide.dependencies
 
-enum class LintModelSeverity {
-  FATAL,
-  ERROR,
-  WARNING,
-  INFORMATIONAL,
-  IGNORE,
-  DEFAULT_ENABLED;
+import com.android.builder.model.v2.ide.Library
+import java.io.File
 
-  companion object {
-    @JvmStatic
-    fun fromName(name: String): LintModelSeverity? {
-      for (severity in values()) {
-        if (severity.name.equals(name, ignoreCase = true)) {
-          return severity
-        }
-      }
-
-      return null
-    }
-  }
-}
+/**
+ * Data class containing javadoc, source and sample locations of a given [Library].
+ */
+data class AdditionalArtifacts(val javadoc: File?, val source: File?, val sample: File?)

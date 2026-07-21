@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.tools.lint.model
+package com.android.build.api.dsl
 
-enum class LintModelSeverity {
-  FATAL,
-  ERROR,
-  WARNING,
-  INFORMATIONAL,
-  IGNORE,
-  DEFAULT_ENABLED;
+import org.gradle.api.Incubating
 
-  companion object {
-    @JvmStatic
-    fun fromName(name: String): LintModelSeverity? {
-      for (severity in values()) {
-        if (severity.name.equals(name, ignoreCase = true)) {
-          return severity
-        }
-      }
-
-      return null
-    }
-  }
+interface ApplicationAndroidResources : AndroidResources {
+    /**
+     * Property that automatically generates locale config when enabled.
+     */
+    @get:Incubating
+    @set:Incubating
+    var generateLocaleConfig: Boolean
 }
