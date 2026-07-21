@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.builder.model.v2.models
+package com.android.build.api.variant
 
-import com.android.builder.model.v2.AndroidModel
+import com.android.build.api.component.AndroidTest
 
 /**
- * Basic model providing version information about the actual model.
- *
- * This model is meant to be very stable and never change, so that Studio can safely query it.
+ * Variants that optionally have instrumented tests.
  */
-interface ModelVersions: AndroidModel {
-    interface Version {
-        val major: Int
-        val minor: Int
-    }
+interface HasAndroidTest {
 
-    val androidProject: Version
-    val androidDsl: Version
-    val variantDependencies: Version
-    val nativeModule: Version
+    /**
+     * Variant's [AndroidTest] configuration, or null if android tests are disabled for this
+     * variant.
+     */
+    val androidTest: AndroidTest?
 }

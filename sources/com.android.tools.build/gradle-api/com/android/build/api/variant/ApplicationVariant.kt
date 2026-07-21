@@ -16,24 +16,17 @@
 
 package com.android.build.api.variant
 
-import com.android.build.api.component.AndroidTest
 import org.gradle.api.provider.Property
 
 /**
  * Properties for the main Variant of an application.
  */
-interface ApplicationVariant : GeneratesApk, Variant {
+interface ApplicationVariant : GeneratesApk, Variant, HasAndroidTest, HasTestFixtures {
 
     /**
      * Variant's application ID as present in the final manifest file of the APK.
      */
     override val applicationId: Property<String>
-
-    /**
-     * Variant's [AndroidTest] configuration, or null if android tests are disabled for this
-     * variant.
-     */
-    val androidTest: AndroidTest?
 
     /**
      * Returns the final list of variant outputs.

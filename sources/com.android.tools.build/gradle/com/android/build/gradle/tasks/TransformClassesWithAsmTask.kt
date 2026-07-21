@@ -19,6 +19,7 @@ package com.android.build.gradle.tasks
 import com.android.SdkConstants.DOT_CLASS
 import com.android.SdkConstants.DOT_JAR
 import com.android.SdkConstants.DOT_JSON
+import com.android.build.api.artifact.MultipleArtifact
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.gradle.internal.component.ApkCreationConfig
@@ -29,12 +30,14 @@ import com.android.build.gradle.internal.instrumentation.loadClassData
 import com.android.build.gradle.internal.instrumentation.saveClassData
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.scope.InternalArtifactType
+import com.android.build.gradle.internal.scope.InternalMultipleArtifactType
 import com.android.build.gradle.internal.services.ClassesHierarchyBuildService
 import com.android.build.gradle.internal.services.getBuildService
 import com.android.build.gradle.internal.tasks.JarsClasspathInputsWithIdentity
 import com.android.build.gradle.internal.tasks.NewIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.setDisallowChanges
+import com.android.build.gradle.options.BooleanOption
 import com.android.builder.utils.isValidZipEntryName
 import com.android.utils.FileUtils
 import com.google.common.io.ByteStreams
@@ -354,7 +357,8 @@ abstract class TransformClassesWithAsmTask : NewIncrementalTask() {
 
             task.asmApiVersion.setDisallowChanges(creationConfig.asmApiVersion)
 
-            if (isTestCoverageEnabled) {
+            if (isTestCoverageEnabled &&
+                !creationConfig.services.projectOptions[BooleanOption.ENABLE_JACOCO_TRANSFORM_INSTRUMENTATION]) {
                 task.inputClassesDir.from(
                         creationConfig.artifacts.get(
                                 InternalArtifactType.JACOCO_INSTRUMENTED_CLASSES
@@ -365,14 +369,12 @@ abstract class TransformClassesWithAsmTask : NewIncrementalTask() {
                         task.inputJarsDir
                 )
             } else {
-                task.inputClassesDir.from(creationConfig.artifacts.getAllClasses().filter {
-                    !it.name.endsWith(DOT_JAR)
-                })
+                task.inputClassesDir.from(
+                    creationConfig.artifacts.getAll(MultipleArtifact.ALL_CLASSES_DIRS)
+                )
 
                 task.inputJarsWithIdentity.inputJars.from(
-                        creationConfig.artifacts.getAllClasses().filter {
-                            it.name.endsWith(DOT_JAR)
-                        }
+                    creationConfig.artifacts.getAll(MultipleArtifact.ALL_CLASSES_JARS)
                 )
             }
 
@@ -380,11 +382,18 @@ abstract class TransformClassesWithAsmTask : NewIncrementalTask() {
 
             task.runtimeClasspath.from(creationConfig.variantScope.providedOnlyClasspath)
 
+
             task.runtimeClasspath.from(
                     creationConfig.variantDependencies.getArtifactFileCollection(
                             AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
                             AndroidArtifacts.ArtifactScope.ALL,
+                        if (creationConfig.services.projectOptions[BooleanOption.ENABLE_JACOCO_TRANSFORM_INSTRUMENTATION]
+                            && creationConfig.variantDslInfo.isTestCoverageEnabled
+                        ) {
+                            AndroidArtifacts.ArtifactType.JACOCO_CLASSES_JAR
+                        } else {
                             AndroidArtifacts.ArtifactType.CLASSES_JAR
+                        }
                     )
             )
 

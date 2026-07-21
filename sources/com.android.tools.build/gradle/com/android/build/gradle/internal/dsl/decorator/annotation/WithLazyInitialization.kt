@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.dsl
+package com.android.build.gradle.internal.dsl.decorator.annotation
 
-import com.android.build.api.dsl.DexPackagingOptions
-
-open class DexPackagingOptionsImpl : DexPackagingOptions {
-    override var useLegacyPackaging: Boolean? = null
-}
+/**
+ * Allows to set defaults or manipulate fields that are implemented by the [DslDecorator].
+ *
+ * The class should have a protected method [methodName] which will be invoked last in the decorated
+ * constructor.
+ */
+@Target(AnnotationTarget.CONSTRUCTOR)
+annotation class WithLazyInitialization(val methodName: String)
