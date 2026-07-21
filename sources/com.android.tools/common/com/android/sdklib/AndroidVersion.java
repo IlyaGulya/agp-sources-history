@@ -118,7 +118,7 @@ public final class AndroidVersion implements Comparable<AndroidVersion>, Seriali
         UPSIDE_DOWN_CAKE(new AndroidApiLevel(34), 7),
         VANILLA_ICE_CREAM(new AndroidApiLevel(35), 13),
         BAKLAVA(new AndroidApiLevel(36), 17),
-        BAKLAVA_2025Q4(new AndroidApiLevel(36, 1), 19),
+        BAKLAVA_2025Q4(new AndroidApiLevel(36, 1), 20),
         ;
 
         private final AndroidApiLevel myApi;
@@ -415,7 +415,7 @@ public final class AndroidVersion implements Comparable<AndroidVersion>, Seriali
 
     /** Returns the major version of this version as an {@link AndroidMajorVersion}. */
     public AndroidMajorVersion getMajorVersion() {
-        return new AndroidMajorVersion(mAndroidApiLevel.getMajorVersion(), mCodename);
+        return new AndroidMajorVersion(mAndroidApiLevel, mCodename);
     }
 
     /**

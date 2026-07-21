@@ -123,7 +123,7 @@ public final class KotlinMultiplatformAndroidModelsProto {
       "\t\022\r\n\005value\030\002 \001(\t:\0028\001B\014\n\n_namespaceB\036\n\034_t" +
       "est_instrumentation_runnerB\021\n\017_signing_c" +
       "onfigB$\n\"_assemble_task_output_listing_f" +
-      "ile\"\244\004\n\022AndroidCompilation\0226\n\004type\030\001 \001(\016" +
+      "ile\"\312\004\n\022AndroidCompilation\0226\n\004type\030\001 \001(\016" +
       "2#.AndroidCompilation.CompilationTypeH\000\210" +
       "\001\001\022(\n\tmain_info\030\002 \001(\0132\020.MainVariantInfoH" +
       "\001\210\001\001\022*\n\016unit_test_info\030\003 \001(\0132\r.UnitTestI" +
@@ -131,18 +131,19 @@ public final class KotlinMultiplatformAndroidModelsProto {
       "2\025.InstrumentedTestInfoH\003\210\001\001\022$\n\027default_" +
       "source_set_name\030\005 \001(\tH\004\210\001\001\022\037\n\022assemble_t" +
       "ask_name\030\006 \001(\tH\005\210\001\001\022%\n\030kotlin_compile_ta" +
-      "sk_name\030\007 \001(\tH\006\210\001\001\"A\n\017CompilationType\022\010\n" +
-      "\004MAIN\020\000\022\r\n\tUNIT_TEST\020\001\022\025\n\021INSTRUMENTED_T" +
-      "EST\020\002B\007\n\005_typeB\014\n\n_main_infoB\021\n\017_unit_te" +
-      "st_infoB\031\n\027_instrumented_test_infoB\032\n\030_d" +
-      "efault_source_set_nameB\025\n\023_assemble_task" +
-      "_nameB\033\n\031_kotlin_compile_task_name\"U\n\020An" +
-      "droidSourceSet\022-\n\017source_provider\030\001 \001(\0132" +
-      "\017.SourceProviderH\000\210\001\001B\022\n\020_source_provide" +
-      "r\"<\n\016DependencyInfo\022\036\n\007library\030\001 \001(\0132\010.L" +
-      "ibraryH\000\210\001\001B\n\n\010_libraryBR\n\'com.android.k" +
-      "otlin.multiplatform.modelsB%KotlinMultip" +
-      "latformAndroidModelsProtoP\001b\006proto3"
+      "sk_name\030\007 \001(\tH\006\210\001\001\022$\n\025extra_classes_fold" +
+      "ers\030\010 \003(\0132\005.File\"A\n\017CompilationType\022\010\n\004M" +
+      "AIN\020\000\022\r\n\tUNIT_TEST\020\001\022\025\n\021INSTRUMENTED_TES" +
+      "T\020\002B\007\n\005_typeB\014\n\n_main_infoB\021\n\017_unit_test" +
+      "_infoB\031\n\027_instrumented_test_infoB\032\n\030_def" +
+      "ault_source_set_nameB\025\n\023_assemble_task_n" +
+      "ameB\033\n\031_kotlin_compile_task_name\"U\n\020Andr" +
+      "oidSourceSet\022-\n\017source_provider\030\001 \001(\0132\017." +
+      "SourceProviderH\000\210\001\001B\022\n\020_source_provider\"" +
+      "<\n\016DependencyInfo\022\036\n\007library\030\001 \001(\0132\010.Lib" +
+      "raryH\000\210\001\001B\n\n\010_libraryBR\n\'com.android.kot" +
+      "lin.multiplatform.modelsB%KotlinMultipla" +
+      "tformAndroidModelsProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -196,7 +197,7 @@ public final class KotlinMultiplatformAndroidModelsProto {
     internal_static_AndroidCompilation_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_AndroidCompilation_descriptor,
-        new java.lang.String[] { "Type", "MainInfo", "UnitTestInfo", "InstrumentedTestInfo", "DefaultSourceSetName", "AssembleTaskName", "KotlinCompileTaskName", "Type", "MainInfo", "UnitTestInfo", "InstrumentedTestInfo", "DefaultSourceSetName", "AssembleTaskName", "KotlinCompileTaskName", });
+        new java.lang.String[] { "Type", "MainInfo", "UnitTestInfo", "InstrumentedTestInfo", "DefaultSourceSetName", "AssembleTaskName", "KotlinCompileTaskName", "ExtraClassesFolders", "Type", "MainInfo", "UnitTestInfo", "InstrumentedTestInfo", "DefaultSourceSetName", "AssembleTaskName", "KotlinCompileTaskName", });
     internal_static_AndroidSourceSet_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_AndroidSourceSet_fieldAccessorTable = new

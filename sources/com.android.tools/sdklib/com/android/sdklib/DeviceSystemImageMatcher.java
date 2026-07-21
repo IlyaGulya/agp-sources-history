@@ -53,13 +53,19 @@ public final class DeviceSystemImageMatcher {
                     && !SystemImageTags.isTvImage(tags)
                     && !SystemImageTags.isAutomotiveImage(tags)
                     && !SystemImageTags.isXrHeadsetImage(tags)
-                    && !SystemImageTags.isXrGlassesImage(tags)
+                    && !SystemImageTags.isAiGlassesImage(tags)
                     && !tags.contains(SystemImageTags.CHROMEOS_TAG);
         }
 
         if (id.equals(SystemImageTags.ANDROID_TV_TAG.getId())
                 || id.equals(SystemImageTags.GOOGLE_TV_TAG.getId())) {
             return SystemImageTags.isTvImage(tags);
+        }
+
+        // AI Glasses supports different tags since there are a couple of different images
+        // circulating. SystemImageTags and Device handle this correctly.
+        if (Device.isAiGlasses(device)) {
+            return SystemImageTags.isAiGlassesImage(tags);
         }
 
         return tags.stream().map(IdDisplay::getId).anyMatch(i -> i.equals(id));
