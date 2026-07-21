@@ -5,29 +5,28 @@ package com.android.kotlin.multiplatform.models;
 
 /**
  * <pre>
- * The dsl info of the unit test component of the android kotlin multiplatform target.
+ * Extra information to identify a dependency that is outgoing from an android kotlin sourceSet.
  * </pre>
  *
- * Protobuf type {@code UnitTestDslInfo}
+ * Protobuf type {@code DependencyInfo}
  */
-public final class UnitTestDslInfo extends
+public final class DependencyInfo extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:UnitTestDslInfo)
-    UnitTestDslInfoOrBuilder {
+    // @@protoc_insertion_point(message_implements:DependencyInfo)
+    DependencyInfoOrBuilder {
 private static final long serialVersionUID = 0L;
-  // Use UnitTestDslInfo.newBuilder() to construct.
-  private UnitTestDslInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+  // Use DependencyInfo.newBuilder() to construct.
+  private DependencyInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
   }
-  private UnitTestDslInfo() {
-    namespace_ = "";
+  private DependencyInfo() {
   }
 
   @java.lang.Override
   @SuppressWarnings({"unused"})
   protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
-    return new UnitTestDslInfo();
+    return new DependencyInfo();
   }
 
   @java.lang.Override
@@ -35,7 +34,7 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private UnitTestDslInfo(
+  private DependencyInfo(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
@@ -55,9 +54,16 @@ private static final long serialVersionUID = 0L;
             done = true;
             break;
           case 10: {
-            java.lang.String s = input.readStringRequireUtf8();
+            com.android.builder.model.proto.ide.Library.Builder subBuilder = null;
+            if (((bitField0_ & 0x00000001) != 0)) {
+              subBuilder = library_.toBuilder();
+            }
+            library_ = input.readMessage(com.android.builder.model.proto.ide.Library.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(library_);
+              library_ = subBuilder.buildPartial();
+            }
             bitField0_ |= 0x00000001;
-            namespace_ = s;
             break;
           }
           default: {
@@ -81,62 +87,42 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_UnitTestDslInfo_descriptor;
+    return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_DependencyInfo_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_UnitTestDslInfo_fieldAccessorTable
+    return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_DependencyInfo_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            com.android.kotlin.multiplatform.models.UnitTestDslInfo.class, com.android.kotlin.multiplatform.models.UnitTestDslInfo.Builder.class);
+            com.android.kotlin.multiplatform.models.DependencyInfo.class, com.android.kotlin.multiplatform.models.DependencyInfo.Builder.class);
   }
 
   private int bitField0_;
-  public static final int NAMESPACE_FIELD_NUMBER = 1;
-  private volatile java.lang.Object namespace_;
+  public static final int LIBRARY_FIELD_NUMBER = 1;
+  private com.android.builder.model.proto.ide.Library library_;
   /**
-   * <code>optional string namespace = 1;</code>
-   * @return Whether the namespace field is set.
+   * <code>optional .Library library = 1;</code>
+   * @return Whether the library field is set.
    */
   @java.lang.Override
-  public boolean hasNamespace() {
+  public boolean hasLibrary() {
     return ((bitField0_ & 0x00000001) != 0);
   }
   /**
-   * <code>optional string namespace = 1;</code>
-   * @return The namespace.
+   * <code>optional .Library library = 1;</code>
+   * @return The library.
    */
   @java.lang.Override
-  public java.lang.String getNamespace() {
-    java.lang.Object ref = namespace_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      namespace_ = s;
-      return s;
-    }
+  public com.android.builder.model.proto.ide.Library getLibrary() {
+    return library_ == null ? com.android.builder.model.proto.ide.Library.getDefaultInstance() : library_;
   }
   /**
-   * <code>optional string namespace = 1;</code>
-   * @return The bytes for namespace.
+   * <code>optional .Library library = 1;</code>
    */
   @java.lang.Override
-  public com.google.protobuf.ByteString
-      getNamespaceBytes() {
-    java.lang.Object ref = namespace_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      namespace_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
+  public com.android.builder.model.proto.ide.LibraryOrBuilder getLibraryOrBuilder() {
+    return library_ == null ? com.android.builder.model.proto.ide.Library.getDefaultInstance() : library_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -154,7 +140,7 @@ private static final long serialVersionUID = 0L;
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
     if (((bitField0_ & 0x00000001) != 0)) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, namespace_);
+      output.writeMessage(1, getLibrary());
     }
     unknownFields.writeTo(output);
   }
@@ -166,7 +152,8 @@ private static final long serialVersionUID = 0L;
 
     size = 0;
     if (((bitField0_ & 0x00000001) != 0)) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, namespace_);
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(1, getLibrary());
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -178,15 +165,15 @@ private static final long serialVersionUID = 0L;
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof com.android.kotlin.multiplatform.models.UnitTestDslInfo)) {
+    if (!(obj instanceof com.android.kotlin.multiplatform.models.DependencyInfo)) {
       return super.equals(obj);
     }
-    com.android.kotlin.multiplatform.models.UnitTestDslInfo other = (com.android.kotlin.multiplatform.models.UnitTestDslInfo) obj;
+    com.android.kotlin.multiplatform.models.DependencyInfo other = (com.android.kotlin.multiplatform.models.DependencyInfo) obj;
 
-    if (hasNamespace() != other.hasNamespace()) return false;
-    if (hasNamespace()) {
-      if (!getNamespace()
-          .equals(other.getNamespace())) return false;
+    if (hasLibrary() != other.hasLibrary()) return false;
+    if (hasLibrary()) {
+      if (!getLibrary()
+          .equals(other.getLibrary())) return false;
     }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
@@ -199,78 +186,78 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    if (hasNamespace()) {
-      hash = (37 * hash) + NAMESPACE_FIELD_NUMBER;
-      hash = (53 * hash) + getNamespace().hashCode();
+    if (hasLibrary()) {
+      hash = (37 * hash) + LIBRARY_FIELD_NUMBER;
+      hash = (53 * hash) + getLibrary().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
   }
 
-  public static com.android.kotlin.multiplatform.models.UnitTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.DependencyInfo parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.android.kotlin.multiplatform.models.UnitTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.DependencyInfo parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.android.kotlin.multiplatform.models.UnitTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.DependencyInfo parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.android.kotlin.multiplatform.models.UnitTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.DependencyInfo parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.android.kotlin.multiplatform.models.UnitTestDslInfo parseFrom(byte[] data)
+  public static com.android.kotlin.multiplatform.models.DependencyInfo parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.android.kotlin.multiplatform.models.UnitTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.DependencyInfo parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.android.kotlin.multiplatform.models.UnitTestDslInfo parseFrom(java.io.InputStream input)
+  public static com.android.kotlin.multiplatform.models.DependencyInfo parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static com.android.kotlin.multiplatform.models.UnitTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.DependencyInfo parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static com.android.kotlin.multiplatform.models.UnitTestDslInfo parseDelimitedFrom(java.io.InputStream input)
+  public static com.android.kotlin.multiplatform.models.DependencyInfo parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static com.android.kotlin.multiplatform.models.UnitTestDslInfo parseDelimitedFrom(
+  public static com.android.kotlin.multiplatform.models.DependencyInfo parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static com.android.kotlin.multiplatform.models.UnitTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.DependencyInfo parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static com.android.kotlin.multiplatform.models.UnitTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.DependencyInfo parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -283,7 +270,7 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(com.android.kotlin.multiplatform.models.UnitTestDslInfo prototype) {
+  public static Builder newBuilder(com.android.kotlin.multiplatform.models.DependencyInfo prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
   @java.lang.Override
@@ -300,29 +287,29 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * The dsl info of the unit test component of the android kotlin multiplatform target.
+   * Extra information to identify a dependency that is outgoing from an android kotlin sourceSet.
    * </pre>
    *
-   * Protobuf type {@code UnitTestDslInfo}
+   * Protobuf type {@code DependencyInfo}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:UnitTestDslInfo)
-      com.android.kotlin.multiplatform.models.UnitTestDslInfoOrBuilder {
+      // @@protoc_insertion_point(builder_implements:DependencyInfo)
+      com.android.kotlin.multiplatform.models.DependencyInfoOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_UnitTestDslInfo_descriptor;
+      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_DependencyInfo_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_UnitTestDslInfo_fieldAccessorTable
+      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_DependencyInfo_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.android.kotlin.multiplatform.models.UnitTestDslInfo.class, com.android.kotlin.multiplatform.models.UnitTestDslInfo.Builder.class);
+              com.android.kotlin.multiplatform.models.DependencyInfo.class, com.android.kotlin.multiplatform.models.DependencyInfo.Builder.class);
     }
 
-    // Construct using com.android.kotlin.multiplatform.models.UnitTestDslInfo.newBuilder()
+    // Construct using com.android.kotlin.multiplatform.models.DependencyInfo.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }
@@ -335,12 +322,17 @@ private static final long serialVersionUID = 0L;
     private void maybeForceBuilderInitialization() {
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
+        getLibraryFieldBuilder();
       }
     }
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      namespace_ = "";
+      if (libraryBuilder_ == null) {
+        library_ = null;
+      } else {
+        libraryBuilder_.clear();
+      }
       bitField0_ = (bitField0_ & ~0x00000001);
       return this;
     }
@@ -348,17 +340,17 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_UnitTestDslInfo_descriptor;
+      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_DependencyInfo_descriptor;
     }
 
     @java.lang.Override
-    public com.android.kotlin.multiplatform.models.UnitTestDslInfo getDefaultInstanceForType() {
-      return com.android.kotlin.multiplatform.models.UnitTestDslInfo.getDefaultInstance();
+    public com.android.kotlin.multiplatform.models.DependencyInfo getDefaultInstanceForType() {
+      return com.android.kotlin.multiplatform.models.DependencyInfo.getDefaultInstance();
     }
 
     @java.lang.Override
-    public com.android.kotlin.multiplatform.models.UnitTestDslInfo build() {
-      com.android.kotlin.multiplatform.models.UnitTestDslInfo result = buildPartial();
+    public com.android.kotlin.multiplatform.models.DependencyInfo build() {
+      com.android.kotlin.multiplatform.models.DependencyInfo result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
@@ -366,14 +358,18 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public com.android.kotlin.multiplatform.models.UnitTestDslInfo buildPartial() {
-      com.android.kotlin.multiplatform.models.UnitTestDslInfo result = new com.android.kotlin.multiplatform.models.UnitTestDslInfo(this);
+    public com.android.kotlin.multiplatform.models.DependencyInfo buildPartial() {
+      com.android.kotlin.multiplatform.models.DependencyInfo result = new com.android.kotlin.multiplatform.models.DependencyInfo(this);
       int from_bitField0_ = bitField0_;
       int to_bitField0_ = 0;
       if (((from_bitField0_ & 0x00000001) != 0)) {
+        if (libraryBuilder_ == null) {
+          result.library_ = library_;
+        } else {
+          result.library_ = libraryBuilder_.build();
+        }
         to_bitField0_ |= 0x00000001;
       }
-      result.namespace_ = namespace_;
       result.bitField0_ = to_bitField0_;
       onBuilt();
       return result;
@@ -413,20 +409,18 @@ private static final long serialVersionUID = 0L;
     }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof com.android.kotlin.multiplatform.models.UnitTestDslInfo) {
-        return mergeFrom((com.android.kotlin.multiplatform.models.UnitTestDslInfo)other);
+      if (other instanceof com.android.kotlin.multiplatform.models.DependencyInfo) {
+        return mergeFrom((com.android.kotlin.multiplatform.models.DependencyInfo)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(com.android.kotlin.multiplatform.models.UnitTestDslInfo other) {
-      if (other == com.android.kotlin.multiplatform.models.UnitTestDslInfo.getDefaultInstance()) return this;
-      if (other.hasNamespace()) {
-        bitField0_ |= 0x00000001;
-        namespace_ = other.namespace_;
-        onChanged();
+    public Builder mergeFrom(com.android.kotlin.multiplatform.models.DependencyInfo other) {
+      if (other == com.android.kotlin.multiplatform.models.DependencyInfo.getDefaultInstance()) return this;
+      if (other.hasLibrary()) {
+        mergeLibrary(other.getLibrary());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -443,11 +437,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      com.android.kotlin.multiplatform.models.UnitTestDslInfo parsedMessage = null;
+      com.android.kotlin.multiplatform.models.DependencyInfo parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (com.android.kotlin.multiplatform.models.UnitTestDslInfo) e.getUnfinishedMessage();
+        parsedMessage = (com.android.kotlin.multiplatform.models.DependencyInfo) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -458,87 +452,124 @@ private static final long serialVersionUID = 0L;
     }
     private int bitField0_;
 
-    private java.lang.Object namespace_ = "";
+    private com.android.builder.model.proto.ide.Library library_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        com.android.builder.model.proto.ide.Library, com.android.builder.model.proto.ide.Library.Builder, com.android.builder.model.proto.ide.LibraryOrBuilder> libraryBuilder_;
     /**
-     * <code>optional string namespace = 1;</code>
-     * @return Whether the namespace field is set.
+     * <code>optional .Library library = 1;</code>
+     * @return Whether the library field is set.
      */
-    public boolean hasNamespace() {
+    public boolean hasLibrary() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
-     * <code>optional string namespace = 1;</code>
-     * @return The namespace.
+     * <code>optional .Library library = 1;</code>
+     * @return The library.
      */
-    public java.lang.String getNamespace() {
-      java.lang.Object ref = namespace_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        namespace_ = s;
-        return s;
+    public com.android.builder.model.proto.ide.Library getLibrary() {
+      if (libraryBuilder_ == null) {
+        return library_ == null ? com.android.builder.model.proto.ide.Library.getDefaultInstance() : library_;
       } else {
-        return (java.lang.String) ref;
+        return libraryBuilder_.getMessage();
       }
     }
     /**
-     * <code>optional string namespace = 1;</code>
-     * @return The bytes for namespace.
+     * <code>optional .Library library = 1;</code>
      */
-    public com.google.protobuf.ByteString
-        getNamespaceBytes() {
-      java.lang.Object ref = namespace_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        namespace_ = b;
-        return b;
+    public Builder setLibrary(com.android.builder.model.proto.ide.Library value) {
+      if (libraryBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        library_ = value;
+        onChanged();
       } else {
-        return (com.google.protobuf.ByteString) ref;
+        libraryBuilder_.setMessage(value);
       }
-    }
-    /**
-     * <code>optional string namespace = 1;</code>
-     * @param value The namespace to set.
-     * @return This builder for chaining.
-     */
-    public Builder setNamespace(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-      namespace_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>optional string namespace = 1;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearNamespace() {
-      bitField0_ = (bitField0_ & ~0x00000001);
-      namespace_ = getDefaultInstance().getNamespace();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>optional string namespace = 1;</code>
-     * @param value The bytes for namespace to set.
-     * @return This builder for chaining.
-     */
-    public Builder setNamespaceBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
       bitField0_ |= 0x00000001;
-      namespace_ = value;
-      onChanged();
       return this;
+    }
+    /**
+     * <code>optional .Library library = 1;</code>
+     */
+    public Builder setLibrary(
+        com.android.builder.model.proto.ide.Library.Builder builderForValue) {
+      if (libraryBuilder_ == null) {
+        library_ = builderForValue.build();
+        onChanged();
+      } else {
+        libraryBuilder_.setMessage(builderForValue.build());
+      }
+      bitField0_ |= 0x00000001;
+      return this;
+    }
+    /**
+     * <code>optional .Library library = 1;</code>
+     */
+    public Builder mergeLibrary(com.android.builder.model.proto.ide.Library value) {
+      if (libraryBuilder_ == null) {
+        if (((bitField0_ & 0x00000001) != 0) &&
+            library_ != null &&
+            library_ != com.android.builder.model.proto.ide.Library.getDefaultInstance()) {
+          library_ =
+            com.android.builder.model.proto.ide.Library.newBuilder(library_).mergeFrom(value).buildPartial();
+        } else {
+          library_ = value;
+        }
+        onChanged();
+      } else {
+        libraryBuilder_.mergeFrom(value);
+      }
+      bitField0_ |= 0x00000001;
+      return this;
+    }
+    /**
+     * <code>optional .Library library = 1;</code>
+     */
+    public Builder clearLibrary() {
+      if (libraryBuilder_ == null) {
+        library_ = null;
+        onChanged();
+      } else {
+        libraryBuilder_.clear();
+      }
+      bitField0_ = (bitField0_ & ~0x00000001);
+      return this;
+    }
+    /**
+     * <code>optional .Library library = 1;</code>
+     */
+    public com.android.builder.model.proto.ide.Library.Builder getLibraryBuilder() {
+      bitField0_ |= 0x00000001;
+      onChanged();
+      return getLibraryFieldBuilder().getBuilder();
+    }
+    /**
+     * <code>optional .Library library = 1;</code>
+     */
+    public com.android.builder.model.proto.ide.LibraryOrBuilder getLibraryOrBuilder() {
+      if (libraryBuilder_ != null) {
+        return libraryBuilder_.getMessageOrBuilder();
+      } else {
+        return library_ == null ?
+            com.android.builder.model.proto.ide.Library.getDefaultInstance() : library_;
+      }
+    }
+    /**
+     * <code>optional .Library library = 1;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        com.android.builder.model.proto.ide.Library, com.android.builder.model.proto.ide.Library.Builder, com.android.builder.model.proto.ide.LibraryOrBuilder> 
+        getLibraryFieldBuilder() {
+      if (libraryBuilder_ == null) {
+        libraryBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            com.android.builder.model.proto.ide.Library, com.android.builder.model.proto.ide.Library.Builder, com.android.builder.model.proto.ide.LibraryOrBuilder>(
+                getLibrary(),
+                getParentForChildren(),
+                isClean());
+        library_ = null;
+      }
+      return libraryBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(
@@ -553,41 +584,41 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:UnitTestDslInfo)
+    // @@protoc_insertion_point(builder_scope:DependencyInfo)
   }
 
-  // @@protoc_insertion_point(class_scope:UnitTestDslInfo)
-  private static final com.android.kotlin.multiplatform.models.UnitTestDslInfo DEFAULT_INSTANCE;
+  // @@protoc_insertion_point(class_scope:DependencyInfo)
+  private static final com.android.kotlin.multiplatform.models.DependencyInfo DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new com.android.kotlin.multiplatform.models.UnitTestDslInfo();
+    DEFAULT_INSTANCE = new com.android.kotlin.multiplatform.models.DependencyInfo();
   }
 
-  public static com.android.kotlin.multiplatform.models.UnitTestDslInfo getDefaultInstance() {
+  public static com.android.kotlin.multiplatform.models.DependencyInfo getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
-  private static final com.google.protobuf.Parser<UnitTestDslInfo>
-      PARSER = new com.google.protobuf.AbstractParser<UnitTestDslInfo>() {
+  private static final com.google.protobuf.Parser<DependencyInfo>
+      PARSER = new com.google.protobuf.AbstractParser<DependencyInfo>() {
     @java.lang.Override
-    public UnitTestDslInfo parsePartialFrom(
+    public DependencyInfo parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new UnitTestDslInfo(input, extensionRegistry);
+      return new DependencyInfo(input, extensionRegistry);
     }
   };
 
-  public static com.google.protobuf.Parser<UnitTestDslInfo> parser() {
+  public static com.google.protobuf.Parser<DependencyInfo> parser() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.google.protobuf.Parser<UnitTestDslInfo> getParserForType() {
+  public com.google.protobuf.Parser<DependencyInfo> getParserForType() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.android.kotlin.multiplatform.models.UnitTestDslInfo getDefaultInstanceForType() {
+  public com.android.kotlin.multiplatform.models.DependencyInfo getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

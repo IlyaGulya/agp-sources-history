@@ -19,6 +19,7 @@ private static final long serialVersionUID = 0L;
     type_ = 0;
     defaultSourceSetName_ = "";
     assembleTaskName_ = "";
+    kotlinCompileTaskName_ = "";
   }
 
   @java.lang.Override
@@ -59,40 +60,40 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 18: {
-            com.android.kotlin.multiplatform.models.MainVariantDslInfo.Builder subBuilder = null;
+            com.android.kotlin.multiplatform.models.MainVariantInfo.Builder subBuilder = null;
             if (((bitField0_ & 0x00000002) != 0)) {
-              subBuilder = mainDslInfo_.toBuilder();
+              subBuilder = mainInfo_.toBuilder();
             }
-            mainDslInfo_ = input.readMessage(com.android.kotlin.multiplatform.models.MainVariantDslInfo.parser(), extensionRegistry);
+            mainInfo_ = input.readMessage(com.android.kotlin.multiplatform.models.MainVariantInfo.parser(), extensionRegistry);
             if (subBuilder != null) {
-              subBuilder.mergeFrom(mainDslInfo_);
-              mainDslInfo_ = subBuilder.buildPartial();
+              subBuilder.mergeFrom(mainInfo_);
+              mainInfo_ = subBuilder.buildPartial();
             }
             bitField0_ |= 0x00000002;
             break;
           }
           case 26: {
-            com.android.kotlin.multiplatform.models.UnitTestDslInfo.Builder subBuilder = null;
+            com.android.kotlin.multiplatform.models.UnitTestInfo.Builder subBuilder = null;
             if (((bitField0_ & 0x00000004) != 0)) {
-              subBuilder = unitTestDslInfo_.toBuilder();
+              subBuilder = unitTestInfo_.toBuilder();
             }
-            unitTestDslInfo_ = input.readMessage(com.android.kotlin.multiplatform.models.UnitTestDslInfo.parser(), extensionRegistry);
+            unitTestInfo_ = input.readMessage(com.android.kotlin.multiplatform.models.UnitTestInfo.parser(), extensionRegistry);
             if (subBuilder != null) {
-              subBuilder.mergeFrom(unitTestDslInfo_);
-              unitTestDslInfo_ = subBuilder.buildPartial();
+              subBuilder.mergeFrom(unitTestInfo_);
+              unitTestInfo_ = subBuilder.buildPartial();
             }
             bitField0_ |= 0x00000004;
             break;
           }
           case 34: {
-            com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.Builder subBuilder = null;
+            com.android.kotlin.multiplatform.models.InstrumentedTestInfo.Builder subBuilder = null;
             if (((bitField0_ & 0x00000008) != 0)) {
-              subBuilder = instrumentedTestDslInfo_.toBuilder();
+              subBuilder = instrumentedTestInfo_.toBuilder();
             }
-            instrumentedTestDslInfo_ = input.readMessage(com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.parser(), extensionRegistry);
+            instrumentedTestInfo_ = input.readMessage(com.android.kotlin.multiplatform.models.InstrumentedTestInfo.parser(), extensionRegistry);
             if (subBuilder != null) {
-              subBuilder.mergeFrom(instrumentedTestDslInfo_);
-              instrumentedTestDslInfo_ = subBuilder.buildPartial();
+              subBuilder.mergeFrom(instrumentedTestInfo_);
+              instrumentedTestInfo_ = subBuilder.buildPartial();
             }
             bitField0_ |= 0x00000008;
             break;
@@ -107,6 +108,12 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
             bitField0_ |= 0x00000020;
             assembleTaskName_ = s;
+            break;
+          }
+          case 58: {
+            java.lang.String s = input.readStringRequireUtf8();
+            bitField0_ |= 0x00000040;
+            kotlinCompileTaskName_ = s;
             break;
           }
           default: {
@@ -297,118 +304,118 @@ private static final long serialVersionUID = 0L;
     return result == null ? com.android.kotlin.multiplatform.models.AndroidCompilation.CompilationType.UNRECOGNIZED : result;
   }
 
-  public static final int MAIN_DSL_INFO_FIELD_NUMBER = 2;
-  private com.android.kotlin.multiplatform.models.MainVariantDslInfo mainDslInfo_;
+  public static final int MAIN_INFO_FIELD_NUMBER = 2;
+  private com.android.kotlin.multiplatform.models.MainVariantInfo mainInfo_;
   /**
    * <pre>
-   * The dsl info of the main variant, will be available iff compilation type is MAIN.
+   * The info of the main variant, will be available iff compilation type is MAIN.
    * </pre>
    *
-   * <code>optional .MainVariantDslInfo main_dsl_info = 2;</code>
-   * @return Whether the mainDslInfo field is set.
+   * <code>optional .MainVariantInfo main_info = 2;</code>
+   * @return Whether the mainInfo field is set.
    */
   @java.lang.Override
-  public boolean hasMainDslInfo() {
+  public boolean hasMainInfo() {
     return ((bitField0_ & 0x00000002) != 0);
   }
   /**
    * <pre>
-   * The dsl info of the main variant, will be available iff compilation type is MAIN.
+   * The info of the main variant, will be available iff compilation type is MAIN.
    * </pre>
    *
-   * <code>optional .MainVariantDslInfo main_dsl_info = 2;</code>
-   * @return The mainDslInfo.
+   * <code>optional .MainVariantInfo main_info = 2;</code>
+   * @return The mainInfo.
    */
   @java.lang.Override
-  public com.android.kotlin.multiplatform.models.MainVariantDslInfo getMainDslInfo() {
-    return mainDslInfo_ == null ? com.android.kotlin.multiplatform.models.MainVariantDslInfo.getDefaultInstance() : mainDslInfo_;
+  public com.android.kotlin.multiplatform.models.MainVariantInfo getMainInfo() {
+    return mainInfo_ == null ? com.android.kotlin.multiplatform.models.MainVariantInfo.getDefaultInstance() : mainInfo_;
   }
   /**
    * <pre>
-   * The dsl info of the main variant, will be available iff compilation type is MAIN.
+   * The info of the main variant, will be available iff compilation type is MAIN.
    * </pre>
    *
-   * <code>optional .MainVariantDslInfo main_dsl_info = 2;</code>
+   * <code>optional .MainVariantInfo main_info = 2;</code>
    */
   @java.lang.Override
-  public com.android.kotlin.multiplatform.models.MainVariantDslInfoOrBuilder getMainDslInfoOrBuilder() {
-    return mainDslInfo_ == null ? com.android.kotlin.multiplatform.models.MainVariantDslInfo.getDefaultInstance() : mainDslInfo_;
+  public com.android.kotlin.multiplatform.models.MainVariantInfoOrBuilder getMainInfoOrBuilder() {
+    return mainInfo_ == null ? com.android.kotlin.multiplatform.models.MainVariantInfo.getDefaultInstance() : mainInfo_;
   }
 
-  public static final int UNIT_TEST_DSL_INFO_FIELD_NUMBER = 3;
-  private com.android.kotlin.multiplatform.models.UnitTestDslInfo unitTestDslInfo_;
+  public static final int UNIT_TEST_INFO_FIELD_NUMBER = 3;
+  private com.android.kotlin.multiplatform.models.UnitTestInfo unitTestInfo_;
   /**
    * <pre>
-   * The dsl info of the unit test component, will be available iff compilation type is UNIT_TEST.
+   * The info of the unit test component, will be available iff compilation type is UNIT_TEST.
    * </pre>
    *
-   * <code>optional .UnitTestDslInfo unit_test_dsl_info = 3;</code>
-   * @return Whether the unitTestDslInfo field is set.
+   * <code>optional .UnitTestInfo unit_test_info = 3;</code>
+   * @return Whether the unitTestInfo field is set.
    */
   @java.lang.Override
-  public boolean hasUnitTestDslInfo() {
+  public boolean hasUnitTestInfo() {
     return ((bitField0_ & 0x00000004) != 0);
   }
   /**
    * <pre>
-   * The dsl info of the unit test component, will be available iff compilation type is UNIT_TEST.
+   * The info of the unit test component, will be available iff compilation type is UNIT_TEST.
    * </pre>
    *
-   * <code>optional .UnitTestDslInfo unit_test_dsl_info = 3;</code>
-   * @return The unitTestDslInfo.
+   * <code>optional .UnitTestInfo unit_test_info = 3;</code>
+   * @return The unitTestInfo.
    */
   @java.lang.Override
-  public com.android.kotlin.multiplatform.models.UnitTestDslInfo getUnitTestDslInfo() {
-    return unitTestDslInfo_ == null ? com.android.kotlin.multiplatform.models.UnitTestDslInfo.getDefaultInstance() : unitTestDslInfo_;
+  public com.android.kotlin.multiplatform.models.UnitTestInfo getUnitTestInfo() {
+    return unitTestInfo_ == null ? com.android.kotlin.multiplatform.models.UnitTestInfo.getDefaultInstance() : unitTestInfo_;
   }
   /**
    * <pre>
-   * The dsl info of the unit test component, will be available iff compilation type is UNIT_TEST.
+   * The info of the unit test component, will be available iff compilation type is UNIT_TEST.
    * </pre>
    *
-   * <code>optional .UnitTestDslInfo unit_test_dsl_info = 3;</code>
+   * <code>optional .UnitTestInfo unit_test_info = 3;</code>
    */
   @java.lang.Override
-  public com.android.kotlin.multiplatform.models.UnitTestDslInfoOrBuilder getUnitTestDslInfoOrBuilder() {
-    return unitTestDslInfo_ == null ? com.android.kotlin.multiplatform.models.UnitTestDslInfo.getDefaultInstance() : unitTestDslInfo_;
+  public com.android.kotlin.multiplatform.models.UnitTestInfoOrBuilder getUnitTestInfoOrBuilder() {
+    return unitTestInfo_ == null ? com.android.kotlin.multiplatform.models.UnitTestInfo.getDefaultInstance() : unitTestInfo_;
   }
 
-  public static final int INSTRUMENTED_TEST_DSL_INFO_FIELD_NUMBER = 4;
-  private com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo instrumentedTestDslInfo_;
+  public static final int INSTRUMENTED_TEST_INFO_FIELD_NUMBER = 4;
+  private com.android.kotlin.multiplatform.models.InstrumentedTestInfo instrumentedTestInfo_;
   /**
    * <pre>
-   * The dsl info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
+   * The info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
    * </pre>
    *
-   * <code>optional .InstrumentedTestDslInfo instrumented_test_dsl_info = 4;</code>
-   * @return Whether the instrumentedTestDslInfo field is set.
+   * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
+   * @return Whether the instrumentedTestInfo field is set.
    */
   @java.lang.Override
-  public boolean hasInstrumentedTestDslInfo() {
+  public boolean hasInstrumentedTestInfo() {
     return ((bitField0_ & 0x00000008) != 0);
   }
   /**
    * <pre>
-   * The dsl info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
+   * The info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
    * </pre>
    *
-   * <code>optional .InstrumentedTestDslInfo instrumented_test_dsl_info = 4;</code>
-   * @return The instrumentedTestDslInfo.
+   * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
+   * @return The instrumentedTestInfo.
    */
   @java.lang.Override
-  public com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo getInstrumentedTestDslInfo() {
-    return instrumentedTestDslInfo_ == null ? com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.getDefaultInstance() : instrumentedTestDslInfo_;
+  public com.android.kotlin.multiplatform.models.InstrumentedTestInfo getInstrumentedTestInfo() {
+    return instrumentedTestInfo_ == null ? com.android.kotlin.multiplatform.models.InstrumentedTestInfo.getDefaultInstance() : instrumentedTestInfo_;
   }
   /**
    * <pre>
-   * The dsl info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
+   * The info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
    * </pre>
    *
-   * <code>optional .InstrumentedTestDslInfo instrumented_test_dsl_info = 4;</code>
+   * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
    */
   @java.lang.Override
-  public com.android.kotlin.multiplatform.models.InstrumentedTestDslInfoOrBuilder getInstrumentedTestDslInfoOrBuilder() {
-    return instrumentedTestDslInfo_ == null ? com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.getDefaultInstance() : instrumentedTestDslInfo_;
+  public com.android.kotlin.multiplatform.models.InstrumentedTestInfoOrBuilder getInstrumentedTestInfoOrBuilder() {
+    return instrumentedTestInfo_ == null ? com.android.kotlin.multiplatform.models.InstrumentedTestInfo.getDefaultInstance() : instrumentedTestInfo_;
   }
 
   public static final int DEFAULT_SOURCE_SET_NAME_FIELD_NUMBER = 5;
@@ -527,6 +534,64 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int KOTLIN_COMPILE_TASK_NAME_FIELD_NUMBER = 7;
+  private volatile java.lang.Object kotlinCompileTaskName_;
+  /**
+   * <pre>
+   * The kotlin gradle compilation task name.
+   * </pre>
+   *
+   * <code>optional string kotlin_compile_task_name = 7;</code>
+   * @return Whether the kotlinCompileTaskName field is set.
+   */
+  @java.lang.Override
+  public boolean hasKotlinCompileTaskName() {
+    return ((bitField0_ & 0x00000040) != 0);
+  }
+  /**
+   * <pre>
+   * The kotlin gradle compilation task name.
+   * </pre>
+   *
+   * <code>optional string kotlin_compile_task_name = 7;</code>
+   * @return The kotlinCompileTaskName.
+   */
+  @java.lang.Override
+  public java.lang.String getKotlinCompileTaskName() {
+    java.lang.Object ref = kotlinCompileTaskName_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      kotlinCompileTaskName_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * The kotlin gradle compilation task name.
+   * </pre>
+   *
+   * <code>optional string kotlin_compile_task_name = 7;</code>
+   * @return The bytes for kotlinCompileTaskName.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getKotlinCompileTaskNameBytes() {
+    java.lang.Object ref = kotlinCompileTaskName_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      kotlinCompileTaskName_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -545,19 +610,22 @@ private static final long serialVersionUID = 0L;
       output.writeEnum(1, type_);
     }
     if (((bitField0_ & 0x00000002) != 0)) {
-      output.writeMessage(2, getMainDslInfo());
+      output.writeMessage(2, getMainInfo());
     }
     if (((bitField0_ & 0x00000004) != 0)) {
-      output.writeMessage(3, getUnitTestDslInfo());
+      output.writeMessage(3, getUnitTestInfo());
     }
     if (((bitField0_ & 0x00000008) != 0)) {
-      output.writeMessage(4, getInstrumentedTestDslInfo());
+      output.writeMessage(4, getInstrumentedTestInfo());
     }
     if (((bitField0_ & 0x00000010) != 0)) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 5, defaultSourceSetName_);
     }
     if (((bitField0_ & 0x00000020) != 0)) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 6, assembleTaskName_);
+    }
+    if (((bitField0_ & 0x00000040) != 0)) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 7, kotlinCompileTaskName_);
     }
     unknownFields.writeTo(output);
   }
@@ -574,21 +642,24 @@ private static final long serialVersionUID = 0L;
     }
     if (((bitField0_ & 0x00000002) != 0)) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(2, getMainDslInfo());
+        .computeMessageSize(2, getMainInfo());
     }
     if (((bitField0_ & 0x00000004) != 0)) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(3, getUnitTestDslInfo());
+        .computeMessageSize(3, getUnitTestInfo());
     }
     if (((bitField0_ & 0x00000008) != 0)) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(4, getInstrumentedTestDslInfo());
+        .computeMessageSize(4, getInstrumentedTestInfo());
     }
     if (((bitField0_ & 0x00000010) != 0)) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, defaultSourceSetName_);
     }
     if (((bitField0_ & 0x00000020) != 0)) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, assembleTaskName_);
+    }
+    if (((bitField0_ & 0x00000040) != 0)) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, kotlinCompileTaskName_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -609,20 +680,20 @@ private static final long serialVersionUID = 0L;
     if (hasType()) {
       if (type_ != other.type_) return false;
     }
-    if (hasMainDslInfo() != other.hasMainDslInfo()) return false;
-    if (hasMainDslInfo()) {
-      if (!getMainDslInfo()
-          .equals(other.getMainDslInfo())) return false;
+    if (hasMainInfo() != other.hasMainInfo()) return false;
+    if (hasMainInfo()) {
+      if (!getMainInfo()
+          .equals(other.getMainInfo())) return false;
     }
-    if (hasUnitTestDslInfo() != other.hasUnitTestDslInfo()) return false;
-    if (hasUnitTestDslInfo()) {
-      if (!getUnitTestDslInfo()
-          .equals(other.getUnitTestDslInfo())) return false;
+    if (hasUnitTestInfo() != other.hasUnitTestInfo()) return false;
+    if (hasUnitTestInfo()) {
+      if (!getUnitTestInfo()
+          .equals(other.getUnitTestInfo())) return false;
     }
-    if (hasInstrumentedTestDslInfo() != other.hasInstrumentedTestDslInfo()) return false;
-    if (hasInstrumentedTestDslInfo()) {
-      if (!getInstrumentedTestDslInfo()
-          .equals(other.getInstrumentedTestDslInfo())) return false;
+    if (hasInstrumentedTestInfo() != other.hasInstrumentedTestInfo()) return false;
+    if (hasInstrumentedTestInfo()) {
+      if (!getInstrumentedTestInfo()
+          .equals(other.getInstrumentedTestInfo())) return false;
     }
     if (hasDefaultSourceSetName() != other.hasDefaultSourceSetName()) return false;
     if (hasDefaultSourceSetName()) {
@@ -633,6 +704,11 @@ private static final long serialVersionUID = 0L;
     if (hasAssembleTaskName()) {
       if (!getAssembleTaskName()
           .equals(other.getAssembleTaskName())) return false;
+    }
+    if (hasKotlinCompileTaskName() != other.hasKotlinCompileTaskName()) return false;
+    if (hasKotlinCompileTaskName()) {
+      if (!getKotlinCompileTaskName()
+          .equals(other.getKotlinCompileTaskName())) return false;
     }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
@@ -649,17 +725,17 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + TYPE_FIELD_NUMBER;
       hash = (53 * hash) + type_;
     }
-    if (hasMainDslInfo()) {
-      hash = (37 * hash) + MAIN_DSL_INFO_FIELD_NUMBER;
-      hash = (53 * hash) + getMainDslInfo().hashCode();
+    if (hasMainInfo()) {
+      hash = (37 * hash) + MAIN_INFO_FIELD_NUMBER;
+      hash = (53 * hash) + getMainInfo().hashCode();
     }
-    if (hasUnitTestDslInfo()) {
-      hash = (37 * hash) + UNIT_TEST_DSL_INFO_FIELD_NUMBER;
-      hash = (53 * hash) + getUnitTestDslInfo().hashCode();
+    if (hasUnitTestInfo()) {
+      hash = (37 * hash) + UNIT_TEST_INFO_FIELD_NUMBER;
+      hash = (53 * hash) + getUnitTestInfo().hashCode();
     }
-    if (hasInstrumentedTestDslInfo()) {
-      hash = (37 * hash) + INSTRUMENTED_TEST_DSL_INFO_FIELD_NUMBER;
-      hash = (53 * hash) + getInstrumentedTestDslInfo().hashCode();
+    if (hasInstrumentedTestInfo()) {
+      hash = (37 * hash) + INSTRUMENTED_TEST_INFO_FIELD_NUMBER;
+      hash = (53 * hash) + getInstrumentedTestInfo().hashCode();
     }
     if (hasDefaultSourceSetName()) {
       hash = (37 * hash) + DEFAULT_SOURCE_SET_NAME_FIELD_NUMBER;
@@ -668,6 +744,10 @@ private static final long serialVersionUID = 0L;
     if (hasAssembleTaskName()) {
       hash = (37 * hash) + ASSEMBLE_TASK_NAME_FIELD_NUMBER;
       hash = (53 * hash) + getAssembleTaskName().hashCode();
+    }
+    if (hasKotlinCompileTaskName()) {
+      hash = (37 * hash) + KOTLIN_COMPILE_TASK_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getKotlinCompileTaskName().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -797,9 +877,9 @@ private static final long serialVersionUID = 0L;
     private void maybeForceBuilderInitialization() {
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
-        getMainDslInfoFieldBuilder();
-        getUnitTestDslInfoFieldBuilder();
-        getInstrumentedTestDslInfoFieldBuilder();
+        getMainInfoFieldBuilder();
+        getUnitTestInfoFieldBuilder();
+        getInstrumentedTestInfoFieldBuilder();
       }
     }
     @java.lang.Override
@@ -807,28 +887,30 @@ private static final long serialVersionUID = 0L;
       super.clear();
       type_ = 0;
       bitField0_ = (bitField0_ & ~0x00000001);
-      if (mainDslInfoBuilder_ == null) {
-        mainDslInfo_ = null;
+      if (mainInfoBuilder_ == null) {
+        mainInfo_ = null;
       } else {
-        mainDslInfoBuilder_.clear();
+        mainInfoBuilder_.clear();
       }
       bitField0_ = (bitField0_ & ~0x00000002);
-      if (unitTestDslInfoBuilder_ == null) {
-        unitTestDslInfo_ = null;
+      if (unitTestInfoBuilder_ == null) {
+        unitTestInfo_ = null;
       } else {
-        unitTestDslInfoBuilder_.clear();
+        unitTestInfoBuilder_.clear();
       }
       bitField0_ = (bitField0_ & ~0x00000004);
-      if (instrumentedTestDslInfoBuilder_ == null) {
-        instrumentedTestDslInfo_ = null;
+      if (instrumentedTestInfoBuilder_ == null) {
+        instrumentedTestInfo_ = null;
       } else {
-        instrumentedTestDslInfoBuilder_.clear();
+        instrumentedTestInfoBuilder_.clear();
       }
       bitField0_ = (bitField0_ & ~0x00000008);
       defaultSourceSetName_ = "";
       bitField0_ = (bitField0_ & ~0x00000010);
       assembleTaskName_ = "";
       bitField0_ = (bitField0_ & ~0x00000020);
+      kotlinCompileTaskName_ = "";
+      bitField0_ = (bitField0_ & ~0x00000040);
       return this;
     }
 
@@ -862,26 +944,26 @@ private static final long serialVersionUID = 0L;
       }
       result.type_ = type_;
       if (((from_bitField0_ & 0x00000002) != 0)) {
-        if (mainDslInfoBuilder_ == null) {
-          result.mainDslInfo_ = mainDslInfo_;
+        if (mainInfoBuilder_ == null) {
+          result.mainInfo_ = mainInfo_;
         } else {
-          result.mainDslInfo_ = mainDslInfoBuilder_.build();
+          result.mainInfo_ = mainInfoBuilder_.build();
         }
         to_bitField0_ |= 0x00000002;
       }
       if (((from_bitField0_ & 0x00000004) != 0)) {
-        if (unitTestDslInfoBuilder_ == null) {
-          result.unitTestDslInfo_ = unitTestDslInfo_;
+        if (unitTestInfoBuilder_ == null) {
+          result.unitTestInfo_ = unitTestInfo_;
         } else {
-          result.unitTestDslInfo_ = unitTestDslInfoBuilder_.build();
+          result.unitTestInfo_ = unitTestInfoBuilder_.build();
         }
         to_bitField0_ |= 0x00000004;
       }
       if (((from_bitField0_ & 0x00000008) != 0)) {
-        if (instrumentedTestDslInfoBuilder_ == null) {
-          result.instrumentedTestDslInfo_ = instrumentedTestDslInfo_;
+        if (instrumentedTestInfoBuilder_ == null) {
+          result.instrumentedTestInfo_ = instrumentedTestInfo_;
         } else {
-          result.instrumentedTestDslInfo_ = instrumentedTestDslInfoBuilder_.build();
+          result.instrumentedTestInfo_ = instrumentedTestInfoBuilder_.build();
         }
         to_bitField0_ |= 0x00000008;
       }
@@ -893,6 +975,10 @@ private static final long serialVersionUID = 0L;
         to_bitField0_ |= 0x00000020;
       }
       result.assembleTaskName_ = assembleTaskName_;
+      if (((from_bitField0_ & 0x00000040) != 0)) {
+        to_bitField0_ |= 0x00000040;
+      }
+      result.kotlinCompileTaskName_ = kotlinCompileTaskName_;
       result.bitField0_ = to_bitField0_;
       onBuilt();
       return result;
@@ -945,14 +1031,14 @@ private static final long serialVersionUID = 0L;
       if (other.hasType()) {
         setType(other.getType());
       }
-      if (other.hasMainDslInfo()) {
-        mergeMainDslInfo(other.getMainDslInfo());
+      if (other.hasMainInfo()) {
+        mergeMainInfo(other.getMainInfo());
       }
-      if (other.hasUnitTestDslInfo()) {
-        mergeUnitTestDslInfo(other.getUnitTestDslInfo());
+      if (other.hasUnitTestInfo()) {
+        mergeUnitTestInfo(other.getUnitTestInfo());
       }
-      if (other.hasInstrumentedTestDslInfo()) {
-        mergeInstrumentedTestDslInfo(other.getInstrumentedTestDslInfo());
+      if (other.hasInstrumentedTestInfo()) {
+        mergeInstrumentedTestInfo(other.getInstrumentedTestInfo());
       }
       if (other.hasDefaultSourceSetName()) {
         bitField0_ |= 0x00000010;
@@ -962,6 +1048,11 @@ private static final long serialVersionUID = 0L;
       if (other.hasAssembleTaskName()) {
         bitField0_ |= 0x00000020;
         assembleTaskName_ = other.assembleTaskName_;
+        onChanged();
+      }
+      if (other.hasKotlinCompileTaskName()) {
+        bitField0_ |= 0x00000040;
+        kotlinCompileTaskName_ = other.kotlinCompileTaskName_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -1079,472 +1170,472 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private com.android.kotlin.multiplatform.models.MainVariantDslInfo mainDslInfo_;
+    private com.android.kotlin.multiplatform.models.MainVariantInfo mainInfo_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.android.kotlin.multiplatform.models.MainVariantDslInfo, com.android.kotlin.multiplatform.models.MainVariantDslInfo.Builder, com.android.kotlin.multiplatform.models.MainVariantDslInfoOrBuilder> mainDslInfoBuilder_;
+        com.android.kotlin.multiplatform.models.MainVariantInfo, com.android.kotlin.multiplatform.models.MainVariantInfo.Builder, com.android.kotlin.multiplatform.models.MainVariantInfoOrBuilder> mainInfoBuilder_;
     /**
      * <pre>
-     * The dsl info of the main variant, will be available iff compilation type is MAIN.
+     * The info of the main variant, will be available iff compilation type is MAIN.
      * </pre>
      *
-     * <code>optional .MainVariantDslInfo main_dsl_info = 2;</code>
-     * @return Whether the mainDslInfo field is set.
+     * <code>optional .MainVariantInfo main_info = 2;</code>
+     * @return Whether the mainInfo field is set.
      */
-    public boolean hasMainDslInfo() {
+    public boolean hasMainInfo() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
      * <pre>
-     * The dsl info of the main variant, will be available iff compilation type is MAIN.
+     * The info of the main variant, will be available iff compilation type is MAIN.
      * </pre>
      *
-     * <code>optional .MainVariantDslInfo main_dsl_info = 2;</code>
-     * @return The mainDslInfo.
+     * <code>optional .MainVariantInfo main_info = 2;</code>
+     * @return The mainInfo.
      */
-    public com.android.kotlin.multiplatform.models.MainVariantDslInfo getMainDslInfo() {
-      if (mainDslInfoBuilder_ == null) {
-        return mainDslInfo_ == null ? com.android.kotlin.multiplatform.models.MainVariantDslInfo.getDefaultInstance() : mainDslInfo_;
+    public com.android.kotlin.multiplatform.models.MainVariantInfo getMainInfo() {
+      if (mainInfoBuilder_ == null) {
+        return mainInfo_ == null ? com.android.kotlin.multiplatform.models.MainVariantInfo.getDefaultInstance() : mainInfo_;
       } else {
-        return mainDslInfoBuilder_.getMessage();
+        return mainInfoBuilder_.getMessage();
       }
     }
     /**
      * <pre>
-     * The dsl info of the main variant, will be available iff compilation type is MAIN.
+     * The info of the main variant, will be available iff compilation type is MAIN.
      * </pre>
      *
-     * <code>optional .MainVariantDslInfo main_dsl_info = 2;</code>
+     * <code>optional .MainVariantInfo main_info = 2;</code>
      */
-    public Builder setMainDslInfo(com.android.kotlin.multiplatform.models.MainVariantDslInfo value) {
-      if (mainDslInfoBuilder_ == null) {
+    public Builder setMainInfo(com.android.kotlin.multiplatform.models.MainVariantInfo value) {
+      if (mainInfoBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        mainDslInfo_ = value;
+        mainInfo_ = value;
         onChanged();
       } else {
-        mainDslInfoBuilder_.setMessage(value);
+        mainInfoBuilder_.setMessage(value);
       }
       bitField0_ |= 0x00000002;
       return this;
     }
     /**
      * <pre>
-     * The dsl info of the main variant, will be available iff compilation type is MAIN.
+     * The info of the main variant, will be available iff compilation type is MAIN.
      * </pre>
      *
-     * <code>optional .MainVariantDslInfo main_dsl_info = 2;</code>
+     * <code>optional .MainVariantInfo main_info = 2;</code>
      */
-    public Builder setMainDslInfo(
-        com.android.kotlin.multiplatform.models.MainVariantDslInfo.Builder builderForValue) {
-      if (mainDslInfoBuilder_ == null) {
-        mainDslInfo_ = builderForValue.build();
+    public Builder setMainInfo(
+        com.android.kotlin.multiplatform.models.MainVariantInfo.Builder builderForValue) {
+      if (mainInfoBuilder_ == null) {
+        mainInfo_ = builderForValue.build();
         onChanged();
       } else {
-        mainDslInfoBuilder_.setMessage(builderForValue.build());
+        mainInfoBuilder_.setMessage(builderForValue.build());
       }
       bitField0_ |= 0x00000002;
       return this;
     }
     /**
      * <pre>
-     * The dsl info of the main variant, will be available iff compilation type is MAIN.
+     * The info of the main variant, will be available iff compilation type is MAIN.
      * </pre>
      *
-     * <code>optional .MainVariantDslInfo main_dsl_info = 2;</code>
+     * <code>optional .MainVariantInfo main_info = 2;</code>
      */
-    public Builder mergeMainDslInfo(com.android.kotlin.multiplatform.models.MainVariantDslInfo value) {
-      if (mainDslInfoBuilder_ == null) {
+    public Builder mergeMainInfo(com.android.kotlin.multiplatform.models.MainVariantInfo value) {
+      if (mainInfoBuilder_ == null) {
         if (((bitField0_ & 0x00000002) != 0) &&
-            mainDslInfo_ != null &&
-            mainDslInfo_ != com.android.kotlin.multiplatform.models.MainVariantDslInfo.getDefaultInstance()) {
-          mainDslInfo_ =
-            com.android.kotlin.multiplatform.models.MainVariantDslInfo.newBuilder(mainDslInfo_).mergeFrom(value).buildPartial();
+            mainInfo_ != null &&
+            mainInfo_ != com.android.kotlin.multiplatform.models.MainVariantInfo.getDefaultInstance()) {
+          mainInfo_ =
+            com.android.kotlin.multiplatform.models.MainVariantInfo.newBuilder(mainInfo_).mergeFrom(value).buildPartial();
         } else {
-          mainDslInfo_ = value;
+          mainInfo_ = value;
         }
         onChanged();
       } else {
-        mainDslInfoBuilder_.mergeFrom(value);
+        mainInfoBuilder_.mergeFrom(value);
       }
       bitField0_ |= 0x00000002;
       return this;
     }
     /**
      * <pre>
-     * The dsl info of the main variant, will be available iff compilation type is MAIN.
+     * The info of the main variant, will be available iff compilation type is MAIN.
      * </pre>
      *
-     * <code>optional .MainVariantDslInfo main_dsl_info = 2;</code>
+     * <code>optional .MainVariantInfo main_info = 2;</code>
      */
-    public Builder clearMainDslInfo() {
-      if (mainDslInfoBuilder_ == null) {
-        mainDslInfo_ = null;
+    public Builder clearMainInfo() {
+      if (mainInfoBuilder_ == null) {
+        mainInfo_ = null;
         onChanged();
       } else {
-        mainDslInfoBuilder_.clear();
+        mainInfoBuilder_.clear();
       }
       bitField0_ = (bitField0_ & ~0x00000002);
       return this;
     }
     /**
      * <pre>
-     * The dsl info of the main variant, will be available iff compilation type is MAIN.
+     * The info of the main variant, will be available iff compilation type is MAIN.
      * </pre>
      *
-     * <code>optional .MainVariantDslInfo main_dsl_info = 2;</code>
+     * <code>optional .MainVariantInfo main_info = 2;</code>
      */
-    public com.android.kotlin.multiplatform.models.MainVariantDslInfo.Builder getMainDslInfoBuilder() {
+    public com.android.kotlin.multiplatform.models.MainVariantInfo.Builder getMainInfoBuilder() {
       bitField0_ |= 0x00000002;
       onChanged();
-      return getMainDslInfoFieldBuilder().getBuilder();
+      return getMainInfoFieldBuilder().getBuilder();
     }
     /**
      * <pre>
-     * The dsl info of the main variant, will be available iff compilation type is MAIN.
+     * The info of the main variant, will be available iff compilation type is MAIN.
      * </pre>
      *
-     * <code>optional .MainVariantDslInfo main_dsl_info = 2;</code>
+     * <code>optional .MainVariantInfo main_info = 2;</code>
      */
-    public com.android.kotlin.multiplatform.models.MainVariantDslInfoOrBuilder getMainDslInfoOrBuilder() {
-      if (mainDslInfoBuilder_ != null) {
-        return mainDslInfoBuilder_.getMessageOrBuilder();
+    public com.android.kotlin.multiplatform.models.MainVariantInfoOrBuilder getMainInfoOrBuilder() {
+      if (mainInfoBuilder_ != null) {
+        return mainInfoBuilder_.getMessageOrBuilder();
       } else {
-        return mainDslInfo_ == null ?
-            com.android.kotlin.multiplatform.models.MainVariantDslInfo.getDefaultInstance() : mainDslInfo_;
+        return mainInfo_ == null ?
+            com.android.kotlin.multiplatform.models.MainVariantInfo.getDefaultInstance() : mainInfo_;
       }
     }
     /**
      * <pre>
-     * The dsl info of the main variant, will be available iff compilation type is MAIN.
+     * The info of the main variant, will be available iff compilation type is MAIN.
      * </pre>
      *
-     * <code>optional .MainVariantDslInfo main_dsl_info = 2;</code>
+     * <code>optional .MainVariantInfo main_info = 2;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.android.kotlin.multiplatform.models.MainVariantDslInfo, com.android.kotlin.multiplatform.models.MainVariantDslInfo.Builder, com.android.kotlin.multiplatform.models.MainVariantDslInfoOrBuilder> 
-        getMainDslInfoFieldBuilder() {
-      if (mainDslInfoBuilder_ == null) {
-        mainDslInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            com.android.kotlin.multiplatform.models.MainVariantDslInfo, com.android.kotlin.multiplatform.models.MainVariantDslInfo.Builder, com.android.kotlin.multiplatform.models.MainVariantDslInfoOrBuilder>(
-                getMainDslInfo(),
+        com.android.kotlin.multiplatform.models.MainVariantInfo, com.android.kotlin.multiplatform.models.MainVariantInfo.Builder, com.android.kotlin.multiplatform.models.MainVariantInfoOrBuilder> 
+        getMainInfoFieldBuilder() {
+      if (mainInfoBuilder_ == null) {
+        mainInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            com.android.kotlin.multiplatform.models.MainVariantInfo, com.android.kotlin.multiplatform.models.MainVariantInfo.Builder, com.android.kotlin.multiplatform.models.MainVariantInfoOrBuilder>(
+                getMainInfo(),
                 getParentForChildren(),
                 isClean());
-        mainDslInfo_ = null;
+        mainInfo_ = null;
       }
-      return mainDslInfoBuilder_;
+      return mainInfoBuilder_;
     }
 
-    private com.android.kotlin.multiplatform.models.UnitTestDslInfo unitTestDslInfo_;
+    private com.android.kotlin.multiplatform.models.UnitTestInfo unitTestInfo_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.android.kotlin.multiplatform.models.UnitTestDslInfo, com.android.kotlin.multiplatform.models.UnitTestDslInfo.Builder, com.android.kotlin.multiplatform.models.UnitTestDslInfoOrBuilder> unitTestDslInfoBuilder_;
+        com.android.kotlin.multiplatform.models.UnitTestInfo, com.android.kotlin.multiplatform.models.UnitTestInfo.Builder, com.android.kotlin.multiplatform.models.UnitTestInfoOrBuilder> unitTestInfoBuilder_;
     /**
      * <pre>
-     * The dsl info of the unit test component, will be available iff compilation type is UNIT_TEST.
+     * The info of the unit test component, will be available iff compilation type is UNIT_TEST.
      * </pre>
      *
-     * <code>optional .UnitTestDslInfo unit_test_dsl_info = 3;</code>
-     * @return Whether the unitTestDslInfo field is set.
+     * <code>optional .UnitTestInfo unit_test_info = 3;</code>
+     * @return Whether the unitTestInfo field is set.
      */
-    public boolean hasUnitTestDslInfo() {
+    public boolean hasUnitTestInfo() {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
      * <pre>
-     * The dsl info of the unit test component, will be available iff compilation type is UNIT_TEST.
+     * The info of the unit test component, will be available iff compilation type is UNIT_TEST.
      * </pre>
      *
-     * <code>optional .UnitTestDslInfo unit_test_dsl_info = 3;</code>
-     * @return The unitTestDslInfo.
+     * <code>optional .UnitTestInfo unit_test_info = 3;</code>
+     * @return The unitTestInfo.
      */
-    public com.android.kotlin.multiplatform.models.UnitTestDslInfo getUnitTestDslInfo() {
-      if (unitTestDslInfoBuilder_ == null) {
-        return unitTestDslInfo_ == null ? com.android.kotlin.multiplatform.models.UnitTestDslInfo.getDefaultInstance() : unitTestDslInfo_;
+    public com.android.kotlin.multiplatform.models.UnitTestInfo getUnitTestInfo() {
+      if (unitTestInfoBuilder_ == null) {
+        return unitTestInfo_ == null ? com.android.kotlin.multiplatform.models.UnitTestInfo.getDefaultInstance() : unitTestInfo_;
       } else {
-        return unitTestDslInfoBuilder_.getMessage();
+        return unitTestInfoBuilder_.getMessage();
       }
     }
     /**
      * <pre>
-     * The dsl info of the unit test component, will be available iff compilation type is UNIT_TEST.
+     * The info of the unit test component, will be available iff compilation type is UNIT_TEST.
      * </pre>
      *
-     * <code>optional .UnitTestDslInfo unit_test_dsl_info = 3;</code>
+     * <code>optional .UnitTestInfo unit_test_info = 3;</code>
      */
-    public Builder setUnitTestDslInfo(com.android.kotlin.multiplatform.models.UnitTestDslInfo value) {
-      if (unitTestDslInfoBuilder_ == null) {
+    public Builder setUnitTestInfo(com.android.kotlin.multiplatform.models.UnitTestInfo value) {
+      if (unitTestInfoBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        unitTestDslInfo_ = value;
+        unitTestInfo_ = value;
         onChanged();
       } else {
-        unitTestDslInfoBuilder_.setMessage(value);
+        unitTestInfoBuilder_.setMessage(value);
       }
       bitField0_ |= 0x00000004;
       return this;
     }
     /**
      * <pre>
-     * The dsl info of the unit test component, will be available iff compilation type is UNIT_TEST.
+     * The info of the unit test component, will be available iff compilation type is UNIT_TEST.
      * </pre>
      *
-     * <code>optional .UnitTestDslInfo unit_test_dsl_info = 3;</code>
+     * <code>optional .UnitTestInfo unit_test_info = 3;</code>
      */
-    public Builder setUnitTestDslInfo(
-        com.android.kotlin.multiplatform.models.UnitTestDslInfo.Builder builderForValue) {
-      if (unitTestDslInfoBuilder_ == null) {
-        unitTestDslInfo_ = builderForValue.build();
+    public Builder setUnitTestInfo(
+        com.android.kotlin.multiplatform.models.UnitTestInfo.Builder builderForValue) {
+      if (unitTestInfoBuilder_ == null) {
+        unitTestInfo_ = builderForValue.build();
         onChanged();
       } else {
-        unitTestDslInfoBuilder_.setMessage(builderForValue.build());
+        unitTestInfoBuilder_.setMessage(builderForValue.build());
       }
       bitField0_ |= 0x00000004;
       return this;
     }
     /**
      * <pre>
-     * The dsl info of the unit test component, will be available iff compilation type is UNIT_TEST.
+     * The info of the unit test component, will be available iff compilation type is UNIT_TEST.
      * </pre>
      *
-     * <code>optional .UnitTestDslInfo unit_test_dsl_info = 3;</code>
+     * <code>optional .UnitTestInfo unit_test_info = 3;</code>
      */
-    public Builder mergeUnitTestDslInfo(com.android.kotlin.multiplatform.models.UnitTestDslInfo value) {
-      if (unitTestDslInfoBuilder_ == null) {
+    public Builder mergeUnitTestInfo(com.android.kotlin.multiplatform.models.UnitTestInfo value) {
+      if (unitTestInfoBuilder_ == null) {
         if (((bitField0_ & 0x00000004) != 0) &&
-            unitTestDslInfo_ != null &&
-            unitTestDslInfo_ != com.android.kotlin.multiplatform.models.UnitTestDslInfo.getDefaultInstance()) {
-          unitTestDslInfo_ =
-            com.android.kotlin.multiplatform.models.UnitTestDslInfo.newBuilder(unitTestDslInfo_).mergeFrom(value).buildPartial();
+            unitTestInfo_ != null &&
+            unitTestInfo_ != com.android.kotlin.multiplatform.models.UnitTestInfo.getDefaultInstance()) {
+          unitTestInfo_ =
+            com.android.kotlin.multiplatform.models.UnitTestInfo.newBuilder(unitTestInfo_).mergeFrom(value).buildPartial();
         } else {
-          unitTestDslInfo_ = value;
+          unitTestInfo_ = value;
         }
         onChanged();
       } else {
-        unitTestDslInfoBuilder_.mergeFrom(value);
+        unitTestInfoBuilder_.mergeFrom(value);
       }
       bitField0_ |= 0x00000004;
       return this;
     }
     /**
      * <pre>
-     * The dsl info of the unit test component, will be available iff compilation type is UNIT_TEST.
+     * The info of the unit test component, will be available iff compilation type is UNIT_TEST.
      * </pre>
      *
-     * <code>optional .UnitTestDslInfo unit_test_dsl_info = 3;</code>
+     * <code>optional .UnitTestInfo unit_test_info = 3;</code>
      */
-    public Builder clearUnitTestDslInfo() {
-      if (unitTestDslInfoBuilder_ == null) {
-        unitTestDslInfo_ = null;
+    public Builder clearUnitTestInfo() {
+      if (unitTestInfoBuilder_ == null) {
+        unitTestInfo_ = null;
         onChanged();
       } else {
-        unitTestDslInfoBuilder_.clear();
+        unitTestInfoBuilder_.clear();
       }
       bitField0_ = (bitField0_ & ~0x00000004);
       return this;
     }
     /**
      * <pre>
-     * The dsl info of the unit test component, will be available iff compilation type is UNIT_TEST.
+     * The info of the unit test component, will be available iff compilation type is UNIT_TEST.
      * </pre>
      *
-     * <code>optional .UnitTestDslInfo unit_test_dsl_info = 3;</code>
+     * <code>optional .UnitTestInfo unit_test_info = 3;</code>
      */
-    public com.android.kotlin.multiplatform.models.UnitTestDslInfo.Builder getUnitTestDslInfoBuilder() {
+    public com.android.kotlin.multiplatform.models.UnitTestInfo.Builder getUnitTestInfoBuilder() {
       bitField0_ |= 0x00000004;
       onChanged();
-      return getUnitTestDslInfoFieldBuilder().getBuilder();
+      return getUnitTestInfoFieldBuilder().getBuilder();
     }
     /**
      * <pre>
-     * The dsl info of the unit test component, will be available iff compilation type is UNIT_TEST.
+     * The info of the unit test component, will be available iff compilation type is UNIT_TEST.
      * </pre>
      *
-     * <code>optional .UnitTestDslInfo unit_test_dsl_info = 3;</code>
+     * <code>optional .UnitTestInfo unit_test_info = 3;</code>
      */
-    public com.android.kotlin.multiplatform.models.UnitTestDslInfoOrBuilder getUnitTestDslInfoOrBuilder() {
-      if (unitTestDslInfoBuilder_ != null) {
-        return unitTestDslInfoBuilder_.getMessageOrBuilder();
+    public com.android.kotlin.multiplatform.models.UnitTestInfoOrBuilder getUnitTestInfoOrBuilder() {
+      if (unitTestInfoBuilder_ != null) {
+        return unitTestInfoBuilder_.getMessageOrBuilder();
       } else {
-        return unitTestDslInfo_ == null ?
-            com.android.kotlin.multiplatform.models.UnitTestDslInfo.getDefaultInstance() : unitTestDslInfo_;
+        return unitTestInfo_ == null ?
+            com.android.kotlin.multiplatform.models.UnitTestInfo.getDefaultInstance() : unitTestInfo_;
       }
     }
     /**
      * <pre>
-     * The dsl info of the unit test component, will be available iff compilation type is UNIT_TEST.
+     * The info of the unit test component, will be available iff compilation type is UNIT_TEST.
      * </pre>
      *
-     * <code>optional .UnitTestDslInfo unit_test_dsl_info = 3;</code>
+     * <code>optional .UnitTestInfo unit_test_info = 3;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.android.kotlin.multiplatform.models.UnitTestDslInfo, com.android.kotlin.multiplatform.models.UnitTestDslInfo.Builder, com.android.kotlin.multiplatform.models.UnitTestDslInfoOrBuilder> 
-        getUnitTestDslInfoFieldBuilder() {
-      if (unitTestDslInfoBuilder_ == null) {
-        unitTestDslInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            com.android.kotlin.multiplatform.models.UnitTestDslInfo, com.android.kotlin.multiplatform.models.UnitTestDslInfo.Builder, com.android.kotlin.multiplatform.models.UnitTestDslInfoOrBuilder>(
-                getUnitTestDslInfo(),
+        com.android.kotlin.multiplatform.models.UnitTestInfo, com.android.kotlin.multiplatform.models.UnitTestInfo.Builder, com.android.kotlin.multiplatform.models.UnitTestInfoOrBuilder> 
+        getUnitTestInfoFieldBuilder() {
+      if (unitTestInfoBuilder_ == null) {
+        unitTestInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            com.android.kotlin.multiplatform.models.UnitTestInfo, com.android.kotlin.multiplatform.models.UnitTestInfo.Builder, com.android.kotlin.multiplatform.models.UnitTestInfoOrBuilder>(
+                getUnitTestInfo(),
                 getParentForChildren(),
                 isClean());
-        unitTestDslInfo_ = null;
+        unitTestInfo_ = null;
       }
-      return unitTestDslInfoBuilder_;
+      return unitTestInfoBuilder_;
     }
 
-    private com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo instrumentedTestDslInfo_;
+    private com.android.kotlin.multiplatform.models.InstrumentedTestInfo instrumentedTestInfo_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo, com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.Builder, com.android.kotlin.multiplatform.models.InstrumentedTestDslInfoOrBuilder> instrumentedTestDslInfoBuilder_;
+        com.android.kotlin.multiplatform.models.InstrumentedTestInfo, com.android.kotlin.multiplatform.models.InstrumentedTestInfo.Builder, com.android.kotlin.multiplatform.models.InstrumentedTestInfoOrBuilder> instrumentedTestInfoBuilder_;
     /**
      * <pre>
-     * The dsl info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
+     * The info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
      * </pre>
      *
-     * <code>optional .InstrumentedTestDslInfo instrumented_test_dsl_info = 4;</code>
-     * @return Whether the instrumentedTestDslInfo field is set.
+     * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
+     * @return Whether the instrumentedTestInfo field is set.
      */
-    public boolean hasInstrumentedTestDslInfo() {
+    public boolean hasInstrumentedTestInfo() {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
      * <pre>
-     * The dsl info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
+     * The info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
      * </pre>
      *
-     * <code>optional .InstrumentedTestDslInfo instrumented_test_dsl_info = 4;</code>
-     * @return The instrumentedTestDslInfo.
+     * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
+     * @return The instrumentedTestInfo.
      */
-    public com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo getInstrumentedTestDslInfo() {
-      if (instrumentedTestDslInfoBuilder_ == null) {
-        return instrumentedTestDslInfo_ == null ? com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.getDefaultInstance() : instrumentedTestDslInfo_;
+    public com.android.kotlin.multiplatform.models.InstrumentedTestInfo getInstrumentedTestInfo() {
+      if (instrumentedTestInfoBuilder_ == null) {
+        return instrumentedTestInfo_ == null ? com.android.kotlin.multiplatform.models.InstrumentedTestInfo.getDefaultInstance() : instrumentedTestInfo_;
       } else {
-        return instrumentedTestDslInfoBuilder_.getMessage();
+        return instrumentedTestInfoBuilder_.getMessage();
       }
     }
     /**
      * <pre>
-     * The dsl info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
+     * The info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
      * </pre>
      *
-     * <code>optional .InstrumentedTestDslInfo instrumented_test_dsl_info = 4;</code>
+     * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
      */
-    public Builder setInstrumentedTestDslInfo(com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo value) {
-      if (instrumentedTestDslInfoBuilder_ == null) {
+    public Builder setInstrumentedTestInfo(com.android.kotlin.multiplatform.models.InstrumentedTestInfo value) {
+      if (instrumentedTestInfoBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        instrumentedTestDslInfo_ = value;
+        instrumentedTestInfo_ = value;
         onChanged();
       } else {
-        instrumentedTestDslInfoBuilder_.setMessage(value);
+        instrumentedTestInfoBuilder_.setMessage(value);
       }
       bitField0_ |= 0x00000008;
       return this;
     }
     /**
      * <pre>
-     * The dsl info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
+     * The info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
      * </pre>
      *
-     * <code>optional .InstrumentedTestDslInfo instrumented_test_dsl_info = 4;</code>
+     * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
      */
-    public Builder setInstrumentedTestDslInfo(
-        com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.Builder builderForValue) {
-      if (instrumentedTestDslInfoBuilder_ == null) {
-        instrumentedTestDslInfo_ = builderForValue.build();
+    public Builder setInstrumentedTestInfo(
+        com.android.kotlin.multiplatform.models.InstrumentedTestInfo.Builder builderForValue) {
+      if (instrumentedTestInfoBuilder_ == null) {
+        instrumentedTestInfo_ = builderForValue.build();
         onChanged();
       } else {
-        instrumentedTestDslInfoBuilder_.setMessage(builderForValue.build());
+        instrumentedTestInfoBuilder_.setMessage(builderForValue.build());
       }
       bitField0_ |= 0x00000008;
       return this;
     }
     /**
      * <pre>
-     * The dsl info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
+     * The info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
      * </pre>
      *
-     * <code>optional .InstrumentedTestDslInfo instrumented_test_dsl_info = 4;</code>
+     * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
      */
-    public Builder mergeInstrumentedTestDslInfo(com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo value) {
-      if (instrumentedTestDslInfoBuilder_ == null) {
+    public Builder mergeInstrumentedTestInfo(com.android.kotlin.multiplatform.models.InstrumentedTestInfo value) {
+      if (instrumentedTestInfoBuilder_ == null) {
         if (((bitField0_ & 0x00000008) != 0) &&
-            instrumentedTestDslInfo_ != null &&
-            instrumentedTestDslInfo_ != com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.getDefaultInstance()) {
-          instrumentedTestDslInfo_ =
-            com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.newBuilder(instrumentedTestDslInfo_).mergeFrom(value).buildPartial();
+            instrumentedTestInfo_ != null &&
+            instrumentedTestInfo_ != com.android.kotlin.multiplatform.models.InstrumentedTestInfo.getDefaultInstance()) {
+          instrumentedTestInfo_ =
+            com.android.kotlin.multiplatform.models.InstrumentedTestInfo.newBuilder(instrumentedTestInfo_).mergeFrom(value).buildPartial();
         } else {
-          instrumentedTestDslInfo_ = value;
+          instrumentedTestInfo_ = value;
         }
         onChanged();
       } else {
-        instrumentedTestDslInfoBuilder_.mergeFrom(value);
+        instrumentedTestInfoBuilder_.mergeFrom(value);
       }
       bitField0_ |= 0x00000008;
       return this;
     }
     /**
      * <pre>
-     * The dsl info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
+     * The info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
      * </pre>
      *
-     * <code>optional .InstrumentedTestDslInfo instrumented_test_dsl_info = 4;</code>
+     * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
      */
-    public Builder clearInstrumentedTestDslInfo() {
-      if (instrumentedTestDslInfoBuilder_ == null) {
-        instrumentedTestDslInfo_ = null;
+    public Builder clearInstrumentedTestInfo() {
+      if (instrumentedTestInfoBuilder_ == null) {
+        instrumentedTestInfo_ = null;
         onChanged();
       } else {
-        instrumentedTestDslInfoBuilder_.clear();
+        instrumentedTestInfoBuilder_.clear();
       }
       bitField0_ = (bitField0_ & ~0x00000008);
       return this;
     }
     /**
      * <pre>
-     * The dsl info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
+     * The info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
      * </pre>
      *
-     * <code>optional .InstrumentedTestDslInfo instrumented_test_dsl_info = 4;</code>
+     * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
      */
-    public com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.Builder getInstrumentedTestDslInfoBuilder() {
+    public com.android.kotlin.multiplatform.models.InstrumentedTestInfo.Builder getInstrumentedTestInfoBuilder() {
       bitField0_ |= 0x00000008;
       onChanged();
-      return getInstrumentedTestDslInfoFieldBuilder().getBuilder();
+      return getInstrumentedTestInfoFieldBuilder().getBuilder();
     }
     /**
      * <pre>
-     * The dsl info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
+     * The info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
      * </pre>
      *
-     * <code>optional .InstrumentedTestDslInfo instrumented_test_dsl_info = 4;</code>
+     * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
      */
-    public com.android.kotlin.multiplatform.models.InstrumentedTestDslInfoOrBuilder getInstrumentedTestDslInfoOrBuilder() {
-      if (instrumentedTestDslInfoBuilder_ != null) {
-        return instrumentedTestDslInfoBuilder_.getMessageOrBuilder();
+    public com.android.kotlin.multiplatform.models.InstrumentedTestInfoOrBuilder getInstrumentedTestInfoOrBuilder() {
+      if (instrumentedTestInfoBuilder_ != null) {
+        return instrumentedTestInfoBuilder_.getMessageOrBuilder();
       } else {
-        return instrumentedTestDslInfo_ == null ?
-            com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.getDefaultInstance() : instrumentedTestDslInfo_;
+        return instrumentedTestInfo_ == null ?
+            com.android.kotlin.multiplatform.models.InstrumentedTestInfo.getDefaultInstance() : instrumentedTestInfo_;
       }
     }
     /**
      * <pre>
-     * The dsl info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
+     * The info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
      * </pre>
      *
-     * <code>optional .InstrumentedTestDslInfo instrumented_test_dsl_info = 4;</code>
+     * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo, com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.Builder, com.android.kotlin.multiplatform.models.InstrumentedTestDslInfoOrBuilder> 
-        getInstrumentedTestDslInfoFieldBuilder() {
-      if (instrumentedTestDslInfoBuilder_ == null) {
-        instrumentedTestDslInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo, com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.Builder, com.android.kotlin.multiplatform.models.InstrumentedTestDslInfoOrBuilder>(
-                getInstrumentedTestDslInfo(),
+        com.android.kotlin.multiplatform.models.InstrumentedTestInfo, com.android.kotlin.multiplatform.models.InstrumentedTestInfo.Builder, com.android.kotlin.multiplatform.models.InstrumentedTestInfoOrBuilder> 
+        getInstrumentedTestInfoFieldBuilder() {
+      if (instrumentedTestInfoBuilder_ == null) {
+        instrumentedTestInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            com.android.kotlin.multiplatform.models.InstrumentedTestInfo, com.android.kotlin.multiplatform.models.InstrumentedTestInfo.Builder, com.android.kotlin.multiplatform.models.InstrumentedTestInfoOrBuilder>(
+                getInstrumentedTestInfo(),
                 getParentForChildren(),
                 isClean());
-        instrumentedTestDslInfo_ = null;
+        instrumentedTestInfo_ = null;
       }
-      return instrumentedTestDslInfoBuilder_;
+      return instrumentedTestInfoBuilder_;
     }
 
     private java.lang.Object defaultSourceSetName_ = "";
@@ -1757,6 +1848,113 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       bitField0_ |= 0x00000020;
       assembleTaskName_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object kotlinCompileTaskName_ = "";
+    /**
+     * <pre>
+     * The kotlin gradle compilation task name.
+     * </pre>
+     *
+     * <code>optional string kotlin_compile_task_name = 7;</code>
+     * @return Whether the kotlinCompileTaskName field is set.
+     */
+    public boolean hasKotlinCompileTaskName() {
+      return ((bitField0_ & 0x00000040) != 0);
+    }
+    /**
+     * <pre>
+     * The kotlin gradle compilation task name.
+     * </pre>
+     *
+     * <code>optional string kotlin_compile_task_name = 7;</code>
+     * @return The kotlinCompileTaskName.
+     */
+    public java.lang.String getKotlinCompileTaskName() {
+      java.lang.Object ref = kotlinCompileTaskName_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        kotlinCompileTaskName_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * The kotlin gradle compilation task name.
+     * </pre>
+     *
+     * <code>optional string kotlin_compile_task_name = 7;</code>
+     * @return The bytes for kotlinCompileTaskName.
+     */
+    public com.google.protobuf.ByteString
+        getKotlinCompileTaskNameBytes() {
+      java.lang.Object ref = kotlinCompileTaskName_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        kotlinCompileTaskName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * The kotlin gradle compilation task name.
+     * </pre>
+     *
+     * <code>optional string kotlin_compile_task_name = 7;</code>
+     * @param value The kotlinCompileTaskName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setKotlinCompileTaskName(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000040;
+      kotlinCompileTaskName_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The kotlin gradle compilation task name.
+     * </pre>
+     *
+     * <code>optional string kotlin_compile_task_name = 7;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearKotlinCompileTaskName() {
+      bitField0_ = (bitField0_ & ~0x00000040);
+      kotlinCompileTaskName_ = getDefaultInstance().getKotlinCompileTaskName();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The kotlin gradle compilation task name.
+     * </pre>
+     *
+     * <code>optional string kotlin_compile_task_name = 7;</code>
+     * @param value The bytes for kotlinCompileTaskName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setKotlinCompileTaskNameBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      bitField0_ |= 0x00000040;
+      kotlinCompileTaskName_ = value;
       onChanged();
       return this;
     }

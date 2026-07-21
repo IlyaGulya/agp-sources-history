@@ -5,21 +5,21 @@ package com.android.kotlin.multiplatform.models;
 
 /**
  * <pre>
- * The dsl info of the instrumented test component of the android kotlin multiplatform target.
+ * The info of the instrumented test component of the android kotlin multiplatform target.
  * </pre>
  *
- * Protobuf type {@code InstrumentedTestDslInfo}
+ * Protobuf type {@code InstrumentedTestInfo}
  */
-public final class InstrumentedTestDslInfo extends
+public final class InstrumentedTestInfo extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:InstrumentedTestDslInfo)
-    InstrumentedTestDslInfoOrBuilder {
+    // @@protoc_insertion_point(message_implements:InstrumentedTestInfo)
+    InstrumentedTestInfoOrBuilder {
 private static final long serialVersionUID = 0L;
-  // Use InstrumentedTestDslInfo.newBuilder() to construct.
-  private InstrumentedTestDslInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+  // Use InstrumentedTestInfo.newBuilder() to construct.
+  private InstrumentedTestInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
   }
-  private InstrumentedTestDslInfo() {
+  private InstrumentedTestInfo() {
     namespace_ = "";
     testInstrumentationRunner_ = "";
   }
@@ -28,7 +28,7 @@ private static final long serialVersionUID = 0L;
   @SuppressWarnings({"unused"})
   protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
-    return new InstrumentedTestDslInfo();
+    return new InstrumentedTestInfo();
   }
 
   @java.lang.Override
@@ -36,7 +36,7 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private InstrumentedTestDslInfo(
+  private InstrumentedTestInfo(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
@@ -93,6 +93,19 @@ private static final long serialVersionUID = 0L;
             bitField0_ |= 0x00000004;
             break;
           }
+          case 42: {
+            com.android.builder.model.proto.ide.File.Builder subBuilder = null;
+            if (((bitField0_ & 0x00000008) != 0)) {
+              subBuilder = assembleTaskOutputListingFile_.toBuilder();
+            }
+            assembleTaskOutputListingFile_ = input.readMessage(com.android.builder.model.proto.ide.File.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(assembleTaskOutputListingFile_);
+              assembleTaskOutputListingFile_ = subBuilder.buildPartial();
+            }
+            bitField0_ |= 0x00000008;
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -114,7 +127,7 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_InstrumentedTestDslInfo_descriptor;
+    return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_InstrumentedTestInfo_descriptor;
   }
 
   @SuppressWarnings({"rawtypes"})
@@ -132,9 +145,9 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_InstrumentedTestDslInfo_fieldAccessorTable
+    return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_InstrumentedTestInfo_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.class, com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.Builder.class);
+            com.android.kotlin.multiplatform.models.InstrumentedTestInfo.class, com.android.kotlin.multiplatform.models.InstrumentedTestInfo.Builder.class);
   }
 
   private int bitField0_;
@@ -236,7 +249,7 @@ private static final long serialVersionUID = 0L;
         java.lang.String, java.lang.String> defaultEntry =
             com.google.protobuf.MapEntry
             .<java.lang.String, java.lang.String>newDefaultInstance(
-                com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_InstrumentedTestDslInfo_TestInstrumentationRunnerArgumentsEntry_descriptor, 
+                com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_InstrumentedTestInfo_TestInstrumentationRunnerArgumentsEntry_descriptor, 
                 com.google.protobuf.WireFormat.FieldType.STRING,
                 "",
                 com.google.protobuf.WireFormat.FieldType.STRING,
@@ -349,6 +362,47 @@ private static final long serialVersionUID = 0L;
     return signingConfig_ == null ? com.android.builder.model.proto.ide.SigningConfig.getDefaultInstance() : signingConfig_;
   }
 
+  public static final int ASSEMBLE_TASK_OUTPUT_LISTING_FILE_FIELD_NUMBER = 5;
+  private com.android.builder.model.proto.ide.File assembleTaskOutputListingFile_;
+  /**
+   * <pre>
+   * Returns the absolute path for the listing file that will get updated after each build. The
+   * model file will contain deployment related information like applicationId, list of APKs.
+   * </pre>
+   *
+   * <code>optional .File assemble_task_output_listing_file = 5;</code>
+   * @return Whether the assembleTaskOutputListingFile field is set.
+   */
+  @java.lang.Override
+  public boolean hasAssembleTaskOutputListingFile() {
+    return ((bitField0_ & 0x00000008) != 0);
+  }
+  /**
+   * <pre>
+   * Returns the absolute path for the listing file that will get updated after each build. The
+   * model file will contain deployment related information like applicationId, list of APKs.
+   * </pre>
+   *
+   * <code>optional .File assemble_task_output_listing_file = 5;</code>
+   * @return The assembleTaskOutputListingFile.
+   */
+  @java.lang.Override
+  public com.android.builder.model.proto.ide.File getAssembleTaskOutputListingFile() {
+    return assembleTaskOutputListingFile_ == null ? com.android.builder.model.proto.ide.File.getDefaultInstance() : assembleTaskOutputListingFile_;
+  }
+  /**
+   * <pre>
+   * Returns the absolute path for the listing file that will get updated after each build. The
+   * model file will contain deployment related information like applicationId, list of APKs.
+   * </pre>
+   *
+   * <code>optional .File assemble_task_output_listing_file = 5;</code>
+   */
+  @java.lang.Override
+  public com.android.builder.model.proto.ide.FileOrBuilder getAssembleTaskOutputListingFileOrBuilder() {
+    return assembleTaskOutputListingFile_ == null ? com.android.builder.model.proto.ide.File.getDefaultInstance() : assembleTaskOutputListingFile_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -377,6 +431,9 @@ private static final long serialVersionUID = 0L;
         3);
     if (((bitField0_ & 0x00000004) != 0)) {
       output.writeMessage(4, getSigningConfig());
+    }
+    if (((bitField0_ & 0x00000008) != 0)) {
+      output.writeMessage(5, getAssembleTaskOutputListingFile());
     }
     unknownFields.writeTo(output);
   }
@@ -407,6 +464,10 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(4, getSigningConfig());
     }
+    if (((bitField0_ & 0x00000008) != 0)) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(5, getAssembleTaskOutputListingFile());
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -417,10 +478,10 @@ private static final long serialVersionUID = 0L;
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo)) {
+    if (!(obj instanceof com.android.kotlin.multiplatform.models.InstrumentedTestInfo)) {
       return super.equals(obj);
     }
-    com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo other = (com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo) obj;
+    com.android.kotlin.multiplatform.models.InstrumentedTestInfo other = (com.android.kotlin.multiplatform.models.InstrumentedTestInfo) obj;
 
     if (hasNamespace() != other.hasNamespace()) return false;
     if (hasNamespace()) {
@@ -438,6 +499,11 @@ private static final long serialVersionUID = 0L;
     if (hasSigningConfig()) {
       if (!getSigningConfig()
           .equals(other.getSigningConfig())) return false;
+    }
+    if (hasAssembleTaskOutputListingFile() != other.hasAssembleTaskOutputListingFile()) return false;
+    if (hasAssembleTaskOutputListingFile()) {
+      if (!getAssembleTaskOutputListingFile()
+          .equals(other.getAssembleTaskOutputListingFile())) return false;
     }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
@@ -466,74 +532,78 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + SIGNING_CONFIG_FIELD_NUMBER;
       hash = (53 * hash) + getSigningConfig().hashCode();
     }
+    if (hasAssembleTaskOutputListingFile()) {
+      hash = (37 * hash) + ASSEMBLE_TASK_OUTPUT_LISTING_FILE_FIELD_NUMBER;
+      hash = (53 * hash) + getAssembleTaskOutputListingFile().hashCode();
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
   }
 
-  public static com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.InstrumentedTestInfo parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.InstrumentedTestInfo parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.InstrumentedTestInfo parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.InstrumentedTestInfo parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo parseFrom(byte[] data)
+  public static com.android.kotlin.multiplatform.models.InstrumentedTestInfo parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.InstrumentedTestInfo parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo parseFrom(java.io.InputStream input)
+  public static com.android.kotlin.multiplatform.models.InstrumentedTestInfo parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.InstrumentedTestInfo parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo parseDelimitedFrom(java.io.InputStream input)
+  public static com.android.kotlin.multiplatform.models.InstrumentedTestInfo parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo parseDelimitedFrom(
+  public static com.android.kotlin.multiplatform.models.InstrumentedTestInfo parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.InstrumentedTestInfo parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.InstrumentedTestInfo parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -546,7 +616,7 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo prototype) {
+  public static Builder newBuilder(com.android.kotlin.multiplatform.models.InstrumentedTestInfo prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
   @java.lang.Override
@@ -563,18 +633,18 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * The dsl info of the instrumented test component of the android kotlin multiplatform target.
+   * The info of the instrumented test component of the android kotlin multiplatform target.
    * </pre>
    *
-   * Protobuf type {@code InstrumentedTestDslInfo}
+   * Protobuf type {@code InstrumentedTestInfo}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:InstrumentedTestDslInfo)
-      com.android.kotlin.multiplatform.models.InstrumentedTestDslInfoOrBuilder {
+      // @@protoc_insertion_point(builder_implements:InstrumentedTestInfo)
+      com.android.kotlin.multiplatform.models.InstrumentedTestInfoOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_InstrumentedTestDslInfo_descriptor;
+      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_InstrumentedTestInfo_descriptor;
     }
 
     @SuppressWarnings({"rawtypes"})
@@ -602,12 +672,12 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_InstrumentedTestDslInfo_fieldAccessorTable
+      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_InstrumentedTestInfo_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.class, com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.Builder.class);
+              com.android.kotlin.multiplatform.models.InstrumentedTestInfo.class, com.android.kotlin.multiplatform.models.InstrumentedTestInfo.Builder.class);
     }
 
-    // Construct using com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.newBuilder()
+    // Construct using com.android.kotlin.multiplatform.models.InstrumentedTestInfo.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }
@@ -621,6 +691,7 @@ private static final long serialVersionUID = 0L;
       if (com.google.protobuf.GeneratedMessageV3
               .alwaysUseFieldBuilders) {
         getSigningConfigFieldBuilder();
+        getAssembleTaskOutputListingFileFieldBuilder();
       }
     }
     @java.lang.Override
@@ -637,23 +708,29 @@ private static final long serialVersionUID = 0L;
         signingConfigBuilder_.clear();
       }
       bitField0_ = (bitField0_ & ~0x00000008);
+      if (assembleTaskOutputListingFileBuilder_ == null) {
+        assembleTaskOutputListingFile_ = null;
+      } else {
+        assembleTaskOutputListingFileBuilder_.clear();
+      }
+      bitField0_ = (bitField0_ & ~0x00000010);
       return this;
     }
 
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_InstrumentedTestDslInfo_descriptor;
+      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_InstrumentedTestInfo_descriptor;
     }
 
     @java.lang.Override
-    public com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo getDefaultInstanceForType() {
-      return com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.getDefaultInstance();
+    public com.android.kotlin.multiplatform.models.InstrumentedTestInfo getDefaultInstanceForType() {
+      return com.android.kotlin.multiplatform.models.InstrumentedTestInfo.getDefaultInstance();
     }
 
     @java.lang.Override
-    public com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo build() {
-      com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo result = buildPartial();
+    public com.android.kotlin.multiplatform.models.InstrumentedTestInfo build() {
+      com.android.kotlin.multiplatform.models.InstrumentedTestInfo result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
@@ -661,8 +738,8 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo buildPartial() {
-      com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo result = new com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo(this);
+    public com.android.kotlin.multiplatform.models.InstrumentedTestInfo buildPartial() {
+      com.android.kotlin.multiplatform.models.InstrumentedTestInfo result = new com.android.kotlin.multiplatform.models.InstrumentedTestInfo(this);
       int from_bitField0_ = bitField0_;
       int to_bitField0_ = 0;
       if (((from_bitField0_ & 0x00000001) != 0)) {
@@ -682,6 +759,14 @@ private static final long serialVersionUID = 0L;
           result.signingConfig_ = signingConfigBuilder_.build();
         }
         to_bitField0_ |= 0x00000004;
+      }
+      if (((from_bitField0_ & 0x00000010) != 0)) {
+        if (assembleTaskOutputListingFileBuilder_ == null) {
+          result.assembleTaskOutputListingFile_ = assembleTaskOutputListingFile_;
+        } else {
+          result.assembleTaskOutputListingFile_ = assembleTaskOutputListingFileBuilder_.build();
+        }
+        to_bitField0_ |= 0x00000008;
       }
       result.bitField0_ = to_bitField0_;
       onBuilt();
@@ -722,16 +807,16 @@ private static final long serialVersionUID = 0L;
     }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo) {
-        return mergeFrom((com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo)other);
+      if (other instanceof com.android.kotlin.multiplatform.models.InstrumentedTestInfo) {
+        return mergeFrom((com.android.kotlin.multiplatform.models.InstrumentedTestInfo)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo other) {
-      if (other == com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo.getDefaultInstance()) return this;
+    public Builder mergeFrom(com.android.kotlin.multiplatform.models.InstrumentedTestInfo other) {
+      if (other == com.android.kotlin.multiplatform.models.InstrumentedTestInfo.getDefaultInstance()) return this;
       if (other.hasNamespace()) {
         bitField0_ |= 0x00000001;
         namespace_ = other.namespace_;
@@ -746,6 +831,9 @@ private static final long serialVersionUID = 0L;
           other.internalGetTestInstrumentationRunnerArguments());
       if (other.hasSigningConfig()) {
         mergeSigningConfig(other.getSigningConfig());
+      }
+      if (other.hasAssembleTaskOutputListingFile()) {
+        mergeAssembleTaskOutputListingFile(other.getAssembleTaskOutputListingFile());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -762,11 +850,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo parsedMessage = null;
+      com.android.kotlin.multiplatform.models.InstrumentedTestInfo parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo) e.getUnfinishedMessage();
+        parsedMessage = (com.android.kotlin.multiplatform.models.InstrumentedTestInfo) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -1229,6 +1317,171 @@ private static final long serialVersionUID = 0L;
       }
       return signingConfigBuilder_;
     }
+
+    private com.android.builder.model.proto.ide.File assembleTaskOutputListingFile_;
+    private com.google.protobuf.SingleFieldBuilderV3<
+        com.android.builder.model.proto.ide.File, com.android.builder.model.proto.ide.File.Builder, com.android.builder.model.proto.ide.FileOrBuilder> assembleTaskOutputListingFileBuilder_;
+    /**
+     * <pre>
+     * Returns the absolute path for the listing file that will get updated after each build. The
+     * model file will contain deployment related information like applicationId, list of APKs.
+     * </pre>
+     *
+     * <code>optional .File assemble_task_output_listing_file = 5;</code>
+     * @return Whether the assembleTaskOutputListingFile field is set.
+     */
+    public boolean hasAssembleTaskOutputListingFile() {
+      return ((bitField0_ & 0x00000010) != 0);
+    }
+    /**
+     * <pre>
+     * Returns the absolute path for the listing file that will get updated after each build. The
+     * model file will contain deployment related information like applicationId, list of APKs.
+     * </pre>
+     *
+     * <code>optional .File assemble_task_output_listing_file = 5;</code>
+     * @return The assembleTaskOutputListingFile.
+     */
+    public com.android.builder.model.proto.ide.File getAssembleTaskOutputListingFile() {
+      if (assembleTaskOutputListingFileBuilder_ == null) {
+        return assembleTaskOutputListingFile_ == null ? com.android.builder.model.proto.ide.File.getDefaultInstance() : assembleTaskOutputListingFile_;
+      } else {
+        return assembleTaskOutputListingFileBuilder_.getMessage();
+      }
+    }
+    /**
+     * <pre>
+     * Returns the absolute path for the listing file that will get updated after each build. The
+     * model file will contain deployment related information like applicationId, list of APKs.
+     * </pre>
+     *
+     * <code>optional .File assemble_task_output_listing_file = 5;</code>
+     */
+    public Builder setAssembleTaskOutputListingFile(com.android.builder.model.proto.ide.File value) {
+      if (assembleTaskOutputListingFileBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        assembleTaskOutputListingFile_ = value;
+        onChanged();
+      } else {
+        assembleTaskOutputListingFileBuilder_.setMessage(value);
+      }
+      bitField0_ |= 0x00000010;
+      return this;
+    }
+    /**
+     * <pre>
+     * Returns the absolute path for the listing file that will get updated after each build. The
+     * model file will contain deployment related information like applicationId, list of APKs.
+     * </pre>
+     *
+     * <code>optional .File assemble_task_output_listing_file = 5;</code>
+     */
+    public Builder setAssembleTaskOutputListingFile(
+        com.android.builder.model.proto.ide.File.Builder builderForValue) {
+      if (assembleTaskOutputListingFileBuilder_ == null) {
+        assembleTaskOutputListingFile_ = builderForValue.build();
+        onChanged();
+      } else {
+        assembleTaskOutputListingFileBuilder_.setMessage(builderForValue.build());
+      }
+      bitField0_ |= 0x00000010;
+      return this;
+    }
+    /**
+     * <pre>
+     * Returns the absolute path for the listing file that will get updated after each build. The
+     * model file will contain deployment related information like applicationId, list of APKs.
+     * </pre>
+     *
+     * <code>optional .File assemble_task_output_listing_file = 5;</code>
+     */
+    public Builder mergeAssembleTaskOutputListingFile(com.android.builder.model.proto.ide.File value) {
+      if (assembleTaskOutputListingFileBuilder_ == null) {
+        if (((bitField0_ & 0x00000010) != 0) &&
+            assembleTaskOutputListingFile_ != null &&
+            assembleTaskOutputListingFile_ != com.android.builder.model.proto.ide.File.getDefaultInstance()) {
+          assembleTaskOutputListingFile_ =
+            com.android.builder.model.proto.ide.File.newBuilder(assembleTaskOutputListingFile_).mergeFrom(value).buildPartial();
+        } else {
+          assembleTaskOutputListingFile_ = value;
+        }
+        onChanged();
+      } else {
+        assembleTaskOutputListingFileBuilder_.mergeFrom(value);
+      }
+      bitField0_ |= 0x00000010;
+      return this;
+    }
+    /**
+     * <pre>
+     * Returns the absolute path for the listing file that will get updated after each build. The
+     * model file will contain deployment related information like applicationId, list of APKs.
+     * </pre>
+     *
+     * <code>optional .File assemble_task_output_listing_file = 5;</code>
+     */
+    public Builder clearAssembleTaskOutputListingFile() {
+      if (assembleTaskOutputListingFileBuilder_ == null) {
+        assembleTaskOutputListingFile_ = null;
+        onChanged();
+      } else {
+        assembleTaskOutputListingFileBuilder_.clear();
+      }
+      bitField0_ = (bitField0_ & ~0x00000010);
+      return this;
+    }
+    /**
+     * <pre>
+     * Returns the absolute path for the listing file that will get updated after each build. The
+     * model file will contain deployment related information like applicationId, list of APKs.
+     * </pre>
+     *
+     * <code>optional .File assemble_task_output_listing_file = 5;</code>
+     */
+    public com.android.builder.model.proto.ide.File.Builder getAssembleTaskOutputListingFileBuilder() {
+      bitField0_ |= 0x00000010;
+      onChanged();
+      return getAssembleTaskOutputListingFileFieldBuilder().getBuilder();
+    }
+    /**
+     * <pre>
+     * Returns the absolute path for the listing file that will get updated after each build. The
+     * model file will contain deployment related information like applicationId, list of APKs.
+     * </pre>
+     *
+     * <code>optional .File assemble_task_output_listing_file = 5;</code>
+     */
+    public com.android.builder.model.proto.ide.FileOrBuilder getAssembleTaskOutputListingFileOrBuilder() {
+      if (assembleTaskOutputListingFileBuilder_ != null) {
+        return assembleTaskOutputListingFileBuilder_.getMessageOrBuilder();
+      } else {
+        return assembleTaskOutputListingFile_ == null ?
+            com.android.builder.model.proto.ide.File.getDefaultInstance() : assembleTaskOutputListingFile_;
+      }
+    }
+    /**
+     * <pre>
+     * Returns the absolute path for the listing file that will get updated after each build. The
+     * model file will contain deployment related information like applicationId, list of APKs.
+     * </pre>
+     *
+     * <code>optional .File assemble_task_output_listing_file = 5;</code>
+     */
+    private com.google.protobuf.SingleFieldBuilderV3<
+        com.android.builder.model.proto.ide.File, com.android.builder.model.proto.ide.File.Builder, com.android.builder.model.proto.ide.FileOrBuilder> 
+        getAssembleTaskOutputListingFileFieldBuilder() {
+      if (assembleTaskOutputListingFileBuilder_ == null) {
+        assembleTaskOutputListingFileBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            com.android.builder.model.proto.ide.File, com.android.builder.model.proto.ide.File.Builder, com.android.builder.model.proto.ide.FileOrBuilder>(
+                getAssembleTaskOutputListingFile(),
+                getParentForChildren(),
+                isClean());
+        assembleTaskOutputListingFile_ = null;
+      }
+      return assembleTaskOutputListingFileBuilder_;
+    }
     @java.lang.Override
     public final Builder setUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -1242,41 +1495,41 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:InstrumentedTestDslInfo)
+    // @@protoc_insertion_point(builder_scope:InstrumentedTestInfo)
   }
 
-  // @@protoc_insertion_point(class_scope:InstrumentedTestDslInfo)
-  private static final com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo DEFAULT_INSTANCE;
+  // @@protoc_insertion_point(class_scope:InstrumentedTestInfo)
+  private static final com.android.kotlin.multiplatform.models.InstrumentedTestInfo DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo();
+    DEFAULT_INSTANCE = new com.android.kotlin.multiplatform.models.InstrumentedTestInfo();
   }
 
-  public static com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo getDefaultInstance() {
+  public static com.android.kotlin.multiplatform.models.InstrumentedTestInfo getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
-  private static final com.google.protobuf.Parser<InstrumentedTestDslInfo>
-      PARSER = new com.google.protobuf.AbstractParser<InstrumentedTestDslInfo>() {
+  private static final com.google.protobuf.Parser<InstrumentedTestInfo>
+      PARSER = new com.google.protobuf.AbstractParser<InstrumentedTestInfo>() {
     @java.lang.Override
-    public InstrumentedTestDslInfo parsePartialFrom(
+    public InstrumentedTestInfo parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new InstrumentedTestDslInfo(input, extensionRegistry);
+      return new InstrumentedTestInfo(input, extensionRegistry);
     }
   };
 
-  public static com.google.protobuf.Parser<InstrumentedTestDslInfo> parser() {
+  public static com.google.protobuf.Parser<InstrumentedTestInfo> parser() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.google.protobuf.Parser<InstrumentedTestDslInfo> getParserForType() {
+  public com.google.protobuf.Parser<InstrumentedTestInfo> getParserForType() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo getDefaultInstanceForType() {
+  public com.android.kotlin.multiplatform.models.InstrumentedTestInfo getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

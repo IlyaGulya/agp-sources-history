@@ -3,8 +3,8 @@
 
 package com.android.kotlin.multiplatform.models;
 
-public interface InstrumentedTestDslInfoOrBuilder extends
-    // @@protoc_insertion_point(interface_extends:InstrumentedTestDslInfo)
+public interface InstrumentedTestInfoOrBuilder extends
+    // @@protoc_insertion_point(interface_extends:InstrumentedTestInfo)
     com.google.protobuf.MessageOrBuilder {
 
   /**
@@ -101,4 +101,34 @@ public interface InstrumentedTestDslInfoOrBuilder extends
    * <code>optional .SigningConfig signing_config = 4;</code>
    */
   com.android.builder.model.proto.ide.SigningConfigOrBuilder getSigningConfigOrBuilder();
+
+  /**
+   * <pre>
+   * Returns the absolute path for the listing file that will get updated after each build. The
+   * model file will contain deployment related information like applicationId, list of APKs.
+   * </pre>
+   *
+   * <code>optional .File assemble_task_output_listing_file = 5;</code>
+   * @return Whether the assembleTaskOutputListingFile field is set.
+   */
+  boolean hasAssembleTaskOutputListingFile();
+  /**
+   * <pre>
+   * Returns the absolute path for the listing file that will get updated after each build. The
+   * model file will contain deployment related information like applicationId, list of APKs.
+   * </pre>
+   *
+   * <code>optional .File assemble_task_output_listing_file = 5;</code>
+   * @return The assembleTaskOutputListingFile.
+   */
+  com.android.builder.model.proto.ide.File getAssembleTaskOutputListingFile();
+  /**
+   * <pre>
+   * Returns the absolute path for the listing file that will get updated after each build. The
+   * model file will contain deployment related information like applicationId, list of APKs.
+   * </pre>
+   *
+   * <code>optional .File assemble_task_output_listing_file = 5;</code>
+   */
+  com.android.builder.model.proto.ide.FileOrBuilder getAssembleTaskOutputListingFileOrBuilder();
 }
