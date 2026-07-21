@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.build.api.variant
+package com.android.build.gradle.api
 
-import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
-import com.android.build.api.dsl.KotlinMultiplatformAndroidExtension
+import com.android.build.gradle.BasePlugin
 import org.gradle.api.Incubating
-import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.api.Project
 
 /**
- * Interface for kotlin multiplatform android target
+ * The plugin applied with 'com.android.kotlin.multiplatform.library'
  */
 @Incubating
-interface KotlinMultiplatformAndroidTarget: KotlinTarget, KotlinMultiplatformAndroidExtension {
-    override val compilations: NamedDomainObjectContainer<KotlinMultiplatformAndroidCompilation>
-
-    /**
-     * Enables compilation of java sources.
-     *
-     * @note This API is experimental and is likely to change.
-     */
-    @Incubating
-    fun withJava()
+class KotlinMultiplatformAndroidPlugin: BasePlugin() {
+    override fun apply(project: Project) {
+        super.apply(project)
+        project.apply(INTERNAL_PLUGIN_ID)
+    }
 }
+
+private val INTERNAL_PLUGIN_ID = mapOf("plugin" to "com.android.internal.kotlin.multiplatform.library")

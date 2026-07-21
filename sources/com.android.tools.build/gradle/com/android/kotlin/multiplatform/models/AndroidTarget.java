@@ -161,7 +161,7 @@ private static final long serialVersionUID = 0L;
                 input.readMessage(com.android.builder.model.proto.ide.File.parser(), extensionRegistry));
             break;
           }
-          case 114: {
+          case 106: {
             com.android.builder.model.proto.ide.File.Builder subBuilder = null;
             if (((bitField0_ & 0x00000100) != 0)) {
               subBuilder = rootBuildId_.toBuilder();
@@ -174,7 +174,7 @@ private static final long serialVersionUID = 0L;
             bitField0_ |= 0x00000100;
             break;
           }
-          case 122: {
+          case 114: {
             com.android.builder.model.proto.ide.File.Builder subBuilder = null;
             if (((bitField0_ & 0x00000200) != 0)) {
               subBuilder = buildId_.toBuilder();
@@ -185,6 +185,11 @@ private static final long serialVersionUID = 0L;
               buildId_ = subBuilder.buildPartial();
             }
             bitField0_ |= 0x00000200;
+            break;
+          }
+          case 120: {
+            bitField0_ |= 0x00000400;
+            withJava_ = input.readBool();
             break;
           }
           default: {
@@ -870,14 +875,14 @@ private static final long serialVersionUID = 0L;
     return desugaredMethodsFiles_.get(index);
   }
 
-  public static final int ROOT_BUILD_ID_FIELD_NUMBER = 14;
+  public static final int ROOT_BUILD_ID_FIELD_NUMBER = 13;
   private com.android.builder.model.proto.ide.File rootBuildId_;
   /**
    * <pre>
    * The build ID (directory containing the settings file) of the root build of this project.
    * </pre>
    *
-   * <code>optional .File root_build_id = 14;</code>
+   * <code>optional .File root_build_id = 13;</code>
    * @return Whether the rootBuildId field is set.
    */
   @java.lang.Override
@@ -889,7 +894,7 @@ private static final long serialVersionUID = 0L;
    * The build ID (directory containing the settings file) of the root build of this project.
    * </pre>
    *
-   * <code>optional .File root_build_id = 14;</code>
+   * <code>optional .File root_build_id = 13;</code>
    * @return The rootBuildId.
    */
   @java.lang.Override
@@ -901,14 +906,14 @@ private static final long serialVersionUID = 0L;
    * The build ID (directory containing the settings file) of the root build of this project.
    * </pre>
    *
-   * <code>optional .File root_build_id = 14;</code>
+   * <code>optional .File root_build_id = 13;</code>
    */
   @java.lang.Override
   public com.android.builder.model.proto.ide.FileOrBuilder getRootBuildIdOrBuilder() {
     return rootBuildId_ == null ? com.android.builder.model.proto.ide.File.getDefaultInstance() : rootBuildId_;
   }
 
-  public static final int BUILD_ID_FIELD_NUMBER = 15;
+  public static final int BUILD_ID_FIELD_NUMBER = 14;
   private com.android.builder.model.proto.ide.File buildId_;
   /**
    * <pre>
@@ -916,7 +921,7 @@ private static final long serialVersionUID = 0L;
    * project.
    * </pre>
    *
-   * <code>optional .File build_id = 15;</code>
+   * <code>optional .File build_id = 14;</code>
    * @return Whether the buildId field is set.
    */
   @java.lang.Override
@@ -929,7 +934,7 @@ private static final long serialVersionUID = 0L;
    * project.
    * </pre>
    *
-   * <code>optional .File build_id = 15;</code>
+   * <code>optional .File build_id = 14;</code>
    * @return The buildId.
    */
   @java.lang.Override
@@ -942,11 +947,38 @@ private static final long serialVersionUID = 0L;
    * project.
    * </pre>
    *
-   * <code>optional .File build_id = 15;</code>
+   * <code>optional .File build_id = 14;</code>
    */
   @java.lang.Override
   public com.android.builder.model.proto.ide.FileOrBuilder getBuildIdOrBuilder() {
     return buildId_ == null ? com.android.builder.model.proto.ide.File.getDefaultInstance() : buildId_;
+  }
+
+  public static final int WITH_JAVA_FIELD_NUMBER = 15;
+  private boolean withJava_;
+  /**
+   * <pre>
+   * Whether java compilation is enabled.
+   * </pre>
+   *
+   * <code>optional bool with_java = 15;</code>
+   * @return Whether the withJava field is set.
+   */
+  @java.lang.Override
+  public boolean hasWithJava() {
+    return ((bitField0_ & 0x00000400) != 0);
+  }
+  /**
+   * <pre>
+   * Whether java compilation is enabled.
+   * </pre>
+   *
+   * <code>optional bool with_java = 15;</code>
+   * @return The withJava.
+   */
+  @java.lang.Override
+  public boolean getWithJava() {
+    return withJava_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -1000,10 +1032,13 @@ private static final long serialVersionUID = 0L;
       output.writeMessage(12, desugaredMethodsFiles_.get(i));
     }
     if (((bitField0_ & 0x00000100) != 0)) {
-      output.writeMessage(14, getRootBuildId());
+      output.writeMessage(13, getRootBuildId());
     }
     if (((bitField0_ & 0x00000200) != 0)) {
-      output.writeMessage(15, getBuildId());
+      output.writeMessage(14, getBuildId());
+    }
+    if (((bitField0_ & 0x00000400) != 0)) {
+      output.writeBool(15, withJava_);
     }
     unknownFields.writeTo(output);
   }
@@ -1060,11 +1095,15 @@ private static final long serialVersionUID = 0L;
     }
     if (((bitField0_ & 0x00000100) != 0)) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(14, getRootBuildId());
+        .computeMessageSize(13, getRootBuildId());
     }
     if (((bitField0_ & 0x00000200) != 0)) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(15, getBuildId());
+        .computeMessageSize(14, getBuildId());
+    }
+    if (((bitField0_ & 0x00000400) != 0)) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(15, withJava_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -1139,6 +1178,11 @@ private static final long serialVersionUID = 0L;
       if (!getBuildId()
           .equals(other.getBuildId())) return false;
     }
+    if (hasWithJava() != other.hasWithJava()) return false;
+    if (hasWithJava()) {
+      if (getWithJava()
+          != other.getWithJava()) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1206,6 +1250,11 @@ private static final long serialVersionUID = 0L;
     if (hasBuildId()) {
       hash = (37 * hash) + BUILD_ID_FIELD_NUMBER;
       hash = (53 * hash) + getBuildId().hashCode();
+    }
+    if (hasWithJava()) {
+      hash = (37 * hash) + WITH_JAVA_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getWithJava());
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -1413,6 +1462,8 @@ private static final long serialVersionUID = 0L;
         buildIdBuilder_.clear();
       }
       bitField0_ = (bitField0_ & ~0x00002000);
+      withJava_ = false;
+      bitField0_ = (bitField0_ & ~0x00004000);
       return this;
     }
 
@@ -1536,6 +1587,10 @@ private static final long serialVersionUID = 0L;
           result.buildId_ = buildIdBuilder_.build();
         }
         to_bitField0_ |= 0x00000200;
+      }
+      if (((from_bitField0_ & 0x00004000) != 0)) {
+        result.withJava_ = withJava_;
+        to_bitField0_ |= 0x00000400;
       }
       result.bitField0_ = to_bitField0_;
       onBuilt();
@@ -1727,6 +1782,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasBuildId()) {
         mergeBuildId(other.getBuildId());
+      }
+      if (other.hasWithJava()) {
+        setWithJava(other.getWithJava());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -4055,7 +4113,7 @@ private static final long serialVersionUID = 0L;
      * The build ID (directory containing the settings file) of the root build of this project.
      * </pre>
      *
-     * <code>optional .File root_build_id = 14;</code>
+     * <code>optional .File root_build_id = 13;</code>
      * @return Whether the rootBuildId field is set.
      */
     public boolean hasRootBuildId() {
@@ -4066,7 +4124,7 @@ private static final long serialVersionUID = 0L;
      * The build ID (directory containing the settings file) of the root build of this project.
      * </pre>
      *
-     * <code>optional .File root_build_id = 14;</code>
+     * <code>optional .File root_build_id = 13;</code>
      * @return The rootBuildId.
      */
     public com.android.builder.model.proto.ide.File getRootBuildId() {
@@ -4081,7 +4139,7 @@ private static final long serialVersionUID = 0L;
      * The build ID (directory containing the settings file) of the root build of this project.
      * </pre>
      *
-     * <code>optional .File root_build_id = 14;</code>
+     * <code>optional .File root_build_id = 13;</code>
      */
     public Builder setRootBuildId(com.android.builder.model.proto.ide.File value) {
       if (rootBuildIdBuilder_ == null) {
@@ -4101,7 +4159,7 @@ private static final long serialVersionUID = 0L;
      * The build ID (directory containing the settings file) of the root build of this project.
      * </pre>
      *
-     * <code>optional .File root_build_id = 14;</code>
+     * <code>optional .File root_build_id = 13;</code>
      */
     public Builder setRootBuildId(
         com.android.builder.model.proto.ide.File.Builder builderForValue) {
@@ -4119,7 +4177,7 @@ private static final long serialVersionUID = 0L;
      * The build ID (directory containing the settings file) of the root build of this project.
      * </pre>
      *
-     * <code>optional .File root_build_id = 14;</code>
+     * <code>optional .File root_build_id = 13;</code>
      */
     public Builder mergeRootBuildId(com.android.builder.model.proto.ide.File value) {
       if (rootBuildIdBuilder_ == null) {
@@ -4143,7 +4201,7 @@ private static final long serialVersionUID = 0L;
      * The build ID (directory containing the settings file) of the root build of this project.
      * </pre>
      *
-     * <code>optional .File root_build_id = 14;</code>
+     * <code>optional .File root_build_id = 13;</code>
      */
     public Builder clearRootBuildId() {
       if (rootBuildIdBuilder_ == null) {
@@ -4160,7 +4218,7 @@ private static final long serialVersionUID = 0L;
      * The build ID (directory containing the settings file) of the root build of this project.
      * </pre>
      *
-     * <code>optional .File root_build_id = 14;</code>
+     * <code>optional .File root_build_id = 13;</code>
      */
     public com.android.builder.model.proto.ide.File.Builder getRootBuildIdBuilder() {
       bitField0_ |= 0x00001000;
@@ -4172,7 +4230,7 @@ private static final long serialVersionUID = 0L;
      * The build ID (directory containing the settings file) of the root build of this project.
      * </pre>
      *
-     * <code>optional .File root_build_id = 14;</code>
+     * <code>optional .File root_build_id = 13;</code>
      */
     public com.android.builder.model.proto.ide.FileOrBuilder getRootBuildIdOrBuilder() {
       if (rootBuildIdBuilder_ != null) {
@@ -4187,7 +4245,7 @@ private static final long serialVersionUID = 0L;
      * The build ID (directory containing the settings file) of the root build of this project.
      * </pre>
      *
-     * <code>optional .File root_build_id = 14;</code>
+     * <code>optional .File root_build_id = 13;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         com.android.builder.model.proto.ide.File, com.android.builder.model.proto.ide.File.Builder, com.android.builder.model.proto.ide.FileOrBuilder> 
@@ -4212,7 +4270,7 @@ private static final long serialVersionUID = 0L;
      * project.
      * </pre>
      *
-     * <code>optional .File build_id = 15;</code>
+     * <code>optional .File build_id = 14;</code>
      * @return Whether the buildId field is set.
      */
     public boolean hasBuildId() {
@@ -4224,7 +4282,7 @@ private static final long serialVersionUID = 0L;
      * project.
      * </pre>
      *
-     * <code>optional .File build_id = 15;</code>
+     * <code>optional .File build_id = 14;</code>
      * @return The buildId.
      */
     public com.android.builder.model.proto.ide.File getBuildId() {
@@ -4240,7 +4298,7 @@ private static final long serialVersionUID = 0L;
      * project.
      * </pre>
      *
-     * <code>optional .File build_id = 15;</code>
+     * <code>optional .File build_id = 14;</code>
      */
     public Builder setBuildId(com.android.builder.model.proto.ide.File value) {
       if (buildIdBuilder_ == null) {
@@ -4261,7 +4319,7 @@ private static final long serialVersionUID = 0L;
      * project.
      * </pre>
      *
-     * <code>optional .File build_id = 15;</code>
+     * <code>optional .File build_id = 14;</code>
      */
     public Builder setBuildId(
         com.android.builder.model.proto.ide.File.Builder builderForValue) {
@@ -4280,7 +4338,7 @@ private static final long serialVersionUID = 0L;
      * project.
      * </pre>
      *
-     * <code>optional .File build_id = 15;</code>
+     * <code>optional .File build_id = 14;</code>
      */
     public Builder mergeBuildId(com.android.builder.model.proto.ide.File value) {
       if (buildIdBuilder_ == null) {
@@ -4305,7 +4363,7 @@ private static final long serialVersionUID = 0L;
      * project.
      * </pre>
      *
-     * <code>optional .File build_id = 15;</code>
+     * <code>optional .File build_id = 14;</code>
      */
     public Builder clearBuildId() {
       if (buildIdBuilder_ == null) {
@@ -4323,7 +4381,7 @@ private static final long serialVersionUID = 0L;
      * project.
      * </pre>
      *
-     * <code>optional .File build_id = 15;</code>
+     * <code>optional .File build_id = 14;</code>
      */
     public com.android.builder.model.proto.ide.File.Builder getBuildIdBuilder() {
       bitField0_ |= 0x00002000;
@@ -4336,7 +4394,7 @@ private static final long serialVersionUID = 0L;
      * project.
      * </pre>
      *
-     * <code>optional .File build_id = 15;</code>
+     * <code>optional .File build_id = 14;</code>
      */
     public com.android.builder.model.proto.ide.FileOrBuilder getBuildIdOrBuilder() {
       if (buildIdBuilder_ != null) {
@@ -4352,7 +4410,7 @@ private static final long serialVersionUID = 0L;
      * project.
      * </pre>
      *
-     * <code>optional .File build_id = 15;</code>
+     * <code>optional .File build_id = 14;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
         com.android.builder.model.proto.ide.File, com.android.builder.model.proto.ide.File.Builder, com.android.builder.model.proto.ide.FileOrBuilder> 
@@ -4366,6 +4424,61 @@ private static final long serialVersionUID = 0L;
         buildId_ = null;
       }
       return buildIdBuilder_;
+    }
+
+    private boolean withJava_ ;
+    /**
+     * <pre>
+     * Whether java compilation is enabled.
+     * </pre>
+     *
+     * <code>optional bool with_java = 15;</code>
+     * @return Whether the withJava field is set.
+     */
+    @java.lang.Override
+    public boolean hasWithJava() {
+      return ((bitField0_ & 0x00004000) != 0);
+    }
+    /**
+     * <pre>
+     * Whether java compilation is enabled.
+     * </pre>
+     *
+     * <code>optional bool with_java = 15;</code>
+     * @return The withJava.
+     */
+    @java.lang.Override
+    public boolean getWithJava() {
+      return withJava_;
+    }
+    /**
+     * <pre>
+     * Whether java compilation is enabled.
+     * </pre>
+     *
+     * <code>optional bool with_java = 15;</code>
+     * @param value The withJava to set.
+     * @return This builder for chaining.
+     */
+    public Builder setWithJava(boolean value) {
+      bitField0_ |= 0x00004000;
+      withJava_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Whether java compilation is enabled.
+     * </pre>
+     *
+     * <code>optional bool with_java = 15;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearWithJava() {
+      bitField0_ = (bitField0_ & ~0x00004000);
+      withJava_ = false;
+      onChanged();
+      return this;
     }
     @java.lang.Override
     public final Builder setUnknownFields(
