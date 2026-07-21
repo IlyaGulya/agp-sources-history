@@ -442,7 +442,7 @@ class VariantManager<VariantBuilderT : VariantBuilderImpl, VariantT : VariantImp
                     .executeOperations(unitTestVariantBuilder)
             unitTestVariantBuilder
         }
-        if (!component.enabled) {
+        if (!component.enable) {
             return null
         }
 

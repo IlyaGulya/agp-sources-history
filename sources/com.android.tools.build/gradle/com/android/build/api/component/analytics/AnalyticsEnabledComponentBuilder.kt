@@ -35,6 +35,13 @@ abstract class AnalyticsEnabledComponentBuilder(
             delegate.enabled = value
         }
 
+    override var enable: Boolean
+        get() = delegate.enabled
+        set(value) {
+            stats.variantApiAccessBuilder.addVariantAccessBuilder().type = VariantMethodType.ENABLED_VALUE
+            delegate.enabled = value
+        }
+
     override fun getName(): String =
         delegate.name
 
