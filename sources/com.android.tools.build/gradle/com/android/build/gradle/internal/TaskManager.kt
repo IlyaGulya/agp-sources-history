@@ -34,7 +34,6 @@ import com.android.build.gradle.internal.component.ApkCreationConfig
 import com.android.build.gradle.internal.component.ApplicationCreationConfig
 import com.android.build.gradle.internal.component.ComponentCreationConfig
 import com.android.build.gradle.internal.component.ConsumableCreationConfig
-import com.android.build.gradle.internal.component.HostTestCreationConfig
 import com.android.build.gradle.internal.component.InstrumentedTestCreationConfig
 import com.android.build.gradle.internal.component.KmpComponentCreationConfig
 import com.android.build.gradle.internal.component.TestComponentCreationConfig
@@ -53,7 +52,8 @@ import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactSco
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.PublishedConfigType
 import com.android.build.gradle.internal.publishing.PublishedConfigSpec
-import com.android.build.gradle.internal.res.ConvertProtoResourcesTask
+import com.android.build.gradle.internal.res.ConvertLinkedResourcesToProtoTask
+import com.android.build.gradle.internal.res.ConvertShrunkResourcesToBinaryTask
 import com.android.build.gradle.internal.res.GenerateLibraryRFileTask
 import com.android.build.gradle.internal.res.LinkAndroidResForBundleTask
 import com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask
@@ -528,9 +528,7 @@ abstract class TaskManager(
                 null,
                 taskProviderCallback)
 
-        if (creationConfig is HostTestCreationConfig && globalConfig.unitTestOptions.isIncludeAndroidResources) {
-            creationConfig.taskContainer.compileTask.dependsOn(mergeResourcesTask)
-        }
+        creationConfig.taskContainer.compileTask.dependsOn(mergeResourcesTask)
         return mergeResourcesTask
     }
 
@@ -1782,8 +1780,9 @@ abstract class TaskManager(
         }
         // Shrink resources in APK with a new resource shrinker and produce stripped res
         // package.
+        taskFactory.register(ConvertLinkedResourcesToProtoTask.CreationAction(creationConfig))
         taskFactory.register(ShrinkResourcesNewShrinkerTask.CreationAction(creationConfig))
-        taskFactory.register(ConvertProtoResourcesTask.CreationAction(creationConfig))
+        taskFactory.register(ConvertShrunkResourcesToBinaryTask.CreationAction(creationConfig))
         // Shrink resources in bundles with new resource shrinker.
         taskFactory.register(ShrinkAppBundleResourcesTask.CreationAction(creationConfig))
     }

@@ -128,7 +128,49 @@ public class ConnectedDeviceProvider extends DeviceProvider {
         Log.addLogger(logAdapter);
 
         try {
-            IDevice[] devices = loadDevices();
+            DdmPreferences.setLogLevel(Log.LogLevel.VERBOSE.getStringValue());
+            // TODO: switch to devicelib
+            if (timeOut > 0) {
+                DdmPreferences.setTimeOut((int) timeOutUnit.toMillis(timeOut));
+            } else {
+                DdmPreferences.setTimeOut(Integer.MAX_VALUE);
+            }
+
+            AndroidDebugBridge.initIfNeeded(false /*clientSupport*/);
+            File adbLocation = adbLocationSupplier.get();
+            AndroidDebugBridge bridge =
+                    AndroidDebugBridge.createBridge(
+                            adbLocation.getAbsolutePath(),
+                            false /*forceNewBridge*/,
+                            timeOut == 0 ? Long.MAX_VALUE : timeOut,
+                            timeOutUnit);
+
+            if (bridge == null) {
+                throw new DeviceException(
+                        "Could not create ADB Bridge. "
+                                + "ADB location: "
+                                + adbLocation.getAbsolutePath());
+            }
+
+            long getDevicesCountdown = timeOutUnit.toMillis(timeOut);
+            final int sleepTime = 1000;
+            while (!bridge.hasInitialDeviceList() && getDevicesCountdown >= 0) {
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    throw new DeviceException(e);
+                }
+                // If timeOut is 0, wait forever.
+                if (timeOut != 0) {
+                    getDevicesCountdown -= sleepTime;
+                }
+            }
+
+            if (!bridge.hasInitialDeviceList()) {
+                throw new DeviceException("Timeout getting device list.");
+            }
+
+            IDevice[] devices = bridge.getDevices();
 
             if (devices.length == 0) {
                 throw new DeviceException("No connected devices!");
@@ -169,7 +211,7 @@ public class ConnectedDeviceProvider extends DeviceProvider {
                             device.getState(),
                             device.getState() == IDevice.DeviceState.UNAUTHORIZED
                                     ? ",\n"
-                                    + "    see http://d.android.com/tools/help/adb.html#Enabling"
+                                            + "    see http://d.android.com/tools/help/adb.html#Enabling"
                                     : "");
                 }
             }
@@ -219,56 +261,6 @@ public class ConnectedDeviceProvider extends DeviceProvider {
             }
         }
 
-    }
-
-    private IDevice[] loadDevices() throws DeviceException {
-        DdmPreferences.setLogLevel(Log.LogLevel.VERBOSE.getStringValue());
-        // TODO: switch to devicelib
-        if (timeOut > 0) {
-            DdmPreferences.setTimeOut((int) timeOutUnit.toMillis(timeOut));
-        } else {
-            DdmPreferences.setTimeOut(Integer.MAX_VALUE);
-        }
-
-        AndroidDebugBridge.initIfNeeded(false /*clientSupport*/);
-        File adbLocation = adbLocationSupplier.get();
-        try {
-            AndroidDebugBridge bridge =
-                    AndroidDebugBridge.createBridge(
-                            adbLocation.getAbsolutePath(),
-                            false /*forceNewBridge*/,
-                            timeOut == 0 ? Long.MAX_VALUE : timeOut,
-                            timeOutUnit);
-
-            if (bridge == null) {
-                throw new DeviceException(
-                        "Could not create ADB Bridge. "
-                                + "ADB location: "
-                                + adbLocation.getAbsolutePath());
-            }
-
-            long getDevicesCountdown = timeOutUnit.toMillis(timeOut);
-            final int sleepTime = 1000;
-            while (!bridge.hasInitialDeviceList() && getDevicesCountdown >= 0) {
-                try {
-                    Thread.sleep(sleepTime);
-                } catch (InterruptedException e) {
-                    throw new DeviceException(e);
-                }
-                // If timeOut is 0, wait forever.
-                if (timeOut != 0) {
-                    getDevicesCountdown -= sleepTime;
-                }
-            }
-
-            if (!bridge.hasInitialDeviceList()) {
-                throw new DeviceException("Timeout getting device list.");
-            }
-
-            return bridge.getDevices();
-        } finally {
-            AndroidDebugBridge.terminate();
-        }
     }
 
     @Override
