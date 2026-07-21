@@ -18,30 +18,26 @@ package com.android.ide.common.gradle.model.level2;
 import com.android.annotations.NonNull;
 import com.android.builder.model.level2.Library;
 import com.google.common.collect.ImmutableList;
-import java.io.File;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
 
 public class IdeDependenciesImpl implements IdeDependencies, Serializable {
     // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 1L;
 
     @NonNull private final Collection<Library> myAndroidLibraries;
     @NonNull private final Collection<Library> myJavaLibraries;
     @NonNull private final Collection<Library> myModuleDependencies;
-    @NonNull private final Collection<File> myRuntimeOnlyClasses;
     private final int myHashCode;
 
     IdeDependenciesImpl(
             @NonNull ImmutableList<Library> androidLibraries,
             @NonNull ImmutableList<Library> javaLibraries,
-            @NonNull ImmutableList<Library> moduleDependencies,
-            @NonNull ImmutableList<File> runtimeOnlyClasses) {
+            @NonNull ImmutableList<Library> moduleDependencies) {
         myAndroidLibraries = androidLibraries;
         myJavaLibraries = javaLibraries;
         myModuleDependencies = moduleDependencies;
-        myRuntimeOnlyClasses = runtimeOnlyClasses;
         myHashCode = calculateHashCode();
     }
 
@@ -64,12 +60,6 @@ public class IdeDependenciesImpl implements IdeDependencies, Serializable {
     }
 
     @Override
-    @NonNull
-    public Collection<File> getRuntimeOnlyClasses() {
-        return myRuntimeOnlyClasses;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -80,8 +70,7 @@ public class IdeDependenciesImpl implements IdeDependencies, Serializable {
         IdeDependenciesImpl item = (IdeDependenciesImpl) o;
         return Objects.equals(myAndroidLibraries, item.myAndroidLibraries)
                 && Objects.equals(myJavaLibraries, item.myJavaLibraries)
-                && Objects.equals(myModuleDependencies, item.myModuleDependencies)
-                && Objects.equals(myRuntimeOnlyClasses, item.myRuntimeOnlyClasses);
+                && Objects.equals(myModuleDependencies, item.myModuleDependencies);
     }
 
     @Override
@@ -90,8 +79,7 @@ public class IdeDependenciesImpl implements IdeDependencies, Serializable {
     }
 
     private int calculateHashCode() {
-        return Objects.hash(
-                myAndroidLibraries, myJavaLibraries, myModuleDependencies, myRuntimeOnlyClasses);
+        return Objects.hash(myAndroidLibraries, myJavaLibraries, myModuleDependencies);
     }
 
     @Override
@@ -103,8 +91,6 @@ public class IdeDependenciesImpl implements IdeDependencies, Serializable {
                 + myJavaLibraries
                 + ", myModuleDependencies="
                 + myModuleDependencies
-                + ", myRuntimeOnlyClasses="
-                + myRuntimeOnlyClasses
                 + '}';
     }
 }

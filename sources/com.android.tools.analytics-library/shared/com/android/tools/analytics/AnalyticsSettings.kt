@@ -175,24 +175,22 @@ object AnalyticsSettings {
     }
     val channel = RandomAccessFile(file, "rw").channel
     try {
-      val settings: AnalyticsSettingsData? = channel.tryLock().use {
+      lateinit var settings: AnalyticsSettingsData
+      channel.tryLock().use {
         val inputStream = Channels.newInputStream(channel)
         val gson = GsonBuilder().create()
-        gson.fromJson(InputStreamReader(inputStream), AnalyticsSettingsData::class.java)
+        settings = gson.fromJson(InputStreamReader(inputStream), AnalyticsSettingsData::class.java)
       }
-      if (settings == null || !isValid(settings)) {
+      if (!isValid(settings)) {
         return createNewAnalyticsSettingsData()
       }
       return settings
     }
     catch (e: OverlappingFileLockException) {
-      logger.warning("Unable to lock settings file %s: %s", file.toString(), e)
+      logger.error(e, "Unable to lock settings file %s", file.toString())
     }
     catch (e: JsonParseException) {
-      logger.warning("Unable to parse settings file %s: %s", file.toString(), e)
-    }
-    catch (e: IllegalStateException) {
-      logger.warning("Unable to parse settings file %s: %s", file.toString(), e)
+      logger.error(e, "Unable to parse settings file %s", file.toString())
     }
     var newSettings = AnalyticsSettingsData()
     newSettings.userId = UUID.randomUUID().toString()
@@ -248,19 +246,11 @@ object AnalyticsSettings {
   @JvmOverloads
   fun initialize(logger: ILogger, scheduler: ScheduledExecutorService? = null) {
     synchronized(gate) {
-      try {
-        if (instance != null) {
-          return
-        }
-        initialized = true
-        instance = loadSettingsData(logger)
-      } catch (e : IOException) {
-        // null out metrics in case of failure to load.
-        initialized = true
-        instance = AnalyticsSettingsData()
-        logger.warning("Unable to initialize metrics, ensure %s is writable, details: %s",
-                       AnalyticsPaths.getAndEnsureAndroidSettingsHome(), e.message)
+      if (instance != null) {
+        return
       }
+      initialized = true
+      instance = loadSettingsData(logger)
     }
     scheduler?.submit {
       try {
@@ -268,8 +258,8 @@ object AnalyticsSettings {
         dateProvider = gp
         googlePlayDateProvider = gp
       }
-      catch (_: IOException) {
-        logger.warning("Unable to get current time from Google's servers, using local system time instead.")
+      catch (e: IOException) {
+        logger.error(e, "Unable to get current time from Google's servers")
       }
     }
   }
@@ -368,7 +358,9 @@ object AnalyticsSettings {
       calendar.time = now
       calendar.add(Calendar.DATE, -DAYS_TO_WAIT_FOR_REQUESTING_SENTIMENT_AGAIN)
       val startOfWaitForRequest = calendar.time
-      return !lastSentimentQuestionDate.after(startOfWaitForRequest)
+      if (!lastSentimentQuestionDate.after(startOfWaitForRequest)) {
+        return true
+      }
     }
 
     val startOfYear = GregorianCalendar(now.year + 1900 ,0, 1)

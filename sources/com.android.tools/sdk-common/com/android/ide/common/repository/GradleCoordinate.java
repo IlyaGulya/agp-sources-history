@@ -15,6 +15,8 @@
  */
 package com.android.ide.common.repository;
 
+import static com.android.SdkConstants.MATERIAL2_PKG;
+
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.google.common.base.Joiner;
@@ -538,9 +540,8 @@ public final class GradleCoordinate {
     /** Returns the dependency version range of this coordinate */
     @Nullable
     public GradleVersionRange getVersionRange() {
-        KnownVersionStability stability =
-                KnownVersionStabilityKt.stabilityOf(mGroupId, mArtifactId, getRevision());
-        return GradleVersionRange.tryParse(getRevision(), stability);
+        return GradleVersionRange.tryParse(
+                getRevision(), MavenRepositories.isAndroidX(mGroupId) || mGroupId == MATERIAL2_PKG);
     }
 
     public boolean isPreview() {

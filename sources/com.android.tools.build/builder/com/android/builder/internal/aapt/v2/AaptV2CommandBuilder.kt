@@ -133,7 +133,6 @@ fun makeLinkCommand(config: AaptPackageConfig): ImmutableList<String> {
                         PrintWriter(fos).use { pw ->
                             dir.listFiles()
                                 .filter { it.isFile }
-                                .sortedBy { it.path }
                                 .forEach { pw.print(it.absolutePath + " ") }
                         }
                     }
@@ -143,7 +142,6 @@ fun makeLinkCommand(config: AaptPackageConfig): ImmutableList<String> {
                 for (dir in config.resourceDirs) {
                     dir.listFiles()
                         .filter { it.isFile }
-                        .sortedBy { it.path }
                         .forEach { builder.add("-R", it.absolutePath) }
                 }
             }
