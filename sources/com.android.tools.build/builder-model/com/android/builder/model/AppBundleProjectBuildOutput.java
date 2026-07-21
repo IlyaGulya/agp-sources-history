@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.ide.common.resources.configuration;
-
+package com.android.builder.model;
 
 import com.android.annotations.NonNull;
+import java.util.Collection;
 
-/**
- * An object that is associated with a {@link FolderConfiguration}.
- */
-public interface Configurable {
-    /** Returns the {@link FolderConfiguration} for this object. */
+/** Project output for the bundle file of an app. */
+public interface AppBundleProjectBuildOutput {
+
     @NonNull
-    FolderConfiguration getConfiguration();
+    Collection<AppBundleVariantBuildOutput> getAppBundleVariantsBuildOutput();
 }
