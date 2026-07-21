@@ -164,6 +164,22 @@ private static final long serialVersionUID = 0L;
      * <code>GENERATE_MANIFEST_CLASS = 11;</code>
      */
     GENERATE_MANIFEST_CLASS(11),
+    /**
+     * <pre>
+     * Whether the old variant API is used in this project
+     * </pre>
+     *
+     * <code>OLD_VARIANT_API_IN_USE = 12;</code>
+     */
+    OLD_VARIANT_API_IN_USE(12),
+    /**
+     * <pre>
+     * Whether aligning compile to runtime constraints for all components is enabled
+     * </pre>
+     *
+     * <code>ENABLE_COMPILE_RUNTIME_CLASSPATH_ALIGNMENT = 13;</code>
+     */
+    ENABLE_COMPILE_RUNTIME_CLASSPATH_ALIGNMENT(13),
     UNRECOGNIZED(-1),
     ;
 
@@ -270,6 +286,22 @@ private static final long serialVersionUID = 0L;
      * <code>GENERATE_MANIFEST_CLASS = 11;</code>
      */
     public static final int GENERATE_MANIFEST_CLASS_VALUE = 11;
+    /**
+     * <pre>
+     * Whether the old variant API is used in this project
+     * </pre>
+     *
+     * <code>OLD_VARIANT_API_IN_USE = 12;</code>
+     */
+    public static final int OLD_VARIANT_API_IN_USE_VALUE = 12;
+    /**
+     * <pre>
+     * Whether aligning compile to runtime constraints for all components is enabled
+     * </pre>
+     *
+     * <code>ENABLE_COMPILE_RUNTIME_CLASSPATH_ALIGNMENT = 13;</code>
+     */
+    public static final int ENABLE_COMPILE_RUNTIME_CLASSPATH_ALIGNMENT_VALUE = 13;
 
 
     public final int getNumber() {
@@ -308,6 +340,8 @@ private static final long serialVersionUID = 0L;
         case 9: return EXCLUDE_LIBRARY_COMPONENTS_FROM_CONSTRAINTS;
         case 10: return DATA_BINDING_ENABLED;
         case 11: return GENERATE_MANIFEST_CLASS;
+        case 12: return OLD_VARIANT_API_IN_USE;
+        case 13: return ENABLE_COMPILE_RUNTIME_CLASSPATH_ALIGNMENT;
         default: return null;
       }
     }

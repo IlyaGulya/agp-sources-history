@@ -70,9 +70,14 @@ internal class KmpGlobalTaskCreationConfigImpl(
     bootClasspathConfig: BootClasspathConfigImpl,
     compileSdkVersionProvider: () -> String,
     buildToolsVersionProvider: () -> Revision,
+    private val androidJar: Configuration,
     override val services: BaseServices,
     override val settingsOptions: SettingsOptions
 ): GlobalTaskCreationConfig, BootClasspathConfig by bootClasspathConfig {
+
+    init {
+        bootClasspathConfig.androidJar = androidJar
+    }
 
     override val compileSdkHashString: String by lazy {
         compileSdkVersionProvider.invoke()
@@ -103,8 +108,7 @@ internal class KmpGlobalTaskCreationConfigImpl(
                     AndroidArtifacts.TYPE_PLATFORM_ATTR
                 )
             }
-
-        bootClasspathConfig.androidJar
+        androidJar
             .incoming
             .artifactView { config -> config.attributes(attributes) }
             .artifacts

@@ -43,7 +43,6 @@ import com.android.build.api.variant.impl.KmpAndroidCompilationType
 import com.android.build.api.variant.impl.KmpVariantImpl
 import com.android.build.api.variant.impl.KotlinMultiplatformAndroidCompilationImpl
 import com.android.build.api.variant.impl.KotlinMultiplatformAndroidLibraryTargetImpl
-import com.android.build.gradle.internal.AvdComponentsBuildService
 import com.android.build.gradle.internal.CompileOptions
 import com.android.build.gradle.internal.DependencyConfigurator
 import com.android.build.gradle.internal.SdkComponentsBuildService
@@ -56,6 +55,7 @@ import com.android.build.gradle.internal.core.dsl.impl.KmpUnitTestDslInfoImpl
 import com.android.build.gradle.internal.core.dsl.impl.KmpVariantDslInfoImpl
 import com.android.build.gradle.internal.core.dsl.impl.features.KmpDeviceTestOptionsDslInfoImpl
 import com.android.build.gradle.internal.dependency.AgpVersionCompatibilityRule
+import com.android.build.gradle.internal.dependency.CONFIG_NAME_ANDROID_JDK_IMAGE
 import com.android.build.gradle.internal.dependency.JacocoInstrumentationService
 import com.android.build.gradle.internal.dependency.ModelArtifactCompatibilityRule.Companion.setUp
 import com.android.build.gradle.internal.dependency.SingleVariantBuildTypeRule
@@ -65,7 +65,6 @@ import com.android.build.gradle.internal.dsl.KotlinMultiplatformAndroidLibraryEx
 import com.android.build.gradle.internal.dsl.DependencySelectionImpl
 import com.android.build.gradle.internal.dsl.ModulePropertyKey
 import com.android.build.gradle.internal.dsl.SdkComponentsImpl
-import com.android.build.gradle.internal.getManagedDeviceAvdFolder
 import com.android.build.gradle.internal.ide.dependencies.LibraryDependencyCacheBuildService
 import com.android.build.gradle.internal.ide.dependencies.MavenCoordinatesCacheBuildService
 import com.android.build.gradle.internal.ide.v2.GlobalSyncService
@@ -79,7 +78,6 @@ import com.android.build.gradle.internal.scope.KotlinMultiplatformHostTestBuildF
 import com.android.build.gradle.internal.scope.MutableTaskContainer
 import com.android.build.gradle.internal.services.Aapt2DaemonBuildService
 import com.android.build.gradle.internal.services.Aapt2ThreadPoolBuildService
-import com.android.build.gradle.internal.services.AndroidLocationsBuildService
 import com.android.build.gradle.internal.services.ClassesHierarchyBuildService
 import com.android.build.gradle.internal.services.DslServices
 import com.android.build.gradle.internal.services.DslServicesImpl
@@ -93,7 +91,6 @@ import com.android.build.gradle.internal.services.TaskCreationServicesImpl
 import com.android.build.gradle.internal.services.VariantServices
 import com.android.build.gradle.internal.services.VariantServicesImpl
 import com.android.build.gradle.internal.services.VersionedSdkLoaderService
-import com.android.build.gradle.internal.services.getBuildService
 import com.android.build.gradle.internal.tasks.KmpTaskManager
 import com.android.build.gradle.internal.tasks.SigningConfigUtils.Companion.createSigningOverride
 import com.android.build.gradle.internal.tasks.factory.BootClasspathConfig
@@ -115,8 +112,10 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.configuration.BuildFeatures
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Provider
 import org.gradle.build.event.BuildEventsListenerRegistry
+import org.gradle.jvm.toolchain.JavaToolchainService
 import org.jetbrains.kotlin.gradle.ExternalKotlinTargetApi
 import javax.inject.Inject
 import org.jetbrains.kotlin.gradle.plugin.mpp.external.publishSources
@@ -206,27 +205,7 @@ class KotlinMultiplatformAndroidPlugin @Inject constructor(
             "kotlin.publishJvmEnvironmentAttribute", "true"
         )
 
-        BasePlugin.createAndroidJdkImageConfiguration(project, versionedSdkLoaderService)
-
-        AvdComponentsBuildService.RegistrationAction(
-            project,
-            projectServices.projectOptions,
-            getManagedDeviceAvdFolder(
-                project.objects,
-                project.providers,
-                getBuildService(
-                    project.gradle.sharedServices,
-                    AndroidLocationsBuildService::class.java,
-                ).get()
-            ),
-            dslServices.sdkComponents,
-            project.providers.provider {
-                getCompileSdkVersion()
-            },
-            project.providers.provider {
-                getBuildToolsVersion()
-            },
-        ).execute()
+        createAndroidJdkImageConfiguration(project)
     }
 
     override fun configureExtension(project: Project) {
@@ -269,6 +248,7 @@ class KotlinMultiplatformAndroidPlugin @Inject constructor(
             bootClasspathConfig,
             ::getCompileSdkVersion,
             ::getBuildToolsVersion,
+            BasePlugin.createAndroidJarConfig(project),
             dslServices,
             createSettingsOptions(dslServices)
         )
@@ -296,6 +276,24 @@ class KotlinMultiplatformAndroidPlugin @Inject constructor(
             }
             afterEvaluate(it)
         }
+    }
+
+    private fun createAndroidJdkImageConfiguration(project: Project) {
+        project.configurations.register(CONFIG_NAME_ANDROID_JDK_IMAGE) { config ->
+            config.isVisible = false
+            config.isCanBeConsumed = false
+            config.description = "Configuration providing JDK image for compiling Java 9+ sources"
+        }
+
+        project.dependencies
+            .add(
+                CONFIG_NAME_ANDROID_JDK_IMAGE,
+                project.files(
+                    versionedSdkLoaderService
+                        .versionedSdkLoader
+                        .flatMap { it.coreForSystemModulesProvider }
+                )
+            )
     }
 
     private fun KotlinMultiplatformAndroidLibraryExtension.initExtensionFromSettings(

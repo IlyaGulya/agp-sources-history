@@ -17,7 +17,6 @@
 package com.android.build.gradle.internal.tasks.factory
 
 import com.android.build.gradle.internal.SdkComponentsBuildService
-import com.android.build.gradle.internal.dependency.VariantDependencies
 import com.android.build.gradle.internal.dsl.CommonExtensionImpl
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.scope.BootClasspathBuilder
@@ -33,7 +32,6 @@ import org.gradle.api.attributes.AttributeContainer
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
-import java.util.concurrent.Callable
 
 class BootClasspathConfigImpl(
     project: Project,
@@ -196,25 +194,7 @@ class BootClasspathConfigImpl(
         property
     }
 
-    // Only create the configuration if it's needed in configuration stage
-    val androidJar: Configuration by lazy {
-        val androidJarConfig: Configuration = project.configurations
-            .maybeCreate(VariantDependencies.CONFIG_NAME_ANDROID_APIS)
-        androidJarConfig.description = "Configuration providing various types of Android JAR file"
-        androidJarConfig.isCanBeConsumed = false
-
-        project.dependencies
-            .add(
-                VariantDependencies.CONFIG_NAME_ANDROID_APIS,
-                project.files(
-                    Callable {
-                        versionedSdkLoaderService.versionedSdkLoader.flatMap {
-                            it.androidJarProvider
-                        }.orNull
-                    } as Callable<*>))
-
-        androidJarConfig
-    }
+    internal lateinit var androidJar: Configuration
 
     override val mockableJarArtifact: FileCollection by lazy {
         val attributes =
@@ -229,7 +209,6 @@ class BootClasspathConfigImpl(
                         returnDefaultValuesForMockableJar()
                     )
             }
-
         androidJar
             .incoming
             .artifactView { config -> config.attributes(attributes) }

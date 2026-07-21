@@ -472,6 +472,7 @@ class AndroidTestTaskManager(
     }
 
     private fun createMockableJarTask() {
+        addAndroidJarDependency()
         // Adding this task to help the IDE find the mockable JAR.
         taskFactory.register(
             globalConfig.taskNames.createMockableJar

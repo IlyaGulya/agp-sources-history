@@ -98,12 +98,12 @@ public final class IdeModelsProto {
       "_TEST_ORCHESTRATOR\020\001\022\036\n\032ANDROIDX_TEST_OR" +
       "CHESTRATOR\020\002B\026\n\024_animations_disabledB\014\n\n" +
       "_executionB\036\n\034_instrumented_test_task_na" +
-      "me\"\270\004\n\037AndroidGradlePluginProjectFlags\022N" +
+      "me\"\204\005\n\037AndroidGradlePluginProjectFlags\022N" +
       "\n\023boolean_flag_values\030\001 \003(\01321.AndroidGra" +
       "dlePluginProjectFlags.BooleanFlagValue\032]" +
       "\n\020BooleanFlagValue\022:\n\004flag\030\001 \001(\0162,.Andro" +
       "idGradlePluginProjectFlags.BooleanFlag\022\r" +
-      "\n\005value\030\002 \001(\010\"\345\002\n\013BooleanFlag\022$\n APPLICA" +
+      "\n\005value\030\002 \001(\010\"\261\003\n\013BooleanFlag\022$\n APPLICA" +
       "TION_R_CLASS_CONSTANT_IDS\020\000\022\035\n\031TEST_R_CL" +
       "ASS_CONSTANT_IDS\020\001\022\026\n\022TRANSITIVE_R_CLASS" +
       "\020\002\022\023\n\017JETPACK_COMPOSE\020\003\022\024\n\020ML_MODEL_BIND" +
@@ -112,71 +112,73 @@ public final class IdeModelsProto {
       "D_FEATURE_ANDROID_RESOURCES\020\010\022/\n+EXCLUDE" +
       "_LIBRARY_COMPONENTS_FROM_CONSTRAINTS\020\t\022\030" +
       "\n\024DATA_BINDING_ENABLED\020\n\022\033\n\027GENERATE_MAN" +
-      "IFEST_CLASS\020\013\"5\n\016AndroidVersion\022\021\n\tapi_l" +
-      "evel\030\001 \001(\005\022\020\n\010codename\030\002 \001(\t\"\316\003\n\rSigning" +
-      "Config\022\021\n\004name\030\001 \001(\tH\000\210\001\001\022\036\n\nstore_file\030" +
-      "\002 \001(\0132\005.FileH\001\210\001\001\022\033\n\016store_password\030\003 \001(" +
-      "\tH\002\210\001\001\022\026\n\tkey_alias\030\004 \001(\tH\003\210\001\001\022\031\n\014key_pa" +
-      "ssword\030\005 \001(\tH\004\210\001\001\022\036\n\021enable_v1_signing\030\006" +
-      " \001(\010H\005\210\001\001\022\036\n\021enable_v2_signing\030\007 \001(\010H\006\210\001" +
-      "\001\022\036\n\021enable_v3_signing\030\010 \001(\010H\007\210\001\001\022\036\n\021ena" +
-      "ble_v4_signing\030\t \001(\010H\010\210\001\001\022\030\n\020is_signing_" +
-      "ready\030\n \001(\010B\007\n\005_nameB\r\n\013_store_fileB\021\n\017_" +
-      "store_passwordB\014\n\n_key_aliasB\017\n\r_key_pas" +
-      "swordB\024\n\022_enable_v1_signingB\024\n\022_enable_v" +
-      "2_signingB\024\n\022_enable_v3_signingB\024\n\022_enab" +
-      "le_v4_signing\"\302\002\n\rComponentInfo\022\027\n\nbuild" +
-      "_type\030\001 \001(\tH\000\210\001\001\022;\n\017product_flavors\030\002 \003(" +
-      "\0132\".ComponentInfo.ProductFlavorsEntry\0222\n" +
-      "\nattributes\030\003 \003(\0132\036.ComponentInfo.Attrib" +
-      "utesEntry\022\024\n\014capabilities\030\004 \003(\t\022\030\n\020is_te" +
-      "st_fixtures\030\005 \001(\010\0325\n\023ProductFlavorsEntry" +
-      "\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0321\n\017Attr" +
-      "ibutesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:" +
-      "\0028\001B\r\n\013_build_type\"\235\001\n\013ProjectInfo\022+\n\016co" +
-      "mponent_info\030\001 \001(\0132\016.ComponentInfoH\000\210\001\001\022" +
-      "\025\n\010build_id\030\002 \001(\tH\001\210\001\001\022\031\n\014project_path\030\003" +
-      " \001(\tH\002\210\001\001B\021\n\017_component_infoB\013\n\t_build_i" +
-      "dB\017\n\r_project_path\"\251\001\n\013LibraryInfo\022+\n\016co" +
-      "mponent_info\030\001 \001(\0132\016.ComponentInfoH\000\210\001\001\022" +
-      "\022\n\005group\030\002 \001(\tH\001\210\001\001\022\021\n\004name\030\003 \001(\tH\002\210\001\001\022\024" +
-      "\n\007version\030\004 \001(\tH\003\210\001\001B\021\n\017_component_infoB" +
-      "\010\n\006_groupB\007\n\005_nameB\n\n\010_version\"\255\005\n\022Andro" +
-      "idLibraryData\022\034\n\010manifest\030\001 \001(\0132\005.FileH\000" +
-      "\210\001\001\022 \n\021compile_jar_files\030\002 \003(\0132\005.File\022 \n" +
-      "\021runtime_jar_files\030\003 \003(\0132\005.File\022\036\n\nres_f" +
-      "older\030\004 \001(\0132\005.FileH\001\210\001\001\022&\n\022res_static_li" +
-      "brary\030\005 \001(\0132\005.FileH\002\210\001\001\022!\n\rassets_folder" +
-      "\030\006 \001(\0132\005.FileH\003\210\001\001\022\036\n\njni_folder\030\007 \001(\0132\005" +
-      ".FileH\004\210\001\001\022\037\n\013aidl_folder\030\010 \001(\0132\005.FileH\005" +
-      "\210\001\001\022\'\n\023renderscript_folder\030\t \001(\0132\005.FileH" +
-      "\006\210\001\001\022\"\n\016proguard_rules\030\n \001(\0132\005.FileH\007\210\001\001" +
-      "\022(\n\024external_annotations\030\013 \001(\0132\005.FileH\010\210" +
-      "\001\001\022$\n\020public_resources\030\014 \001(\0132\005.FileH\t\210\001\001" +
-      "\022\037\n\013symbol_file\030\r \001(\0132\005.FileH\n\210\001\001B\013\n\t_ma" +
-      "nifestB\r\n\013_res_folderB\025\n\023_res_static_lib" +
-      "raryB\020\n\016_assets_folderB\r\n\013_jni_folderB\016\n" +
-      "\014_aidl_folderB\026\n\024_renderscript_folderB\021\n" +
-      "\017_proguard_rulesB\027\n\025_external_annotation" +
-      "sB\023\n\021_public_resourcesB\016\n\014_symbol_file\"\204" +
-      "\004\n\007Library\022\020\n\003key\030\001 \001(\tH\000\210\001\001\022\037\n\004type\030\002 \001" +
-      "(\0162\014.LibraryTypeH\001\210\001\001\022\'\n\014project_info\030\003 " +
-      "\001(\0132\014.ProjectInfoH\002\210\001\001\022\'\n\014library_info\030\004" +
-      " \001(\0132\014.LibraryInfoH\003\210\001\001\022\034\n\010artifact\030\005 \001(" +
-      "\0132\005.FileH\004\210\001\001\022\034\n\010lint_jar\030\006 \001(\0132\005.FileH\005" +
-      "\210\001\001\022\033\n\007src_jar\030\007 \001(\0132\005.FileH\006\210\001\001\022\033\n\007doc_" +
-      "jar\030\010 \001(\0132\005.FileH\007\210\001\001\022\037\n\013samples_jar\030\t \001" +
-      "(\0132\005.FileH\010\210\001\001\0226\n\024android_library_data\030\n" +
-      " \001(\0132\023.AndroidLibraryDataH\t\210\001\001\022\027\n\010src_ja" +
-      "rs\030\013 \003(\0132\005.FileB\006\n\004_keyB\007\n\005_typeB\017\n\r_pro" +
-      "ject_infoB\017\n\r_library_infoB\013\n\t_artifactB" +
-      "\013\n\t_lint_jarB\n\n\010_src_jarB\n\n\010_doc_jarB\016\n\014" +
-      "_samples_jarB\027\n\025_android_library_data*f\n" +
-      "\013LibraryType\022\024\n\020NO_ARTIFACT_FILE\020\000\022\013\n\007PR" +
-      "OJECT\020\001\022\023\n\017ANDROID_LIBRARY\020\002\022\020\n\014JAVA_LIB" +
-      "RARY\020\003\022\r\n\tRELOCATED\020\004B7\n#com.android.bui" +
-      "lder.model.proto.ideB\016IdeModelsProtoP\001b\006" +
-      "proto3"
+      "IFEST_CLASS\020\013\022\032\n\026OLD_VARIANT_API_IN_USE\020" +
+      "\014\022.\n*ENABLE_COMPILE_RUNTIME_CLASSPATH_AL" +
+      "IGNMENT\020\r\"5\n\016AndroidVersion\022\021\n\tapi_level" +
+      "\030\001 \001(\005\022\020\n\010codename\030\002 \001(\t\"\316\003\n\rSigningConf" +
+      "ig\022\021\n\004name\030\001 \001(\tH\000\210\001\001\022\036\n\nstore_file\030\002 \001(" +
+      "\0132\005.FileH\001\210\001\001\022\033\n\016store_password\030\003 \001(\tH\002\210" +
+      "\001\001\022\026\n\tkey_alias\030\004 \001(\tH\003\210\001\001\022\031\n\014key_passwo" +
+      "rd\030\005 \001(\tH\004\210\001\001\022\036\n\021enable_v1_signing\030\006 \001(\010" +
+      "H\005\210\001\001\022\036\n\021enable_v2_signing\030\007 \001(\010H\006\210\001\001\022\036\n" +
+      "\021enable_v3_signing\030\010 \001(\010H\007\210\001\001\022\036\n\021enable_" +
+      "v4_signing\030\t \001(\010H\010\210\001\001\022\030\n\020is_signing_read" +
+      "y\030\n \001(\010B\007\n\005_nameB\r\n\013_store_fileB\021\n\017_stor" +
+      "e_passwordB\014\n\n_key_aliasB\017\n\r_key_passwor" +
+      "dB\024\n\022_enable_v1_signingB\024\n\022_enable_v2_si" +
+      "gningB\024\n\022_enable_v3_signingB\024\n\022_enable_v" +
+      "4_signing\"\302\002\n\rComponentInfo\022\027\n\nbuild_typ" +
+      "e\030\001 \001(\tH\000\210\001\001\022;\n\017product_flavors\030\002 \003(\0132\"." +
+      "ComponentInfo.ProductFlavorsEntry\0222\n\natt" +
+      "ributes\030\003 \003(\0132\036.ComponentInfo.Attributes" +
+      "Entry\022\024\n\014capabilities\030\004 \003(\t\022\030\n\020is_test_f" +
+      "ixtures\030\005 \001(\010\0325\n\023ProductFlavorsEntry\022\013\n\003" +
+      "key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0321\n\017Attribut" +
+      "esEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001B" +
+      "\r\n\013_build_type\"\235\001\n\013ProjectInfo\022+\n\016compon" +
+      "ent_info\030\001 \001(\0132\016.ComponentInfoH\000\210\001\001\022\025\n\010b" +
+      "uild_id\030\002 \001(\tH\001\210\001\001\022\031\n\014project_path\030\003 \001(\t" +
+      "H\002\210\001\001B\021\n\017_component_infoB\013\n\t_build_idB\017\n" +
+      "\r_project_path\"\251\001\n\013LibraryInfo\022+\n\016compon" +
+      "ent_info\030\001 \001(\0132\016.ComponentInfoH\000\210\001\001\022\022\n\005g" +
+      "roup\030\002 \001(\tH\001\210\001\001\022\021\n\004name\030\003 \001(\tH\002\210\001\001\022\024\n\007ve" +
+      "rsion\030\004 \001(\tH\003\210\001\001B\021\n\017_component_infoB\010\n\006_" +
+      "groupB\007\n\005_nameB\n\n\010_version\"\255\005\n\022AndroidLi" +
+      "braryData\022\034\n\010manifest\030\001 \001(\0132\005.FileH\000\210\001\001\022" +
+      " \n\021compile_jar_files\030\002 \003(\0132\005.File\022 \n\021run" +
+      "time_jar_files\030\003 \003(\0132\005.File\022\036\n\nres_folde" +
+      "r\030\004 \001(\0132\005.FileH\001\210\001\001\022&\n\022res_static_librar" +
+      "y\030\005 \001(\0132\005.FileH\002\210\001\001\022!\n\rassets_folder\030\006 \001" +
+      "(\0132\005.FileH\003\210\001\001\022\036\n\njni_folder\030\007 \001(\0132\005.Fil" +
+      "eH\004\210\001\001\022\037\n\013aidl_folder\030\010 \001(\0132\005.FileH\005\210\001\001\022" +
+      "\'\n\023renderscript_folder\030\t \001(\0132\005.FileH\006\210\001\001" +
+      "\022\"\n\016proguard_rules\030\n \001(\0132\005.FileH\007\210\001\001\022(\n\024" +
+      "external_annotations\030\013 \001(\0132\005.FileH\010\210\001\001\022$" +
+      "\n\020public_resources\030\014 \001(\0132\005.FileH\t\210\001\001\022\037\n\013" +
+      "symbol_file\030\r \001(\0132\005.FileH\n\210\001\001B\013\n\t_manife" +
+      "stB\r\n\013_res_folderB\025\n\023_res_static_library" +
+      "B\020\n\016_assets_folderB\r\n\013_jni_folderB\016\n\014_ai" +
+      "dl_folderB\026\n\024_renderscript_folderB\021\n\017_pr" +
+      "oguard_rulesB\027\n\025_external_annotationsB\023\n" +
+      "\021_public_resourcesB\016\n\014_symbol_file\"\204\004\n\007L" +
+      "ibrary\022\020\n\003key\030\001 \001(\tH\000\210\001\001\022\037\n\004type\030\002 \001(\0162\014" +
+      ".LibraryTypeH\001\210\001\001\022\'\n\014project_info\030\003 \001(\0132" +
+      "\014.ProjectInfoH\002\210\001\001\022\'\n\014library_info\030\004 \001(\013" +
+      "2\014.LibraryInfoH\003\210\001\001\022\034\n\010artifact\030\005 \001(\0132\005." +
+      "FileH\004\210\001\001\022\034\n\010lint_jar\030\006 \001(\0132\005.FileH\005\210\001\001\022" +
+      "\033\n\007src_jar\030\007 \001(\0132\005.FileH\006\210\001\001\022\033\n\007doc_jar\030" +
+      "\010 \001(\0132\005.FileH\007\210\001\001\022\037\n\013samples_jar\030\t \001(\0132\005" +
+      ".FileH\010\210\001\001\0226\n\024android_library_data\030\n \001(\013" +
+      "2\023.AndroidLibraryDataH\t\210\001\001\022\027\n\010src_jars\030\013" +
+      " \003(\0132\005.FileB\006\n\004_keyB\007\n\005_typeB\017\n\r_project" +
+      "_infoB\017\n\r_library_infoB\013\n\t_artifactB\013\n\t_" +
+      "lint_jarB\n\n\010_src_jarB\n\n\010_doc_jarB\016\n\014_sam" +
+      "ples_jarB\027\n\025_android_library_data*f\n\013Lib" +
+      "raryType\022\024\n\020NO_ARTIFACT_FILE\020\000\022\013\n\007PROJEC" +
+      "T\020\001\022\023\n\017ANDROID_LIBRARY\020\002\022\020\n\014JAVA_LIBRARY" +
+      "\020\003\022\r\n\tRELOCATED\020\004B7\n#com.android.builder" +
+      ".model.proto.ideB\016IdeModelsProtoP\001b\006prot" +
+      "o3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

@@ -73,6 +73,7 @@ class GlobalTaskCreationConfigImpl(
     bootClasspathConfig: BootClasspathConfigImpl,
     override val lintPublish: Configuration,
     override val lintChecks: Configuration,
+    private val androidJar: Configuration,
     override val fakeDependency: Configuration,
     override val settingsOptions: SettingsOptions,
     override val managedDeviceRegistry: ManagedDeviceRegistry,
@@ -86,6 +87,10 @@ class GlobalTaskCreationConfigImpl(
             )
             return converter.convert(this)
         }
+    }
+
+    init {
+        bootClasspathConfig.androidJar = androidJar
     }
 
     // DSL elements
@@ -218,8 +223,7 @@ class GlobalTaskCreationConfigImpl(
                     AndroidArtifacts.TYPE_PLATFORM_ATTR
                 )
             }
-
-        bootClasspathConfig.androidJar
+        androidJar
             .incoming
             .artifactView { config -> config.attributes(attributes) }
             .artifacts
