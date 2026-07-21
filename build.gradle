@@ -1,4 +1,5 @@
 import org.gradle.api.attributes.java.TargetJvmEnvironment
+import groovy.xml.XmlSlurper
 
 def agpVersions = providers.gradleProperty("agpVersions")
   .map { it.split(",").findAll { version -> !version.isBlank() } }
@@ -49,4 +50,133 @@ agpVersions.eachWithIndex { agpVersion, index ->
       }
   }
   dumpSources.configure { it.dependsOn(dumpVersion) }
+}
+
+def runCommand = { List<String> command ->
+  def process = new ProcessBuilder(command.collect { it.toString() })
+    .directory(rootDir)
+    .inheritIO()
+    .start()
+  def exitCode = process.waitFor()
+  if (exitCode != 0) {
+    throw new GradleException("Command failed (${exitCode}): ${command.join(' ')}")
+  }
+}
+
+def versionPattern = ~/^(\d+)\.(\d+)\.(\d+)(?:-(alpha|beta|rc)(\d+))?$/
+def qualifierOrder = [alpha: 0, beta: 1, rc: 2]
+def versionKey = { String version ->
+  def match = version =~ versionPattern
+  if (!match.matches()) {
+    throw new GradleException("Unsupported AGP version: $version")
+  }
+  def qualifier = match[0][4]
+  [
+    match[0][1].toInteger(),
+    match[0][2].toInteger(),
+    match[0][3].toInteger(),
+    qualifier ? qualifierOrder[qualifier] : 3,
+    match[0][5] ? match[0][5].toInteger() : 0,
+  ]
+}
+def compareVersions = { String left, String right ->
+  def leftKey = versionKey(left)
+  def rightKey = versionKey(right)
+  for (int i = 0; i < leftKey.size(); i++) {
+    def comparison = leftKey[i] <=> rightKey[i]
+    if (comparison != 0) return comparison
+  }
+  0
+}
+
+tasks.register("importHistory") {
+  group = "AGP sources"
+  description = "Imports all missing AGP releases as sequential Git commits and tags"
+
+  doLast {
+    def metadataUrl = new URL(
+      "https://dl.google.com/dl/android/maven2/com/android/tools/build/gradle/maven-metadata.xml"
+    )
+    def published = metadataUrl.openStream().withCloseable { stream ->
+      new XmlSlurper()
+        .parse(stream)
+        .versioning
+        .versions
+        .version
+        .collect { it.text() }
+        .findAll { it ==~ versionPattern }
+        .sort(compareVersions)
+    }
+
+    def stateFile = file(".agp-version")
+    def current = stateFile.exists() ? stateFile.text.trim() : null
+    def baseline = providers.gradleProperty("baseline").getOrElse("3.0.0-alpha1")
+    def pending = published.findAll {
+      compareVersions(it, current ?: baseline) > 0 || (!current && it == baseline)
+    }
+
+    def excludeLatest = providers.gradleProperty("excludeLatest").getOrElse("0").toInteger()
+    if (excludeLatest > 0) {
+      pending = pending.take(Math.max(0, pending.size() - excludeLatest))
+    }
+    def maxVersions = providers.gradleProperty("maxVersions").getOrElse("0").toInteger()
+    if (maxVersions > 0) {
+      pending = pending.take(maxVersions)
+    }
+
+    logger.lifecycle("Importing ${pending.size()} AGP versions after ${current ?: 'initial state'}")
+    runCommand(["git", "config", "user.name", "AGP Sources Bot"])
+    runCommand(["git", "config", "user.email", "agp-sources-bot@users.noreply.github.com"])
+
+    pending.eachWithIndex { String version, int index ->
+      logger.lifecycle("[${index + 1}/${pending.size()}] Resolving AGP $version")
+      def configuration = configurations.detachedConfiguration(
+        dependencies.create("com.android.tools.build:gradle:${version}")
+      )
+      configuration.attributes.attribute(
+        TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE,
+        objects.named(TargetJvmEnvironment, TargetJvmEnvironment.STANDARD_JVM),
+      )
+      def componentIds = configuration
+        .incoming
+        .resolutionResult
+        .allDependencies
+        .findAll { it.selected.id.group.startsWith("com.android.tools") }
+        .collect { it.selected.id }
+        .toSet()
+      def artifacts = dependencies.createArtifactResolutionQuery()
+        .forComponents(componentIds)
+        .withArtifacts(JvmLibrary, SourcesArtifact)
+        .execute()
+        .resolvedComponents
+        .collectMany { it.getArtifacts(SourcesArtifact) }
+        .findAll { it instanceof ResolvedArtifactResult }
+
+      project.sync { syncSpec ->
+        syncSpec.into(file("sources"))
+        artifacts.each { ResolvedArtifactResult artifact ->
+          ModuleComponentIdentifier id = artifact.id.componentIdentifier
+          syncSpec.from(zipTree(artifact.file)) {
+            into("${id.group}/${id.module}")
+            exclude("**/*.RSA", "**/*.SF")
+            exclude("**/*.so", "**/*.dll", "**/*.dylib")
+          }
+        }
+      }
+      fileTree("sources").files.findAll { it.isFile() }.each {
+        it.setExecutable(false, false)
+      }
+      stateFile.text = "${version}\n"
+
+      runCommand(["git", "add", "--all", "sources", ".agp-version"])
+      runCommand(["git", "commit", "--quiet", "-m", "AGP $version"])
+      runCommand(["git", "tag", "-f", "-a", "agp-$version", "-m", "Android Gradle Plugin $version sources"])
+      logger.lifecycle("[${index + 1}/${pending.size()}] Committed AGP $version")
+
+      if ((index + 1) % 20 == 0) {
+        runCommand(["git", "gc"])
+      }
+    }
+    runCommand(["git", "gc"])
+  }
 }
