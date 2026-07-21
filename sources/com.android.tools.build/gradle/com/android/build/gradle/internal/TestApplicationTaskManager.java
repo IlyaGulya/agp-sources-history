@@ -34,23 +34,20 @@ import com.android.build.gradle.internal.tasks.SigningConfigVersionsWriterTask;
 import com.android.build.gradle.internal.tasks.factory.GlobalTaskCreationConfig;
 import com.android.build.gradle.internal.tasks.factory.TaskFactoryUtils;
 import com.android.build.gradle.internal.tasks.factory.TaskManagerConfig;
-import com.android.build.gradle.internal.test.SeparateTestModuleTestData;
+import com.android.build.gradle.internal.test.TestApplicationTestData;
 import com.android.build.gradle.internal.variant.ComponentInfo;
 import com.android.build.gradle.tasks.CheckTestedAppObfuscation;
 import com.android.build.gradle.tasks.ManifestProcessorTask;
 import com.android.build.gradle.tasks.ProcessTestManifest;
 import com.android.builder.core.ComponentType;
-
 import com.google.common.base.Preconditions;
-
+import java.util.Collection;
 import org.gradle.api.Project;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
 
 /**
  * TaskManager for standalone test application that lives in a separate module from the tested
@@ -82,8 +79,7 @@ public class TestApplicationTaskManager
                 extension);
     }
 
-    private SeparateTestModuleTestData getTestData(
-            TestVariantCreationConfig testVariantProperties) {
+    private TestApplicationTestData getTestData(TestVariantCreationConfig testVariantProperties) {
         Provider<Directory> testingApk =
                 testVariantProperties.getArtifacts().get(SingleArtifact.APK.INSTANCE);
 
@@ -108,7 +104,7 @@ public class TestApplicationTaskManager
                         ? testVariantProperties.getUsesSdkLibrarySplitForLocalDeployment()
                         : null;
 
-        return new SeparateTestModuleTestData(
+        return new TestApplicationTestData(
                 testVariantProperties.getNamespace(),
                 testVariantProperties,
                 testingApk,
@@ -128,7 +124,7 @@ public class TestApplicationTaskManager
         createCommonTasks(variantInfo);
 
         TestVariantCreationConfig testVariantProperties = variantInfo.getVariant();
-        SeparateTestModuleTestData testData = getTestData(testVariantProperties);
+        TestApplicationTestData testData = getTestData(testVariantProperties);
         configureTestData(testVariantProperties, testData);
 
         // create tasks to validate signing and produce signing config versions file.

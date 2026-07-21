@@ -65,8 +65,6 @@ internal class BundleTestDataImpl constructor(
     extraInstrumentationTestRunnerArgs = extraInstrumentationTestRunnerArgs
 ) {
 
-    override val supportedAbis: Set<String> = emptySet()
-
     override val libraryType = creationConfig.services.provider { false }
 
     override val testedApksFinder: ApksFinder

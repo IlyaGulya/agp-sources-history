@@ -696,7 +696,7 @@ To learn more, go to https://d.android.com/r/tools/java-8-support-message.html
 
         // create the build feature object that will be re-used everywhere
         val buildFeatureValues = variantFactory.createBuildFeatureValues(
-            extension.buildFeatures, projectServices
+            extension.buildFeatures, projectServices.projectOptions
         )
 
         // create all registered custom source sets from the user on each AndroidSourceSet
@@ -762,7 +762,7 @@ To learn more, go to https://d.android.com/r/tools/java-8-support-message.html
                     // Registering Jacoco transforms causes the jacoco configuration to be created.
                     // Ensure there is at least one variant with enableAndroidTestCoverage
                     // enabled before registering the transforms.
-                    if (variants.any { it.variant.codeCoverageEnabled }) {
+                    if (variants.any { it.variant.requiresJacocoTransformation }) {
                         configureJacocoTransforms()
                     }
                 }
@@ -771,14 +771,12 @@ To learn more, go to https://d.android.com/r/tools/java-8-support-message.html
                     // configurations for tools it uses. Only register them if privacy sandbox
                     // consumption is enabled.
                     if (anyVariantSupportsSdkConsumption) {
-                        configurePrivacySandboxSdkConsumerTransforms(
-                            globalConfig.compileSdkHashString,
-                            globalConfig.buildToolsRevision,
-                            globalConfig,
-                            variants.map { it.variant }
-                        )
+                        configurePrivacySandboxSdkConsumerTransforms()
                         configurePrivacySandboxSdkVariantTransforms(
                                 variants.map { it.variant },
+                                globalConfig.compileSdkHashString,
+                                globalConfig.buildToolsRevision,
+                                globalConfig
                         )
                     }
                 }

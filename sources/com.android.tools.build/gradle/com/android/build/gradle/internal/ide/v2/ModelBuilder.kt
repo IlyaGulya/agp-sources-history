@@ -32,9 +32,9 @@ import com.android.build.api.dsl.TestExtension
 import com.android.build.api.variant.ScopedArtifacts.Scope.ALL
 import com.android.build.api.variant.ScopedArtifacts.Scope.PROJECT
 import com.android.build.api.variant.impl.BuiltArtifactsImpl
+import com.android.build.api.variant.impl.HasHostTestsCreationConfig
 import com.android.build.api.variant.impl.HasTestFixtures
 import com.android.build.api.variant.impl.HasDeviceTestsCreationConfig
-import com.android.build.api.variant.impl.HasHostTestsCreationConfig
 import com.android.build.gradle.internal.component.DeviceTestCreationConfig
 import com.android.build.gradle.internal.component.ApkCreationConfig
 import com.android.build.gradle.internal.component.ApplicationCreationConfig
@@ -258,6 +258,12 @@ class ModelBuilder<
     }
 
     private fun buildBasicAndroidProjectModel(project: Project): BasicAndroidProject {
+        // Cannot be injected, as the project might not be the same as the project used to construct
+        // the model builder e.g. when lint explicitly builds the model.
+        val projectOptions =
+            getBuildService(project.gradle.sharedServices, ProjectOptionService::class.java)
+                .get().projectOptions
+
         val sdkSetupCorrectly = variantModel.versionedSdkLoader.get().sdkSetupCorrectly.get()
 
         // Get the boot classpath. This will ensure the target is configured.
@@ -739,6 +745,9 @@ class ModelBuilder<
                 variant.minSdk,
                 variant.global
             ).files.toList(),
+            experimentalProperties = if (variant.experimentalProperties.isPresent) {
+                variant.experimentalProperties.get().mapValues { it.value.toString() }
+            } else emptyMap()
         )
     }
 
@@ -902,7 +911,7 @@ class ModelBuilder<
     }
 
     private fun getBytecodeTransformations(component: ComponentCreationConfig): List<BytecodeTransformation> {
-        val jacoco = (component as? ApkCreationConfig)?.useJacocoTransformInstrumentation == true
+        val jacoco = (component as? ApkCreationConfig)?.requiresJacocoTransformation == true
         val classesProject = component.artifacts.forScope(PROJECT).getScopedArtifactsContainer(
             ScopedArtifact.CLASSES
         ).artifactsAltered.get()

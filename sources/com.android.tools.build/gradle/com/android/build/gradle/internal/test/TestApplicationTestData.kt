@@ -15,15 +15,20 @@
  */
 package com.android.build.gradle.internal.test
 
+import com.android.build.api.variant.BuiltArtifact
+import com.android.build.api.variant.BuiltArtifacts
 import com.android.build.api.variant.impl.BuiltArtifactsLoaderImpl
 import com.android.build.gradle.internal.component.TestVariantCreationConfig
+import com.android.builder.testing.api.DeviceConfigProvider
+import com.google.common.collect.ImmutableList
 import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.Input
+import java.io.File
+import java.util.stream.Collectors
 
 /** Implementation of [TestData] for separate test modules.  */
-class SeparateTestModuleTestData(
+class TestApplicationTestData(
     namespace: Provider<String>,
     creationConfig: TestVariantCreationConfig,
     testApkDir: Provider<Directory>,
@@ -43,9 +48,6 @@ class SeparateTestModuleTestData(
     extraInstrumentationTestRunnerArgs
 ) {
 
-    @get: Input
-    override val supportedAbis: Set<String> = emptySet()
-
     override val libraryType = creationConfig.services.provider { false }
 
     // AbstractTestDataImpl.testedApplicationId relies on creationConfig.testedApplicationId,
@@ -57,6 +59,24 @@ class SeparateTestModuleTestData(
         testedApksDir.map {
             BuiltArtifactsLoaderImpl().load(it)?.applicationId!!
         }
+
+    override val testedApksFinder: ApksFinder
+        get() = _testedApksFinder ?:
+                ApplicationApksFinder(
+                    testedApksDir?.let { BuiltArtifactsLoaderImpl().load(testedApksDir) }
+                ).also { _testedApksFinder = it }
+
+    private var _testedApksFinder: ApplicationApksFinder? = null
+
+    internal class ApplicationApksFinder(
+        private val builtArtifacts: BuiltArtifacts?
+    ): ApksFinder {
+
+        override fun findApks(deviceConfigProvider: DeviceConfigProvider): List<File> {
+            return if (builtArtifacts != null) builtArtifacts.elements.stream()
+                .map(BuiltArtifact::outputFile)
+                .map { pathname: String -> File(pathname) }
+                .collect(Collectors.toList()) else ImmutableList.of()
+        }
+    }
 }
-
-

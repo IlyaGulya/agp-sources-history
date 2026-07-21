@@ -17,17 +17,17 @@
 package com.android.build.gradle.internal.scope
 
 import com.android.build.api.dsl.BuildFeatures
-import com.android.build.gradle.internal.services.ProjectServices
+import com.android.build.gradle.options.ProjectOptions
 
 class TestFixturesBuildFeaturesValuesImpl(
     buildFeatures: BuildFeatures,
-    projectServices: ProjectServices,
+    projectOptions: ProjectOptions,
     androidResourcesEnabled: Boolean,
     dataBindingOverride: Boolean? = null,
     mlModelBindingOverride: Boolean? = null
 ) : BuildFeatureValuesImpl(
     buildFeatures,
-    projectServices,
+    projectOptions,
     dataBindingOverride,
     mlModelBindingOverride
 ) {

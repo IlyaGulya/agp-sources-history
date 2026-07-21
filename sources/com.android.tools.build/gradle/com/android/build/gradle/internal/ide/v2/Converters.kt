@@ -200,18 +200,18 @@ internal fun DefaultAndroidSourceSet.convert(
     return SourceProviderImpl(
         name = name,
         manifestFile = manifestFile,
-        javaDirectories = (javaDirectories + variantSourcesForModel(mixin?.java)).toSet(),
-        kotlinDirectories = (kotlinDirectories + variantSourcesForModel(mixin?.kotlin)).toSet(),
+        javaDirectories = javaDirectories + variantSourcesForModel(mixin?.java),
+        kotlinDirectories = kotlinDirectories + variantSourcesForModel(mixin?.kotlin),
         resourcesDirectories = resourcesDirectories,
         aidlDirectories = if (features.aidl) aidlDirectories else null,
         renderscriptDirectories = if (features.renderScript) renderscriptDirectories else null,
-        baselineProfileDirectories = ((baselineProfiles as DefaultAndroidSourceDirectorySet).srcDirs
-            + variantSourcesForModel(mixin?.baselineProfiles)).toSet(),
+        baselineProfileDirectories = (baselineProfiles as DefaultAndroidSourceDirectorySet).srcDirs
+            + variantSourcesForModel(mixin?.baselineProfiles),
         resDirectories = if (features.androidResources) resDirectories else null,
-        assetsDirectories = (assetsDirectories + allVariantSources(mixin?.assets)).toSet(),
-        jniLibsDirectories = (jniLibsDirectories + variantSourcesForModel(mixin?.jniLibs)).toSet(),
+        assetsDirectories = assetsDirectories + variantSourcesForModel(mixin?.assets),
+        jniLibsDirectories = jniLibsDirectories + variantSourcesForModel(mixin?.jniLibs),
         shadersDirectories = if (features.shaders) {
-            (shadersDirectories + variantSourcesForModel(mixin?.shaders)).toSet()
+            shadersDirectories + variantSourcesForModel(mixin?.shaders)
         } else null,
         mlModelsDirectories = if (features.mlModelBinding) mlModelsDirectories else null,
         customDirectories = customDirectories,
@@ -243,12 +243,6 @@ internal fun DefaultAndroidSourceSet.convert(
  */
 private fun variantSourcesForModel(sourceDirectories: SourceDirectoriesImpl?) =
     sourceDirectories?.variantSourcesForModel { it.shouldBeAddedToIdeModel && !it.isGenerated } ?: emptyList()
-
-/**
- * Returns source dirs that should be added to the model included generated
- */
-private fun allVariantSources(sourceDirectories: SourceDirectoriesImpl?) =
-    sourceDirectories?.variantSourcesForModel { it.shouldBeAddedToIdeModel } ?: emptyList()
 
 internal fun AndroidResources.convert() = AaptOptionsImpl(
     namespacing = if (namespaced) REQUIRED else DISABLED

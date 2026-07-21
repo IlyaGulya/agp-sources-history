@@ -55,23 +55,20 @@ import com.android.build.gradle.internal.scope.BuildFeatureValuesImpl;
 import com.android.build.gradle.internal.scope.MutableTaskContainer;
 import com.android.build.gradle.internal.scope.TestFixturesBuildFeaturesValuesImpl;
 import com.android.build.gradle.internal.services.DslServices;
-import com.android.build.gradle.internal.services.ProjectServices;
 import com.android.build.gradle.internal.services.TaskCreationServices;
 import com.android.build.gradle.internal.services.VariantBuilderServices;
 import com.android.build.gradle.internal.services.VariantServices;
 import com.android.build.gradle.internal.tasks.factory.GlobalTaskCreationConfig;
+import com.android.build.gradle.options.ProjectOptions;
 import com.android.builder.core.BuilderConstants;
 import com.android.builder.core.ComponentType;
 import com.android.builder.core.ComponentTypeImpl;
-
 import com.google.common.collect.ImmutableMap;
-
+import java.util.Map;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
-
-import java.util.Map;
 
 /** Customization of {@link AbstractAppVariantFactory} for test-only projects. */
 public class TestVariantFactory
@@ -132,11 +129,11 @@ public class TestVariantFactory
     @NonNull
     @Override
     public BuildFeatureValues createBuildFeatureValues(
-            @NonNull BuildFeatures buildFeatures, @NonNull ProjectServices projectServices) {
+            @NonNull BuildFeatures buildFeatures, @NonNull ProjectOptions projectOptions) {
         if (buildFeatures instanceof TestBuildFeatures) {
             return new BuildFeatureValuesImpl(
                     buildFeatures,
-                    projectServices,
+                    projectOptions,
                     false /* dataBindingOverride */,
                     false /* mlModelBindingOverride */);
         } else {
@@ -148,12 +145,12 @@ public class TestVariantFactory
     @Override
     public BuildFeatureValues createTestFixturesBuildFeatureValues(
             @NonNull BuildFeatures buildFeatures,
-            @NonNull ProjectServices projectServices,
+            @NonNull ProjectOptions projectOptions,
             boolean androidResourcesEnabled) {
         if (buildFeatures instanceof TestBuildFeatures) {
             return new TestFixturesBuildFeaturesValuesImpl(
                     buildFeatures,
-                    projectServices,
+                    projectOptions,
                     androidResourcesEnabled,
                     false /* dataBindingOverride */,
                     false /* mlModelBindingOverride */);
@@ -167,7 +164,7 @@ public class TestVariantFactory
     public BuildFeatureValues createHostTestBuildFeatureValues(
             @NonNull BuildFeatures buildFeatures,
             @NonNull DataBinding dataBinding,
-            @NonNull ProjectServices projectServices,
+            @NonNull ProjectOptions projectOptions,
             boolean includeAndroidResources,
             @NonNull ComponentType hostTestComponentType) {
         throw new RuntimeException("cannot instantiate test build features in test plugin");
@@ -178,7 +175,7 @@ public class TestVariantFactory
     public BuildFeatureValues createAndroidTestBuildFeatureValues(
             @NonNull BuildFeatures buildFeatures,
             @NonNull DataBinding dataBinding,
-            @NonNull ProjectServices projectServices) {
+            @NonNull ProjectOptions projectOptions) {
         throw new RuntimeException("cannot instantiate test build features in test plugin");
     }
 
