@@ -1094,7 +1094,10 @@ public class ProcessAndroidResources extends IncrementalTask {
         this.aaptOptions = aaptOptions;
     }
 
-    @Input
+    /**
+     * Only used for rewriting error messages. Should not affect task result.
+     */
+    @Internal
     public File getMergeBlameLogFolder() {
         return mergeBlameLogFolder;
     }

@@ -374,6 +374,10 @@ public class ManifestMerger2 {
             addDebuggableAttribute(document);
         }
 
+        if (mOptionalFeatures.contains(Invoker.Feature.ADD_MULTIDEX_APPLICATION_IF_NO_NAME)) {
+            addMultiDexApplicationIfNoName(document);
+        }
+
         if (!mOptionalFeatures.contains(Invoker.Feature.SKIP_XML_STRING)) {
             mergingReport.setMergedDocument(
                     MergingReport.MergedManifestKind.MERGED,
@@ -464,6 +468,25 @@ public class ManifestMerger2 {
             // assumes just 1 application element among manifest's immediate children.
             Element application = applicationElements.get(0);
             setAndroidAttribute(application, SdkConstants.ATTR_DEBUGGABLE, SdkConstants.VALUE_TRUE);
+        }
+    }
+
+    /**
+     * Adds android:name="{@link SdkConstants#SUPPORT_MULTI_DEX_APPLICATION}" if there is no value
+     * specified for that field.
+     *
+     * @param document the document for which the name attribute might be set.
+     */
+    private static void addMultiDexApplicationIfNoName(@NonNull Document document) {
+        Element manifest = document.getDocumentElement();
+        ImmutableList<Element> applicationElements =
+                getChildElementsByName(manifest, SdkConstants.TAG_APPLICATION);
+        if (!applicationElements.isEmpty()) {
+            Element application = applicationElements.get(0);
+            setAndroidAttributeIfMissing(
+                    application,
+                    SdkConstants.ATTR_NAME,
+                    SdkConstants.SUPPORT_MULTI_DEX_APPLICATION);
         }
     }
 
@@ -620,6 +643,19 @@ public class ManifestMerger2 {
                 XmlUtils.lookupNamespacePrefix(
                         node, SdkConstants.ANDROID_URI, SdkConstants.ANDROID_NS_NAME, true);
         node.setAttributeNS(SdkConstants.ANDROID_URI, prefix + ":" + localName, value);
+    }
+
+    /**
+     * Set an Android-namespaced XML attribute on the given node, if that attribute is missing.
+     *
+     * @param node Node in which to set the attribute; must be part of a document
+     * @param localName Non-prefixed attribute name
+     * @param value value of the attribute
+     */
+    private static void setAndroidAttributeIfMissing(Element node, String localName, String value) {
+        if (!node.hasAttributeNS(SdkConstants.ANDROID_URI, localName)) {
+            setAndroidAttribute(node, localName, value);
+        }
     }
 
     /**
@@ -1188,7 +1224,13 @@ public class ManifestMerger2 {
              *
              * <p>(This will log a warning.)
              */
-            HANDLE_VALUE_CONFLICTS_AUTOMATICALLY
+            HANDLE_VALUE_CONFLICTS_AUTOMATICALLY,
+
+            /**
+             * Adds {@link SdkConstants#SUPPORT_MULTI_DEX_APPLICATION} as application name if none
+             * is specified. Used for legacy multidex.
+             */
+            ADD_MULTIDEX_APPLICATION_IF_NO_NAME,
         }
 
         /**
