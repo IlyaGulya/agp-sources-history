@@ -89,7 +89,7 @@ open class DefaultAndroidSourceSet @Inject constructor(
                 SourceArtifactType.JAVA_RESOURCES,
                 dslScope
         )
-        javaResources.getFilter().exclude("**/*.java")
+        javaResources.getFilter().exclude("**/*.java", "**/*.kt")
 
         manifest = DefaultAndroidSourceFile("$displayName manifest", project)
 

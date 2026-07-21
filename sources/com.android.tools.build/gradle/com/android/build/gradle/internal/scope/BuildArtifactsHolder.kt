@@ -201,14 +201,6 @@ abstract class BuildArtifactsHolder(
         fileName: String) {
 
         val producers = producersMap.getProducers(artifactType)
-        taskProvider.configure {
-            // add a new configuration action to make sure the producers are configured even
-            // if no one injects the result. The task is being configured so it will be executed
-            // and output folders must be set correctly.
-            // this can happen when users request an intermediary task execution (instead of
-            // assemble for instance).
-            producers.resolveAllAndReturnLast()
-        }
         when(operationType) {
             OperationType.INITIAL -> {
                 if (!producers.isEmpty()) {
@@ -228,6 +220,15 @@ abstract class BuildArtifactsHolder(
             }
         }
         producers.add(product, taskProvider.name, fileName)
+
+        taskProvider.configure {
+            // add a new configuration action to make sure the producers are configured even
+            // if no one injects the result. The task is being configured so it will be executed
+            // and output folders must be set correctly.
+            // this can happen when users request an intermediary task execution (instead of
+            // assemble for instance).
+            producers.resolveAllAndReturnLast()
+        }
     }
 
     /**
