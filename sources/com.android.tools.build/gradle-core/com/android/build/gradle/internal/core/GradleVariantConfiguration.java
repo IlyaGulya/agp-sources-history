@@ -226,7 +226,7 @@ public class GradleVariantConfiguration
                     return applicationId;
                 }
 
-                @Nullable
+                @NonNull
                 @Override
                 public String getOriginalApplicationId() {
                     return getApplicationId();
@@ -245,6 +245,11 @@ public class GradleVariantConfiguration
                         @Nullable SourceProvider buildTypeSourceProvider,
                         @NonNull VariantType type) {
                     throw new UnsupportedOperationException("Test modules have no test variants.");
+                }
+
+                @Override
+                public boolean isInstantRunBuild(@NonNull GlobalScope globalScope) {
+                    return false;
                 }
             };
         }

@@ -16,13 +16,13 @@
 
 package com.android.build.gradle.internal.api.dsl.options
 
-import com.android.build.api.dsl.options.PostprocessingFilesOptions
+import com.android.build.api.dsl.options.PostProcessingFilesOptions
 import com.android.build.gradle.internal.api.dsl.sealing.InitializableSealable
 import com.android.build.gradle.internal.api.dsl.sealing.SealableList
 import com.android.builder.errors.EvalIssueReporter
 
-class PostprocessingFilesOptionsImpl(issueReporter: EvalIssueReporter)
-        : InitializableSealable<PostprocessingFilesOptions>(issueReporter), PostprocessingFilesOptions {
+class PostProcessingFilesOptionsImpl(issueReporter: EvalIssueReporter)
+        : InitializableSealable<PostProcessingFilesOptions>(issueReporter), PostProcessingFilesOptions {
 
     // the actual backing data for the exposed properties.
     private val _proguardFiles: SealableList<Any> = SealableList.new(issueReporter)
@@ -47,7 +47,7 @@ class PostprocessingFilesOptionsImpl(issueReporter: EvalIssueReporter)
             _consumerProguardFiles.reset(value)
         }
 
-    override fun initWith(that: PostprocessingFilesOptions) {
+    override fun initWith(that: PostProcessingFilesOptions) {
         _proguardFiles.reset(that.proguardFiles)
         _testProguardFiles.reset(that.testProguardFiles)
         _consumerProguardFiles.reset(that.consumerProguardFiles)

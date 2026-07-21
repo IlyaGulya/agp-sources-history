@@ -42,6 +42,7 @@ public enum BooleanOption implements Option<Boolean> {
 
     ENABLE_D8("android.enableD8", true),
     ENABLE_D8_DESUGARING("android.enableD8.desugaring", false),
+    ENABLE_D8_MAIN_DEX_LIST("android.enableD8MainDexList", true),
 
     ENABLE_DEPRECATED_NDK("android.useDeprecatedNdk"),
     DISABLE_RESOURCE_VALIDATION("android.disableResourceValidation"),
@@ -53,6 +54,8 @@ public enum BooleanOption implements Option<Boolean> {
 
     ENABLE_NEW_DSL_AND_API("android.enableNewDsl"),
 
+    ENABLE_DATA_BINDING_V2("android.databinding.enableV2", false),
+
     IDE_INVOKED_FROM_IDE(AndroidProject.PROPERTY_INVOKED_FROM_IDE),
     IDE_BUILD_MODEL_ONLY(AndroidProject.PROPERTY_BUILD_MODEL_ONLY),
     IDE_BUILD_MODEL_ONLY_ADVANCED(AndroidProject.PROPERTY_BUILD_MODEL_ONLY_ADVANCED),
@@ -61,7 +64,6 @@ public enum BooleanOption implements Option<Boolean> {
     IDE_REFRESH_EXTERNAL_NATIVE_MODEL(AndroidProject.PROPERTY_REFRESH_EXTERNAL_NATIVE_MODEL),
     IDE_GENERATE_SOURCES_ONLY(AndroidProject.PROPERTY_GENERATE_SOURCES_ONLY),
     ENABLE_SEPARATE_APK_RESOURCES("android.enableSeparateApkRes", true),
-    ENABLE_BUILDSCRIPT_CLASSPATH_CHECK("android.enableBuildScriptClasspathCheck", true),
     ENABLE_EXPERIMENTAL_FEATURE_DATABINDING("android.enableExperimentalFeatureDatabinding", false),
     ENABLE_SEPARATE_R_CLASS_COMPILATION("android.enableSeparateRClassCompilation"),
     ;

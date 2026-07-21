@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal;
+package com.android.build.api.artifact
 
-import com.google.auto.value.AutoValue;
+import org.gradle.api.Incubating
 
-/** Describes actions that we should do at bytecode postprocessing time. */
-@AutoValue
-public abstract class PostprocessingFeatures {
-
-    public static PostprocessingFeatures create(
-            boolean removeUnusedCode, boolean obfuscate, boolean optimize) {
-        return new AutoValue_PostprocessingFeatures(removeUnusedCode, obfuscate, optimize);
-    }
-
-    public abstract boolean isRemoveUnusedCode();
-
-    public abstract boolean isObfuscate();
-
-    public abstract boolean isOptimize();
+/** Represents a type of build artifact.  */
+@Incubating
+interface ArtifactType {
+    fun name(): String
 }
