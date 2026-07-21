@@ -162,14 +162,11 @@ class DefaultLintModelDependencyGraph(
     override val roots: List<LintModelDependency>,
     private val libraryResolver: LintModelLibraryResolver
 ) : LintModelDependencyGraph {
-    /** All libraries that we depend on, keyed by artifact address */
-    private val transitiveDependencies = mutableMapOf<String, LintModelDependency>()
-
     /**
-     * All transitive dependencies with known maven names, keyed by
-     * maven name (groupId:artifactId)
+     * All libraries that we depend on, keyed by maven name
+     * (groupId:artifactId)
      */
-    private val mavenTransitiveDependencies = mutableMapOf<String, LintModelDependency>()
+    private val transitiveDependencies = mutableMapOf<String, LintModelDependency>()
 
     init {
         for (item in roots) {
@@ -178,19 +175,11 @@ class DefaultLintModelDependencyGraph(
     }
 
     private fun register(item: LintModelDependency) {
-        if (transitiveDependencies.containsKey(item.artifactAddress)) {
+        if (transitiveDependencies.containsKey(item.artifactName)) {
             return
         }
 
-        transitiveDependencies[item.artifactAddress] = item
-
-        // Update mavenTransitiveDependencies for the findLibrary convenience method. If
-        // item.artifactName is ":", the dependency's maven name is unknown (for example, in the
-        // case of a local java module modeled as an external library by AGP), and we omit the
-        // dependency from mavenTransitiveDependencies.
-        if (item.artifactName != ":") {
-            mavenTransitiveDependencies[item.artifactName] = item
-        }
+        transitiveDependencies[item.artifactName] = item
 
         for (dependsOn in item.dependencies) {
             register(dependsOn)
@@ -201,7 +190,7 @@ class DefaultLintModelDependencyGraph(
         val artifactAddress = if (direct) {
             roots.firstOrNull { it.artifactName == mavenName }?.artifactAddress
         } else {
-            mavenTransitiveDependencies[mavenName]?.artifactAddress
+            transitiveDependencies[mavenName]?.artifactAddress
         }
 
         // Not found?

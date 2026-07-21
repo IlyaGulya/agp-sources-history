@@ -13,8 +13,6 @@ private const val INLINE_CACHE_MISSING_TYPES_ENCODING = 6
 /** Serialization encoding for a megamorphic inline cache.  */
 private const val INLINE_CACHE_MEGAMORPHIC_ENCODING = 7
 
-private const val MAX_NUM_CLASS_IDS = 1 shl 16
-
 enum class ArtProfileSerializer(internal val bytes: ByteArray) {
     /**
      * 0.1.0 Serialization format (P/Android 9.0.0):
@@ -50,7 +48,7 @@ enum class ArtProfileSerializer(internal val bytes: ByteArray) {
         override fun write(os: OutputStream, profileData: Map<DexFile, DexFileData>) = with(os) {
             // Write the profile data in a byte array first. The array will need to be compressed before
             // writing it in the final output stream.
-            val profileBytes = createCompressibleBody(profileData.entries.sortedBy { it.key.name })
+            val profileBytes = createCompressibleBody(profileData)
             writeUInt8(profileData.size) // number of dex files
             writeUInt32(profileBytes.size.toLong())
             writeCompressed(profileBytes)
@@ -60,7 +58,7 @@ enum class ArtProfileSerializer(internal val bytes: ByteArray) {
          * Serializes the profile data in a byte array. This methods only serializes the actual
          * profile content and not the necessary headers.
          */
-        private fun createCompressibleBody(profileData: List<Map.Entry<DexFile, DexFileData>>): ByteArray {
+        private fun createCompressibleBody(profileData: Map<DexFile, DexFileData>): ByteArray {
             // Start by creating a couple of caches for the data we re-use during serialization.
 
             // The required capacity in bytes for the uncompressed profile data.
@@ -186,9 +184,7 @@ enum class ArtProfileSerializer(internal val bytes: ByteArray) {
             // The profile stores the first class index, then the remainder are relative
             // to the previous value.
             var lastClassIndex = 0
-            // class ids must be sorted ascending so that each id is greater than the last since we
-            // are writing unsigned ints and cannot represent negative values
-            for (classIndex in dexFileData.classes.sorted()) {
+            for (classIndex in dexFileData.classes) {
                 val diffWithTheLastClassIndex = classIndex - lastClassIndex
                 writeUInt16(diffWithTheLastClassIndex)
                 lastClassIndex = classIndex
@@ -405,9 +401,6 @@ enum class ArtProfileSerializer(internal val bytes: ByteArray) {
             for (k in 0 until data.classSetSize) {
                 val diffWithTheLastClassIndex = readUInt16()
                 val classDexIndex = lastClassIndex + diffWithTheLastClassIndex
-                if (classDexIndex >= MAX_NUM_CLASS_IDS) {
-                    error("Value exceeded max class index. Value=$classDexIndex, Max=$MAX_NUM_CLASS_IDS")
-                }
                 data.classes.add(classDexIndex)
                 lastClassIndex = classDexIndex
             }

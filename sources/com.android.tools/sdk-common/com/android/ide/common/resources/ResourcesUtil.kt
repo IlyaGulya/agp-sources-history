@@ -119,13 +119,12 @@ fun findUnusedResources(
     resource.references?.forEach { visit(it) }
   }
 
-  val roots = resources.filter { it.isReachable || it.isKeep || it.isPublic }
+  val roots = resources.filter { it.isReachable || it.isKeep }
   rootsConsumer(roots)
   roots.forEach { visit(it) }
 
   return resources.asSequence()
     .filterNot { it.isReachable }
-    .filter { it.type != ResourceType.PUBLIC }
     // Styles not yet handled correctly: don't mark as unused
     .filter { it.type != ResourceType.ATTR && it.type != ResourceType.STYLEABLE }
     // Don't flag known service keys read by library

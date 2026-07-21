@@ -23,6 +23,7 @@ import com.android.annotations.Nullable;
 import com.android.annotations.concurrency.Slow;
 import com.android.ddmlib.log.LogReceiver;
 import com.google.common.base.Strings;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
@@ -45,9 +46,6 @@ import java.util.concurrent.TimeUnit;
  * like overkill for what we're doing here.
  */
 public final class AdbHelper {
-
-    // public static final long kOkay = 0x59414b4fL;
-    // public static final long kFail = 0x4c494146L;
 
     static final int WAIT_TIME = 5; // spin-wait sleep, in ms
 
@@ -1067,7 +1065,7 @@ public final class AdbHelper {
             count = chan.read(buf);
             if (count < 0) {
                 Log.d("ddms", "read: channel EOF");
-                throw new IOException("EOF");
+                throw new EOFException("EOF");
             } else if (count == 0) {
                 // TODO: need more accurate timeout?
                 if (timeout != 0 && numWaits * WAIT_TIME > timeout) {
