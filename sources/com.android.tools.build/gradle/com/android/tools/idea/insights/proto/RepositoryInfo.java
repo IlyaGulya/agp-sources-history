@@ -189,6 +189,7 @@ private static final long serialVersionUID = 0L;
     // @@protoc_insertion_point(enum_scope:RepositoryInfo.WorktreeStatus)
   }
 
+  private int bitField0_;
   public static final int SYSTEM_FIELD_NUMBER = 1;
   private int system_;
   /**
@@ -196,7 +197,18 @@ private static final long serialVersionUID = 0L;
    * VC system used by the app.
    * </pre>
    *
-   * <code>.VersionControlSystem system = 1;</code>
+   * <code>optional .VersionControlSystem system = 1;</code>
+   * @return Whether the system field is set.
+   */
+  @java.lang.Override public boolean hasSystem() {
+    return ((bitField0_ & 0x00000001) != 0);
+  }
+  /**
+   * <pre>
+   * VC system used by the app.
+   * </pre>
+   *
+   * <code>optional .VersionControlSystem system = 1;</code>
    * @return The enum numeric value on the wire for system.
    */
   @java.lang.Override public int getSystemValue() {
@@ -207,7 +219,7 @@ private static final long serialVersionUID = 0L;
    * VC system used by the app.
    * </pre>
    *
-   * <code>.VersionControlSystem system = 1;</code>
+   * <code>optional .VersionControlSystem system = 1;</code>
    * @return The system.
    */
   @java.lang.Override public com.android.tools.idea.insights.proto.VersionControlSystem getSystem() {
@@ -223,7 +235,19 @@ private static final long serialVersionUID = 0L;
    * The local repository path starts with the “$PROJECT_DIR” or “$ABOVE_PROJECT_DIR” placeholder.
    * </pre>
    *
-   * <code>string local_root_path = 2;</code>
+   * <code>optional string local_root_path = 2;</code>
+   * @return Whether the localRootPath field is set.
+   */
+  @java.lang.Override
+  public boolean hasLocalRootPath() {
+    return ((bitField0_ & 0x00000002) != 0);
+  }
+  /**
+   * <pre>
+   * The local repository path starts with the “$PROJECT_DIR” or “$ABOVE_PROJECT_DIR” placeholder.
+   * </pre>
+   *
+   * <code>optional string local_root_path = 2;</code>
    * @return The localRootPath.
    */
   @java.lang.Override
@@ -244,7 +268,7 @@ private static final long serialVersionUID = 0L;
    * The local repository path starts with the “$PROJECT_DIR” or “$ABOVE_PROJECT_DIR” placeholder.
    * </pre>
    *
-   * <code>string local_root_path = 2;</code>
+   * <code>optional string local_root_path = 2;</code>
    * @return The bytes for localRootPath.
    */
   @java.lang.Override
@@ -269,7 +293,19 @@ private static final long serialVersionUID = 0L;
    * The revision identifier, e.g. the SHA1 git commit id
    * </pre>
    *
-   * <code>string revision = 3;</code>
+   * <code>optional string revision = 3;</code>
+   * @return Whether the revision field is set.
+   */
+  @java.lang.Override
+  public boolean hasRevision() {
+    return ((bitField0_ & 0x00000004) != 0);
+  }
+  /**
+   * <pre>
+   * The revision identifier, e.g. the SHA1 git commit id
+   * </pre>
+   *
+   * <code>optional string revision = 3;</code>
    * @return The revision.
    */
   @java.lang.Override
@@ -290,7 +326,7 @@ private static final long serialVersionUID = 0L;
    * The revision identifier, e.g. the SHA1 git commit id
    * </pre>
    *
-   * <code>string revision = 3;</code>
+   * <code>optional string revision = 3;</code>
    * @return The bytes for revision.
    */
   @java.lang.Override
@@ -315,7 +351,18 @@ private static final long serialVersionUID = 0L;
    * Status of the working tree this app was built from.
    * </pre>
    *
-   * <code>.RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
+   * <code>optional .RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
+   * @return Whether the worktreeStatus field is set.
+   */
+  @java.lang.Override public boolean hasWorktreeStatus() {
+    return ((bitField0_ & 0x00000008) != 0);
+  }
+  /**
+   * <pre>
+   * Status of the working tree this app was built from.
+   * </pre>
+   *
+   * <code>optional .RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
    * @return The enum numeric value on the wire for worktreeStatus.
    */
   @java.lang.Override public int getWorktreeStatusValue() {
@@ -326,7 +373,7 @@ private static final long serialVersionUID = 0L;
    * Status of the working tree this app was built from.
    * </pre>
    *
-   * <code>.RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
+   * <code>optional .RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
    * @return The worktreeStatus.
    */
   @java.lang.Override public com.android.tools.idea.insights.proto.RepositoryInfo.WorktreeStatus getWorktreeStatus() {
@@ -349,16 +396,16 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (system_ != com.android.tools.idea.insights.proto.VersionControlSystem.VERSION_CONTROL_SYSTEM_UNSPECIFIED.getNumber()) {
+    if (((bitField0_ & 0x00000001) != 0)) {
       output.writeEnum(1, system_);
     }
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(localRootPath_)) {
+    if (((bitField0_ & 0x00000002) != 0)) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 2, localRootPath_);
     }
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(revision_)) {
+    if (((bitField0_ & 0x00000004) != 0)) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, revision_);
     }
-    if (worktreeStatus_ != com.android.tools.idea.insights.proto.RepositoryInfo.WorktreeStatus.WORKTREE_STATUS_UNSPECIFIED.getNumber()) {
+    if (((bitField0_ & 0x00000008) != 0)) {
       output.writeEnum(4, worktreeStatus_);
     }
     getUnknownFields().writeTo(output);
@@ -370,17 +417,17 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (system_ != com.android.tools.idea.insights.proto.VersionControlSystem.VERSION_CONTROL_SYSTEM_UNSPECIFIED.getNumber()) {
+    if (((bitField0_ & 0x00000001) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeEnumSize(1, system_);
     }
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(localRootPath_)) {
+    if (((bitField0_ & 0x00000002) != 0)) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, localRootPath_);
     }
-    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(revision_)) {
+    if (((bitField0_ & 0x00000004) != 0)) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, revision_);
     }
-    if (worktreeStatus_ != com.android.tools.idea.insights.proto.RepositoryInfo.WorktreeStatus.WORKTREE_STATUS_UNSPECIFIED.getNumber()) {
+    if (((bitField0_ & 0x00000008) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeEnumSize(4, worktreeStatus_);
     }
@@ -399,12 +446,24 @@ private static final long serialVersionUID = 0L;
     }
     com.android.tools.idea.insights.proto.RepositoryInfo other = (com.android.tools.idea.insights.proto.RepositoryInfo) obj;
 
-    if (system_ != other.system_) return false;
-    if (!getLocalRootPath()
-        .equals(other.getLocalRootPath())) return false;
-    if (!getRevision()
-        .equals(other.getRevision())) return false;
-    if (worktreeStatus_ != other.worktreeStatus_) return false;
+    if (hasSystem() != other.hasSystem()) return false;
+    if (hasSystem()) {
+      if (system_ != other.system_) return false;
+    }
+    if (hasLocalRootPath() != other.hasLocalRootPath()) return false;
+    if (hasLocalRootPath()) {
+      if (!getLocalRootPath()
+          .equals(other.getLocalRootPath())) return false;
+    }
+    if (hasRevision() != other.hasRevision()) return false;
+    if (hasRevision()) {
+      if (!getRevision()
+          .equals(other.getRevision())) return false;
+    }
+    if (hasWorktreeStatus() != other.hasWorktreeStatus()) return false;
+    if (hasWorktreeStatus()) {
+      if (worktreeStatus_ != other.worktreeStatus_) return false;
+    }
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -416,14 +475,22 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + SYSTEM_FIELD_NUMBER;
-    hash = (53 * hash) + system_;
-    hash = (37 * hash) + LOCAL_ROOT_PATH_FIELD_NUMBER;
-    hash = (53 * hash) + getLocalRootPath().hashCode();
-    hash = (37 * hash) + REVISION_FIELD_NUMBER;
-    hash = (53 * hash) + getRevision().hashCode();
-    hash = (37 * hash) + WORKTREE_STATUS_FIELD_NUMBER;
-    hash = (53 * hash) + worktreeStatus_;
+    if (hasSystem()) {
+      hash = (37 * hash) + SYSTEM_FIELD_NUMBER;
+      hash = (53 * hash) + system_;
+    }
+    if (hasLocalRootPath()) {
+      hash = (37 * hash) + LOCAL_ROOT_PATH_FIELD_NUMBER;
+      hash = (53 * hash) + getLocalRootPath().hashCode();
+    }
+    if (hasRevision()) {
+      hash = (37 * hash) + REVISION_FIELD_NUMBER;
+      hash = (53 * hash) + getRevision().hashCode();
+    }
+    if (hasWorktreeStatus()) {
+      hash = (37 * hash) + WORKTREE_STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + worktreeStatus_;
+    }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -558,13 +625,13 @@ private static final long serialVersionUID = 0L;
     public Builder clear() {
       super.clear();
       system_ = 0;
-
+      bitField0_ = (bitField0_ & ~0x00000001);
       localRootPath_ = "";
-
+      bitField0_ = (bitField0_ & ~0x00000002);
       revision_ = "";
-
+      bitField0_ = (bitField0_ & ~0x00000004);
       worktreeStatus_ = 0;
-
+      bitField0_ = (bitField0_ & ~0x00000008);
       return this;
     }
 
@@ -591,10 +658,25 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.tools.idea.insights.proto.RepositoryInfo buildPartial() {
       com.android.tools.idea.insights.proto.RepositoryInfo result = new com.android.tools.idea.insights.proto.RepositoryInfo(this);
+      int from_bitField0_ = bitField0_;
+      int to_bitField0_ = 0;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        to_bitField0_ |= 0x00000001;
+      }
       result.system_ = system_;
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        to_bitField0_ |= 0x00000002;
+      }
       result.localRootPath_ = localRootPath_;
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        to_bitField0_ |= 0x00000004;
+      }
       result.revision_ = revision_;
+      if (((from_bitField0_ & 0x00000008) != 0)) {
+        to_bitField0_ |= 0x00000008;
+      }
       result.worktreeStatus_ = worktreeStatus_;
+      result.bitField0_ = to_bitField0_;
       onBuilt();
       return result;
     }
@@ -643,19 +725,21 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(com.android.tools.idea.insights.proto.RepositoryInfo other) {
       if (other == com.android.tools.idea.insights.proto.RepositoryInfo.getDefaultInstance()) return this;
-      if (other.system_ != 0) {
-        setSystemValue(other.getSystemValue());
+      if (other.hasSystem()) {
+        setSystem(other.getSystem());
       }
-      if (!other.getLocalRootPath().isEmpty()) {
+      if (other.hasLocalRootPath()) {
+        bitField0_ |= 0x00000002;
         localRootPath_ = other.localRootPath_;
         onChanged();
       }
-      if (!other.getRevision().isEmpty()) {
+      if (other.hasRevision()) {
+        bitField0_ |= 0x00000004;
         revision_ = other.revision_;
         onChanged();
       }
-      if (other.worktreeStatus_ != 0) {
-        setWorktreeStatusValue(other.getWorktreeStatusValue());
+      if (other.hasWorktreeStatus()) {
+        setWorktreeStatus(other.getWorktreeStatus());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -685,22 +769,22 @@ private static final long serialVersionUID = 0L;
               break;
             case 8: {
               system_ = input.readEnum();
-
+              bitField0_ |= 0x00000001;
               break;
             } // case 8
             case 18: {
               localRootPath_ = input.readStringRequireUtf8();
-
+              bitField0_ |= 0x00000002;
               break;
             } // case 18
             case 26: {
               revision_ = input.readStringRequireUtf8();
-
+              bitField0_ |= 0x00000004;
               break;
             } // case 26
             case 32: {
               worktreeStatus_ = input.readEnum();
-
+              bitField0_ |= 0x00000008;
               break;
             } // case 32
             default: {
@@ -718,6 +802,7 @@ private static final long serialVersionUID = 0L;
       } // finally
       return this;
     }
+    private int bitField0_;
 
     private int system_ = 0;
     /**
@@ -725,7 +810,18 @@ private static final long serialVersionUID = 0L;
      * VC system used by the app.
      * </pre>
      *
-     * <code>.VersionControlSystem system = 1;</code>
+     * <code>optional .VersionControlSystem system = 1;</code>
+     * @return Whether the system field is set.
+     */
+    @java.lang.Override public boolean hasSystem() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <pre>
+     * VC system used by the app.
+     * </pre>
+     *
+     * <code>optional .VersionControlSystem system = 1;</code>
      * @return The enum numeric value on the wire for system.
      */
     @java.lang.Override public int getSystemValue() {
@@ -736,12 +832,12 @@ private static final long serialVersionUID = 0L;
      * VC system used by the app.
      * </pre>
      *
-     * <code>.VersionControlSystem system = 1;</code>
+     * <code>optional .VersionControlSystem system = 1;</code>
      * @param value The enum numeric value on the wire for system to set.
      * @return This builder for chaining.
      */
     public Builder setSystemValue(int value) {
-      
+      bitField0_ |= 0x00000001;
       system_ = value;
       onChanged();
       return this;
@@ -751,7 +847,7 @@ private static final long serialVersionUID = 0L;
      * VC system used by the app.
      * </pre>
      *
-     * <code>.VersionControlSystem system = 1;</code>
+     * <code>optional .VersionControlSystem system = 1;</code>
      * @return The system.
      */
     @java.lang.Override
@@ -765,7 +861,7 @@ private static final long serialVersionUID = 0L;
      * VC system used by the app.
      * </pre>
      *
-     * <code>.VersionControlSystem system = 1;</code>
+     * <code>optional .VersionControlSystem system = 1;</code>
      * @param value The system to set.
      * @return This builder for chaining.
      */
@@ -773,7 +869,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
         throw new NullPointerException();
       }
-      
+      bitField0_ |= 0x00000001;
       system_ = value.getNumber();
       onChanged();
       return this;
@@ -783,11 +879,11 @@ private static final long serialVersionUID = 0L;
      * VC system used by the app.
      * </pre>
      *
-     * <code>.VersionControlSystem system = 1;</code>
+     * <code>optional .VersionControlSystem system = 1;</code>
      * @return This builder for chaining.
      */
     public Builder clearSystem() {
-      
+      bitField0_ = (bitField0_ & ~0x00000001);
       system_ = 0;
       onChanged();
       return this;
@@ -799,7 +895,18 @@ private static final long serialVersionUID = 0L;
      * The local repository path starts with the “$PROJECT_DIR” or “$ABOVE_PROJECT_DIR” placeholder.
      * </pre>
      *
-     * <code>string local_root_path = 2;</code>
+     * <code>optional string local_root_path = 2;</code>
+     * @return Whether the localRootPath field is set.
+     */
+    public boolean hasLocalRootPath() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <pre>
+     * The local repository path starts with the “$PROJECT_DIR” or “$ABOVE_PROJECT_DIR” placeholder.
+     * </pre>
+     *
+     * <code>optional string local_root_path = 2;</code>
      * @return The localRootPath.
      */
     public java.lang.String getLocalRootPath() {
@@ -819,7 +926,7 @@ private static final long serialVersionUID = 0L;
      * The local repository path starts with the “$PROJECT_DIR” or “$ABOVE_PROJECT_DIR” placeholder.
      * </pre>
      *
-     * <code>string local_root_path = 2;</code>
+     * <code>optional string local_root_path = 2;</code>
      * @return The bytes for localRootPath.
      */
     public com.google.protobuf.ByteString
@@ -840,7 +947,7 @@ private static final long serialVersionUID = 0L;
      * The local repository path starts with the “$PROJECT_DIR” or “$ABOVE_PROJECT_DIR” placeholder.
      * </pre>
      *
-     * <code>string local_root_path = 2;</code>
+     * <code>optional string local_root_path = 2;</code>
      * @param value The localRootPath to set.
      * @return This builder for chaining.
      */
@@ -849,7 +956,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
     throw new NullPointerException();
   }
-  
+  bitField0_ |= 0x00000002;
       localRootPath_ = value;
       onChanged();
       return this;
@@ -859,11 +966,11 @@ private static final long serialVersionUID = 0L;
      * The local repository path starts with the “$PROJECT_DIR” or “$ABOVE_PROJECT_DIR” placeholder.
      * </pre>
      *
-     * <code>string local_root_path = 2;</code>
+     * <code>optional string local_root_path = 2;</code>
      * @return This builder for chaining.
      */
     public Builder clearLocalRootPath() {
-      
+      bitField0_ = (bitField0_ & ~0x00000002);
       localRootPath_ = getDefaultInstance().getLocalRootPath();
       onChanged();
       return this;
@@ -873,7 +980,7 @@ private static final long serialVersionUID = 0L;
      * The local repository path starts with the “$PROJECT_DIR” or “$ABOVE_PROJECT_DIR” placeholder.
      * </pre>
      *
-     * <code>string local_root_path = 2;</code>
+     * <code>optional string local_root_path = 2;</code>
      * @param value The bytes for localRootPath to set.
      * @return This builder for chaining.
      */
@@ -883,7 +990,7 @@ private static final long serialVersionUID = 0L;
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-      
+      bitField0_ |= 0x00000002;
       localRootPath_ = value;
       onChanged();
       return this;
@@ -895,7 +1002,18 @@ private static final long serialVersionUID = 0L;
      * The revision identifier, e.g. the SHA1 git commit id
      * </pre>
      *
-     * <code>string revision = 3;</code>
+     * <code>optional string revision = 3;</code>
+     * @return Whether the revision field is set.
+     */
+    public boolean hasRevision() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <pre>
+     * The revision identifier, e.g. the SHA1 git commit id
+     * </pre>
+     *
+     * <code>optional string revision = 3;</code>
      * @return The revision.
      */
     public java.lang.String getRevision() {
@@ -915,7 +1033,7 @@ private static final long serialVersionUID = 0L;
      * The revision identifier, e.g. the SHA1 git commit id
      * </pre>
      *
-     * <code>string revision = 3;</code>
+     * <code>optional string revision = 3;</code>
      * @return The bytes for revision.
      */
     public com.google.protobuf.ByteString
@@ -936,7 +1054,7 @@ private static final long serialVersionUID = 0L;
      * The revision identifier, e.g. the SHA1 git commit id
      * </pre>
      *
-     * <code>string revision = 3;</code>
+     * <code>optional string revision = 3;</code>
      * @param value The revision to set.
      * @return This builder for chaining.
      */
@@ -945,7 +1063,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
     throw new NullPointerException();
   }
-  
+  bitField0_ |= 0x00000004;
       revision_ = value;
       onChanged();
       return this;
@@ -955,11 +1073,11 @@ private static final long serialVersionUID = 0L;
      * The revision identifier, e.g. the SHA1 git commit id
      * </pre>
      *
-     * <code>string revision = 3;</code>
+     * <code>optional string revision = 3;</code>
      * @return This builder for chaining.
      */
     public Builder clearRevision() {
-      
+      bitField0_ = (bitField0_ & ~0x00000004);
       revision_ = getDefaultInstance().getRevision();
       onChanged();
       return this;
@@ -969,7 +1087,7 @@ private static final long serialVersionUID = 0L;
      * The revision identifier, e.g. the SHA1 git commit id
      * </pre>
      *
-     * <code>string revision = 3;</code>
+     * <code>optional string revision = 3;</code>
      * @param value The bytes for revision to set.
      * @return This builder for chaining.
      */
@@ -979,7 +1097,7 @@ private static final long serialVersionUID = 0L;
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-      
+      bitField0_ |= 0x00000004;
       revision_ = value;
       onChanged();
       return this;
@@ -991,7 +1109,18 @@ private static final long serialVersionUID = 0L;
      * Status of the working tree this app was built from.
      * </pre>
      *
-     * <code>.RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
+     * <code>optional .RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
+     * @return Whether the worktreeStatus field is set.
+     */
+    @java.lang.Override public boolean hasWorktreeStatus() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <pre>
+     * Status of the working tree this app was built from.
+     * </pre>
+     *
+     * <code>optional .RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
      * @return The enum numeric value on the wire for worktreeStatus.
      */
     @java.lang.Override public int getWorktreeStatusValue() {
@@ -1002,12 +1131,12 @@ private static final long serialVersionUID = 0L;
      * Status of the working tree this app was built from.
      * </pre>
      *
-     * <code>.RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
+     * <code>optional .RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
      * @param value The enum numeric value on the wire for worktreeStatus to set.
      * @return This builder for chaining.
      */
     public Builder setWorktreeStatusValue(int value) {
-      
+      bitField0_ |= 0x00000008;
       worktreeStatus_ = value;
       onChanged();
       return this;
@@ -1017,7 +1146,7 @@ private static final long serialVersionUID = 0L;
      * Status of the working tree this app was built from.
      * </pre>
      *
-     * <code>.RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
+     * <code>optional .RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
      * @return The worktreeStatus.
      */
     @java.lang.Override
@@ -1031,7 +1160,7 @@ private static final long serialVersionUID = 0L;
      * Status of the working tree this app was built from.
      * </pre>
      *
-     * <code>.RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
+     * <code>optional .RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
      * @param value The worktreeStatus to set.
      * @return This builder for chaining.
      */
@@ -1039,7 +1168,7 @@ private static final long serialVersionUID = 0L;
       if (value == null) {
         throw new NullPointerException();
       }
-      
+      bitField0_ |= 0x00000008;
       worktreeStatus_ = value.getNumber();
       onChanged();
       return this;
@@ -1049,11 +1178,11 @@ private static final long serialVersionUID = 0L;
      * Status of the working tree this app was built from.
      * </pre>
      *
-     * <code>.RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
+     * <code>optional .RepositoryInfo.WorktreeStatus worktree_status = 4;</code>
      * @return This builder for chaining.
      */
     public Builder clearWorktreeStatus() {
-      
+      bitField0_ = (bitField0_ & ~0x00000008);
       worktreeStatus_ = 0;
       onChanged();
       return this;
