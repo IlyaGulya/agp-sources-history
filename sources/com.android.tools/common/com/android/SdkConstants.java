@@ -1101,9 +1101,6 @@ public final class SdkConstants {
     public static final String TAG_META_DATA = "meta-data";
     public static final String TAG_RESOURCE = "resource";
     public static final String TAG_MODULE = "module";
-    public static final String TAG_NAV_GRAPH = "nav-graph";
-    public static final String TAG_QUERIES = "queries";
-    public static final String TAG_INTENT = "intent";
 
     // Tags: Resources
     public static final String TAG_RESOURCES = "resources"; //$NON-NLS-1$
@@ -1126,7 +1123,6 @@ public final class SdkConstants {
     public static final String TAG_EAT_COMMENT = "eat-comment"; //$NON-NLS-1$
     public static final String TAG_SKIP = "skip"; //$NON-NLS-1$
     public static final String TAG_PUBLIC = "public"; //$NON-NLS-1$
-    public static final String TAG_PUBLIC_GROUP = "public-group";
 
     // Tags: Adaptive icon
     public static final String TAG_ADAPTIVE_ICON = "adaptive-icon";
@@ -2670,7 +2666,7 @@ public final class SdkConstants {
     public static final String ANDROIDX_RECYCLER_VIEW_ARTIFACT =
             "androidx.recyclerview:recyclerview";
     public static final String ANDROIDX_LEANBACK_ARTIFACT = "androidx.leanback:leanback";
-    public static final String ANDROIDX_ANNOTATIONS_ARTIFACT = "androidx.annotations:annotations";
+    public static final String ANDROIDX_ANNOTATIONS_ARTIFACT = "androidx.annotation:annotation";
     public static final String ANDROIDX_SUPPORT_LIB_ARTIFACT = "androidx.legacy:legacy-support-v4";
     public static final String ANDROIDX_VIEW_PAGER_LIB_ARTIFACT = "androidx.viewpager:viewpager";
     public static final String ANDROIDX_APPCOMPAT_LIB_ARTIFACT = "androidx.appcompat:appcompat";
@@ -2690,6 +2686,9 @@ public final class SdkConstants {
     public static final String TYPE_DEF_VALUE_ATTRIBUTE = "value";
     public static final String TYPE_DEF_FLAG_ATTRIBUTE = "flag";
     public static final String FN_ANNOTATIONS_ZIP = "annotations.zip";
+
+    public static final String VIEW_BINDING_ARTIFACT = "com.android.databinding:viewbinding";
+    public static final String ANDROIDX_VIEW_BINDING_ARTIFACT = "androidx.databinding:viewbinding";
 
     // Data Binding MISC
     public static final String DATA_BINDING_LIB_ARTIFACT = "com.android.databinding:library";
