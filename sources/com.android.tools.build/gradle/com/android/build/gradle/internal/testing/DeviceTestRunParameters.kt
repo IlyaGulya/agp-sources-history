@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.dsl
+package com.android.build.gradle.internal.testing
 
-import com.android.build.api.dsl.PrivacySandboxSdkBundle
-import com.android.build.api.dsl.PrivacySandboxSdkExtension
-import org.gradle.api.Action
-import com.android.build.api.dsl.SigningConfig
+import com.android.build.api.instrumentation.manageddevice.DeviceTestRunInput
+import org.gradle.api.file.RegularFileProperty
 
-interface InternalPrivacySandboxSdkExtension: PrivacySandboxSdkExtension {
-    fun signingConfig(action: Action<SigningConfig>)
-    fun bundle(action: Action<PrivacySandboxSdkBundle>)
-}
+data class DeviceTestRunParameters<T: DeviceTestRunInput> (
+
+        override val deviceInput: T,
+
+        override val setupResult: RegularFileProperty,
+
+        override val testRunData: TestRunData
+): com.android.build.api.instrumentation.manageddevice.DeviceTestRunParameters<T>

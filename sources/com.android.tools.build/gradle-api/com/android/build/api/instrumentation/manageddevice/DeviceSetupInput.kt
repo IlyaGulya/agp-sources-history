@@ -18,36 +18,33 @@ package com.android.build.api.instrumentation.manageddevice
 
 import java.io.Serializable
 import org.gradle.api.Incubating
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 
 /**
- * Interface that represents input into the Instrumented Test Task, created by
- * a [DeviceTestRunConfigureAction], to be consumed by the [DeviceTestRunTaskAction].
+ * Interface that represents input into the Managed Device Setup Task, created by
+ * a [DeviceSetupConfigureAction], to be consumed by the [DeviceSetupTaskAction].
  *
- * This interface should be implemented for use with a Custom Managed Device Registration.
- * The implementation of this class is used as an input into the Managed Device Test Task.
- * Therefore, all properities on the implementation of this interface
- * _must_ be marked with [Input], [Nested] or [Internal] to ensure proper caching of test results.
+ * This interface can be implemented for use with a Custom Managed Device Registration,
+ * as device setup is optional for Custom Managed Devices.
+ * The implementation of this class is used as an input into the
+ * Managed Device Setup Task. All properties of the implementation of this interface
+ * _must_ be marked with [Input], [Nested] or [Internal].
  *
- * Additionally, making the type compatible with [ObjectFactory.newInstance] makes implementing
- * the [DeviceTestRunConfigureAction] easier. See: [DeviceTestRunConfureAction]
+ * Additionally, making the type compatible with [ObjectFactory.newInstance] makes
+ * implementing the [DeviceSetupConfigureAction] easier. See: [DeviceSetupConfigureAction]
  *
  * Example Implementation:
  * ```
- * abstract class CustomInput: DeviceTestRunInput {
- *     /** name of device from DSL */
- *     @get: Input
+ * abstract class CustomSetupInput: DeviceSetupInput {
+ *     /** name of device from DSL, used for error reporting */
+ *     @get: Internal
  *     abstract val deviceName: Property<String>
  *
- *     /** Id of device in a device farm, for example*/
+ *     /** Id of device in a device farm, for example. */
  *     @get: Input
  *     abstract val deviceId: Property<Int>
- *
- *     @get: Internal
- *     abstract val timeoutSeconds: Property<Int>
  * }
  * ```
  *
@@ -55,4 +52,4 @@ import org.gradle.api.tasks.Nested
  * prototype.
  */
 @Incubating
-interface DeviceTestRunInput: Serializable
+interface DeviceSetupInput: Serializable
