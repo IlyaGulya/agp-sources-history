@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.tools.mlkit;
 
-package com.android.builder.model;
+/** Store names that used by both light class and gradle task. */
+public class MlkitNames {
+    public static final String INPUTS = "Inputs";
+    public static final String OUTPUTS = "Outputs";
+    public static final String LABEL = "Label";
 
-import java.util.Collection;
-
-/**
- * Options for adb.
- */
-public interface AdbOptions {
-
-    /**
-     * Returns the time out used for all adb operations.
-     * @return the time out in milliseconds.
-     */
-    int getTimeOutInMs();
-
-    /**
-     * Returns the list of APK installation options.
-     */
-    Collection<String> getInstallOptions();
+    public static final String PACKAGE_SUFFIX = ".ml";
 }

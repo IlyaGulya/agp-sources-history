@@ -129,12 +129,6 @@ public interface AndroidProject {
      */
     String PROPERTY_ATTRIBUTION_FILE_LOCATION = "android.injected.attribution.file.location";
 
-    /**
-     * Comma separated list of on-demand dynamic modules or instant app modules names that are
-     * selected by the user for installation on the device during deployment.
-     */
-    String PROPERTY_INJECTED_DYNAMIC_MODULES_LIST = "android.injected.modules.install.list";
-
     String ARTIFACT_MAIN = "_main_";
     String ARTIFACT_ANDROID_TEST = "_android_test_";
     String ARTIFACT_UNIT_TEST = "_unit_test_";
@@ -428,4 +422,13 @@ public interface AndroidProject {
     /** Returns the AGP flags for this project. */
     @NonNull
     AndroidGradlePluginProjectFlags getFlags();
+
+    /**
+     * Returns the minimal information of variants for this project, excluding test related
+     * variants.
+     *
+     * @since 4.1
+     */
+    @NonNull
+    Collection<VariantBuildInformation> getVariantsBuildInformation();
 }

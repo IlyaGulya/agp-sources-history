@@ -24,7 +24,6 @@ import com.google.common.base.Preconditions
 import com.google.common.base.Splitter
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableTable
-import com.google.common.collect.Interner
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
 import com.google.common.collect.Table
@@ -256,10 +255,6 @@ abstract class SymbolTable protected constructor() {
          */
         internal fun addFromPartial(table: SymbolTable): Builder {
             table.symbols.values().forEach {
-                Preconditions.checkArgument(
-                        it.resourceVisibility != ResourceVisibility.UNDEFINED,
-                        "Resource visibility needs to be defined for partial files.")
-
                 if (!this.symbols.contains(it.resourceType, it.canonicalName)) {
                     // If this symbol hasn't been encountered yet, simply add it as is.
                     this.symbols.put(it.resourceType, it.canonicalName, it)
@@ -304,7 +299,7 @@ abstract class SymbolTable protected constructor() {
                         this.symbols.put(
                                 it.resourceType,
                                 it.canonicalName,
-                                Symbol.styleableSymbol(
+                                Symbol.StyleableSymbol(
                                         it.canonicalName,
                                         ImmutableList.of(),
                                         children,
@@ -389,7 +384,7 @@ abstract class SymbolTable protected constructor() {
     /**
      * A builder that creates a symbol table. Use this class instead of [Builder], if possible.
      */
-    class FastBuilder(private val symbolInterner: Interner<Symbol>) {
+    class FastBuilder {
 
         private var tablePackage = ""
 
@@ -403,7 +398,7 @@ abstract class SymbolTable protected constructor() {
          * @param symbol the symbol to add
          */
         fun add(symbol: Symbol) {
-            symbols.put(symbol.resourceType, symbol.canonicalName, symbolInterner.intern(symbol))
+            symbols.put(symbol.resourceType, symbol.canonicalName, symbol)
         }
 
         /**
@@ -485,7 +480,6 @@ abstract class SymbolTable protected constructor() {
          * @param packageName the package name for the merged symbol table.
          */
         @JvmStatic fun mergePartialTables(tables: List<File>, packageName: String): SymbolTable {
-            val symbolIo = SymbolIo()
             val builder = SymbolTable.builder()
             builder.tablePackage(packageName)
 
@@ -503,13 +497,13 @@ abstract class SymbolTable protected constructor() {
                             // If we haven't encountered a file with this name yet, remember it and
                             // process the partial R file.
                             visitedFiles.add(it.name)
-                            builder.addFromPartial(symbolIo.readFromPartialRFile(it, null))
+                            builder.addFromPartial(SymbolIo.readFromPartialRFile(it, null))
                         }
                     } else {
                         // Partial R files for values XML files and non-XML files need to be parsed
                         // always. The order matters for declare-styleables and for resource
                         // accessibility.
-                        builder.addFromPartial(symbolIo.readFromPartialRFile(it, null))
+                        builder.addFromPartial(SymbolIo.readFromPartialRFile(it, null))
                     }
                 }
             } catch (e: Exception) {
