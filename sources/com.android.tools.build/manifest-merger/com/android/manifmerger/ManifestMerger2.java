@@ -402,12 +402,8 @@ public class ManifestMerger2 {
             addDebuggableAttribute(document);
         }
 
-        if (mOptionalFeatures.contains(
-                Invoker.Feature.ADD_ANDROIDX_MULTIDEX_APPLICATION_IF_NO_NAME)) {
-            addMultiDexApplicationIfNoName(document, SdkConstants.MULTI_DEX_APPLICATION.newName());
-        } else if (mOptionalFeatures.contains(
-                Invoker.Feature.ADD_SUPPORT_MULTIDEX_APPLICATION_IF_NO_NAME)) {
-            addMultiDexApplicationIfNoName(document, SdkConstants.MULTI_DEX_APPLICATION.oldName());
+        if (mOptionalFeatures.contains(Invoker.Feature.ADD_MULTIDEX_APPLICATION_IF_NO_NAME)) {
+            addMultiDexApplicationIfNoName(document);
         }
 
         if (!mOptionalFeatures.contains(Invoker.Feature.SKIP_XML_STRING)) {
@@ -480,20 +476,21 @@ public class ManifestMerger2 {
     }
 
     /**
-     * Adds android:name="{multiDexApplicationName}" if there is no value specified for that field.
+     * Adds android:name="{@link SdkConstants#SUPPORT_MULTI_DEX_APPLICATION}" if there is no value
+     * specified for that field.
      *
      * @param document the document for which the name attribute might be set.
-     * @param multiDexApplicationName the FQCN of MultiDexApplication
      */
-    private static void addMultiDexApplicationIfNoName(
-            @NonNull Document document, @NonNull String multiDexApplicationName) {
+    private static void addMultiDexApplicationIfNoName(@NonNull Document document) {
         Element manifest = document.getDocumentElement();
         ImmutableList<Element> applicationElements =
                 getChildElementsByName(manifest, SdkConstants.TAG_APPLICATION);
         if (!applicationElements.isEmpty()) {
             Element application = applicationElements.get(0);
             setAndroidAttributeIfMissing(
-                    application, SdkConstants.ATTR_NAME, multiDexApplicationName);
+                    application,
+                    SdkConstants.ATTR_NAME,
+                    SdkConstants.SUPPORT_MULTI_DEX_APPLICATION);
         }
     }
 
@@ -1265,16 +1262,10 @@ public class ManifestMerger2 {
             HANDLE_VALUE_CONFLICTS_AUTOMATICALLY,
 
             /**
-             * Adds the AndroidX name of {@link SdkConstants#MULTI_DEX_APPLICATION} as application
-             * name if none is specified. Used for legacy multidex.
+             * Adds {@link SdkConstants#SUPPORT_MULTI_DEX_APPLICATION} as application name if none
+             * is specified. Used for legacy multidex.
              */
-            ADD_ANDROIDX_MULTIDEX_APPLICATION_IF_NO_NAME,
-
-            /**
-             * Adds the pre-AndroidX name of {@link SdkConstants#MULTI_DEX_APPLICATION} as
-             * application name if none is specified. Used for legacy multidex.
-             */
-            ADD_SUPPORT_MULTIDEX_APPLICATION_IF_NO_NAME,
+            ADD_MULTIDEX_APPLICATION_IF_NO_NAME,
         }
 
         /**

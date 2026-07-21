@@ -27,7 +27,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
-import java.util.EnumSet;
 import org.w3c.dom.Attr;
 
 /**
@@ -194,14 +193,6 @@ public class XmlAttribute extends XmlNode {
             @NonNull XmlAttribute higherPriority,
             AttributeOperationType operationType) {
 
-        // check that this XmlAttribute's XmlDocument.Type is mergeable.
-        if (!isMergeableFromLowerPriorityNode()) {
-            // record rejection and return.
-            report.getActionRecorder()
-                    .recordAttributeAction(this, Actions.ActionType.REJECTED, null);
-            return;
-        }
-
         // handles tools: attribute separately.
 
         if (getXml().getNamespaceURI() != null
@@ -315,15 +306,6 @@ public class XmlAttribute extends XmlNode {
     private String mergeThisAndDefaultValue(@NonNull MergingReport.Builder mergingReport,
             @NonNull XmlElement implicitNode) {
 
-        // check that this XmlAttribute's XmlDocument.Type is mergeable.
-        if (!isMergeableFromLowerPriorityNode()) {
-            // record rejection and return null.
-            mergingReport
-                    .getActionRecorder()
-                    .recordAttributeAction(this, Actions.ActionType.REJECTED, null);
-            return null;
-        }
-
         String mergedValue = getValue();
         if (mAttributeModel == null || mAttributeModel.getDefaultValue() == null
                 || !mAttributeModel.getMergingPolicy().shouldMergeDefaultValues()) {
@@ -364,11 +346,6 @@ public class XmlAttribute extends XmlNode {
 
         if (mAttributeModel == null || mAttributeModel.getDefaultValue() == null
                 || !mAttributeModel.getMergingPolicy().shouldMergeDefaultValues()) {
-            return;
-        }
-        // check that implicitNode's XmlDocument.Type is mergeable.
-        XmlDocument.Type type = implicitNode.getDocument().getFileType();
-        if (!mAttributeModel.getMergingPolicy().getMergeableLowerPriorityTypes().contains(type)) {
             return;
         }
         // if this value has been explicitly set to replace the implicit default value, just
@@ -447,20 +424,6 @@ public class XmlAttribute extends XmlNode {
                         ? attributeRecord.getActionLocation().getPosition()
                         : SourcePosition.UNKNOWN,
                 MergingReport.Record.Severity.ERROR, error);
-    }
-
-    /**
-     * Returns whether this xmlAttribute can be merged from a lower priority node, based on its
-     * XmlDocument.Type and it's AttributeModel::getMergeableLowerPriorityTypes
-     */
-    private boolean isMergeableFromLowerPriorityNode() {
-        XmlDocument.Type type = getOwnerElement().getDocument().getFileType();
-        if (mAttributeModel != null) {
-            EnumSet<XmlDocument.Type> mergeableTypes =
-                    mAttributeModel.getMergingPolicy().getMergeableLowerPriorityTypes();
-            return mergeableTypes.contains(type);
-        }
-        return true;
     }
 
     void addMessage(@NonNull MergingReport.Builder report,

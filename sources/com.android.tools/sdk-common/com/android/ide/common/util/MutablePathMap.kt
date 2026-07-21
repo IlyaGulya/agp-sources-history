@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+package com.android.ide.common.util
+
 /**
- * The {@code aapt} package contains support for invoking the {@code aapt2} tool. The package is
- * organized with a top-level package (the {@code aapt} package) that contains the common interface
- * for {@code aapt} as well as common implementation parts.
- *
- * <p>Using the package requires instantiating an {@link com.android.builder.internal.aapt.Aapt}
- * using one of the implementations that exist in the sub-packages.
+ * A modifiable collection that maps [PathString] instances onto arbitrary values.
  */
-package com.android.builder.internal.aapt;
+interface MutablePathMap<T> : PathMap<T> {
+    /**
+     * Associates the given value with the given key in the map. If there was an existing value,
+     * it is replaced and returned from this function. If not, the function returns null.
+     */
+    fun put(key: PathString, value: T): T?
+}
