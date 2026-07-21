@@ -75,7 +75,6 @@ enum class BooleanOption(
     ENABLE_SEPARATE_ANNOTATION_PROCESSING("android.enableSeparateAnnotationProcessing", false),
     FULL_R8("android.enableR8.fullMode", false),
     CONDITIONAL_KEEP_RULES("android.useConditionalKeepRules", false),
-    ENFORCE_UNIQUE_PACKAGE_NAMES("android.uniquePackageNames", false, status = Option.Status.STABLE),
 
     // ---------------
     // Lifecycle flags: Stable stage, Enabled by default, can be disabled
@@ -85,6 +84,7 @@ enum class BooleanOption(
     ENABLE_EXTRACT_ANNOTATIONS("android.enableExtractAnnotations", true),
     ENABLE_AAPT2_WORKER_ACTIONS("android.enableAapt2WorkerActions", true),
     ENABLE_D8_DESUGARING("android.enableD8.desugaring", true),
+    ENABLE_R8("android.enableR8", true, status = Option.Status.STABLE),
     ENABLE_R8_LIBRARIES("android.enableR8.libraries", true, status = Option.Status.STABLE),
     /** Set to true by default, but has effect only if R8 is enabled. */
     ENABLE_R8_DESUGARING("android.enableR8.desugaring", true),
@@ -97,7 +97,7 @@ enum class BooleanOption(
     ENABLE_SEPARATE_R_CLASS_COMPILATION(AndroidProject.PROPERTY_SEPARATE_R_CLASS_COMPILATION, true),
     ENABLE_PARALLEL_NATIVE_JSON_GEN("android.enableParallelJsonGen", true),
     ENABLE_SIDE_BY_SIDE_CMAKE("android.enableSideBySideCmake", true),
-    ENABLE_NATIVE_COMPILER_SETTINGS_CACHE("android.enableNativeCompilerSettingsCache", false),
+    ENABLE_NATIVE_COMPILER_SETTINGS_CACHE("android.enableNativeCompilerSettingsCache", true),
     ENABLE_PROGUARD_RULES_EXTRACTION("android.proguard.enableRulesExtraction", true),
     ENABLE_UNCOMPRESSED_NATIVE_LIBS_IN_BUNDLE("android.bundle.enableUncompressedNativeLibs", true),
     USE_DEPENDENCY_CONSTRAINTS("android.dependency.useConstraints", true),

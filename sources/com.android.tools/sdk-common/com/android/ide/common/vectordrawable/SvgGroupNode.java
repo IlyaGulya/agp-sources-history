@@ -56,24 +56,12 @@ class SvgGroupNode extends SvgNode {
         // Pass the presentation map down to the children, who can override the attributes.
         mChildren.add(child);
         // The child has its own attributes map. But the parents can still fill some attributes
-        // if they don't exist.
+        // if they don't exists
         child.fillEmptyAttributes(mVdAttributesMap);
     }
 
-    /**
-     * Replaces an existing child node with a new one.
-     *
-     * @param oldChild the child node to replace
-     * @param newChild the node to replace the existing child node with
-     */
-    public void replaceChild(@NonNull SvgNode oldChild, @NonNull SvgNode newChild) {
-        int index = mChildren.indexOf(oldChild);
-        if (index < 0) {
-            throw new IllegalArgumentException(
-                    "The child being replaced doesn't belong to this group");
-        }
-
-        mChildren.set(index, newChild);
+    public void removeChild(@NonNull SvgNode child) {
+        mChildren.remove(child);
     }
 
     @Override
@@ -129,11 +117,10 @@ class SvgGroupNode extends SvgNode {
     }
 
     @Override
-    public void writeXml(
-            @NonNull OutputStreamWriter writer, boolean inClipPath, @NonNull String indent)
-            throws IOException {
+    public void writeXML(@NonNull OutputStreamWriter writer, boolean inClipPath,
+            @NonNull String indent) throws IOException {
         for (SvgNode node : mChildren) {
-            node.writeXml(writer, inClipPath, indent);
+            node.writeXML(writer, inClipPath, indent);
         }
     }
 

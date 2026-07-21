@@ -41,8 +41,8 @@ class OldPostProcessingOptions(
 
     override fun getCodeShrinker() = when {
         !coreBuildType.isMinifyEnabled -> null
-        coreBuildType.isUseProguard == true -> CodeShrinker.PROGUARD
-        else -> CodeShrinker.R8
+        coreBuildType.isUseProguard == false -> CodeShrinker.R8
+        else -> CodeShrinker.PROGUARD
     }
 
     override fun resourcesShrinkingEnabled(): Boolean = coreBuildType.isShrinkResources

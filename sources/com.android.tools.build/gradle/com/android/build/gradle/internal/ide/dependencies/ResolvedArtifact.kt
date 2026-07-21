@@ -21,7 +21,7 @@ import com.android.SdkConstants.EXT_JAR
 import com.android.builder.dependency.MavenCoordinatesImpl
 import com.android.builder.model.MavenCoordinates
 import com.google.common.collect.ImmutableMap
-import org.gradle.api.artifacts.component.ComponentIdentifier
+import org.gradle.api.artifacts.component.ComponentArtifactIdentifier
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedArtifactResult
@@ -36,7 +36,7 @@ import java.util.regex.Pattern
  * key) plus additional information.
  */
 data class ResolvedArtifact(
-    val componentIdentifier: ComponentIdentifier,
+    val id: ComponentArtifactIdentifier,
     val variantName: String?,
     val artifactFile: File,
     /**
@@ -57,7 +57,7 @@ data class ResolvedArtifact(
         buildMapping: ImmutableMap<String, String>
     ) :
             this(
-                mainArtifactResult.id.componentIdentifier,
+                mainArtifactResult.id,
                 mainArtifactResult.getVariantName(),
                 mainArtifactResult.file,
                 secondaryArtifactResult?.file,
@@ -75,10 +75,12 @@ data class ResolvedArtifact(
      * Computes Maven Coordinate for a given artifact result.
      */
     fun computeMavenCoordinates(): MavenCoordinates {
-        return when (componentIdentifier) {
+        val id = id.componentIdentifier
+
+        return when (id) {
             is ModuleComponentIdentifier -> {
-                val module = componentIdentifier.module
-                val version = componentIdentifier.version
+                val module = id.module
+                val version = id.version
                 val extension = dependencyType.extension
                 var classifier: String? = null
 
@@ -93,11 +95,11 @@ data class ResolvedArtifact(
                     }
                 }
 
-                MavenCoordinatesImpl(componentIdentifier.group, module, version, extension, classifier)
+                MavenCoordinatesImpl(id.group, module, version, extension, classifier)
             }
 
             is ProjectComponentIdentifier -> {
-                MavenCoordinatesImpl("artifacts", componentIdentifier.projectPath, "unspecified")
+                MavenCoordinatesImpl("artifacts", id.projectPath, "unspecified")
             }
 
             is OpaqueComponentArtifactIdentifier -> {
@@ -118,9 +120,9 @@ data class ResolvedArtifact(
             else -> {
                 throw RuntimeException(
                     "Don't know how to compute maven coordinate for artifact '"
-                            + componentIdentifier.displayName
+                            + id.displayName
                             + "' with component identifier of type '"
-                            + componentIdentifier.javaClass
+                            + id.javaClass
                             + "'."
                 )
             }
@@ -130,13 +132,14 @@ data class ResolvedArtifact(
     /**
      * Computes a unique address to use in the level 4 model
      */
-    fun computeModelAddress(): String = when (componentIdentifier) {
+    fun computeModelAddress(): String = when (id.componentIdentifier) {
         is ProjectComponentIdentifier -> {
+            val projectId = id.componentIdentifier as ProjectComponentIdentifier
 
             StringBuilder(100)
-                .append(componentIdentifier.getBuildId(buildMapping))
+                .append(projectId.getBuildId(buildMapping))
                 .append("@@")
-                .append(componentIdentifier.projectPath)
+                .append(projectId.projectPath)
                 .also { sb ->
                     this.variantName?.let{ sb.append("::").append(it) }
                 }
@@ -148,9 +151,10 @@ data class ResolvedArtifact(
         else -> {
             throw RuntimeException(
                 "Don't know how to handle ComponentIdentifier '"
-                        + componentIdentifier.displayName
+                        + id.displayName
                         + "'of type "
-                        + componentIdentifier.javaClass)
+                        + id.javaClass)
+
         }
     }
 }

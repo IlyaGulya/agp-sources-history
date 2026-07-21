@@ -31,11 +31,11 @@ import com.android.build.gradle.internal.incremental.FileType;
 import com.android.build.gradle.internal.incremental.InstantRunBuildContext;
 import com.android.build.gradle.internal.packaging.ApkCreatorFactories;
 import com.android.build.gradle.internal.pipeline.ExtendedContentType;
-import com.android.build.gradle.internal.scope.ApkData;
 import com.android.build.gradle.internal.tasks.SigningConfigMetadata;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.internal.aapt.AaptOptions;
 import com.android.builder.packaging.PackagerException;
+import com.android.ide.common.build.ApkInfo;
 import com.android.ide.common.internal.WaitableExecutor;
 import com.android.ide.common.signing.KeytoolException;
 import com.android.utils.FileUtils;
@@ -83,7 +83,7 @@ public class InstantRunSliceSplitApkBuilder extends InstantRunSplitApkBuilder {
             @NonNull BuildableArtifact resourcesWithMainManifest,
             @NonNull BuildableArtifact apkList,
             @NonNull BuildableArtifact splitApkResourceFiles,
-            @NonNull ApkData mainApk) {
+            @NonNull ApkInfo mainApk) {
         super(
                 logger,
                 project,

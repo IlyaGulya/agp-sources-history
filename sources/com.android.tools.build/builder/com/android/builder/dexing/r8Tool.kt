@@ -34,7 +34,6 @@ import com.android.tools.r8.ProgramResource
 import com.android.tools.r8.ProgramResourceProvider
 import com.android.tools.r8.R8
 import com.android.tools.r8.StringConsumer
-import com.android.tools.r8.Version
 import com.android.tools.r8.origin.Origin
 import com.android.tools.r8.utils.ArchiveResourceProvider
 import java.io.IOException
@@ -48,8 +47,6 @@ fun isProguardRule(name: String): Boolean {
     return lowerCaseName.startsWith("meta-inf/proguard/")
             || lowerCaseName.startsWith("/meta-inf/proguard/")
 }
-
-fun getR8Version(): String = Version.getVersionString()
 
 /**
  * Converts the specified inputs, according to the configuration, and writes dex or classes to

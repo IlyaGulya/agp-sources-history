@@ -50,7 +50,7 @@ class PostProcessingBlockOptions(
             return null
         }
 
-        return postProcessingBlock.codeShrinkerEnum ?: CodeShrinker.R8
+        return postProcessingBlock.codeShrinkerEnum ?: CodeShrinker.PROGUARD
     }
 
     override fun resourcesShrinkingEnabled(): Boolean = postProcessingBlock.isRemoveUnusedResources

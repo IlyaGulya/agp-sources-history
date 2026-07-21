@@ -90,10 +90,4 @@ public class ConfigurationDependencies implements Dependencies {
     public Collection<ProjectIdentifier> getJavaModules() {
         return Collections.emptyList();
     }
-
-    @NonNull
-    @Override
-    public Collection<File> getRuntimeOnlyClasses() {
-        return Collections.emptyList();
-    }
 }

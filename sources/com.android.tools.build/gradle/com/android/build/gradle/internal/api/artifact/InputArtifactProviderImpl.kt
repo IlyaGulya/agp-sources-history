@@ -68,7 +68,7 @@ class InputArtifactProviderImpl(
                         EvalIssueReporter.Type.GENERIC,
                         EvalIssueException("No artifacts was defined for input.")
                     )
-                    BuildableArtifactImpl(defaultValue)
+                    BuildableArtifactImpl(defaultValue, dslScope)
                 }
                 size > 1 -> {
                     dslScope.issueReporter.reportError(
@@ -78,7 +78,7 @@ class InputArtifactProviderImpl(
                                 Joiner.on(",").join(mapOfInputs().keys))
                     )
                     // when doing sync, return empty file collection.
-                    BuildableArtifactImpl(defaultValue)
+                    BuildableArtifactImpl(defaultValue, dslScope)
                 }
                 else -> mapOfInputs().values.single()
             }
@@ -91,7 +91,7 @@ class InputArtifactProviderImpl(
                 EvalIssueReporter.Type.GENERIC,
                 EvalIssueException("Artifact was not defined for input of type: $type.")
             )
-            return BuildableArtifactImpl(defaultValue)
+            return BuildableArtifactImpl(defaultValue, dslScope)
         }
         return buildableArtifact
     }

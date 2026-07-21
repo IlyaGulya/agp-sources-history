@@ -20,7 +20,6 @@ import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.builder.files.RelativeFile;
 import com.android.ide.common.resources.FileStatus;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.BiMap;
@@ -220,7 +219,9 @@ class DexIncrementalRenameManager implements Closeable {
                         .stream()
                         .filter(e -> e.getValue() == FileStatus.NEW)
                         .map(Map.Entry::getKey)
-                        .sorted(new DexFileComparator())
+                        .sorted(
+                                Comparator.comparing(
+                                        RelativeFile::getRelativePath, new DexNameComparator()))
                         .collect(Collectors.toCollection(LinkedList::new));
 
         // Build a list with buckets that represent the dex files we have before the updates.
@@ -345,32 +346,17 @@ class DexIncrementalRenameManager implements Closeable {
         return pathSplit[pathSplit.length - 1];
     }
 
-    /** Comparator that compares dex file paths, placing classes.dex always in front. */
-    @VisibleForTesting
-    static class DexFileComparator implements Comparator<RelativeFile> {
+    /** Comparator that compares dex file names placing classes.dex always in front. */
+    private static class DexNameComparator implements Comparator<String> {
 
         @Override
-        public int compare(RelativeFile f1, RelativeFile f2) {
-            if (f1.getRelativePath().endsWith(SdkConstants.FN_APK_CLASSES_DEX)) {
-                if (f2.getRelativePath().endsWith(SdkConstants.FN_APK_CLASSES_DEX)) {
-                    return f1.getBase().getAbsolutePath().compareTo(f2.getBase().getAbsolutePath());
-                } else {
-                    return -1;
-                }
+        public int compare(String f1, String f2) {
+            if (f1.equals(SdkConstants.FN_APK_CLASSES_DEX)) {
+                return -1;
+            } else if (f2.equals(SdkConstants.FN_APK_CLASSES_DEX)) {
+                return 1;
             } else {
-                if (f2.getRelativePath().endsWith(SdkConstants.FN_APK_CLASSES_DEX)) {
-                    return 1;
-                } else {
-                    int result =
-                            f1.getBase()
-                                    .getAbsolutePath()
-                                    .compareTo(f2.getBase().getAbsolutePath());
-                    if (result != 0) {
-                        return result;
-                    } else {
-                        return f1.getRelativePath().compareTo(f2.getRelativePath());
-                    }
-                }
+                return f1.compareTo(f2);
             }
         }
     }

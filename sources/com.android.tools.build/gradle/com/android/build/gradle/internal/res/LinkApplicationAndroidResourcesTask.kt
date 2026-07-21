@@ -59,7 +59,8 @@ import com.android.builder.core.VariantTypeImpl
 import com.android.builder.internal.aapt.AaptPackageConfig
 import com.android.builder.internal.aapt.v2.Aapt2Exception
 import com.android.ide.common.blame.MergingLog
-import com.android.build.gradle.internal.scope.ApkData
+import com.android.ide.common.build.ApkData
+import com.android.ide.common.build.ApkInfo
 import com.android.ide.common.process.ProcessException
 import com.android.ide.common.symbols.SymbolIo
 import com.android.ide.common.workers.WorkerExecutorException
@@ -101,10 +102,10 @@ open class LinkApplicationAndroidResourcesTask @Inject constructor(workerExecuto
         private const val IR_APK_FILE_NAME = "resources"
         private val LOG = Logging.getLogger(LinkApplicationAndroidResourcesTask::class.java)
 
-        private fun getOutputBaseNameFile(apkData: ApkData, resPackageOutputFolder: File): File {
+        private fun getOutputBaseNameFile(apkInfo: ApkInfo, resPackageOutputFolder: File): File {
             return File(
                 resPackageOutputFolder,
-                FN_RES_BASE + RES_QUALIFIER_SEP + apkData.fullName + SdkConstants.DOT_RES
+                FN_RES_BASE + RES_QUALIFIER_SEP + apkInfo.fullName + SdkConstants.DOT_RES
             )
         }
     }
@@ -253,7 +254,7 @@ open class LinkApplicationAndroidResourcesTask @Inject constructor(workerExecuto
                     imports,
                     splitList,
                     featureResourcePackages,
-                    mainOutput.apkData,
+                    mainOutput.apkInfo,
                     true,
                     aapt2ServiceKey,
                     this
@@ -264,7 +265,7 @@ open class LinkApplicationAndroidResourcesTask @Inject constructor(workerExecuto
             // now all remaining splits will be generated asynchronously.
             if (variantScope.type.canHaveSplits) {
                 for (manifestBuildOutput in unprocessedManifest) {
-                    val apkInfo = manifestBuildOutput.apkData
+                    val apkInfo = manifestBuildOutput.apkInfo
                     if (apkInfo.requiresAapt()) {
                         workers.submit(
                             AaptSplitInvoker::class.java,
@@ -295,7 +296,7 @@ open class LinkApplicationAndroidResourcesTask @Inject constructor(workerExecuto
             val unprocessedManifest = manifestBuildElements.toList()
 
             for (manifestBuildOutput in unprocessedManifest) {
-                val apkInfo = manifestBuildOutput.apkData
+                val apkInfo = manifestBuildOutput.apkInfo
                 if (apkInfo.filters
                         .stream()
                         .anyMatch { f -> f.filterType == VariantOutput.FilterType.ABI.name }
@@ -332,7 +333,7 @@ open class LinkApplicationAndroidResourcesTask @Inject constructor(workerExecuto
             MultiOutputPolicy.SPLITS -> {
                 val main = manifestBuildElements
                     .stream()
-                    .filter { output -> output.apkData.type == VariantOutput.OutputType.MAIN }
+                    .filter { output -> output.apkInfo.type == VariantOutput.OutputType.MAIN }
                     .findFirst()
                 if (!main.isPresent) {
                     throw RuntimeException("No main apk found")
@@ -343,7 +344,7 @@ open class LinkApplicationAndroidResourcesTask @Inject constructor(workerExecuto
                 val nonDensity = manifestBuildElements
                     .stream()
                     .filter { output ->
-                        output.apkData
+                        output.apkInfo
                             .getFilter(
                                 VariantOutput.FilterType
                                     .DENSITY
@@ -694,7 +695,7 @@ open class LinkApplicationAndroidResourcesTask @Inject constructor(workerExecuto
             }
 
             val resOutBaseNameFile =
-                getOutputBaseNameFile(params.apkData, params.resPackageOutputFolder)
+                getOutputBaseNameFile(params.apkInfo, params.resPackageOutputFolder)
             var manifestFile = params.manifestOutput.outputFile
 
             var packageForR: String? = null
@@ -723,7 +724,7 @@ open class LinkApplicationAndroidResourcesTask @Inject constructor(workerExecuto
                 mainDexListProguardOutputFile = params.mainDexListProguardOutputFile
             }
 
-            val densityFilterData = params.apkData.getFilter(VariantOutput.FilterType.DENSITY)
+            val densityFilterData = params.apkInfo.getFilter(VariantOutput.FilterType.DENSITY)
             // if resConfigs is set, we should not use our preferredDensity.
             val preferredDensity =
                 densityFilterData?.identifier
@@ -739,8 +740,8 @@ open class LinkApplicationAndroidResourcesTask @Inject constructor(workerExecuto
                         params.supportDirectory,
                         IR_APK_FILE_NAME,
                         { params.applicationId },
-                        params.apkData.versionName,
-                        params.apkData.versionCode,
+                        params.apkInfo.versionName,
+                        params.apkInfo.versionCode,
                         params.manifestOutput.properties[SdkConstants.ATTR_MIN_SDK_VERSION]
                     )
                 }
@@ -831,7 +832,7 @@ open class LinkApplicationAndroidResourcesTask @Inject constructor(workerExecuto
                 appendOutput(
                     BuildOutput(
                         InternalArtifactType.PROCESSED_RES,
-                        params.apkData,
+                        params.apkInfo,
                         resOutBaseNameFile,
                         params.manifestOutput.properties
                     ),
@@ -852,7 +853,7 @@ open class LinkApplicationAndroidResourcesTask @Inject constructor(workerExecuto
         val imports: Set<File>,
         splitList: SplitList,
         val featureResourcePackages: Set<File>,
-        val apkData: ApkData,
+        val apkInfo: ApkInfo,
         val generateCode: Boolean,
         val aapt2ServiceKey: Aapt2ServiceKey?,
         task: LinkApplicationAndroidResourcesTask
@@ -1075,9 +1076,9 @@ open class LinkApplicationAndroidResourcesTask @Inject constructor(workerExecuto
         return isNamespaced
     }
 
-    private fun findPackagedResForSplit(outputFolder: File?, apkData: ApkData): File? {
+    private fun findPackagedResForSplit(outputFolder: File?, apkInfo: ApkInfo): File? {
         val resourcePattern = Pattern.compile(
-            FN_RES_BASE + RES_QUALIFIER_SEP + apkData.fullName + ".ap__(.*)"
+            FN_RES_BASE + RES_QUALIFIER_SEP + apkInfo.fullName + ".ap__(.*)"
         )
 
         if (outputFolder == null) {
@@ -1090,7 +1091,7 @@ open class LinkApplicationAndroidResourcesTask @Inject constructor(workerExecuto
                 // each time we match, we remove the associated filter from our copies.
                 if (match.matches()
                     && !match.group(1).isEmpty()
-                    && isValidSplit(apkData, match.group(1))
+                    && isValidSplit(apkInfo, match.group(1))
                 ) {
                     return file
                 }
@@ -1104,16 +1105,16 @@ open class LinkApplicationAndroidResourcesTask @Inject constructor(workerExecuto
      * requested split for this task). A density split identifier can be suffixed with characters
      * added by aapt.
      */
-    private fun isValidSplit(apkData: ApkData, splitWithOptionalSuffix: String): Boolean {
+    private fun isValidSplit(apkInfo: ApkInfo, splitWithOptionalSuffix: String): Boolean {
 
-        var splitFilter = apkData.getFilter(VariantOutput.FilterType.DENSITY)
+        var splitFilter = apkInfo.getFilter(VariantOutput.FilterType.DENSITY)
         if (splitFilter != null) {
             if (splitWithOptionalSuffix.startsWith(splitFilter.identifier)) {
                 return true
             }
         }
         val mangledName = unMangleSplitName(splitWithOptionalSuffix)
-        splitFilter = apkData.getFilter(VariantOutput.FilterType.LANGUAGE)
+        splitFilter = apkInfo.getFilter(VariantOutput.FilterType.LANGUAGE)
         return splitFilter != null && mangledName == splitFilter.identifier
     }
 

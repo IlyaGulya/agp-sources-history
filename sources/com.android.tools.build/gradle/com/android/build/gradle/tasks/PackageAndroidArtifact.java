@@ -36,7 +36,6 @@ import com.android.build.gradle.internal.incremental.InstantRunBuildContext;
 import com.android.build.gradle.internal.packaging.IncrementalPackagerBuilder;
 import com.android.build.gradle.internal.pipeline.StreamFilter;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
-import com.android.build.gradle.internal.scope.ApkData;
 import com.android.build.gradle.internal.scope.BuildElements;
 import com.android.build.gradle.internal.scope.BuildElementsTransformParams;
 import com.android.build.gradle.internal.scope.BuildElementsTransformRunnable;
@@ -63,10 +62,10 @@ import com.android.builder.internal.packaging.IncrementalPackager;
 import com.android.builder.packaging.PackagingUtils;
 import com.android.builder.utils.FileCache;
 import com.android.builder.utils.ZipEntryUtils;
+import com.android.ide.common.build.ApkInfo;
 import com.android.ide.common.resources.FileStatus;
 import com.android.ide.common.workers.WorkerExecutorFacade;
 import com.android.sdklib.AndroidVersion;
-import com.android.tools.build.apkzlib.sign.SigningOptions;
 import com.android.tools.build.apkzlib.utils.IOExceptionWrapper;
 import com.android.tools.build.apkzlib.zip.compress.Zip64NotSupportedException;
 import com.android.utils.FileUtils;
@@ -337,7 +336,7 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
 
     interface OutputFileProvider {
         @NonNull
-        File getOutputFile(@NonNull ApkData apkData);
+        File getOutputFile(@NonNull ApkInfo apkData);
     }
 
     InternalArtifactType taskInputType;
@@ -377,7 +376,7 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
                 .getApkDatas()
                 .stream()
                 .filter(apkData -> apkData.getType() != VariantOutput.OutputType.SPLIT)
-                .map(ApkData::getOutputFileName)
+                .map(ApkInfo::getOutputFileName)
                 .collect(Collectors.toList());
     }
 
@@ -387,7 +386,7 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
     }
 
     private static BuildOutput computeBuildOutputFile(
-            ApkData apkInfo,
+            ApkInfo apkInfo,
             OutputFileProvider outputFileProvider,
             File outputDirectory,
             InternalArtifactType expectedOutputType) {
@@ -419,7 +418,7 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
                 .transform(
                         workers,
                         FullActionSplitterRunnable.class,
-                        (ApkData apkInfo, File inputFile) -> {
+                        (ApkInfo apkInfo, File inputFile) -> {
                             SplitterParams params = new SplitterParams(apkInfo, inputFile, this);
                             inputList.add(inputFile);
                             outputList.add(params.getOutput());
@@ -463,7 +462,7 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
                                                     .equals(repeatingFileName))
                             .map(
                                     buildOutput -> {
-                                        ApkData apkInfo = buildOutput.getApkData();
+                                        ApkInfo apkInfo = buildOutput.getApkInfo();
                                         if (apkInfo.getFilters().isEmpty()) {
                                             return apkInfo.getType().toString();
                                         } else {
@@ -581,7 +580,7 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
     }
 
     private static class SplitterParams extends BuildElementsTransformParams {
-        @NonNull ApkData apkInfo;
+        @NonNull ApkInfo apkInfo;
         @NonNull File processedResources;
         @NonNull protected final File outputFile;
         @NonNull protected final File incrementalFolder;
@@ -611,7 +610,7 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
         @Nullable protected transient InstantRunBuildContext instantRunBuildContext;
 
         SplitterParams(
-                @NonNull ApkData apkInfo,
+                @NonNull ApkInfo apkInfo,
                 @NonNull File processedResources,
                 PackageAndroidArtifact task) {
             this.apkInfo = apkInfo;
@@ -778,19 +777,18 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
         FileUtils.mkdirs(outputFile.getParentFile());
         // we are executing a task right now, so we can parse the manifest.
         BooleanSupplier isInExecutionPhase = () -> true;
-        SigningOptions.Validation validation =
+        IncrementalPackagerBuilder.BuildType buildType =
                 isIncremental
-                        ? SigningOptions.Validation.ASSUME_VALID
-                        : SigningOptions.Validation.ASSUME_INVALID;
+                        ? IncrementalPackagerBuilder.BuildType.INCREMENTAL
+                        : IncrementalPackagerBuilder.BuildType.CLEAN;
 
         try (IncrementalPackager packager =
-                new IncrementalPackagerBuilder(params.apkFormat)
+                new IncrementalPackagerBuilder(params.apkFormat, buildType)
                         .withOutputFile(outputFile)
                         .withSigning(
                                 SigningConfigMetadata.Companion.load(params.signingConfig),
-                                validation)
+                                params.minSdkVersion)
                         .withCreatedBy(params.createdBy)
-                        .withMinSdk(params.minSdkVersion)
                         // TODO: allow extra metadata to be saved in the split scope to avoid
                         // reparsing
                         // these manifest files.
@@ -1044,7 +1042,7 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
         private final Map<File, FileStatus> changedInputs;
 
         IncrementalSplitterParams(
-                @NonNull ApkData apkInfo,
+                @NonNull ApkInfo apkInfo,
                 @NonNull File processedResources,
                 Map<File, FileStatus> changedInputs,
                 PackageAndroidArtifact task) {

@@ -33,6 +33,7 @@ import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.transforms.InstantRunSliceSplitApkBuilder
 import com.android.build.gradle.internal.transforms.InstantRunSplitApkBuilder
 import com.android.builder.internal.aapt.BlockingResourceLinker
+import com.android.ide.common.build.ApkInfo
 import com.android.ide.common.process.ProcessException
 import com.android.ide.common.workers.WorkerExecutorFacade
 import com.android.sdklib.IAndroidTarget
@@ -105,7 +106,7 @@ open class InstantRunMainApkResourcesBuilder @Inject constructor(workerExecutor:
         val manifestFile: File,
         task: InstantRunMainApkResourcesBuilder
     ) : BuildElementsTransformParams() {
-        val androidTarget: IAndroidTarget = task.builder.target
+        val androidJarPath: String = task.builder.target.getPath(IAndroidTarget.ANDROID_JAR)
         val resourceFiles: Set<File> = task.resourceFiles.get().asFileTree.files
 
         override val output: File?
@@ -161,7 +162,7 @@ open class InstantRunMainApkResourcesBuilder @Inject constructor(workerExecutor:
                 com.android.builder.internal.aapt.AaptOptions(
                     ImmutableList.of(), false, ImmutableList.of()
                 ),
-                params.androidTarget,
+                params.androidJarPath,
                 params.resourceFiles
             )
         }

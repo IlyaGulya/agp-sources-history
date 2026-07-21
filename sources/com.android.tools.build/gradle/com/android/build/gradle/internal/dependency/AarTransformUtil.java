@@ -27,7 +27,6 @@ import com.android.utils.FileUtils;
 import com.google.common.collect.Lists;
 import java.io.File;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 class AarTransformUtil {
@@ -46,7 +45,6 @@ class AarTransformUtil {
         File[] jars = localJarFolder.listFiles((dir, name) -> name.endsWith(SdkConstants.DOT_JAR));
 
         if (jars != null) {
-            Arrays.sort(jars, Comparator.naturalOrder());
             files.addAll((Arrays.asList(jars)));
         }
 

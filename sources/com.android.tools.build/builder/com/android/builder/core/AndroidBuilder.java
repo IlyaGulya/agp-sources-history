@@ -74,7 +74,6 @@ import com.android.tools.build.apkzlib.zfile.NativeLibrariesPackagingMode;
 import com.android.utils.FileUtils;
 import com.android.utils.ILogger;
 import com.google.common.base.Charsets;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -821,7 +820,8 @@ public class AndroidBuilder {
             @NonNull BlockingResourceLinker aapt,
             @NonNull AaptPackageConfig.Builder aaptConfigBuilder)
             throws IOException, ProcessException {
-        processResources(aapt, aaptConfigBuilder, getTarget(), mLogger);
+        processResources(
+                aapt, aaptConfigBuilder, getTarget().getPath(IAndroidTarget.ANDROID_JAR), mLogger);
     }
 
     /**
@@ -829,7 +829,7 @@ public class AndroidBuilder {
      *
      * @param aapt the interface to the {@code aapt} tool
      * @param aaptConfigBuilder aapt command invocation parameters
-     * @param androidTarget the android target used in {@link AaptPackageConfig}
+     * @param androidJarPath the android jar path used in {@link AaptPackageConfig}
      * @param logger the logger used to request package invocation in {@code aapt} (see {@link
      *     BlockingResourceLinker#link(AaptPackageConfig, ILogger)})
      * @throws IOException failed
@@ -838,11 +838,11 @@ public class AndroidBuilder {
     public static void processResources(
             @NonNull BlockingResourceLinker aapt,
             @NonNull AaptPackageConfig.Builder aaptConfigBuilder,
-            @NonNull IAndroidTarget androidTarget,
+            @NonNull String androidJarPath,
             @NonNull ILogger logger)
             throws IOException, ProcessException {
 
-        aaptConfigBuilder.setAndroidTarget(androidTarget);
+        aaptConfigBuilder.setAndroidJarPath(androidJarPath);
 
         AaptPackageConfig aaptConfig = aaptConfigBuilder.build();
         processResources(aapt, aaptConfig, logger);
@@ -1135,7 +1135,11 @@ public class AndroidBuilder {
             @Nullable String createdBy)
             throws KeytoolException, PackagerException, IOException {
 
-        Optional<SigningOptions> signingOptions;
+        ApkCreatorFactory.CreationData.Builder creationDataBuilder =
+                ApkCreatorFactory.CreationData.builder()
+                        .setApkPath(outApkLocation)
+                        .setCreatedBy(createdBy)
+                        .setNativeLibrariesPackagingMode(NativeLibrariesPackagingMode.COMPRESSED);
 
         if (signingConfig != null && signingConfig.isSigningReady()) {
             CertificateInfo certificateInfo = KeystoreHelper.getCertificateInfo(
@@ -1144,34 +1148,23 @@ public class AndroidBuilder {
                     Preconditions.checkNotNull(signingConfig.getStorePassword()),
                     Preconditions.checkNotNull(signingConfig.getKeyPassword()),
                     Preconditions.checkNotNull(signingConfig.getKeyAlias()));
-            signingOptions =
-                    Optional.of(
-                            SigningOptions.builder()
-                                    .setKey(certificateInfo.getKey())
-                                    .setCertificates(certificateInfo.getCertificate())
-                                    .setV1SigningEnabled(signingConfig.isV1SigningEnabled())
-                                    .setV2SigningEnabled(signingConfig.isV2SigningEnabled())
-                                    .setMinSdkVersion(API_LEVEL_SPLIT_APK)
-                                    .build());
-        } else {
-            signingOptions = Optional.absent();
+            creationDataBuilder.setSigningOptions(
+                    SigningOptions.builder()
+                            .setKey(certificateInfo.getKey())
+                            .setCertificates(certificateInfo.getCertificate())
+                            .setV1SigningEnabled(signingConfig.isV1SigningEnabled())
+                            .setV2SigningEnabled(signingConfig.isV2SigningEnabled())
+                            .setMinSdkVersion(API_LEVEL_SPLIT_APK)
+                            .build());
         }
 
-        ApkCreatorFactory.CreationData creationData =
-                new ApkCreatorFactory.CreationData(
-                        outApkLocation,
-                        signingOptions,
-                        null,
-                        createdBy,
-                        NativeLibrariesPackagingMode.COMPRESSED,
-                        s -> false);
-
-        try (IncrementalPackager packager = new IncrementalPackager(
-                creationData,
-                incrementalDir,
-                apkCreatorFactory,
-                new HashSet<>(),
-                true)) {
+        try (IncrementalPackager packager =
+                new IncrementalPackager(
+                        creationDataBuilder.build(),
+                        incrementalDir,
+                        apkCreatorFactory,
+                        new HashSet<>(),
+                        true)) {
             ImmutableMap<RelativeFile, FileStatus> androidResources =
                     IncrementalRelativeFileSets.fromZip(androidResPkg);
             packager.updateAndroidResources(androidResources);

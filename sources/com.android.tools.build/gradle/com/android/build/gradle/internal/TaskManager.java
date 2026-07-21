@@ -97,7 +97,6 @@ import com.android.build.gradle.internal.res.LinkAndroidResForBundleTask;
 import com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask;
 import com.android.build.gradle.internal.res.namespaced.NamespacedResourcesTaskManager;
 import com.android.build.gradle.internal.scope.AnchorOutputType;
-import com.android.build.gradle.internal.scope.ApkData;
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
 import com.android.build.gradle.internal.scope.CodeShrinker;
 import com.android.build.gradle.internal.scope.GlobalScope;
@@ -224,6 +223,7 @@ import com.android.builder.testing.ConnectedDeviceProvider;
 import com.android.builder.testing.api.DeviceProvider;
 import com.android.builder.testing.api.TestServer;
 import com.android.builder.utils.FileCache;
+import com.android.ide.common.build.ApkData;
 import com.android.ide.common.repository.GradleVersion;
 import com.android.sdklib.AndroidVersion;
 import com.android.sdklib.IAndroidTarget;
@@ -1761,8 +1761,9 @@ public abstract class TaskManager {
         createPostCompilationTasks(variantScope);
 
         // Add a task to produce the signing config file
-        createValidateSigningTask(variantScope);
-        taskFactory.register(new SigningConfigWriterTask.CreationAction(variantScope));
+        taskFactory.register(
+                new SigningConfigWriterTask.CreationAction(
+                        variantScope, getValidateSigningTask(variantScope)));
 
         createPackagingTask(variantScope, null /* buildInfoGeneratorTask */);
 
@@ -2334,8 +2335,7 @@ public abstract class TaskManager {
                         && extension.getTransforms().isEmpty()
                         && !minified
                         && !variantScope.getInstantRunBuildContext().isInInstantRunMode()
-                        && variantScope.getJava8LangSupportType() == Java8LangSupport.UNUSED
-                        && getAdvancedProfilingTransforms(projectOptions).isEmpty();
+                        && variantScope.getJava8LangSupportType() == Java8LangSupport.UNUSED;
         FileCache userLevelCache = getUserDexCache(minified, dexOptions.getPreDexLibraries());
         DexArchiveBuilderTransform preDexTransform =
                 new DexArchiveBuilderTransformBuilder()
@@ -2929,15 +2929,24 @@ public abstract class TaskManager {
     }
 
     @Nullable
-    protected void createValidateSigningTask(@NonNull VariantScope variantScope) {
+    protected TaskProvider<? extends Task> getValidateSigningTask(
+            @NonNull VariantScope variantScope) {
         if (variantScope.getVariantConfiguration().getSigningConfig() == null) {
-            return;
+            return null;
         }
 
         // FIXME create one per signing config instead of one per variant.
-        taskFactory.register(
-                new ValidateSigningTask.CreationAction(
-                        variantScope, GradleKeystoreHelper.getDefaultDebugKeystoreLocation()));
+        TaskProvider<? extends ValidateSigningTask> validateSigningTask =
+                variantScope.getTaskContainer().getValidateSigningTask();
+        if (validateSigningTask == null) {
+            validateSigningTask =
+                    taskFactory.register(
+                            new ValidateSigningTask.CreationAction(
+                                    variantScope,
+                                    GradleKeystoreHelper.getDefaultDebugKeystoreLocation()));
+            variantScope.getTaskContainer().setValidateSigningTask(validateSigningTask);
+        }
+        return validateSigningTask;
     }
 
     /**
@@ -3231,12 +3240,22 @@ public abstract class TaskManager {
      * only used by test-only modules. Returns a type of the {@link CodeShrinker} shrinker that was
      * created, or {@code null} if none was created.
      */
-    @NonNull
+    @Nullable
     protected final CodeShrinker doCreateJavaCodeShrinkerTransform(
             @NonNull final VariantScope variantScope,
             @NonNull CodeShrinker codeShrinker,
             @Nullable FileCollection mappingFileCollection) {
         Optional<TaskProvider<TransformTask>> transformTask;
+        if (variantScope.getInstantRunBuildContext().isInInstantRunMode()) {
+            logger.warn(
+                    "{} is disabled for variant {} because it is not compatible with Instant Run. "
+                            + "See http://d.android.com/r/studio-ui/shrink-code-with-ir.html "
+                            + "for details on how to enable a code shrinker that's compatible with "
+                            + "Instant Run.",
+                    codeShrinker.name(),
+                    variantScope.getVariantConfiguration().getFullName());
+            return null;
+        }
 
         CodeShrinker createdShrinker = codeShrinker;
         switch (codeShrinker) {
@@ -3761,10 +3780,7 @@ public abstract class TaskManager {
                 .setSourceGenTask(
                         taskFactory.register(
                                 scope.getTaskName("generate", "Sources"),
-                                task -> {
-                                    task.dependsOn(PrepareLintJar.NAME);
-                                    task.dependsOn(variantData.getExtraGeneratedResFolders());
-                                }));
+                                task -> task.dependsOn(PrepareLintJar.NAME)));
         // and resGenTask
         scope.getTaskContainer()
                 .setResourceGenTask(

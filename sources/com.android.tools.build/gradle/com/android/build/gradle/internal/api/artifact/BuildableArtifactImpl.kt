@@ -17,19 +17,46 @@
 package com.android.build.gradle.internal.api.artifact
 
 import com.android.build.api.artifact.BuildableArtifact
+import com.android.build.gradle.internal.api.dsl.DslScope
+import com.android.builder.errors.EvalIssueException
+import com.android.builder.errors.EvalIssueReporter
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
 import org.gradle.api.tasks.TaskDependency
 import java.io.File
 import java.util.Collections
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Implementation of [BuildableArtifact].
  */
 class BuildableArtifactImpl(
-    val fileCollection: FileCollection
-)
+        val fileCollection: FileCollection,
+        private val dslScope: DslScope)
     : BuildableArtifact {
+    companion object {
+        private val resolvable = AtomicBoolean(false)
+
+        fun isResolvable() : Boolean {
+            return resolvable.get()
+        }
+
+        fun enableResolution() {
+            resolvable.set(true)
+        }
+
+        fun disableResolution() {
+            resolvable.set(false)
+        }
+    }
+
+    private fun checkResolvable() {
+        if (!isResolvable()) {
+            dslScope.issueReporter.reportError(
+                    EvalIssueReporter.Type.GENERIC,
+                    EvalIssueException("Resolving this BuildableArtifact can only done during task execution."))
+        }
+    }
 
     override fun get(): FileCollection {
         return fileCollection
@@ -41,10 +68,12 @@ class BuildableArtifactImpl(
 
     override val files : Set<File>
         get() {
+            checkResolvable()
             return Collections.unmodifiableSet(fileCollection.files)
         }
 
     override fun isEmpty() : Boolean {
+        checkResolvable()
         return fileCollection.isEmpty
     }
 
@@ -52,9 +81,14 @@ class BuildableArtifactImpl(
 
     val asFileTree : FileTree
         get() {
+            checkResolvable()
             return fileCollection.asFileTree
         }
 
     override fun toString(): String =
-        "BuildableArtifactImpl (${get()})"
+        if (isResolvable()) {
+            "BuildableArtifactImpl (${get()})"
+        } else {
+            "BuildableArtifactImpl (Not currently resolvable)"
+        }
 }

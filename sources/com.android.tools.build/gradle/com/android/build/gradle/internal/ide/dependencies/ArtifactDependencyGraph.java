@@ -43,6 +43,7 @@ import com.android.builder.model.level2.DependencyGraphs;
 import com.android.builder.model.level2.GraphItem;
 import com.android.utils.FileUtils;
 import com.android.utils.ImmutableCollectors;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -52,7 +53,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.ArtifactCollection;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
@@ -102,7 +102,7 @@ class ArtifactDependencyGraph implements DependencyGraphBuilder {
                 Set<ComponentIdentifier> ids =
                         Sets.newHashSetWithExpectedSize(compileArtifacts.size());
                 for (ResolvedArtifact artifact : compileArtifacts) {
-                    ids.add(artifact.getComponentIdentifier());
+                    ids.add(artifact.getId().getComponentIdentifier());
                 }
 
                 handleSources(variantScope.getGlobalScope().getProject(), ids, failureConsumer);
@@ -141,7 +141,7 @@ class ArtifactDependencyGraph implements DependencyGraphBuilder {
                             new GraphItemImpl(artifact.computeModelAddress(), ImmutableList.of());
                     compileItems.add(graphItem);
                     LibraryUtils.getLibraryCache().get(artifact);
-                    if (!runtimeIdentifiers.contains(artifact.getComponentIdentifier())) {
+                    if (!runtimeIdentifiers.contains(artifact.getId().getComponentIdentifier())) {
                         providedAddresses.add(graphItem.getArtifactAddress());
                     }
                 }
@@ -235,8 +235,9 @@ class ArtifactDependencyGraph implements DependencyGraphBuilder {
                             COMPILE_CLASSPATH,
                             dependencyFailureHandler,
                             buildMapping);
+
             for (ResolvedArtifact artifact : artifacts) {
-                ComponentIdentifier id = artifact.getComponentIdentifier();
+                ComponentIdentifier id = artifact.getId().getComponentIdentifier();
 
                 boolean isProvided = !runtimeIdentifiers.contains(id);
 
@@ -302,34 +303,14 @@ class ArtifactDependencyGraph implements DependencyGraphBuilder {
             if (downloadSources) {
                 Set<ComponentIdentifier> ids = Sets.newHashSetWithExpectedSize(artifacts.size());
                 for (ResolvedArtifact artifact : artifacts) {
-                    ids.add(artifact.getComponentIdentifier());
+                    ids.add(artifact.getId().getComponentIdentifier());
                 }
 
                 handleSources(variantScope.getGlobalScope().getProject(), ids, failureConsumer);
             }
 
-            // get runtime-only jars by filtering out compile dependencies from runtime artifacts.
-            Set<ComponentIdentifier> compileIdentifiers =
-                    artifacts
-                            .stream()
-                            .map(ResolvedArtifact::getComponentIdentifier)
-                            .collect(Collectors.toSet());
-            List<File> runtimeOnlyClasspath =
-                    runtimeArtifactCollection
-                            .getArtifacts()
-                            .stream()
-                            .filter(
-                                    it ->
-                                            !compileIdentifiers.contains(
-                                                    it.getId().getComponentIdentifier()))
-                            .map(ResolvedArtifactResult::getFile)
-                            .collect(Collectors.toList());
-
             return new DependenciesImpl(
-                    androidLibraries.build(),
-                    javaLibrary.build(),
-                    projects.build(),
-                    runtimeOnlyClasspath);
+                    androidLibraries.build(), javaLibrary.build(), projects.build());
         } finally {
             dependencyFailureHandler.collectIssues().forEach(failureConsumer);
         }

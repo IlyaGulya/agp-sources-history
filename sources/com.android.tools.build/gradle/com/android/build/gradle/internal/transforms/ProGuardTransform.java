@@ -36,20 +36,23 @@ import com.android.build.api.transform.TransformOutputProvider;
 import com.android.build.gradle.internal.pipeline.TransformManager;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.VariantScope;
-import com.android.build.gradle.internal.tasks.WorkLimiter;
+import com.android.build.gradle.tasks.SimpleWorkQueue;
+import com.android.builder.tasks.Job;
+import com.android.builder.tasks.JobContext;
 import com.android.utils.FileUtils;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+import com.google.common.util.concurrent.SettableFuture;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.concurrent.GuardedBy;
+import java.util.concurrent.ExecutionException;
 import org.gradle.api.UncheckedIOException;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.logging.Logger;
@@ -61,16 +64,7 @@ import proguard.ParseException;
  * ProGuard support as a transform
  */
 public class ProGuardTransform extends BaseProguardAction {
-
-    /** This constant replaces that in now-deleted SimpleWorkQueue */
-    private static final int PROGUARD_CONCURRENCY_LIMIT = 4;
-
-    @GuardedBy("ProGuardTransform.class")
-    @Nullable
-    private static WorkLimiter proguardWorkLimiter;
-
     private static final Logger LOG = Logging.getLogger(ProGuardTransform.class);
-
 
     private final VariantScope variantScope;
 
@@ -94,14 +88,6 @@ public class ProGuardTransform extends BaseProguardAction {
         printSeeds = new File(proguardOut, "seeds.txt");
         printUsage = new File(proguardOut, "usage.txt");
         secondaryFileOutputs = ImmutableList.of(printMapping, printSeeds, printUsage);
-    }
-
-    @NonNull
-    private static synchronized WorkLimiter getWorkLimiter() {
-        if (proguardWorkLimiter == null) {
-            proguardWorkLimiter = new WorkLimiter(PROGUARD_CONCURRENCY_LIMIT);
-        }
-        return proguardWorkLimiter;
     }
 
     @Nullable
@@ -173,11 +159,16 @@ public class ProGuardTransform extends BaseProguardAction {
 
     @Override
     public void transform(@NonNull final TransformInvocation invocation) throws TransformException {
-        // only run PROGUARD_CONCURRENCY_LIMIT proguard invocations at a time (across projects)
-        try {
-            getWorkLimiter()
-                    .limit(
-                            () -> {
+        // only run one minification at a time (across projects)
+        SettableFuture<TransformOutputProvider> resultFuture = SettableFuture.create();
+        final Job<Void> job =
+                new Job<>(
+                        getName(),
+                        new com.android.builder.tasks.Task<Void>() {
+                            @Override
+                            public void run(
+                                    @NonNull Job<Void> job, @NonNull JobContext<Void> context)
+                                    throws IOException {
                                 doMinification(
                                         invocation.getInputs(),
                                         invocation.getReferencedInputs(),
@@ -189,9 +180,28 @@ public class ProGuardTransform extends BaseProguardAction {
                                 if (!printMapping.isFile()) {
                                     Files.asCharSink(printMapping, Charsets.UTF_8).write("");
                                 }
-                                return null;
-                            });
+                            }
 
+                            @Override
+                            public void finished() {
+                                resultFuture.set(invocation.getOutputProvider());
+                            }
+
+                            @Override
+                            public void error(Throwable e) {
+                                resultFuture.setException(e);
+                            }
+                        },
+                        resultFuture);
+        try {
+            SimpleWorkQueue.push(job);
+
+            // wait for the task completion.
+            try {
+                job.awaitRethrowExceptions();
+            } catch (ExecutionException e) {
+                throw new RuntimeException("Job failed, see logs for details", e.getCause());
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);

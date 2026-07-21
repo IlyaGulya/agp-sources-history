@@ -19,7 +19,6 @@ import com.android.annotations.NonNull;
 import com.android.builder.model.Dependencies;
 import com.android.builder.model.level2.DependencyGraphs;
 import com.android.builder.model.level2.Library;
-import java.io.File;
 import java.util.Collection;
 
 /**
@@ -50,12 +49,4 @@ public interface IdeDependencies {
      */
     @NonNull
     Collection<Library> getModuleDependencies();
-
-    /**
-     * Returns the list of runtime only classes.
-     *
-     * @return the list of runtime only classes.
-     */
-    @NonNull
-    Collection<File> getRuntimeOnlyClasses();
 }

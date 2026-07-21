@@ -33,7 +33,6 @@ import com.android.build.gradle.internal.core.GradleVariantConfiguration;
 import com.android.build.gradle.internal.dsl.AaptOptions;
 import com.android.build.gradle.internal.pipeline.ExtendedContentType;
 import com.android.build.gradle.internal.pipeline.TransformManager;
-import com.android.build.gradle.internal.scope.ApkData;
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
 import com.android.build.gradle.internal.scope.BuildElements;
 import com.android.build.gradle.internal.scope.BuildElementsTransformParams;
@@ -48,6 +47,7 @@ import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.internal.variant.MultiOutputPolicy;
 import com.android.build.gradle.tasks.ResourceUsageAnalyzer;
 import com.android.builder.core.VariantType;
+import com.android.ide.common.build.ApkInfo;
 import com.android.ide.common.workers.WorkerExecutorFacade;
 import com.android.utils.FileUtils;
 import com.google.common.base.Joiner;
@@ -264,7 +264,7 @@ public class ShrinkResourcesTransform extends Transform {
                     .transform(
                             workers,
                             SplitterRunnable.class,
-                            (ApkData apkInfo, File buildInput) ->
+                            (ApkInfo apkInfo, File buildInput) ->
                                     new SplitterParams(
                                             apkInfo,
                                             buildInput,
@@ -392,7 +392,7 @@ public class ShrinkResourcesTransform extends Transform {
         private final boolean isDebugLoggingEnabled;
 
         SplitterParams(
-                @NonNull ApkData apkInfo,
+                @NonNull ApkInfo apkInfo,
                 @NonNull File uncompressedResourceFile,
                 @NonNull BuildElements mergedManifests,
                 @NonNull List<File> classes,

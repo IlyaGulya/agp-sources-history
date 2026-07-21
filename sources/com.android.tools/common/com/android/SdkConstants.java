@@ -1085,9 +1085,6 @@ public final class SdkConstants {
     public static final String TAG_META_DATA = "meta-data";
     public static final String TAG_RESOURCE = "resource";
     public static final String TAG_MODULE = "module";
-    public static final String TAG_NAV_GRAPH = "nav-graph";
-    public static final String TAG_QUERIES = "queries";
-    public static final String TAG_INTENT = "intent";
 
     // Tags: Resources
     public static final String TAG_RESOURCES = "resources"; //$NON-NLS-1$
@@ -2602,7 +2599,7 @@ public final class SdkConstants {
     public static final String GRADLE_PLUGIN_NAME = "com.android.tools.build:gradle:";
     public static final String GRADLE_EXPERIMENTAL_PLUGIN_NAME =
             "com.android.tools.build:gradle-experimental:";
-    public static final String GRADLE_MINIMUM_VERSION = "5.1.1";
+    public static final String GRADLE_MINIMUM_VERSION = "5.1-milestone-1";
     public static final String GRADLE_LATEST_VERSION = GRADLE_MINIMUM_VERSION;
     public static final String GRADLE_PLUGIN_MINIMUM_VERSION = "1.0.0";
     public static final String GRADLE_PLUGIN_RECOMMENDED_VERSION = "3.1.0";
@@ -2636,9 +2633,7 @@ public final class SdkConstants {
     public static final String MAPS_ARTIFACT = "com.google.android.gms:play-services-maps";
     public static final String ADS_ARTIFACT = "com.google.android.gms:play-services-ads";
     public static final String LEANBACK_V17_ARTIFACT = "com.android.support:leanback-v17";
-    public static final String ANNOTATIONS_LIB_ARTIFACT_ID = "support-annotations";
-    public static final String ANNOTATIONS_LIB_ARTIFACT =
-            SUPPORT_LIB_GROUP_ID + ":" + ANNOTATIONS_LIB_ARTIFACT_ID;
+    public static final String ANNOTATIONS_LIB_ARTIFACT = "com.android.support:support-annotations";
     public static final String MEDIA_ROUTER_LIB_ARTIFACT = "com.android.support:mediarouter-v7";
 
     public static final String ANDROIDX_MATERIAL_ARTIFACT = "com.google.android.material:material";

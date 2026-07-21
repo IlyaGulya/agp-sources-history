@@ -26,7 +26,6 @@ import com.android.build.gradle.internal.incremental.FileType;
 import com.android.build.gradle.internal.incremental.InstantRunBuildContext;
 import com.android.build.gradle.internal.incremental.InstantRunPatchingPolicy;
 import com.android.build.gradle.internal.packaging.ApkCreatorFactories;
-import com.android.build.gradle.internal.scope.ApkData;
 import com.android.build.gradle.internal.scope.BuildElements;
 import com.android.build.gradle.internal.scope.BuildElementsTransformParams;
 import com.android.build.gradle.internal.scope.BuildElementsTransformRunnable;
@@ -39,6 +38,7 @@ import com.android.build.gradle.internal.tasks.Workers;
 import com.android.build.gradle.internal.tasks.factory.TaskCreationAction;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.packaging.PackagerException;
+import com.android.ide.common.build.ApkInfo;
 import com.android.ide.common.signing.KeytoolException;
 import com.android.ide.common.workers.WorkerExecutorFacade;
 import com.android.utils.FileUtils;
@@ -122,7 +122,7 @@ public class InstantRunResourcesApkBuilder extends AndroidBuilderTask {
             getResInputBuildArtifacts()
                     .forEach(
                             buildOutput -> {
-                                ApkData apkInfo = buildOutput.getApkData();
+                                ApkInfo apkInfo = buildOutput.getApkInfo();
                                 final File outputFile =
                                         new File(
                                                 outputDirectory,
@@ -152,6 +152,7 @@ public class InstantRunResourcesApkBuilder extends AndroidBuilderTask {
 
     private static class ApkBuilderRunnable extends BuildElementsTransformRunnable {
 
+        @Inject
         public ApkBuilderRunnable(@NonNull ApkBuilderParams params) {
             super(params);
         }
@@ -194,7 +195,7 @@ public class InstantRunResourcesApkBuilder extends AndroidBuilderTask {
         private final String createdBy;
         private final boolean keepTimestampsInApk;
 
-        ApkBuilderParams(ApkData apkInfo, @NonNull File input, InstantRunResourcesApkBuilder task) {
+        ApkBuilderParams(ApkInfo apkInfo, @NonNull File input, InstantRunResourcesApkBuilder task) {
             this.input = input;
             outputFile =
                     new File(
@@ -218,7 +219,7 @@ public class InstantRunResourcesApkBuilder extends AndroidBuilderTask {
         return ExistingBuildElements.from(resInputType, resources);
     }
 
-    static String mangleApkName(ApkData apkData) {
+    static String mangleApkName(ApkInfo apkData) {
         return APK_FILE_NAME + "-" + apkData.getBaseName();
     }
 

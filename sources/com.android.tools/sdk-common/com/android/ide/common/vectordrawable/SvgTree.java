@@ -15,10 +15,9 @@
  */
 package com.android.ide.common.vectordrawable;
 
-import static com.android.utils.PositionXmlParser.getPosition;
-
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.ide.common.blame.SourcePosition;
 import com.android.utils.Pair;
 import com.android.utils.PositionXmlParser;
 import com.google.common.base.Preconditions;
@@ -31,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -59,17 +57,30 @@ class SvgTree {
     private SvgGroupNode mRoot;
     private String mFileName;
 
-    private final List<LogMessage> mLogMessages = new ArrayList<>();
+    private final ArrayList<LogMessage> mLogMessages = new ArrayList<>();
 
     private boolean mHasLeafNode;
 
     private boolean mHasGradient;
 
+    public float getWidth() { return w; }
+    public float getHeight() { return h; }
+    public float getScaleFactor() { return mScaleFactor; }
+    public void setHasLeafNode(boolean hasLeafNode) {
+        mHasLeafNode = hasLeafNode;
+    }
+
+    public void setHasGradient(boolean hasGradient) {
+        mHasGradient = hasGradient;
+    }
+
+    public float[] getViewBox() { return viewBox; }
+
     // Map of SvgNode's id to the SvgNode.
-    private final Map<String, SvgNode> mIdMap = new HashMap<>();
+    private final HashMap<String, SvgNode> mIdMap = new HashMap<>();
 
     // Set of SvgGroupNodes that contain use elements.
-    private final Set<SvgGroupNode> mPendingUseGroupSet = new HashSet<>();
+    private final HashSet<SvgGroupNode> mUseGroupSet = new HashSet<>();
 
     // Key is SvgNode that references a clipPath. Value is SvgGroupNode that is the parent of that
     // SvgNode.
@@ -77,11 +88,16 @@ class SvgTree {
 
     // Key is String that is the id of a style class.
     // Value is set of SvgNodes referencing that class.
-    private final Map<String, Set<SvgNode>> mStyleAffectedNodes = new HashMap<>();
+    private final HashMap<String, HashSet<SvgNode>> mStyleAffectedNodes = new HashMap<>();
 
     // Key is String that is the id of a style class. Value is a String that contains attribute
     // information of that style class.
-    private final Map<String, String> mStyleClassAttributeMap = new HashMap<>();
+    private final HashMap<String, String> mStyleClassAttributeMap = new HashMap<>();
+
+    /** From the root, top down, pass the transformation (TODO: attributes) down the children. */
+    public void flatten() {
+        mRoot.flatten(new AffineTransform());
+    }
 
     public enum SvgLogLevel {
         ERROR,
@@ -126,35 +142,6 @@ class SvgTree {
         }
     }
 
-    public float getWidth() {
-        return w;
-    }
-
-    public float getHeight() {
-        return h;
-    }
-
-    public float getScaleFactor() {
-        return mScaleFactor;
-    }
-
-    public void setHasLeafNode(boolean hasLeafNode) {
-        mHasLeafNode = hasLeafNode;
-    }
-
-    public void setHasGradient(boolean hasGradient) {
-        mHasGradient = hasGradient;
-    }
-
-    public float[] getViewBox() {
-        return viewBox;
-    }
-
-    /** From the root, top down, pass the transformation (TODO: attributes) down the children. */
-    public void flatten() {
-        mRoot.flatten(new AffineTransform());
-    }
-
     public Document parse(@NonNull File f) throws Exception {
         mFileName = f.getName();
         return PositionXmlParser.parse(new BufferedInputStream(new FileInputStream(f)), false);
@@ -188,7 +175,7 @@ class SvgTree {
 
     public void logErrorLine(@NonNull String s, @Nullable Node node, @NonNull SvgLogLevel level) {
         Preconditions.checkArgument(!s.isEmpty());
-        int line = node == null ? 0 : getStartLine(node);
+        int line = node == null ? 0 : getPosition(node).getStartLine() + 1;
         mLogMessages.add(new LogMessage(level, line, s));
     }
 
@@ -221,9 +208,8 @@ class SvgTree {
         return mHasGradient;
     }
 
-    /** Returns the 1-based start line number of the given node. */
-    public static int getStartLine(@NonNull Node node) {
-        return getPosition(node).getStartLine() + 1;
+    private static SourcePosition getPosition(Node node) {
+        return PositionXmlParser.getPosition(node);
     }
 
     public float getViewportWidth() {
@@ -299,13 +285,13 @@ class SvgTree {
         return mIdMap.get(id);
     }
 
-    public void addToPendingUseSet(@NonNull SvgGroupNode useGroup) {
-        mPendingUseGroupSet.add(useGroup);
+    public void addToUseSet(@NonNull SvgGroupNode useGroup) {
+        mUseGroupSet.add(useGroup);
     }
 
     @NonNull
-    public Set<SvgGroupNode> getPendingUseSet() {
-        return mPendingUseGroupSet;
+    public Set<SvgGroupNode> getUseSet() {
+        return mUseGroupSet;
     }
 
     public void addClipPathAffectedNode(
@@ -325,7 +311,7 @@ class SvgTree {
         if (mStyleAffectedNodes.containsKey(className)) {
             mStyleAffectedNodes.get(className).add(child);
         } else {
-            Set<SvgNode> styleNodesSet = new HashSet<>();
+            HashSet<SvgNode> styleNodesSet = new HashSet<>();
             styleNodesSet.add(child);
             mStyleAffectedNodes.put(className, styleNodesSet);
         }
@@ -344,7 +330,7 @@ class SvgTree {
     }
 
     @NonNull
-    public Set<Map.Entry<String, Set<SvgNode>>> getStyleAffectedNodes() {
+    public Set<Map.Entry<String, HashSet<SvgNode>>> getStyleAffectedNodes() {
         return mStyleAffectedNodes.entrySet();
     }
 

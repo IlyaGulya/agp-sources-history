@@ -51,6 +51,10 @@ class ChunkBytesToLineOutputStream(
                 "Use write(byte[], int, int) for performance")
     }
 
+    override fun flush() {
+        writeBufferToInfo()
+    }
+
     override fun close() {
         writeBufferToInfo()
     }

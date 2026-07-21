@@ -32,7 +32,6 @@ import com.android.build.gradle.internal.incremental.InstantRunVerifierStatus;
 import com.android.build.gradle.internal.packaging.ApkCreatorFactories;
 import com.android.build.gradle.internal.res.namespaced.Aapt2DaemonManagerService;
 import com.android.build.gradle.internal.res.namespaced.Aapt2ServiceKey;
-import com.android.build.gradle.internal.scope.ApkData;
 import com.android.build.gradle.internal.tasks.SigningConfigMetadata;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.VariantTypeImpl;
@@ -41,10 +40,10 @@ import com.android.builder.internal.aapt.AaptPackageConfig;
 import com.android.builder.internal.aapt.BlockingResourceLinker;
 import com.android.builder.internal.aapt.CloseableBlockingResourceLinker;
 import com.android.builder.packaging.PackagerException;
+import com.android.ide.common.build.ApkInfo;
 import com.android.ide.common.process.ProcessException;
 import com.android.ide.common.resources.configuration.VersionQualifier;
 import com.android.ide.common.signing.KeytoolException;
-import com.android.sdklib.IAndroidTarget;
 import com.android.utils.FileUtils;
 import com.android.utils.XmlUtils;
 import com.google.common.collect.ImmutableList;
@@ -95,7 +94,7 @@ public abstract class InstantRunSplitApkBuilder extends Transform {
     @NonNull protected final BuildableArtifact resourcesWithMainManifest;
 
     @NonNull private final BuildableArtifact apkList;
-    @NonNull protected final ApkData mainApk;
+    @NonNull protected final ApkInfo mainApk;
 
     public InstantRunSplitApkBuilder(
             @NonNull Logger logger,
@@ -111,7 +110,7 @@ public abstract class InstantRunSplitApkBuilder extends Transform {
             @NonNull BuildableArtifact resources,
             @NonNull BuildableArtifact resourcesWithMainManifest,
             @NonNull BuildableArtifact apkList,
-            @NonNull ApkData mainApk) {
+            @NonNull ApkInfo mainApk) {
         this.logger = logger;
         this.project = project;
         this.buildContext = buildContext;
@@ -211,7 +210,7 @@ public abstract class InstantRunSplitApkBuilder extends Transform {
     }
 
     @NonNull
-    protected File generateSplitApk(@NonNull ApkData apkData, @NonNull DexFiles dexFiles)
+    protected File generateSplitApk(@NonNull ApkInfo apkData, @NonNull DexFiles dexFiles)
             throws IOException, KeytoolException, PackagerException, ProcessException,
                     TransformException {
 
@@ -318,7 +317,7 @@ public abstract class InstantRunSplitApkBuilder extends Transform {
             @NonNull Logger logger,
             @NonNull BlockingResourceLinker aapt,
             @NonNull Supplier<String> applicationIdSupplier,
-            @NonNull ApkData apkData,
+            @NonNull ApkInfo apkInfo,
             @NonNull File supportDirectory,
             @NonNull AaptOptions aaptOptions,
             @NonNull AndroidBuilder androidBuilder,
@@ -335,8 +334,8 @@ public abstract class InstantRunSplitApkBuilder extends Transform {
                         apkSupportDir,
                         uniqueName,
                         applicationIdSupplier,
-                        apkData.getVersionName(),
-                        apkData.getVersionCode(),
+                        apkInfo.getVersionName(),
+                        apkInfo.getVersionCode(),
                         null);
 
         return generateSplitApkResourcesAp(
@@ -407,7 +406,7 @@ public abstract class InstantRunSplitApkBuilder extends Transform {
             @NonNull File androidManifest,
             @NonNull File resFilePackageFile,
             @NonNull AaptOptions aaptOptions,
-            @NonNull IAndroidTarget androidTarget,
+            @NonNull String androidJarPath,
             @NonNull Set<File> importsFiles)
             throws IOException, ProcessException {
         List<File> importedAPKs =
@@ -425,7 +424,8 @@ public abstract class InstantRunSplitApkBuilder extends Transform {
                         .setImports(ImmutableList.copyOf(importedAPKs))
                         .setResourceOutputApk(resFilePackageFile);
 
-        AndroidBuilder.processResources(aapt, aaptConfig, androidTarget, new LoggerWrapper(logger));
+        AndroidBuilder.processResources(
+                aapt, aaptConfig, androidJarPath, new LoggerWrapper(logger));
     }
 
     protected CloseableBlockingResourceLinker getLinker() {

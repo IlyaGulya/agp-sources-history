@@ -255,7 +255,7 @@ public abstract class LintBaseTask extends DefaultTask {
             Optional<File> mainManifest =
                     manifests
                             .stream()
-                            .filter(buildOutput -> buildOutput.getApkData().getType() == MAIN)
+                            .filter(buildOutput -> buildOutput.getApkInfo().getType() == MAIN)
                             .map(BuildOutput::getOutputFile)
                             .findFirst();
             if (mainManifest.isPresent()) {
@@ -268,7 +268,7 @@ public abstract class LintBaseTask extends DefaultTask {
                             .stream()
                             .filter(
                                     output ->
-                                            output.getApkData().getType() == FULL_SPLIT
+                                            output.getApkInfo().getType() == FULL_SPLIT
                                                     && output.getFilters().isEmpty())
                             .map(BuildOutput::getOutputFile)
                             .findFirst();

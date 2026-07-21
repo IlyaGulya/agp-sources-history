@@ -28,7 +28,6 @@ import com.android.build.gradle.internal.core.VariantConfiguration;
 import com.android.build.gradle.internal.dsl.CoreBuildType;
 import com.android.build.gradle.internal.dsl.CoreProductFlavor;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
-import com.android.build.gradle.internal.scope.ApkData;
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
 import com.android.build.gradle.internal.scope.BuildElements;
 import com.android.build.gradle.internal.scope.BuildOutput;
@@ -38,6 +37,7 @@ import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.scope.OutputScope;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.TaskInputHelper;
+import com.android.ide.common.build.ApkData;
 import com.android.manifmerger.ManifestProvider;
 import com.android.utils.FileUtils;
 import com.google.common.base.Joiner;
@@ -125,7 +125,7 @@ public class ProcessTestManifest extends ManifestProcessorTask {
                             .stream()
                             .filter(
                                     output ->
-                                            output.getApkData().getType()
+                                            output.getApkInfo().getType()
                                                     != VariantOutput.OutputType.SPLIT)
                             .findFirst();
 
@@ -287,6 +287,7 @@ public class ProcessTestManifest extends ManifestProcessorTask {
         private final VariantScope scope;
 
         @NonNull private final Provider<Directory> testTargetMetadata;
+        private Provider<Directory> manifestOutputDirectory;
 
         public CreationAction(
                 @NonNull VariantScope scope, @NonNull Provider<Directory> testTargetMetadata) {
@@ -302,6 +303,14 @@ public class ProcessTestManifest extends ManifestProcessorTask {
                     .republish(
                             InternalArtifactType.MERGED_MANIFESTS,
                             InternalArtifactType.MANIFEST_METADATA);
+
+            manifestOutputDirectory =
+                    scope.getArtifacts()
+                            .createDirectory(
+                                    InternalArtifactType.MERGED_MANIFESTS,
+                                    BuildArtifactsHolder.OperationType.INITIAL,
+                                    taskName,
+                                    "");
         }
 
         @Override

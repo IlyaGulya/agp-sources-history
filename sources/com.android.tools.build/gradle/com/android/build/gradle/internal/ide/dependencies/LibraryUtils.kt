@@ -70,8 +70,7 @@ fun clone(dependencies: Dependencies, modelLevel: Int): Dependencies {
     return DependenciesImpl(
         libraries,
         javaLibraries,
-        projects,
-        Lists.newArrayList(dependencies.runtimeOnlyClasses)
+        projects
     )
 }
 
@@ -128,7 +127,7 @@ fun getGlobalLibMap(): Map<String, Library> {
 
 private fun instantiateLibrary(artifact: ResolvedArtifact): Library {
     val library: Library
-    val id = artifact.componentIdentifier
+    val id = artifact.id.componentIdentifier
     val address = artifact.computeModelAddress()
 
     if (id !is ProjectComponentIdentifier || artifact.isWrappedModule) {
@@ -191,7 +190,7 @@ fun findResStaticLibrary(
             return File(
                 convertedDirectory,
                 getAutoNamespacedLibraryFileName(
-                    explodedAar.componentIdentifier
+                    explodedAar.id.componentIdentifier
                 )
             )
         }
