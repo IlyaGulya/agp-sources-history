@@ -22,6 +22,7 @@ import android.databinding.tool.DataBindingBuilder;
 import com.android.Version;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.build.api.dsl.CommonExtension;
 import com.android.build.api.variant.impl.GradleProperty;
 import com.android.build.gradle.BaseExtension;
 import com.android.build.gradle.api.AndroidBasePlugin;
@@ -65,12 +66,12 @@ import com.android.build.gradle.internal.scope.BuildFeatureValuesImpl;
 import com.android.build.gradle.internal.scope.DelayedActionsExecutor;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.VariantScope;
+import com.android.build.gradle.internal.services.Aapt2Daemon;
 import com.android.build.gradle.internal.services.Aapt2Workers;
 import com.android.build.gradle.internal.utils.GradlePluginUtils;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.internal.variant.VariantFactory;
 import com.android.build.gradle.internal.variant2.DslScopeImpl;
-import com.android.build.gradle.internal.workeractions.WorkerActionServiceRegistry;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.options.StringOption;
@@ -242,6 +243,7 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
         threadRecorder = ThreadRecorder.get();
 
         Aapt2Workers.registerAapt2WorkersBuildService(project, projectOptions);
+        Aapt2Daemon.registerAapt2DaemonBuildService(project);
 
         ProcessProfileWriter.getProject(project.getPath())
                 .setAndroidPluginVersion(Version.ANDROID_GRADLE_PLUGIN_VERSION)
@@ -291,22 +293,9 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
         dataBindingBuilder.setPrintMachineReadableOutput(
                 SyncOptions.getErrorFormatMode(projectOptions) == ErrorFormatMode.MACHINE_PARSABLE);
 
-        if (projectOptions.hasRemovedOptions()) {
-            syncIssueHandler.reportWarning(
-                    Type.GENERIC, projectOptions.getRemovedOptionsErrorMessage());
-        }
-
-        if (projectOptions.hasDeprecatedOptions()) {
-            extraModelInfo
-                    .getDeprecationReporter()
-                    .reportDeprecatedOptions(projectOptions.getDeprecatedOptions());
-        }
-
-        if (!projectOptions.getExperimentalOptions().isEmpty()) {
-            projectOptions
-                    .getExperimentalOptions()
-                    .forEach(extraModelInfo.getDeprecationReporter()::reportExperimentalOption);
-        }
+        projectOptions
+                .getAllOptions()
+                .forEach(extraModelInfo.getDeprecationReporter()::reportOptionIssuesIfAny);
 
         // Enforce minimum versions of certain plugins
         GradlePluginUtils.enforceMinimumVersionsOfPlugins(project, syncIssueHandler);
@@ -322,7 +311,8 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
                         project.getLogger(),
                         new BuildFeatureValuesImpl(projectOptions),
                         project.getProviders(),
-                        new DslVariableFactory(syncIssueHandler));
+                        new DslVariableFactory(syncIssueHandler),
+                        project::file);
 
         @Nullable
         FileCache buildCache = BuildCacheUtils.createBuildCacheIfEnabled(project, projectOptions);
@@ -367,13 +357,13 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
                                 project.getPath(),
                                 null,
                                 () -> {
-                                    if (!projectOptions.get(
-                                            BooleanOption.KEEP_SERVICES_BETWEEN_BUILDS)) {
-                                        WorkerActionServiceRegistry.INSTANCE
-                                                .shutdownAllRegisteredServices(
-                                                        ForkJoinPool.commonPool());
-                                    }
                                     Main.clearInternTables();
+                                    // Because some registrations may happen w/o gradle build
+                                    // service (from artifact transforms), we need to explicitly
+                                    // invoked this method.
+                                    Aapt2Daemon.getAapt2DaemonServiceRegistry()
+                                            .shutdownAllRegisteredServices(
+                                                    ForkJoinPool.commonPool());
                                 });
                         DeprecationReporterImpl.Companion.clean();
                     }
@@ -446,7 +436,7 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
 
         // link the extension buildFeature to the BuildFeatureValues in DslScope
         ((BuildFeatureValuesImpl) globalScope.getDslScope().getBuildFeatures())
-                .setDslBuildFeatures(extension.getBuildFeatures());
+                .setDslBuildFeatures(((CommonExtension) extension).getBuildFeatures());
 
         globalScope.setExtension(extension);
 

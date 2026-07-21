@@ -25,6 +25,7 @@ import com.android.build.gradle.internal.scope.InternalArtifactType.DUPLICATE_CL
 import com.android.build.gradle.internal.scope.MultipleArtifactType
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.utils.getDesugarLibConfig
+import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.build.gradle.options.BooleanOption
 import com.android.builder.core.VariantType
 import com.android.builder.dexing.DexingType
@@ -197,6 +198,11 @@ abstract class R8Task: ProguardConfigurableTask() {
                         productProvider = R8Task::baseDexDir,
                         fileName = ""
                     )
+                    if (variantScope.needsShrinkDesugarLibrary) {
+                        variantScope.artifacts.getOperations()
+                            .setInitialProvider(taskProvider, R8Task::projectOutputKeepRules)
+                            .on(InternalArtifactType.DESUGAR_LIB_PROJECT_KEEP_RULES)
+                    }
                 }
                 else -> {
                     variantScope.artifacts.getOperations().append(
@@ -240,7 +246,8 @@ abstract class R8Task: ProguardConfigurableTask() {
 
             task.bootClasspath.from(variantScope.globalScope.fullBootClasspath)
             task.minSdkVersion.set(variantScope.minSdkVersion.featureLevel)
-            task.debuggable.set(variantScope.variantDslInfo.buildType.isDebuggable)
+            task.debuggable
+                .setDisallowChanges(variantScope.variantData.publicVariantApi.isDebuggable)
             task.disableTreeShaking.set(disableTreeShaking)
             task.disableMinification.set(disableMinification)
             task.messageReceiver = variantScope.globalScope.messageReceiver

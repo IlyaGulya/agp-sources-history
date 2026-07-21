@@ -29,14 +29,29 @@ import org.gradle.api.Incubating
 @Incubating
 interface DynamicFeatureExtension<
         BuildTypeT : BuildType,
+        CMakeOptionsT : CmakeOptions,
+        CompileOptionsT : CompileOptions,
         DefaultConfigT : DefaultConfig,
+        ExternalNativeBuildT : ExternalNativeBuild<CMakeOptionsT, NdkBuildOptionsT>,
+        JacocoOptionsT : JacocoOptions,
+        NdkBuildOptionsT : NdkBuildOptions,
         ProductFlavorT : ProductFlavor,
-        SigningConfigT : SigningConfig> :
+        SigningConfigT : SigningConfig,
+        TestOptionsT: TestOptions<UnitTestOptionsT>,
+        UnitTestOptionsT: UnitTestOptions> :
     CommonExtension<
+            DynamicFeatureBuildFeatures,
             BuildTypeT,
+            CMakeOptionsT,
+            CompileOptionsT,
             DefaultConfigT,
+            ExternalNativeBuildT,
+            JacocoOptionsT,
+            NdkBuildOptionsT,
             ProductFlavorT,
             SigningConfigT,
+            TestOptionsT,
+            UnitTestOptionsT,
             DynamicFeatureVariant,
             DynamicFeatureVariantProperties>,
     ApkExtension,

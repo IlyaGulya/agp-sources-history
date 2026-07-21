@@ -24,6 +24,7 @@ import com.android.build.api.variant.impl.VariantImpl;
 import com.android.build.api.variant.impl.VariantPropertiesImpl;
 import com.android.build.gradle.internal.TaskManager;
 import com.android.build.gradle.internal.core.VariantDslInfo;
+import com.android.build.gradle.internal.core.VariantDslInfoImpl;
 import com.android.build.gradle.internal.core.VariantSources;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.builder.core.BuilderConstants;
@@ -44,20 +45,22 @@ public class LibraryVariantData extends BaseVariantData implements TestedVariant
     public LibraryVariantData(
             @NonNull GlobalScope globalScope,
             @NonNull TaskManager taskManager,
-            @NonNull VariantDslInfo variantDslInfo,
+            @NonNull VariantDslInfoImpl variantDslInfo,
             @NonNull VariantSources variantSources,
             @NonNull Recorder recorder) {
         super(globalScope, taskManager, variantDslInfo, variantSources, recorder);
         testVariants = Maps.newHashMap();
 
         // create default output
-        getOutputFactory()
-                .addMainOutput(
-                        globalScope.getProjectBaseName()
-                                + "-"
-                                + getVariantDslInfo().getBaseName()
-                                + "."
-                                + BuilderConstants.EXT_LIB_ARCHIVE);
+        getPublicVariantPropertiesApi()
+                .addVariantOutput(
+                        getOutputFactory()
+                                .addMainOutput(
+                                        globalScope.getProjectBaseName()
+                                                + "-"
+                                                + getVariantDslInfo().getBaseName()
+                                                + "."
+                                                + BuilderConstants.EXT_LIB_ARCHIVE));
     }
 
     @Override

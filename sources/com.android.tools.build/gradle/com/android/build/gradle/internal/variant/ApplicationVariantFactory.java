@@ -21,6 +21,8 @@ import static com.android.builder.core.BuilderConstants.RELEASE;
 
 import com.android.annotations.NonNull;
 import com.android.build.OutputFile;
+import com.android.build.api.variant.impl.VariantOutputImpl;
+import com.android.build.api.variant.impl.VariantOutputList;
 import com.android.build.gradle.BaseExtension;
 import com.android.build.gradle.internal.BuildTypeData;
 import com.android.build.gradle.internal.ProductFlavorData;
@@ -28,6 +30,7 @@ import com.android.build.gradle.internal.TaskManager;
 import com.android.build.gradle.internal.api.ApplicationVariantImpl;
 import com.android.build.gradle.internal.api.BaseVariantImpl;
 import com.android.build.gradle.internal.core.VariantDslInfo;
+import com.android.build.gradle.internal.core.VariantDslInfoImpl;
 import com.android.build.gradle.internal.core.VariantSources;
 import com.android.build.gradle.internal.dsl.BuildType;
 import com.android.build.gradle.internal.dsl.ProductFlavor;
@@ -70,7 +73,7 @@ public class ApplicationVariantFactory extends BaseVariantFactory implements Var
     @Override
     @NonNull
     public BaseVariantData createVariantData(
-            @NonNull VariantDslInfo variantDslInfo,
+            @NonNull VariantDslInfoImpl variantDslInfo,
             @NonNull VariantSources variantSources,
             @NonNull TaskManager taskManager,
             @NonNull Recorder recorder) {
@@ -102,7 +105,14 @@ public class ApplicationVariantFactory extends BaseVariantFactory implements Var
         OutputFactory outputFactory = variant.getOutputFactory();
         populateMultiApkOutputs(abis, densities, outputFactory, includeMainApk);
 
-        restrictEnabledOutputs(variantDslInfo, variant.getOutputScope().getApkDatas());
+        outputFactory
+                .finalizeApkDataList()
+                .forEach(
+                        apkData ->
+                                variant.getPublicVariantPropertiesApi().addVariantOutput(apkData));
+
+        restrictEnabledOutputs(
+                variantDslInfo, variant.getPublicVariantPropertiesApi().getOutputs());
     }
 
     private void populateMultiApkOutputs(
@@ -184,7 +194,8 @@ public class ApplicationVariantFactory extends BaseVariantFactory implements Var
                         Joiner.on(",").join(ndkConfigAbiFilters), Joiner.on(",").join(abiFilters)));
     }
 
-    private void restrictEnabledOutputs(VariantDslInfo variantDslInfo, List<ApkData> apkDataList) {
+    private void restrictEnabledOutputs(
+            VariantDslInfo variantDslInfo, VariantOutputList variantOutputs) {
 
         Set<String> supportedAbis = variantDslInfo.getSupportedAbis();
         ProjectOptions projectOptions = globalScope.getProjectOptions();
@@ -199,6 +210,12 @@ public class ApplicationVariantFactory extends BaseVariantFactory implements Var
 
         String buildTargetDensity = projectOptions.get(StringOption.IDE_BUILD_TARGET_DENSITY);
         Density density = Density.getEnum(buildTargetDensity);
+
+        List<ApkData> apkDataList =
+                variantOutputs
+                        .stream()
+                        .map(VariantOutputImpl::getApkData)
+                        .collect(Collectors.toList());
 
         List<ApkData> apksToGenerate =
                 SplitOutputMatcher.computeBestOutput(
@@ -232,10 +249,10 @@ public class ApplicationVariantFactory extends BaseVariantFactory implements Var
             return;
         }
 
-        apkDataList.forEach(
-                apkData -> {
-                    if (!apksToGenerate.contains(apkData)) {
-                        apkData.disable();
+        variantOutputs.forEach(
+                variantOutput -> {
+                    if (!apksToGenerate.contains(variantOutput.getApkData())) {
+                        variantOutput.isEnabled().set(false);
                     }
                 });
     }
@@ -271,6 +288,8 @@ public class ApplicationVariantFactory extends BaseVariantFactory implements Var
             return;
         }
 
+        // below is for dynamic-features only.
+
         EvalIssueReporter issueReporter = globalScope.getErrorHandler();
         for (BuildTypeData buildType : model.getBuildTypes().values()) {
             if (buildType.getBuildType().isMinifyEnabled()) {
@@ -281,6 +300,30 @@ public class ApplicationVariantFactory extends BaseVariantFactory implements Var
                                 + buildType.getBuildType().getName()
                                 + "'.\nTo enable minification for a dynamic feature "
                                 + "module, set minifyEnabled to true in the base module.");
+            }
+        }
+
+        // check if any of the build types or flavors have a signing config.
+        String message =
+                "Signing configuration should not be declared in build types of "
+                        + "dynamic-feature. Dynamic-features use the signing configuration "
+                        + "declared in the application module.";
+        for (BuildTypeData buildType : model.getBuildTypes().values()) {
+            if (buildType.getBuildType().getSigningConfig() != null) {
+                issueReporter.reportWarning(
+                        Type.SIGNING_CONFIG_DECLARED_IN_DYNAMIC_FEATURE, message);
+            }
+        }
+
+        message =
+                "Signing configuration should not be declared in product flavors of "
+                        + "dynamic-feature. Dynamic-features use the signing configuration "
+                        + "declared in the application module.";
+        for (ProductFlavorData<ProductFlavor> productFlavor : model.getProductFlavors().values()) {
+            if (productFlavor.getProductFlavor().getSigningConfig() != null) {
+
+                issueReporter.reportWarning(
+                        Type.SIGNING_CONFIG_DECLARED_IN_DYNAMIC_FEATURE, message);
             }
         }
     }

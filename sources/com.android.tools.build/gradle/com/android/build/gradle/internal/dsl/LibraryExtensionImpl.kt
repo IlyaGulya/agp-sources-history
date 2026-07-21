@@ -16,12 +16,15 @@
 
 package com.android.build.gradle.internal.dsl
 
+import com.android.build.api.dsl.LibraryBuildFeatures
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.GenericVariantFilterBuilder
 import com.android.build.api.variant.LibraryVariant
 import com.android.build.api.variant.LibraryVariantProperties
 import com.android.build.api.variant.impl.GenericVariantFilterBuilderImpl
+import com.android.build.gradle.internal.CompileOptions
 import com.android.build.gradle.internal.api.dsl.DslScope
+import com.android.build.gradle.internal.coverage.JacocoOptions
 import com.android.build.gradle.internal.scope.VariantScope
 import org.gradle.api.NamedDomainObjectContainer
 
@@ -34,6 +37,7 @@ class LibraryExtensionImpl(
     signingConfigs: NamedDomainObjectContainer<SigningConfig>
 ) :
     CommonExtensionImpl<
+            LibraryBuildFeatures,
             BuildType,
             DefaultConfig,
             ProductFlavor,
@@ -46,8 +50,23 @@ class LibraryExtensionImpl(
         productFlavors,
         signingConfigs
     ),
-    LibraryExtension<BuildType, DefaultConfig, ProductFlavor, SigningConfig>,
+    LibraryExtension<
+            BuildType,
+            CmakeOptions,
+            CompileOptions,
+            DefaultConfig,
+            ExternalNativeBuild,
+            JacocoOptions,
+            NdkBuildOptions,
+            ProductFlavor,
+            SigningConfig,
+            TestOptions,
+            TestOptions.UnitTestOptions>,
     ActionableVariantObjectOperationsExecutor {
+
+    override val buildFeatures: LibraryBuildFeatures =
+        dslScope.objectFactory.newInstance(LibraryBuildFeaturesImpl::class.java)
+
     override fun executeVariantOperations(variantScopes: List<VariantScope>) {
         variantOperations.executeOperations<LibraryVariant>(variantScopes)
     }

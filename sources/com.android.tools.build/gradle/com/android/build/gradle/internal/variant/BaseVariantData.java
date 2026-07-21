@@ -31,6 +31,7 @@ import com.android.build.api.variant.impl.VariantPropertiesImpl;
 import com.android.build.gradle.api.AndroidSourceSet;
 import com.android.build.gradle.internal.TaskManager;
 import com.android.build.gradle.internal.core.VariantDslInfo;
+import com.android.build.gradle.internal.core.VariantDslInfoImpl;
 import com.android.build.gradle.internal.core.VariantSources;
 import com.android.build.gradle.internal.dependency.VariantDependencies;
 import com.android.build.gradle.internal.dsl.Splits;
@@ -41,7 +42,6 @@ import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.scope.MutableTaskContainer;
 import com.android.build.gradle.internal.scope.OutputFactory;
-import com.android.build.gradle.internal.scope.OutputScope;
 import com.android.build.gradle.internal.scope.TaskContainer;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.scope.VariantScopeImpl;
@@ -86,7 +86,7 @@ public abstract class BaseVariantData {
 
     @NonNull
     protected final TaskManager taskManager;
-    @NonNull private final VariantDslInfo variantDslInfo;
+    @NonNull private final VariantDslInfoImpl variantDslInfo;
     @NonNull private final VariantSources variantSources;
 
     private VariantDependencies variantDependency;
@@ -123,8 +123,6 @@ public abstract class BaseVariantData {
     @NonNull private final OutputFactory outputFactory;
     public VariantOutputFactory variantOutputFactory;
 
-    private final MultiOutputPolicy multiOutputPolicy;
-
     private final MutableTaskContainer taskContainer;
     public TextResource applicationIdTextResource;
     private final VariantConfiguration publicVariantConfiguration;
@@ -134,7 +132,7 @@ public abstract class BaseVariantData {
     public BaseVariantData(
             @NonNull GlobalScope globalScope,
             @NonNull TaskManager taskManager,
-            @NonNull VariantDslInfo variantDslInfo,
+            @NonNull VariantDslInfoImpl variantDslInfo,
             @NonNull VariantSources variantSources,
             @NonNull Recorder recorder) {
         this.variantDslInfo = variantDslInfo;
@@ -146,9 +144,6 @@ public abstract class BaseVariantData {
                 splits.getDensity().isEnable()
                         || splits.getAbi().isEnable()
                         || splits.getLanguage().isEnable();
-
-        // Since pure SPLITS are not supported, remove this before submitting.
-        multiOutputPolicy = MultiOutputPolicy.MULTI_APK;
 
         // warn the user if we are forced to ignore the generatePureSplits flag.
         if (splitsEnabled && globalScope.getExtension().getGeneratePureSplits()) {
@@ -173,7 +168,8 @@ public abstract class BaseVariantData {
                 new VariantConfigurationImpl(
                         variantDslInfo.getFullName(),
                         variantDslInfo.getBuildType().getName(),
-                        variantDslInfo.getFlavorNamesWithDimensionNames());
+                        variantDslInfo.getFlavorNamesWithDimensionNames(),
+                        variantDslInfo.getBuildType().isDebuggable());
 
         outputFactory = new OutputFactory(globalScope.getProjectBaseName(), variantDslInfo);
 
@@ -244,18 +240,8 @@ public abstract class BaseVariantData {
     }
 
     @NonNull
-    public OutputScope getOutputScope() {
-        return outputFactory.getOutput();
-    }
-
-    @NonNull
     public OutputFactory getOutputFactory() {
         return outputFactory;
-    }
-
-    @NonNull
-    public MultiOutputPolicy getMultiOutputPolicy() {
-        return multiOutputPolicy;
     }
 
     @NonNull

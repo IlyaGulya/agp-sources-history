@@ -22,11 +22,12 @@ import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.PROJECT
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.FEATURE_RESOURCE_PKG
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH
-import com.android.build.gradle.internal.res.namespaced.registerAaptService
 import com.android.build.gradle.internal.scope.ApkData
 import com.android.build.gradle.internal.scope.ExistingBuildElements
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.VariantScope
+import com.android.build.gradle.internal.services.Aapt2DaemonBuildService
+import com.android.build.gradle.internal.services.getAapt2DaemonBuildService
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.setDisallowChanges
@@ -70,8 +71,7 @@ import java.io.IOException
 @CacheableTask
 abstract class LinkAndroidResForBundleTask : NonIncrementalTask() {
     @get:Input
-    var debuggable: Boolean = false
-        private set
+    abstract val debuggable: Property<Boolean>
 
     private lateinit var aaptOptions: AaptOptions
 
@@ -112,7 +112,7 @@ abstract class LinkAndroidResForBundleTask : NonIncrementalTask() {
     lateinit var incrementalFolder: File
         private set
 
-    @get:Input
+    @get:Nested
     lateinit var mainSplit: ApkData
         private set
 
@@ -124,14 +124,17 @@ abstract class LinkAndroidResForBundleTask : NonIncrementalTask() {
     abstract val aapt2FromMaven: ConfigurableFileCollection
 
     @get:Input
-    var excludeResSources: Boolean = false
-        private set
+    abstract val excludeResSourcesForReleaseBundles: Property<Boolean>
+
+    @get:Internal
+    abstract val aapt2DaemonBuildService: Property<Aapt2DaemonBuildService>
 
     private var compiledDependenciesResources: ArtifactCollection? = null
 
     override fun doTaskAction() {
 
-        val manifestFile = ExistingBuildElements.from(InternalArtifactType.BUNDLE_MANIFEST, manifestFiles)
+        val manifestFile =
+            ExistingBuildElements.from(InternalArtifactType.BUNDLE_MANIFEST, manifestFiles)
                 .element(mainSplit)
                 ?.outputFile
                 ?: throw RuntimeException("Cannot find merged manifest file")
@@ -160,7 +163,7 @@ abstract class LinkAndroidResForBundleTask : NonIncrementalTask() {
             options = aaptOptions,
             resourceOutputApk = outputFile,
             variantType = VariantTypeImpl.BASE_APK,
-            debuggable = debuggable,
+            debuggable = debuggable.get(),
             packageId = resOffset.orNull,
             allowReservedPackageId = minSdkVersion < AndroidVersion.VersionCodes.O,
             dependentFeatures = featurePackagesBuilder.build(),
@@ -169,13 +172,15 @@ abstract class LinkAndroidResForBundleTask : NonIncrementalTask() {
                     checkNotNull(getInputResourcesDir().orNull?.asFile)
                 ).build(),
             resourceConfigs = ImmutableSet.copyOf(resConfig),
-            excludeSources = excludeResSources
+            // We only want to exclude res sources for release builds and when the flag is turned on
+            // This will result in smaller release bundles
+            excludeSources = excludeResSourcesForReleaseBundles.get() && debuggable.get().not()
         )
         if (logger.isInfoEnabled) {
             logger.info("Aapt output file {}", outputFile.absolutePath)
         }
 
-        val aapt2ServiceKey = registerAaptService(
+        val aapt2ServiceKey = aapt2DaemonBuildService.get().registerAaptService(
             aapt2FromMaven = aapt2FromMaven,
             logger = LoggerWrapper(logger)
         )
@@ -247,30 +252,18 @@ abstract class LinkAndroidResForBundleTask : NonIncrementalTask() {
         override fun configure(task: LinkAndroidResForBundleTask) {
             super.configure(task)
 
+            val variantScope = variantScope
             val variantData = variantScope.variantData
-
             val projectOptions = variantScope.globalScope.projectOptions
-
-            val config = variantData.variantDslInfo
+            val variantDslInfo = variantData.variantDslInfo
 
             task.incrementalFolder = variantScope.getIncrementalDir(name)
 
             val mainSplit = variantData.publicVariantPropertiesApi.outputs.getMainSplit()
-            // check the variant API property first (if there is one) in case the variant
-            // output version has been overridden, otherwise use the variant configuration
-            task.versionCode.set(
-                mainSplit?.versionCode ?: task.project.provider {
-                    config.versionCode
-                }
-            )
-            task.versionCode.disallowChanges()
-            task.versionName.setDisallowChanges(
-                mainSplit?.versionName ?: task.project.provider {
-                    config.versionName
-                }
-            )
+            task.versionCode.setDisallowChanges(mainSplit.versionCode)
+            task.versionName.setDisallowChanges(mainSplit.versionName)
 
-            task.mainSplit = variantData.outputScope.mainSplit
+            task.mainSplit = mainSplit.apkData
 
             variantScope.artifacts.setTaskInputToFinalProduct(
                 InternalArtifactType.BUNDLE_MANIFEST,
@@ -289,13 +282,13 @@ abstract class LinkAndroidResForBundleTask : NonIncrementalTask() {
                 task.resOffset.disallowChanges()
             }
 
-            task.debuggable = config.buildType.isDebuggable
+            task.debuggable.setDisallowChanges(variantData.publicVariantApi.isDebuggable)
             task.aaptOptions = variantScope.globalScope.extension.aaptOptions.convert()
 
-            // We only want to exclude res sources for release builds and when the flag is turned on
-            // This will result in smaller release bundles
-            task.excludeResSources = !task.debuggable
-                    && projectOptions.get(BooleanOption.EXCLUDE_RES_SOURCES_FOR_RELEASE_BUNDLES)
+            task.excludeResSourcesForReleaseBundles
+                .setDisallowChanges(
+                    projectOptions.get(BooleanOption.EXCLUDE_RES_SOURCES_FOR_RELEASE_BUNDLES)
+                )
 
             task.buildTargetDensity =
                     projectOptions.get(StringOption.IDE_BUILD_TARGET_DENSITY)
@@ -306,8 +299,7 @@ abstract class LinkAndroidResForBundleTask : NonIncrementalTask() {
             task.aapt2Version = aapt2Version
             task.minSdkVersion = variantScope.minSdkVersion.apiLevel
 
-            task.resConfig =
-                    variantScope.variantDslInfo.mergedFlavor.resourceConfigurations
+            task.resConfig = variantScope.variantDslInfo.resourceConfigurations
 
             task.androidJar = variantScope.globalScope.sdkComponents.androidJarProvider
 
@@ -326,6 +318,7 @@ abstract class LinkAndroidResForBundleTask : NonIncrementalTask() {
                     AndroidArtifacts.ArtifactType.COMPILED_DEPENDENCIES_RESOURCES
                 )
             }
+            task.aapt2DaemonBuildService.set(getAapt2DaemonBuildService(task.project))
         }
     }
 }

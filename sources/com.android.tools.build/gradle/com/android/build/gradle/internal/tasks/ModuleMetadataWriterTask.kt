@@ -18,8 +18,8 @@ package com.android.build.gradle.internal.tasks
 
 import com.android.build.api.variant.impl.VariantPropertiesImpl
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.OutputScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
+import com.android.build.gradle.internal.utils.setDisallowChanges
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -44,20 +44,15 @@ abstract class ModuleMetadataWriterTask : NonIncrementalTask() {
     @get:Input
     abstract val applicationId: Property<String>
 
-    private lateinit var outputScope: OutputScope
-
     @get:Input
-    val versionCode
-        get() = outputScope.mainSplit.versionCode
+    abstract val versionCode: Property<Int>
 
     @get:Input
     @get:Optional
-    val versionName
-        get() = outputScope.mainSplit.versionName
+    abstract val versionName: Property<String>
 
     @get:Input
-    var debuggable: Boolean = false
-    private set
+    abstract val debuggable: Property<Boolean>
 
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
@@ -66,9 +61,9 @@ abstract class ModuleMetadataWriterTask : NonIncrementalTask() {
         val declaration =
             ModuleMetadata(
                 applicationId = applicationId.get(),
-                versionCode = versionCode.toString(),
-                versionName = versionName,
-                debuggable = debuggable
+                versionCode = versionCode.get().toString(),
+                versionName = versionName.orNull,
+                debuggable = debuggable.get()
             )
 
         declaration.save(outputFile.get().asFile)
@@ -96,8 +91,13 @@ abstract class ModuleMetadataWriterTask : NonIncrementalTask() {
         override fun configure(task: ModuleMetadataWriterTask) {
             super.configure(task)
             task.applicationId.set(variantProperties.applicationId)
-            task.outputScope = variantScope.variantData.outputScope
-            task.debuggable = variantScope.variantDslInfo.buildType.isDebuggable
+            task.debuggable
+                .setDisallowChanges(variantScope.variantData.publicVariantApi.isDebuggable)
+            task.versionCode.setDisallowChanges(variantScope.variantData.publicVariantPropertiesApi
+                .outputs.getMainSplit().versionCode)
+            task.versionName.setDisallowChanges(variantScope.variantData.publicVariantPropertiesApi
+                .outputs.getMainSplit().versionName)
+
         }
     }
 }

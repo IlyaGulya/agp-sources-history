@@ -20,8 +20,9 @@ import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.res.getAapt2FromMavenAndVersion
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.OutputScope
 import com.android.build.gradle.internal.scope.VariantScope
+import com.android.build.gradle.internal.services.Aapt2DaemonBuildService
+import com.android.build.gradle.internal.services.getAapt2DaemonBuildService
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.options.BooleanOption
@@ -36,6 +37,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
@@ -90,7 +92,8 @@ abstract class ProcessAndroidAppResourcesTask : NonIncrementalTask() {
     @get:OutputDirectory abstract val rClassSource: DirectoryProperty
     @get:OutputFile abstract val resourceApUnderscoreDirectory: DirectoryProperty
 
-    @get:Internal lateinit var outputScope: OutputScope private set
+    @get:Internal
+    abstract val aapt2DaemonBuildService: Property<Aapt2DaemonBuildService>
 
     @get:Input
     lateinit var noCompress: List<String>
@@ -116,7 +119,7 @@ abstract class ProcessAndroidAppResourcesTask : NonIncrementalTask() {
                 variantType = VariantTypeImpl.LIBRARY,
                 intermediateDir = aaptIntermediateDir)
 
-        val aapt2ServiceKey = registerAaptService(
+        val aapt2ServiceKey = aapt2DaemonBuildService.get().registerAaptService(
             aapt2FromMaven = aapt2FromMaven, logger = LoggerWrapper(logger)
         )
         getWorkerFacadeWithWorkers().use {
@@ -183,7 +186,6 @@ abstract class ProcessAndroidAppResourcesTask : NonIncrementalTask() {
                             AndroidArtifacts.ArtifactScope.ALL,
                             AndroidArtifacts.ArtifactType.RES_SHARED_STATIC_LIBRARY)
 
-            task.outputScope = variantScope.outputScope
             task.aaptIntermediateDir =
                     FileUtils.join(
                             variantScope.globalScope.intermediatesDir, "res-process-intermediate", variantScope.variantDslInfo.dirName)
@@ -197,6 +199,7 @@ abstract class ProcessAndroidAppResourcesTask : NonIncrementalTask() {
             task.noCompress =
                 variantScope.globalScope.extension.aaptOptions.noCompress?.toList()?.sorted() ?:
                         listOf()
+            task.aapt2DaemonBuildService.set(getAapt2DaemonBuildService(task.project))
         }
     }
 

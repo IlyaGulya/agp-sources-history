@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:JvmName("BaseConfigAdapter")
 
-package com.android.build.gradle.internal
+package com.android.build.api.dsl
 
-import com.android.builder.model.BaseConfig
-import java.io.File
+import org.gradle.api.Incubating
 
-fun BaseConfig.getProguardFiles(type: ProguardFileType): Collection<File> = when(type) {
-    ProguardFileType.EXPLICIT -> this.proguardFiles
-    ProguardFileType.TEST -> this.testProguardFiles
-    ProguardFileType.CONSUMER -> this.consumerProguardFiles
-    else -> throw AssertionError("Unknown proguard file type: $type")
+/**
+ * A list of build features that can be disabled or enabled in an Android Dynamic Feature project.
+ */
+@Incubating
+interface DynamicFeatureBuildFeatures : BuildFeatures {
 }

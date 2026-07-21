@@ -19,9 +19,8 @@ package com.android.build.gradle.tasks;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.api.artifact.ArtifactType;
-import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
+import com.android.build.gradle.internal.scope.ExistingBuildElements;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
-import com.android.build.gradle.internal.scope.OutputScope;
 import com.android.build.gradle.internal.scope.SingleArtifactType;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.builder.profile.ProcessProfileWriter;
@@ -93,7 +92,6 @@ public abstract class PackageApplication extends PackageAndroidArtifact {
                 @NonNull SingleArtifactType<Directory> inputResourceFilesType,
                 @NonNull Provider<Directory> manifests,
                 @NonNull ArtifactType<Directory> manifestType,
-                @NonNull OutputScope outputScope,
                 @Nullable FileCache fileCache,
                 boolean packageCustomClassDependencies) {
             super(
@@ -102,7 +100,6 @@ public abstract class PackageApplication extends PackageAndroidArtifact {
                     manifests,
                     manifestType,
                     fileCache,
-                    outputScope,
                     packageCustomClassDependencies);
             this.outputDirectory = outputDirectory;
         }
@@ -132,6 +129,14 @@ public abstract class PackageApplication extends PackageAndroidArtifact {
                             PackageApplication::getOutputDirectory,
                             outputDirectory.getAbsolutePath(),
                             "");
+
+            getVariantScope()
+                    .getArtifacts()
+                    .getOperations()
+                    .setInitialProvider(taskProvider, PackageApplication::getIdeModelOutputFile)
+                    .atLocation(PackageApplication::getOutputDirectory)
+                    .withName(ExistingBuildElements.METADATA_FILE_NAME)
+                    .on(InternalArtifactType.APK_IDE_MODEL.INSTANCE);
         }
 
         @Override

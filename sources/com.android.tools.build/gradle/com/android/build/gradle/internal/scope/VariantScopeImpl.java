@@ -25,7 +25,7 @@ import static com.android.build.gradle.internal.dsl.BuildType.PostProcessingConf
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ARTIFACT_TYPE;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.ALL;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.PROJECT;
-import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.CLASSES;
+import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.CLASSES_JAR;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.COMPILE_ONLY_NAMESPACED_R_CLASS_JAR;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.FEATURE_SET_METADATA;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.SHARED_CLASSES;
@@ -53,11 +53,9 @@ import static com.google.common.base.Preconditions.checkState;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.gradle.BaseExtension;
-import com.android.build.gradle.internal.BaseConfigAdapter;
 import com.android.build.gradle.internal.PostprocessingFeatures;
 import com.android.build.gradle.internal.ProguardFileType;
 import com.android.build.gradle.internal.core.Abi;
-import com.android.build.gradle.internal.core.OldPostProcessingOptions;
 import com.android.build.gradle.internal.core.PostProcessingBlockOptions;
 import com.android.build.gradle.internal.core.PostProcessingOptions;
 import com.android.build.gradle.internal.core.VariantDslInfo;
@@ -70,7 +68,6 @@ import com.android.build.gradle.internal.dependency.ProvidedClasspath;
 import com.android.build.gradle.internal.dependency.SubtractingArtifactCollection;
 import com.android.build.gradle.internal.dependency.VariantDependencies;
 import com.android.build.gradle.internal.dsl.BuildType;
-import com.android.build.gradle.internal.dsl.ProductFlavor;
 import com.android.build.gradle.internal.packaging.JarCreatorType;
 import com.android.build.gradle.internal.pipeline.TransformManager;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
@@ -114,7 +111,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -201,7 +197,9 @@ public class VariantScopeImpl implements VariantScope {
                     buildType.getPostprocessing(), getType().isTestComponent());
         }
 
-        return new OldPostProcessingOptions(buildType, globalScope.getProject());
+        return variantData
+                .getVariantDslInfo()
+                .createOldPostProcessingOptions(globalScope.getProject());
     }
 
     protected Project getProject() {
@@ -461,16 +459,8 @@ public class VariantScopeImpl implements VariantScope {
     private List<File> gatherProguardFiles(ProguardFileType type) {
         VariantDslInfo variantDslInfo = getVariantDslInfo();
 
-        List<File> result =
-                new ArrayList<>(
-                        BaseConfigAdapter.getProguardFiles(
-                                variantDslInfo.getDefaultConfig(), type));
-
+        List<File> result = variantDslInfo.gatherProguardFiles(type);
         result.addAll(postProcessingOptions.getProguardFiles(type));
-
-        for (ProductFlavor flavor : variantDslInfo.getProductFlavors()) {
-            result.addAll(BaseConfigAdapter.getProguardFiles(flavor, type));
-        }
 
         return result;
     }
@@ -565,7 +555,7 @@ public class VariantScopeImpl implements VariantScope {
         // Assume Java8LangSupport is either D8 or R8 as we checked that in
         // isCoreLibraryDesugaringEnabled()
         if (getJava8LangSupportType() == Java8LangSupport.D8
-                && getVariantDslInfo().getBuildType().isDebuggable()) {
+                && getVariantData().getPublicVariantApi().isDebuggable()) {
             return false;
         }
         return true;
@@ -644,12 +634,6 @@ public class VariantScopeImpl implements VariantScope {
         return variantData instanceof TestVariantData ?
                 (BaseVariantData) ((TestVariantData) variantData).getTestedVariantData() :
                 null;
-    }
-
-    @NonNull
-    @Override
-    public File getSplitApkOutputFolder() {
-        return new File(globalScope.getIntermediatesDir(), "/split-apk/" + getDirName());
     }
 
     // Precomputed file paths.
@@ -1097,8 +1081,8 @@ public class VariantScopeImpl implements VariantScope {
     @NonNull
     @Override
     public FileCollection getProvidedOnlyClasspath() {
-        ArtifactCollection compile = getArtifactCollection(COMPILE_CLASSPATH, ALL, CLASSES);
-        ArtifactCollection runtime = getArtifactCollection(RUNTIME_CLASSPATH, ALL, CLASSES);
+        ArtifactCollection compile = getArtifactCollection(COMPILE_CLASSPATH, ALL, CLASSES_JAR);
+        ArtifactCollection runtime = getArtifactCollection(RUNTIME_CLASSPATH, ALL, CLASSES_JAR);
 
         return ProvidedClasspath.getProvidedClasspath(compile, runtime);
     }
@@ -1328,12 +1312,6 @@ public class VariantScopeImpl implements VariantScope {
     @Override
     public File getAarLocation() {
         return FileUtils.join(globalScope.getOutputsDir(), BuilderConstants.EXT_LIB_ARCHIVE);
-    }
-
-    @Override
-    @NonNull
-    public OutputScope getOutputScope() {
-        return variantData.getOutputScope();
     }
 
     @NonNull

@@ -102,9 +102,6 @@ abstract class ShrinkResourcesTask : NonIncrementalTask() {
     abstract val enableRTxtResourceShrinking: Property<Boolean>
 
     @get:Input
-    abstract val multiOutputPolicy: Property<MultiOutputPolicy>
-
-    @get:Input
     abstract val variantTypeName: Property<String>
 
     @Input
@@ -221,10 +218,7 @@ abstract class ShrinkResourcesTask : NonIncrementalTask() {
 
             task.variantTypeName.setDisallowChanges(variantData.type.name)
 
-            task.debuggableBuildType
-                .setDisallowChanges(variantData.variantDslInfo.buildType.isDebuggable)
-
-            task.multiOutputPolicy.setDisallowChanges(variantData.multiOutputPolicy)
+            task.debuggableBuildType.setDisallowChanges(variantData.publicVariantApi.isDebuggable)
 
             task.enableRTxtResourceShrinking.set(variantScope
                 .globalScope.projectOptions[BooleanOption.ENABLE_R_TXT_RESOURCE_SHRINKING])

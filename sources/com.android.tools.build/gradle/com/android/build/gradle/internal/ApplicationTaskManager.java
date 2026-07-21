@@ -356,7 +356,7 @@ public class ApplicationTaskManager extends TaskManager {
         final VariantType variantType = scope.getType();
 
         if (variantType.isBaseModule()) {
-            Boolean unbundledWearApp = variantDslInfo.getMergedFlavor().getWearAppUnbundled();
+            Boolean unbundledWearApp = variantDslInfo.isWearAppUnbundled();
 
             if (!Boolean.TRUE.equals(unbundledWearApp)
                     && variantDslInfo.getBuildType().isEmbedMicroApp()) {
@@ -463,6 +463,6 @@ public class ApplicationTaskManager extends TaskManager {
     }
 
     private static boolean addBundleDependenciesTask(@NonNull VariantScope scope) {
-        return !scope.getVariantDslInfo().getBuildType().isDebuggable();
+        return !scope.getVariantData().getPublicVariantApi().isDebuggable();
     }
 }

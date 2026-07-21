@@ -19,6 +19,7 @@ package com.android.build.gradle.internal;
 import static com.android.build.api.transform.QualifiedContent.DefaultContentType.RESOURCES;
 import static com.android.build.gradle.internal.cxx.model.TryCreateCxxModuleModelKt.tryCreateCxxModuleModel;
 import static com.android.build.gradle.internal.dependency.VariantDependencies.CONFIG_NAME_ANDROID_APIS;
+import static com.android.build.gradle.internal.dependency.VariantDependencies.CONFIG_NAME_CORE_LIBRARY_DESUGARING;
 import static com.android.build.gradle.internal.dependency.VariantDependencies.CONFIG_NAME_LINTCHECKS;
 import static com.android.build.gradle.internal.dependency.VariantDependencies.CONFIG_NAME_LINTPUBLISH;
 import static com.android.build.gradle.internal.pipeline.ExtendedContentType.NATIVE_LIBS;
@@ -26,7 +27,7 @@ import static com.android.build.gradle.internal.publishing.AndroidArtifacts.Arti
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.EXTERNAL;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.PROJECT;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.APKS_FROM_BUNDLE;
-import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.CLASSES;
+import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.CLASSES_JAR;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.JAVA_RES;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.REVERSE_METADATA_CLASSES;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.REVERSE_METADATA_VALUES;
@@ -412,6 +413,8 @@ public abstract class TaskManager {
         // By resolving it here we avoid configuration problems. The value returned will be cached
         // and returned immediately later when this method is invoked.
         Aapt2MavenUtils.getAapt2FromMavenAndVersion(globalScope);
+
+        createCoreLibraryDesugaringConfig(project);
     }
 
     private void configureCustomLintChecksConfig() {
@@ -618,6 +621,18 @@ public abstract class TaskManager {
         return androidJarConfig;
     }
 
+    public static void createCoreLibraryDesugaringConfig(@NonNull Project project) {
+        Configuration coreLibraryDesugaring =
+                project.getConfigurations().findByName(CONFIG_NAME_CORE_LIBRARY_DESUGARING);
+        if (coreLibraryDesugaring == null) {
+            coreLibraryDesugaring =
+                    project.getConfigurations().create(CONFIG_NAME_CORE_LIBRARY_DESUGARING);
+            coreLibraryDesugaring.setVisible(false);
+            coreLibraryDesugaring.setCanBeConsumed(false);
+            coreLibraryDesugaring.setDescription("Configuration to desugar libraries");
+        }
+    }
+
     protected void createDependencyStreams(@NonNull final VariantScope variantScope) {
         // Since it's going to chance the configurations, we need to do it before
         // we start doing queries to fill the streams.
@@ -632,7 +647,7 @@ public abstract class TaskManager {
                         .addScope(Scope.EXTERNAL_LIBRARIES)
                         .setArtifactCollection(
                                 variantScope.getArtifactCollection(
-                                        RUNTIME_CLASSPATH, EXTERNAL, CLASSES))
+                                        RUNTIME_CLASSPATH, EXTERNAL, CLASSES_JAR))
                         .build());
 
         // Add stream of external java resources if EXTERNAL_LIBRARIES isn't in the set of java res
@@ -655,7 +670,7 @@ public abstract class TaskManager {
                         .addScope(Scope.SUB_PROJECTS)
                         .setArtifactCollection(
                                 variantScope.getArtifactCollection(
-                                        RUNTIME_CLASSPATH, PROJECT, CLASSES))
+                                        RUNTIME_CLASSPATH, PROJECT, CLASSES_JAR))
                         .build());
 
         // same for the java resources, if SUB_PROJECTS isn't in the set of java res merging scopes.
@@ -708,7 +723,7 @@ public abstract class TaskManager {
             // get the OutputPublishingSpec from the ArtifactType for this particular variant spec
             PublishingSpecs.OutputSpec taskOutputSpec =
                     testedSpec.getSpec(
-                            AndroidArtifacts.ArtifactType.CLASSES,
+                            AndroidArtifacts.ArtifactType.CLASSES_JAR,
                             AndroidArtifacts.PublishedConfigType.RUNTIME_ELEMENTS);
             // now get the output type
             SingleArtifactType<Directory> testedOutputType =
@@ -740,7 +755,7 @@ public abstract class TaskManager {
                             .addScope(Scope.TESTED_CODE)
                             .setArtifactCollection(
                                     testedVariantScope.getArtifactCollection(
-                                            RUNTIME_CLASSPATH, ALL, CLASSES))
+                                            RUNTIME_CLASSPATH, ALL, CLASSES_JAR))
                             .build());
         }
     }
@@ -776,7 +791,7 @@ public abstract class TaskManager {
     protected static boolean appliesCustomClassTransforms(
             @NonNull VariantScope scope, @NonNull ProjectOptions options) {
         final VariantType type = scope.getType();
-        return scope.getVariantDslInfo().getBuildType().isDebuggable()
+        return scope.getVariantData().getPublicVariantApi().isDebuggable()
                 && type.isApk()
                 && !type.isForTesting()
                 && !getAdvancedProfilingTransforms(options).isEmpty();
@@ -1677,10 +1692,9 @@ public abstract class TaskManager {
     public void maybeCreateLintVitalTask(
             @NonNull ApkVariantData variantData, @NonNull List<VariantScope> variantScopes) {
         VariantScope variantScope = variantData.getScope();
-        VariantDslInfo variantDslInfo = variantData.getVariantDslInfo();
 
         if (!isLintVariant(variantScope)
-                || variantDslInfo.getBuildType().isDebuggable()
+                || variantScope.getVariantData().getPublicVariantApi().isDebuggable()
                 || !extension.getLintOptions().isCheckReleaseBuilds()) {
             return;
         }
@@ -2207,7 +2221,7 @@ public abstract class TaskManager {
         } else {
             boolean produceSeparateOutputs =
                     dexingType == DexingType.NATIVE_MULTIDEX
-                            && variantScope.getVariantDslInfo().getBuildType().isDebuggable();
+                            && variantScope.getVariantData().getPublicVariantApi().isDebuggable();
 
             taskFactory.register(
                     new DexMergingTask.CreationAction(
@@ -2345,53 +2359,34 @@ public abstract class TaskManager {
                                 .build());
     }
 
-    private void createDataBindingMergeArtifactsTask(@NonNull VariantScope variantScope) {
-        final BuildFeatureValues features = variantScope.getGlobalScope().getBuildFeatures();
-        if (!features.getDataBinding() && !features.getViewBinding()) {
-            return;
-        }
-        final BaseVariantData variantData = variantScope.getVariantData();
-        VariantType type = variantData.getType();
-        if (type.isForTesting() && !extension.getDataBinding().isEnabledForTests()) {
-            BaseVariantData testedVariantData = checkNotNull(variantScope.getTestedVariantData());
-            if (!testedVariantData.getType().isAar()) {
-                return;
-            }
-        }
-        taskFactory.register(
-                new DataBindingMergeDependencyArtifactsTask.CreationAction(variantScope));
-    }
-
-    private void createDataBindingMergeBaseClassesTask(@NonNull VariantScope variantScope) {
-        final BaseVariantData variantData = variantScope.getVariantData();
-        VariantType type = variantData.getType();
-        if (type.isForTesting() && !extension.getDataBinding().isEnabledForTests()) {
-            BaseVariantData testedVariantData = checkNotNull(variantScope.getTestedVariantData());
-            if (!testedVariantData.getType().isAar()) {
-                return;
-            }
-        }
-
-        taskFactory.register(new DataBindingMergeBaseClassLogTask.CreationAction(variantScope));
-    }
-
     protected void createDataBindingTasksIfNecessary(@NonNull VariantScope scope) {
         final BuildFeatureValues features = scope.getGlobalScope().getBuildFeatures();
         boolean dataBindingEnabled = features.getDataBinding();
         if (!dataBindingEnabled && !features.getViewBinding()) {
             return;
         }
-        createDataBindingMergeBaseClassesTask(scope);
-        createDataBindingMergeArtifactsTask(scope);
-
 
         VariantType type = scope.getType();
-        if (type.isForTesting() && !extension.getDataBinding().isEnabledForTests()) {
-            BaseVariantData testedVariantData = checkNotNull(scope.getTestedVariantData());
-            if (!testedVariantData.getType().isAar()) {
+        if (type.isForTesting()) {
+            BaseVariantData testedVariantData = scope.getTestedVariantData();
+            if (testedVariantData == null) {
+                // This is a com.android.test module.
+                if (dataBindingEnabled) {
+                    getLogger()
+                            .error("Data binding cannot be enabled in a com.android.test project");
+                    return;
+                }
+                // else viewBinding must be enabled which is fine.
+            } else if (!extension.getDataBinding().isEnabledForTests()
+                    && !testedVariantData.getType().isAar()) {
                 return;
             }
         }
+
+        taskFactory.register(new DataBindingMergeBaseClassLogTask.CreationAction(scope));
+
+        taskFactory.register(
+                new DataBindingMergeDependencyArtifactsTask.CreationAction(scope));
 
         dataBindingBuilder.setDebugLogEnabled(getLogger().isDebugEnabled());
 
@@ -2485,7 +2480,6 @@ public abstract class TaskManager {
                                 resourceFilesInputType,
                                 manifests,
                                 manifestType,
-                                variantScope.getOutputScope(),
                                 globalScope.getBuildCache(),
                                 packagesCustomClassDependencies(variantScope, projectOptions)),
                         null,

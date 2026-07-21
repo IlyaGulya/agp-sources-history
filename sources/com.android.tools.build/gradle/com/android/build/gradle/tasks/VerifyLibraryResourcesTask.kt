@@ -23,16 +23,17 @@ import com.android.build.gradle.internal.res.Aapt2CompileRunnable
 import com.android.build.gradle.internal.res.Aapt2ProcessResourcesRunnable
 import com.android.build.gradle.internal.res.ResourceCompilerRunnable
 import com.android.build.gradle.internal.res.getAapt2FromMavenAndVersion
-import com.android.build.gradle.internal.res.namespaced.Aapt2ServiceKey
-import com.android.build.gradle.internal.res.namespaced.registerAaptService
 import com.android.build.gradle.internal.scope.ExistingBuildElements
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.VariantScope
+import com.android.build.gradle.internal.services.Aapt2DaemonBuildService
+import com.android.build.gradle.internal.services.Aapt2DaemonServiceKey
 import com.android.build.gradle.internal.services.Aapt2WorkersBuildService
+import com.android.build.gradle.internal.services.aapt2WorkersServiceRegistry
+import com.android.build.gradle.internal.services.getAapt2DaemonBuildService
 import com.android.build.gradle.internal.tasks.NewIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.services.getAapt2WorkersBuildService
-import com.android.build.gradle.internal.services.registerForWorkers
 import com.android.build.gradle.internal.utils.fromDisallowChanges
 import com.android.build.gradle.internal.workeractions.WorkerActionServiceRegistry
 import com.android.build.gradle.options.BooleanOption
@@ -119,6 +120,9 @@ abstract class VerifyLibraryResourcesTask : NewIncrementalTask() {
     @get:Internal
     abstract val aapt2WorkersBuildService: Property<Aapt2WorkersBuildService>
 
+    @get:Internal
+    abstract val aapt2DaemonBuildService: Property<Aapt2DaemonBuildService>
+
     private lateinit var mergeBlameFolder: File
 
     private lateinit var manifestMergeBlameFile: Provider<RegularFile>
@@ -129,8 +133,9 @@ abstract class VerifyLibraryResourcesTask : NewIncrementalTask() {
         val manifestsOutputs = ExistingBuildElements.from(taskInputType, manifestFiles.get().asFile)
         val manifestFile = Iterables.getOnlyElement(manifestsOutputs).outputFile
 
-        val aapt2ServiceKey = registerAaptService(aapt2FromMaven, LoggerWrapper(logger))
-        val aapt2WorkersBuildServiceKey = aapt2WorkersBuildService.get().registerForWorkers()
+        val aapt2ServiceKey =
+            aapt2DaemonBuildService.get().registerAaptService(aapt2FromMaven, LoggerWrapper(logger))
+        val aapt2WorkersBuildServiceKey = aapt2WorkersBuildService.get().getWorkersServiceKey()
         val parameter = Params(
             projectName = projectName,
             owner = path,
@@ -152,7 +157,7 @@ abstract class VerifyLibraryResourcesTask : NewIncrementalTask() {
         val projectName: String,
         val owner: String,
         val androidJar: File,
-        val aapt2ServiceKey: Aapt2ServiceKey,
+        val aapt2ServiceKey: Aapt2DaemonServiceKey,
         val aapt2WorkersBuildServiceKey: WorkerActionServiceRegistry.ServiceKey<Aapt2WorkersBuildService>,
         val errorFormatMode: SyncOptions.ErrorFormatMode,
         val inputs: SerializableInputChanges,
@@ -169,7 +174,7 @@ abstract class VerifyLibraryResourcesTask : NewIncrementalTask() {
      */
     private class Action @Inject constructor(private val params: Params) : Runnable {
         override fun run() {
-            WorkerActionServiceRegistry.INSTANCE
+            aapt2WorkersServiceRegistry
                 .getService(params.aapt2WorkersBuildServiceKey)
                 .service
                 .getSharedExecutorForAapt2(params.projectName, params.owner).use { facade ->
@@ -262,6 +267,7 @@ abstract class VerifyLibraryResourcesTask : NewIncrementalTask() {
             task.useJvmResourceCompiler =
               variantScope.globalScope.projectOptions[BooleanOption.ENABLE_JVM_RESOURCE_COMPILER]
             task.aapt2WorkersBuildService.set(getAapt2WorkersBuildService(task.project))
+            task.aapt2DaemonBuildService.set(getAapt2DaemonBuildService(task.project))
         }
     }
 
@@ -301,7 +307,7 @@ abstract class VerifyLibraryResourcesTask : NewIncrementalTask() {
             inputs: SerializableInputChanges,
             outDirectory: File,
             workerExecutor: WorkerExecutorFacade,
-            aapt2ServiceKey: Aapt2ServiceKey,
+            aapt2ServiceKey: Aapt2DaemonServiceKey,
             errorFormatMode: SyncOptions.ErrorFormatMode,
             mergeBlameFolder: File,
             useJvmResourceCompiler: Boolean
@@ -331,7 +337,7 @@ abstract class VerifyLibraryResourcesTask : NewIncrementalTask() {
                             )
 
                             if (useJvmResourceCompiler &&
-                              canCompileResourceInJvm(request.inputFile)) {
+                              canCompileResourceInJvm(request.inputFile, request.isPngCrunching)) {
                                 workerExecutor.submit(
                                   ResourceCompilerRunnable::class.java,
                                   ResourceCompilerRunnable.Params(request)

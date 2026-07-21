@@ -16,12 +16,15 @@
 
 package com.android.build.gradle.internal.dsl
 
+import com.android.build.api.dsl.ApplicationBuildFeatures
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.variant.AppVariant
 import com.android.build.api.variant.AppVariantProperties
 import com.android.build.api.variant.GenericVariantFilterBuilder
 import com.android.build.api.variant.impl.GenericVariantFilterBuilderImpl
+import com.android.build.gradle.internal.CompileOptions
 import com.android.build.gradle.internal.api.dsl.DslScope
+import com.android.build.gradle.internal.coverage.JacocoOptions
 import com.android.build.gradle.internal.scope.VariantScope
 import org.gradle.api.NamedDomainObjectContainer
 
@@ -34,6 +37,7 @@ class ApplicationExtensionImpl(
     signingConfigs: NamedDomainObjectContainer<SigningConfig>
 ) :
     CommonExtensionImpl<
+            ApplicationBuildFeatures,
             BuildType,
             DefaultConfig,
             ProductFlavor,
@@ -48,10 +52,21 @@ class ApplicationExtensionImpl(
     ),
     ApplicationExtension<
             BuildType,
+            CmakeOptions,
+            CompileOptions,
             DefaultConfig,
+            ExternalNativeBuild,
+            JacocoOptions,
+            NdkBuildOptions,
             ProductFlavor,
-            SigningConfig>,
+            SigningConfig,
+            TestOptions,
+            TestOptions.UnitTestOptions>,
     ActionableVariantObjectOperationsExecutor {
+
+    override val buildFeatures: ApplicationBuildFeatures =
+        dslScope.objectFactory.newInstance(ApplicationBuildFeaturesImpl::class.java)
+
     override fun executeVariantOperations(variantScopes: List<VariantScope>) {
         variantOperations.executeOperations<AppVariant>(variantScopes)
     }
