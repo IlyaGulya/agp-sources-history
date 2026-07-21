@@ -98,9 +98,7 @@ final class D8DexArchiveBuilder extends DexArchiveBuilder {
             if (globalSyntheticsOutput != null) {
                 builder.setGlobalSyntheticsConsumer(
                         new D8GlobalSyntheticsConsumer(globalSyntheticsOutput));
-            }
-
-            if (dexParams.getEnableApiModeling()) {
+                // Enable this flag along with the support for global synthetics (b/231547906)
                 builder.setEnableExperimentalMissingLibraryApiModeling(true);
             }
 

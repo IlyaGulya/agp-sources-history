@@ -138,7 +138,7 @@ This is the path of preference folder expected by the Android tools."""
      * ANDROID_USER_HOME does not exist
      *
      */
-     fun computeAndroidFolder(): Path  {
+    private fun computeAndroidFolder(): Path  {
         val locator = AndroidPathLocator(environmentProvider, if (!silent) logger else NullLogger())
 
         val folder =
