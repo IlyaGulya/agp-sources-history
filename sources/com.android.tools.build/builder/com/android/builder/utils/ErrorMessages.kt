@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.build.api.variant
+package com.android.builder.utils
 
-import com.android.build.api.dsl.TestExtension
+import com.android.Version
 
-/**
- * Extension for the Android Test Gradle Plugin components.
- *
- * This is the `androidComponents` block when the `com.android.test` plugin is applied.
- *
- * Only the Android Gradle Plugin should create instances of interfaces in com.android.build.api.variant.
- */
-interface TestAndroidComponentsExtension:
-    AndroidComponentsExtension<TestExtension, TestVariantBuilder, TestVariant>
+/** The version used on developer.android.com */
+val agpReferenceDocsVersion = Version.ANDROID_GRADLE_PLUGIN_VERSION.substringBeforeLast('.')
+
+private val agpReferenceDocsSitePrefix = "https://developer.android.com/reference/tools/gradle-api/$agpReferenceDocsVersion/"
+
+fun agpReferenceDocsUrl(path: String): String {
+    return agpReferenceDocsSitePrefix + path
+}
