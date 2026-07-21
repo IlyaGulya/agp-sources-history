@@ -20,6 +20,7 @@ package com.android.build.gradle.internal.lint
 
 import com.android.SdkConstants.VALUE_TRUE
 import com.android.Version
+import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.artifact.impl.ArtifactsImpl
 import com.android.build.api.dsl.Lint
 import com.android.build.api.variant.DeviceTestBuilder
@@ -361,8 +362,7 @@ abstract class AndroidLintTask : NonIncrementalTask() {
     val baselineFile = projectInputs.lintOptions.baseline.orNull?.asFile
     if (baselineFile != null) {
       val isUpdating = lintMode.get() == LintMode.UPDATE_BASELINE
-      val treatAsEmptyIfMissing = missingBaselineIsEmptyBaseline.get() ||
-        (projectInputs.lintOptions.defaultBaseline.get() && !isUpdating)
+      val treatAsEmptyIfMissing = missingBaselineIsEmptyBaseline.get() || (projectInputs.lintOptions.defaultBaseline.get() && !isUpdating)
       if (baselineFile.exists() || isUpdating || treatAsEmptyIfMissing) {
         arguments.add("--baseline", baselineFile.absolutePath)
       }
@@ -398,11 +398,12 @@ abstract class AndroidLintTask : NonIncrementalTask() {
     }
 
     if (projectInputs.lintOptions.checkDependencies.isPresent) {
-      arguments += if (projectInputs.lintOptions.checkDependencies.get()) {
-        "--check-dependencies"
-      } else {
-        "--no-check-dependencies"
-      }
+      arguments +=
+        if (projectInputs.lintOptions.checkDependencies.get()) {
+          "--check-dependencies"
+        } else {
+          "--no-check-dependencies"
+        }
     }
 
     return Collections.unmodifiableList(arguments)
@@ -445,10 +446,10 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         creationConfig.name,
         creationConfig.services.projectInfo.getReportsDir(),
         "lint-results",
-        InternalArtifactType.LINT_TEXT_REPORT,
-        InternalArtifactType.LINT_HTML_REPORT,
-        InternalArtifactType.LINT_XML_REPORT,
-        InternalArtifactType.LINT_SARIF_REPORT,
+        SingleArtifact.LINT_TEXT_REPORT,
+        SingleArtifact.LINT_HTML_REPORT,
+        SingleArtifact.LINT_XML_REPORT,
+        SingleArtifact.LINT_SARIF_REPORT,
       )
     }
 
@@ -483,10 +484,10 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         creationConfig.name,
         creationConfig.services.projectInfo.getReportsDir(),
         "local-lint-results",
-        InternalArtifactType.LINT_TEXT_REPORT,
-        InternalArtifactType.LINT_HTML_REPORT,
-        InternalArtifactType.LINT_XML_REPORT,
-        InternalArtifactType.LINT_SARIF_REPORT,
+        SingleArtifact.LINT_TEXT_REPORT,
+        SingleArtifact.LINT_HTML_REPORT,
+        SingleArtifact.LINT_XML_REPORT,
+        SingleArtifact.LINT_SARIF_REPORT,
       )
     }
 
@@ -520,10 +521,10 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         creationConfig.name,
         creationConfig.services.projectInfo.getReportsDir(),
         "aggregated-lint-results",
-        InternalArtifactType.AGGREGATED_LINT_TEXT_REPORT,
-        InternalArtifactType.AGGREGATED_LINT_HTML_REPORT,
-        InternalArtifactType.AGGREGATED_LINT_XML_REPORT,
-        InternalArtifactType.AGGREGATED_LINT_SARIF_REPORT,
+        SingleArtifact.AGGREGATED_LINT_TEXT_REPORT,
+        SingleArtifact.AGGREGATED_LINT_HTML_REPORT,
+        SingleArtifact.AGGREGATED_LINT_XML_REPORT,
+        SingleArtifact.AGGREGATED_LINT_SARIF_REPORT,
       )
     }
 
@@ -843,10 +844,10 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         variantName: String?,
         reportsDirectory: Provider<Directory>,
         namePrefix: String,
-        textReportType: InternalArtifactType<RegularFile>,
-        htmlReportType: InternalArtifactType<RegularFile>,
-        xmlReportType: InternalArtifactType<RegularFile>,
-        sarifReportType: InternalArtifactType<RegularFile>,
+        textReportType: SingleArtifact<RegularFile>,
+        htmlReportType: SingleArtifact<RegularFile>,
+        xmlReportType: SingleArtifact<RegularFile>,
+        sarifReportType: SingleArtifact<RegularFile>,
       ) {
         val name = namePrefix + if (variantName != null) "-$variantName" else ""
         artifacts
