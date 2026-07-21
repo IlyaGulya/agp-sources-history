@@ -19,24 +19,36 @@ package com.android.builder.symbols;
 import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.ide.common.xml.AndroidManifestParser;
 import com.android.resources.ResourceType;
 import com.android.utils.FileUtils;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.io.ByteStreams;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
 
 /**
  * Reads and writes symbol tables to files.
@@ -58,18 +70,86 @@ public final class SymbolIo {
     @NonNull
     public static SymbolTable read(@NonNull File file, @Nullable String tablePackage)
             throws IOException {
-        List<String> lines;
-        try {
-            lines = Files.readAllLines(file.toPath(), Charsets.UTF_8);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        return read(file, tablePackage, InOrderHandler::new);
+    }
+
+    /**
+     * Loads a symbol table from a symbol file created by aapt
+     *
+     * @param file the symbol file
+     * @param tablePackage the package name associated with the table
+     * @return the table read
+     * @throws IOException failed to read the table
+     */
+    @NonNull
+    public static SymbolTable readFromAapt(@NonNull File file, @Nullable String tablePackage)
+            throws IOException {
+        return read(file, tablePackage, AaptHandler::new);
+    }
+
+    @NonNull
+    private static SymbolTable read(
+            @NonNull File file,
+            @Nullable String tablePackage,
+            @NonNull Function<String, StyleableIndexHandler> handlerFunction)
+            throws IOException {
+        List<String> lines = Files.readAllLines(file.toPath(), Charsets.UTF_8);
+
+        SymbolTable.Builder table = readLines(lines, 1, file.toPath(), handlerFunction);
+
+        if (tablePackage != null) {
+            table.tablePackage(tablePackage);
         }
 
+        return table.build();
+    }
+
+    /**
+     * Loads a symbol table from a synthetic namespaced symbol file.
+     *
+     * <p>This is just a symbol table, but with the addition of the table package as the first line.
+     *
+     * @param file the symbol file
+     * @return the table read
+     * @throws IOException failed to read the table
+     */
+    @NonNull
+    public static SymbolTable readTableWithPackage(@NonNull File file) throws IOException {
+        return readTableWithPackage(file.toPath());
+    }
+
+    @NonNull
+    public static SymbolTable readTableWithPackage(@NonNull Path file) throws IOException {
+
+        List<String> lines = Files.readAllLines(file, Charsets.UTF_8);
+
+        if (lines.isEmpty()) {
+            throw new IOException("Internal error: Symbol file with package cannot be empty.");
+        }
+
+        SymbolTable.Builder table = readLines(lines, 2, file, InOrderHandler::new);
+        table.tablePackage(lines.get(0).trim());
+
+        return table.build();
+    }
+
+    @NonNull
+    private static SymbolTable.Builder readLines(
+            @NonNull List<String> lines,
+            int startLine,
+            @NonNull Path file,
+            @NonNull Function<String, StyleableIndexHandler> handlerFunction)
+            throws IOException {
         SymbolTable.Builder table = SymbolTable.builder();
 
-        int lineIndex = 1;
+        int lineIndex = startLine;
         String line = null;
         try {
+            final SymbolFilter symbolFilter =
+                    (resType, javaType) ->
+                            resType.equals(ResourceType.STYLEABLE.getName())
+                                    && javaType.equals(SymbolJavaType.INT.getTypeName());
+
             final int count = lines.size();
             for (; lineIndex <= count ; lineIndex++) {
                 line = lines.get(lineIndex - 1);
@@ -78,46 +158,22 @@ public final class SymbolIo {
                 // because there are some misordered file out there we want to make sure
                 // both the resType is Styleable and the javaType is array.
                 // We skip the non arrays that are out of sort
+                // data cannot be null, since the filter is null
+                //noinspection ConstantConditions
                 if (data.resourceType == ResourceType.STYLEABLE) {
                     if (data.javaType == SymbolJavaType.INT_LIST) {
-                        List<String> childrenNames = Lists.newArrayList();
                         final String data_name = data.name + "_";
+                        StyleableIndexHandler indexHandler = handlerFunction.apply(data_name);
                         SymbolData subData;
                         // read the next line
                         while (lineIndex < count
-                                && (subData =
-                                                readLine(
-                                                        lines.get(lineIndex),
-                                                        (resourceType, javaType) ->
-                                                                resourceType.equals(
-                                                                                ResourceType
-                                                                                        .STYLEABLE
-                                                                                        .getName())
-                                                                        && javaType.equals(
-                                                                                SymbolJavaType.INT
-                                                                                        .getTypeName())))
+                                && (subData = readLine(lines.get(lineIndex), symbolFilter))
                                         != null) {
                             // line is value, inc the index
                             lineIndex++;
 
-                            // check if the sub item actually belongs to this declare-styleable,
-                            // because of broken R.txt files.
-                            // We could have a int/styleable that follows a int[]/styleable but
-                            // is an index for a different declare-stylealbe.
-                            if (subData.name.startsWith(data_name)) {
-                                // tweak the name to remove the styleable.
-                                String indexName = subData.name.substring(data_name.length());
-                                // check if it's a namespace, in which case replace android_name
-                                // with android:name
-                                if (indexName.startsWith(ANDROID_ATTR_PREFIX)) {
-                                    indexName =
-                                            SdkConstants.ANDROID_NS_NAME_PREFIX
-                                                    + indexName.substring(
-                                                            ANDROID_ATTR_PREFIX.length());
-                                }
-
-                                childrenNames.add(indexName);
-                            }
+                            //noinspection ConstantConditions
+                            indexHandler.handle(subData);
                         }
 
                         table.add(
@@ -126,7 +182,7 @@ public final class SymbolIo {
                                         data.name,
                                         data.javaType,
                                         data.value,
-                                        childrenNames));
+                                        indexHandler.getChildrenNames()));
                     }
 
                 } else {
@@ -139,15 +195,11 @@ public final class SymbolIo {
             throw new IOException(
                     String.format(
                             "File format error reading %s line %d: '%s'",
-                            file.getAbsolutePath(), lineIndex, line),
+                            file.toString(), lineIndex, line),
                     e);
         }
 
-        if (tablePackage != null) {
-            table.tablePackage(tablePackage);
-        }
-
-        return table.build();
+        return table;
     }
 
     private static class SymbolData {
@@ -200,6 +252,95 @@ public final class SymbolIo {
         return new SymbolData(resourceType, name, type, value);
     }
 
+    /** Handler for the styleable indices read from a R.txt file. */
+    private interface StyleableIndexHandler {
+        void handle(@NonNull SymbolData data);
+
+        @NonNull
+        List<String> getChildrenNames();
+    }
+
+    private abstract static class BaseHandler implements StyleableIndexHandler {
+        @NonNull protected final String prefix;
+
+        BaseHandler(@NonNull String prefix) {
+            this.prefix = prefix;
+        }
+
+        protected String computeItemName(@NonNull String name) {
+            // tweak the name to remove the styleable prefix
+            String indexName = name.substring(prefix.length());
+            // check if it's a namespace, in which case replace android_name
+            // with android:name
+            if (indexName.startsWith(ANDROID_ATTR_PREFIX)) {
+                indexName =
+                        SdkConstants.ANDROID_NS_NAME_PREFIX
+                                + indexName.substring(ANDROID_ATTR_PREFIX.length());
+            }
+
+            return indexName;
+        }
+    }
+
+    /** Handler that just create the children name in the order the items are read */
+    private static class InOrderHandler extends BaseHandler {
+
+        @NonNull private final List<String> childrenNames = Lists.newArrayList();
+
+        InOrderHandler(@NonNull String prefix) {
+            super(prefix);
+        }
+
+        @Override
+        public void handle(@NonNull SymbolData subData) {
+            // check if the sub item actually belongs to this declare-styleable,
+            // because of broken R.txt files.
+            // We could have a int/styleable that follows a int[]/styleable but
+            // is an index for a different declare-styleable.
+            if (subData.name.startsWith(prefix)) {
+                childrenNames.add(computeItemName(subData.name));
+            }
+        }
+
+        @NonNull
+        @Override
+        public List<String> getChildrenNames() {
+            return ImmutableList.copyOf(childrenNames);
+        }
+    }
+
+    /**
+     * Handler sorting the items based on their values rather than the order they are read.
+     *
+     * <p>This is compatible with R.txt files generated by aapt.
+     */
+    private static class AaptHandler extends BaseHandler {
+        @NonNull private final List<SymbolData> allDatas = Lists.newArrayList();
+
+        public AaptHandler(@NonNull String prefix) {
+            super(prefix);
+        }
+
+        @Override
+        public void handle(@NonNull SymbolData data) {
+            allDatas.add(data);
+        }
+
+        @NonNull
+        @Override
+        public List<String> getChildrenNames() {
+            // sort the data by their values.
+            allDatas.sort(Comparator.comparingInt(o -> Integer.parseInt(o.value)));
+
+            // now extract the names only, and remove the prefix
+            return allDatas.stream().map(this::computeName).collect(Collectors.toList());
+        }
+
+        @NonNull
+        private String computeName(@NonNull SymbolData data) {
+            return computeItemName(data.name);
+        }
+    }
 
 
     /**
@@ -210,6 +351,10 @@ public final class SymbolIo {
      * @throws UncheckedIOException I/O error
      */
     public static void write(@NonNull SymbolTable table, @NonNull File file) {
+        write(table, file.toPath());
+    }
+
+    public static void write(@NonNull SymbolTable table, @NonNull Path file) {
         List<String> lines = new ArrayList<>();
 
         for (Symbol s : table.allSymbols()) {
@@ -238,19 +383,52 @@ public final class SymbolIo {
                                     + " "
                                     + s.getName()
                                     + "_"
-                                    + children.get(i)
+                                    + SymbolUtils.canonicalizeValueResourceName(children.get(i))
                                     + " "
                                     + i);
                 }
             }
         }
 
-        try (
-                FileOutputStream fos = new FileOutputStream(file);
-                PrintWriter pw = new PrintWriter(fos)) {
-            lines.forEach(pw::println);
+        try (BufferedOutputStream os = new BufferedOutputStream(Files.newOutputStream(file))) {
+            for (String line : lines) {
+                os.write(line.getBytes(Charsets.UTF_8));
+                os.write('\n');
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Writes the symbol table with the package name as the first line.
+     *
+     * @param symbolTable The R.txt file. If it does not exist, the result will be a file containing
+     *     only the package name
+     * @param manifest The AndroidManifest.xml file for this library. The package name is extracted
+     *     and written as the first line of the output.
+     * @param outputFile The file to write the result to.
+     */
+    public static void writeSymbolTableWithPackage(
+            @NonNull Path symbolTable, @NonNull Path manifest, @NonNull Path outputFile)
+            throws IOException {
+        @Nullable String packageName;
+        try (InputStream is = new BufferedInputStream(Files.newInputStream(manifest))) {
+            packageName = AndroidManifestParser.parse(is).getPackage();
+        } catch (SAXException | ParserConfigurationException e) {
+            throw new IOException(e);
+        }
+        try (OutputStream os = new BufferedOutputStream(Files.newOutputStream(outputFile))) {
+            if (packageName != null) {
+                os.write(packageName.getBytes(Charsets.UTF_8));
+            }
+            os.write('\n');
+            if (!Files.exists(symbolTable)) {
+                return;
+            }
+            try (InputStream is = new BufferedInputStream(Files.newInputStream(symbolTable))) {
+                ByteStreams.copy(is, os);
+            }
         }
     }
 

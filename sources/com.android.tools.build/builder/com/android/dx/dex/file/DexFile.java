@@ -21,9 +21,11 @@ import com.android.dx.dex.DexOptions;
 import com.android.dx.dex.file.MixedItemSection.SortType;
 import com.android.dx.rop.cst.Constant;
 import com.android.dx.rop.cst.CstBaseMethodRef;
+import com.android.dx.rop.cst.CstCallSite;
 import com.android.dx.rop.cst.CstCallSiteRef;
 import com.android.dx.rop.cst.CstEnumRef;
 import com.android.dx.rop.cst.CstFieldRef;
+import com.android.dx.rop.cst.CstMethodHandle;
 import com.android.dx.rop.cst.CstProtoRef;
 import com.android.dx.rop.cst.CstString;
 import com.android.dx.rop.cst.CstType;
@@ -36,6 +38,8 @@ import java.io.Writer;
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.Adler32;
 
 /**
@@ -217,7 +221,7 @@ public final class DexFile {
     public void writeTo(OutputStream out, Writer humanOut, boolean verbose)
         throws IOException {
         boolean annotate = (humanOut != null);
-        ByteArrayAnnotatedOutput result = toDex0(annotate, verbose);
+        ByteArrayAnnotatedOutput result = toDex0(annotate, verbose, null);
 
         if (out != null) {
             out.write(result.getArray());
@@ -227,6 +231,41 @@ public final class DexFile {
             result.writeAnnotationsTo(humanOut);
         }
     }
+
+
+    /**
+     * Writes the contents of this instance as either a binary or a
+     * human-readable form, or both.
+     *
+     * @param out {@code null-ok;} where to write to
+     * @param storage temporary storage for storing dexing.
+     * @param humanOut {@code null-ok;} where to write human-oriented output to
+     * @param verbose whether to be verbose when writing human-oriented output
+     */
+    public void writeTo(OutputStream out, Storage storage, Writer humanOut, boolean verbose)
+            throws IOException {
+        boolean annotate = (humanOut != null);
+        ByteArrayAnnotatedOutput result = toDex0(annotate, verbose, storage);
+
+        if (out != null) {
+            out.write(result.getArray());
+        }
+
+        if (annotate) {
+            result.writeAnnotationsTo(humanOut);
+        }
+    }
+
+    /**
+     * Writes the contents of this instance as either a binary.
+     *
+     * @param storage temporary storage for storing dexing.
+     * @return the stored content.
+     */
+    public ByteArrayAnnotatedOutput writeTo(Storage storage) {
+        return toDex0(false, false, storage);
+    }
+
 
     /**
      * Returns the contents of this instance as a {@code .dex} file,
@@ -239,7 +278,7 @@ public final class DexFile {
     public byte[] toDex(Writer humanOut, boolean verbose)
         throws IOException {
         boolean annotate = (humanOut != null);
-        ByteArrayAnnotatedOutput result = toDex0(annotate, verbose);
+        ByteArrayAnnotatedOutput result = toDex0(annotate, verbose, null);
 
         if (annotate) {
             result.writeAnnotationsTo(humanOut);
@@ -493,6 +532,10 @@ public final class DexFile {
      * @param cst {@code non-null;} constant to possibly intern
      */
     /*package*/ void internIfAppropriate(Constant cst) {
+        if (cst == null) {
+            throw new NullPointerException("cst == null");
+        }
+
         if (cst instanceof CstString) {
             stringIds.intern((CstString) cst);
         } else if (cst instanceof CstType) {
@@ -503,8 +546,10 @@ public final class DexFile {
             fieldIds.intern((CstFieldRef) cst);
         } else if (cst instanceof CstEnumRef) {
             fieldIds.intern(((CstEnumRef) cst).getFieldRef());
-        } else if (cst == null) {
-            throw new NullPointerException("cst == null");
+        } else if (cst instanceof CstProtoRef) {
+            protoIds.intern(((CstProtoRef) cst).getPrototype());
+        } else if (cst instanceof CstMethodHandle) {
+            methodHandles.intern((CstMethodHandle) cst);
         }
     }
 
@@ -520,8 +565,6 @@ public final class DexFile {
      * item, or {@code null} if it's not that sort of constant
      */
     /*package*/ IndexedItem findItemOrNull(Constant cst) {
-        IndexedItem item;
-
         if (cst instanceof CstString) {
             return stringIds.get(cst);
         } else if (cst instanceof CstType) {
@@ -530,12 +573,39 @@ public final class DexFile {
             return methodIds.get(cst);
         } else if (cst instanceof CstFieldRef) {
             return fieldIds.get(cst);
+        } else if (cst instanceof CstEnumRef) {
+            return fieldIds.intern(((CstEnumRef) cst).getFieldRef());
         } else if (cst instanceof CstProtoRef) {
             return protoIds.get(cst);
+        } else if (cst instanceof CstMethodHandle) {
+            return methodHandles.get(cst);
         } else if (cst instanceof CstCallSiteRef) {
             return callSiteIds.get(cst);
         } else {
             return null;
+        }
+    }
+
+    /**
+     * Holder for a byte[] that can grow on demand.
+     */
+    public static final class Storage {
+        byte[] storage;
+        public Storage(byte[] storage) {
+            this.storage = storage;
+        }
+
+        public byte[] getStorage(int requestedLength) {
+            if (storage.length < requestedLength) {
+                Logger.getAnonymousLogger().log(
+                        Level.FINER,
+                        "DexFile storage too small  "
+                                + storage.length
+                                + " vs "
+                                + requestedLength);
+                storage = new byte[requestedLength];
+            }
+            return storage;
         }
     }
 
@@ -548,20 +618,26 @@ public final class DexFile {
      * @return {@code non-null;} a {@code .dex} file for this instance
      */
     private ByteArrayAnnotatedOutput toDex0(boolean annotate,
-            boolean verbose) {
+            boolean verbose,
+            Storage storage) {
         /*
          * The following is ordered so that the prepare() calls which
          * add items happen before the calls to the sections that get
          * added to.
          */
-        if (dexOptions.canUseInvokePolymorphic()) {
-            callSiteIds.prepare();
-            methodHandles.prepare();
-        }
+
         classDefs.prepare();
         classData.prepare();
         wordData.prepare();
+        if (dexOptions.canUseInvokePolymorphic()) {
+            // Prepare call site ids before byteData where the call site items are placed.
+            callSiteIds.prepare();
+        }
         byteData.prepare();
+        if (dexOptions.canUseInvokePolymorphic()) {
+            // Prepare method handles after call site items placed in byteData.
+            methodHandles.prepare();
+        }
         methodIds.prepare();
         fieldIds.prepare();
         protoIds.prepare();
@@ -621,7 +697,8 @@ public final class DexFile {
         // Write out all the sections.
 
         fileSize = offset;
-        byte[] barr = new byte[fileSize];
+        byte[] barr = storage == null ? new byte[fileSize] : storage.getStorage(fileSize);
+
         ByteArrayAnnotatedOutput out = new ByteArrayAnnotatedOutput(barr);
 
         if (annotate) {
@@ -659,8 +736,8 @@ public final class DexFile {
 
         // Perform final bookkeeping.
 
-        calcSignature(barr);
-        calcChecksum(barr);
+        calcSignature(barr, out.getCursor());
+        calcChecksum(barr, out.getCursor());
 
         if (annotate) {
             wordData.writeIndexAnnotation(out, ItemType.TYPE_CODE_ITEM,
@@ -692,8 +769,9 @@ public final class DexFile {
      * given array, and modify the array to contain it.
      *
      * @param bytes {@code non-null;} the bytes of the file
+     * @param len length of {@code .dex} file encoded in the array
      */
-    private static void calcSignature(byte[] bytes) {
+    private static void calcSignature(byte[] bytes, int len) {
         MessageDigest md;
 
         try {
@@ -702,13 +780,13 @@ public final class DexFile {
             throw new RuntimeException(ex);
         }
 
-        md.update(bytes, 32, bytes.length - 32);
+        md.update(bytes, 32, len - 32);
 
         try {
             int amt = md.digest(bytes, 12, 20);
             if (amt != 20) {
                 throw new RuntimeException("unexpected digest write: " + amt +
-                                           " bytes");
+                        " bytes");
             }
         } catch (DigestException ex) {
             throw new RuntimeException(ex);
@@ -720,11 +798,12 @@ public final class DexFile {
      * given array, and modify the array to contain it.
      *
      * @param bytes {@code non-null;} the bytes of the file
+     * @param len length of {@code .dex} file encoded in the array
      */
-    private static void calcChecksum(byte[] bytes) {
+    private static void calcChecksum(byte[] bytes, int len) {
         Adler32 a32 = new Adler32();
 
-        a32.update(bytes, 12, bytes.length - 12);
+        a32.update(bytes, 12, len - 12);
 
         int sum = (int) a32.getValue();
 
