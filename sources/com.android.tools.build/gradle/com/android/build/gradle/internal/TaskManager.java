@@ -666,11 +666,18 @@ public abstract class TaskManager {
             com.android.build.api.artifact.ArtifactType testedOutputType =
                     taskOutputSpec.getOutputType();
 
-            FileCollection testedCodeClasses =
-                    testedVariantScope
-                            .getArtifacts()
-                            .getFinalArtifactFiles(testedOutputType)
-                            .get();
+            FileCollection testedCodeClasses;
+            if (testedVariantScope.getArtifacts().hasArtifact(testedOutputType)) {
+                testedCodeClasses =
+                        testedVariantScope
+                                .getArtifacts()
+                                .getFinalArtifactFiles(testedOutputType)
+                                .get();
+            } else {
+                Provider<FileSystemLocation> finalProduct =
+                        testedVariantScope.getArtifacts().getFinalProduct(testedOutputType);
+                testedCodeClasses = project.files(finalProduct);
+            }
 
             variantScope.getArtifacts().createBuildableArtifact(
                     InternalArtifactType.TESTED_CODE_CLASSES,
@@ -1437,6 +1444,11 @@ public abstract class TaskManager {
                         ExternalNativeBuildJsonTask.createTaskConfigAction(generator, scope));
 
         ProjectOptions projectOptions = globalScope.getProjectOptions();
+
+        String targetAbi =
+                projectOptions.get(BooleanOption.BUILD_ONLY_TARGET_ABI)
+                        ? projectOptions.get(StringOption.IDE_BUILD_TARGET_ABI)
+                        : null;
 
         // Set up build tasks
         TaskProvider<ExternalNativeBuildTask> buildTask =
