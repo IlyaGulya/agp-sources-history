@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.tools.lint.gradle.api
-
-import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry
+package com.android.builder.compiling
 
 /**
- * Interface implemented by objects that can provide a
- * [org.gradle.tooling.provider.model.ToolingModelBuilderRegistry]
+ * BuildConfigType values describe the existence & format of a BuildConfig class.
  */
-interface ToolingRegistryProvider {
-    val modelBuilderRegistry: ToolingModelBuilderRegistry
+enum class BuildConfigType {
+    // BuildConfig is represented by a Jar file containing a compiled BuildConfig .class file.
+    JAR,
+    // BuildConfig is represented by a Java source file class.
+    JAVA_CLASS,
+    // No BuildConfig exists.
+    NONE
 }
