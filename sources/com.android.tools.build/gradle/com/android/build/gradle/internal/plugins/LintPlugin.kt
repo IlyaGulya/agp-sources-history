@@ -75,8 +75,6 @@ import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.attributes.Category
-import org.gradle.api.attributes.Usage
-import org.gradle.api.attributes.java.TargetJvmEnvironment
 import org.gradle.api.component.AdhocComponentWithVariants
 import org.gradle.api.component.ConfigurationVariantDetails
 import org.gradle.api.component.SoftwareComponent
@@ -363,91 +361,7 @@ abstract class LintPlugin : Plugin<Project> {
                         kotlinExtensionWrapper,
                         jvmTargetName
                     )
-
-                    val lintModelWriterMainTask =
-                        project.tasks.register(
-                            "generate${jvmTargetName.usLocaleCapitalize()}MainLintModel",
-                            LintModelWriterTask::class.java
-                        ) { task ->
-                            task.configureForStandalone(
-                                taskCreationServices,
-                                javaExtension,
-                                kotlinExtensionWrapper,
-                                lintOptions!!,
-                                artifacts.getOutputPath(
-                                    InternalMultipleArtifactType.LINT_PARTIAL_RESULTS,
-                                    "lintAnalyze${jvmTargetName.usLocaleCapitalize()}Main"
-                                ),
-                                LintModelArtifactType.MAIN,
-                                fatalOnly = false,
-                                jvmTargetName
-                            )
-                        }
-                    LintModelWriterTask.registerOutputArtifacts(
-                        lintModelWriterMainTask,
-                        LINT_REPORT_LINT_MODEL,
-                        artifacts
-                    )
-                    publishLintArtifact(
-                        project,
-                        lintModelWriterMainTask.flatMap { it.outputDirectory },
-                        AndroidArtifacts.ArtifactType.LINT_MODEL,
-                        javaExtension,
-                        kotlinExtensionWrapper,
-                        jvmTargetName
-                    )
                     if (lintOptions!!.ignoreTestSources.not()) {
-                        // Create custom compile and runtime classpath configurations for unit tests
-                        // for the standalone lint plugin because the existing configurations don't
-                        // include the main jar output in their artifacts.
-                        // Create these configurations eagerly here to avoid recent problems when
-                        // creating Configurations during task configuration.
-                        // TODO(b/327452732) stop creating these extra configurations.
-                        val libraryCategory =
-                            project.objects.named(Category::class.java, Category.LIBRARY)
-                        val standardJvmEnvironment =
-                            project.objects.named(
-                                TargetJvmEnvironment::class.java,
-                                TargetJvmEnvironment.STANDARD_JVM
-                            )
-                        val testCompileClasspath =
-                            project.configurations
-                                .create("${jvmTargetName}TestCompileClasspathForLint")
-                                .apply {
-                                    isCanBeConsumed = false
-                                    isCanBeResolved = true
-                                    attributes.attribute(
-                                        Category.CATEGORY_ATTRIBUTE,
-                                        libraryCategory
-                                    )
-                                    attributes.attribute(
-                                        Usage.USAGE_ATTRIBUTE,
-                                        project.objects.named(Usage::class.java, Usage.JAVA_API)
-                                    )
-                                    attributes.attribute(
-                                        TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE,
-                                        standardJvmEnvironment
-                                    )
-                                }
-                        val testRuntimeClasspath =
-                            project.configurations
-                                .create("${jvmTargetName}TestRuntimeClasspathForLint")
-                                .apply {
-                                    isCanBeConsumed = false
-                                    isCanBeResolved = true
-                                    attributes.attribute(
-                                        Category.CATEGORY_ATTRIBUTE,
-                                        libraryCategory
-                                    )
-                                    attributes.attribute(
-                                        Usage.USAGE_ATTRIBUTE,
-                                        project.objects.named(Usage::class.java, Usage.JAVA_RUNTIME)
-                                    )
-                                    attributes.attribute(
-                                        TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE,
-                                        standardJvmEnvironment
-                                    )
-                                }
                         val lintAnalysisTestTask =
                             project.tasks.register(
                                 "lintAnalyze${jvmTargetName.usLocaleCapitalize()}Test",
@@ -463,9 +377,7 @@ abstract class LintPlugin : Plugin<Project> {
                                     lintOptions!!,
                                     LintModelArtifactType.UNIT_TEST,
                                     fatalOnly = false,
-                                    jvmTargetName,
-                                    testCompileClasspath,
-                                    testRuntimeClasspath
+                                    jvmTargetName
                                 )
                             }
                         AndroidLintAnalysisTask.registerOutputArtifacts(
@@ -477,41 +389,6 @@ abstract class LintPlugin : Plugin<Project> {
                             project,
                             lintAnalysisTestTask.flatMap { it.partialResultsDirectory },
                             AndroidArtifacts.ArtifactType.UNIT_TEST_LINT_PARTIAL_RESULTS,
-                            javaExtension,
-                            kotlinExtensionWrapper,
-                            jvmTargetName
-                        )
-
-                        val lintModelWriterTestTask =
-                            project.tasks.register(
-                                "generate${jvmTargetName.usLocaleCapitalize()}TestLintModel",
-                                LintModelWriterTask::class.java
-                            ) { task ->
-                                task.configureForStandalone(
-                                    taskCreationServices,
-                                    javaExtension,
-                                    kotlinExtensionWrapper,
-                                    lintOptions!!,
-                                    artifacts.getOutputPath(
-                                        InternalMultipleArtifactType.UNIT_TEST_LINT_PARTIAL_RESULTS,
-                                        "lintAnalyze${jvmTargetName.usLocaleCapitalize()}Test"
-                                    ),
-                                    LintModelArtifactType.UNIT_TEST,
-                                    fatalOnly = false,
-                                    jvmTargetName,
-                                    testCompileClasspath,
-                                    testRuntimeClasspath
-                                )
-                            }
-                        LintModelWriterTask.registerOutputArtifacts(
-                            lintModelWriterTestTask,
-                            InternalMultipleArtifactType.UNIT_TEST_LINT_MODEL,
-                            artifacts
-                        )
-                        publishLintArtifact(
-                            project,
-                            lintModelWriterTestTask.flatMap { it.outputDirectory },
-                            AndroidArtifacts.ArtifactType.UNIT_TEST_LINT_MODEL,
                             javaExtension,
                             kotlinExtensionWrapper,
                             jvmTargetName
@@ -544,39 +421,6 @@ abstract class LintPlugin : Plugin<Project> {
                         project,
                         lintVitalAnalysisMainTask.flatMap { it.partialResultsDirectory },
                         AndroidArtifacts.ArtifactType.LINT_VITAL_PARTIAL_RESULTS,
-                        javaExtension,
-                        kotlinExtensionWrapper,
-                        jvmTargetName
-                    )
-
-                    val lintVitalModelWriterMainTask =
-                        project.tasks.register(
-                            "generateLintVital${jvmTargetName.usLocaleCapitalize()}MainLintModel",
-                            LintModelWriterTask::class.java
-                        ) { task ->
-                            task.configureForStandalone(
-                                taskCreationServices,
-                                javaExtension,
-                                kotlinExtensionWrapper,
-                                lintOptions!!,
-                                artifacts.getOutputPath(
-                                    InternalMultipleArtifactType.LINT_VITAL_PARTIAL_RESULTS,
-                                    "lintVitalAnalyze${jvmTargetName.usLocaleCapitalize()}Main"
-                                ),
-                                LintModelArtifactType.MAIN,
-                                fatalOnly = true,
-                                jvmTargetName
-                            )
-                        }
-                    LintModelWriterTask.registerOutputArtifacts(
-                        lintVitalModelWriterMainTask,
-                        LINT_VITAL_REPORT_LINT_MODEL,
-                        artifacts
-                    )
-                    publishLintArtifact(
-                        project,
-                        lintVitalModelWriterMainTask.flatMap { it.outputDirectory },
-                        AndroidArtifacts.ArtifactType.LINT_VITAL_LINT_MODEL,
                         javaExtension,
                         kotlinExtensionWrapper,
                         jvmTargetName
@@ -644,7 +488,109 @@ abstract class LintPlugin : Plugin<Project> {
                     kotlinExtensionWrapper = null,
                     jvmTargetName = null
                 )
-
+            }
+            if (isPerComponentLintAnalysis) {
+                for (jvmTargetName in jvmTargetNames) {
+                    val lintModelWriterMainTask =
+                        project.tasks.register(
+                            "generate${jvmTargetName.usLocaleCapitalize()}MainLintModel",
+                            LintModelWriterTask::class.java
+                        ) { task ->
+                            task.configureForStandalone(
+                                taskCreationServices,
+                                javaExtension,
+                                kotlinExtensionWrapper,
+                                lintOptions!!,
+                                artifacts.getOutputPath(
+                                    InternalMultipleArtifactType.LINT_PARTIAL_RESULTS,
+                                    "lintAnalyze${jvmTargetName.usLocaleCapitalize()}Main"
+                                ),
+                                LintModelArtifactType.MAIN,
+                                fatalOnly = false,
+                                jvmTargetName
+                            )
+                        }
+                    LintModelWriterTask.registerOutputArtifacts(
+                        lintModelWriterMainTask,
+                        LINT_REPORT_LINT_MODEL,
+                        artifacts
+                    )
+                    publishLintArtifact(
+                        project,
+                        lintModelWriterMainTask.flatMap { it.outputDirectory },
+                        AndroidArtifacts.ArtifactType.LINT_MODEL,
+                        javaExtension,
+                        kotlinExtensionWrapper,
+                        jvmTargetName
+                    )
+                    if (lintOptions!!.ignoreTestSources.not()) {
+                        val lintModelWriterTestTask =
+                            project.tasks.register(
+                                "generate${jvmTargetName.usLocaleCapitalize()}TestLintModel",
+                                LintModelWriterTask::class.java
+                            ) { task ->
+                                task.configureForStandalone(
+                                    taskCreationServices,
+                                    javaExtension,
+                                    kotlinExtensionWrapper,
+                                    lintOptions!!,
+                                    artifacts.getOutputPath(
+                                        InternalMultipleArtifactType.UNIT_TEST_LINT_PARTIAL_RESULTS,
+                                        "lintAnalyze${jvmTargetName.usLocaleCapitalize()}Test"
+                                    ),
+                                    LintModelArtifactType.UNIT_TEST,
+                                    fatalOnly = false,
+                                    jvmTargetName
+                                )
+                            }
+                        LintModelWriterTask.registerOutputArtifacts(
+                            lintModelWriterTestTask,
+                            InternalMultipleArtifactType.UNIT_TEST_LINT_MODEL,
+                            artifacts
+                        )
+                        publishLintArtifact(
+                            project,
+                            lintModelWriterTestTask.flatMap { it.outputDirectory },
+                            AndroidArtifacts.ArtifactType.UNIT_TEST_LINT_MODEL,
+                            javaExtension,
+                            kotlinExtensionWrapper,
+                            jvmTargetName
+                        )
+                    }
+                    val lintVitalModelWriterMainTask =
+                        project.tasks.register(
+                            "generateLintVital${jvmTargetName.usLocaleCapitalize()}MainLintModel",
+                            LintModelWriterTask::class.java
+                        ) { task ->
+                            task.configureForStandalone(
+                                taskCreationServices,
+                                javaExtension,
+                                kotlinExtensionWrapper,
+                                lintOptions!!,
+                                artifacts.getOutputPath(
+                                    InternalMultipleArtifactType.LINT_VITAL_PARTIAL_RESULTS,
+                                    "lintVitalAnalyze${jvmTargetName.usLocaleCapitalize()}Main"
+                                ),
+                                LintModelArtifactType.MAIN,
+                                fatalOnly = true,
+                                jvmTargetName
+                            )
+                        }
+                    LintModelWriterTask.registerOutputArtifacts(
+                        lintVitalModelWriterMainTask,
+                        LINT_VITAL_REPORT_LINT_MODEL,
+                        artifacts
+                    )
+                    publishLintArtifact(
+                        project,
+                        lintVitalModelWriterMainTask.flatMap { it.outputDirectory },
+                        AndroidArtifacts.ArtifactType.LINT_VITAL_LINT_MODEL,
+                        javaExtension,
+                        kotlinExtensionWrapper,
+                        jvmTargetName
+                    )
+                }
+            } else {
                 val lintModelWriterTask =
                     project.tasks.register(
                         "generateJvmLintModel",

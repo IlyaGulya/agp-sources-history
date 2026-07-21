@@ -51,7 +51,6 @@ import com.android.buildanalyzer.common.TaskCategory
 import com.android.tools.lint.model.LintModelArtifactType
 import com.android.tools.lint.model.LintModelModule
 import com.android.tools.lint.model.LintModelSerialization
-import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
@@ -119,12 +118,6 @@ abstract class LintModelWriterTask : NonIncrementalTask() {
     /**
      * If [lintModelArtifactType] is not null, only the corresponding artifact is initialized; if
      * it's null, both the main and test artifacts are initialized.
-     *
-     * If [testCompileClasspath] is null, the standard "testCompileClasspath" is used; otherwise,
-     * [testCompileClasspath] is used in order to properly include the main jar.
-     *
-     * If [testRuntimeClasspath] is null, the standard "testRuntimeClasspath" is used; otherwise,
-     * [testRuntimeClasspath] is used in order to properly include the main jar.
      */
     internal fun configureForStandalone(
         taskCreationServices: TaskCreationServices,
@@ -134,9 +127,7 @@ abstract class LintModelWriterTask : NonIncrementalTask() {
         partialResultsDir: File,
         lintModelArtifactType: LintModelArtifactType?,
         fatalOnly: Boolean,
-        jvmTargetName: String?,
-        testCompileClasspath: Configuration? = null,
-        testRuntimeClasspath: Configuration? = null
+        jvmTargetName: String?
     ) {
         this.variantName = ""
         this.analyticsService.setDisallowChanges(
@@ -154,9 +145,7 @@ abstract class LintModelWriterTask : NonIncrementalTask() {
                 useModuleDependencyLintModels = true,
                 LintMode.MODEL_WRITING,
                 lintModelArtifactType,
-                jvmTargetName,
-                testCompileClasspath,
-                testRuntimeClasspath
+                jvmTargetName
             )
         this.partialResultsDir.set(partialResultsDir)
         this.partialResultsDir.disallowChanges()

@@ -33,6 +33,7 @@ abstract class VariantBuilderImpl(
 ) :
     ComponentBuilderImpl(
         globalVariantBuilderConfig,
+        variantDslInfo,
         componentIdentity,
         variantBuilderServices
     ),
@@ -115,15 +116,12 @@ abstract class VariantBuilderImpl(
 
     override var maxSdk: Int? = variantDslInfo.maxSdkVersion
 
-    private val renderscriptTargetInDsl =
-        variantDslInfo.renderscriptDslInfo?.renderscriptTarget ?: -1
-
     override var renderscriptTargetApi: Int = -1
         get() {
             // if the field has been set, always use  that value, otherwise, calculate it each
             // time in case minSdkVersion changes.
             if (field != -1) return field
-            val targetApi = renderscriptTargetInDsl
+            val targetApi = (dslInfo as VariantDslInfo).renderscriptDslInfo?.renderscriptTarget ?: -1
             // default to -1 if not in build.gradle file.
             val minSdk = mutableMinSdk.getFeatureLevel()
             return if (targetApi > minSdk) targetApi else minSdk
@@ -151,15 +149,13 @@ abstract class VariantBuilderImpl(
             registeredExtensionDelegate.value
         else null
 
-    private val hasPostProcessingConfiguration =
-        variantDslInfo.optimizationDslInfo.postProcessingOptions.hasPostProcessingConfiguration()
-
     internal fun setMinificationIfPossible(
         varName: String,
         newValue: Boolean,
         setter: (Boolean) -> Unit
     ) {
-        if (hasPostProcessingConfiguration)
+        if ((dslInfo as VariantDslInfo).optimizationDslInfo
+                .postProcessingOptions.hasPostProcessingConfiguration())
             variantBuilderServices.issueReporter.reportWarning(
                 IssueReporter.Type.GENERIC,
                 "You cannot set $varName via Variant API as build uses postprocessing{...} " +

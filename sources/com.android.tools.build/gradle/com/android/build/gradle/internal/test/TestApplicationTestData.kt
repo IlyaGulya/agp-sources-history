@@ -35,7 +35,6 @@ class TestApplicationTestData(
     testedApksDir: Provider<Directory>,
     privacySandboxSdkApks: FileCollection?,
     privacySandboxCompatSdkApksDir: Provider<Directory>?,
-    extraInstrumentationTestRunnerArgs: Map<String, String>,
 ) : AbstractTestDataImpl(
     namespace,
     creationConfig,
@@ -43,8 +42,7 @@ class TestApplicationTestData(
     testedApksDir,
     privacySandboxSdkApks,
     privacySandboxCompatSdkApksDir,
-    null,
-    extraInstrumentationTestRunnerArgs
+    null
 ) {
 
     override val libraryType = creationConfig.services.provider { false }

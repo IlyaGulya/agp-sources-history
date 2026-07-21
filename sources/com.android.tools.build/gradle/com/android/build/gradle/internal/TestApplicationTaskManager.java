@@ -119,11 +119,7 @@ public class TestApplicationTaskManager
                         testingApk,
                         testVariantProperties.getTestedApks(),
                         privacySandboxSdkApks,
-                        privacySandboxCompatSdkApks,
-                        testVariantProperties
-                                .getServices()
-                                .getProjectOptions()
-                                .getExtraInstrumentationTestRunnerArgs());
+                        privacySandboxCompatSdkApks);
 
         configureTestData(testVariantProperties, testData);
 

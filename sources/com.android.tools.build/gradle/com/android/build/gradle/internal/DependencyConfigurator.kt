@@ -81,7 +81,7 @@ import com.android.build.gradle.internal.tasks.factory.BootClasspathConfig
 import com.android.build.gradle.internal.utils.ATTR_ENABLE_CORE_LIBRARY_DESUGARING
 import com.android.build.gradle.internal.utils.D8BackportedMethodsGenerator
 import com.android.build.gradle.internal.utils.D8_DESUGAR_METHODS
-import com.android.build.gradle.internal.utils.getDesugarLibConfigFiles
+import com.android.build.gradle.internal.utils.getDesugarLibConfig
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.build.gradle.internal.variant.VariantInputModel
 import com.android.build.gradle.options.BooleanOption
@@ -104,7 +104,6 @@ import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIB
 import org.gradle.api.attributes.AttributesSchema
 import org.gradle.api.attributes.Category
 import org.gradle.api.attributes.Usage
-import org.gradle.api.provider.Provider
 import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
 import java.lang.Boolean.FALSE
 import java.lang.Boolean.TRUE
@@ -591,37 +590,22 @@ class DependencyConfigurator(
         }
 
         fun registerAsarToApksTransform(variants: List<VariantCreationConfig>) {
-            // For signing privacy sandbox artifacts we allow per project signing configuration
-            // by the use of experimental properties. To reduce the expense of registering per
-            // variant we set a limit of one signing config in all variants, then register the
-            // AsarToApksTransform once. To maintain the semantic, the build file must explicitly
-            // declare the same signing config for all variants.
-            val variantSigningConfigs = variants.map { variant ->
+            val variantSigningConfigs = variants.mapNotNull { variant ->
                 val experimentalProps = variant.experimentalProperties
                 experimentalProps.finalizeValue()
                 SigningConfigData.fromExperimentalPropertiesSigningConfig(variant.experimentalProperties)
-            }.distinct()
+            }
 
-            val signingConfigProvider: Provider<SigningConfigData> =
-                    when (variantSigningConfigs.count()) {
-                        0 -> return // No variants
-                        1 -> if (variantSigningConfigs.singleOrNull() != null) {
-                            // An identical signing config is set in all variants by experimental properties.
-                            variants.first().services.provider {
-                                variantSigningConfigs.singleOrNull()
-                            }
-                        } else {
-                            // No experimental properties are set, use the default.
-                            getBuildService(
-                                    variants.first().services.buildServiceRegistry,
-                                    AndroidLocationsBuildService::class.java
-                            ).map(AndroidLocationsBuildService::getDefaultDebugKeystoreSigningConfig)
-                        }
+            val signingConfigProvider = when (variantSigningConfigs.count()) {
+                0 -> getBuildService(
+                        variants.first().services.buildServiceRegistry,
+                        AndroidLocationsBuildService::class.java
+                ).map(AndroidLocationsBuildService::getDefaultDebugKeystoreSigningConfig)
+                1 -> variants.first().services.provider { variantSigningConfigs.single() }
+                else -> error("It is not possible to override Privacy Sandbox experimental properties per variant.\n" +
+                        "Properties with different signing config experimental property values defined across multiple variants.")
+            }
 
-                        else -> throw UnsupportedOperationException(
-                                "It is not possible to override Privacy Sandbox experimental properties per variant.\n" +
-                                        "Set the same signing config using experimental properties in each variant explicitly.")
-                    }
             registerTransform(
                     AsarToApksTransform::class.java,
                     AndroidArtifacts.ArtifactType.ANDROID_PRIVACY_SANDBOX_SDK_ARCHIVE,
@@ -864,7 +848,7 @@ class DependencyConfigurator(
                     projectName = project.name,
                     dependencyHandler = dependencies,
                     bootClasspath = bootClasspath,
-                    desugarLibConfigFiles = getDesugarLibConfigFiles(services),
+                    libConfiguration = getDesugarLibConfig(services),
                     errorFormat = SyncOptions.getErrorFormatMode(projectOptions),
                     // Disable incremental dexing for main and androidTest components in dynamic
                     // feature module (b/246326007)
@@ -881,7 +865,7 @@ class DependencyConfigurator(
             ) { spec ->
                 spec.parameters { parameters ->
                     parameters.d8Version.set(d8Version)
-                    parameters.desugarLibConfigFiles.setFrom(getDesugarLibConfigFiles(services))
+                    parameters.coreLibDesugarConfig.set(getDesugarLibConfig(services))
                     parameters.bootclasspath.from(bootClasspath)
                 }
                 spec.from.attribute(ARTIFACT_TYPE_ATTRIBUTE, ArtifactTypeDefinition.JAR_TYPE)

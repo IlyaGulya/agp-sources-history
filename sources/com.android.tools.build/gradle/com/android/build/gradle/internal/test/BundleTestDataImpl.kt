@@ -53,17 +53,15 @@ internal class BundleTestDataImpl constructor(
     @get:Optional
     val apkBundle: FileCollection,
     privacySandboxSdkApks: FileCollection?,
-    privacySandboxCompatSdkApks: Provider<Directory>?,
-    extraInstrumentationTestRunnerArgs: Map<String, String>
+    privacySandboxCompatSdkApks: Provider<Directory>?
 ) : AbstractTestDataImpl(
-    namespace = namespace,
-    creationConfig = creationConfig,
-    testApkDir = testApkDir,
-    testedApksDir = null,
-    privacySandboxSdkApks = privacySandboxSdkApks,
-    privacySandboxCompatSdkApks = privacySandboxCompatSdkApks,
-    additionalSdkSupportedSplitApks = null,
-    extraInstrumentationTestRunnerArgs = extraInstrumentationTestRunnerArgs
+    namespace,
+    creationConfig,
+    testApkDir,
+    null,
+    privacySandboxSdkApks,
+    privacySandboxCompatSdkApks,
+    null
 ) {
 
     override val libraryType = creationConfig.services.provider { false }

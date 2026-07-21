@@ -36,8 +36,7 @@ class TestDataImpl(
     testedApksDir: Provider<Directory>?,
     privacySandboxSdkApks: FileCollection?,
     privacySandboxCompatSdkApksDir: Provider<Directory>?,
-    additionalSdkSupportedApkSplits: Provider<Directory>?,
-    extraInstrumentationTestRunnerArgs: Map<String, String>
+    additionalSdkSupportedApkSplits: Provider<Directory>?
 ) : AbstractTestDataImpl(
     namespace,
     testConfig,
@@ -45,8 +44,7 @@ class TestDataImpl(
     testedApksDir,
     privacySandboxSdkApks,
     privacySandboxCompatSdkApksDir,
-    additionalSdkSupportedApkSplits,
-    extraInstrumentationTestRunnerArgs
+    additionalSdkSupportedApkSplits
 ) {
     @get: Input
     val supportedAbis: Set<String> =

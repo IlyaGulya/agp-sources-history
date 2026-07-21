@@ -78,15 +78,7 @@ abstract class ApkZipPackagingTask : NonIncrementalTask() {
 
             JarFlinger(parameters.zipOutputFile.asFile.get().toPath()).use { jar ->
                 for (sourceFile in sourceFiles) {
-                    if (sourceFile.isDirectory) {
-                        jar.addDirectory(
-                            sourceFile.toPath(),
-                            null,
-                            null
-                        ) { entryPath -> "${sourceFile.name}/$entryPath" }
-                    } else {
-                        jar.addFile(sourceFile.name, sourceFile.toPath())
-                    }
+                    jar.addFile(sourceFile.name, sourceFile.toPath())
                 }
 
                 parameters.mappingFile.asFile.orNull?.let {
