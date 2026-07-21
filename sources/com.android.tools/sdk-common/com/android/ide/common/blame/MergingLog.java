@@ -190,9 +190,7 @@ public class MergingLog {
             if (relativeSourceFile != null && relativeSourceFile.getSourcePath() != null) {
                 String absoluteSourcePath =
                         RelativeResourceUtils.relativeResourcePathToAbsolutePath(
-                                relativeSourceFile.getSourcePath(),
-                                mSourceSetPaths,
-                                java.nio.file.FileSystems.getDefault());
+                                relativeSourceFile.getSourcePath(), mSourceSetPaths);
                 return new SourceFile(new File(absoluteSourcePath));
             }
         }
