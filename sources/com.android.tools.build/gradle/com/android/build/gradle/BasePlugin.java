@@ -16,7 +16,6 @@
 
 package com.android.build.gradle;
 
-import static com.android.builder.model.AndroidProject.FD_INTERMEDIATES;
 import static com.google.common.base.Preconditions.checkState;
 import static java.io.File.separator;
 
@@ -25,13 +24,13 @@ import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.annotations.VisibleForTesting;
-import com.android.build.api.transform.Transform;
 import com.android.build.gradle.api.AndroidBasePlugin;
 import com.android.build.gradle.api.BaseVariantOutput;
 import com.android.build.gradle.internal.ApiObjectFactory;
 import com.android.build.gradle.internal.BadPluginException;
 import com.android.build.gradle.internal.BuildCacheUtils;
 import com.android.build.gradle.internal.ClasspathVerifier;
+import com.android.build.gradle.internal.DependencyResolutionChecks;
 import com.android.build.gradle.internal.ExtraModelInfo;
 import com.android.build.gradle.internal.LoggerWrapper;
 import com.android.build.gradle.internal.NativeLibraryFactoryImpl;
@@ -52,8 +51,8 @@ import com.android.build.gradle.internal.dsl.SigningConfigFactory;
 import com.android.build.gradle.internal.dsl.Splits;
 import com.android.build.gradle.internal.ide.ModelBuilder;
 import com.android.build.gradle.internal.ide.NativeModelBuilder;
+import com.android.build.gradle.internal.ndk.NdkHandler;
 import com.android.build.gradle.internal.packaging.GradleKeystoreHelper;
-import com.android.build.gradle.internal.pipeline.TransformTask;
 import com.android.build.gradle.internal.plugin.PluginDelegate;
 import com.android.build.gradle.internal.plugin.ProjectWrapper;
 import com.android.build.gradle.internal.plugin.TypedPluginDelegate;
@@ -65,7 +64,6 @@ import com.android.build.gradle.internal.scope.DelayedActionsExecutor;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.Workers;
-import com.android.build.gradle.internal.transforms.DexTransform;
 import com.android.build.gradle.internal.utils.GradlePluginUtils;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.internal.variant.VariantFactory;
@@ -84,7 +82,6 @@ import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.BuilderConstants;
 import com.android.builder.errors.EvalIssueReporter;
 import com.android.builder.errors.EvalIssueReporter.Type;
-import com.android.builder.internal.compiler.PreDexCache;
 import com.android.builder.model.AndroidProject;
 import com.android.builder.model.Version;
 import com.android.builder.profile.ProcessProfileWriter;
@@ -103,7 +100,6 @@ import com.android.repository.impl.downloader.LocalFileAwareDownloader;
 import com.android.repository.io.FileOpUtils;
 import com.android.sdklib.repository.legacy.LegacyDownloader;
 import com.android.tools.lint.gradle.api.ToolingRegistryProvider;
-import com.android.utils.FileUtils;
 import com.android.utils.ILogger;
 import com.google.common.base.CharMatcher;
 import com.google.wireless.android.sdk.stats.GradleBuildProfileSpan.ExecutionType;
@@ -131,7 +127,6 @@ import org.gradle.api.GradleException;
 import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.invocation.Gradle;
@@ -160,9 +155,11 @@ public abstract class BasePlugin<E extends BaseExtension2>
 
     protected ProjectOptions projectOptions;
 
-    private GlobalScope globalScope;
-
     private SdkHandler sdkHandler;
+
+    protected NdkHandler ndkHandler;
+
+    protected AndroidBuilder androidBuilder;
 
     private DataBindingBuilder dataBindingBuilder;
 
@@ -195,7 +192,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
     protected abstract BaseExtension createExtension(
             @NonNull Project project,
             @NonNull ProjectOptions projectOptions,
-            @NonNull GlobalScope globalScope,
+            @NonNull AndroidBuilder androidBuilder,
             @NonNull SdkHandler sdkHandler,
             @NonNull NamedDomainObjectContainer<BuildType> buildTypeContainer,
             @NonNull NamedDomainObjectContainer<ProductFlavor> productFlavorContainer,
@@ -210,6 +207,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
     @NonNull
     protected abstract VariantFactory createVariantFactory(
             @NonNull GlobalScope globalScope,
+            @NonNull AndroidBuilder androidBuilder,
             @NonNull AndroidConfig androidConfig);
 
     @NonNull
@@ -217,9 +215,11 @@ public abstract class BasePlugin<E extends BaseExtension2>
             @NonNull GlobalScope globalScope,
             @NonNull Project project,
             @NonNull ProjectOptions projectOptions,
+            @NonNull AndroidBuilder androidBuilder,
             @NonNull DataBindingBuilder dataBindingBuilder,
             @NonNull AndroidConfig androidConfig,
             @NonNull SdkHandler sdkHandler,
+            @NonNull NdkHandler ndkHandler,
             @NonNull ToolingModelBuilderRegistry toolingRegistry,
             @NonNull Recorder threadRecorder);
 
@@ -236,7 +236,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
 
     @VisibleForTesting
     AndroidBuilder getAndroidBuilder() {
-        return globalScope.getAndroidBuilder();
+        return androidBuilder;
     }
 
     private ILogger getLogger() {
@@ -255,6 +255,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
         this.project = project;
         this.projectOptions = new ProjectOptions(project);
         checkGradleVersion(project, getLogger(), projectOptions);
+        DependencyResolutionChecks.registerDependencyCheck(project, projectOptions);
 
         project.getPluginManager().apply(AndroidBasePlugin.class);
 
@@ -343,7 +344,6 @@ public abstract class BasePlugin<E extends BaseExtension2>
 
     private void configureProject() {
         final Gradle gradle = project.getGradle();
-        ObjectFactory objectFactory = project.getObjects();
 
         extraModelInfo = new ExtraModelInfo(project.getPath(), projectOptions, project.getLogger());
 
@@ -354,7 +354,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
             sdkHandler.setSdkLibData(sdkLibData);
         }
 
-        AndroidBuilder androidBuilder =
+        androidBuilder =
                 new AndroidBuilder(
                         project == project.getRootProject() ? project.getName() : project.getPath(),
                         creator,
@@ -392,26 +392,6 @@ public abstract class BasePlugin<E extends BaseExtension2>
 
         // Apply the Java plugin
         project.getPlugins().apply(JavaBasePlugin.class);
-
-        DslScopeImpl dslScope =
-                new DslScopeImpl(
-                        extraModelInfo.getSyncIssueHandler(),
-                        extraModelInfo.getDeprecationReporter(),
-                        objectFactory);
-
-        @Nullable
-        FileCache buildCache = BuildCacheUtils.createBuildCacheIfEnabled(project, projectOptions);
-
-        globalScope =
-                new GlobalScope(
-                        project,
-                        new ProjectWrapper(project),
-                        projectOptions,
-                        dslScope,
-                        androidBuilder,
-                        sdkHandler,
-                        registry,
-                        buildCache);
 
         project.getTasks()
                 .getByName("assemble")
@@ -453,39 +433,10 @@ public abstract class BasePlugin<E extends BaseExtension2>
                                     WorkerActionServiceRegistry.INSTANCE
                                             .shutdownAllRegisteredServices(
                                                     ForkJoinPool.commonPool());
-                                    PreDexCache.getCache()
-                                            .clear(
-                                                    FileUtils.join(
-                                                            project.getRootProject().getBuildDir(),
-                                                            FD_INTERMEDIATES,
-                                                            "dex-cache",
-                                                            "cache.xml"),
-                                                    getLogger());
                                     Main.clearInternTables();
                                 });
                     }
                 });
-
-        gradle.getTaskGraph()
-                .addTaskExecutionGraphListener(
-                        taskGraph -> {
-                            for (Task task : taskGraph.getAllTasks()) {
-                                if (task instanceof TransformTask) {
-                                    Transform transform = ((TransformTask) task).getTransform();
-                                    if (transform instanceof DexTransform) {
-                                        PreDexCache.getCache()
-                                                .load(
-                                                        FileUtils.join(
-                                                                project.getRootProject()
-                                                                        .getBuildDir(),
-                                                                FD_INTERMEDIATES,
-                                                                "dex-cache",
-                                                                "cache.xml"));
-                                        break;
-                                    }
-                                }
-                            }
-                        });
 
         createLintClasspathConfiguration(project);
     }
@@ -530,6 +481,13 @@ public abstract class BasePlugin<E extends BaseExtension2>
         final NamedDomainObjectContainer<BaseVariantOutput> buildOutputs =
                 project.container(BaseVariantOutput.class);
 
+        DslScopeImpl dslScope =
+                new DslScopeImpl(
+                        extraModelInfo.getSyncIssueHandler(),
+                        extraModelInfo.getDeprecationReporter(),
+                        objectFactory);
+
+
         project.getExtensions().add("buildOutputs", buildOutputs);
 
         sourceSetManager = createSourceSetManager();
@@ -538,7 +496,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
                 createExtension(
                         project,
                         projectOptions,
-                        globalScope,
+                        androidBuilder,
                         sdkHandler,
                         buildTypeContainer,
                         productFlavorContainer,
@@ -547,18 +505,43 @@ public abstract class BasePlugin<E extends BaseExtension2>
                         sourceSetManager,
                         extraModelInfo);
 
-        globalScope.setExtension(extension);
+        ndkHandler =
+                new NdkHandler(
+                        project.getRootDir(),
+                        null, /* compileSkdVersion, this will be set in afterEvaluate */
+                        "gcc",
+                        "" /*toolchainVersion*/,
+                        false /* useUnifiedHeaders */);
 
-        variantFactory = createVariantFactory(globalScope, extension);
+
+        @Nullable
+        FileCache buildCache = BuildCacheUtils.createBuildCacheIfEnabled(project, projectOptions);
+
+        GlobalScope globalScope =
+                new GlobalScope(
+                        project,
+                        new ProjectWrapper(project),
+                        projectOptions,
+                        dslScope,
+                        androidBuilder,
+                        extension,
+                        sdkHandler,
+                        ndkHandler,
+                        registry,
+                        buildCache);
+
+        variantFactory = createVariantFactory(globalScope, androidBuilder, extension);
 
         taskManager =
                 createTaskManager(
                         globalScope,
                         project,
                         projectOptions,
+                        androidBuilder,
                         dataBindingBuilder,
                         extension,
                         sdkHandler,
+                        ndkHandler,
                         registry,
                         threadRecorder);
 
@@ -567,6 +550,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
                         globalScope,
                         project,
                         projectOptions,
+                        androidBuilder,
                         extension,
                         variantFactory,
                         taskManager,
@@ -629,11 +613,13 @@ public abstract class BasePlugin<E extends BaseExtension2>
         registry.register(
                 new ModelBuilder<>(
                         globalScope,
+                        androidBuilder,
                         variantManager,
                         taskManager,
                         config,
                         extraModelInfo,
-                        new NativeLibraryFactoryImpl(globalScope.getNdkHandler()),
+                        ndkHandler,
+                        new NativeLibraryFactoryImpl(ndkHandler),
                         getProjectType(),
                         AndroidProject.GENERATION_ORIGINAL));
     }
@@ -707,7 +693,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
                 "buildToolsVersion is not specified.");
         checkState(extension.getCompileSdkVersion() != null, "compileSdkVersion is not specified.");
 
-        globalScope.getNdkHandler().setCompileSdkVersion(extension.getCompileSdkVersion());
+        ndkHandler.setCompileSdkVersion(extension.getCompileSdkVersion());
 
         // get current plugins and look for the default Java plugin.
         if (project.getPlugins().hasPlugin(JavaPlugin.class)) {
@@ -780,7 +766,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
                     variantManager.createAndroidTasks();
                     ApiObjectFactory apiObjectFactory =
                             new ApiObjectFactory(
-                                    globalScope.getAndroidBuilder(),
+                                    androidBuilder,
                                     extension,
                                     variantFactory,
                                     project.getObjects());
@@ -948,7 +934,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
 
     private boolean ensureTargetSetup() {
         // check if the target has been set.
-        TargetInfo targetInfo = globalScope.getAndroidBuilder().getTargetInfo();
+        TargetInfo targetInfo = androidBuilder.getTargetInfo();
         // noinspection VariableNotUsedInsideIf Directly checking if initialized.
         if (targetInfo != null) {
             return true;
@@ -961,7 +947,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
                 extension.getCompileSdkVersion(),
                 extension.getBuildToolsRevision(),
                 extension.getLibraryRequests(),
-                globalScope.getAndroidBuilder(),
+                androidBuilder,
                 SdkHandler.useCachedSdk(projectOptions));
     }
 

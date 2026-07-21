@@ -42,7 +42,6 @@ import com.android.build.gradle.internal.dsl.ProductFlavor;
 import com.android.build.gradle.internal.dsl.SigningConfig;
 import com.android.build.gradle.internal.dsl.Splits;
 import com.android.build.gradle.internal.dsl.TestOptions;
-import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.BuilderConstants;
@@ -113,7 +112,7 @@ public abstract class BaseExtension implements AndroidConfig {
     /** Secondary dependencies for the custom transform. */
     private final List<List<Object>> transformDependencies = Lists.newArrayList();
 
-    protected final GlobalScope globalScope;
+    private final AndroidBuilder androidBuilder;
 
     private final SdkHandler sdkHandler;
 
@@ -186,7 +185,7 @@ public abstract class BaseExtension implements AndroidConfig {
     BaseExtension(
             @NonNull final Project project,
             @NonNull final ProjectOptions projectOptions,
-            @NonNull GlobalScope globalScope,
+            @NonNull AndroidBuilder androidBuilder,
             @NonNull SdkHandler sdkHandler,
             @NonNull NamedDomainObjectContainer<BuildType> buildTypes,
             @NonNull NamedDomainObjectContainer<ProductFlavor> productFlavors,
@@ -195,7 +194,7 @@ public abstract class BaseExtension implements AndroidConfig {
             @NonNull SourceSetManager sourceSetManager,
             @NonNull ExtraModelInfo extraModelInfo,
             boolean isBaseModule) {
-        this.globalScope = globalScope;
+        this.androidBuilder = androidBuilder;
         this.sdkHandler = sdkHandler;
         this.buildTypes = buildTypes;
         //noinspection unchecked
@@ -433,7 +432,7 @@ public abstract class BaseExtension implements AndroidConfig {
      * belong to that dimension. If you specify more than one dimension, you need to manually assign
      * each flavor to a dimension, as shown in the sample below.
      *
-     * <p>Flavor dimensions allow you to create groups of product flavors that you can combine with
+     * <p>Flavor dimensions allow you to create groups of product flavors that you can compine with
      * flavors from other flavor dimensions. For example, you can have one dimension that includes a
      * 'free' and 'paid' version of your app, and another dimension for flavors that support
      * different API levels, such as 'minApi21' and 'minApi24'. The Android plugin can then combine
@@ -895,7 +894,7 @@ public abstract class BaseExtension implements AndroidConfig {
             // In sync mode where the SDK could not be installed.
             return ImmutableList.of();
         }
-        return globalScope.getAndroidBuilder().getBootClasspath(false);
+        return androidBuilder.getBootClasspath(false);
     }
 
     /**
@@ -1002,13 +1001,13 @@ public abstract class BaseExtension implements AndroidConfig {
 
     private boolean ensureTargetSetup() {
         // check if the target has been set.
-        TargetInfo targetInfo = globalScope.getAndroidBuilder().getTargetInfo();
+        TargetInfo targetInfo = androidBuilder.getTargetInfo();
         if (targetInfo == null) {
             return sdkHandler.initTarget(
                     getCompileSdkVersion(),
                     buildToolsRevision,
                     libraryRequests,
-                    globalScope.getAndroidBuilder(),
+                    androidBuilder,
                     SdkHandler.useCachedSdk(projectOptions));
         }
         return true;

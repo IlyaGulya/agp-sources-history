@@ -2,7 +2,7 @@ package com.android.build.gradle.tasks.factory;
 
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.ALL;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.CLASSES;
-import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.PROCESSED_JAR;
+import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.JAR;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.ANNOTATION_PROCESSOR;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH;
 import static com.android.build.gradle.internal.scope.InternalArtifactType.ANNOTATION_PROCESSOR_LIST;
@@ -16,7 +16,7 @@ import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.VariantScope;
-import com.android.build.gradle.options.BooleanOption;
+import com.android.builder.core.VariantType;
 import com.android.utils.ILogger;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
@@ -24,6 +24,7 @@ import java.util.Map;
 import org.gradle.api.Project;
 import org.gradle.api.file.ConfigurableFileTree;
 import org.gradle.api.file.FileCollection;
+import org.gradle.api.tasks.PathSensitivity;
 
 /**
  * Configuration Action for a JavaCompile task.
@@ -68,16 +69,7 @@ public class JavaCompileConfigAction implements TaskConfigAction<AndroidJavaComp
         }
 
         javacTask.getOptions().setBootstrapClasspath(scope.getBootClasspath());
-
-        FileCollection classpath = scope.getJavaClasspath(COMPILE_CLASSPATH, CLASSES);
-        if (!globalScope.getProjectOptions().get(BooleanOption.ENABLE_CORE_LAMBDA_STUBS)
-                && scope.keepDefaultBootstrap()) {
-            // adding android.jar to classpath, as it is not in the bootclasspath
-            classpath =
-                    classpath.plus(
-                            project.files(globalScope.getAndroidBuilder().getBootClasspath(false)));
-        }
-        javacTask.setClasspath(classpath);
+        javacTask.setClasspath(scope.getJavaClasspath(COMPILE_CLASSPATH, CLASSES));
 
         javacTask.setDestinationDir(
                 artifacts
@@ -100,11 +92,10 @@ public class JavaCompileConfigAction implements TaskConfigAction<AndroidJavaComp
                         .getIncludeCompileClasspath();
 
         FileCollection processorPath =
-                scope.getArtifactFileCollection(ANNOTATION_PROCESSOR, ALL, PROCESSED_JAR);
+                scope.getArtifactFileCollection(ANNOTATION_PROCESSOR, ALL, JAR);
         if (Boolean.TRUE.equals(includeCompileClasspath)) {
             // We need the jar files because annotation processors require the resources.
-            processorPath =
-                    processorPath.plus(scope.getJavaClasspath(COMPILE_CLASSPATH, PROCESSED_JAR));
+            processorPath = processorPath.plus(scope.getJavaClasspath(COMPILE_CLASSPATH, JAR));
         }
 
         javacTask.getOptions().setAnnotationProcessorPath(processorPath);
@@ -154,10 +145,13 @@ public class JavaCompileConfigAction implements TaskConfigAction<AndroidJavaComp
         javacTask.annotationProcessorOutputFolder = scope.getAnnotationProcessorOutputDir();
 
         if (isDataBindingEnabled) {
-            // The data binding artifact is created through annotation processing, which is invoked
-            // by the JavaCompile task. Therefore, we register JavaCompile as the generating task.
-            artifacts.appendArtifact(
-                    InternalArtifactType.DATA_BINDING_ARTIFACT,
+
+            // the data binding artifact is created by the annotation processor, so we register this
+            // task output (which also publishes it) with javac as the generating task.
+            javacTask.dataBindingArtifactOutputDirectory =
+                    scope.getBundleArtifactFolderForDataBinding();
+
+            artifacts.appendArtifact(InternalArtifactType.DATA_BINDING_ARTIFACT,
                     ImmutableList.of(scope.getBundleArtifactFolderForDataBinding()),
                     javacTask);
         }

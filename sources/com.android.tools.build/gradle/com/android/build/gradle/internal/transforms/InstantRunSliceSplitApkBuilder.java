@@ -16,7 +16,6 @@
 
 package com.android.build.gradle.internal.transforms;
 
-
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.api.artifact.BuildableArtifact;
@@ -28,7 +27,6 @@ import com.android.build.api.transform.Status;
 import com.android.build.api.transform.TransformException;
 import com.android.build.api.transform.TransformInput;
 import com.android.build.api.transform.TransformInvocation;
-import com.android.build.gradle.internal.aapt.AaptGeneration;
 import com.android.build.gradle.internal.dsl.CoreSigningConfig;
 import com.android.build.gradle.internal.incremental.FileType;
 import com.android.build.gradle.internal.incremental.InstantRunBuildContext;
@@ -47,7 +45,6 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,7 +75,6 @@ public class InstantRunSliceSplitApkBuilder extends InstantRunSplitApkBuilder {
             @Nullable FileCollection aapt2FromMaven,
             @NonNull Supplier<String> applicationIdSupplier,
             @Nullable CoreSigningConfig signingConf,
-            @NonNull AaptGeneration aaptGeneration,
             @NonNull AaptOptions aaptOptions,
             @NonNull File outputDirectory,
             @NonNull File supportDirectory,
@@ -95,7 +91,6 @@ public class InstantRunSliceSplitApkBuilder extends InstantRunSplitApkBuilder {
                 aapt2FromMaven,
                 applicationIdSupplier,
                 signingConf,
-                aaptGeneration,
                 aaptOptions,
                 outputDirectory,
                 supportDirectory,
@@ -232,10 +227,6 @@ public class InstantRunSliceSplitApkBuilder extends InstantRunSplitApkBuilder {
                                     File resPackageFile =
                                             new File(splitApkResource, "resources_ap");
 
-                                    if (!resPackageFile.exists()) {
-                                        throw new FileNotFoundException(
-                                                resPackageFile.getAbsolutePath());
-                                    }
                                     generateSplitApk(
                                             uniqueName, resPackageFile, split, alignedOutput);
 

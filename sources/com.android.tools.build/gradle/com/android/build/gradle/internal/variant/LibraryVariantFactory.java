@@ -32,6 +32,7 @@ import com.android.build.gradle.internal.dsl.BuildType;
 import com.android.build.gradle.internal.dsl.ProductFlavor;
 import com.android.build.gradle.internal.dsl.SigningConfig;
 import com.android.build.gradle.internal.scope.GlobalScope;
+import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.VariantType;
 import com.android.builder.core.VariantTypeImpl;
 import com.android.builder.errors.EvalIssueException;
@@ -46,8 +47,9 @@ public class LibraryVariantFactory extends BaseVariantFactory {
 
     public LibraryVariantFactory(
             @NonNull GlobalScope globalScope,
+            @NonNull AndroidBuilder androidBuilder,
             @NonNull AndroidConfig extension) {
-        super(globalScope, extension);
+        super(globalScope, androidBuilder, extension);
     }
 
     @Override
@@ -87,7 +89,7 @@ public class LibraryVariantFactory extends BaseVariantFactory {
      */
     @Override
     public void validateModel(@NonNull VariantModel model) {
-        EvalIssueReporter issueReporter = globalScope.getAndroidBuilder().getIssueReporter();
+        EvalIssueReporter issueReporter = androidBuilder.getIssueReporter();
 
         if (model.getDefaultConfig().getProductFlavor().getApplicationId() != null) {
             String applicationId = model.getDefaultConfig().getProductFlavor().getApplicationId();

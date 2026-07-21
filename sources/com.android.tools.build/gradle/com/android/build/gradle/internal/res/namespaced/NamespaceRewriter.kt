@@ -24,6 +24,7 @@ import com.android.ide.common.xml.XmlPrettyPrinter
 import com.android.resources.ResourceType
 import com.android.tools.build.apkzlib.zip.StoredEntryType
 import com.android.tools.build.apkzlib.zip.ZFile
+import com.android.utils.PathUtils
 import com.android.utils.PositionXmlParser
 import com.google.common.base.Joiner
 import com.google.common.collect.ImmutableList
@@ -36,9 +37,13 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.ACC_PUBLIC
 import org.objectweb.asm.Opcodes.ACC_STATIC
 import org.objectweb.asm.Opcodes.ASM5
+import org.w3c.dom.Document
+import org.w3c.dom.Element
+import org.w3c.dom.NamedNodeMap
 import org.w3c.dom.Node
-import java.io.BufferedInputStream
+import org.w3c.dom.NodeList
 import java.io.File
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.HashSet
@@ -99,35 +104,54 @@ class NamespaceRewriter(
     }
 
     /**
+     * Rewrites the input file to be fully namespaced using the provided method. Writes fully
+     * namespaced document to the output.
+     */
+    private inline fun rewriteFile(input: Path, output: Path, method: (node: Document) -> Unit) {
+        Files.newInputStream(input).buffered().use {
+            // Read the file.
+            val doc = try {
+                PositionXmlParser.parse(it)
+            } catch (e: Exception) {
+                throw IOException("Failed to parse $input", e)
+            }
+
+            // Fix namespaces.
+            try {
+                method(doc)
+            } catch (e: Exception) {
+                throw IOException("Failed namespace $input", e)
+            }
+
+            // Write the new file. The PositionXmlParser uses UTF_8 when reading the file, so it
+            // should be fine to write as UTF_8 too.
+            Files.newOutputStream(output).bufferedWriter(Charsets.UTF_8).use {
+                it.write(
+                    XmlPrettyPrinter
+                        .prettyPrint(
+                            doc,
+                            XmlFormatPreferences.defaults(),
+                            XmlFormatStyle.get(doc),
+                            System.lineSeparator(),
+                            false
+                        )
+                )
+            }
+        }
+    }
+
+    /**
      * Rewrites the AndroidManifest.xml file to be fully resource namespace aware. Finds all
      * resource references (e.g. '@string/app_name') and makes them namespace aware (e.g.
      * '@com.foo.bar:string/app_name').
      * This will also append the package to the references to resources from this library - it is
      * not necessary, but saves us from comparing the package names.
      */
-    fun rewriteManifest(inputManifest: File, outputManifest: File) {
-        BufferedInputStream(Files.newInputStream(inputManifest.toPath())).use {
-            // Read the manifest.
-            val doc = PositionXmlParser.parse(it)
-
-            // Fix namespaces.
-            rewriteNode(doc)
-
-            // Write the new manifest.
-            Files.write(
-                    outputManifest.toPath(),
-                    XmlPrettyPrinter
-                            .prettyPrint(
-                                    doc,
-                                    XmlFormatPreferences.defaults(),
-                                    XmlFormatStyle.get(doc),
-                                    System.lineSeparator(),
-                                    false)
-                            .toByteArray())
-        }
+    fun rewriteManifest(inputManifest: Path, outputManifest: Path) {
+        rewriteFile(inputManifest, outputManifest, this::rewriteManifestNode)
     }
 
-    private fun rewriteNode(node: Node) {
+    private fun rewriteManifestNode(node: Node) {
         if (node.nodeType == Node.ATTRIBUTE_NODE) {
             // The content could be a resource reference. If it is not, do not update the content.
             val content = node.nodeValue
@@ -138,21 +162,341 @@ class NamespaceRewriter(
         }
 
         // First fix the attributes.
-        node.attributes?.let {
-            for (i in 0 until it.length) rewriteNode(it.item(i))
+        node.attributes?.forEach {
+            rewriteManifestNode(it)
         }
 
         // Now fix the children.
-        node.childNodes?.let {
-            for (i in 0 until it.length) rewriteNode(it.item(i))
+        node.childNodes?.forEach {
+            rewriteManifestNode(it)
+        }
+    }
+
+    /**
+     * Rewrites a values file to be fully resource namespace aware. Finds all resource references
+     * and makes them namespace aware, for example:
+     * - simple references, e.g. '@string/app_name' becomes '@com.foo.bar:string/app_name'
+     * - styles' parents, e.g. 'parent="@style/Parent', 'parent="Parent"' both become
+     *   'parent="@com.foo.bar:style/Parent"'
+     * - styles' item name references, e.g. 'item name="my_attr"' becomes
+     *   'item name="com.foo.bar:my_attr" (no "@" or "attr/" in this case)
+     * This will also append the package to the references to resources from this library - it is
+     * not necessary, but saves us from comparing the package names.
+     */
+    fun rewriteValuesFile(input: Path, output: Path) {
+        rewriteFile(input, output, this::rewriteValuesNode)
+    }
+
+    private fun rewriteValuesNode(node: Node) {
+        if (node.nodeType == Node.TEXT_NODE) {
+            // The content could be a resource reference. If it is not, do not update the content.
+            val content = node.nodeValue
+            val namespacedContent = rewritePossibleReference(content)
+            if (content != namespacedContent) {
+                node.nodeValue = namespacedContent
+            }
+        } else if (node.nodeType == Node.ELEMENT_NODE && node.nodeName == "style") {
+            // Styles need to be handled separately.
+            rewriteStyleElement(node as Element)
+            return
+        }
+
+        // First fix the attributes.
+        node.attributes?.forEach {
+            rewriteValuesNode(it)
+        }
+
+        // Now fix the children.
+        node.childNodes?.forEach {
+            rewriteValuesNode(it)
+        }
+    }
+
+    /** Rewrites a style element
+     *
+     * e.g.
+     * ```
+     * <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+     *     <item name="colorPrimary">@color/colorPrimary</item>
+     * </style>
+     * ```
+     * to
+     * ```
+     * <style name="AppTheme" parent="android.support.v7.appcompat:Theme.AppCompat.Light.DarkActionBar">
+     *     <item name="android.support.v7.appcompat:colorPrimary">@com.example.app:color/colorPrimary</item>
+     * </style>
+     * ```
+     * */
+    private fun rewriteStyleElement(element: Element) {
+        rewriteStyleParent(element)
+        rewriteStyleItems(element)
+    }
+
+    private fun rewriteStyleParent(element: Element) {
+        val name: String = element.attributes.getNamedItem("name")!!.nodeValue
+
+        val originalParent: String? = element.attributes.getNamedItem("parent")?.nodeValue
+        var parent: String? = null
+        if (originalParent == null) {
+            // Guess, maybe we have an implicit parent?
+            val possibleParent = name.substringBeforeLast('.', "")
+            if (!possibleParent.isEmpty()) {
+                val possiblePackage = maybeFindPackage(
+                    "style",
+                    canonicalizeValueResourceName(possibleParent),
+                    logger,
+                    symbolTables
+                )
+                if (possiblePackage != null) {
+                    parent = "@$possiblePackage:style/$possibleParent"
+                }
+            }
+        } else if (originalParent.isEmpty()) {
+            // leave it alone, there is explicitly no parent
+        } else {
+            // Rewrite explicitly included parents
+            parent = originalParent
+            if (!parent.startsWith("@")) {
+                parent = "@style/$parent"
+            }
+            parent = rewritePossibleReference(parent)
+        }
+        if (parent != null && parent != originalParent) {
+            val parentAttribute = element.ownerDocument.createAttribute("parent")
+            parentAttribute.value = parent
+            element.attributes.setNamedItem(parentAttribute)
+        }
+
+    }
+
+    private fun rewriteStyleItems(styleElement: Element) {
+        styleElement.childNodes?.forEach {
+            if (it.nodeType == Node.ELEMENT_NODE && it.nodeName == "item") {
+                rewriteStyleItem(it as Element)
+            }
+        }
+    }
+
+    private fun rewriteStyleItem(styleItemElement: Element) {
+        styleItemElement.attributes.forEach { attribute ->
+            if (attribute.nodeName == "name") {
+                rewriteStyleItemNameAttribute(attribute)
+            }
+        }
+        styleItemElement.childNodes.forEach { node ->
+            if (node.nodeType == Node.TEXT_NODE) {
+                rewriteStyleItemValue(node)
+            }
+        }
+    }
+
+    private fun rewriteStyleItemNameAttribute(attribute: Node) {
+        if (attribute.nodeValue.contains(':')) {
+            return
+        }
+        // If the name is not from the "android:" namespace, it comes from this library or its
+        // dependencies (uncommon but needs to be handled).
+        val content = "@attr/${attribute.nodeValue}"
+        val namespacedContent = rewritePossibleReference(content)
+        if (content != namespacedContent) {
+            // Prepend the package to the content
+            val foundPackage =
+                namespacedContent.substring(1, namespacedContent.indexOf(":"))
+            attribute.nodeValue = "$foundPackage:${attribute.nodeValue}"
+        }
+    }
+
+    private fun rewriteStyleItemValue(node: Node) {
+        // The content could be a resource reference. If it is not, do not update the content.
+        val content = node.nodeValue
+        val namespacedContent = rewritePossibleReference(content)
+        if (content != namespacedContent) {
+            node.nodeValue = namespacedContent
+        }
+    }
+
+    /**
+     * Rewrites an XML file (e.g. layout) to be fully resource namespace aware. Finds all resource
+     * references and makes them namespace aware, for example:
+     * - simple references, e.g. '@string/app_name' becomes '@com.foo.bar:string/app_name'
+     * - adds XML namespaces for dependencies (e.g. xmlns:android_support_constraint=
+     *   "http://schemas.android.com/apk/res/android.support.constraint")
+     * - updates XML namespaces from to the correct package, e.g  app:layout_constraintLeft_toLeftOf
+     *   becomes android_support_constraint:layout_constraintLeft_toLeftOf
+     * - removes res-auto namespace to make sure we don't leave anything up to luck
+     * This will also append the package to the references to resources from this library - it is
+     * not necessary, but saves us from comparing the package names.
+     */
+    fun rewriteXmlFile(input: Path, output: Path) {
+        rewriteFile(input, output, this::rewriteXmlDoc)
+    }
+
+    /**
+     * Rewrites all the resources from an exploded-aar input directory as passed in input to the
+     * output directory.
+     *
+     * * Values files are processed with [#rewriteValuesFile]
+     * * XML files not in raw (such as layouts) are processed with [#rewriteXmlFile]
+     * * Everything else is copied as-is
+     */
+    fun rewriteAarResources(input: Path, output: Path) {
+        if (!Files.isDirectory(input)) {
+            throw IOException("expected $input to be a directory")
+        }
+        PathUtils.deleteRecursivelyIfExists(output)
+        Files.createDirectories(output)
+        Files.list(input).use {
+            it.forEach { resSubdirectory ->
+                val name = resSubdirectory.fileName.toString()
+                val outputDir = output.resolve(name)
+                Files.createDirectory(outputDir)
+                if (name == "values" || name.startsWith("values-")) {
+                    resSubdirectory.forEachFile(outputDir) { from, to ->
+                        rewriteValuesFile(from, to)
+                    }
+                } else if (name == "raw" || name.startsWith("raw-")) {
+                    resSubdirectory.forEachFile(outputDir) { from, to ->
+                        Files.copy(from, to)
+                    }
+                } else {
+                    resSubdirectory.forEachFile(outputDir) { from, to ->
+                        if (from.fileName.toString().endsWith(".xml")) {
+                            rewriteXmlFile(from, to)
+                        } else {
+                            Files.copy(from, to)
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    private inline fun Path.forEachFile(outdir: Path, crossinline action: (Path, Path) -> Unit) {
+        Files.list(this).use {
+            it.forEach { file ->
+                if (Files.isRegularFile(file)) {
+                    action.invoke(file, outdir.resolve(file.fileName))
+                }
+            }
+        }
+    }
+
+    private fun rewriteXmlDoc(document: Document) {
+        // Get the main node. Can be a 'layout' or a 'vector' etc. This is where we will add all the
+        // namespaces.
+        val mainNode = getMainElement(document)
+
+        // TODO(b/110036551): can 'res-auto' be declared anywhere deeper than the main node?
+        // First, find any namespaces we need to fix - any pointing to 'res-auto'. Usually it is
+        // only "xmlns:app", but let's be safe here.
+        val namespacesToFix: ArrayList<String> = ArrayList()
+        mainNode.attributes?.let {
+            for (i in 0 until it.length) {
+                val attr = it.item(i)
+                if (attr.nodeName.startsWith("xmlns:")
+                        && attr.nodeValue == "http://schemas.android.com/apk/res-auto") {
+                    namespacesToFix.add(attr.nodeName.substring(6))
+                }
+            }
+        }
+        namespacesToFix.forEach { mainNode.removeAttribute("xmlns:$it") }
+
+        // Add namespaces, we might not need all of them (if any), but it's safer and cheaper to add
+        // all.
+        for (table in symbolTables) {
+            mainNode.setAttribute(
+                    "xmlns:${table.tablePackage.replace('.', '_')}",
+                    "http://schemas.android.com/apk/res/${table.tablePackage}")
+        }
+
+        // First fix the attributes.
+        mainNode.attributes?.forEach {
+            if (!it.nodeName.startsWith("xmlns:")){
+                rewriteXmlNode(it, document, namespacesToFix)
+            }
+        }
+
+        // Now fix the children.
+        mainNode.childNodes?.forEach {
+            rewriteXmlNode(it, document, namespacesToFix)
+        }
+    }
+
+    /** Resource XML files should have only one main element
+     * everything else should be whitespace and comments */
+    private fun getMainElement(document: Document): Element {
+        var candidateMainNode: Element? = null
+
+        document.childNodes?.forEach {
+            if (it.nodeType == Node.ELEMENT_NODE) {
+                if (candidateMainNode != null) {
+                    error("Invalid XML file - there can only be one main node.")
+                }
+                candidateMainNode = it as Element
+            }
+        }
+
+        return candidateMainNode ?: error("Invalid XML file - missing main node.")
+    }
+
+    private fun rewriteXmlNode(node: Node, document: Document, namespacesToFix: List<String>) {
+        if (node.nodeType == Node.TEXT_NODE) {
+            // The content could be a resource reference. If it is not, do not update the content.
+            val content = node.nodeValue
+            val namespacedContent = rewritePossibleReference(content)
+            if (content != namespacedContent) {
+                node.nodeValue = namespacedContent
+            }
+        } else if (node.nodeType == Node.ATTRIBUTE_NODE && node.nodeName.contains(":")) {
+            // Only fix res-auto.
+            if (namespacesToFix.any { node.nodeName.startsWith("$it:")}) {
+                val name =
+                        node.nodeName.substring(
+                                node.nodeName.indexOf(':') + 1, node.nodeName.length)
+                val content = "@attr/$name"
+                val namespacedContent = rewritePossibleReference(content)
+                if (content != namespacedContent) {
+                    // Prepend the package to the content
+                    val foundPackage = namespacedContent.substring(1, namespacedContent.indexOf(":"))
+                    document.renameNode(
+                            node,
+                            "http://schemas.android/apk/res/$foundPackage",
+                            "${foundPackage.replace('.', '_')}:$name")
+                }
+            }
+        }
+
+        // First fix the attributes.
+        node.attributes?.forEach {
+            rewriteXmlNode(it, document, namespacesToFix)
+        }
+
+        // Now fix the children.
+        node.childNodes?.forEach {
+            rewriteXmlNode(it, document, namespacesToFix)
         }
     }
 
     private fun rewritePossibleReference(content: String): String {
-        // We're not dealing with a reference or we already have a namespace, just let it go.
-        if (!content.startsWith("@") || !content.contains('/') || content.contains(':')) {
+        if (!content.startsWith("@") && !content.startsWith("?")) {
+            // Not a reference, don't rewrite it.
             return content
         }
+        if (!content.contains("/")) {
+            // Not a reference, don't rewrite it.
+            return content
+        }
+        if (content.startsWith("@+")) {
+            // ID declarations are inheritently local, don't rewrite it.
+            return content
+        }
+        if (content.contains(':')) {
+            // The reference is already namespaced (probably @android:...), don't rewrite it.
+            return content
+        }
+
+        val prefixChar = content[0]
         val trimmedContent = content.trim()
         val slashIndex = trimmedContent.indexOf('/')
         val type = trimmedContent.substring(1, slashIndex)
@@ -161,7 +505,7 @@ class NamespaceRewriter(
         val pckg = findPackage(type, canonicalizeValueResourceName(name), logger, symbolTables)
 
         // Rewrite the reference using the package and the un-canonicalized name.
-        return "@$pckg:$type/$name"
+        return "$prefixChar$pckg:$type/$name"
     }
 
     /**
@@ -262,6 +606,11 @@ class NamespaceRewriter(
             }
         }
     }
+
+    private inline fun NodeList.forEach(f: (Node) -> Unit) { for (i in 0 until length) f(item(i)) }
+    private inline fun NamedNodeMap.forEach(f: (Node) -> Unit) {
+        for (i in 0 until length) f(item(i))
+    }
 }
 
 /**
@@ -269,21 +618,39 @@ class NamespaceRewriter(
  * name.
  */
 private fun findPackage(
-        type: String,
-        name: String,
-        logger: Logger,
-        symbolTables: ImmutableList<SymbolTable>
+    type: String,
+    name: String,
+    logger: Logger,
+    symbolTables: ImmutableList<SymbolTable>
 ): String {
-    var packages:ArrayList<String>? = null
-    var result:String? = null
+    val result: String? =
+        maybeFindPackage(type = type, name = name, logger = logger, symbolTables = symbolTables)
+    return result
+            ?: error(
+                "In package ${symbolTables[0].tablePackage} found unknown symbol of type " +
+                        "$type and name $name."
+            )
+}
+
+/**
+ * Finds the first package in which the R file contains a symbol with the given type and
+ * name.
+ */
+private fun maybeFindPackage(
+    type: String,
+    name: String,
+    logger: Logger,
+    symbolTables: ImmutableList<SymbolTable>
+): String? {
+    var packages: ArrayList<String>? = null
+    var result: String? = null
 
     // Go through R.txt files and find the proper package.
     for (table in symbolTables) {
-        if (table.containsSymbol(ResourceType.getEnum(type)!!, name)) {
+        if (table.containsSymbol(getResourceType(type), name)) {
             if (result == null) {
                 result = table.tablePackage
-            }
-            else {
+            } else {
                 if (packages == null) {
                     packages = ArrayList()
                 }
@@ -291,18 +658,18 @@ private fun findPackage(
             }
         }
     }
-    if (result == null) {
-        // Error out if we cannot find the symbol.
-        error("In package ${symbolTables[0].tablePackage} found unknown symbol of type " +
-                "$type and name $name.")
-    }
     if (packages != null && !packages.isEmpty()) {
         // If we have found more than one fitting package, log a warning about which one we
         // chose (the closest one in the dependencies graph).
-        logger.warn("In package ${symbolTables[0].tablePackage} multiple options found " +
-                "in its dependencies for resource $type $name. " +
-                "Using $result, other available: ${Joiner.on(", ").join(packages)}")
+        logger.warn(
+            "In package ${symbolTables[0].tablePackage} multiple options found " +
+                    "in its dependencies for resource $type $name. " +
+                    "Using $result, other available: ${Joiner.on(", ").join(packages)}"
+        )
     }
     // Return the first found reference.
     return result
 }
+
+private fun getResourceType(typeString: String): ResourceType =
+    ResourceType.getEnum(typeString) ?: error("Unknown type '$typeString'")

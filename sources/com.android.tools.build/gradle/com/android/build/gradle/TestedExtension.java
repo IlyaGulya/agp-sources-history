@@ -10,13 +10,12 @@ import com.android.build.gradle.internal.dependency.SourceSetManager;
 import com.android.build.gradle.internal.dsl.BuildType;
 import com.android.build.gradle.internal.dsl.ProductFlavor;
 import com.android.build.gradle.internal.dsl.SigningConfig;
-import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.options.ProjectOptions;
+import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.VariantType;
 import org.gradle.api.DomainObjectSet;
 import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Project;
-import org.gradle.api.file.FileCollection;
 import org.gradle.api.internal.DefaultDomainObjectSet;
 
 /**
@@ -39,7 +38,7 @@ public abstract class TestedExtension extends BaseExtension implements TestedAnd
     public TestedExtension(
             @NonNull Project project,
             @NonNull ProjectOptions projectOptions,
-            @NonNull GlobalScope globalScope,
+            @NonNull AndroidBuilder androidBuilder,
             @NonNull SdkHandler sdkHandler,
             @NonNull NamedDomainObjectContainer<BuildType> buildTypes,
             @NonNull NamedDomainObjectContainer<ProductFlavor> productFlavors,
@@ -51,7 +50,7 @@ public abstract class TestedExtension extends BaseExtension implements TestedAnd
         super(
                 project,
                 projectOptions,
-                globalScope,
+                androidBuilder,
                 sdkHandler,
                 buildTypes,
                 productFlavors,
@@ -168,10 +167,5 @@ public abstract class TestedExtension extends BaseExtension implements TestedAnd
 
     public void setTestBuildType(String testBuildType) {
         this.testBuildType = testBuildType;
-    }
-
-    @NonNull
-    public FileCollection getMockableAndroidJar() {
-        return globalScope.getMockableJarArtifact();
     }
 }

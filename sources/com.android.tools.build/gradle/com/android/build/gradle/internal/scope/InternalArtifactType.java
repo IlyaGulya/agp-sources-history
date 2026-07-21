@@ -38,7 +38,8 @@ public enum InternalArtifactType implements ArtifactType {
 
     // Packaged classes for AAR intermediate publishing
     // This is for external usage. For usage inside a module use ALL_CLASSES
-    LIBRARY_CLASSES,
+    LIBRARY_CLASSES_JAR,
+    LIBRARY_CLASSES_DIR,
     // the packaged classes published by APK modules.
     // This is for external usage. For usage inside a module use ALL_CLASSES
     APP_CLASSES,
@@ -88,7 +89,6 @@ public enum InternalArtifactType implements ArtifactType {
     INSTANT_RUN_SPLIT_APK_RESOURCES,
     // linked res for the unified bundle
     LINKED_RES_FOR_BUNDLE,
-    SHRUNK_LINKED_RES_FOR_BUNDLE,
 
     // Artifacts for legacy multidex
     LEGACY_MULTIDEX_AAPT_DERIVED_PROGUARD_RULES,
@@ -127,6 +127,7 @@ public enum InternalArtifactType implements ArtifactType {
 
     LIBRARY_ASSETS,
     MERGED_ASSETS,
+    MOCKABLE_JAR,
 
     // AIDL headers "packaged" by libraries for consumers.
     AIDL_PARCELABLE,
@@ -208,8 +209,6 @@ public enum InternalArtifactType implements ArtifactType {
     APKS_FROM_BUNDLE,
     // output of ExtractApks applied to APKS_FROM_BUNDLE and a device config.
     EXTRACTED_APKS,
-    // Universal APK from the bundle
-    UNIVERSAL_APK(Category.OUTPUTS),
 
     // file containing the metadata for the full feature set. This contains the feature names,
     // the res ID offset, both tied to the feature module path. Published by the base for the
@@ -218,6 +217,9 @@ public enum InternalArtifactType implements ArtifactType {
     // file containing the module information (like its application ID) to synchronize all base
     // and dynamic feature. This is published by the base feature and installed application module.
     METADATA_BASE_MODULE_DECLARATION,
+    // file containing only the application ID. It is used to synchronize all feature plugins
+    // with the application module's application ID.
+    METADATA_APPLICATION_ID,
     FEATURE_RESOURCE_PKG,
     // File containing the list of transitive dependencies of a given feature. This is consumed
     // by other features to avoid repackaging the same thing.

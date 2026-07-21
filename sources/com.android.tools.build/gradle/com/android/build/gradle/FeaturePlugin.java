@@ -26,10 +26,12 @@ import com.android.build.gradle.internal.SdkHandler;
 import com.android.build.gradle.internal.TaskManager;
 import com.android.build.gradle.internal.VariantManager;
 import com.android.build.gradle.internal.dependency.VariantDependencies;
+import com.android.build.gradle.internal.ndk.NdkHandler;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.variant.MultiTypeVariantFactory;
 import com.android.build.gradle.internal.variant.VariantFactory;
 import com.android.build.gradle.options.ProjectOptions;
+import com.android.builder.core.AndroidBuilder;
 import com.android.builder.model.AndroidProject;
 import com.android.builder.profile.Recorder;
 import com.google.wireless.android.sdk.stats.GradleBuildProject;
@@ -81,8 +83,9 @@ public class FeaturePlugin extends LibraryPlugin {
     @Override
     protected VariantFactory createVariantFactory(
             @NonNull GlobalScope globalScope,
+            @NonNull AndroidBuilder androidBuilder,
             @NonNull AndroidConfig androidConfig) {
-        return new MultiTypeVariantFactory(globalScope, androidConfig);
+        return new MultiTypeVariantFactory(globalScope, androidBuilder, androidConfig);
     }
 
     @Override
@@ -96,15 +99,18 @@ public class FeaturePlugin extends LibraryPlugin {
             @NonNull GlobalScope globalScope,
             @NonNull Project project,
             @NonNull ProjectOptions projectOptions,
+            @NonNull AndroidBuilder androidBuilder,
             @NonNull DataBindingBuilder dataBindingBuilder,
             @NonNull AndroidConfig androidConfig,
             @NonNull SdkHandler sdkHandler,
+            @NonNull NdkHandler ndkHandler,
             @NonNull ToolingModelBuilderRegistry toolingRegistry,
             @NonNull Recorder recorder) {
         return new MultiTypeTaskManager(
                 globalScope,
                 project,
                 projectOptions,
+                androidBuilder,
                 dataBindingBuilder,
                 androidConfig,
                 sdkHandler,
@@ -123,11 +129,13 @@ public class FeaturePlugin extends LibraryPlugin {
         registry.register(
                 new FeatureModelBuilder(
                         globalScope,
+                        androidBuilder,
                         variantManager,
                         taskManager,
                         (FeatureExtension) config,
                         extraModelInfo,
-                        new NativeLibraryFactoryImpl(globalScope.getNdkHandler()),
+                        ndkHandler,
+                        new NativeLibraryFactoryImpl(ndkHandler),
                         getProjectType(),
                         AndroidProject.GENERATION_ORIGINAL));
     }

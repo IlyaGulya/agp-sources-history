@@ -30,6 +30,7 @@ import com.android.build.gradle.internal.dsl.BuildType;
 import com.android.build.gradle.internal.dsl.ProductFlavor;
 import com.android.build.gradle.internal.dsl.SigningConfig;
 import com.android.build.gradle.internal.scope.GlobalScope;
+import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.VariantType;
 import com.android.builder.core.VariantTypeImpl;
 import com.android.builder.errors.EvalIssueException;
@@ -47,17 +48,22 @@ public class MultiTypeVariantFactory extends BaseVariantFactory {
 
     public MultiTypeVariantFactory(
             @NonNull GlobalScope globalScope,
+            @NonNull AndroidBuilder androidBuilder,
             @NonNull AndroidConfig extension) {
-        super(globalScope, extension);
+        super(globalScope, androidBuilder, extension);
         delegates =
                 ImmutableMap.of(
                         VariantTypeImpl.BASE_FEATURE,
                         new FeatureVariantFactory(
-                                globalScope, extension, VariantTypeImpl.BASE_FEATURE),
+                                globalScope,
+                                androidBuilder,
+                                extension,
+                                VariantTypeImpl.BASE_FEATURE),
                         VariantTypeImpl.FEATURE,
-                        new FeatureVariantFactory(globalScope, extension, VariantTypeImpl.FEATURE),
+                        new FeatureVariantFactory(
+                                globalScope, androidBuilder, extension, VariantTypeImpl.FEATURE),
                         VariantTypeImpl.LIBRARY,
-                        new LibraryVariantFactory(globalScope, extension));
+                        new LibraryVariantFactory(globalScope, androidBuilder, extension));
     }
 
     @NonNull
@@ -102,7 +108,7 @@ public class MultiTypeVariantFactory extends BaseVariantFactory {
             return;
         }
 
-        EvalIssueReporter issueReporter = globalScope.getAndroidBuilder().getIssueReporter();
+        EvalIssueReporter issueReporter = androidBuilder.getIssueReporter();
 
         for (BuildTypeData buildType : model.getBuildTypes().values()) {
             if (buildType.getBuildType().isMinifyEnabled()) {

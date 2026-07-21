@@ -135,10 +135,12 @@ public class ModelBuilder<Extension extends AndroidConfig>
 
     @NonNull static final DependencyGraphs EMPTY_DEPENDENCY_GRAPH = new EmptyDependencyGraphs();
     @NonNull protected final GlobalScope globalScope;
+    @NonNull private final AndroidBuilder androidBuilder;
     @NonNull protected final Extension extension;
     @NonNull private final ExtraModelInfo extraModelInfo;
     @NonNull private final VariantManager variantManager;
     @NonNull private final TaskManager taskManager;
+    @NonNull private final NdkHandler ndkHandler;
     @NonNull private Map<Abi, NativeToolchain> toolchains;
     @NonNull private NativeLibraryFactory nativeLibFactory;
     private final int projectType;
@@ -155,18 +157,22 @@ public class ModelBuilder<Extension extends AndroidConfig>
 
     public ModelBuilder(
             @NonNull GlobalScope globalScope,
+            @NonNull AndroidBuilder androidBuilder,
             @NonNull VariantManager variantManager,
             @NonNull TaskManager taskManager,
             @NonNull Extension extension,
             @NonNull ExtraModelInfo extraModelInfo,
+            @NonNull NdkHandler ndkHandler,
             @NonNull NativeLibraryFactory nativeLibraryFactory,
             int projectType,
             int generation) {
         this.globalScope = globalScope;
+        this.androidBuilder = androidBuilder;
         this.extension = extension;
         this.extraModelInfo = extraModelInfo;
         this.variantManager = variantManager;
         this.taskManager = taskManager;
+        this.ndkHandler = ndkHandler;
         this.nativeLibFactory = nativeLibraryFactory;
         this.projectType = projectType;
         this.generation = generation;
@@ -315,7 +321,6 @@ public class ModelBuilder<Extension extends AndroidConfig>
 
         // Get the boot classpath. This will ensure the target is configured.
         List<String> bootClasspath;
-        final AndroidBuilder androidBuilder = globalScope.getAndroidBuilder();
         if (androidBuilder.getTargetInfo() != null) {
             bootClasspath = androidBuilder.getBootClasspathAsStrings(false);
         } else {
@@ -348,7 +353,7 @@ public class ModelBuilder<Extension extends AndroidConfig>
                         ? extension.getFlavorDimensionList()
                         : Lists.newArrayList();
 
-        toolchains = createNativeToolchainModelMap(globalScope.getNdkHandler());
+        toolchains = createNativeToolchainModelMap(ndkHandler);
 
         ProductFlavorContainer defaultConfig = ProductFlavorContainerImpl
                 .createProductFlavorContainer(
@@ -713,8 +718,6 @@ public class ModelBuilder<Extension extends AndroidConfig>
 
         CoreNdkOptions ndkConfig = variantData.getVariantConfiguration().getNdkConfig();
         Collection<NativeLibrary> nativeLibraries = ImmutableList.of();
-
-        NdkHandler ndkHandler = globalScope.getNdkHandler();
         if (ndkHandler.isConfigured()) {
             if (extension.getSplits().getAbi().isEnable()) {
                 nativeLibraries =
@@ -923,27 +926,36 @@ public class ModelBuilder<Extension extends AndroidConfig>
                                                             .getVariantConfiguration()
                                                             .getType());
 
-                            // get the OutputPublishingSpec from the ArtifactType for this particular variant spec
-                            PublishingSpecs.OutputSpec taskOutputSpec =
-                                    testedSpec.getSpec(AndroidArtifacts.ArtifactType.CLASSES);
-                            // now get the output type
-                            ArtifactType testedOutputType = taskOutputSpec.getOutputType();
+                            ImmutableList.Builder<EarlySyncBuildOutput> list =
+                                    ImmutableList.builder();
+                            // get the OutputPublishingSpec from the ArtifactType for this
+                            // particular variant spec
+                            for (PublishingSpecs.OutputSpec taskOutputSpec :
+                                    testedSpec.getSpec(AndroidArtifacts.ArtifactType.CLASSES)) {
+                                // now get the output type
+                                ArtifactType testedOutputType = taskOutputSpec.getOutputType();
 
-                            return ImmutableList.of(
-                                    new EarlySyncBuildOutput(
-                                            JAVAC,
-                                            VariantOutput.OutputType.MAIN,
-                                            ImmutableList.of(),
-                                            variantData.getVariantConfiguration().getVersionCode(),
-                                            variantScope
-                                                    .getArtifacts()
-                                                    .getFinalArtifactFiles(testedOutputType)
-                                                    // We used to call .getSingleFile() but Kotlin projects
-                                                    // currently have 2 output dirs specified for test classes.
-                                                    // This supplier is going away in beta3, so this is obsolete
-                                                    // in any case.
-                                                    .iterator()
-                                                    .next()));
+                                // We used to call .getSingleFile() but Kotlin projects
+                                // currently have 2 output dirs specified for test classes.
+                                // This supplier is going away in beta3, so this is obsolete
+                                // in any case.
+                                File file =
+                                        variantScope
+                                                .getArtifacts()
+                                                .getFinalArtifactFiles(testedOutputType)
+                                                .iterator()
+                                                .next();
+                                int versionCode =
+                                        variantData.getVariantConfiguration().getVersionCode();
+                                list.add(
+                                        new EarlySyncBuildOutput(
+                                                JAVAC,
+                                                VariantOutput.OutputType.MAIN,
+                                                ImmutableList.of(),
+                                                versionCode,
+                                                file));
+                            }
+                            return list.build();
                         };
             case INSTANTAPP:
             default:

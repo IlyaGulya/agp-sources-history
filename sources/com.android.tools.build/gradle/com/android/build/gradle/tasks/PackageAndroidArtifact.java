@@ -27,7 +27,6 @@ import com.android.build.FilterData;
 import com.android.build.OutputFile;
 import com.android.build.VariantOutput;
 import com.android.build.api.artifact.BuildableArtifact;
-import com.android.build.gradle.internal.aapt.AaptGeneration;
 import com.android.build.gradle.internal.core.GradleVariantConfiguration;
 import com.android.build.gradle.internal.dsl.AbiSplitOptions;
 import com.android.build.gradle.internal.dsl.CoreSigningConfig;
@@ -50,6 +49,7 @@ import com.android.build.gradle.internal.tasks.KnownFilesSaveData;
 import com.android.build.gradle.internal.tasks.KnownFilesSaveData.InputSet;
 import com.android.build.gradle.internal.tasks.TaskInputHelper;
 import com.android.build.gradle.internal.variant.MultiOutputPolicy;
+import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.options.StringOption;
 import com.android.builder.errors.EvalIssueReporter;
@@ -229,13 +229,17 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
         return projectBaseName;
     }
 
-    protected File aaptIntermediateFolder;
-
-    protected AaptGeneration aaptGeneration;
-
     protected FileCache fileCache;
 
     protected BuildableArtifact apkList;
+
+    /** Desired output format. */
+    protected IncrementalPackagerBuilder.ApkFormat apkFormat;
+
+    @Input
+    public String getApkFormat() {
+        return apkFormat.name();
+    }
 
     /**
      * Name of directory, inside the intermediate directory, where zip caches are kept.
@@ -373,11 +377,6 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
 
     protected abstract InternalArtifactType getInternalArtifactType();
 
-    @Input
-    public String getAaptGeneration() {
-        return aaptGeneration.name();
-    }
-
     @NonNull
     static Set<File> getAndroidResources(@Nullable File processedResources) {
 
@@ -488,7 +487,7 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
         /*
          * Additionally, make sure we have no previous package, if it exists.
          */
-        FileUtils.deleteIfExists(outputFile);
+        FileUtils.deleteRecursivelyIfExists(outputFile);
 
         final ImmutableMap<RelativeFile, FileStatus> updatedDex;
         final ImmutableMap<RelativeFile, FileStatus> updatedJavaResources;
@@ -663,7 +662,7 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
         BooleanSupplier isInExecutionPhase = () -> true;
 
         try (IncrementalPackager packager =
-                new IncrementalPackagerBuilder()
+                new IncrementalPackagerBuilder(apkFormat)
                         .withOutputFile(outputFile)
                         .withSigning(signingConfig)
                         .withCreatedBy(getBuilder().getCreatedBy())
@@ -939,10 +938,6 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
                     TaskInputHelper.memoize(variantScope::getMinSdkVersion);
             packageAndroidArtifact.instantRunContext =
                     TaskInputHelper.memoize(variantScope::getInstantRunBuildContext);
-            packageAndroidArtifact.aaptIntermediateFolder =
-                    new File(
-                            variantScope.getIncrementalDir(packageAndroidArtifact.getName()),
-                            "aapt-temp");
 
             packageAndroidArtifact.resourceFiles =
                     variantScope.getArtifacts().getFinalArtifactFiles(inputResourceFilesType);
@@ -975,8 +970,6 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
             ProjectOptions projectOptions = variantScope.getGlobalScope().getProjectOptions();
             packageAndroidArtifact.projectBaseName = globalScope.getProjectBaseName();
             packageAndroidArtifact.manifestType = manifestType;
-            packageAndroidArtifact.aaptGeneration =
-                    AaptGeneration.fromProjectOptions(projectOptions);
             packageAndroidArtifact.buildTargetAbi =
                     globalScope.getExtension().getSplits().getAbi().isEnable()
                             ? projectOptions.get(StringOption.IDE_BUILD_TARGET_ABI)
@@ -987,6 +980,10 @@ public abstract class PackageAndroidArtifact extends IncrementalTask {
                             : null;
 
             variantScope.getTaskContainer().setPackageAndroidTask(packageAndroidArtifact);
+            packageAndroidArtifact.apkFormat =
+                    projectOptions.get(BooleanOption.DEPLOYMENT_USES_DIRECTORY)
+                            ? IncrementalPackagerBuilder.ApkFormat.DIRECTORY
+                            : IncrementalPackagerBuilder.ApkFormat.FILE;
             configure(packageAndroidArtifact);
         }
 

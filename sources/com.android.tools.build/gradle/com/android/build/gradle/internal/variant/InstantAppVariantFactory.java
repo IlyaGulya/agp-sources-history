@@ -30,6 +30,7 @@ import com.android.build.gradle.internal.dsl.BuildType;
 import com.android.build.gradle.internal.dsl.ProductFlavor;
 import com.android.build.gradle.internal.dsl.SigningConfig;
 import com.android.build.gradle.internal.scope.GlobalScope;
+import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.VariantType;
 import com.android.builder.core.VariantTypeImpl;
 import com.android.builder.profile.Recorder;
@@ -42,8 +43,9 @@ public class InstantAppVariantFactory extends BaseVariantFactory {
 
     public InstantAppVariantFactory(
             @NonNull GlobalScope globalScope,
+            @NonNull AndroidBuilder androidBuilder,
             @NonNull AndroidConfig extension) {
-        super(globalScope, extension);
+        super(globalScope, androidBuilder, extension);
     }
 
     @NonNull

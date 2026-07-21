@@ -114,7 +114,6 @@ public class DexMergerTransform extends Transform {
     @NonNull private final MessageReceiver messageReceiver;
     @NonNull private final ForkJoinPool forkJoinPool = new ForkJoinPool();
     private final boolean includeFeaturesInScopes;
-    private final boolean isInInstantRunMode;
 
     public DexMergerTransform(
             @NonNull DexingType dexingType,
@@ -123,8 +122,7 @@ public class DexMergerTransform extends Transform {
             @NonNull DexMergerTool dexMerger,
             int minSdkVersion,
             boolean isDebuggable,
-            boolean includeFeaturesInScopes,
-            boolean isInInstantRunMode) {
+            boolean includeFeaturesInScopes) {
         this.dexingType = dexingType;
         this.mainDexListFile = mainDexListFile;
         this.dexMerger = dexMerger;
@@ -135,7 +133,6 @@ public class DexMergerTransform extends Transform {
                 "Main dex list must only be set when in legacy multidex");
         this.messageReceiver = messageReceiver;
         this.includeFeaturesInScopes = includeFeaturesInScopes;
-        this.isInInstantRunMode = isInInstantRunMode;
     }
 
     @NonNull
@@ -183,7 +180,6 @@ public class DexMergerTransform extends Transform {
         params.put("dex-merger-tool", dexMerger.name());
         params.put("is-debuggable", isDebuggable);
         params.put("min-sdk-version", minSdkVersion);
-        params.put("is-in-instant-run", isInInstantRunMode);
 
         return params;
     }
@@ -499,9 +495,7 @@ public class DexMergerTransform extends Transform {
         if (mergeAllInputs) {
             File dexOutput =
                     getDexOutputLocation(
-                            outputProvider,
-                            isInInstantRunMode ? "slice_0" : "directories",
-                            ImmutableSet.of(Scope.PROJECT));
+                            outputProvider, "directories", ImmutableSet.of(Scope.PROJECT));
             FileUtils.cleanOutputDir(dexOutput);
 
             List<Path> toMerge = new ArrayList<>(changed.size() + notChanged.size());

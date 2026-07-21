@@ -26,7 +26,6 @@ import com.android.annotations.Nullable;
 import com.android.build.api.artifact.BuildableArtifact;
 import com.android.build.api.transform.QualifiedContent.Scope;
 import com.android.build.gradle.AndroidConfig;
-import com.android.build.gradle.internal.aapt.AaptGeneration;
 import com.android.build.gradle.internal.core.GradleVariantConfiguration;
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension;
 import com.android.build.gradle.internal.dsl.DslAdaptersKt;
@@ -42,9 +41,9 @@ import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.AppClasspathCheckTask;
 import com.android.build.gradle.internal.tasks.AppPreBuildTask;
+import com.android.build.gradle.internal.tasks.ApplicationIdWriterTask;
 import com.android.build.gradle.internal.tasks.BundleTask;
 import com.android.build.gradle.internal.tasks.BundleToApkTask;
-import com.android.build.gradle.internal.tasks.BundleToStandaloneApkTask;
 import com.android.build.gradle.internal.tasks.CheckMultiApkLibrariesTask;
 import com.android.build.gradle.internal.tasks.ExtractApksTask;
 import com.android.build.gradle.internal.tasks.InstallVariantViaBundleTask;
@@ -79,6 +78,7 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.attributes.AttributeContainer;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.FileCollection;
+import org.gradle.api.resources.TextResourceFactory;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 
@@ -91,6 +91,7 @@ public class ApplicationTaskManager extends TaskManager {
             @NonNull GlobalScope globalScope,
             @NonNull Project project,
             @NonNull ProjectOptions projectOptions,
+            @NonNull AndroidBuilder androidBuilder,
             @NonNull DataBindingBuilder dataBindingBuilder,
             @NonNull AndroidConfig extension,
             @NonNull SdkHandler sdkHandler,
@@ -100,6 +101,7 @@ public class ApplicationTaskManager extends TaskManager {
                 globalScope,
                 project,
                 projectOptions,
+                androidBuilder,
                 dataBindingBuilder,
                 extension,
                 sdkHandler,
@@ -292,10 +294,9 @@ public class ApplicationTaskManager extends TaskManager {
                         project,
                         variantScope.getInstantRunBuildContext(),
                         variantScope.getGlobalScope().getAndroidBuilder(),
-                        Aapt2MavenUtils.getAapt2FromMavenIfEnabled(globalScope),
+                        Aapt2MavenUtils.getAapt2FromMaven(globalScope),
                         variantScope.getVariantConfiguration()::getApplicationId,
                         variantScope.getVariantConfiguration().getSigningConfig(),
-                        AaptGeneration.fromProjectOptions(projectOptions),
                         DslAdaptersKt.convert(globalScope.getExtension().getAaptOptions()),
                         new File(variantScope.getInstantRunSplitApkOutputFolder(), "dep"),
                         new File(
@@ -323,10 +324,9 @@ public class ApplicationTaskManager extends TaskManager {
                         project,
                         variantScope.getInstantRunBuildContext(),
                         variantScope.getGlobalScope().getAndroidBuilder(),
-                        Aapt2MavenUtils.getAapt2FromMavenIfEnabled(globalScope),
+                        Aapt2MavenUtils.getAapt2FromMaven(globalScope),
                         variantScope.getVariantConfiguration()::getApplicationId,
                         variantScope.getVariantConfiguration().getSigningConfig(),
-                        AaptGeneration.fromProjectOptions(projectOptions),
                         DslAdaptersKt.convert(globalScope.getExtension().getAaptOptions()),
                         new File(variantScope.getInstantRunSplitApkOutputFolder(), "slices"),
                         getIncrementalFolder(variantScope, "ir_slices"),
@@ -463,6 +463,14 @@ public class ApplicationTaskManager extends TaskManager {
         if (variantScope.getType().isBaseModule()) {
             taskFactory.create(new ModuleMetadataWriterTask.ConfigAction(variantScope));
         }
+
+        Task applicationIdWriterTask =
+                taskFactory.create(new ApplicationIdWriterTask.ConfigAction(variantScope));
+
+        TextResourceFactory resources = project.getResources().getText();
+        // this builds the dependencies from the task, and its output is the textResource.
+        variantScope.getVariantData().applicationIdTextResource =
+                resources.fromFile(applicationIdWriterTask);
     }
 
     private static File getIncrementalFolder(VariantScope variantScope, String taskName) {
@@ -488,17 +496,12 @@ public class ApplicationTaskManager extends TaskManager {
                             scope.getArtifacts()
                                     .getFinalArtifactFiles(InternalArtifactType.BUNDLE));
 
-            BundleToApkTask splitAndMultiApkTask =
-                    taskFactory.create(new BundleToApkTask.ConfigAction(scope));
-            BundleToStandaloneApkTask universalApkTask =
-                    taskFactory.create(new BundleToStandaloneApkTask.ConfigAction(scope));
-            // make the tasks depend on the validate signing task to ensure that the keystore
+            BundleToApkTask task = taskFactory.create(new BundleToApkTask.ConfigAction(scope));
+            // make the task depend on the validate signing task to ensure that the keystore
             // is created if it's a debug one.
             if (scope.getVariantConfiguration().getSigningConfig() != null) {
-                Task validateSigningTask = getValidateSigningTask(scope);
-                splitAndMultiApkTask.dependsOn(validateSigningTask);
-                bundleTask.dependsOn(validateSigningTask);
-                universalApkTask.dependsOn(validateSigningTask);
+                task.dependsOn(getValidateSigningTask(scope));
+                bundleTask.dependsOn(getValidateSigningTask(scope));
             }
 
             taskFactory.create(new ExtractApksTask.ConfigAction(scope));

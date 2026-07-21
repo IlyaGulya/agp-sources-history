@@ -28,10 +28,7 @@ import com.android.annotations.Nullable;
 import com.android.build.api.artifact.BuildableArtifact;
 import com.android.build.gradle.internal.LoggerWrapper;
 import com.android.build.gradle.internal.TaskManager;
-import com.android.build.gradle.internal.aapt.AaptGeneration;
-import com.android.build.gradle.internal.aapt.AaptGradleFactory;
 import com.android.build.gradle.internal.aapt.WorkerExecutorResourceCompilationService;
-import com.android.build.gradle.internal.api.sourcesets.FilesProvider;
 import com.android.build.gradle.internal.res.Aapt2MavenUtils;
 import com.android.build.gradle.internal.res.namespaced.Aapt2DaemonManagerService;
 import com.android.build.gradle.internal.res.namespaced.Aapt2ServiceKey;
@@ -49,13 +46,6 @@ import com.android.builder.model.SourceProvider;
 import com.android.builder.model.VectorDrawablesOptions;
 import com.android.builder.png.VectorDrawableRenderer;
 import com.android.ide.common.blame.MergingLog;
-import com.android.ide.common.blame.MergingLogRewriter;
-import com.android.ide.common.blame.ParsingProcessOutputHandler;
-import com.android.ide.common.blame.parser.PatternAwareOutputParser;
-import com.android.ide.common.blame.parser.ToolOutputParser;
-import com.android.ide.common.blame.parser.aapt.Aapt2OutputParser;
-import com.android.ide.common.blame.parser.aapt.AaptOutputParser;
-import com.android.ide.common.process.ProcessOutputHandler;
 import com.android.ide.common.rendering.api.ResourceNamespace;
 import com.android.ide.common.resources.CopyToOutputDirectoryResourceCompilationService;
 import com.android.ide.common.resources.FileStatus;
@@ -64,7 +54,6 @@ import com.android.ide.common.resources.GeneratedResourceSet;
 import com.android.ide.common.resources.MergedResourceWriter;
 import com.android.ide.common.resources.MergingException;
 import com.android.ide.common.resources.NoOpResourcePreprocessor;
-import com.android.ide.common.resources.QueueableResourceCompilationService;
 import com.android.ide.common.resources.ResourceCompilationService;
 import com.android.ide.common.resources.ResourceMerger;
 import com.android.ide.common.resources.ResourcePreprocessor;
@@ -118,8 +107,6 @@ public class MergeResources extends IncrementalTask {
 
     // ----- PRIVATE TASK API -----
 
-    private FilesProvider filesProvider;
-
     /**
      * Optional file to write any publicly imported resource types and names to
      */
@@ -157,10 +144,6 @@ public class MergeResources extends IncrementalTask {
 
     private Supplier<Integer> minSdk;
 
-    private VariantScope variantScope;
-
-    private AaptGeneration aaptGeneration;
-
     @Nullable private FileCollection aapt2FromMaven;
 
     @Nullable private SingleFileProcessor dataBindingLayoutProcessor;
@@ -176,13 +159,9 @@ public class MergeResources extends IncrementalTask {
 
     @NonNull
     private static ResourceCompilationService getResourceProcessor(
-            @NonNull AaptGeneration aaptGeneration,
             @NonNull AndroidBuilder builder,
             @Nullable FileCollection aapt2FromMaven,
             @NonNull WorkerExecutorFacade workerExecutor,
-            boolean crunchPng,
-            @NonNull VariantScope scope,
-            @Nullable MergingLog blameLog,
             ImmutableSet<Flag> flags,
             boolean processResources) {
         // If we received the flag for removing namespaces we need to use the namespace remover to
@@ -197,44 +176,11 @@ public class MergeResources extends IncrementalTask {
             return CopyToOutputDirectoryResourceCompilationService.INSTANCE;
         }
 
-        if (aaptGeneration == AaptGeneration.AAPT_V2_DAEMON_SHARED_POOL) {
-            Aapt2ServiceKey aapt2ServiceKey =
-                    Aapt2DaemonManagerService.registerAaptService(
-                            aapt2FromMaven, builder.getBuildToolInfo(), builder.getLogger());
+        Aapt2ServiceKey aapt2ServiceKey =
+                Aapt2DaemonManagerService.registerAaptService(
+                        aapt2FromMaven, builder.getBuildToolInfo(), builder.getLogger());
 
-            return new WorkerExecutorResourceCompilationService(workerExecutor, aapt2ServiceKey);
-        }
-
-        // Finally, use AAPT or one of AAPT2 versions based on the project flags.
-        return new QueueableResourceCompilationService(
-                AaptGradleFactory.make(
-                        aaptGeneration,
-                        builder,
-                        createProcessOutputHandler(aaptGeneration, builder, blameLog),
-                        crunchPng,
-                        scope.getGlobalScope()
-                                .getExtension()
-                                .getAaptOptions()
-                                .getCruncherProcesses()));
-    }
-
-    @Nullable
-    private static ProcessOutputHandler createProcessOutputHandler(
-            @NonNull AaptGeneration aaptGeneration,
-            @NonNull AndroidBuilder builder,
-            @Nullable MergingLog blameLog) {
-        if (blameLog == null) {
-            return null;
-        }
-
-        PatternAwareOutputParser parsers =
-                        aaptGeneration == AaptGeneration.AAPT_V1
-                                ? new AaptOutputParser()
-                                : new Aapt2OutputParser();
-
-        return new ParsingProcessOutputHandler(
-                new ToolOutputParser(parsers, builder.getLogger()),
-                new MergingLogRewriter(blameLog::find, builder.getMessageReceiver()));
+        return new WorkerExecutorResourceCompilationService(workerExecutor, aapt2ServiceKey);
     }
 
     @Input
@@ -284,13 +230,9 @@ public class MergeResources extends IncrementalTask {
 
         try (ResourceCompilationService resourceCompiler =
                 getResourceProcessor(
-                        aaptGeneration,
                         getBuilder(),
                         aapt2FromMaven,
                         workerExecutorFacade,
-                        crunchPng,
-                        variantScope,
-                        mergingLog,
                         flags,
                         processResources)) {
 
@@ -386,13 +328,9 @@ public class MergeResources extends IncrementalTask {
 
             try (ResourceCompilationService resourceCompiler =
                     getResourceProcessor(
-                            aaptGeneration,
                             getBuilder(),
                             aapt2FromMaven,
                             workerExecutorFacade,
-                            crunchPng,
-                            variantScope,
-                            mergingLog,
                             flags,
                             processResources)) {
 
@@ -658,11 +596,6 @@ public class MergeResources extends IncrementalTask {
         return vectorSupportLibraryIsUsed;
     }
 
-    @Input
-    public String getAaptGeneration() {
-        return aaptGeneration.name();
-    }
-
     @InputFiles
     @Optional
     @PathSensitive(PathSensitivity.RELATIVE)
@@ -822,7 +755,6 @@ public class MergeResources extends IncrementalTask {
             BaseVariantData variantData = scope.getVariantData();
             Project project = scope.getGlobalScope().getProject();
 
-            mergeResourcesTask.filesProvider = scope.getGlobalScope().getFilesProvider();
             mergeResourcesTask.minSdk =
                     TaskInputHelper.memoize(
                             () ->
@@ -831,14 +763,11 @@ public class MergeResources extends IncrementalTask {
                                             .getMinSdkVersion()
                                             .getApiLevel());
 
-            mergeResourcesTask.aaptGeneration =
-                    AaptGeneration.fromProjectOptions(scope.getGlobalScope().getProjectOptions());
             mergeResourcesTask.aapt2FromMaven =
-                    Aapt2MavenUtils.getAapt2FromMavenIfEnabled(scope.getGlobalScope());
+                    Aapt2MavenUtils.getAapt2FromMaven(scope.getGlobalScope());
             mergeResourcesTask.setAndroidBuilder(scope.getGlobalScope().getAndroidBuilder());
             mergeResourcesTask.setVariantName(scope.getVariantConfiguration().getFullName());
             mergeResourcesTask.setIncrementalFolder(scope.getIncrementalDir(getName()));
-            mergeResourcesTask.variantScope = scope;
             // Libraries use this task twice, once for compilation (with dependencies),
             // where blame is useful, and once for packaging where it is not.
             if (includeDependencies) {
@@ -865,11 +794,10 @@ public class MergeResources extends IncrementalTask {
             mergeResourcesTask.vectorSupportLibraryIsUsed =
                     Boolean.TRUE.equals(vectorDrawablesOptions.getUseSupportLibrary());
 
-            boolean validateEnabled =
+            mergeResourcesTask.validateEnabled =
                     !scope.getGlobalScope()
                             .getProjectOptions()
                             .get(BooleanOption.DISABLE_RESOURCE_VALIDATION);
-            mergeResourcesTask.validateEnabled = validateEnabled;
 
             if (includeDependencies) {
                 mergeResourcesTask.libraries = scope.getArtifactCollection(

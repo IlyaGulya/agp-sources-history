@@ -190,11 +190,7 @@ open class PerModuleBundleTask : AndroidVariantTask() {
 
             task.assetsFiles = artifacts.getFinalArtifactFiles(InternalArtifactType.MERGED_ASSETS)
             task.resFiles = artifacts.getFinalArtifactFiles(
-                    if (variantScope.useResourceShrinker()) {
-                        InternalArtifactType.SHRUNK_LINKED_RES_FOR_BUNDLE
-                    } else {
-                        InternalArtifactType.LINKED_RES_FOR_BUNDLE
-                    })
+                InternalArtifactType.LINKED_RES_FOR_BUNDLE)
             task.dexFiles = variantScope.transformManager.getPipelineOutputAsFileCollection(
                 StreamFilter.DEX)
             task.featureDexFiles =

@@ -25,6 +25,7 @@ import com.android.build.gradle.internal.scope.InternalArtifactType.FEATURE_DATA
 import com.android.build.gradle.internal.scope.InternalArtifactType.FEATURE_DATA_BINDING_FEATURE_INFO
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.options.BooleanOption
+import org.gradle.api.Task
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
@@ -114,8 +115,8 @@ class DataBindingCompilerArguments constructor(
     @Input
     fun getModulePackage() = modulePackageProvider()
 
-    override fun asArguments(): Iterable<String> {
-        val arguments = CompilerArguments(
+    fun toMap(): Map<String, String> {
+        return CompilerArguments(
             artifactType = artifactType,
             modulePackage = getModulePackage(),
             minApi = minApi,
@@ -133,11 +134,55 @@ class DataBindingCompilerArguments constructor(
             isEnabledForTests = isEnabledForTests,
             isEnableV2 = isEnableV2
         ).toMap()
+    }
 
+    override fun asArguments(): Iterable<String> {
         // Don't need to sort the returned list as the order shouldn't matter to Gradle.
         // Also don't need to escape the key and value strings as they will be passed as-is to
         // the Java compiler.
-        return arguments.map { entry -> "-A${entry.key}=${entry.value}" }
+        return toMap().map { entry -> "-A${entry.key}=${entry.value}" }
+    }
+
+    /**
+     * Configures inputs and outputs for the given task with the properties of the current instance.
+     */
+    fun configureInputsOutputsForTask(task: Task) {
+        // The following needs to be consistent with the annotations in this class.
+        val inputs = task.inputs
+        val outputs = task.outputs
+        val prefix = "databinding"
+
+        inputs.property("$prefix.artifactType", artifactType)
+        inputs.property("$prefix.modulePackage", getModulePackage())
+        inputs.property("$prefix.minApi", minApi)
+
+        inputs.files(dependencyArtifactsDir).withPropertyName("$prefix.dependencyArtifactsDir")
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+        inputs.files(layoutInfoDir).withPropertyName("$prefix.layoutInfoDir")
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+        inputs.files(classLogDir).withPropertyName("$prefix.classLogDir")
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+
+        if (baseFeatureInfoDir != null) {
+            inputs.files(baseFeatureInfoDir).withPropertyName("$prefix.baseFeatureInfoDir")
+                .withPathSensitivity(PathSensitivity.RELATIVE)
+        }
+        if (featureInfoDir != null) {
+            inputs.files(featureInfoDir).withPropertyName("$prefix.featureInfoDir")
+                .withPathSensitivity(PathSensitivity.RELATIVE)
+        }
+
+        if (aarOutDir != null) {
+            outputs.dir(aarOutDir).withPropertyName("$prefix.aarOutDir")
+        }
+        if (exportClassListOutFile != null) {
+            outputs.file(exportClassListOutFile).withPropertyName("$prefix.exportClassListOutFile")
+        }
+
+        inputs.property("$prefix.enableDebugLogs", enableDebugLogs)
+        inputs.property("$prefix.isTestVariant", isTestVariant)
+        inputs.property("$prefix.isEnabledForTests", isEnabledForTests)
+        inputs.property("$prefix.isEnableV2", isEnableV2)
     }
 
     companion object {

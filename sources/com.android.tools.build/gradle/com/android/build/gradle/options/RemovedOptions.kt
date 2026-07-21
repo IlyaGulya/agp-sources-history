@@ -58,7 +58,23 @@ enum class RemovedOptions(
             "This property has been replaced by android.overridePathCheck"),
     AAPT_NAMESPACING(
             "android.aaptNamespacing",
-            "This property has been replaced by android.aaptOptions.namespaced");
+            "This property has been replaced by android.aaptOptions.namespaced"),
+    ENABLE_INCREMENTAL_DESUGARING(
+        "android.enableIncrementalDesugaring",
+        "This property has no effect, incremental desugaring is always enabled."),
+    ENABLE_CORE_LAMBDA_STUBS(
+        "android.enableCoreLambdaStubs",
+        "This property has no effect, core-lambda-stubs.jar is always in the bootclasspath."),
+    ENABLE_DEX_ARCHIVE(
+        "android.useDexArchive", "This property has no effect, incremental dexing is always used."),
+    ENABLE_AAPT2(
+            "android.enableAapt2", "This property has no effect, AAPT2 is now always used."),
+    USE_AAPT2_FROM_MAVEN(
+            "android.useAapt2FromMaven",
+            "This property has no effect and AAPT2 from maven.google.com is now always used. "
+                    + "If you wish to use a local executable of AAPT2 please use the "
+                    + "'android.aapt2FromMavenOverride' option."),
+    ;
 
     override val status: Option.Status
         get() = Option.Status.REMOVED

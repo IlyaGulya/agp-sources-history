@@ -29,14 +29,12 @@ import java.io.FileReader
  */
 class CompilationDatabaseIndexingVisitor(private val strings: StringTable) :
     CompilationDatabaseStreamingVisitor() {
-    private var compiler = ""
-    private var flags = ""
+    private var command = ""
     private var file = ""
     private val map = mutableMapOf<String, Int>()
 
     override fun beginCommand() {
-        compiler = ""
-        flags = ""
+        command = ""
         file = ""
     }
 
@@ -49,9 +47,8 @@ class CompilationDatabaseIndexingVisitor(private val strings: StringTable) :
      */
     override fun visitCommand(command: String) {
         val tokens = StringHelper.tokenizeCommandLineToEscaped(command)
-        compiler = tokens.first()
         val stripped = mutableListOf<String>()
-        var skipNext = true // Initially true to remove the actual clang++.exe
+        var skipNext = false
         for (token in tokens) {
             if (skipNext) {
                 skipNext = false
@@ -63,11 +60,11 @@ class CompilationDatabaseIndexingVisitor(private val strings: StringTable) :
             }
         }
         val recombined = stripped.joinToString(" ")
-        this.flags = recombined
+        this.command = recombined
     }
 
     override fun endCommand() {
-        map[file] = strings.intern(flags)
+        map[file] = strings.intern(command)
     }
 
     fun mappings(): Map<String, Int> = map

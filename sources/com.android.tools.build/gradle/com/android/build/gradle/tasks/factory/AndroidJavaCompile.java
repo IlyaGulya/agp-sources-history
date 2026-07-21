@@ -59,6 +59,8 @@ public class AndroidJavaCompile extends JavaCompile {
 
     String variantName;
 
+    File dataBindingArtifactOutputDirectory;
+
     @PathSensitive(PathSensitivity.NONE)
     @InputFiles
     public BuildableArtifact getProcessorListFile() {
@@ -68,6 +70,12 @@ public class AndroidJavaCompile extends JavaCompile {
     @OutputDirectory
     public File getAnnotationProcessorOutputFolder() {
         return annotationProcessorOutputFolder;
+    }
+
+    @OutputDirectory
+    @Optional
+    public File getDataBindingArtifactOutputDirectory() {
+        return dataBindingArtifactOutputDirectory;
     }
 
     @Override

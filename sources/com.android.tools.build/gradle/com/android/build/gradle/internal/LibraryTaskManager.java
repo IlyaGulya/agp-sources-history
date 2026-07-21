@@ -54,6 +54,7 @@ import com.android.build.gradle.tasks.MergeResources;
 import com.android.build.gradle.tasks.MergeSourceSetFolders;
 import com.android.build.gradle.tasks.VerifyLibraryResourcesTask;
 import com.android.build.gradle.tasks.ZipMergingTask;
+import com.android.builder.core.AndroidBuilder;
 import com.android.builder.errors.EvalIssueException;
 import com.android.builder.errors.EvalIssueReporter.Type;
 import com.android.builder.profile.Recorder;
@@ -76,6 +77,7 @@ public class LibraryTaskManager extends TaskManager {
             @NonNull GlobalScope globalScope,
             @NonNull Project project,
             @NonNull ProjectOptions projectOptions,
+            @NonNull AndroidBuilder androidBuilder,
             @NonNull DataBindingBuilder dataBindingBuilder,
             @NonNull AndroidConfig extension,
             @NonNull SdkHandler sdkHandler,
@@ -85,6 +87,7 @@ public class LibraryTaskManager extends TaskManager {
                 globalScope,
                 project,
                 projectOptions,
+                androidBuilder,
                 dataBindingBuilder,
                 extension,
                 sdkHandler,
@@ -217,8 +220,7 @@ public class LibraryTaskManager extends TaskManager {
                     Sets.difference(transform.getScopes(), TransformManager.PROJECT_ONLY);
             if (!difference.isEmpty()) {
                 String scopes = difference.toString();
-                globalScope
-                        .getAndroidBuilder()
+                androidBuilder
                         .getIssueReporter()
                         .reportError(
                                 Type.GENERIC,
@@ -247,11 +249,14 @@ public class LibraryTaskManager extends TaskManager {
 
         // Now add transforms for intermediate publishing (projects to projects).
         File jarOutputFolder = variantScope.getIntermediateJarOutputFolder();
-        File mainClassJar = new File(jarOutputFolder, FN_CLASSES_JAR);
+        File classesMainDir = new File(variantScope.getIntermediateJarOutputFolder(), "classes");
+        File mainClassJar = new File(classesMainDir, FN_CLASSES_JAR);
+        File mainClassDir = new File(classesMainDir, "dir");
         File mainResJar = new File(jarOutputFolder, FN_INTERMEDIATE_RES_JAR);
         LibraryIntermediateJarsTransform intermediateTransform =
                 new LibraryIntermediateJarsTransform(
                         mainClassJar,
+                        mainClassDir,
                         mainResJar,
                         variantConfig::getPackageFromManifest,
                         extension.getPackageBuildConfig());
@@ -265,8 +270,12 @@ public class LibraryTaskManager extends TaskManager {
                 t -> {
                     // publish the intermediate classes.jar
                     artifacts.appendArtifact(
-                            InternalArtifactType.LIBRARY_CLASSES,
+                            InternalArtifactType.LIBRARY_CLASSES_JAR,
                             ImmutableList.of(mainClassJar),
+                            t);
+                    artifacts.appendArtifact(
+                            InternalArtifactType.LIBRARY_CLASSES_DIR,
+                            ImmutableList.of(mainClassDir),
                             t);
                     // publish the res jar
                     artifacts.appendArtifact(

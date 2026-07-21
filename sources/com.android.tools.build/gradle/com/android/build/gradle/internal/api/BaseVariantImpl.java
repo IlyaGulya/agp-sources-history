@@ -28,7 +28,6 @@ import com.android.build.gradle.internal.dependency.VariantDependencies;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
-import com.android.build.gradle.internal.scope.MutableTaskContainer;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.tasks.AidlCompile;
@@ -60,6 +59,7 @@ import org.gradle.api.attributes.AttributesSchema;
 import org.gradle.api.file.ConfigurableFileTree;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.resources.TextResource;
 import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.compile.JavaCompile;
 
@@ -204,6 +204,12 @@ public abstract class BaseVariantImpl implements BaseVariant {
     @NonNull
     public String getApplicationId() {
         return getVariantData().getApplicationId();
+    }
+
+    @Override
+    @NonNull
+    public TextResource getApplicationIdTextResource() {
+        return getVariantData().applicationIdTextResource;
     }
 
     @Override
@@ -448,17 +454,9 @@ public abstract class BaseVariantImpl implements BaseVariant {
         return getVariantData().outputsAreSigned;
     }
 
+    @NonNull
     @Override
-    public void register(Task task) {
-        MutableTaskContainer taskContainer = getVariantData().getScope().getTaskContainer();
-        taskContainer.getAssembleTask().dependsOn(task);
-        Task bundleTask = taskContainer.getBundleTask();
-        if (bundleTask != null) {
-            bundleTask.dependsOn(task);
-        }
-        Task bundleTaskLibrary = taskContainer.getBundleLibraryTask();
-        if (bundleTaskLibrary != null) {
-            bundleTaskLibrary.dependsOn(task);
-        }
+    public FileCollection getAllRawAndroidResources() {
+        return getVariantData().getAllRawAndroidResources();
     }
 }
