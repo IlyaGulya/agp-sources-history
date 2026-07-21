@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.builder.internal.aapt
+package com.android.ide.common.res2
 
-import java.io.Serializable
+import java.io.Closeable
+import java.io.File
+import java.io.IOException
 
-data class AaptOptions @JvmOverloads constructor(
-        val noCompress: Collection<String>? = null,
-        val failOnMissingConfigEntry: Boolean = true,
-        val additionalParameters: List<String>? = null,
-        val privateRDotJavaPackage: String? = null) : Serializable
+/** Abstraction for resource compiler services used by the resource merger. */
+interface ResourceCompilationService : Closeable {
+    /** Submit a request. */
+    @Throws(IOException::class)
+    fun submitCompile(request: CompileResourceRequest)
+    /** Given a request, returns the output file that would, will or has been written. */
+    fun compileOutputFor(request: CompileResourceRequest): File
+}
