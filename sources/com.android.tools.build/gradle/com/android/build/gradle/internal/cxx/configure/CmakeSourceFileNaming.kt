@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.projectmodel
+package com.android.build.gradle.internal.cxx.configure
+
+import java.io.File
+
+// The file extensions CMake recognizes as header files.
+private val cmakeHeaderFileExtensions = setOf("h", "hh", "h++", "hm", "hpp")
 
 /**
- * Reflects the namespacing strategy used within an [AndroidSubmodule].
+ * Return true if the given file has an extension recognized by CMake as being a header file.
  */
-enum class NamespacingType {
-    /**
-     * Resources are not namespaced.
-     *
-     * They are merged at the application level, as was the behavior with AAPT1
-     */
-    DISABLED,
-    /**
-     * Resources must be namespaced.
-     *
-     * Each library is compiled in to an AAPT2 static library with its own namespace.
-     *
-     * [AndroidSubmodule] instances using this *cannot* consume non-namespaced dependencies.
-     */
-    REQUIRED,
-    // TODO: add more modes as implemented.
+fun hasCmakeHeaderFileExtensions(file : File) : Boolean {
+    return cmakeHeaderFileExtensions.contains(
+        file.path!!.substringAfterLast(".").toLowerCase()
+    )
 }

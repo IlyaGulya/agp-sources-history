@@ -14,25 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.projectmodel
+package com.android.build.gradle.internal.cxx.json
+
+import java.io.File
 
 /**
- * Reflects the namespacing strategy used within an [AndroidSubmodule].
+ * Refers to a header file
  */
-enum class NamespacingType {
-    /**
-     * Resources are not namespaced.
-     *
-     * They are merged at the application level, as was the behavior with AAPT1
-     */
-    DISABLED,
-    /**
-     * Resources must be namespaced.
-     *
-     * Each library is compiled in to an AAPT2 static library with its own namespace.
-     *
-     * [AndroidSubmodule] instances using this *cannot* consume non-namespaced dependencies.
-     */
-    REQUIRED,
-    // TODO: add more modes as implemented.
-}
+data class NativeHeaderFileValue(
+    val header : File,
+    val workingDirectoryOrdinal : Int)
