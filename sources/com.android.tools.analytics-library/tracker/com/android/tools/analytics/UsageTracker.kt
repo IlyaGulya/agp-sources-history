@@ -16,7 +16,7 @@
 
 package com.android.tools.analytics
 
-import com.android.annotations.VisibleForTesting
+import com.google.common.annotations.VisibleForTesting
 import com.google.wireless.android.sdk.stats.AndroidStudioEvent
 import java.nio.file.Paths
 import java.util.*
@@ -183,6 +183,9 @@ object UsageTracker {
     synchronized(gate) {
       initialized = false
       try {
+        // The writer may have pending events which will be dropped by close
+        // call flush() to write them before closing.
+        writer.flush()
         writer.close()
       } catch (ex: Exception) {
         throw RuntimeException("Unable to close usage tracker", ex)
