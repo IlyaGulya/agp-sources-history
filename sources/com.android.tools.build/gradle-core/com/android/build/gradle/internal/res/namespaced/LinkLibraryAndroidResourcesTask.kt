@@ -16,6 +16,7 @@
 package com.android.build.gradle.internal.res.namespaced
 
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
+import com.android.build.gradle.internal.res.getAapt2FromMaven
 import com.android.build.gradle.internal.scope.ExistingBuildElements
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.TaskConfigAction
@@ -56,7 +57,6 @@ open class LinkLibraryAndroidResourcesTask @Inject constructor(private val worke
     @get:InputFiles @get:PathSensitive(PathSensitivity.RELATIVE) lateinit var inputResourcesDirectories: FileCollection private set
     @get:InputFiles @get:PathSensitive(PathSensitivity.NONE) lateinit var libraryDependencies: FileCollection private set
     @get:InputFiles @get:PathSensitive(PathSensitivity.NONE) lateinit var sharedLibraryDependencies: FileCollection private set
-    @get:InputFiles @get:PathSensitive(PathSensitivity.NONE) @get:Optional var featureDependencies: FileCollection? = null; private set
     @get:InputFiles @get:PathSensitive(PathSensitivity.NONE) @get:Optional var tested: FileCollection? = null; private set
 
     @get:Internal lateinit var packageForRSupplier: Supplier<String> private set
@@ -76,15 +76,6 @@ open class LinkLibraryAndroidResourcesTask @Inject constructor(private val worke
         // Link against library dependencies
         imports.addAll(libraryDependencies.files)
         imports.addAll(sharedLibraryDependencies.files)
-
-        // Link against features
-        featureDependencies?.let {
-            imports.addAll(
-                    it.files
-                            .map { ExistingBuildElements.from(InternalArtifactType.PROCESSED_RES, it) }
-                            .filterNot { it.isEmpty() }
-                            .map { splitOutputs -> splitOutputs.single().outputFile })
-        }
 
         val request = AaptPackageConfig(
                 androidJarPath = builder.target.getPath(IAndroidTarget.ANDROID_JAR),
@@ -131,14 +122,6 @@ open class LinkLibraryAndroidResourcesTask @Inject constructor(private val worke
                             AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH,
                             AndroidArtifacts.ArtifactScope.ALL,
                             AndroidArtifacts.ArtifactType.RES_SHARED_STATIC_LIBRARY)
-
-            if (scope.variantData.type.isApk && !scope.variantData.type.isBaseModule) {
-                task.featureDependencies =
-                        scope.getArtifactFileCollection(
-                                AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH,
-                                AndroidArtifacts.ArtifactScope.MODULE,
-                                AndroidArtifacts.ArtifactType.FEATURE_RESOURCE_PKG)
-            }
 
             val testedScope = scope.testedVariantData?.scope
             if (testedScope != null) {
