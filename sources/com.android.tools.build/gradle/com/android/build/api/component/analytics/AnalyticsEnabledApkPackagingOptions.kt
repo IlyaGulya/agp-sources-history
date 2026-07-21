@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.build.api.variant.impl
+package com.android.build.api.component.analytics
 
 import com.android.build.api.variant.ApkPackagingOptions
 import com.android.build.api.variant.JniLibsApkPackagingOptions
-import com.android.build.gradle.internal.services.VariantPropertiesApiServices
+import com.android.tools.build.gradle.internal.profile.VariantPropertiesMethodType
+import com.google.wireless.android.sdk.stats.GradleBuildVariant
+import javax.inject.Inject
 
-class ApkPackagingOptionsImpl(
-    dslPackagingOptions: com.android.build.gradle.internal.dsl.PackagingOptions,
-    variantPropertiesApiServices: VariantPropertiesApiServices,
-    minSdk: Int
-) : PackagingOptionsImpl(dslPackagingOptions, variantPropertiesApiServices), ApkPackagingOptions {
-
-    override val jniLibs =
-        JniLibsApkPackagingOptionsImpl(dslPackagingOptions, variantPropertiesApiServices, minSdk)
+open class AnalyticsEnabledApkPackagingOptions @Inject constructor(
+    override val delegate: ApkPackagingOptions,
+    stats: GradleBuildVariant.Builder
+) : AnalyticsEnabledPackagingOptions(delegate, stats), ApkPackagingOptions {
 
     override fun jniLibs(action: JniLibsApkPackagingOptions.() -> Unit) {
-        action.invoke(jniLibs)
+        stats.variantApiAccessBuilder.addVariantPropertiesAccessBuilder().type =
+            VariantPropertiesMethodType.JNI_LIBS_PACKAGING_OPTIONS_ACTION_VALUE
+        delegate.jniLibs(action)
     }
 }
