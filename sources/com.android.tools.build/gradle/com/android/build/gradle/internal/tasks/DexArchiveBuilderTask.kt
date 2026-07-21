@@ -20,13 +20,14 @@ import com.android.SdkConstants
 import com.android.build.api.transform.QualifiedContent.DefaultContentType
 import com.android.build.api.transform.QualifiedContent.Scope
 import com.android.build.api.transform.QualifiedContent.ScopeType
+import com.android.build.api.variant.impl.getFeatureLevel
 import com.android.build.gradle.internal.InternalScope
+import com.android.build.gradle.internal.component.ApkCreationConfig
 import com.android.build.gradle.internal.component.VariantCreationConfig
 import com.android.build.gradle.internal.dependency.BaseDexingTransform
 import com.android.build.gradle.internal.dependency.KEEP_RULES_FILE_NAME
 import com.android.build.gradle.internal.dexing.DexParameters
 import com.android.build.gradle.internal.dexing.DxDexParameters
-import com.android.build.gradle.internal.errors.MessageReceiverImpl
 import com.android.build.gradle.internal.pipeline.StreamFilter
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.build.gradle.internal.profile.ProfileAwareWorkAction
@@ -173,9 +174,6 @@ abstract class DexArchiveBuilderTask : NewIncrementalTask() {
     @get:LocalState
     abstract val previousRunNumberOfBucketsFile: RegularFileProperty
 
-    @get:Input
-    abstract val useGradleWorkers: Property<Boolean>
-
     @get:Incremental
     @get:PathSensitive(PathSensitivity.NONE)
     @get:InputFiles
@@ -271,9 +269,10 @@ abstract class DexArchiveBuilderTask : NewIncrementalTask() {
             inputJarHashesFile = inputJarHashesFile.get().asFile,
             dexer = dexer.get(),
             numberOfBuckets = numberOfBuckets.get(),
-            useGradleWorkers = useGradleWorkers.get(),
             workerExecutor = workerExecutor,
-            messageReceiver = MessageReceiverImpl(dexParams.errorFormatMode.get(), logger)
+            projectName = projectName,
+            taskPath = path,
+            analyticsService = analyticsService
         ).doProcess()
 
         if (dexer.get() == DexerTool.DX) {
@@ -310,8 +309,8 @@ abstract class DexArchiveBuilderTask : NewIncrementalTask() {
     class CreationAction(
         private val dexOptions: DexOptions,
         enableDexingArtifactTransform: Boolean,
-        creationConfig: VariantCreationConfig
-    ) : VariantTaskCreationAction<DexArchiveBuilderTask, VariantCreationConfig>(
+        creationConfig: ApkCreationConfig
+    ) : VariantTaskCreationAction<DexArchiveBuilderTask, ApkCreationConfig>(
         creationConfig
     ) {
 
@@ -476,7 +475,7 @@ abstract class DexArchiveBuilderTask : NewIncrementalTask() {
                 taskProvider,
                 DexArchiveBuilderTask::previousRunNumberOfBucketsFile
             ).withName("out").on(InternalArtifactType.DEX_NUMBER_OF_BUCKETS_FILE)
-            if (creationConfig.variantScope.needsShrinkDesugarLibrary) {
+            if (creationConfig.needsShrinkDesugarLibrary) {
                 creationConfig.artifacts.setInitialProvider(
                     taskProvider,
                     DexArchiveBuilderTask::projectOutputKeepRules
@@ -515,12 +514,11 @@ abstract class DexArchiveBuilderTask : NewIncrementalTask() {
                 })
 
             val minSdkVersion = creationConfig
-                .variantDslInfo
                 .minSdkVersionWithTargetDeviceApi
-                .featureLevel
+                .getFeatureLevel()
             task.dexParams.minSdkVersion.set(minSdkVersion)
             val languageDesugaring =
-                creationConfig.variantScope.java8LangSupportType == VariantScope.Java8LangSupport.D8
+                creationConfig.getJava8LangSupportType() == VariantScope.Java8LangSupport.D8
             task.dexParams.withDesugaring.set(languageDesugaring)
             if (languageDesugaring && minSdkVersion < AndroidVersion.VersionCodes.N
             ) {
@@ -535,7 +533,7 @@ abstract class DexArchiveBuilderTask : NewIncrementalTask() {
             // Set bootclasspath only for two cases:
             // 1. language desugaring with D8 and minSdkVersion < 24
             // 2. library desugaring enabled(required for API conversion)
-            val libraryDesugaring = creationConfig.variantScope.isCoreLibraryDesugaringEnabled
+            val libraryDesugaring = creationConfig.isCoreLibraryDesugaringEnabled
             if (languageDesugaring && minSdkVersion < AndroidVersion.VersionCodes.N
                 || libraryDesugaring) {
                 task.dexParams.desugarBootclasspath
@@ -544,7 +542,6 @@ abstract class DexArchiveBuilderTask : NewIncrementalTask() {
 
             task.dexParams.errorFormatMode.set(SyncOptions.getErrorFormatMode(projectOptions))
             task.dexer.set(creationConfig.variantScope.dexer)
-            task.useGradleWorkers.set(projectOptions.get(BooleanOption.ENABLE_GRADLE_WORKERS))
             task.dxDexParams.inBufferSize.set(
                 task.project.providers.provider {
                     (projectOptions.getProvider(IntegerOption.DEXING_READ_BUFFER_SIZE).getOrElse(DEFAULT_BUFFER_SIZE_IN_KB)) * 1024

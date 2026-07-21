@@ -26,10 +26,7 @@ import com.android.build.api.component.impl.TestComponentPropertiesImpl;
 import com.android.build.api.variant.impl.TestVariantImpl;
 import com.android.build.api.variant.impl.TestVariantPropertiesImpl;
 import com.android.build.gradle.BaseExtension;
-import com.android.build.gradle.internal.component.ApkCreationConfig;
-import com.android.build.gradle.internal.component.ComponentCreationConfig;
-import com.android.build.gradle.internal.component.TestCreationConfig;
-import com.android.build.gradle.internal.component.VariantCreationConfig;
+import com.android.build.gradle.internal.component.*;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.tasks.DeviceProviderInstrumentTestTask;
@@ -42,7 +39,6 @@ import com.android.build.gradle.tasks.ProcessTestManifest;
 import com.android.builder.core.BuilderConstants;
 import com.android.builder.core.VariantType;
 import com.android.builder.model.CodeShrinker;
-import com.android.builder.profile.Recorder;
 import com.google.common.base.Preconditions;
 import java.util.List;
 import java.util.Objects;
@@ -69,9 +65,8 @@ public class TestApplicationTaskManager
                             testComponents,
             boolean hasFlavors,
             @NonNull GlobalScope globalScope,
-            @NonNull BaseExtension extension,
-            @NonNull Recorder recorder) {
-        super(variants, testComponents, hasFlavors, globalScope, extension, recorder);
+            @NonNull BaseExtension extension) {
+        super(variants, testComponents, hasFlavors, globalScope, extension);
     }
 
     @Override
@@ -146,8 +141,9 @@ public class TestApplicationTaskManager
     }
 
     @Override
-    protected void maybeCreateJavaCodeShrinkerTask(@NonNull VariantCreationConfig creationConfig) {
-        final CodeShrinker codeShrinker = creationConfig.getVariantScope().getCodeShrinker();
+    protected void maybeCreateJavaCodeShrinkerTask(
+            @NonNull ConsumableCreationConfig creationConfig) {
+        final CodeShrinker codeShrinker = creationConfig.getCodeShrinker();
         if (codeShrinker != null) {
             doCreateJavaCodeShrinkerTask(
                     creationConfig, Objects.requireNonNull(codeShrinker), true);

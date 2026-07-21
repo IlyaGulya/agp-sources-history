@@ -45,15 +45,15 @@ import java.util.zip.ZipOutputStream
  *
  * @param visitors the list of registered [AsmClassVisitorFactoryEntry].
  * @param apiVersion the asm api version.
- * @param classesHierarchyData used to derive information about classes hierarchy without having to
- *                             load the actual classes.
+ * @param classesHierarchyResolver used to derive information about classes hierarchy without having
+ *                                 to load the actual classes.
  * @param framesComputationMode the frame computation mode that will be applied to the bytecode of
  *                              the instrumented classes.
  */
 class AsmInstrumentationManager(
     private val visitors: List<AsmClassVisitorFactory<*>>,
     private val apiVersion: Int,
-    private val classesHierarchyData: ClassesHierarchyData,
+    private val classesHierarchyResolver: ClassesHierarchyResolver,
     private val framesComputationMode: FramesComputationMode
 ) {
     private val classWriterFlags: Int =
@@ -114,15 +114,18 @@ class AsmInstrumentationManager(
         }
     }
 
-    fun instrumentModifiedClass(inputFile: File, outputFile: File, packageName: String) {
+    fun instrumentModifiedFile(inputFile: File, outputFile: File, packageName: String) {
         outputFile.parentFile.mkdirs()
-
-        instrumentClassToDir(
-            packageName = packageName,
-            className = inputFile.name.removeSuffix(DOT_CLASS),
-            classFile = inputFile,
-            outputFile = outputFile
-        )
+        if (inputFile.name.endsWith(DOT_CLASS)) {
+            instrumentClassToDir(
+                packageName = packageName,
+                className = inputFile.name.removeSuffix(DOT_CLASS),
+                classFile = inputFile,
+                outputFile = outputFile
+            )
+        } else {
+            FileUtils.copyFile(inputFile, outputFile)
+        }
     }
 
     private fun doInstrumentClass(
@@ -135,9 +138,9 @@ class AsmInstrumentationManager(
 
         val classData = ClassDataImpl(
             classFullName,
-            classesHierarchyData.getAnnotations(classInternalName),
-            classesHierarchyData.getAllInterfaces(classInternalName),
-            classesHierarchyData.getAllSuperClasses(classInternalName)
+            classesHierarchyResolver.getAnnotations(classInternalName),
+            classesHierarchyResolver.getAllInterfaces(classInternalName),
+            classesHierarchyResolver.getAllSuperClasses(classInternalName)
         )
 
         // Reversing the visitors as they will be chained from the end, and so the visiting
@@ -150,7 +153,8 @@ class AsmInstrumentationManager(
             classInputStream.invoke().use {
                 val bytes = ByteStreams.toByteArray(it)
                 val classReader = ClassReader(bytes)
-                val classWriter = ClassWriter(classReader, classWriterFlags)
+                val classWriter =
+                    FixFramesClassWriter(classReader, classWriterFlags, classesHierarchyResolver)
                 var nextVisitor: ClassVisitor = classWriter
 
                 if (framesComputationMode == FramesComputationMode.COMPUTE_FRAMES_FOR_INSTRUMENTED_CLASSES) {

@@ -39,7 +39,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 
 /** DSL object to configure build types.  */
-open class BuildType @Inject constructor(
+abstract class BuildType @Inject constructor(
     private val name: String,
     private val dslServices: DslServices
 ) :
@@ -70,6 +70,7 @@ open class BuildType @Inject constructor(
 
     override var renderscriptOptimLevel = 3
 
+    @Deprecated("This property is deprecated. Changing its value has no effect.")
     override var isZipAlignEnabled: Boolean = true
 
     /**

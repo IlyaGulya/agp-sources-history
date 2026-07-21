@@ -17,6 +17,7 @@
 package com.android.build.gradle.internal.tasks
 
 import com.android.SdkConstants
+import com.android.SdkConstants.DOT_DEX
 import com.android.SdkConstants.FD_ASSETS
 import com.android.SdkConstants.FD_DEX
 import com.android.build.gradle.internal.component.ApkCreationConfig
@@ -194,8 +195,7 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
     private fun hasFeatureDexFiles() = featureDexFiles.files.isNotEmpty()
 
     class CreationAction(
-        creationConfig: ApkCreationConfig,
-        private val packageCustomClassDependencies: Boolean
+        creationConfig: ApkCreationConfig
     ) : VariantTaskCreationAction<PerModuleBundleTask, ApkCreationConfig>(
         creationConfig
     ) {
@@ -231,7 +231,7 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
             creationConfig.artifacts.setTaskInputToFinalProduct(
                  InternalArtifactType.MERGED_ASSETS, task.assetsFiles)
 
-            val legacyShrinkerEnabled = creationConfig.variantScope.useResourceShrinker() &&
+            val legacyShrinkerEnabled = creationConfig.useResourceShrinker() &&
                 !creationConfig.services.projectOptions[BooleanOption.ENABLE_NEW_RESOURCE_SHRINKER]
             task.resFiles.set(
                 if (legacyShrinkerEnabled){
@@ -264,11 +264,11 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
                 )
             )
             task.javaResFiles.from(
-                if (creationConfig.variantScope.codeShrinker == CodeShrinker.R8) {
+                if (creationConfig.codeShrinker == CodeShrinker.R8) {
                     creationConfig.services.fileCollection(
                         artifacts.get(InternalArtifactType.SHRUNK_JAVA_RES)
                     )
-                } else if (creationConfig.variantScope.needsMergedJavaResStream) {
+                } else if (creationConfig.getNeedsMergedJavaResStream()) {
                     creationConfig.transformManager
                         .getPipelineOutputAsFileCollection(StreamFilter.RESOURCES)
                 } else {
@@ -277,7 +277,7 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
                     )
                 }
             )
-            task.nativeLibsFiles.from(getNativeLibsFiles(creationConfig, packageCustomClassDependencies))
+            task.nativeLibsFiles.from(getNativeLibsFiles(creationConfig))
 
             if (creationConfig.variantType.isDynamicFeature) {
                 // If this is a dynamic feature, we use the abiFilters published by the base module.
@@ -322,8 +322,11 @@ private class DexRelocator(private val prefix: String): JarCreator.Relocator {
     val index = AtomicInteger(2)
     val classesDexNameUsed = AtomicBoolean(false)
     override fun relocate(entryPath: String): String {
-        if (entryPath.startsWith("classes")) {
-            return if (entryPath == "classes.dex" && !classesDexNameUsed.get()) {
+        // Note that the dex file may be in a subdirectory (e.g.,
+        // `<dex_merging_task_output>/bucket_0/classes.dex`). Also, it may not have the name
+        // `classesXY.dex` (e.g., it could be `ExampleClass.dex`).
+        if (entryPath.endsWith(DOT_DEX, ignoreCase=true)) {
+            return if (entryPath.endsWith("classes.dex") && !classesDexNameUsed.get()) {
                 classesDexNameUsed.set(true)
                 "$prefix/classes.dex"
             } else {
@@ -346,19 +349,11 @@ private class ResRelocator : JarCreator.Relocator {
 /**
  * Returns a file collection containing all of the native libraries to be packaged.
  */
-fun getNativeLibsFiles(
-    creationConfig: ComponentCreationConfig,
-    packageCustomClassDependencies: Boolean
-): FileCollection {
+fun getNativeLibsFiles(creationConfig: ComponentCreationConfig): FileCollection {
     val nativeLibs = creationConfig.services.fileCollection()
     if (creationConfig.variantType.isForTesting) {
         return nativeLibs.from(creationConfig.artifacts.get(MERGED_NATIVE_LIBS))
     }
     nativeLibs.from(creationConfig.artifacts.get(STRIPPED_NATIVE_LIBS))
-    if (packageCustomClassDependencies) {
-        nativeLibs.from(
-            creationConfig.transformManager.getPipelineOutputAsFileCollection(StreamFilter.NATIVE_LIBS)
-        )
-    }
     return nativeLibs
 }

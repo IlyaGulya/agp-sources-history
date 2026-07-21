@@ -16,47 +16,47 @@
 package com.android.build.gradle.tasks
 
 import com.android.SdkConstants
-import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.cxx.configure.JsonGenerationInvalidationState
-import com.android.build.gradle.internal.cxx.configure.isCmakeForkVersion
 import com.android.build.gradle.internal.cxx.gradle.generator.CxxMetadataGenerator
 import com.android.build.gradle.internal.cxx.gradle.generator.NativeAndroidProjectBuilder
 import com.android.build.gradle.internal.cxx.json.AndroidBuildGradleJsons
 import com.android.build.gradle.internal.cxx.json.NativeBuildConfigValueMini
-import com.android.build.gradle.internal.cxx.logging.IssueReporterLoggingEnvironment
 import com.android.build.gradle.internal.cxx.logging.PassThroughPrefixingLoggingEnvironment
 import com.android.build.gradle.internal.cxx.logging.ThreadLoggingEnvironment.Companion.requireExplicitLogger
 import com.android.build.gradle.internal.cxx.logging.errorln
 import com.android.build.gradle.internal.cxx.logging.infoln
 import com.android.build.gradle.internal.cxx.logging.toJsonString
 import com.android.build.gradle.internal.cxx.model.CxxAbiModel
-import com.android.build.gradle.internal.cxx.model.CxxModuleModel
 import com.android.build.gradle.internal.cxx.model.CxxVariantModel
 import com.android.build.gradle.internal.cxx.model.PrefabConfigurationState
 import com.android.build.gradle.internal.cxx.model.PrefabConfigurationState.Companion.fromJson
 import com.android.build.gradle.internal.cxx.model.buildCommandFile
-import com.android.build.gradle.internal.cxx.model.buildOutputFile
-import com.android.build.gradle.internal.cxx.model.createCxxAbiModel
-import com.android.build.gradle.internal.cxx.model.createCxxVariantModel
+import com.android.build.gradle.internal.cxx.model.buildFileIndexFile
+import com.android.build.gradle.internal.cxx.model.compileCommandsJsonBinFile
+import com.android.build.gradle.internal.cxx.model.compileCommandsJsonFile
 import com.android.build.gradle.internal.cxx.model.jsonFile
 import com.android.build.gradle.internal.cxx.model.jsonGenerationLoggingRecordFile
 import com.android.build.gradle.internal.cxx.model.modelOutputFile
 import com.android.build.gradle.internal.cxx.model.prefabConfigFile
 import com.android.build.gradle.internal.cxx.model.shouldGeneratePrefabPackages
 import com.android.build.gradle.internal.cxx.model.soFolder
-import com.android.build.gradle.internal.cxx.model.statsBuilder
+import com.android.build.gradle.internal.cxx.model.symbolFolderIndexFile
 import com.android.build.gradle.internal.cxx.model.writeJsonToFile
 import com.android.build.gradle.internal.cxx.settings.getBuildCommandArguments
-import com.android.build.gradle.internal.cxx.settings.rewriteCxxAbiModelWithCMakeSettings
 import com.android.build.gradle.internal.profile.AnalyticsUtil
-import com.android.builder.profile.ProcessProfileWriter
 import com.android.ide.common.process.ProcessException
 import com.android.ide.common.process.ProcessInfoBuilder
 import com.android.utils.FileUtils
+import com.android.utils.TokenizedCommandLineMap
+import com.android.utils.cxx.CompileCommandsEncoder
+import com.android.utils.cxx.STRIP_FLAGS_WITHOUT_ARG
+import com.android.utils.cxx.STRIP_FLAGS_WITH_ARG
+import com.android.utils.cxx.STRIP_FLAGS_WITH_IMMEDIATE_ARG
 import com.google.common.base.Charsets
 import com.google.common.collect.Lists
 import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
+import com.google.wireless.android.sdk.stats.GradleBuildVariant
 import com.google.wireless.android.sdk.stats.GradleBuildVariant.NativeBuildConfigInfo
 import com.google.wireless.android.sdk.stats.GradleBuildVariant.NativeBuildConfigInfo.GenerationOutcome
 import org.gradle.api.GradleException
@@ -66,10 +66,12 @@ import java.io.File
 import java.io.FileReader
 import java.io.IOException
 import java.io.StringReader
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.Objects
 import java.util.concurrent.Callable
+
+const val ANDROID_GRADLE_BUILD_VERSION = "1"
 
 /**
  * Base class for generation of native JSON.
@@ -77,7 +79,8 @@ import java.util.concurrent.Callable
 abstract class ExternalNativeJsonGenerator internal constructor(
     @get:Internal("Temporary to suppress Gradle warnings (bug 135900510), may need more investigation")
     final override val variant: CxxVariantModel,
-    @get:Internal override val abis: List<CxxAbiModel>
+    @get:Internal override val abis: List<CxxAbiModel>,
+    @get:Internal override val variantBuilder: GradleBuildVariant.Builder
 ) : CxxMetadataGenerator {
 
     // TODO(153964094) Reconcile this with jsonGenerationDependencyFiles
@@ -91,8 +94,8 @@ abstract class ExternalNativeJsonGenerator internal constructor(
         }
 
         // Now check whether the JSON is out-of-date with respect to the build files it declares.
-        val config =
-            AndroidBuildGradleJsons.getNativeBuildMiniConfig(json, variant.statsBuilder)
+        val config = AndroidBuildGradleJsons
+            .getNativeBuildMiniConfig(json, variantBuilder)
 
         // If anything in the prefab package changes, re-run. Note that this also depends on the
         // directories, so added/removed files will also trigger a re-run.
@@ -124,13 +127,11 @@ abstract class ExternalNativeJsonGenerator internal constructor(
                     requireExplicitLogger()
                     try {
                         buildForOneConfiguration(ops, forceGeneration, abi)
-                    } catch (e: IOException) {
-                        errorln("exception while building Json %s", e.message!!)
                     } catch (e: GradleException) {
                         errorln("exception while building Json %s", e.message!!)
                     } catch (e: ProcessException) {
-                        errorln("executing external native build for %s %s",
-                            variant.module.buildSystem.tag, variant.module.makeFile)
+                        errorln("error when building with %s using %s: %s",
+                            variant.module.buildSystem.tag, variant.module.makeFile, e.message!!)
                     }
                 }
             )
@@ -141,14 +142,11 @@ abstract class ExternalNativeJsonGenerator internal constructor(
     override fun addCurrentMetadata(
         builder: NativeAndroidProjectBuilder) {
         requireExplicitLogger()
-        val stats = ProcessProfileWriter.getOrCreateVariant(
-            variant.module.gradleModulePathName, variant.variantName
-        )
         val config =
-            if (stats.nativeBuildConfigCount == 0) {
+            if (variantBuilder.nativeBuildConfigCount == 0) {
                 val config =
                     NativeBuildConfigInfo.newBuilder()
-                stats.addNativeBuildConfig(config)
+                variantBuilder.addNativeBuildConfig(config)
                 config
             } else {
                 // Do not include stats if they were gathered during build.
@@ -220,11 +218,13 @@ abstract class ExternalNativeJsonGenerator internal constructor(
     private fun buildForOneConfiguration(
         ops: ExecOperations,
         forceJsonGeneration: Boolean,
-        abi: CxxAbiModel) {
+        abi: CxxAbiModel
+    ) {
         PassThroughPrefixingLoggingEnvironment(
             abi.variant.module.makeFile,
             abi.variant.variantName + "|" + abi.abi.tag
         ).use { recorder ->
+
             val variantStats =
                 NativeBuildConfigInfo.newBuilder()
             variantStats.abi = AnalyticsUtil.getAbi(abi.abi.tag)
@@ -243,9 +243,10 @@ abstract class ExternalNativeJsonGenerator internal constructor(
 
                 // See whether the current build command matches a previously written build command.
                 val currentBuildCommand = """
-                ${processBuilder}Build command args:${abi.getBuildCommandArguments()}
-
-                """.trimIndent()
+                    ${processBuilder}
+                    Build command args: ${abi.getBuildCommandArguments()}
+                    Version: $ANDROID_GRADLE_BUILD_VERSION
+                    """.trimIndent()
                 val prefabState = PrefabConfigurationState(
                     abi.variant.module.project.isPrefabEnabled,
                     abi.variant.prefabClassPath,
@@ -259,7 +260,7 @@ abstract class ExternalNativeJsonGenerator internal constructor(
                         abi.jsonFile,
                         abi.buildCommandFile,
                         currentBuildCommand,
-                        getPreviousBuildCommand(abi.buildCommandFile),
+                        getFileContent(abi.buildCommandFile),
                         getDependentBuildFiles(abi.jsonFile),
                         prefabState,
                         previousPrefabState
@@ -302,16 +303,9 @@ abstract class ExternalNativeJsonGenerator internal constructor(
                     }
 
                     infoln("executing %s %s", variant.module.buildSystem.tag, processBuilder)
-                    val buildOutput = executeProcess(ops, abi)
+                    executeProcess(ops, abi)
                     infoln("done executing %s", variant.module.buildSystem.tag)
 
-                    // Write the captured process output to a file for diagnostic purposes.
-                    infoln("write build output %s", abi.buildOutputFile.absolutePath)
-                    Files.write(
-                        abi.buildOutputFile.toPath(),
-                        buildOutput.toByteArray(Charsets.UTF_8)
-                    )
-                    processBuildOutput(buildOutput, abi)
                     if (!abi.jsonFile.exists()) {
                         throw GradleException(
                             String.format(
@@ -320,16 +314,17 @@ abstract class ExternalNativeJsonGenerator internal constructor(
                             )
                         )
                     }
-                    synchronized(variant.statsBuilder) {
+
+                    synchronized(variantBuilder) {
                         // Related to https://issuetracker.google.com/69408798
-                        // Targets may have been removed or there could be other orphaned extra .so
-                        // files. Remove these and rely on the build step to replace them if they are
-                        // legitimate. This is to prevent unexpected .so files from being packaged in
-                        // the APK.
+                        // Targets may have been removed or there could be other orphaned extra
+                        // .so files. Remove these and rely on the build step to replace them
+                        // if they are legitimate. This is to prevent unexpected .so files from
+                        // being packaged in the APK.
                         removeUnexpectedSoFiles(
                             abi.soFolder,
                             AndroidBuildGradleJsons.getNativeBuildMiniConfig(
-                                abi.jsonFile, variant.statsBuilder
+                                abi.jsonFile, variantBuilder
                             )
                         )
                     }
@@ -337,6 +332,7 @@ abstract class ExternalNativeJsonGenerator internal constructor(
                     // Write the ProcessInfo to a file, this has all the flags used to generate the
                     // JSON. If any of these change later the JSON will be regenerated.
                     infoln("write command file %s", abi.buildCommandFile.absolutePath)
+                    abi.buildCommandFile.parentFile.mkdirs()
                     Files.write(
                         abi.buildCommandFile.toPath(),
                         currentBuildCommand.toByteArray(Charsets.UTF_8)
@@ -355,6 +351,9 @@ abstract class ExternalNativeJsonGenerator internal constructor(
                     infoln("JSON '%s' was up-to-date", abi.jsonFile)
                     variantStats.outcome = GenerationOutcome.SUCCESS_UP_TO_DATE
                 }
+                abi.generateSymbolFolderIndexFile()
+                abi.generateBuildFilesIndex(variantBuilder)
+                abi.generateCompileCommandsJsonBin()
                 infoln("JSON generation completed without problems")
             } catch (e: GradleException) {
                 variantStats.outcome = GenerationOutcome.FAILED
@@ -370,8 +369,8 @@ abstract class ExternalNativeJsonGenerator internal constructor(
                 throw e
             } finally {
                 variantStats.generationDurationMs = System.currentTimeMillis() - startTime
-                synchronized(variant.statsBuilder) {
-                    variant.statsBuilder.addNativeBuildConfig(variantStats)
+                synchronized(variantBuilder) {
+                    variantBuilder.addNativeBuildConfig(variantStats)
                 }
                 abi.jsonGenerationLoggingRecordFile.parentFile.mkdirs()
                 Files.write(
@@ -385,21 +384,86 @@ abstract class ExternalNativeJsonGenerator internal constructor(
         }
     }
 
-    /**
-     * Derived class implements this method to post-process build output. NdkPlatform-build uses
-     * this to capture and analyze the compile and link commands that were written to stdout.
-     */
-    @Throws(IOException::class)
-    abstract fun processBuildOutput(buildOutput: String, abiConfig: CxxAbiModel)
+    private fun CxxAbiModel.generateSymbolFolderIndexFile() {
+        symbolFolderIndexFile.parentFile.mkdirs()
+        symbolFolderIndexFile.writeText(
+            soFolder.absolutePath,
+            StandardCharsets.UTF_8
+        )
+    }
+
+    private fun CxxAbiModel.generateBuildFilesIndex(variantBuilder: GradleBuildVariant.Builder?) {
+        buildFileIndexFile.parentFile.mkdirs()
+        buildFileIndexFile.writeText(
+            AndroidBuildGradleJsons.getNativeBuildMiniConfig(
+                jsonFile,
+                variantBuilder
+            ).buildFiles.joinToString(System.lineSeparator()),
+            StandardCharsets.UTF_8
+        )
+    }
+
+    private fun CxxAbiModel.generateCompileCommandsJsonBin() {
+        val interner =
+            TokenizedCommandLineMap<Pair<String, List<String>>>(raw = false) { tokens, sourceFile ->
+                tokens.removeTokenGroup(sourceFile, 0)
+                for (flag in STRIP_FLAGS_WITH_ARG) {
+                    tokens.removeTokenGroup(flag, 1)
+                }
+                for (flag in STRIP_FLAGS_WITH_IMMEDIATE_ARG) {
+                    tokens.removeTokenGroup(flag, 0, matchPrefix = true)
+                }
+                for (flag in STRIP_FLAGS_WITHOUT_ARG) {
+                    tokens.removeTokenGroup(flag, 0)
+                }
+            }
+        if (!compileCommandsJsonFile.exists()
+            || (compileCommandsJsonBinFile.exists()
+                    && compileCommandsJsonBinFile.lastModified() >= compileCommandsJsonFile.lastModified())
+        ) {
+            return
+        }
+        JsonReader(compileCommandsJsonFile.reader(StandardCharsets.UTF_8)).use { reader ->
+            CompileCommandsEncoder(compileCommandsJsonBinFile).use { encoder ->
+                reader.beginArray()
+                while (reader.hasNext()) {
+                    reader.beginObject()
+                    lateinit var directory: String
+                    lateinit var command: String
+                    lateinit var sourceFile: String
+                    while (reader.hasNext()) {
+                        when (reader.nextName()) {
+                            "directory" -> directory = reader.nextString()
+                            "command" -> command = reader.nextString()
+                            "file" -> sourceFile = reader.nextString()
+                            // swallow other optional fields
+                            else -> reader.skipValue()
+                        }
+                    }
+                    reader.endObject()
+                    val (compiler, flags) = interner.computeIfAbsent(command, sourceFile) {
+                        val tokenList = it.toTokenList()
+                        tokenList[0] to tokenList.subList(1, tokenList.size)
+                    }
+                    encoder.writeCompileCommand(
+                        File(sourceFile),
+                        File(compiler),
+                        flags,
+                        File(directory)
+                    )
+                }
+                reader.endArray()
+            }
+        }
+    }
+
     abstract fun getProcessBuilder(abi: CxxAbiModel): ProcessInfoBuilder
 
     /**
      * Executes the JSON generation process. Return the combination of STDIO and STDERR from running
      * the process.
-     *
-     * @return Returns the combination of STDIO and STDERR from running the process.
      */
-    abstract fun executeProcess(ops: ExecOperations, abi: CxxAbiModel): String
+    abstract fun executeProcess(ops: ExecOperations, abi: CxxAbiModel)
 
     companion object {
         /**
@@ -410,7 +474,7 @@ abstract class ExternalNativeJsonGenerator internal constructor(
             get() = SdkConstants.CURRENT_PLATFORM == SdkConstants.PLATFORM_WINDOWS
 
         @Throws(IOException::class)
-        private fun getPreviousBuildCommand(commandFile: File): String {
+        private fun getFileContent(commandFile: File): String {
             return if (!commandFile.exists()) {
                 ""
             } else String(

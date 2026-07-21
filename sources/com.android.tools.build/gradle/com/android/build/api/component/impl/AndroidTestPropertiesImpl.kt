@@ -18,31 +18,38 @@ package com.android.build.api.component.impl
 
 import com.android.build.api.artifact.impl.ArtifactsImpl
 import com.android.build.api.component.AndroidTestProperties
-import com.android.build.api.component.ComponentIdentity
+import com.android.build.api.component.analytics.AnalyticsEnabledAndroidTestProperties
 import com.android.build.api.variant.AaptOptions
 import com.android.build.api.variant.AndroidVersion
 import com.android.build.api.variant.BuildConfigField
+import com.android.build.api.variant.ApkPackagingOptions
+import com.android.build.api.variant.SigningConfig
+import com.android.build.api.variant.impl.ApkPackagingOptionsImpl
 import com.android.build.api.variant.impl.ResValue
+import com.android.build.api.variant.impl.SigningConfigImpl
 import com.android.build.api.variant.impl.VariantPropertiesImpl
 import com.android.build.api.variant.impl.initializeAaptOptionsFromDsl
 import com.android.build.gradle.internal.component.AndroidTestCreationConfig
-import com.android.build.gradle.internal.component.ConsumableCreationConfig
 import com.android.build.gradle.internal.core.VariantDslInfo
 import com.android.build.gradle.internal.core.VariantSources
 import com.android.build.gradle.internal.dependency.VariantDependencies
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.build.gradle.internal.scope.BuildFeatureValues
 import com.android.build.gradle.internal.scope.GlobalScope
-import com.android.build.gradle.internal.services.VariantPropertiesApiServices
 import com.android.build.gradle.internal.scope.VariantScope
+import com.android.build.gradle.internal.services.ProjectServices
 import com.android.build.gradle.internal.services.TaskCreationServices
+import com.android.build.gradle.internal.services.VariantPropertiesApiServices
 import com.android.build.gradle.internal.variant.BaseVariantData
 import com.android.build.gradle.internal.variant.VariantPathHelper
+import com.android.build.gradle.options.IntegerOption
+import com.google.wireless.android.sdk.stats.GradleBuildVariant
+import com.android.builder.dexing.DexingType
+import com.android.builder.model.CodeShrinker
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import java.io.Serializable
-import java.lang.RuntimeException
 import javax.inject.Inject
 
 open class AndroidTestPropertiesImpl @Inject constructor(
@@ -77,6 +84,8 @@ open class AndroidTestPropertiesImpl @Inject constructor(
     globalScope
 ), AndroidTestProperties, AndroidTestCreationConfig {
 
+    private val delegate by lazy { AndroidTestCreationConfigImpl(this, globalScope, variantDslInfo) }
+
     // ---------------------------------------------------------------------------------------------
     // PUBLIC API
     // ---------------------------------------------------------------------------------------------
@@ -89,21 +98,21 @@ open class AndroidTestPropertiesImpl @Inject constructor(
 
     override val applicationId: Property<String> = internalServices.propertyOf(
         String::class.java,
-        variantDslInfo.applicationId)
+        variantDslInfo.applicationId
+    )
 
     override val manifestPlaceholders: MapProperty<String, String> by lazy {
         internalServices.mapPropertyOf(
             String::class.java,
             String::class.java,
-            variantDslInfo.manifestPlaceholders,
-            "$name:manifestPlaceholders"
+            variantDslInfo.manifestPlaceholders
         )
     }
 
     override val aaptOptions: AaptOptions by lazy {
         initializeAaptOptionsFromDsl(
-            globalScope.extension.aaptOptions,
-            variantPropertiesApiServices
+                globalScope.extension.aaptOptions,
+                variantPropertiesApiServices
         )
     }
 
@@ -111,11 +120,25 @@ open class AndroidTestPropertiesImpl @Inject constructor(
         action.invoke(aaptOptions)
     }
 
+    override val packagingOptions: ApkPackagingOptions by lazy {
+        ApkPackagingOptionsImpl(
+            globalScope.extension.packagingOptions,
+            variantPropertiesApiServices
+        )
+    }
+
+    override fun packagingOptions(action: ApkPackagingOptions.() -> Unit) {
+        action.invoke(packagingOptions)
+    }
+
     override val minifiedEnabled: Boolean
         get() = variantDslInfo.isMinifyEnabled
 
     override val instrumentationRunner: Property<String> =
-        internalServices.propertyOf(String::class.java, variantDslInfo.instrumentationRunner)
+        internalServices.propertyOf(
+            String::class.java,
+            variantDslInfo.getInstrumentationRunner(dexingType)
+        )
 
     override val handleProfiling: Property<Boolean> =
         internalServices.propertyOf(Boolean::class.java, variantDslInfo.handleProfiling)
@@ -130,8 +153,7 @@ open class AndroidTestPropertiesImpl @Inject constructor(
         internalServices.mapPropertyOf(
             String::class.java,
             BuildConfigField::class.java,
-            variantDslInfo.getBuildConfigFields(),
-            "$name:buildConfigs"
+            variantDslInfo.getBuildConfigFields()
         )
     }
 
@@ -153,8 +175,26 @@ open class AndroidTestPropertiesImpl @Inject constructor(
      * @param value a [Provider] for the value
      * @param comment optional comment to be added to the generated resource file for the field.
      */
-    override fun addResValue(name: String, type: String, value: Provider<String>, comment: String?) {
+    override fun addResValue(
+        name: String,
+        type: String,
+        value: Provider<String>,
+        comment: String?
+    ) {
         resValues.put(ResValue.Key(type, name), value.map { ResValue(it, comment) })
+    }
+
+    override val signingConfig: SigningConfig by lazy {
+        SigningConfigImpl(
+            variantDslInfo.signingConfig,
+            variantPropertiesApiServices,
+            minSdkVersion.apiLevel,
+            globalScope.projectOptions.get(IntegerOption.IDE_TARGET_DEVICE_API)
+        )
+    }
+
+    override fun signingConfig(action: SigningConfig.() -> Unit) {
+        action.invoke(signingConfig)
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -188,8 +228,7 @@ open class AndroidTestPropertiesImpl @Inject constructor(
         internalServices.mapPropertyOf(
             ResValue.Key::class.java,
             ResValue::class.java,
-            variantDslInfo.getResValues(),
-            "$name:resValues"
+            variantDslInfo.getResValues()
         )
     }
 
@@ -204,9 +243,50 @@ open class AndroidTestPropertiesImpl @Inject constructor(
      */
     override val shouldPackageDesugarLibDex: Boolean
         get() = when {
-            !variantScope.isCoreLibraryDesugaringEnabled -> false
+            !isCoreLibraryDesugaringEnabled -> false
             testedConfig.variantType.isAar -> true
-            else -> testedConfig.variantType.isBaseModule && testedConfig.variantScope.needsShrinkDesugarLibrary
+            else -> testedConfig.variantType.isBaseModule && needsShrinkDesugarLibrary
         }
+
+    override val minSdkVersionWithTargetDeviceApi: AndroidVersion =
+        testedVariant.minSdkVersionWithTargetDeviceApi
+
+    override val isMultiDexEnabled: Boolean =
+        testedVariant.isMultiDexEnabled
+
+    override val needsShrinkDesugarLibrary: Boolean
+        get() = delegate.needsShrinkDesugarLibrary
+
+    override val isCoreLibraryDesugaringEnabled: Boolean
+        get() = delegate.isCoreLibraryDesugaringEnabled
+
+    override val dexingType: DexingType
+        get() = delegate.dexingType
+
+    override val needsMainDexListForBundle: Boolean
+        get() = false
+
+    override fun createUserVisibleVariantPropertiesObject(
+        projectServices: ProjectServices,
+        stats: GradleBuildVariant.Builder
+    ): AnalyticsEnabledAndroidTestProperties =
+        projectServices.objectFactory.newInstance(
+            AnalyticsEnabledAndroidTestProperties::class.java,
+            this
+,
+            stats
+        )
+
+    override val shouldPackageProfilerDependencies: Boolean = false
+
+    override val advancedProfilingTransforms: List<String> = emptyList()
+
+    override val codeShrinker: CodeShrinker?
+        get() = delegate.getCodeShrinker()
+
+    override fun getNeedsMergedJavaResStream(): Boolean =
+        delegate.getNeedsMergedJavaResStream()
+
+    override fun getJava8LangSupportType(): VariantScope.Java8LangSupport = delegate.getJava8LangSupportType()
 }
 

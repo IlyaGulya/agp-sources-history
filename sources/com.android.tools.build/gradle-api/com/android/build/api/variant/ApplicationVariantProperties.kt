@@ -48,4 +48,24 @@ interface ApplicationVariantProperties : VariantProperties {
      * Variant's aaptOptions, initialized by the corresponding global DSL element.
      */
     fun aaptOptions(action: AaptOptions.() -> Unit)
+
+    /**
+     * Variant's signingConfig, initialized by the corresponding DSL element.
+     */
+    val signingConfig: SigningConfig
+
+    /**
+     * Variant's signingConfig, initialized by the corresponding DSL element.
+     */
+    fun signingConfig(action: SigningConfig.() -> Unit)
+
+    /**
+     * Variant's packagingOptions, initialized by the corresponding global DSL element.
+     */
+    override val packagingOptions: ApkPackagingOptions
+
+    /**
+     * Variant's packagingOptions, initialized by the corresponding global DSL element.
+     */
+    fun packagingOptions(action: ApkPackagingOptions.() -> Unit)
 }

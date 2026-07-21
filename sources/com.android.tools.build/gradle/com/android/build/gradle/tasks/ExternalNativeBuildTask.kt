@@ -21,18 +21,19 @@ import com.android.build.gradle.internal.SdkComponentsBuildService
 import com.android.build.gradle.internal.component.VariantCreationConfig
 import com.android.build.gradle.internal.core.Abi
 import com.android.build.gradle.internal.cxx.attribution.generateChromeTrace
+import com.android.build.gradle.internal.cxx.gradle.generator.CxxConfigurationModel
 import com.android.build.gradle.internal.cxx.gradle.generator.CxxMetadataGenerator
+import com.android.build.gradle.internal.cxx.gradle.generator.createCxxMetadataGenerator
+import com.android.build.gradle.internal.cxx.gradle.generator.variantObjFolder
+import com.android.build.gradle.internal.cxx.gradle.generator.variantSoFolder
 import com.android.build.gradle.internal.cxx.json.AndroidBuildGradleJsons.getNativeBuildMiniConfigs
 import com.android.build.gradle.internal.cxx.json.NativeBuildConfigValueMini
 import com.android.build.gradle.internal.cxx.json.NativeLibraryValueMini
 import com.android.build.gradle.internal.cxx.logging.IssueReporterLoggingEnvironment
 import com.android.build.gradle.internal.cxx.logging.errorln
 import com.android.build.gradle.internal.cxx.logging.infoln
-import com.android.build.gradle.internal.cxx.gradle.generator.CxxConfigurationModel
-import com.android.build.gradle.internal.cxx.gradle.generator.createCxxMetadataGenerator
 import com.android.build.gradle.internal.cxx.model.jsonFile
 import com.android.build.gradle.internal.cxx.model.ninjaLogFile
-import com.android.build.gradle.internal.cxx.model.soFolder
 import com.android.build.gradle.internal.cxx.process.createProcessOutputJunction
 import com.android.build.gradle.internal.cxx.settings.BuildSettingsConfiguration
 import com.android.build.gradle.internal.cxx.settings.getEnvironmentVariableMap
@@ -49,7 +50,6 @@ import com.android.ide.common.process.BuildCommandException
 import com.android.ide.common.process.ProcessInfoBuilder
 import com.android.utils.FileUtils.isSameFile
 import com.android.utils.FileUtils.join
-import com.android.utils.tokenizeCommandLineToEscaped
 import com.google.common.base.Joiner
 import com.google.common.base.Preconditions.checkElementIndex
 import com.google.common.base.Preconditions.checkNotNull
@@ -79,14 +79,14 @@ import kotlin.streams.toList
  * It declares no inputs or outputs, as it's supposed to always run when invoked. Incrementality
  * is left to the underlying build system.
  */
-abstract class ExternalNativeBuildTask @Inject constructor(private val ops: ExecOperations) :
+abstract class ExternalNativeBuildTask @Inject constructor(@get:Internal val ops: ExecOperations) :
     UnsafeOutputsTask("External Native Build task is always run as incrementality is left to the external build system.") {
     @get:Internal
     abstract val sdkComponents: Property<SdkComponentsBuildService>
     private lateinit var configurationModel: CxxConfigurationModel
 
     @Transient
-    private var generator : CxxMetadataGenerator? = null
+    private var generator: CxxMetadataGenerator? = null
     private val variant get() = generator().variant
     private val abis get() = generator().abis
 
@@ -98,7 +98,8 @@ abstract class ExternalNativeBuildTask @Inject constructor(private val ops: Exec
             generator =
                 createCxxMetadataGenerator(
                     sdkComponents.get(),
-                    configurationModel
+                    configurationModel,
+                    analyticsService.get()
                 )
         }
         return generator!!
@@ -116,22 +117,24 @@ abstract class ExternalNativeBuildTask @Inject constructor(private val ops: Exec
     // Exposed in Variants API
     @get:Internal("Temporary to suppress warnings (bug 135900510), may need more investigation")
     val objFolder: File
-        get() = variant.objFolder
+        get() = configurationModel.variantObjFolder
 
     // Exposed in Variants API
     @get:Internal("Temporary to suppress warnings (bug 135900510), may need more investigation")
     val soFolder: File
-        get() = variant.soFolder
+        get() = configurationModel.variantSoFolder
 
     /** Represents a single build step that, when executed, builds one or more libraries.  */
     private class BuildStep(
-        val buildCommand: String,
+        val buildCommandComponents: List<String>,
         val libraries: List<NativeLibraryValueMini>,
         val outputFolder: File
     )
 
     override fun doTaskAction() {
-        IssueReporterLoggingEnvironment(DefaultIssueReporter(LoggerWrapper(logger))).use { buildImpl() }
+        IssueReporterLoggingEnvironment(DefaultIssueReporter(LoggerWrapper(logger))).use {
+            buildImpl()
+        }
     }
 
     private fun getStlSharedObjectFiles(): Map<Abi, File> {
@@ -196,14 +199,17 @@ abstract class ExternalNativeBuildTask @Inject constructor(private val ops: Exec
                 continue
             }
 
-            if (!Strings.isNullOrEmpty(config.buildTargetsCommand)) {
+            if (config.buildTargetsCommandComponents?.isNotEmpty() == true) {
                 // Build all libraries together in one step, using the names of the artifacts.
                 val artifactNames = librariesToBuild
                     .mapNotNull { library -> library.artifactName }
                     .distinct()
                     .sorted()
                 val buildTargetsCommand =
-                    substituteBuildTargetsCommand(config.buildTargetsCommand!!, artifactNames)
+                    substituteBuildTargetsCommand(
+                        config.buildTargetsCommandComponents!!,
+                        artifactNames
+                    )
                 buildSteps.add(
                     BuildStep(
                         buildTargetsCommand,
@@ -218,12 +224,12 @@ abstract class ExternalNativeBuildTask @Inject constructor(private val ops: Exec
                 for (libraryValue in librariesToBuild) {
                     buildSteps.add(
                         BuildStep(
-                            libraryValue.buildCommand!!,
+                            libraryValue.buildCommandComponents!!,
                             listOf(libraryValue),
                             abis[miniConfigIndex].jsonFile.parentFile
                         )
                     )
-                    infoln("about to build ${libraryValue.buildCommand!!}")
+                    infoln("about to build ${libraryValue.buildCommandComponents!!.joinToString(" ")}")
                 }
             }
         }
@@ -326,7 +332,7 @@ abstract class ExternalNativeBuildTask @Inject constructor(private val ops: Exec
         if(destination.exists()) {
             destination.delete()
         }
-        
+
         try {
             createLink(destination.toPath(), source.toPath().toRealPath())
             infoln("linked $source to $destination")
@@ -388,14 +394,12 @@ abstract class ExternalNativeBuildTask @Inject constructor(private val ops: Exec
                 continue
             }
 
-            if (Strings.isNullOrEmpty(config.buildTargetsCommand) && Strings.isNullOrEmpty(
-                    libraryValue.buildCommand
-                )
+            if ((config.buildTargetsCommandComponents?.isEmpty() != false) && (libraryValue.buildCommandComponents?.isEmpty() != false)
             ) {
                 // This can happen when there's an externally referenced library.
                 infoln(
                     "not building target ${libraryValue.artifactName!!} because there was no " +
-                            "buildCommand for the target, nor a buildTargetsCommand for the config")
+                            "buildCommandComponents for the target, nor a buildTargetsCommandComponents for the config")
                 continue
             }
 
@@ -445,7 +449,7 @@ abstract class ExternalNativeBuildTask @Inject constructor(private val ops: Exec
         val logger = logger
 
         for (buildStep in buildSteps) {
-            val tokens = buildStep.buildCommand.tokenizeCommandLineToEscaped()
+            val tokens = buildStep.buildCommandComponents
             val processBuilder = ProcessInfoBuilder()
             processBuilder.setExecutable(tokens[0])
             for (i in 1 until tokens.size) {
@@ -501,11 +505,12 @@ abstract class ExternalNativeBuildTask @Inject constructor(private val ops: Exec
                     }
 
             createProcessOutputJunction(
-                buildStep.outputFolder,
-                "android_gradle_build_$logFileSuffix",
+                buildStep.outputFolder.resolve("android_gradle_build_command_$logFileSuffix.txt"),
+                buildStep.outputFolder.resolve("android_gradle_build_stdout_$logFileSuffix.txt"),
+                buildStep.outputFolder.resolve("android_gradle_build_stderr_$logFileSuffix.txt"),
                 processBuilder,
                 "")
-                .logStderrToInfo()
+                .logStderrToLifecycle()
                 .logStdoutToInfo()
                 .execute(ops::exec)
 
@@ -563,17 +568,20 @@ abstract class ExternalNativeBuildTask @Inject constructor(private val ops: Exec
         const val BUILD_TARGETS_PLACEHOLDER = "{LIST_OF_TARGETS_TO_BUILD}"
 
         /**
-         * @param buildTargetsCommand The build command that can build multiple targets in parallel.
+         * @param buildTargetsCommandComponents The build command that can build multiple targets in parallel.
          * @param artifactNames The names of artifacts the build command will build in parallel.
          * @return Replaces the placeholder in the input command with the given artifacts and returns a
          * command that can be executed directly.
          */
         private fun substituteBuildTargetsCommand(
-            buildTargetsCommand: String, artifactNames: List<String>
-        ): String {
-            return buildTargetsCommand.replace(
-                BUILD_TARGETS_PLACEHOLDER, artifactNames.joinToString(" ")
-            )
+            buildTargetsCommandComponents: List<String>, artifactNames: List<String>
+        ): List<String> {
+            if (BUILD_TARGETS_PLACEHOLDER !in buildTargetsCommandComponents) {
+                return buildTargetsCommandComponents
+            }
+            return buildTargetsCommandComponents.takeWhile { it != BUILD_TARGETS_PLACEHOLDER } +
+                    artifactNames +
+                    buildTargetsCommandComponents.takeLastWhile { it != BUILD_TARGETS_PLACEHOLDER }
         }
     }
 }

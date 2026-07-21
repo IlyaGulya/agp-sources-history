@@ -16,12 +16,13 @@
 package com.android.build.api.variant.impl
 
 import com.android.build.api.artifact.impl.ArtifactsImpl
+import com.android.build.api.component.analytics.AnalyticsEnabledVariantProperties
 import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.api.variant.AndroidVersion
 import com.android.build.api.variant.BuildConfigField
+import com.android.build.api.variant.PackagingOptions
 import com.android.build.api.variant.VariantProperties
 import com.android.build.gradle.internal.component.ConsumableCreationConfig
-import com.android.build.gradle.internal.component.VariantCreationConfig
 import com.android.build.gradle.internal.core.VariantDslInfo
 import com.android.build.gradle.internal.core.VariantSources
 import com.android.build.gradle.internal.dependency.VariantDependencies
@@ -29,14 +30,16 @@ import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.build.gradle.internal.scope.BuildFeatureValues
 import com.android.build.gradle.internal.scope.GlobalScope
 import com.android.build.gradle.internal.scope.VariantScope
+import com.android.build.gradle.internal.services.ProjectServices
 import com.android.build.gradle.internal.services.TaskCreationServices
 import com.android.build.gradle.internal.services.VariantPropertiesApiServices
 import com.android.build.gradle.internal.variant.BaseVariantData
 import com.android.build.gradle.internal.variant.VariantPathHelper
 import com.android.builder.core.VariantType
-import org.objectweb.asm.Type
+import com.google.wireless.android.sdk.stats.GradleBuildVariant
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Provider
+import org.objectweb.asm.Type
 import java.io.Serializable
 
 abstract class VariantPropertiesImpl(
@@ -77,8 +80,7 @@ abstract class VariantPropertiesImpl(
         internalServices.mapPropertyOf(
             String::class.java,
             BuildConfigField::class.java,
-            variantDslInfo.getBuildConfigFields(),
-            "$name:buildConfigs"
+            variantDslInfo.getBuildConfigFields()
         )
     }
 
@@ -115,9 +117,12 @@ abstract class VariantPropertiesImpl(
         internalServices.mapPropertyOf(
             String::class.java,
             String::class.java,
-            variantDslInfo.manifestPlaceholders,
-            "$name:manifestPlaceholders"
+            variantDslInfo.manifestPlaceholders
         )
+    }
+
+    override val packagingOptions: PackagingOptions by lazy {
+        PackagingOptionsImpl(globalScope.extension.packagingOptions, internalServices)
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -130,8 +135,7 @@ abstract class VariantPropertiesImpl(
         internalServices.mapPropertyOf(
             ResValue.Key::class.java,
             ResValue::class.java,
-            variantDslInfo.getResValues(),
-            "$name:resValues"
+            variantDslInfo.getResValues()
         )
     }
 
@@ -140,4 +144,26 @@ abstract class VariantPropertiesImpl(
 
     override val minSdkVersion: AndroidVersion
         get() = variant.minSdkVersion
+
+    private var _isMultiDexEnabled: Boolean? = variantDslInfo.isMultiDexEnabled
+    override val isMultiDexEnabled: Boolean
+        get() {
+            return _isMultiDexEnabled ?: (minSdkVersion.getFeatureLevel() >= 21)
+        }
+
+    private val isBaseModule = variantDslInfo.variantType.isBaseModule
+
+    override val needsMainDexListForBundle: Boolean
+        get() = isBaseModule
+                && globalScope.hasDynamicFeatures()
+                && dexingType.needsMainDexList
+
+    // TODO: Move down to lower type and remove from VariantScope.
+    override val isCoreLibraryDesugaringEnabled: Boolean
+        get() = variantScope.isCoreLibraryDesugaringEnabled(this)
+
+    abstract override fun createUserVisibleVariantPropertiesObject(
+        projectServices: ProjectServices,
+        stats: GradleBuildVariant.Builder
+    ): AnalyticsEnabledVariantProperties
 }

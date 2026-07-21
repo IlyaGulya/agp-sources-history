@@ -21,10 +21,9 @@ import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.crash.PluginCrashReporter
 import com.android.build.gradle.internal.dexing.DexParameters
 import com.android.build.gradle.internal.dexing.DexWorkAction
-import com.android.build.gradle.internal.dexing.DexWorkActionParams
 import com.android.build.gradle.internal.dexing.DxDexParameters
 import com.android.build.gradle.internal.dexing.IncrementalDexSpec
-import com.android.build.gradle.internal.dexing.launchProcessing
+import com.android.build.gradle.internal.profile.AnalyticsService
 import com.android.build.gradle.internal.workeractions.WorkerActionServiceRegistry
 import com.android.builder.core.DefaultDexOptions
 import com.android.builder.dexing.ClassBucket
@@ -34,23 +33,16 @@ import com.android.builder.dexing.DexerTool
 import com.android.builder.dexing.DirectoryBucketGroup
 import com.android.builder.dexing.JarBucketGroup
 import com.android.builder.dexing.r8.ClassFileProviderFactory
-import com.android.ide.common.blame.Message
-import com.android.ide.common.blame.MessageReceiver
-import com.android.ide.common.blame.ParsingProcessOutputHandler
-import com.android.ide.common.blame.parser.DexParser
-import com.android.ide.common.blame.parser.ToolOutputParser
 import com.android.ide.common.internal.WaitableExecutor
-import com.android.ide.common.process.ProcessException
-import com.android.ide.common.process.ProcessOutput
 import com.android.utils.FileUtils
 import com.google.common.base.Throwables
 import com.google.common.collect.Iterables
 import com.google.common.collect.Lists
 import com.google.common.hash.Hashing
 import com.google.common.io.Closer
+import org.gradle.api.provider.Provider
 import org.gradle.work.ChangeType
 import org.gradle.work.FileChange
-import org.gradle.workers.IsolationMode
 import org.gradle.workers.WorkerExecutor
 import java.io.BufferedInputStream
 import java.io.File
@@ -115,10 +107,11 @@ class DexArchiveBuilderTaskDelegate(
     private val inputJarHashesFile: File,
     private val dexer: DexerTool,
     private val numberOfBuckets: Int,
-    private val useGradleWorkers: Boolean,
     private val workerExecutor: WorkerExecutor,
     private val executor: WaitableExecutor = WaitableExecutor.useGlobalSharedThreadPool(),
-    private var messageReceiver: MessageReceiver
+    private val projectName: String,
+    private val taskPath: String,
+    private val analyticsService: Provider<AnalyticsService>
 ) {
     private val outputMapping = OutputMapping(isIncremental)
 
@@ -275,12 +268,8 @@ class DexArchiveBuilderTaskDelegate(
                 )
 
                 // all work items have been submitted, now wait for completion.
-                if (useGradleWorkers) {
-                    // TODO (gavra): use build services in worker actions so ClassFileProviderFactory are not closed too early
-                    workerExecutor.await()
-                } else {
-                    executor.waitForTasksWithQuickFail<Any>(true)
-                }
+                // TODO (gavra): use build services in worker actions so ClassFileProviderFactory are not closed too early
+                workerExecutor.await()
 
                 loggerWrapper.verbose("Done with all dex archive conversions")
             }
@@ -464,67 +453,29 @@ class DexArchiveBuilderTaskDelegate(
             }
 
             val classBucket = ClassBucket(inputs, bucketId)
-            val parameters = DexWorkActionParams(
-                dexer = dexer,
-                dexSpec = IncrementalDexSpec(
-                    inputClassFiles = classBucket,
-                    outputPath = preDexOutputFile,
-                    dexParams = dexParams.toDexParametersForWorkers(
-                        dexPerClass,
-                        bootClasspath,
-                        classpath,
-                        outputKeepRuleFile
-                    ),
-                    isIncremental = isIncremental,
-                    changedFiles = changedFiles,
-                    impactedFiles = impactedFiles,
-                    desugarGraphFile = if (impactedFiles == null) {
-                        getDesugarGraphFile(desugarGraphDir!!, classBucket)
-                    } else {
-                        null
-                    }
-                ),
-                dxDexParams = dxDexParams
-            )
-
-            if (useGradleWorkers) {
-                workerExecutor.submit(
-                    DexWorkAction::class.java
-                ) { configuration ->
-                    configuration.isolationMode = IsolationMode.NONE
-                    configuration.setParams(parameters)
-                }
-            } else {
-                executor.execute<Any> {
-                    val outputHandler = ParsingProcessOutputHandler(
-                        ToolOutputParser(
-                            DexParser(), Message.Kind.ERROR, loggerWrapper
+            workerExecutor.noIsolation().submit(DexWorkAction::class.java) { params ->
+                params.initializeWith(projectName, taskPath, analyticsService)
+                params.dexer.set(dexer)
+                params.dexSpec.set(
+                        IncrementalDexSpec(
+                        inputClassFiles = classBucket,
+                        outputPath = preDexOutputFile,
+                        dexParams = dexParams.toDexParametersForWorkers(
+                                dexPerClass,
+                                bootClasspath,
+                                classpath,
+                                outputKeepRuleFile
                         ),
-                        ToolOutputParser(DexParser(), loggerWrapper),
-                        messageReceiver
-                    )
-                    var output: ProcessOutput? = null
-                    try {
-                        outputHandler.createOutput().use {
-                            output = it
-                            launchProcessing(
-                                parameters,
-                                output!!.standardOutput,
-                                output!!.errorOutput,
-                                messageReceiver
-                            )
+                        isIncremental = isIncremental,
+                        changedFiles = changedFiles,
+                        impactedFiles = impactedFiles,
+                        desugarGraphFile = if (impactedFiles == null) {
+                            getDesugarGraphFile(desugarGraphDir!!, classBucket)
+                        } else {
+                            null
                         }
-                    } finally {
-                        output?.let {
-                            try {
-                                outputHandler.handleOutput(it)
-                            } catch (e: ProcessException) {
-                                // ignore this one
-                            }
-                        }
-                    }
-                    null
-                }
+                ))
+                params.dxDexParams.set(dxDexParams)
             }
         }
     }

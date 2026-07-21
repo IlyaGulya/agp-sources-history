@@ -52,7 +52,6 @@ import com.android.build.gradle.internal.cxx.model.CxxAbiModel
 import com.android.build.gradle.internal.cxx.model.CxxVariantModel
 import com.android.build.gradle.internal.cxx.model.compileCommandsJsonFile
 import com.android.build.gradle.internal.cxx.model.jsonFile
-import com.android.build.gradle.internal.cxx.model.statsBuilder
 import com.android.build.gradle.internal.cxx.settings.getBuildCommandArguments
 import com.android.build.gradle.internal.cxx.settings.getFinalCmakeCommandLineArguments
 import com.android.ide.common.process.ProcessException
@@ -62,13 +61,15 @@ import com.google.common.base.Strings
 import com.google.common.collect.Maps
 import com.google.common.primitives.UnsignedInts
 import com.google.gson.stream.JsonReader
+import com.google.wireless.android.sdk.stats.GradleBuildVariant
 import com.google.wireless.android.sdk.stats.GradleNativeAndroidModule.NativeBuildSystemType.CMAKE
 import org.gradle.process.ExecOperations
 import java.io.File
 import java.io.FileNotFoundException
-import java.io.FileReader
 import java.io.IOException
 import java.io.PrintWriter
+import java.io.Reader
+import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.ArrayList
 import java.util.HashMap
@@ -79,21 +80,19 @@ import java.util.HashMap
  */
 internal class CmakeServerExternalNativeJsonGenerator(
     variant: CxxVariantModel,
-    abis: List<CxxAbiModel>
-) : ExternalNativeJsonGenerator(variant, abis) {
+    abis: List<CxxAbiModel>,
+    variantBuilder: GradleBuildVariant.Builder
+) : ExternalNativeJsonGenerator(variant, abis, variantBuilder) {
     init {
-        variant.statsBuilder.nativeBuildSystemType = CMAKE
+        variantBuilder.nativeBuildSystemType = CMAKE
         cmakeMakefileChecks(variant)
     }
 
     private val cmake get() = variant.module.cmake!!
 
-    override fun executeProcess(ops: ExecOperations, abi: CxxAbiModel): String {
-        val output = executeProcessAndGetOutput(abi)
-        return makeCmakeMessagePathsAbsolute(output, variant.module.makeFile.parentFile.parentFile)
+    override fun executeProcess(ops: ExecOperations, abi: CxxAbiModel) {
+        executeProcessAndGetOutput(abi)
     }
-
-    override fun processBuildOutput(buildOutput: String, abiConfig: CxxAbiModel) {}
 
     override fun getProcessBuilder(abi: CxxAbiModel): ProcessInfoBuilder {
         val builder = ProcessInfoBuilder()
@@ -111,7 +110,7 @@ internal class CmakeServerExternalNativeJsonGenerator(
      *
      * @return Returns the combination of STDIO and STDERR from running the process.
      */
-    private fun executeProcessAndGetOutput(abi: CxxAbiModel): String {
+    private fun executeProcessAndGetOutput(abi: CxxAbiModel) {
         // Once a Cmake server object is created
         // - connect to the server
         // - perform a handshake
@@ -198,7 +197,6 @@ internal class CmakeServerExternalNativeJsonGenerator(
                     )
                 }
                 generateAndroidGradleBuild(abi, cmakeServer)
-                configureCommandResult.interactiveMessages
             } finally {
                 cmakeServer.disconnect()
             }
@@ -307,12 +305,12 @@ internal class CmakeServerExternalNativeJsonGenerator(
             StringTable(nativeBuildConfigValue.stringTable!!)
         assert(nativeBuildConfigValue.buildFiles != null)
         nativeBuildConfigValue.buildFiles!!.addAll(getBuildFiles(cmakeServer))
-        assert(nativeBuildConfigValue.cleanCommands != null)
-        nativeBuildConfigValue.cleanCommands!!.add(
+        assert(nativeBuildConfigValue.cleanCommandsComponents != null)
+        nativeBuildConfigValue.cleanCommandsComponents!!.add(
             CmakeUtils.getCleanCommand(cmake.cmakeExe, abi.cxxBuildFolder)
         )
-        assert(nativeBuildConfigValue.buildTargetsCommand != null)
-        nativeBuildConfigValue.buildTargetsCommand = CmakeUtils.getBuildTargetsCommand(
+        assert(nativeBuildConfigValue.buildTargetsCommandComponents != null)
+        nativeBuildConfigValue.buildTargetsCommandComponents = CmakeUtils.getBuildTargetsCommand(
             cmake.cmakeExe,
             abi.cxxBuildFolder,
             abi.getBuildCommandArguments()
@@ -333,17 +331,19 @@ internal class CmakeServerExternalNativeJsonGenerator(
         nativeBuildConfigValue.cppFileExtensions!!.addAll(CmakeUtils.getCppExtensionSet(codeModel))
 
         // toolchains
-        nativeBuildConfigValue.toolchains =
-            getNativeToolchains(
-                abi,
-                cmakeServer,
-                nativeBuildConfigValue.cppFileExtensions!!,
-                nativeBuildConfigValue.cFileExtensions!!
-            )
-        val toolchainHashString =
-            getOnlyToolchainName(
-                nativeBuildConfigValue.toolchains!!
-            )
+        val toolchainHashString = if (abi.variant.module.project.isV2NativeModelEnabled) {
+            // With V2 model, there is no need to populate the toolchains.
+            null
+        } else {
+            nativeBuildConfigValue.toolchains =
+                getNativeToolchains(
+                    abi,
+                    cmakeServer,
+                    nativeBuildConfigValue.cppFileExtensions!!,
+                    nativeBuildConfigValue.cFileExtensions!!
+                )
+            getOnlyToolchainName(nativeBuildConfigValue.toolchains!!)
+        }
 
         // Fill in the required fields in NativeBuildConfigValue from the code model obtained from
         // Cmake server.
@@ -382,11 +382,12 @@ internal class CmakeServerExternalNativeJsonGenerator(
             cmake.cmakeExe,
             abi.cxxBuildFolder,
             variant.isDebuggableEnabled,
-            JsonReader(FileReader(abi.cmake!!.compileCommandsJsonFile)),
+            { abi.cmake!!.compileCommandsJsonFile.reader(StandardCharsets.UTF_8) },
             abi.abi.tag,
             workingDirectory,
             target,
-            strings
+            strings,
+            abi.variant.module.project.isV2NativeModelEnabled
         )
     }
 
@@ -576,15 +577,16 @@ internal class CmakeServerExternalNativeJsonGenerator(
             cmakeExecutable: File,
             outputFolder: File,
             isDebuggable: Boolean,
-            compileCommandsJson: JsonReader,
+            compileCommandsJsonReader: () -> Reader,
             abi: String,
             workingDirectory: File,
             target: Target,
-            strings: StringTable
+            strings: StringTable,
+            isV2NativeModelEnabled: Boolean
         ): NativeLibraryValue {
             val nativeLibraryValue = NativeLibraryValue()
             nativeLibraryValue.abi = abi
-            nativeLibraryValue.buildCommand =
+            nativeLibraryValue.buildCommandComponents =
                 CmakeUtils.getBuildCommand(cmakeExecutable, outputFolder, target.name)
             nativeLibraryValue.artifactName = target.name
             nativeLibraryValue.buildType = if (isDebuggable) "debug" else "release"
@@ -596,6 +598,10 @@ internal class CmakeServerExternalNativeJsonGenerator(
                 nativeLibraryValue.output = File(target.artifacts[0])
             }
             nativeLibraryValue.runtimeFiles = findRuntimeFiles(target)
+
+            if (isV2NativeModelEnabled) {
+                return nativeLibraryValue
+            }
 
             // Maps each source file to the index of the corresponding strings table entry, which
             // contains the build flags for that source file.
@@ -609,68 +615,71 @@ internal class CmakeServerExternalNativeJsonGenerator(
             )
             val files = mutableListOf<NativeSourceFileValue>()
             val headers = mutableListOf<NativeHeaderFileValue>()
-            for (fileGroup in target.fileGroups) {
-                for (source in fileGroup.sources) {
-                    // Skip object files in sources
-                    if (source.endsWith(".o")) continue
-                    // CMake returns an absolute path or a path relative to the source directory,
-                    // whichever one is shorter.
-                    var sourceFilePath = Paths.get(source)
-                    if (!sourceFilePath.isAbsolute) {
-                        sourceFilePath = Paths.get(target.sourceDirectory, source)
-                    }
-
-                    // Even if CMake returns an absolute path, we still call normalize() to be symmetric
-                    // with indexCompilationDatabase() which always uses normalized paths.
-                    val normalizedSourceFilePath = sourceFilePath.normalize()
-                    if (normalizedSourceFilePath.toString().isNotEmpty()) {
-                        sourceFilePath = normalizedSourceFilePath
-                    }
-                    // else {
-                    // Normalized path should not be empty, unless CMake sends us really bogus data
-                    // such as such as sourceDirectory="a/b", source="../../". This is not supposed
-                    // to happen because (1) sourceDirectory should not be relative, and (2) source
-                    // should contain at least a file name.
-                    //
-                    // Although it is very unlikely, this branch protects against that case by using
-                    // the non-normalized path, which also makes the case more debuggable.
-                    //
-                    // Fall through intended.
-                    // }
-                    val sourceFile = sourceFilePath.toFile()
-                    if (hasCmakeHeaderFileExtensions(sourceFile)) {
-                        headers.add(
-                            NativeHeaderFileValue(sourceFile, workingDirectoryOrdinal)
-                        )
-                    } else {
-                        val nativeSourceFileValue = NativeSourceFileValue()
-                        nativeSourceFileValue.workingDirectoryOrdinal = workingDirectoryOrdinal
-                        nativeSourceFileValue.src = sourceFile
-
-                        // We use flags from compile_commands.json if present. Otherwise, fall back
-                        // to server model compile flags (which is known to not always return a
-                        // complete set).
-                        // Reference b/116237485
-                        if (compilationDatabaseFlags.isEmpty()) {
-                            compilationDatabaseFlags =
-                                indexCompilationDatabase(compileCommandsJson, strings)
+            JsonReader(compileCommandsJsonReader()).use { compileCommandsJson ->
+                for (fileGroup in target.fileGroups) {
+                    for (source in fileGroup.sources) {
+                        // Skip object files in sources
+                        if (source.endsWith(".o")) continue
+                        // CMake returns an absolute path or a path relative to the source directory,
+                        // whichever one is shorter.
+                        var sourceFilePath = Paths.get(source)
+                        if (!sourceFilePath.isAbsolute) {
+                            sourceFilePath = Paths.get(target.sourceDirectory, source)
                         }
-                        if (compilationDatabaseFlags.containsKey(sourceFilePath.toString())) {
-                            nativeSourceFileValue.flagsOrdinal =
-                                compilationDatabaseFlags[sourceFilePath.toString()]
+
+                        // Even if CMake returns an absolute path, we still call normalize() to be symmetric
+                        // with indexCompilationDatabase() which always uses normalized paths.
+                        val normalizedSourceFilePath = sourceFilePath.normalize()
+                        if (normalizedSourceFilePath.toString().isNotEmpty()) {
+                            sourceFilePath = normalizedSourceFilePath
+                        }
+                        // else {
+                        // Normalized path should not be empty, unless CMake sends us really bogus data
+                        // such as such as sourceDirectory="a/b", source="../../". This is not supposed
+                        // to happen because (1) sourceDirectory should not be relative, and (2) source
+                        // should contain at least a file name.
+                        //
+                        // Although it is very unlikely, this branch protects against that case by using
+                        // the non-normalized path, which also makes the case more debuggable.
+                        //
+                        // Fall through intended.
+                        // }
+                        val sourceFile = sourceFilePath.toFile()
+                        if (hasCmakeHeaderFileExtensions(sourceFile)) {
+                            headers.add(
+                                NativeHeaderFileValue(sourceFile, workingDirectoryOrdinal)
+                            )
                         } else {
-                            // TODO I think this path is always wrong because it won't have --targets
-                            // I don't want to make it an exception this late in 3.3 cycle so I'm
-                            // leaving it as-is for now.
-                            val compileFlags =
-                                compileFlagsFromFileGroup(
-                                    fileGroup
-                                )
-                            if (!Strings.isNullOrEmpty(compileFlags)) {
-                                nativeSourceFileValue.flagsOrdinal = strings.intern(compileFlags)
+                            val nativeSourceFileValue = NativeSourceFileValue()
+                            nativeSourceFileValue.workingDirectoryOrdinal = workingDirectoryOrdinal
+                            nativeSourceFileValue.src = sourceFile
+
+                            // We use flags from compile_commands.json if present. Otherwise, fall back
+                            // to server model compile flags (which is known to not always return a
+                            // complete set).
+                            // Reference b/116237485
+                            if (compilationDatabaseFlags.isEmpty()) {
+                                compilationDatabaseFlags =
+                                    indexCompilationDatabase(compileCommandsJson, strings)
                             }
+                            if (compilationDatabaseFlags.containsKey(sourceFilePath.toString())) {
+                                nativeSourceFileValue.flagsOrdinal =
+                                    compilationDatabaseFlags[sourceFilePath.toString()]
+                            } else {
+                                // TODO(jomof): I think this path is always wrong because it won't
+                                //  have --targets I don't want to make it an exception this late in
+                                //  3.3 cycle so I'm leaving it as-is for now.
+                                val compileFlags =
+                                    compileFlagsFromFileGroup(
+                                        fileGroup
+                                    )
+                                if (!Strings.isNullOrEmpty(compileFlags)) {
+                                    nativeSourceFileValue.flagsOrdinal =
+                                        strings.intern(compileFlags)
+                                }
+                            }
+                            files.add(nativeSourceFileValue)
                         }
-                        files.add(nativeSourceFileValue)
                     }
                 }
             }
@@ -722,7 +731,7 @@ internal class CmakeServerExternalNativeJsonGenerator(
         private fun createDefaultNativeBuildConfigValue(): NativeBuildConfigValue {
             val nativeBuildConfigValue = NativeBuildConfigValue()
             nativeBuildConfigValue.buildFiles = ArrayList()
-            nativeBuildConfigValue.cleanCommands = ArrayList()
+            nativeBuildConfigValue.cleanCommandsComponents = ArrayList()
             nativeBuildConfigValue.libraries =
                 HashMap()
             nativeBuildConfigValue.toolchains =

@@ -29,4 +29,8 @@ interface LibraryVariantProperties : VariantProperties {
      */
     override val applicationId: Provider<String>
 
+    /**
+     * Variant's packagingOptions, initialized by the corresponding global DSL element.
+     */
+    fun packagingOptions(action: PackagingOptions.() -> Unit)
 }

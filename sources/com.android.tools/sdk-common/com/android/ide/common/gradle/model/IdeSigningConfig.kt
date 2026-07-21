@@ -15,6 +15,24 @@
  */
 package com.android.ide.common.gradle.model
 
-import com.android.builder.model.SigningConfig
+import java.io.File
 
-interface IdeSigningConfig: SigningConfig
+/**
+ * A Signing Configuration.
+ *
+ * This is an interface for the gradle tooling api, and should only be used from Android Studio.
+ * It is not part of the DSL & API interfaces of the Android Gradle Plugin.
+ */
+interface IdeSigningConfig {
+    /** Returns the name of the Signing config */
+    val name: String
+
+    /** The keystore file. */
+    val storeFile: File?
+
+    /** The keystore password. */
+    val storePassword: String?
+
+    /** The key alias name. */
+    val keyAlias: String?
+}

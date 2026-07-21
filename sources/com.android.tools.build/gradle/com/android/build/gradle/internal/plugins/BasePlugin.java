@@ -64,17 +64,16 @@ import com.android.build.gradle.internal.ide.NativeModelBuilder;
 import com.android.build.gradle.internal.ide.dependencies.LibraryDependencyCacheBuildService;
 import com.android.build.gradle.internal.ide.dependencies.MavenCoordinatesCacheBuildService;
 import com.android.build.gradle.internal.ide.v2.GlobalLibraryBuildService;
+import com.android.build.gradle.internal.profile.AnalyticsConfiguratorService;
+import com.android.build.gradle.internal.profile.AnalyticsService;
 import com.android.build.gradle.internal.profile.AnalyticsUtil;
-import com.android.build.gradle.internal.profile.ProfileAgent;
-import com.android.build.gradle.internal.profile.ProfilerInitializer;
-import com.android.build.gradle.internal.profile.RecordingBuildListener;
 import com.android.build.gradle.internal.res.Aapt2FromMaven;
 import com.android.build.gradle.internal.scope.BuildFeatureValues;
 import com.android.build.gradle.internal.scope.DelayedActionsExecutor;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.services.Aapt2DaemonBuildService;
 import com.android.build.gradle.internal.services.Aapt2ThreadPoolBuildService;
-import com.android.build.gradle.internal.services.Aapt2WorkersBuildService;
+import com.android.build.gradle.internal.services.ClassesHierarchyBuildService;
 import com.android.build.gradle.internal.services.DslServices;
 import com.android.build.gradle.internal.services.DslServicesImpl;
 import com.android.build.gradle.internal.services.LintClassLoaderBuildService;
@@ -97,9 +96,6 @@ import com.android.build.gradle.tasks.LintBaseTask;
 import com.android.builder.errors.IssueReporter;
 import com.android.builder.errors.IssueReporter.Type;
 import com.android.builder.model.v2.ide.ProjectType;
-import com.android.builder.profile.ProcessProfileWriter;
-import com.android.builder.profile.Recorder;
-import com.android.builder.profile.ThreadRecorder;
 import com.android.sdklib.AndroidTargetHash;
 import com.android.sdklib.SdkVersionInfo;
 import com.android.tools.lint.model.LintModelModuleLoader;
@@ -133,6 +129,7 @@ import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.StopExecutionException;
+import org.gradle.build.event.BuildEventsListenerRegistry;
 import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 
 /** Base class for all Android plugins */
@@ -165,19 +162,23 @@ public abstract class BasePlugin<
 
     private String creator;
 
-    private Recorder threadRecorder;
-
     private boolean hasCreatedTasks = false;
+
+    private AnalyticsConfiguratorService configuratorService;
+
+    @NonNull private final BuildEventsListenerRegistry listenerRegistry;
 
     public BasePlugin(
             @NonNull ToolingModelBuilderRegistry registry,
-            @NonNull SoftwareComponentFactory componentFactory) {
+            @NonNull SoftwareComponentFactory componentFactory,
+            @NonNull BuildEventsListenerRegistry listenerRegistry) {
         ClasspathVerifier.checkClasspathSanity();
         this.registry = registry;
         this.lintModuleLoader = new LintModuleLoader(this, registry);
         this.componentFactory = componentFactory;
         creator = "Android Gradle " + Version.ANDROID_GRADLE_PLUGIN_VERSION;
         NonFinalPluginExpiry.verifyRetirementAge();
+        this.listenerRegistry = listenerRegistry;
     }
 
     @NonNull
@@ -208,8 +209,7 @@ public abstract class BasePlugin<
                             testComponents,
             boolean hasFlavors,
             @NonNull GlobalScope globalScope,
-            @NonNull BaseExtension extension,
-            @NonNull Recorder threadRecorder);
+            @NonNull BaseExtension extension);
 
     protected abstract int getProjectType();
 
@@ -253,6 +253,12 @@ public abstract class BasePlugin<
         System.setProperty("java.awt.headless", "true");
 
         this.project = project;
+
+        new AnalyticsService.RegistrationAction(project).execute();
+
+        configuratorService
+                = new AnalyticsConfiguratorService.RegistrationAction(project).execute().get();
+
         createProjectServices(project);
 
         ProjectOptions projectOptions = projectServices.getProjectOptions();
@@ -270,29 +276,27 @@ public abstract class BasePlugin<
 
         AgpVersionChecker.enforceTheSamePluginVersions(project);
 
-        RecordingBuildListener buildListener = ProfilerInitializer.init(project, projectOptions);
-        ProfileAgent.INSTANCE.register(project.getName(), buildListener);
-        threadRecorder = ThreadRecorder.get();
+        configuratorService.createAnalyticsService(project, listenerRegistry);
 
-        ProcessProfileWriter.getProject(project.getPath())
+        configuratorService.getProjectBuilder(project.getPath())
                 .setAndroidPluginVersion(Version.ANDROID_GRADLE_PLUGIN_VERSION)
                 .setAndroidPlugin(getAnalyticsPluginType())
                 .setPluginGeneration(GradleBuildProject.PluginGeneration.FIRST)
                 .setOptions(AnalyticsUtil.toProto(projectOptions));
 
-        threadRecorder.record(
+        configuratorService.recordBlock(
                 ExecutionType.BASE_PLUGIN_PROJECT_CONFIGURE,
                 project.getPath(),
                 null,
                 this::configureProject);
 
-        threadRecorder.record(
+        configuratorService.recordBlock(
                 ExecutionType.BASE_PLUGIN_PROJECT_BASE_EXTENSION_CREATION,
                 project.getPath(),
                 null,
                 this::configureExtension);
 
-        threadRecorder.record(
+        configuratorService.recordBlock(
                 ExecutionType.BASE_PLUGIN_PROJECT_TASKS_CREATION,
                 project.getPath(),
                 null,
@@ -327,7 +331,6 @@ public abstract class BasePlugin<
         IssueReporter issueReporter = projectServices.getIssueReporter();
 
         new Aapt2ThreadPoolBuildService.RegistrationAction(project, projectOptions).execute();
-        new Aapt2WorkersBuildService.RegistrationAction(project, projectOptions).execute();
         new Aapt2DaemonBuildService.RegistrationAction(project, projectOptions).execute();
         new SyncIssueReporterImpl.GlobalSyncIssueService.RegistrationAction(
                         project, SyncOptions.getModelQueryMode(projectOptions))
@@ -345,6 +348,7 @@ public abstract class BasePlugin<
                         .execute();
 
         new SymbolTableBuildService.RegistrationAction(project, projectOptions).execute();
+        new ClassesHierarchyBuildService.RegistrationAction(project).execute();
 
         projectOptions
                 .getAllOptions()
@@ -438,8 +442,7 @@ public abstract class BasePlugin<
                         extension,
                         variantFactory,
                         variantInputModel,
-                        projectServices,
-                        threadRecorder);
+                        projectServices);
 
         registerModels(
                 registry,
@@ -488,10 +491,18 @@ public abstract class BasePlugin<
                         getProjectTypeV2()));
 
         // Register a builder for the native tooling model
-        NativeModelBuilder nativeModelBuilder =
-                new NativeModelBuilder(
-                        projectServices.getIssueReporter(), globalScope, variantModel);
-        registry.register(nativeModelBuilder);
+
+        if (globalScope.getProjectOptions().get(BooleanOption.ENABLE_V2_NATIVE_MODEL)) {
+            com.android.build.gradle.internal.ide.v2.NativeModelBuilder nativeModelBuilderV2 =
+                    new com.android.build.gradle.internal.ide.v2.NativeModelBuilder(
+                            projectServices.getIssueReporter(), globalScope, variantModel);
+            registry.register(nativeModelBuilderV2);
+        } else {
+            NativeModelBuilder nativeModelBuilder =
+                    new NativeModelBuilder(
+                            projectServices.getIssueReporter(), globalScope, variantModel);
+            registry.register(nativeModelBuilder);
+        }
     }
 
     /** Registers a builder for the custom tooling model. */
@@ -512,7 +523,7 @@ public abstract class BasePlugin<
     }
 
     private void createTasks() {
-        threadRecorder.record(
+        configuratorService.recordBlock(
                 ExecutionType.TASK_MANAGER_CREATE_TASKS,
                 project.getPath(),
                 null,
@@ -527,7 +538,7 @@ public abstract class BasePlugin<
                         p -> {
                             variantInputModel.getSourceSetManager().runBuildableArtifactsActions();
 
-                            threadRecorder.record(
+                            configuratorService.recordBlock(
                                     ExecutionType.BASE_PLUGIN_CREATE_ANDROID_TASKS,
                                     project.getPath(),
                                     null,
@@ -607,14 +618,14 @@ public abstract class BasePlugin<
         extension.disableWrite();
         dslServices.getVariableFactory().disableWrite();
 
-        ProcessProfileWriter.getProject(project.getPath())
+        configuratorService.getProjectBuilder(project.getPath())
                 .setCompileSdk(extension.getCompileSdkVersion())
                 .setBuildToolsVersion(extension.getBuildToolsRevision().toString())
                 .setSplits(AnalyticsUtil.toProto(extension.getSplits()));
 
         String kotlinPluginVersion = getKotlinPluginVersion();
         if (kotlinPluginVersion != null) {
-            ProcessProfileWriter.getProject(project.getPath())
+            configuratorService.getProjectBuilder(project.getPath())
                     .setKotlinPluginVersion(kotlinPluginVersion);
         }
         AnalyticsUtil.recordFirebasePerformancePluginVersion(project);
@@ -635,8 +646,7 @@ public abstract class BasePlugin<
                         variantManager.getTestComponents(),
                         !variantInputModel.getProductFlavors().isEmpty(),
                         globalScope,
-                        extension,
-                        threadRecorder);
+                        extension);
 
         taskManager.createTasks(variantFactory.getVariantType(), buildFeatureValues);
 
@@ -673,6 +683,9 @@ public abstract class BasePlugin<
 
         checkSplitConfiguration();
         variantManager.setHasCreatedTasks(true);
+        for (ComponentInfo<VariantT, VariantPropertiesT> variant : variants) {
+            variant.getProperties().getArtifacts().ensureAllOperationsAreSatisfied();
+        }
         // notify our properties that configuration is over for us.
         GradleProperty.Companion.endOfEvaluation();
     }
@@ -870,6 +883,7 @@ public abstract class BasePlugin<
                         projectOptions,
                         project.getGradle().getSharedServices(),
                         aapt2FromMaven,
+                        project.getGradle().getStartParameter().getMaxWorkerCount(),
                         project::file);
     }
 }

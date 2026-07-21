@@ -21,6 +21,7 @@ import com.android.build.gradle.internal.LoggerWrapper;
 import com.android.build.gradle.internal.component.ComponentCreationConfig;
 import com.android.build.gradle.internal.component.VariantCreationConfig;
 import com.android.build.gradle.internal.coverage.JacocoConfigurations;
+import com.android.build.gradle.internal.profile.AnalyticsService;
 import com.android.build.gradle.internal.profile.ProfileAwareWorkAction;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
@@ -67,6 +68,8 @@ import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.work.Incremental;
 import org.gradle.work.InputChanges;
+import org.gradle.workers.WorkAction;
+import org.gradle.workers.WorkParameters;
 import org.gradle.workers.WorkQueue;
 import org.jacoco.core.instr.Instrumenter;
 import org.jacoco.core.runtime.OfflineInstrumentationAccessGenerator;
@@ -142,17 +145,23 @@ public abstract class JacocoTask extends NewIncrementalTask {
         workQueue.submit(
                 InstrumentDirAction.class,
                 params -> {
-                    params.initializeFromAndroidVariantTask(this);
                     params.getChangesToProcess().set(toProcess);
                     params.getOutput().set(getOutputForDirs().getAsFile());
                 });
     }
 
     private void processJars(InputChanges inputChanges) {
-        Map<File, FileInfo> jarsInfo =
-                getJarsWithIdentity().getMappingState(inputChanges).getJarsInfo();
+        JarsIdentityMapping mappingState = getJarsWithIdentity().getMappingState(inputChanges);
 
-        for (Map.Entry<File, FileInfo> fileToInfo : jarsInfo.entrySet()) {
+        if (mappingState.getReprocessAll()) {
+            try {
+                FileUtils.deleteDirectoryContents(getOutputForJars().get().getAsFile());
+            } catch (IOException ex) {
+                throw new UncheckedIOException(ex);
+            }
+        }
+
+        for (Map.Entry<File, FileInfo> fileToInfo : mappingState.getJarsInfo().entrySet()) {
             FileInfo fileInfo = fileToInfo.getValue();
             if (fileInfo.getHasChanged()) {
                 File instrumentedJar =
@@ -171,7 +180,6 @@ public abstract class JacocoTask extends NewIncrementalTask {
                 workQueue.submit(
                         InstrumentJarAction.class,
                         params -> {
-                            params.initializeFromAndroidVariantTask(this);
                             params.getRoot().set(fileToInfo.getKey());
                             params.getOutput().set(instrumentedJar);
                         });
@@ -256,10 +264,14 @@ public abstract class JacocoTask extends NewIncrementalTask {
         }
     }
 
+    /**
+     * This action is not a {@link ProfileAwareWorkAction} as it is submitted in isolation mode
+     * which is not supported by {@link AnalyticsService}.
+     */
     public abstract static class InstrumentDirAction
-            extends ProfileAwareWorkAction<InstrumentDirAction.Parameters> {
+            implements WorkAction<InstrumentDirAction.Parameters> {
 
-        public abstract static class Parameters extends ProfileAwareWorkAction.Parameters {
+        public abstract static class Parameters implements WorkParameters {
             public abstract MapProperty<Action, List<SerializableChange>> getChangesToProcess();
 
             public abstract Property<File> getOutput();
@@ -270,7 +282,7 @@ public abstract class JacocoTask extends NewIncrementalTask {
                 LoggerWrapper.getLogger(InstrumentDirAction.class);
 
         @Override
-        public void run() {
+        public void execute() {
             Map<Action, List<SerializableChange>> inputs =
                     getParameters().getChangesToProcess().get();
             File outputDir = getParameters().getOutput().get();
@@ -306,9 +318,9 @@ public abstract class JacocoTask extends NewIncrementalTask {
     }
 
     public abstract static class InstrumentJarAction
-            extends ProfileAwareWorkAction<InstrumentJarAction.Parameters> {
+            implements WorkAction<InstrumentJarAction.Parameters> {
 
-        public abstract static class Parameters extends ProfileAwareWorkAction.Parameters {
+        public abstract static class Parameters implements WorkParameters {
             public abstract Property<File> getRoot();
 
             public abstract Property<File> getOutput();
@@ -319,7 +331,7 @@ public abstract class JacocoTask extends NewIncrementalTask {
                 LoggerWrapper.getLogger(InstrumentJarAction.class);
 
         @Override
-        public void run() {
+        public void execute() {
             File inputJar = getParameters().getRoot().get();
             logger.info("Instrumenting jar: " + inputJar.getAbsolutePath());
             File instrumentedJar = getParameters().getOutput().get();

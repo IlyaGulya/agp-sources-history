@@ -17,7 +17,11 @@
 package com.android.build.api.variant.impl
 
 import com.android.build.api.artifact.impl.ArtifactsImpl
+import com.android.build.api.component.analytics.AnalyticsEnabledDynamicFeatureVariantProperties
+import com.android.build.api.component.impl.ApkCreationConfigImpl
 import com.android.build.api.variant.AaptOptions
+import com.android.build.api.variant.AndroidVersion
+import com.android.build.api.variant.ApkPackagingOptions
 import com.android.build.api.variant.DynamicFeatureVariantProperties
 import com.android.build.gradle.internal.component.DynamicFeatureCreationConfig
 import com.android.build.gradle.internal.core.VariantDslInfo
@@ -29,13 +33,18 @@ import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactSco
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType
 import com.android.build.gradle.internal.scope.BuildFeatureValues
 import com.android.build.gradle.internal.scope.GlobalScope
-import com.android.build.gradle.internal.services.VariantPropertiesApiServices
 import com.android.build.gradle.internal.scope.VariantScope
+import com.android.build.gradle.internal.services.ProjectServices
 import com.android.build.gradle.internal.services.TaskCreationServices
+import com.android.build.gradle.internal.services.VariantPropertiesApiServices
 import com.android.build.gradle.internal.tasks.ModuleMetadata
 import com.android.build.gradle.internal.tasks.featuresplit.FeatureSetMetadata
 import com.android.build.gradle.internal.variant.BaseVariantData
 import com.android.build.gradle.internal.variant.VariantPathHelper
+import com.android.builder.dexing.DexingType
+import com.android.builder.model.CodeShrinker
+import com.google.wireless.android.sdk.stats.GradleBuildVariant
+import com.android.build.gradle.options.StringOption
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import javax.inject.Inject
@@ -70,6 +79,8 @@ open class DynamicFeatureVariantPropertiesImpl @Inject constructor(
     globalScope
 ), DynamicFeatureVariantProperties, DynamicFeatureCreationConfig {
 
+    private val delegate by lazy { ApkCreationConfigImpl(this, globalScope, variantDslInfo) }
+
     /*
      * Providers of data coming from the base modules. These are loaded just once and finalized.
      */
@@ -79,9 +90,6 @@ open class DynamicFeatureVariantPropertiesImpl @Inject constructor(
     // ---------------------------------------------------------------------------------------------
     // PUBLIC API
     // ---------------------------------------------------------------------------------------------
-
-    override val debuggable: Boolean
-        get() = variantDslInfo.isDebuggable
 
     override val applicationId: Provider<String> =
         internalServices.providerOf(String::class.java, baseModuleMetadata.map { it.applicationId })
@@ -99,6 +107,14 @@ open class DynamicFeatureVariantPropertiesImpl @Inject constructor(
 
     override val minifiedEnabled: Boolean
         get() = variantDslInfo.isMinifyEnabled
+
+    override val packagingOptions: ApkPackagingOptions by lazy {
+        ApkPackagingOptionsImpl(globalScope.extension.packagingOptions, internalServices)
+    }
+
+    override fun packagingOptions(action: ApkPackagingOptions.() -> Unit) {
+        action.invoke(packagingOptions)
+    }
 
     // ---------------------------------------------------------------------------------------------
     // INTERNAL API
@@ -135,6 +151,17 @@ open class DynamicFeatureVariantPropertiesImpl @Inject constructor(
     }
 
     override val shouldPackageDesugarLibDex: Boolean = false
+    override val debuggable: Boolean
+        get() = delegate.isDebuggable
+
+    override val shouldPackageProfilerDependencies: Boolean = false
+
+    override val advancedProfilingTransforms: List<String>
+        get() {
+            return services.projectOptions[StringOption.IDE_ANDROID_CUSTOM_CLASS_TRANSFORMS]?.split(
+                ","
+            ) ?: emptyList()
+        }
 
     // ---------------------------------------------------------------------------------------------
     // Private stuff
@@ -203,4 +230,32 @@ open class DynamicFeatureVariantPropertiesImpl @Inject constructor(
             it.disallowChanges()
             it.finalizeValueOnRead()
         }
+
+    override val dexingType: DexingType
+        get() = delegate.dexingType
+
+    override val needsMainDexListForBundle: Boolean
+        get() = false
+
+    override fun createUserVisibleVariantPropertiesObject(
+        projectServices: ProjectServices,
+        stats: GradleBuildVariant.Builder
+    ): AnalyticsEnabledDynamicFeatureVariantProperties =
+        projectServices.objectFactory.newInstance(
+            AnalyticsEnabledDynamicFeatureVariantProperties::class.java,
+            this,
+            stats
+        )
+    override val minSdkVersionWithTargetDeviceApi: AndroidVersion
+        get() = delegate.minSdkVersionWithTargetDeviceApi
+
+    override val codeShrinker: CodeShrinker?
+        get() = delegate.getCodeShrinker()
+
+    override fun getNeedsMergedJavaResStream(): Boolean = delegate.getNeedsMergedJavaResStream()
+
+    override fun getJava8LangSupportType(): VariantScope.Java8LangSupport = delegate.getJava8LangSupportType()
+
+    override val needsShrinkDesugarLibrary: Boolean
+        get() = delegate.needsShrinkDesugarLibrary
 }

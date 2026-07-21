@@ -17,7 +17,7 @@
 package com.android.build.gradle.internal.component
 
 import com.android.build.api.variant.AaptOptions
-import com.android.build.api.variant.impl.ResValue
+import com.android.build.api.variant.ApkPackagingOptions
 import org.gradle.api.provider.MapProperty
 
 /**
@@ -40,4 +40,15 @@ interface ApkCreationConfig: ConsumableCreationConfig {
 
     /** If this variant should package desugar_lib DEX in the final APK. */
     val shouldPackageDesugarLibDex: Boolean
+
+    /**
+     * If this variant should package additional dependencies (code and native libraries) needed for
+     * profilers support in the IDE.
+     */
+    val shouldPackageProfilerDependencies: Boolean
+
+    /** List of transforms for profilers support in the IDE. */
+    val advancedProfilingTransforms: List<String>
+
+    override val packagingOptions: ApkPackagingOptions
 }

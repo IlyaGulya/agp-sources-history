@@ -25,12 +25,14 @@ import com.android.build.api.variant.VariantProperties
 import com.android.build.api.variant.impl.VariantImpl
 import com.android.build.api.variant.impl.VariantPropertiesImpl
 import com.android.build.gradle.internal.component.ComponentCreationConfig
+import com.android.build.gradle.internal.component.ConsumableCreationConfig
 import com.android.build.gradle.internal.dependency.AarResourcesCompilerTransform
 import com.android.build.gradle.internal.dependency.AarToClassTransform
 import com.android.build.gradle.internal.dependency.AarTransform
 import com.android.build.gradle.internal.dependency.AlternateCompatibilityRule
 import com.android.build.gradle.internal.dependency.AlternateDisambiguationRule
 import com.android.build.gradle.internal.dependency.AndroidXDependencySubstitution.replaceOldSupportLibraries
+import com.android.build.gradle.internal.dependency.AsmClassesTransform.Companion.registerAsmTransformForComponent
 import com.android.build.gradle.internal.dependency.ClassesDirToClassesTransform
 import com.android.build.gradle.internal.dependency.EnumerateClassesTransform
 import com.android.build.gradle.internal.dependency.ExtractAarTransform
@@ -92,7 +94,12 @@ class DependencyConfigurator(
     fun configureDependencySubstitutions(): DependencyConfigurator {
         // If Jetifier is enabled, replace old support libraries with AndroidX.
         if (globalScope.projectOptions.get(BooleanOption.ENABLE_JETIFIER)) {
-            replaceOldSupportLibraries(project)
+            replaceOldSupportLibraries(
+                project,
+                // Inline the property name for a slight memory improvement (so that the JVM doesn't
+                // create a new string every time this code is executed, which could be many when
+                // there are many subprojects).
+                reasonToReplace = "android.enableJetifier=true")
         }
         return this
     }
@@ -528,6 +535,15 @@ class DependencyConfigurator(
             (variants + testComponents).map { it.properties as ComponentCreationConfig }
 
         val dependencies = project.dependencies
+
+        for (component in allComponents) {
+            registerAsmTransformForComponent(
+                globalScope.project.name,
+                dependencies,
+                component
+            )
+        }
+
         if (globalScope.projectOptions[BooleanOption.ENABLE_DEXING_ARTIFACT_TRANSFORM]) {
             for (artifactConfiguration in getDexingArtifactConfigurations(
                 allComponents
@@ -545,7 +561,8 @@ class DependencyConfigurator(
         if (globalScope.projectOptions[BooleanOption.ENABLE_PROGUARD_RULES_EXTRACTION]) {
             val shrinkers: Set<CodeShrinker> = allComponents
                 .asSequence()
-                .map { it.variantScope.codeShrinker }
+                .filterIsInstance(ConsumableCreationConfig::class.java)
+                .map { it.codeShrinker }
                 .filterNotNull()
                 .toSet()
             for (shrinker in shrinkers) {

@@ -16,10 +16,28 @@
 
 package com.android.build.gradle.internal.component
 
+import com.android.build.gradle.internal.scope.VariantScope
+import com.android.builder.dexing.DexingType
+import com.android.builder.model.CodeShrinker
+
 /**
  * CreationConfig for variants that produces an artifact that is directly install-able to devices
  * like APKs or AABs or used by other projects as a versioned reusable logic like AARs.
  */
 interface ConsumableCreationConfig: VariantCreationConfig {
     val renderscriptTargetApi: Int
+
+    val dexingType: DexingType
+
+    val codeShrinker: CodeShrinker?
+
+    /** Returns whether we need to create a stream from the merged java resources */
+    fun getNeedsMergedJavaResStream(): Boolean
+
+    fun getJava8LangSupportType(): VariantScope.Java8LangSupport
+
+    /**
+     * Returns if we need to shrink desugar lib when desugaring Core Library.
+     */
+    val needsShrinkDesugarLibrary: Boolean
 }

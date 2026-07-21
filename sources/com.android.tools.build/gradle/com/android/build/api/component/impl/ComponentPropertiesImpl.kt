@@ -20,6 +20,7 @@ import com.android.build.api.artifact.impl.ArtifactsImpl
 import com.android.build.api.attributes.ProductFlavorAttr
 import com.android.build.api.component.ComponentIdentity
 import com.android.build.api.component.ComponentProperties
+import com.android.build.api.component.analytics.AnalyticsEnabledComponentProperties
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationParameters
@@ -27,7 +28,6 @@ import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.impl.VariantOutputConfigurationImpl
 import com.android.build.api.variant.impl.VariantOutputImpl
 import com.android.build.api.variant.impl.VariantOutputList
-import com.android.build.api.variant.impl.VariantPropertiesImpl
 import com.android.build.api.variant.impl.baseName
 import com.android.build.api.variant.impl.fullName
 import com.android.build.gradle.api.AndroidSourceSet
@@ -38,6 +38,7 @@ import com.android.build.gradle.internal.component.VariantCreationConfig
 import com.android.build.gradle.internal.core.VariantDslInfo
 import com.android.build.gradle.internal.core.VariantSources
 import com.android.build.gradle.internal.dependency.ArtifactCollectionWithExtraArtifact
+import com.android.build.gradle.internal.dependency.AsmClassesTransform
 import com.android.build.gradle.internal.dependency.VariantDependencies
 import com.android.build.gradle.internal.instrumentation.AsmClassVisitorsFactoryRegistry
 import com.android.build.gradle.internal.pipeline.TransformManager
@@ -49,14 +50,9 @@ import com.android.build.gradle.internal.scope.BuildArtifactSpec.Companion.has
 import com.android.build.gradle.internal.scope.BuildFeatureValues
 import com.android.build.gradle.internal.scope.GlobalScope
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.InternalArtifactType.AIDL_SOURCE_OUTPUT_DIR
-import com.android.build.gradle.internal.scope.InternalArtifactType.COMPILE_AND_RUNTIME_NOT_NAMESPACED_R_CLASS_JAR
-import com.android.build.gradle.internal.scope.InternalArtifactType.COMPILE_R_CLASS_JAR
-import com.android.build.gradle.internal.scope.InternalArtifactType.DATA_BINDING_BASE_CLASS_SOURCE_OUT
-import com.android.build.gradle.internal.scope.InternalArtifactType.DATA_BINDING_TRIGGER
-import com.android.build.gradle.internal.scope.InternalArtifactType.ML_SOURCE_OUT
-import com.android.build.gradle.internal.scope.InternalArtifactType.RENDERSCRIPT_SOURCE_OUTPUT_DIR
+import com.android.build.gradle.internal.scope.InternalArtifactType.*
 import com.android.build.gradle.internal.scope.VariantScope
+import com.android.build.gradle.internal.services.ProjectServices
 import com.android.build.gradle.internal.services.TaskCreationServices
 import com.android.build.gradle.internal.services.VariantPropertiesApiServices
 import com.android.build.gradle.internal.variant.BaseVariantData
@@ -65,14 +61,16 @@ import com.android.build.gradle.options.BooleanOption
 import com.android.builder.compiling.BuildConfigType
 import com.android.builder.core.VariantType
 import com.android.builder.core.VariantTypeImpl
-import com.android.builder.dexing.DexingType
+import com.android.builder.errors.IssueReporter
 import com.android.builder.model.ApiVersion
+import com.android.builder.model.CodeShrinker
 import com.android.utils.FileUtils
 import com.android.utils.appendCapitalized
 import com.google.common.base.Preconditions
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
+import com.google.wireless.android.sdk.stats.GradleBuildVariant
 import org.gradle.api.artifacts.ArtifactCollection
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.attributes.LibraryElements
@@ -128,6 +126,8 @@ abstract class ComponentPropertiesImpl(
     // INTERNAL API
     // ---------------------------------------------------------------------------------------------
 
+    override val asmApiVersion = org.objectweb.asm.Opcodes.ASM7
+
     // this is technically a public API for the Application Variant (only)
     override val outputs: VariantOutputList
         get() = VariantOutputList(variantOutputs.toList())
@@ -156,17 +156,38 @@ abstract class ComponentPropertiesImpl(
     override val description: String
         get() = variantData.description
 
-    override val dexingType: DexingType
-        get() = variantDslInfo.dexingType
-
-    override val needsMainDexList: Boolean
-        get() = dexingType.needsMainDexList
-
     // Resource shrinker expects MergeResources task to have all the resources merged and with
     // overlay rules applied, so we have to go through the MergeResources pipeline in case it's
     // enabled, see b/134766811.
     override val isPrecompileDependenciesResourcesEnabled: Boolean
-        get() = internalServices.projectOptions[BooleanOption.PRECOMPILE_DEPENDENCIES_RESOURCES] && !variantScope.useResourceShrinker()
+        get() = internalServices.projectOptions[BooleanOption.PRECOMPILE_DEPENDENCIES_RESOURCES] &&
+                !useResourceShrinker()
+
+    override val registeredProjectClassesVisitors: List<AsmClassVisitorFactory<*>>
+        get() {
+            return asmClassVisitorsRegistry.projectClassesVisitors.map { it.visitorFactory }
+        }
+
+    override val registeredDependenciesClassesVisitors: List<AsmClassVisitorFactory<*>>
+        get() {
+            return asmClassVisitorsRegistry.dependenciesClassesVisitors.map { it.visitorFactory }
+        }
+
+    override val asmFramesComputationMode: FramesComputationMode
+        get() = asmClassVisitorsRegistry.framesComputationMode
+
+    override val allProjectClassesPostAsmInstrumentation: FileCollection
+        get() =
+            if (registeredProjectClassesVisitors.isNotEmpty()) {
+                services.fileCollection(
+                    artifacts.get(InternalArtifactType.ASM_INSTRUMENTED_PROJECT_CLASSES),
+                    services.fileCollection(
+                        artifacts.get(InternalArtifactType.ASM_INSTRUMENTED_PROJECT_JARS)
+                    ).asFileTree
+                )
+            } else {
+                artifacts.getAllClasses()
+            }
 
     /**
      * Returns the tested variant. This is null for [VariantPropertiesImpl] instances
@@ -194,6 +215,55 @@ abstract class ComponentPropertiesImpl(
         return null
     }
 
+    override fun useResourceShrinker(): Boolean {
+        if (variantType.isForTesting || !variantDslInfo.getPostProcessingOptions().resourcesShrinkingEnabled()) {
+            return false
+        }
+        val newResourceShrinker = globalScope.projectOptions[BooleanOption.ENABLE_NEW_RESOURCE_SHRINKER]
+        if (variantType.isDynamicFeature) {
+            globalScope
+                .dslServices
+                .issueReporter
+                .reportError(
+                        IssueReporter.Type.GENERIC,
+                        "Resource shrinking must be configured for base module.")
+            return false
+        }
+        if (!newResourceShrinker && globalScope.hasDynamicFeatures()) {
+            val message = String.format(
+                "Resource shrinker for multi-apk applications can be enabled via " +
+                        "experimental flag: '%s'.",
+                BooleanOption.ENABLE_NEW_RESOURCE_SHRINKER.propertyName)
+            globalScope
+                    .dslServices
+                    .issueReporter
+                    .reportError(IssueReporter.Type.GENERIC, message)
+            return false
+        }
+        if (variantType.isAar) {
+            globalScope
+                .dslServices
+                .issueReporter
+                .reportError(IssueReporter.Type.GENERIC, "Resource shrinker cannot be used for libraries.")
+            return false
+        }
+        if (codeShrinker == null) {
+            globalScope
+                .dslServices
+                .issueReporter
+                .reportError(
+                        IssueReporter.Type.GENERIC,
+                        "Removing unused resources requires unused code shrinking to be turned on. See "
+                                + "http://d.android.com/r/tools/shrink-resources.html "
+                                + "for more information.")
+            return false
+        }
+        return true
+    }
+
+    open val codeShrinker: CodeShrinker?
+        get() = null
+
     // ---------------------------------------------------------------------------------------------
     // Private stuff
     // ---------------------------------------------------------------------------------------------
@@ -203,8 +273,8 @@ abstract class ComponentPropertiesImpl(
 
     // FIXME make internal
     fun addVariantOutput(
-        variantOutputConfiguration: VariantOutputConfigurationImpl,
-        outputFileName: String? = null
+            variantOutputConfiguration: VariantOutputConfigurationImpl,
+            outputFileName: String? = null
     ): VariantOutputImpl {
 
         return VariantOutputImpl(
@@ -605,17 +675,35 @@ abstract class ComponentPropertiesImpl(
         }
     }
 
-    val asmApiVersion: Int = org.objectweb.asm.Opcodes.ASM7
-
-    fun getRegisteredProjectClassesVisitors(): List<AsmClassVisitorFactory<*>> {
-        return asmClassVisitorsRegistry.projectClassesVisitors.map { it.visitorFactory }
-    }
-
-    fun getRegisteredDependenciesClassesVisitors(): List<AsmClassVisitorFactory<*>> {
-        return asmClassVisitorsRegistry.dependenciesClassesVisitors.map { it.visitorFactory }
-    }
-
-    fun configureAndLockAsmClassesVisitors(objectFactory: ObjectFactory) {
+    override fun configureAndLockAsmClassesVisitors(objectFactory: ObjectFactory) {
         asmClassVisitorsRegistry.configureAndLock(objectFactory, asmApiVersion)
+    }
+
+    abstract fun createUserVisibleVariantPropertiesObject(
+        projectServices: ProjectServices,
+        stats: GradleBuildVariant.Builder
+    ): AnalyticsEnabledComponentProperties
+
+    override fun getDependenciesClassesJarsPostAsmInstrumentation(scope: ArtifactScope): FileCollection {
+        return if (registeredDependenciesClassesVisitors.isNotEmpty()) {
+            variantDependencies.getArtifactFileCollection(
+                ConsumedConfigType.RUNTIME_CLASSPATH,
+                scope,
+                AndroidArtifacts.ArtifactType.ASM_INSTRUMENTED_JARS,
+                AsmClassesTransform.getAttributesForConfig(this)
+            )
+        } else {
+            variantDependencies.getArtifactFileCollection(
+                ConsumedConfigType.RUNTIME_CLASSPATH,
+                scope,
+                AndroidArtifacts.ArtifactType.CLASSES_JAR
+            )
+        }
+    }
+
+    companion object {
+        // String to
+        final val ENABLE_LEGACY_API: String =
+            "Turn on with by putting '${BooleanOption.ENABLE_LEGACY_API.propertyName}=true in gradle.properties'"
     }
 }
