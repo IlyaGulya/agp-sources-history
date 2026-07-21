@@ -1130,7 +1130,10 @@ public final class SdkConstants {
     public static final String TAG_PROPERTY = "property";
     public static final String TAG_PROVIDER = "provider";
     public static final String TAG_PURPOSE = "purpose";
+    // TODO (b/442571488) - Remove once usages in lint are updated.
     public static final String TAG_VALID_PURPOSE = "valid-purpose";
+    public static final String TAG_VALID_SPECIFIC_PURPOSE = "valid-specific-purpose";
+    public static final String TAG_VALID_GENERAL_PURPOSE = "valid-general-purpose";
     public static final String TAG_GRANT_PERMISSION = "grant-uri-permission";
     public static final String TAG_PATH_PERMISSION = "path-permission";
     public static final String TAG_ACTION = "action";
@@ -2957,7 +2960,7 @@ public final class SdkConstants {
     public static final String GRADLE_ANDROID_TEST_API_CONFIGURATION = "androidTestApi";
 
     public static final String GRADLE_ANDROID_TEST_UTIL_CONFIGURATION = "androidTestUtil";
-    public static final String CURRENT_BUILD_TOOLS_VERSION = "35.0.0";
+    public static final String CURRENT_BUILD_TOOLS_VERSION = "36.0.0";
     public static final String SUPPORT_LIB_GROUP_ID = "com.android.support";
     public static final String SUPPORT_LIB_ARTIFACT = "com.android.support:support-v4";
     public static final String DESIGN_LIB_ARTIFACT = "com.android.support:design";
