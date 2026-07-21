@@ -24,6 +24,7 @@ import com.android.SdkConstants.TOOLS_CONFIGURATION_FOLDER
 import com.android.builder.dexing.r8.ClassFileProviderFactory
 import com.android.ide.common.blame.MessageReceiver
 import com.android.tools.r8.ArchiveProgramResourceProvider
+import com.android.tools.r8.AssertionsConfiguration
 import com.android.tools.r8.ClassFileConsumer
 import com.android.tools.r8.CompatProguardCommandBuilder
 import com.android.tools.r8.CompilationMode
@@ -120,6 +121,11 @@ fun runR8(
             r8CommandBuilder
                 .addSpecialLibraryConfiguration(libConfiguration)
                 .setDesugaredLibraryKeepRuleConsumer(StringConsumer.FileConsumer(outputKeepRules!!))
+        }
+        if (toolConfig.isDebuggable) {
+            r8CommandBuilder.addAssertionsConfiguration(
+                AssertionsConfiguration.Builder::enableAllAssertions
+            )
         }
     }
 
