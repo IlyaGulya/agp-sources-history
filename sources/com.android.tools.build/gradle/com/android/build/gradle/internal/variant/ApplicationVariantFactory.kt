@@ -40,8 +40,8 @@ import com.android.build.gradle.internal.scope.TestFixturesBuildFeaturesValuesIm
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.services.ProjectServices
 import com.android.build.gradle.internal.services.TaskCreationServices
-import com.android.build.gradle.internal.services.VariantApiServices
-import com.android.build.gradle.internal.services.VariantPropertiesApiServices
+import com.android.build.gradle.internal.services.VariantBuilderServices
+import com.android.build.gradle.internal.services.VariantServices
 import com.android.build.gradle.internal.tasks.factory.GlobalTaskCreationConfig
 import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.options.ProjectOptions
@@ -67,7 +67,7 @@ class ApplicationVariantFactory(
         globalVariantBuilderConfig: GlobalVariantBuilderConfig,
         componentIdentity: ComponentIdentity,
         variantDslInfo: VariantDslInfo,
-        variantApiServices: VariantApiServices
+        variantBuilderServices: VariantBuilderServices
     ): ApplicationVariantBuilderImpl {
 
         return projectServices
@@ -77,7 +77,7 @@ class ApplicationVariantFactory(
                 globalVariantBuilderConfig,
                 variantDslInfo,
                 componentIdentity,
-                variantApiServices
+                variantBuilderServices
             )
     }
 
@@ -93,7 +93,7 @@ class ApplicationVariantFactory(
         variantScope: VariantScope,
         variantData: BaseVariantData,
         transformManager: TransformManager,
-        variantPropertiesApiServices: VariantPropertiesApiServices,
+        variantServices: VariantServices,
         taskCreationServices: TaskCreationServices,
         globalConfig: GlobalTaskCreationConfig,
         ): ApplicationVariantImpl {
@@ -112,7 +112,7 @@ class ApplicationVariantFactory(
                 variantData,
                 variantBuilder.dependenciesInfo,
                 transformManager,
-                variantPropertiesApiServices,
+                variantServices,
                 taskCreationServices,
                 globalConfig,
             )
@@ -134,16 +134,14 @@ class ApplicationVariantFactory(
 
     override fun createTestFixturesBuildFeatureValues(
         buildFeatures: BuildFeatures,
-        projectOptions: ProjectOptions,
-        androidResourcesEnabled: Boolean
+        projectOptions: ProjectOptions
     ): BuildFeatureValues {
         buildFeatures as? ApplicationBuildFeatures
             ?: throw RuntimeException("buildFeatures not of type ApplicationBuildFeatures")
 
         return TestFixturesBuildFeaturesValuesImpl(
             buildFeatures,
-            projectOptions,
-            androidResourcesEnabled
+            projectOptions
         )
     }
 

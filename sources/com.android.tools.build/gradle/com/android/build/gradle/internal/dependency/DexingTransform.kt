@@ -93,10 +93,7 @@ abstract class BaseDexingTransform<T : BaseDexingTransform.Parameters> : Transfo
     @get:Inject
     abstract val inputChanges: InputChanges
 
-    // Use RELATIVE path sensitivity since we use [FileChange.normalizedPath] to calculate the
-    // derived dex file relative path. This will ensure we find the derived file when deletion is
-    // required. Revert to CLASSPATH once Gradle 7.5 is used : b/224524454 
-    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:PathSensitive(PathSensitivity.NAME_ONLY)
     @get:InputArtifact
     @get:Incremental
     abstract val primaryInput: Provider<FileSystemLocation>
@@ -338,7 +335,7 @@ fun getDexingArtifactConfiguration(creationConfig: ApkCreationConfig): DexingArt
         needsShrinkDesugarLibrary = creationConfig.needsShrinkDesugarLibrary,
         asmTransformedVariant =
             if (creationConfig.dependenciesClassesAreInstrumented) creationConfig.name else null,
-        isCoverageEnabled = creationConfig.variantDslInfo.isTestCoverageEnabled,
+        isAndroidTestCoverageEnabled = creationConfig.variantDslInfo.isAndroidTestCoverageEnabled,
         useTransformInstrumentation =
             creationConfig.services
                 .projectOptions[BooleanOption.ENABLE_JACOCO_TRANSFORM_INSTRUMENTATION]
@@ -352,7 +349,7 @@ data class DexingArtifactConfiguration(
     private val enableCoreLibraryDesugaring: Boolean,
     private val needsShrinkDesugarLibrary: Boolean,
     private val asmTransformedVariant: String?,
-    private val isCoverageEnabled: Boolean,
+    private val isAndroidTestCoverageEnabled: Boolean,
     private val useTransformInstrumentation: Boolean
 ) {
 
@@ -408,7 +405,7 @@ data class DexingArtifactConfiguration(
             // used. These artifacts are the same as CLASSES, CLASSES_JAR and ASM_INSTRUMENTED_JARS,
             // but they have been offline instrumented by Jacoco and include Jacoco dependencies.
             val inputArtifact: AndroidArtifacts.ArtifactType =
-                if (isCoverageEnabled && useTransformInstrumentation) {
+                if (isAndroidTestCoverageEnabled && useTransformInstrumentation) {
                     when {
                         asmTransformedVariant != null ->
                             AndroidArtifacts.ArtifactType.JACOCO_ASM_INSTRUMENTED_JARS

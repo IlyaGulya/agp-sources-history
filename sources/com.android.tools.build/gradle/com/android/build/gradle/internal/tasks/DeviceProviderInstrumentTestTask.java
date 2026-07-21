@@ -130,7 +130,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
         public abstract Property<Boolean> getUnifiedTestPlatform();
 
         @Internal
-        public abstract Property<Boolean> getIsUtpLoggingEnabled();
+        public abstract Property<Level> getUtpLoggingLevel();
 
         @Input
         public abstract Property<Boolean> getShardBetweenDevices();
@@ -212,7 +212,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
                         useOrchestrator,
                         getUninstallIncompatibleApks().get(),
                         utpTestResultListener,
-                        utpLoggingLevel());
+                        getUtpLoggingLevel().get());
             } else {
                 switch (getExecutionEnum().get()) {
                     case ANDROID_TEST_ORCHESTRATOR:
@@ -245,10 +245,6 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
                         throw new AssertionError("Unknown value " + getExecutionEnum().get());
                 }
             }
-        }
-
-        private Level utpLoggingLevel() {
-            return getIsUtpLoggingEnabled().get() ? Level.INFO : Level.OFF;
         }
     }
 
@@ -800,7 +796,9 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
 
             boolean infoLoggingEnabled =
                     Logging.getLogger(DeviceProviderInstrumentTestTask.class).isInfoEnabled();
-            task.getTestRunnerFactory().getIsUtpLoggingEnabled().set(infoLoggingEnabled);
+            task.getTestRunnerFactory()
+                    .getUtpLoggingLevel()
+                    .set(infoLoggingEnabled ? Level.INFO : Level.OFF);
 
             task.getTestRunnerFactory()
                     .getUninstallIncompatibleApks()
@@ -814,13 +812,13 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
                                     (EmulatorSnapshots) testOptions.getEmulatorSnapshots()));
 
             task.getCodeCoverageEnabled()
-                    .set(creationConfig.getVariantDslInfo().isTestCoverageEnabled());
+                    .set(creationConfig.getVariantDslInfo().isAndroidTestCoverageEnabled());
             boolean useJacocoTransformOutputs =
                     creationConfig
                                     .getServices()
                                     .getProjectOptions()
                                     .get(BooleanOption.ENABLE_JACOCO_TRANSFORM_INSTRUMENTATION)
-                            && creationConfig.getVariantDslInfo().isTestCoverageEnabled();
+                            && creationConfig.getVariantDslInfo().isAndroidTestCoverageEnabled();
             task.dependencies =
                     creationConfig
                             .getVariantDependencies()

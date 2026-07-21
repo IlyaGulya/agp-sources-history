@@ -50,8 +50,8 @@ import com.android.build.gradle.internal.scope.TestFixturesBuildFeaturesValuesIm
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.services.ProjectServices;
 import com.android.build.gradle.internal.services.TaskCreationServices;
-import com.android.build.gradle.internal.services.VariantApiServices;
-import com.android.build.gradle.internal.services.VariantPropertiesApiServices;
+import com.android.build.gradle.internal.services.VariantBuilderServices;
+import com.android.build.gradle.internal.services.VariantServices;
 import com.android.build.gradle.internal.tasks.factory.GlobalTaskCreationConfig;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.builder.core.BuilderConstants;
@@ -80,7 +80,7 @@ public class TestVariantFactory
             @NonNull GlobalVariantBuilderConfig globalVariantBuilderConfig,
             @NonNull ComponentIdentity componentIdentity,
             @NonNull VariantDslInfo variantDslInfo,
-            @NonNull VariantApiServices variantApiServices) {
+            @NonNull VariantBuilderServices variantBuilderServices) {
         return projectServices
                 .getObjectFactory()
                 .newInstance(
@@ -88,7 +88,7 @@ public class TestVariantFactory
                         globalVariantBuilderConfig,
                         variantDslInfo,
                         componentIdentity,
-                        variantApiServices);
+                        variantBuilderServices);
     }
 
     @NonNull
@@ -105,7 +105,7 @@ public class TestVariantFactory
             @NonNull VariantScope variantScope,
             @NonNull BaseVariantData variantData,
             @NonNull TransformManager transformManager,
-            @NonNull VariantPropertiesApiServices variantPropertiesApiServices,
+            @NonNull VariantServices variantServices,
             @NonNull TaskCreationServices taskCreationServices,
             @NonNull GlobalTaskCreationConfig globalConfig) {
 
@@ -124,7 +124,7 @@ public class TestVariantFactory
                                 variantScope,
                                 variantData,
                                 transformManager,
-                                variantPropertiesApiServices,
+                                variantServices,
                                 taskCreationServices,
                                 globalConfig);
 
@@ -153,14 +153,11 @@ public class TestVariantFactory
     @NonNull
     @Override
     public BuildFeatureValues createTestFixturesBuildFeatureValues(
-            @NonNull BuildFeatures buildFeatures,
-            @NonNull ProjectOptions projectOptions,
-            boolean androidResourcesEnabled) {
+            @NonNull BuildFeatures buildFeatures, @NonNull ProjectOptions projectOptions) {
         if (buildFeatures instanceof TestBuildFeatures) {
             return new TestFixturesBuildFeaturesValuesImpl(
                     buildFeatures,
                     projectOptions,
-                    androidResourcesEnabled,
                     false /* dataBindingOverride */,
                     false /* mlModelBindingOverride */);
         } else {
@@ -191,7 +188,7 @@ public class TestVariantFactory
             @NonNull TestVariantData variantData,
             @NonNull VariantImpl testedVariant,
             @NonNull TransformManager transformManager,
-            @NonNull VariantPropertiesApiServices variantPropertiesApiServices,
+            @NonNull VariantServices variantServices,
             @NonNull TaskCreationServices taskCreationServices,
             @NonNull GlobalTaskCreationConfig globalConfig) {
         throw new RuntimeException("cannot instantiate unit-test properties in test plugin");
@@ -211,7 +208,7 @@ public class TestVariantFactory
             @NonNull TestVariantData variantData,
             @NonNull VariantImpl testedVariant,
             @NonNull TransformManager transformManager,
-            @NonNull VariantPropertiesApiServices variantPropertiesApiServices,
+            @NonNull VariantServices variantServices,
             @NonNull TaskCreationServices taskCreationServices,
             @NonNull GlobalTaskCreationConfig globalConfig) {
         throw new RuntimeException("cannot instantiate android-test properties in test plugin");

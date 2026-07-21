@@ -347,7 +347,7 @@ public interface AndroidProject {
      *
      * @return the NDK version.
      */
-    @Nullable
+    @NonNull
     String getNdkVersion();
 
     /**

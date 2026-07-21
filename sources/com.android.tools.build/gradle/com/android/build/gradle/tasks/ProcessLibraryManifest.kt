@@ -106,7 +106,7 @@ abstract class ProcessLibraryManifest : ManifestProcessorTask() {
 
     private var isNamespaced = false
 
-    override fun doTaskAction() {
+    override fun doFullTaskAction() {
         workerExecutor.noIsolation().submit(ProcessLibWorkAction::class.java) {
             it.initializeFromAndroidVariantTask(this)
             it.variantName.set(variantName)
@@ -188,18 +188,18 @@ abstract class ProcessLibraryManifest : ManifestProcessorTask() {
                 featureName = null,
                 packageOverride = parameters.namespace.get(),
                 namespace = parameters.namespace.get(),
+                profileable = false,
                 versionCode = null,
                 versionName = null,
                 parameters.minSdkVersion.orNull,
                 parameters.targetSdkVersion.orNull,
                 parameters.maxSdkVersion.orNull,
                 parameters.manifestOutputFile.asFile.get().absolutePath,
-                parameters.aaptFriendlyManifestOutputFile.asFile.orNull?.absolutePath,
-                ManifestMerger2.MergeType.LIBRARY /* outInstantRunManifestLocation */,
-                parameters.manifestPlaceholders.get() /* outInstantAppManifestLocation */,
+                parameters.aaptFriendlyManifestOutputFile.asFile.orNull?.absolutePath /* outInstantRunManifestLocation */,
+                ManifestMerger2.MergeType.LIBRARY /* outInstantAppManifestLocation */,
+                parameters.manifestPlaceholders.get(),
                 optionalFeatures,
-                emptyList(),
-                parameters.reportFile.asFile.get(), LoggerWrapper.getLogger(ProcessLibraryManifest::class.java)
+                emptyList(), parameters.reportFile.asFile.get(), LoggerWrapper.getLogger(ProcessLibraryManifest::class.java)
             )
             val mergedXmlDocument =
                 mergingReport.getMergedXmlDocument(MergingReport.MergedManifestKind.MERGED)

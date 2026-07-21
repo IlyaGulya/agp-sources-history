@@ -1,7 +1,6 @@
 package com.android.aaptcompiler
 
 import java.io.InputStream
-import java.lang.RuntimeException
 import javax.xml.namespace.QName
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLStreamConstants
@@ -97,7 +96,7 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
      * Outlines all inline XML aapt:attr resources, collects all created id resources, and flattens
      * the resulting XMLs to proto.
      */
-    fun process(file: ResourceFile, inputFile: InputStream) {
+    fun process(file: ResourceFile, inputFile: InputStream): Boolean {
         primaryFile = file
 
         var eventReader: XMLEventReader? = null
@@ -108,7 +107,8 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
 
             val documentStart = eventReader.nextEvent()
             if (!documentStart.isStartDocument) {
-                error("Failed to find start of XML from ${blameSource(source)}")
+                logError(blameSource(source), "Failed to find start of XML")
+                return false
             }
 
             var rootStart: XMLEvent? = null
@@ -119,12 +119,12 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
                     break
                 }
             }
-            rootStart ?: return
+            rootStart ?: return true
 
             val builder = XmlResourceBuilder(primaryFile)
             protoBuilders[file] = builder
 
-            processElement(
+            val noError = processElement(
                 rootStart.asStartElement(),
                 eventReader,
                 collectedIds,
@@ -132,10 +132,14 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
                 builder
             )
 
+            if (!noError) {
+                return false
+            }
+
             primaryFile.exportedSymbols.addAll(collectedIds.values.toList().sortedBy { it.name })
 
             xmlResources = protoBuilders.values.map { it.build() }
-                .sortedWith { left, right ->
+                .sortedWith(Comparator { left, right ->
                     when {
                         // The primary file should come first in the result.
                         left === right -> 0
@@ -143,16 +147,24 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
                         right.file.name === primaryFile.name -> 1
                         else -> left.file.name.compareTo(right.file.name)
                     }
-                }
+                })
+
+            return true
+
         } catch (xmlException: XMLStreamException) {
             val message = xmlException.message ?: ""
             if (!message.contains("Premature end of file", true)) {
                 // Having no root is not an error, but any other xml format exception is.
                 throw xmlException
             }
+            return true
         } finally {
             eventReader?.close()
         }
+    }
+
+    private fun logError(source: BlameLogger.Source, message: String) {
+        logger?.error(message, source)
     }
 
     /**
@@ -181,6 +193,7 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
      * @param inheritedNamespaceContext When creating the top element of an extracted <aapt:attr>
      * element, this variable will contain the context for all the xml namespaces that are active in
      * [StartElement] that will need to be flattened to proto.
+     * @return true if and only if the processing of the xml element is successful.
      */
     private fun processElement(
         startElement: StartElement,
@@ -189,7 +202,8 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
         resourceBuilders: MutableMap<ResourceFile, XmlResourceBuilder>,
         currentBuilder: XmlResourceBuilder,
         inheritedNamespaceContext: NamespaceContext? = null
-    ) {
+    ): Boolean {
+
         // If the current start element is an aapt:attr, then either it is the root of the xml or
         // there exist consecutively nested aapt:attr tags. I.e.
         // <ListView>
@@ -201,17 +215,16 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
         // </ListView>
         // Both of these are invalid.
         if (isAaptAttribute(startElement.name)) {
-            val exception = RuntimeException(
-                "${blameSource(source, startElement.location)}: " +
-                        "<aapt:attr> blocks are not allowed as the root of documents, or " +
-                        "as a child element under another <aapt:attr>."
-            )
+            logError(
+                blameSource(source, startElement.location),
+                "<aapt:attr> blocks are not allowed as the root of documents, or " +
+                        "as a child element under another <aapt:attr>.")
             walkToEndOfElement(startElement, eventReader)
-            throw exception
+            return false
         }
 
         // First, gather any new ids in the attributes of the element.
-        gatherIds(startElement, collectedIds)
+        var noError = gatherIds(startElement, collectedIds)
 
         // Add the element to the proto builder.
         val elementName = startElement.name
@@ -277,22 +290,28 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
                 // If the element is a aapt:attr, we need to extract that attr.
                 val elName = nextEvent.asStartElement().name
                 if (isAaptAttribute(elName)) {
-                    outlineAttribute(
-                      currentBuilder,
-                      nextEvent.asStartElement(),
-                      eventReader,
-                      collectedIds,
-                      resourceBuilders
-                    )
+                    if (!outlineAttribute(
+                            currentBuilder,
+                            nextEvent.asStartElement(),
+                            eventReader,
+                            collectedIds,
+                            resourceBuilders
+                        )
+                    ) {
+                        noError = false
+                    }
                 } else {
                     // We're going down a level, so process that element.
-                    processElement(
-                      nextEvent.asStartElement(),
-                      eventReader,
-                      collectedIds,
-                      resourceBuilders,
-                      currentBuilder
-                    )
+                    if (!processElement(
+                            nextEvent.asStartElement(),
+                            eventReader,
+                            collectedIds,
+                            resourceBuilders,
+                            currentBuilder
+                        )
+                    ) {
+                        noError = false
+                    }
                 }
                 continue
             }
@@ -308,6 +327,7 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
 
         // Finally finish element
         currentBuilder.endElement()
+        return noError
     }
 
     /**
@@ -335,16 +355,15 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
         eventReader: XMLEventReader,
         collectedIds: MutableMap<ResourceName, SourcedResourceName>,
         resourceBuilders: MutableMap<ResourceFile, XmlResourceBuilder>
-    ) {
+    ): Boolean {
 
         val nameAttribute = attrElement.getAttributeByName(QName("name"))
         if (nameAttribute == null) {
-            val exception = RuntimeException(
-                "${blameSource(source, attrElement.location)}:" +
-                        "<${attrElement.name}> tag requires the 'name' attribute."
-            )
+            logError(
+                blameSource(source, attrElement.location),
+                "<${attrElement.name}> tag requires the 'name' attribute.")
             walkToEndOfElement(attrElement, eventReader)
-            throw exception
+            return false
         }
 
         val reference = parseXmlAttributeName(nameAttribute.value)
@@ -352,13 +371,12 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
 
         val extractedPackage = transformPackageAlias(attrElement, nameValue.pck!!)
         if (extractedPackage == null) {
-            val exception = RuntimeException(
-                blameSource(source, attrElement.location).toString() +
-                        "Invalid namespace prefix '${nameValue.pck}' " +
-                        "for value of 'name' attribute '$nameValue'."
-            )
+            logError(
+                blameSource(source, attrElement.location),
+                "Invalid namespace prefix '${nameValue.pck}' " +
+                        "for value of 'name' attribute '$nameValue'.")
             walkToEndOfElement(attrElement, eventReader)
-            throw exception
+            return false
         }
 
         // Check whether the namespace is or resource is private in order to properly set the
@@ -380,11 +398,11 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
             collectedIds,
             resourceBuilders,
             parentBuilder.namespaceContext
-        )
+        ) ?: return false
 
         // Check to see if the attribute would overwrite a previously defined one.
         if (parentBuilder.findAttribute(nameValue.entry!!, attrUri) != null) {
-            error("Cannot find attribute ${nameValue.entry}")
+            return false
         }
 
         // Now to add the new attribute to the parent xml element.
@@ -395,6 +413,8 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
             attrElement.location.lineNumber,
             attrElement.location.columnNumber
         )
+
+        return true
     }
 
     private fun isAaptAttribute(elName: QName): Boolean =
@@ -426,14 +446,14 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
         collectedIds: MutableMap<ResourceName, SourcedResourceName>,
         resourceBuilders: MutableMap<ResourceFile, XmlResourceBuilder>,
         namespaceContext: NamespaceContext
-    ): ResourceFile {
+    ): ResourceFile? {
 
         val outputFile = getNextAttrResourceFile(resourceBuilders.size - 1, startElement)
         val outputBuilder = XmlResourceBuilder(outputFile)
 
         resourceBuilders[outputFile] = outputBuilder
 
-        val errors = mutableListOf<String>()
+        var foundError = false
         var foundChild = false
 
         while (eventReader.hasNext()) {
@@ -447,8 +467,10 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
             if (event.isCharacters) {
                 // Non-whitespace text is not allowed as children of a aapt:attr
                 if (!event.asCharacters().isWhiteSpace) {
-                    errors += "${blameSource(source, event.location)}: " +
-                            "Can't extract text into its own resource."
+                    logError(
+                        blameSource(source, event.location),
+                        "Can't extract text into its own resource.")
+                    foundError = true
                 }
                 continue
             }
@@ -456,34 +478,38 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
             if (event.isStartElement) {
                 // An aapt:attr element cannot have more than one element child.
                 if (foundChild) {
-                    errors += "${blameSource(source, event.location)}: " +
-                            "Inline XML resources must have a single root."
+                    logError(
+                        blameSource(source, event.location),
+                        "Inline XML resources must have a single root.")
+                    foundError = true
                     walkToEndOfElement(event.asStartElement(), eventReader)
                     continue
                 }
                 foundChild = true
-                processElement(
-                  event.asStartElement(),
-                  eventReader,
-                  collectedIds,
-                  resourceBuilders,
-                  outputBuilder,
-                  namespaceContext
-                )
+                if (!processElement(
+                        event.asStartElement(),
+                        eventReader,
+                        collectedIds,
+                        resourceBuilders,
+                        outputBuilder,
+                        namespaceContext
+                    )
+                ) {
+                    foundError = true
+                }
             }
 
             // Comments are skipped.
         }
 
         if (!foundChild) {
-            error(
-                "${blameSource(source, startElement.location)}:" +
-                        " No resource to outline. <${startElement.name}> block is empty.")
+            logError(
+                blameSource(source, startElement.location),
+                "No resource to outline. <${startElement.name}> block is empty.")
+            return null
         }
 
-        if (errors.any()) {
-            error(errors.joinToString(separator = ","))
-        }
+        if (foundError) return null
 
         return outputFile
     }
@@ -496,7 +522,9 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
     private fun gatherIds(
         startElement: StartElement,
         collectedIds: MutableMap<ResourceName, SourcedResourceName>
-    ) {
+    ): Boolean {
+        var noError = true
+
         val iterator = startElement.attributes
         while (iterator.hasNext()) {
             val attribute = iterator.next() as Attribute
@@ -507,8 +535,10 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
             val resourceName = parsedRef.reference.name
             if (parsedRef.createNew && resourceName.type == AaptResourceType.ID) {
                 if (!isValidResourceEntryName(resourceName.entry!!)) {
-                    error("${blameSource(source, startElement.location)} " +
-                            "Id '$resourceName' has an invalid entry name '${resourceName.entry}'.")
+                    logError(
+                        blameSource(source, startElement.location),
+                        "Id '$resourceName' has an invalid entry name '${resourceName.entry}'.")
+                    noError = false
                 } else {
                     collectedIds.putIfAbsent(
                         resourceName,
@@ -517,6 +547,7 @@ class XmlProcessor(val source: Source, val logger: BlameLogger?) {
                 }
             }
         }
+        return noError
     }
 
     private fun getNextAttrResourceFile(

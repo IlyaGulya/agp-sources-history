@@ -52,6 +52,7 @@ import com.android.build.gradle.internal.tasks.NewIncrementalTask;
 import com.android.build.gradle.internal.tasks.Workers;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
 import com.android.build.gradle.internal.utils.HasConfigurableValuesKt;
+import com.android.build.gradle.internal.variant.VariantPathHelper;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.SyncOptions;
 import com.android.builder.model.VectorDrawablesOptions;
@@ -76,7 +77,6 @@ import com.android.resources.Density;
 import com.android.utils.FileUtils;
 import com.android.utils.ILogger;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.wireless.android.sdk.stats.GradleBuildProfileSpan;
 import java.io.File;
@@ -94,12 +94,15 @@ import java.util.stream.Collectors;
 import javax.xml.bind.JAXBException;
 import org.gradle.api.GradleException;
 import org.gradle.api.artifacts.ArtifactCollection;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.CacheableTask;
+import org.gradle.api.tasks.Classpath;
+import org.gradle.api.tasks.IgnoreEmptyDirectories;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
@@ -111,6 +114,7 @@ import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.work.FileChange;
+import org.gradle.work.Incremental;
 import org.gradle.work.InputChanges;
 
 @CacheableTask
@@ -147,8 +151,7 @@ public abstract class MergeResources extends NewIncrementalTask {
 
     private ImmutableSet<Flag> flags;
 
-    @Nested
-    public abstract DependencyResourcesComputer getResourcesComputer();
+    DependencyResourcesComputer resourcesComputer;
 
     @Input
     public abstract Property<Boolean> getDataBindingEnabled();
@@ -192,10 +195,41 @@ public abstract class MergeResources extends NewIncrementalTask {
     @Nested
     public abstract Aapt2Input getAapt2();
 
+    @Classpath
+    @InputFiles
+    @Incremental
+    public abstract ConfigurableFileCollection getRawLocalResourcesNoProcessRes();
+
+    @InputFiles
+    @PathSensitive(PathSensitivity.ABSOLUTE)
+    @IgnoreEmptyDirectories
+    @Incremental
+    public abstract ConfigurableFileCollection getRawLocalResourcesProcessRes();
+
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    @IgnoreEmptyDirectories
+    @Incremental
+    public abstract ConfigurableFileCollection getRawLocalResourcesProcessResRelative();
+
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    @Incremental
+    public abstract ConfigurableFileCollection getLibrarySourceSets();
+
+    @InputFiles
+    @Optional
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public abstract DirectoryProperty getGeneratedResDir();
+
     @InputFiles
     @Optional
     @PathSensitive(PathSensitivity.RELATIVE)
     public abstract DirectoryProperty getRenderscriptGeneratedResDir();
+
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public abstract ConfigurableFileCollection getExtraGeneratedResDir();
 
     @NonNull
     private static ResourceCompilationService getResourceProcessor(
@@ -350,7 +384,7 @@ public abstract class MergeResources extends NewIncrementalTask {
      * resources task, if it is then it should be ignored.
      */
     private boolean isFilteredOutLibraryResource(File changedFile) {
-        FileCollection localLibraryResources = getResourcesComputer().getLibrarySourceSets();
+        FileCollection localLibraryResources = getLibrarySourceSets();
         File parentFile = changedFile.getParentFile();
         if (parentFile.getName().startsWith(FD_RES_VALUES)) {
             return false;
@@ -378,17 +412,18 @@ public abstract class MergeResources extends NewIncrementalTask {
         ResourcePreprocessor preprocessor = getPreprocessor();
         File incrementalFolder = getIncrementalFolder().get().getAsFile();
 
-        List<FileChange> thisProjectResourceChanges = new ArrayList<>();
-        for (DependencyResourcesComputer.ResourceSourceSetInput input:
-                getResourcesComputer().getResources().get().values()) {
-            Iterable<FileChange> changes =
-                    changedInputs.getFileChanges(input.getSourceDirectories());
-            Iterables.addAll(thisProjectResourceChanges, changes);
-        }
-
+        ConfigurableFileCollection rawLocalResourcesProcessRes =
+                getRelativePathsEnabled().get()
+                        ? getRawLocalResourcesProcessResRelative()
+                        : getRawLocalResourcesProcessRes();
+        ConfigurableFileCollection rawLocalResources =
+                processResources
+                        ? rawLocalResourcesProcessRes
+                        : getRawLocalResourcesNoProcessRes();
+        Iterable<FileChange> rawResourceChanges = changedInputs.getFileChanges(rawLocalResources);
         Iterable<FileChange> libraryResourceChanges =
-                changedInputs.getFileChanges(getResourcesComputer().getLibrarySourceSets());
-        if (!thisProjectResourceChanges.iterator().hasNext()
+                changedInputs.getFileChanges(getLibrarySourceSets());
+        if (!rawResourceChanges.iterator().hasNext()
                 && !libraryResourceChanges.iterator().hasNext()) {
             return;
         }
@@ -422,7 +457,7 @@ public abstract class MergeResources extends NewIncrementalTask {
             // The incremental process is the following:
             // Loop on all the changed files, find which ResourceSet it belongs to, then ask
             // the resource set to update itself with the new file.
-            for (FileChange entry : thisProjectResourceChanges) {
+            for (FileChange entry : rawResourceChanges) {
                 if (!precompileDependenciesResources
                         || !isFilteredOutLibraryResource(entry.getFile())) {
                     if (!tryUpdateResourceSetsWithChangedFile(merger, entry)) {
@@ -495,8 +530,10 @@ public abstract class MergeResources extends NewIncrementalTask {
             } catch (MergingException mergingException) {
                 merger.cleanBlob(incrementalFolder);
                 throw new ResourceException(mergingException.getMessage(), mergingException);
-            } catch (Exception runTimeException) {
+            } catch (JAXBException | IOException runTimeException) {
                 throw new RuntimeException(runTimeException);
+            } catch (Exception exception) {
+                exception.printStackTrace();
             }
         } finally {
             cleanup();
@@ -742,7 +779,7 @@ public abstract class MergeResources extends NewIncrementalTask {
         // back to full task run. Because the cached ResourceList is modified we don't want
         // to recompute this twice (plus, why recompute it twice anyway?)
         if (processedInputs == null) {
-            processedInputs = getResourcesComputer().compute(
+            processedInputs = resourcesComputer.compute(
                     precompileDependenciesResources,
                     aaptEnv,
                     getRenderscriptGeneratedResDir());
@@ -801,6 +838,12 @@ public abstract class MergeResources extends NewIncrementalTask {
     @Optional
     @OutputFile
     public abstract RegularFileProperty getPublicFile();
+
+    // Synthetic input: the validation flag is set on the resource sets in CreationAction.execute.
+    @Input
+    public boolean isValidateEnabled() {
+        return resourcesComputer.getValidateEnabled();
+    }
 
     // the optional blame output folder for the case where the task generates it.
     @OutputDirectory
@@ -967,6 +1010,7 @@ public abstract class MergeResources extends NewIncrementalTask {
             task.vectorSupportLibraryIsUsed =
                     Boolean.TRUE.equals(vectorDrawablesOptions.getUseSupportLibrary());
 
+            task.resourcesComputer = new DependencyResourcesComputer();
             ArtifactCollection libraryArtifacts =
                     includeDependencies
                             ? creationConfig
@@ -982,15 +1026,25 @@ public abstract class MergeResources extends NewIncrementalTask {
                                             .getArtifacts()
                                             .get(InternalArtifactType.MICRO_APK_RES.INSTANCE));
             task.getSourceSetInputs().initialise(creationConfig, includeDependencies);
+            if (includeDependencies) {
+                task.getLibrarySourceSets()
+                        .setFrom(task.getSourceSetInputs().getLibrarySourceSets());
+            }
+            task.getGeneratedResDir()
+                    .set(
+                            creationConfig
+                                    .getArtifacts()
+                                    .get(InternalArtifactType.GENERATED_RES.INSTANCE));
+            task.getGeneratedResDir().disallowChanges();
 
             task.getRenderscriptGeneratedResDir().set(creationConfig.getArtifacts().get(
                     InternalArtifactType.RENDERSCRIPT_GENERATED_RES.INSTANCE));
             task.getRenderscriptGeneratedResDir().disallowChanges();
 
-            boolean relativeLocalResources = !processResources;
-
-            task.getResourcesComputer().initFromVariantScope(
-                    creationConfig, task.getSourceSetInputs(), microApk, libraryArtifacts, relativeLocalResources);
+            task.getExtraGeneratedResDir()
+                    .setFrom(task.getSourceSetInputs().getExtraGeneratedResDir());
+            task.resourcesComputer.initFromVariantScope(
+                    creationConfig, task.getSourceSetInputs(), microApk, libraryArtifacts);
 
             final BuildFeatureValues features = creationConfig.getBuildFeatures();
             final boolean isDataBindingEnabled = features.getDataBinding();
@@ -1038,6 +1092,23 @@ public abstract class MergeResources extends NewIncrementalTask {
 
             task.dependsOn(creationConfig.getTaskContainer().getResourceGenTask());
 
+            if (processResources) {
+                if (creationConfig.getServices()
+                        .getProjectOptions()
+                        .get(BooleanOption.ENABLE_SOURCE_SET_PATHS_MAP)) {
+                    task.getRawLocalResourcesProcessResRelative()
+                            .setFrom(task.getSourceSetInputs().getResourceSourceSets());
+                } else {
+                    task.getRawLocalResourcesProcessRes()
+                            .setFrom(task.getSourceSetInputs().getResourceSourceSets());
+                }
+            } else {
+                task.getRawLocalResourcesNoProcessRes()
+                        .setFrom(task.getSourceSetInputs().getResourceSourceSets());
+            }
+
+            task.getRawLocalResourcesProcessRes().disallowChanges();
+            task.getRawLocalResourcesNoProcessRes().disallowChanges();
 
             HasConfigurableValuesKt.setDisallowChanges(
                     task.getAapt2ThreadPoolBuildService(),
@@ -1080,17 +1151,20 @@ public abstract class MergeResources extends NewIncrementalTask {
             // resource sets that are outside of the root project directory, so we need to collect
             // the latter set.
             File rootProjectDir = task.getProject().getRootDir();
-            for (DependencyResourcesComputer.ResourceSourceSetInput resourceSourceSet : task.getResourcesComputer()
-                    .getResources()
-                    .get()
-                    .values()) {
-                for (File resDir : resourceSourceSet.getSourceDirectories().getFiles()) {
-                    if (!FileUtils.isFileInDirectory(resDir, rootProjectDir)) {
-                        resourceDirsOutsideRootProjectDir.add(resDir.getCanonicalPath());
-                    }
+            ConfigurableFileCollection rawLocalResourcesProcessRes =
+                    task.getRelativePathsEnabled().get()
+                            ? task.getRawLocalResourcesProcessResRelative()
+                            : task.getRawLocalResourcesProcessRes();
+            ConfigurableFileCollection resourceSourceSets =
+                    task.processResources
+                            ? rawLocalResourcesProcessRes
+                            : task.getRawLocalResourcesNoProcessRes();
+
+            for (File resDir : resourceSourceSets.getFiles()) {
+                if (!FileUtils.isFileInDirectory(resDir, rootProjectDir)) {
+                    resourceDirsOutsideRootProjectDir.add(resDir.getCanonicalPath());
                 }
             }
-
             return resourceDirsOutsideRootProjectDir;
         }
     }

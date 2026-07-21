@@ -275,7 +275,7 @@ abstract class CommonExtensionImpl<
     }
 
     override val dataBinding: DataBindingOptions =
-        dslServices.newInstance(
+        dslServices.newDecoratedInstance(
             DataBindingOptions::class.java,
             Supplier { buildFeatures },
             dslServices
@@ -295,17 +295,6 @@ abstract class CommonExtensionImpl<
 
     override fun defaultConfig(action: DefaultConfigT.() -> Unit) {
         action.invoke(defaultConfig)
-    }
-
-    override val externalNativeBuild: ExternalNativeBuild =
-        dslServices.newInstance(ExternalNativeBuild::class.java, dslServices)
-
-    override fun externalNativeBuild(action: com.android.build.api.dsl.ExternalNativeBuild.() -> Unit) {
-        action.invoke(externalNativeBuild)
-    }
-
-    override fun externalNativeBuild(action: Action<ExternalNativeBuild>) {
-        action.execute(externalNativeBuild)
     }
 
     override val testCoverage: TestCoverage  = dslServices.newInstance(JacocoOptions::class.java)

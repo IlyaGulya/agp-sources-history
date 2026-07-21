@@ -82,7 +82,7 @@ class FullDependencyGraphBuilder(
 
         for (artifact in unvisitedArtifacts) {
             val library = libraryService.getLibrary(artifact)
-            items.add(GraphItemImpl(library.key, null))
+            items.add(GraphItemImpl(library.key, null, listOf()))
         }
 
         return items.toList()
@@ -107,19 +107,7 @@ class FullDependencyGraphBuilder(
             return null
         }
 
-        // ResolvedVariantResult getResolvedVariant() should not return null, but there seems to be
-        // some corner cases when it is null. https://issuetracker.google.com/214259374
-        val variant: ResolvedVariantResult? = dependency.resolvedVariant
-        if (variant == null) {
-            val name = dependency.requested.toString()
-            if (!unresolvedDependencies.containsKey(name)) {
-                unresolvedDependencies[name] = UnresolvedDependencyImpl(
-                    name,
-                    "Internal error: ResolvedVariantResult getResolvedVariant() should not return null. https://issuetracker.google.com/214259374"
-                )
-            }
-            return null
-        }
+        val variant = dependency.resolvedVariant
 
         // check if we already visited this.
         val graphItem = visited[variant]
@@ -188,22 +176,19 @@ class FullDependencyGraphBuilder(
         }
 
         if (library != null) {
-            // Create GraphItem for the library first and add it to cache in order to avoid cycles.
-            // See http://b/232075280.
-            val libraryGraphItem = GraphItemImpl(
+            // create the GraphItem for the library, starting by recursively computing the children
+            val children =
+                    dependency.selected.getDependenciesForVariant(variant).mapNotNull {
+                        handleDependency(it, visited, artifactMap)
+                    }
+
+            return GraphItemImpl(
                 library.key,
-                null
+                null,
+                children
             ).also {
                 visited[variant] = it
             }
-
-            // Now visit children, and add them as dependencies
-            dependency.selected.getDependenciesForVariant(variant).forEach {
-                handleDependency(it, visited, artifactMap)?.let { childGraphItem ->
-                    libraryGraphItem.addDependency(childGraphItem)
-                }
-            }
-            return libraryGraphItem
         }
 
         return null

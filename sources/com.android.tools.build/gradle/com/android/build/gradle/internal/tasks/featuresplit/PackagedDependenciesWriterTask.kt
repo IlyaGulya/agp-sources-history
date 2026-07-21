@@ -18,7 +18,6 @@ package com.android.build.gradle.internal.tasks.featuresplit
 
 import com.android.build.gradle.internal.attributes.VariantAttr
 import com.android.build.gradle.internal.component.VariantCreationConfig
-import com.android.build.gradle.internal.ide.dependencies.getIdString
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ARTIFACT_TYPE
 import com.android.build.gradle.internal.scope.InternalArtifactType
@@ -161,9 +160,9 @@ private inline fun ComponentIdentifier.toIdString(variantProvider: () -> String?
         is ProjectComponentIdentifier -> {
             val variant = variantProvider()
             if (variant == null) {
-                getIdString()
+                projectPath
             } else {
-                "${getIdString()}::${variant}"
+                "$projectPath::$variant"
             }
         }
         is ModuleComponentIdentifier -> "$group:$module"

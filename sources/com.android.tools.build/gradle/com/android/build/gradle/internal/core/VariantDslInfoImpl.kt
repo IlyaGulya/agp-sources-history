@@ -46,16 +46,20 @@ import com.android.build.gradle.internal.dsl.BuildType.PostProcessingConfigurati
 import com.android.build.gradle.internal.dsl.CoreExternalNativeBuildOptions
 import com.android.build.gradle.internal.dsl.CoreNdkOptions
 import com.android.build.gradle.internal.dsl.DefaultConfig
+import com.android.build.gradle.internal.dsl.OptimizationImpl
 import com.android.build.gradle.internal.dsl.SigningConfig
 import com.android.build.gradle.internal.manifest.ManifestDataProvider
+import com.android.build.gradle.internal.profile.ProfilingMode
 import com.android.build.gradle.internal.publishing.VariantPublishingInfo
 import com.android.build.gradle.internal.services.DslServices
-import com.android.build.gradle.internal.services.VariantPropertiesApiServices
+import com.android.build.gradle.internal.services.VariantServices
 import com.android.build.gradle.internal.testFixtures.testFixturesFeatureName
 import com.android.build.gradle.internal.variant.DimensionCombination
 import com.android.build.gradle.options.IntegerOption
+import com.android.build.gradle.options.StringOption
 import com.android.build.gradle.options.Version
 import com.android.builder.core.AbstractProductFlavor
+import com.android.builder.core.BuilderConstants
 import com.android.builder.core.VariantType
 import com.android.builder.dexing.DexingType
 import com.android.builder.dexing.isLegacyMultiDexMode
@@ -108,7 +112,7 @@ open class VariantDslInfoImpl internal constructor(
     val dataProvider: ManifestDataProvider,
     @Deprecated("Only used for merged flavor")
     private val dslServices: DslServices,
-    private val services: VariantPropertiesApiServices,
+    private val services: VariantServices,
     private val buildDirectory: DirectoryProperty,
     override val nativeBuildSystem: VariantManager.NativeBuiltType?,
     override val publishInfo: VariantPublishingInfo?,
@@ -157,8 +161,10 @@ open class VariantDslInfoImpl internal constructor(
     private val mergedNdkConfig = MergedNdkConfig()
     private val mergedExternalNativeBuildOptions =
         MergedExternalNativeBuildOptions()
-    private val mergedJavaCompileOptions = MergedJavaCompileOptions(dslServices)
+    private val mergedJavaCompileOptions =
+        dslServices.newDecoratedInstance(MergedJavaCompileOptions::class.java, dslServices)
     private val mergedAarMetadata = MergedAarMetadata()
+    private val mergedOptimization = MergedOptimization()
 
     init {
         mergeOptions()
@@ -807,13 +813,15 @@ open class VariantDslInfoImpl internal constructor(
 
     override val signingConfig: SigningConfig?
         get() {
-            if (variantType.isDynamicFeature) {
+            if (variantType.isDynamicFeature ||
+                testedVariant?.variantType?.isDynamicFeature == true
+            ) {
                 return null
             }
-            // cast builder.SigningConfig to dsl.SigningConfig because MergedFlavor merges
-            // dsl.SigningConfig of ProductFlavor objects
-            val dslSigningConfig: SigningConfig? =
-                ((buildTypeObj as? ApplicationBuildType)?.signingConfig ?: mergedFlavor.signingConfig) as SigningConfig?
+            val dslSigningConfig =
+                (buildTypeObj as? ApplicationBuildType)?.signingConfig
+                    ?: mergedFlavor.signingConfig
+
             signingConfigOverride?.let {
                 // use enableV1 and enableV2 from the DSL if the override values are null
                 if (it.enableV1Signing == null) {
@@ -827,7 +835,10 @@ open class VariantDslInfoImpl internal constructor(
                 it.enableV4Signing = dslSigningConfig?.enableV4Signing
                 return it
             }
-            return dslSigningConfig
+            if (dslSigningConfig == null && (isProfileable || isDebuggable)) {
+                return extension.signingConfigs.findByName(BuilderConstants.DEBUG) as SigningConfig?
+            }
+            return dslSigningConfig as SigningConfig?
         }
 
     override val isSigningReady: Boolean
@@ -836,8 +847,8 @@ open class VariantDslInfoImpl internal constructor(
             return signingConfig != null && signingConfig.isSigningReady
         }
 
-    override val isTestCoverageEnabled: Boolean
-        get() = buildTypeObj.isTestCoverageEnabled // so far, blindly override the build type placeholders
+    override val isAndroidTestCoverageEnabled: Boolean
+        get() = buildTypeObj.enableAndroidTestCoverage || buildTypeObj.isTestCoverageEnabled
 
     override val isUnitTestCoverageEnabled: Boolean
         get() = buildTypeObj.enableUnitTestCoverage || buildTypeObj.isTestCoverageEnabled
@@ -960,6 +971,11 @@ open class VariantDslInfoImpl internal constructor(
                 { (this as LibraryVariantDimension).aarMetadata }
             )
         }
+        computeMergedOptions(
+            mergedOptimization,
+            { optimization as OptimizationImpl },
+            { optimization as OptimizationImpl }
+        )
     }
 
     override val ndkConfig: MergedNdkConfig
@@ -1163,10 +1179,40 @@ open class VariantDslInfoImpl internal constructor(
         }
 
     override val isDebuggable: Boolean
-        get() = (buildTypeObj as? ApplicationBuildType)?.isDebuggable ?: false
+        get() = ProfilingMode.getProfilingModeType(
+            services.projectOptions[StringOption.PROFILING_MODE]
+        ).isDebuggable
+            ?: (buildTypeObj as? ApplicationBuildType)?.isDebuggable
+            ?: false
 
     override val isEmbedMicroApp: Boolean
         get() = (buildTypeObj as? ApplicationBuildType)?.isEmbedMicroApp ?: false
+
+    override val isProfileable: Boolean
+        get() {
+            val fromProfilingModeOption = ProfilingMode.getProfilingModeType(
+                services.projectOptions[StringOption.PROFILING_MODE]
+            ).isProfileable
+            val fromBuildType = (buildTypeObj as? ApplicationBuildType)?.isProfileable
+            return when {
+                fromProfilingModeOption != null -> {
+                    fromProfilingModeOption
+                }
+                fromBuildType == true && isDebuggable -> {
+                    val projectName = services.projectInfo.name
+                    val message =
+                        ":$projectName build type '${buildTypeObj.name}' can only have debuggable or profileable enabled.\n" +
+                                "Only one of these options can be used at a time.\n" +
+                                "Recommended action: Only set one of debuggable=true and profileable=true.\n"
+                    services.issueReporter.reportWarning(IssueReporter.Type.GENERIC, message)
+                    // Disable profileable when profileable and debuggable are both enabled.
+                    false
+                }
+                else -> {
+                    fromBuildType == true
+                }
+            }
+        }
 
     override val isPseudoLocalesEnabled: Boolean
         get() = buildTypeObj.isPseudoLocalesEnabled
@@ -1218,6 +1264,12 @@ open class VariantDslInfoImpl internal constructor(
 
     override val lintOptions: Lint
         get() = extension.lint
+
+    override val ignoredLibraryKeepRules: Set<String>
+        get() = mergedOptimization.ignoredLibraryKeepRules
+
+    override val ignoreAllLibraryKeepRules: Boolean
+        get() = mergedOptimization.ignoreAllLibraryKeepRules
 
     companion object {
 

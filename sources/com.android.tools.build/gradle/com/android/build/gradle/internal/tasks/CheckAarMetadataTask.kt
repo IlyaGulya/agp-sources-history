@@ -24,7 +24,6 @@ import com.android.build.gradle.internal.component.ComponentCreationConfig
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
-import com.android.build.gradle.internal.ide.dependencies.getIdString
 import com.android.build.gradle.internal.utils.parseTargetHash
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.builder.core.ToolsRevisionUtils
@@ -105,7 +104,7 @@ abstract class CheckAarMetadataTask : NonIncrementalTask() {
                         when (val id = artifact.id.componentIdentifier) {
                             is LibraryBinaryIdentifier -> id.projectPath
                             is ModuleComponentIdentifier -> "${id.group}:${id.module}:${id.version}"
-                            is ProjectComponentIdentifier -> id.getIdString()
+                            is ProjectComponentIdentifier -> id.projectPath
                             else -> id.displayName
                         }
                     )

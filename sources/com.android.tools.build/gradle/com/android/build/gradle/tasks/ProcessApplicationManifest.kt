@@ -30,7 +30,6 @@ import com.android.build.gradle.internal.scope.InternalArtifactType.MANIFEST_MER
 import com.android.build.gradle.internal.scope.InternalArtifactType.NAVIGATION_JSON
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.tasks.manifest.mergeManifests
-import com.android.build.gradle.internal.ide.dependencies.getIdString
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.tasks.ProcessApplicationManifest.CreationAction.ManifestProviderImpl
@@ -103,6 +102,9 @@ abstract class ProcessApplicationManifest : ManifestProcessorTask() {
     @get:Input
     abstract val namespace: Property<String>
 
+    @get:Input
+    abstract val profileable: Property<Boolean>
+
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFiles
     abstract val manifestOverlays: ListProperty<File>
@@ -121,8 +123,7 @@ abstract class ProcessApplicationManifest : ManifestProcessorTask() {
         private set
 
     @Throws(IOException::class)
-
-    override fun doTaskAction() {
+    override fun doFullTaskAction() {
         if (baseModuleDebuggable.isPresent) {
             val isDebuggable = optionalFeatures.get()
                 .contains(Invoker.Feature.DEBUGGABLE)
@@ -154,13 +155,14 @@ abstract class ProcessApplicationManifest : ManifestProcessorTask() {
             featureName.orNull,
             packageOverride.get(),
             namespace.get(),
+            profileable.get(),
             variantOutput.get().versionCode.orNull,
             variantOutput.get().versionName.orNull,
             minSdkVersion.orNull,
             targetSdkVersion.orNull,
             maxSdkVersion.orNull,
-            mergedManifest.get().asFile.absolutePath,
-            null /* aaptFriendlyManifestOutputFile */,
+            mergedManifest.get().asFile.absolutePath /* aaptFriendlyManifestOutputFile */,
+            null /* outAaptSafeManifestLocation */,
             ManifestMerger2.MergeType.APPLICATION,
             manifestPlaceholders.get(),
             optionalFeatures.get().plus(
@@ -418,6 +420,7 @@ abstract class ProcessApplicationManifest : ManifestProcessorTask() {
             }
             task.packageOverride.setDisallowChanges(creationConfig.applicationId)
             task.namespace.setDisallowChanges(creationConfig.namespace)
+            task.profileable.setDisallowChanges(creationConfig.profileable)
             task.manifestPlaceholders.set(creationConfig.manifestPlaceholders)
             task.manifestPlaceholders.disallowChanges()
             task.mainManifest.setDisallowChanges(creationConfig.services.provider(variantSources::mainManifestFilePath))
@@ -471,7 +474,7 @@ abstract class ProcessApplicationManifest : ManifestProcessorTask() {
         @JvmStatic
         fun getArtifactName(artifact: ResolvedArtifactResult): String {
             return when(val id = artifact.id.componentIdentifier) {
-                is ProjectComponentIdentifier -> id.getIdString()
+                is ProjectComponentIdentifier -> id.projectPath
                 is ModuleComponentIdentifier -> "${id.group}:${id.module}:${id.version}"
                 is OpaqueComponentArtifactIdentifier -> id.displayName
                 is ExtraComponentIdentifier -> id.displayName

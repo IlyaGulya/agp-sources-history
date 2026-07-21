@@ -79,7 +79,7 @@ abstract class ProcessMultiApkApplicationManifest: ManifestProcessorTask() {
     @get:OutputDirectory
     abstract val multiApkManifestOutputDirectory: DirectoryProperty
 
-    override fun doTaskAction() {
+    override fun doFullTaskAction() {
         // read the output of the compatible screen manifest.
         val compatibleScreenManifests =
             BuiltArtifactsLoaderImpl().load(compatibleScreensManifest)
@@ -141,13 +141,14 @@ abstract class ProcessMultiApkApplicationManifest: ManifestProcessorTask() {
             null,
             packageOverride = null,
             namespace = namespace.get(),
+            false,
             variantOutput.versionCode.orNull,
             variantOutput.versionName.orNull,
             null,
             null,
             null,
-            mergedManifestOutputFile.absolutePath,
-            null /* aaptFriendlyManifestOutputFile */,
+            mergedManifestOutputFile.absolutePath /* aaptFriendlyManifestOutputFile */,
+            null,
             ManifestMerger2.MergeType.APPLICATION,
             mapOf(),
             listOf(),

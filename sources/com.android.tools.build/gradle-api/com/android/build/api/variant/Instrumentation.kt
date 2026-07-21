@@ -20,11 +20,13 @@ import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationParameters
 import com.android.build.api.instrumentation.InstrumentationScope
+import org.gradle.api.Incubating
 import org.gradle.api.provider.SetProperty
 
 /**
  * Options to register asm class visitors and to configure the instrumentation process.
  */
+@Incubating
 interface Instrumentation {
 
     /**

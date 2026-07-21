@@ -121,7 +121,7 @@ data class ResolvedArtifact internal constructor(
                 MavenCoordinatesImpl.create(
                     stringCachingService = stringCachingService,
                     groupId = "artifacts",
-                    artifactId = componentIdentifier.getIdString(),
+                    artifactId = componentIdentifier.projectPath,
                     version = "unspecified"
                 )
             }

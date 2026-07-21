@@ -148,17 +148,17 @@ class TableExtractor(
   val source: Source,
   val config: ConfigDescription,
   val options: TableExtractorOptions,
-  val logger: BlameLogger) {
+  val logger: BlameLogger?) {
 
-  fun extract(inputFile: InputStream) {
+  fun extract(inputFile: InputStream) : Boolean {
     var eventReader : XMLEventReader? = null
     try {
       eventReader = xmlInputFactory.createXMLEventReader(inputFile)
 
       val documentStart = eventReader.nextEvent()
       if (!documentStart.isStartDocument) {
-        val userReadableSource = logger.getOriginalSource(blameSource(source)).toString().trim()
-        error("Failed to find start of XML $userReadableSource")
+        logError(blameSource(source), "Failed to find start of XML")
+        return false
       }
 
       var rootStart: XMLEvent? = null
@@ -169,28 +169,31 @@ class TableExtractor(
           break
         }
       }
-      rootStart ?: return
+      rootStart ?: return true
 
       val rootName = rootStart.asStartElement().name
       if (rootName.namespaceURI != null && rootName.localPart != "resources") {
-        val userReadableSource = logger.getOriginalSource(blameSource(source)).toString().trim()
-        error(
-            "Root xml element of resource table not labeled 'resources' ($userReadableSource)."
-        )
+        logError(
+          blameSource(source),
+          """Root xml element of resource table not labeled "resources"""")
+        return false
       }
-      extractResourceValues(eventReader)
+
+      return extractResourceValues(eventReader)
     } catch (xmlException: XMLStreamException) {
       if (xmlException.message?.contains("Premature end of file.", true) != true) {
-          // Having no root is not an error, but any other xml format exception is.
-          throw xmlException
+        // Having no root is not an error, but any other xml format exception is.
+        logger?.error("Failed to parse file", blameSource(source), xmlException)
+        throw xmlException
       }
+      return true
     } finally {
       eventReader?.close()
     }
   }
 
   private fun logError(source: BlameLogger.Source, message: String) {
-      logger.error(message, source)
+      logger?.error(message, source)
   }
 
   /**
@@ -203,9 +206,10 @@ class TableExtractor(
    * after the root xml element when this method is invoked. The eventReader will be after the
    * corresponding end element when this method returns.
    */
-  private fun extractResourceValues(eventReader: XMLEventReader) {
+  private fun extractResourceValues(eventReader: XMLEventReader): Boolean {
 
-    val errors = mutableListOf<String>()
+    var error = false
+
     var comment = ""
 
     while (eventReader.hasNext()) {
@@ -219,7 +223,8 @@ class TableExtractor(
       if (event.isCharacters) {
         if (!event.asCharacters().isWhiteSpace) {
           // non-whitespace characters are not allowed here
-          errors += "Plain text is not allowed at ${blameSource(source, event.location)}."
+          logError(blameSource(source, event.location), "%s plain text is not allowed here.")
+          error = true
         }
         continue
       }
@@ -230,8 +235,9 @@ class TableExtractor(
       }
 
       if (!event.isStartElement) {
-        errors +=
-            "Unexpected element type: ${event.eventType}, ${blameSource(source, event.location)}."
+        logError(
+          blameSource(source, event.location), "Unexpected element type: ${event.eventType}")
+        error = true
       }
 
       val element = event.asStartElement()
@@ -259,16 +265,15 @@ class TableExtractor(
       }
 
       if (!extractResource(element, eventReader, parsedResource)) {
-        errors += "Can not extract resource from $parsedResource."
+        error = true
       }
 
       if (!addResourceToTable(parsedResource)) {
-        errors += "Can not add resource ($parsedResource) to table."
+        error = true
       }
     }
-    if (errors.any()) {
-        error(errors.joinToString(separator = ","))
-    }
+
+    return !error
   }
 
   /**
@@ -666,7 +671,7 @@ class TableExtractor(
             logError(blameSource(parsedResource.source), errorMsg)
             return false
           }
-          logger.warning(errorMsg, blameSource(parsedResource.source))
+          logger?.warning(errorMsg, blameSource(parsedResource.source))
         }
       }
     } else if (value is StyledString) {
@@ -2065,6 +2070,7 @@ class TableExtractor(
    * Adds the given parsed resource to the [table] property.
    *
    * @param parsedResource the resource parsed from xml.
+   * @return Whether or not the resource was successfully added to the table.
    */
   private fun addResourceToTable(parsedResource: ParsedResource): Boolean {
     if (parsedResource.visibility != ResourceVisibility.UNDEFINED) {

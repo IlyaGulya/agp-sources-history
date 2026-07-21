@@ -72,6 +72,7 @@ class AvdSnapshotHandler(
         avdName: String,
         emulatorExecutable: File,
         avdLocation: File,
+        emulatorGpuFlag: String,
         logger: ILogger,
         snapshotName: String = "default_boot"
     ): Boolean {
@@ -83,7 +84,7 @@ class AvdSnapshotHandler(
                 "-no-window",
                 "-no-boot-anim",
                 "-gpu",
-                "auto-no-window",
+                emulatorGpuFlag,
                 "-check-snapshot-loadable",
                 snapshotName
             )
@@ -134,6 +135,7 @@ class AvdSnapshotHandler(
         emulatorExecutable: File,
         adbExecutable: File,
         avdLocation: File,
+        emulatorGpuFlag: String,
         logger: ILogger
     ) {
         logger.verbose("Creating snapshot for $avdName")
@@ -149,11 +151,12 @@ class AvdSnapshotHandler(
                 "-id",
                 deviceId,
                 "-gpu",
-                "auto-no-window",
+                emulatorGpuFlag,
             )
         )
         processBuilder.environment()["ANDROID_AVD_HOME"] = avdLocation.absolutePath
         val process = processBuilder.start()
+        var bootCompleted = false
 
         try {
             GrabProcessOutput.grabProcessOutput(
@@ -164,12 +167,17 @@ class AvdSnapshotHandler(
                         line ?: return
                         logger.verbose(line)
                         if (line.contains("boot completed")) {
+                            bootCompleted = true
                             Thread.sleep(WAIT_AFTER_BOOT_MS)
                             closeEmulatorWithId(adbExecutable, process, deviceId, logger)
                         }
                     }
 
-                    override fun err(line: String?) {}
+                    override fun err(line: String?) {
+                        if (!line.isNullOrBlank()) {
+                            logger.info(line)
+                        }
+                    }
                 }
             )
             if (!process.waitFor(DEVICE_BOOT_TIMEOUT_SEC, TimeUnit.SECONDS)) {
@@ -182,9 +190,16 @@ class AvdSnapshotHandler(
                     devices requested. Try running the test again and request fewer devices or
                     fewer shards.
                 """.trimIndent())
-            } else {
-                logger.verbose("Successfully created snapshot for: $avdName")
             }
+            if (!bootCompleted) {
+                error("""
+                    Gradle was not able to complete device setup for: $avdName
+                    The emulator failed to open the managed device to generate the snapshot.
+                    This is because the emulator closed unexpectedly, try updating the emulator and
+                    ensure a device can be run from Android Studio.
+                """.trimIndent())
+            }
+            logger.info("Successfully created snapshot for: $avdName")
         } catch (e: Exception) {
             closeEmulatorWithId(adbExecutable, process, deviceId, logger)
             process.waitFor()

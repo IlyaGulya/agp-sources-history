@@ -23,7 +23,18 @@ import com.android.build.api.component.impl.ApkCreationConfigImpl
 import com.android.build.api.component.impl.TestFixturesImpl
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.extension.impl.VariantApiOperationsRegistrar
-import com.android.build.api.variant.*
+import com.android.build.api.variant.AndroidResources
+import com.android.build.api.variant.AndroidTest
+import com.android.build.api.variant.AndroidVersion
+import com.android.build.api.variant.ApkPackaging
+import com.android.build.api.variant.ApplicationVariant
+import com.android.build.api.variant.Component
+import com.android.build.api.variant.DependenciesInfo
+import com.android.build.api.variant.DependenciesInfoBuilder
+import com.android.build.api.variant.Renderscript
+import com.android.build.api.variant.TestFixtures
+import com.android.build.api.variant.Variant
+import com.android.build.api.variant.VariantBuilder
 import com.android.build.gradle.internal.component.ApplicationCreationConfig
 import com.android.build.gradle.internal.core.VariantDslInfo
 import com.android.build.gradle.internal.core.VariantSources
@@ -35,7 +46,7 @@ import com.android.build.gradle.internal.scope.BuildFeatureValues
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.services.ProjectServices
 import com.android.build.gradle.internal.services.TaskCreationServices
-import com.android.build.gradle.internal.services.VariantPropertiesApiServices
+import com.android.build.gradle.internal.services.VariantServices
 import com.android.build.gradle.internal.tasks.factory.GlobalTaskCreationConfig
 import com.android.build.gradle.internal.variant.BaseVariantData
 import com.android.build.gradle.internal.variant.VariantPathHelper
@@ -44,6 +55,7 @@ import com.android.build.gradle.options.StringOption
 import com.android.builder.dexing.DexingType
 import com.google.wireless.android.sdk.stats.GradleBuildVariant
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 import javax.inject.Inject
 
 open class ApplicationVariantImpl @Inject constructor(
@@ -58,7 +70,7 @@ open class ApplicationVariantImpl @Inject constructor(
     variantData: BaseVariantData,
     dependenciesInfoBuilder: DependenciesInfoBuilder,
     transformManager: TransformManager,
-    internalServices: VariantPropertiesApiServices,
+    internalServices: VariantServices,
     taskCreationServices: TaskCreationServices,
     globalTaskCreationConfig: GlobalTaskCreationConfig,
 ) : VariantImpl(
@@ -154,6 +166,8 @@ open class ApplicationVariantImpl @Inject constructor(
         get() = delegate.isCoreLibraryDesugaringEnabled
     override val debuggable: Boolean
         get() = delegate.isDebuggable
+    override val profileable: Boolean
+        get() = delegate.isProfileable
 
     override val shouldPackageProfilerDependencies: Boolean
         get() = advancedProfilingTransforms.isNotEmpty()
@@ -237,12 +251,11 @@ open class ApplicationVariantImpl @Inject constructor(
 
     // Apps include the jacoco agent if test coverage is enabled
     override val packageJacocoRuntime: Boolean
-        get() = variantDslInfo.isTestCoverageEnabled
+        get() = variantDslInfo.isAndroidTestCoverageEnabled
 
     override val bundleConfig: BundleConfigImpl = BundleConfigImpl(
         CodeTransparencyImpl(
-            global.bundleOptions.codeTransparency.signing,
-        ),
-        internalServices,
+            global.bundleOptions.codeTransparency.signing
+        )
     )
 }

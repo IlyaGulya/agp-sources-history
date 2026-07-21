@@ -18,12 +18,14 @@ package com.android.build.gradle.internal.tasks
 
 import com.android.SdkConstants
 import com.android.SdkConstants.FN_EMULATOR
+import com.android.build.api.component.impl.ComponentImpl
 import com.android.build.gradle.internal.AvdComponentsBuildService
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.SdkComponentsBuildService
 import com.android.build.gradle.internal.component.VariantCreationConfig
 import com.android.build.gradle.internal.computeAbiFromArchitecture
 import com.android.build.gradle.internal.computeAvdName
+import com.android.build.gradle.internal.computeManagedDeviceEmulatorMode
 import com.android.build.gradle.internal.dsl.EmulatorSnapshots
 import com.android.build.gradle.internal.dsl.ManagedVirtualDevice
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
@@ -63,7 +65,7 @@ import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
@@ -113,6 +115,9 @@ abstract class ManagedDeviceInstrumentationTestTask: NonIncrementalTask(), Andro
         @get: Internal
         abstract val utpLoggingLevel: Property<Level>
 
+        @get: Input
+        abstract val emulatorGpuFlag: Property<String>
+
         fun createTestRunner(workerExecutor: WorkerExecutor): ManagedDeviceTestRunner {
 
             Preconditions.checkArgument(
@@ -132,6 +137,7 @@ abstract class ManagedDeviceInstrumentationTestTask: NonIncrementalTask(), Andro
                 retentionConfig.get(),
                 useOrchestrator,
                 testShardsSize.getOrNull(),
+                emulatorGpuFlag.get(),
                 utpLoggingLevel.get()
             )
         }
@@ -185,6 +191,18 @@ abstract class ManagedDeviceInstrumentationTestTask: NonIncrementalTask(), Andro
         description = "Adding this option will display the emulator while testing, instead" +
                 "of running the tests on a headless emulator.")
     fun setDisplayEmulatorOption(value: Boolean) = enableEmulatorDisplay.set(value)
+
+    @get:Classpath
+    @get:Optional
+    abstract val classes: ConfigurableFileCollection
+
+    @get:Classpath
+    @get:Optional
+    abstract val buildConfigClasses: ConfigurableFileCollection
+
+    @get:Classpath
+    @get:Optional
+    abstract val rClasses: ConfigurableFileCollection
 
     override fun getIgnoreFailures(): Boolean {
         return shouldIgnore
@@ -301,7 +319,17 @@ abstract class ManagedDeviceInstrumentationTestTask: NonIncrementalTask(), Andro
         hasFailures = false
     }
 
-    private fun testsFound() = !testData.get().testDirectories.asFileTree.isEmpty
+    /**
+     * Determines if there are any tests to run.
+     *
+     * @return true if there are some tests to run, false otherwise
+     */
+    private fun testsFound(): Boolean {
+        return testData
+            .get()
+            .hasTests(classes, rClasses, buildConfigClasses)
+            .get()
+    }
 
     class CreationAction(
         creationConfig: VariantCreationConfig,
@@ -404,6 +432,10 @@ abstract class ManagedDeviceInstrumentationTestTask: NonIncrementalTask(), Andro
                         .resolveDependencies(task.project.configurations)
             }
 
+            task.testRunnerFactory.emulatorGpuFlag.setDisallowChanges(
+                computeManagedDeviceEmulatorMode(creationConfig.services.projectOptions)
+            )
+
             val infoLoggingEnabled =
                 Logging.getLogger(ManagedDeviceInstrumentationTestTask::class.java).isInfoEnabled()
             task.testRunnerFactory.utpLoggingLevel.set(
@@ -435,6 +467,14 @@ abstract class ManagedDeviceInstrumentationTestTask: NonIncrementalTask(), Andro
                 .findByName(SdkConstants.GRADLE_ANDROID_TEST_UTIL_CONFIGURATION)?.let {
                     task.buddyApks.from(it)
                 }
+
+            task.classes.from(creationConfig.artifacts.getAllClasses())
+            task.classes.disallowChanges()
+            task.buildConfigClasses.from((creationConfig as ComponentImpl).getCompiledBuildConfig())
+            task.buildConfigClasses.disallowChanges()
+            task.rClasses.from((creationConfig as ComponentImpl).getCompiledRClasses(
+                AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH))
+            task.rClasses.disallowChanges()
         }
     }
 }

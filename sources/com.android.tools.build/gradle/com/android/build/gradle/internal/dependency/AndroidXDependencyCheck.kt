@@ -18,7 +18,7 @@ package com.android.build.gradle.internal.dependency
 
 import com.android.build.gradle.internal.dependency.AndroidXDependencySubstitution.COM_ANDROID_DATABINDING_BASELIBRARY
 import com.android.build.gradle.internal.utils.getModuleComponents
-import com.android.build.gradle.internal.utils.getPathToComponent
+import com.android.build.gradle.internal.utils.getPathFromRoot
 import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.options.Version
 import com.android.builder.errors.IssueReporter
@@ -54,13 +54,12 @@ object AndroidXDependencyCheck {
                 return
             }
 
-            val result = resolvableDependencies.resolutionResult
-            val androidXDependencies = result.getModuleComponents {
-                AndroidXDependencySubstitution.isAndroidXDependency("${it.group}:${it.module}:${it.version}")
-            }
-            val configurationDisplayPath = project.getConfigurationDisplayPath(configurationName)
+            val androidXDependencies =
+                    resolvableDependencies.resolutionResult.getModuleComponents {
+                        AndroidXDependencySubstitution.isAndroidXDependency("${it.group}:${it.module}:${it.version}")
+                    }
             val pathsToAndroidXDependencies = androidXDependencies.map {
-                result.getPathToComponent(it).getPathString(configurationDisplayPath)
+                it.getPathFromRoot().getPathString(configurationName)
             }.filterNot {
                 // Ignore databinding-compiler (see bug 179377689)
                 it.contains("androidx.databinding:databinding-compiler:")
@@ -68,12 +67,10 @@ object AndroidXDependencyCheck {
             if (pathsToAndroidXDependencies.isNotEmpty()) {
                 project.extensions.extraProperties.set(issueReported, true)
                 val message =
-                    "Configuration `$configurationDisplayPath` contains AndroidX dependencies," +
-                            " but the `${BooleanOption.USE_ANDROID_X.propertyName}` property is not enabled," +
-                            " which may cause runtime issues.\n" +
-                            "Set `${BooleanOption.USE_ANDROID_X.propertyName}=true` in the `gradle.properties` file and retry.\n" +
-                            "The following AndroidX dependencies are detected:\n" +
-                            pathsToAndroidXDependencies.joinToString("\n")
+                        "Configuration `$configurationName` contains AndroidX dependencies, but the `${BooleanOption.USE_ANDROID_X.propertyName}` property is not enabled, which may cause runtime issues.\n" +
+                                "Set `${BooleanOption.USE_ANDROID_X.propertyName}=true` in the `gradle.properties` file and retry.\n" +
+                                "The following AndroidX dependencies are detected:\n" +
+                                pathsToAndroidXDependencies.joinToString("\n")
                 issueReporter.reportError(
                         ANDROID_X_PROPERTY_NOT_ENABLED,
                         message,
@@ -103,42 +100,30 @@ object AndroidXDependencyCheck {
                 return
             }
 
-            val result = resolvableDependencies.resolutionResult
-            val supportLibDependencies = result.getModuleComponents {
-                val componentId = "${it.group}:${it.module}:${it.version}"
-                AndroidXDependencySubstitution.isLegacySupportLibDependency(componentId)
-                        // com.android.databinding:baseLibrary is an exception (see bug 187448822)
-                        && !componentId.startsWith(COM_ANDROID_DATABINDING_BASELIBRARY)
-            }
+            val supportLibDependencies =
+                    resolvableDependencies.resolutionResult.getModuleComponents {
+                        val componentId = "${it.group}:${it.module}:${it.version}"
+                        AndroidXDependencySubstitution.isLegacySupportLibDependency(componentId)
+                                // com.android.databinding:baseLibrary is an exception (see bug 187448822)
+                                && !componentId.startsWith(COM_ANDROID_DATABINDING_BASELIBRARY)
+                    }
             if (supportLibDependencies.isNotEmpty()) {
                 project.extensions.extraProperties.set(issueReported, true)
-                val configurationDisplayPath =
-                    project.getConfigurationDisplayPath(configurationName)
                 val pathsToSupportLibDependencies = supportLibDependencies.map {
-                    result.getPathToComponent(it).getPathString(configurationDisplayPath)
+                    it.getPathFromRoot().getPathString(configurationName)
                 }
                 val message =
-                    "Your project has set `${BooleanOption.USE_ANDROID_X.propertyName}=true`," +
-                            " but configuration `$configurationDisplayPath` still contains legacy support libraries," +
-                            " which may cause runtime issues.\n" +
-                            "This behavior will not be allowed in Android Gradle plugin ${Version.VERSION_8_0.versionString}.\n" +
-                            "Please use only AndroidX dependencies or set `${BooleanOption.ENABLE_JETIFIER.propertyName}=true` in the `gradle.properties` file to migrate your project to AndroidX (see https://developer.android.com/jetpack/androidx/migrate for more info).\n" +
-                            "The following legacy support libraries are detected:\n" +
-                            pathsToSupportLibDependencies.joinToString("\n")
+                        "Your project has set `${BooleanOption.USE_ANDROID_X.propertyName}=true`, but configuration `$configurationName` still contains legacy support libraries, which may cause runtime issues.\n" +
+                                "This behavior will not be allowed in Android Gradle plugin ${Version.VERSION_8_0.versionString}.\n" +
+                                "Please use only AndroidX dependencies or set `${BooleanOption.ENABLE_JETIFIER.propertyName}=true` in the `gradle.properties` file to migrate your project to AndroidX (see https://developer.android.com/jetpack/androidx/migrate for more info).\n" +
+                                "The following legacy support libraries are detected:\n" +
+                                pathsToSupportLibDependencies.joinToString("\n")
                 issueReporter.reportWarning(
-                    ANDROID_X_PROPERTY_NOT_ENABLED,
-                    message,
-                    pathsToSupportLibDependencies.joinToString(",")
+                        ANDROID_X_PROPERTY_NOT_ENABLED,
+                        message,
+                        pathsToSupportLibDependencies.joinToString(",")
                 )
             }
-        }
-    }
-
-    private fun Project.getConfigurationDisplayPath(configurationName: String): String {
-        return if (project.path == ":") {
-            ":$configurationName"
-        } else {
-            "${project.path}:$configurationName"
         }
     }
 }

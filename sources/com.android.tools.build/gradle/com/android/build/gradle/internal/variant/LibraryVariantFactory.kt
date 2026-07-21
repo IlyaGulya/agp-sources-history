@@ -42,8 +42,8 @@ import com.android.build.gradle.internal.scope.TestFixturesBuildFeaturesValuesIm
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.services.ProjectServices
 import com.android.build.gradle.internal.services.TaskCreationServices
-import com.android.build.gradle.internal.services.VariantApiServices
-import com.android.build.gradle.internal.services.VariantPropertiesApiServices
+import com.android.build.gradle.internal.services.VariantBuilderServices
+import com.android.build.gradle.internal.services.VariantServices
 import com.android.build.gradle.internal.tasks.factory.GlobalTaskCreationConfig
 import com.android.build.gradle.options.ProjectOptions
 import com.android.builder.core.BuilderConstants
@@ -62,7 +62,7 @@ class LibraryVariantFactory(
         globalVariantBuilderConfig: GlobalVariantBuilderConfig,
         componentIdentity: ComponentIdentity,
         variantDslInfo: VariantDslInfo,
-        variantApiServices: VariantApiServices
+        variantBuilderServices: VariantBuilderServices
     ): LibraryVariantBuilderImpl {
         return projectServices
                 .objectFactory
@@ -71,7 +71,7 @@ class LibraryVariantFactory(
                         globalVariantBuilderConfig,
                         variantDslInfo,
                         componentIdentity,
-                        variantApiServices)
+                        variantBuilderServices)
     }
 
     override fun createVariant(
@@ -86,7 +86,7 @@ class LibraryVariantFactory(
         variantScope: VariantScope,
         variantData: BaseVariantData,
         transformManager: TransformManager,
-        variantPropertiesApiServices: VariantPropertiesApiServices,
+        variantServices: VariantServices,
         taskCreationServices: TaskCreationServices,
         globalConfig: GlobalTaskCreationConfig,
         ): LibraryVariantImpl {
@@ -104,7 +104,7 @@ class LibraryVariantFactory(
                         variantScope,
                         variantData,
                         transformManager,
-                        variantPropertiesApiServices,
+                        variantServices,
                         taskCreationServices,
                         globalConfig,
                 )
@@ -130,15 +130,11 @@ class LibraryVariantFactory(
     }
 
     override fun createTestFixturesBuildFeatureValues(
-        buildFeatures: BuildFeatures,
-        projectOptions: ProjectOptions,
-        androidResourcesEnabled: Boolean
-    ): BuildFeatureValues {
+        buildFeatures: BuildFeatures, projectOptions: ProjectOptions): BuildFeatureValues {
         return if (buildFeatures is LibraryBuildFeatures) {
             TestFixturesBuildFeaturesValuesImpl(
                 buildFeatures,
                 projectOptions,
-                androidResourcesEnabled,
                 dataBindingOverride = null,
                 mlModelBindingOverride = null
             )
@@ -165,7 +161,7 @@ class LibraryVariantFactory(
         variantSources: VariantSources,
         paths: VariantPathHelper,
         artifacts: ArtifactsImpl,
-        services: VariantPropertiesApiServices,
+        services: VariantServices,
         taskContainer: MutableTaskContainer
     ): BaseVariantData {
         return LibraryVariantData(

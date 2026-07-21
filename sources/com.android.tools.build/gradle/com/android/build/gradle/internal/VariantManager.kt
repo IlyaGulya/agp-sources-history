@@ -27,7 +27,6 @@ import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.TestedExtension
 import com.android.build.api.extension.impl.VariantApiOperationsRegistrar
 import com.android.build.api.variant.AndroidComponentsExtension
-import com.android.build.api.variant.AndroidTest
 import com.android.build.api.variant.HasAndroidTestBuilder
 import com.android.build.api.variant.HasTestFixturesBuilder
 import com.android.build.api.variant.TestFixtures
@@ -41,7 +40,6 @@ import com.android.build.api.variant.impl.HasTestFixtures
 import com.android.build.api.variant.impl.VariantBuilderImpl
 import com.android.build.api.variant.impl.VariantImpl
 import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.TestedAndroidConfig
 import com.android.build.gradle.internal.api.DefaultAndroidSourceSet
 import com.android.build.gradle.internal.api.ReadOnlyObjectProvider
 import com.android.build.gradle.internal.api.VariantFilter
@@ -51,8 +49,8 @@ import com.android.build.gradle.internal.core.VariantDslInfoBuilder.Companion.co
 import com.android.build.gradle.internal.core.VariantDslInfoBuilder.Companion.getBuilder
 import com.android.build.gradle.internal.core.VariantDslInfoImpl
 import com.android.build.gradle.internal.crash.ExternalApiUsageException
+import com.android.build.gradle.internal.cxx.configure.ninja
 import com.android.build.gradle.internal.dependency.VariantDependenciesBuilder
-import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import com.android.build.gradle.internal.dsl.BuildType
 import com.android.build.gradle.internal.dsl.CommonExtensionImpl
 import com.android.build.gradle.internal.dsl.DefaultConfig
@@ -70,9 +68,9 @@ import com.android.build.gradle.internal.services.DslServices
 import com.android.build.gradle.internal.services.ProjectServices
 import com.android.build.gradle.internal.services.TaskCreationServices
 import com.android.build.gradle.internal.services.TaskCreationServicesImpl
-import com.android.build.gradle.internal.services.VariantApiServices
-import com.android.build.gradle.internal.services.VariantApiServicesImpl
-import com.android.build.gradle.internal.services.VariantPropertiesApiServicesImpl
+import com.android.build.gradle.internal.services.VariantBuilderServices
+import com.android.build.gradle.internal.services.VariantBuilderServicesImpl
+import com.android.build.gradle.internal.services.VariantServicesImpl
 import com.android.build.gradle.internal.services.getBuildService
 import com.android.build.gradle.internal.tasks.factory.GlobalTaskCreationConfig
 import com.android.build.gradle.internal.tasks.factory.GlobalTaskCreationConfigImpl.Companion.toExecutionEnum
@@ -128,8 +126,8 @@ class VariantManager<
     private val projectServices: ProjectServices
 ) {
 
-    private val variantApiServices: VariantApiServices
-    private val variantPropertiesApiServices: VariantPropertiesApiServicesImpl
+    private val variantBuilderServices: VariantBuilderServices
+    private val variantPropertiesApiServices: VariantServicesImpl
     private val taskCreationServices: TaskCreationServices
     private val variantFilter: VariantFilter
     private val variants: MutableList<ComponentInfo<VariantBuilderT, VariantT>> =
@@ -246,7 +244,7 @@ class VariantManager<
         // FIXME we should lock the variant API properties after all the beforeVariants, and
         // before any onVariants to avoid cross access between the two.
         // This means changing the way to run beforeVariants vs onVariants.
-        variantApiServices.lockValues()
+        variantBuilderServices.lockValues()
     }
 
     private val testBuildTypeData: BuildTypeData<BuildType>?
@@ -263,9 +261,10 @@ class VariantManager<
             return testBuildTypeData
         }
 
-    enum class NativeBuiltType { CMAKE, NDK_BUILD }
+    enum class NativeBuiltType { CMAKE, NDK_BUILD, NINJA }
 
     private fun configuredNativeBuilder(): NativeBuiltType? {
+        if (dslExtension.experimentalProperties.ninja.path != null) return NativeBuiltType.NINJA
         if (dslExtension.externalNativeBuild.ndkBuild.path != null) return NativeBuiltType.NDK_BUILD
         if (dslExtension.externalNativeBuild.cmake.path != null) return NativeBuiltType.CMAKE
         return null;
@@ -316,7 +315,7 @@ class VariantManager<
         // create the Variant object so that we can run the action which may interrupt the creation
         // (in case of enabled = false)
         val variantBuilder = variantFactory.createVariantBuilder(
-            globalConfig, componentIdentity, variantDslInfo, variantApiServices,
+            globalConfig, componentIdentity, variantDslInfo, variantBuilderServices,
         )
 
         // now that we have the variant, create the analytics object,
@@ -611,8 +610,7 @@ class VariantManager<
         )
         val testFixturesBuildFeatureValues = variantFactory.createTestFixturesBuildFeatureValues(
             dslExtension.buildFeatures,
-            dslServices.projectOptions,
-            variantDslInfo.testFixtures.androidResources
+            dslServices.projectOptions
         )
 
         val testFixturesComponent = variantFactory.createTestFixtures(
@@ -1142,8 +1140,8 @@ class VariantManager<
     init {
         signingOverride = createSigningOverride()
         variantFilter = VariantFilter(ReadOnlyObjectProvider())
-        variantApiServices = VariantApiServicesImpl(projectServices)
-        variantPropertiesApiServices = VariantPropertiesApiServicesImpl(
+        variantBuilderServices = VariantBuilderServicesImpl(projectServices)
+        variantPropertiesApiServices = VariantServicesImpl(
             projectServices,
             // detects whether we are running the plugin under unit test mode
             forUnitTesting = project.hasProperty("_agp_internal_test_mode_")

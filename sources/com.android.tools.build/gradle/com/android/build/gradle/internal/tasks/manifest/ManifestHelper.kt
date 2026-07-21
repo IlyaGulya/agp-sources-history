@@ -45,6 +45,7 @@ fun mergeManifests(
     featureName: String?,
     packageOverride: String?,
     namespace: String,
+    profileable: Boolean,
     versionCode: Int?,
     versionName: String?,
     minSdkVersion: String?,
@@ -72,11 +73,12 @@ fun mergeManifests(
             .setFeatureName(featureName)
             .addDependencyFeatureNames(dependencyFeatureNames)
             .setNamespace(namespace)
+        val isAppMerge = mergeType == ManifestMerger2.MergeType.APPLICATION
+        val injectProfileable = isAppMerge && profileable
 
-        if (mergeType == ManifestMerger2.MergeType.APPLICATION) {
+        if (isAppMerge) {
             manifestMergerInvoker.withFeatures(ManifestMerger2.Invoker.Feature.REMOVE_TOOLS_DECLARATIONS)
         }
-
 
         if (outAaptSafeManifestLocation != null) {
             manifestMergerInvoker.withFeatures(ManifestMerger2.Invoker.Feature.MAKE_AAPT_SAFE)
@@ -85,7 +87,8 @@ fun mergeManifests(
         setInjectableValues(
             manifestMergerInvoker,
             packageOverride, versionCode, versionName,
-            minSdkVersion, targetSdkVersion, maxSdkVersion
+            minSdkVersion, targetSdkVersion, maxSdkVersion,
+            injectProfileable
         )
 
         val mergingReport = manifestMergerInvoker.merge()
@@ -182,7 +185,8 @@ private fun setInjectableValues(
     versionName: String?,
     minSdkVersion: String?,
     targetSdkVersion: String?,
-    maxSdkVersion: Int?
+    maxSdkVersion: Int?,
+    profileable: Boolean
 ) {
 
     if (packageOverride != null && packageOverride.isNotEmpty()) {
@@ -206,6 +210,9 @@ private fun setInjectableValues(
     }
     if (maxSdkVersion != null) {
         invoker.setOverride(ManifestSystemProperty.MAX_SDK_VERSION, maxSdkVersion.toString())
+    }
+    if (profileable) {
+        invoker.setOverride(ManifestSystemProperty.SHELL, "true")
     }
 }
 

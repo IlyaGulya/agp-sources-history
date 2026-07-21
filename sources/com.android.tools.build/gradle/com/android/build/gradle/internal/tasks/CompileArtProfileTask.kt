@@ -25,8 +25,6 @@ import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.fromDisallowChanges
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.build.gradle.tasks.PackageAndroidArtifact
-import com.android.builder.packaging.DexFileComparator
-import com.android.builder.packaging.DexFileNameSupplier
 import com.android.tools.profgen.ArtProfile
 import com.android.tools.profgen.ArtProfileSerializer
 import com.android.tools.profgen.DexFile
@@ -91,7 +89,6 @@ abstract class CompileArtProfileTask: NonIncrementalTask() {
                 "Merged ${SdkConstants.FN_ART_PROFILE} cannot be parsed successfully."
             )
 
-            val supplier = DexFileNameSupplier()
             val artProfile = ArtProfile(
                     humanReadableProfile,
                     if (parameters.obfuscationMappingFile.isPresent) {
@@ -99,9 +96,8 @@ abstract class CompileArtProfileTask: NonIncrementalTask() {
                     } else {
                         ObfuscationMap.Empty
                     },
-                    //need to rename dex files with sequential numbers the same way [DexIncrementalRenameManager] does
-                    parameters.dexFolders.asFileTree.files.sortedWith(DexFileComparator()).map {
-                        DexFile(it.inputStream(), supplier.get())
+                    parameters.dexFolders.asFileTree.files.map {
+                        DexFile(it)
                     }
             )
             // the P compiler is always used, the server side will transcode if necessary.
@@ -109,9 +105,9 @@ abstract class CompileArtProfileTask: NonIncrementalTask() {
                 artProfile.save(it, ArtProfileSerializer.V0_1_0_P)
             }
 
-            // create the metadata for N and above.
+            // create the metadata.
             parameters.binaryArtProfileMetadataOutputFile.get().asFile.outputStream().use {
-                artProfile.save(it, ArtProfileSerializer.METADATA_FOR_N)
+                artProfile.save(it, ArtProfileSerializer.METADATA_0_0_2)
             }
         }
     }

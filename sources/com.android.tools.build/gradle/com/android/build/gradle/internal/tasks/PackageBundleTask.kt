@@ -21,7 +21,6 @@ import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.artifact.impl.ArtifactsImpl
 import com.android.build.api.dsl.AssetPackBundleExtension
 import com.android.build.api.variant.impl.ApplicationVariantImpl
-import com.android.build.api.variant.impl.MetadataRecord
 import com.android.build.api.variant.impl.getFeatureLevel
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import com.android.build.gradle.internal.profile.ProfileAwareWorkAction
@@ -43,11 +42,9 @@ import com.google.common.collect.ImmutableList
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
-import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -159,9 +156,6 @@ abstract class PackageBundleTask : NonIncrementalTask() {
     @get:Optional
     abstract val binaryArtProfileMetadata: RegularFileProperty
 
-    @get:Nested
-    abstract val metadataFiles: ListProperty<MetadataRecord>
-
     companion object {
         const val MIN_SDK_FOR_SPLITS = 21
     }
@@ -192,13 +186,6 @@ abstract class PackageBundleTask : NonIncrementalTask() {
             it.abiFilters.set(abiFilters)
             it.binaryArtProfiler.set(binaryArtProfile)
             it.binaryArtProfilerMetadata.set(binaryArtProfileMetadata)
-            // work action parameters are not serialized like tasks are, therefore it is not possible
-            // to use @Nested annotated java beans. Therefore, decompose the MetadataRecord into
-            // parts that can be individually serialized by the worker machinery.
-            metadataFiles.get().forEach { metadataRecord ->
-                it.metadataFiles.add(metadataRecord.metadataFile)
-                it.metadataDirectories.add(metadataRecord.directory)
-            }
         }
     }
 
@@ -222,8 +209,6 @@ abstract class PackageBundleTask : NonIncrementalTask() {
         abstract val abiFilters: SetProperty<String>
         abstract val binaryArtProfiler: RegularFileProperty
         abstract val binaryArtProfilerMetadata: RegularFileProperty
-        abstract val metadataFiles: ListProperty<RegularFile>
-        abstract val metadataDirectories: ListProperty<String>
     }
 
     abstract class BundleToolWorkAction : ProfileAwareWorkAction<Params>() {
@@ -345,7 +330,7 @@ abstract class PackageBundleTask : NonIncrementalTask() {
             if (parameters.binaryArtProfiler.isPresent
                 && parameters.binaryArtProfiler.get().asFile.exists()) {
                 command.addMetadataFile(
-                        SdkConstants.FN_BINART_ART_PROFILE_FOLDER_IN_AAB,
+                        SdkConstants.FN_BINART_ART_PROFILE_FOLDER_IN_APK.replace('/', '.'),
                         SdkConstants.FN_BINARY_ART_PROFILE,
                         parameters.binaryArtProfiler.get().asFile.toPath(),
                 )
@@ -354,7 +339,7 @@ abstract class PackageBundleTask : NonIncrementalTask() {
             if (parameters.binaryArtProfilerMetadata.isPresent
                 && parameters.binaryArtProfilerMetadata.get().asFile.exists()) {
                 command.addMetadataFile(
-                    SdkConstants.FN_BINART_ART_PROFILE_FOLDER_IN_AAB,
+                    SdkConstants.FN_BINART_ART_PROFILE_FOLDER_IN_APK.replace('/', '.'),
                     SdkConstants.FN_BINARY_ART_PROFILE_METADATA,
                     parameters.binaryArtProfilerMetadata.get().asFile.toPath(),
                 )
@@ -407,18 +392,6 @@ abstract class PackageBundleTask : NonIncrementalTask() {
                     APP_METADATA_FILE_NAME,
                     parameters.appMetadata.asFile.get().toPath()
             )
-
-            // all metadata files added through the Variant API
-            val directories = parameters.metadataDirectories.get().iterator()
-            parameters.metadataFiles.get().forEach { metadataFile ->
-                metadataFile.asFile.let {
-                    command.addMetadataFile(
-                        directories.next(),
-                        it.name,
-                        it.toPath(),
-                    )
-                }
-            }
 
             command.build().execute()
         }
@@ -497,6 +470,7 @@ abstract class PackageBundleTask : NonIncrementalTask() {
             artifacts.setTaskInputToFinalProduct(
                 InternalArtifactType.ASSET_PACK_BUNDLE, task.assetPackZips
             )
+            task.appMetadata
             task.bundleOptions = assetPackBundle.convert();
             task.compressNativeLibs.setDisallowChanges(true)
             task.assetPackOptionsForAssetPackBundle.set(
@@ -632,9 +606,6 @@ abstract class PackageBundleTask : NonIncrementalTask() {
             }
             task.binaryArtProfile.disallowChanges()
             task.binaryArtProfileMetadata.disallowChanges()
-
-            // Metadata files added through the variant API.
-            task.metadataFiles.setDisallowChanges(creationConfig.bundleConfig.metadataFiles)
         }
     }
 }

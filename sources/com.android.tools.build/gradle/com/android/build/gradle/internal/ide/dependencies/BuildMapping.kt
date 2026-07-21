@@ -18,7 +18,6 @@
 package com.android.build.gradle.internal.ide.dependencies
 
 import com.google.common.collect.ImmutableMap
-import org.gradle.api.artifacts.component.BuildIdentifier
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 import org.gradle.api.invocation.Gradle
 
@@ -41,12 +40,6 @@ fun ProjectComponentIdentifier.getBuildId(
         CURRENT_BUILD_NAME
     else
         build.name]
-}
-
-fun ProjectComponentIdentifier.getIdString(): String {
-    return projectPath.apply {
-        (build as BuildIdentifier?)?.let { plus(":${it.name}") }
-    }
 }
 
 fun Gradle.computeBuildMapping(): BuildMapping {
@@ -85,4 +78,4 @@ fun Gradle.computeBuildMapping(): BuildMapping {
     return builder.build()
 }
 
-val BuildMapping.currentBuild: String? get() = this[CURRENT_BUILD_NAME]
+val BuildMapping.currentBuild: String get() = this[CURRENT_BUILD_NAME]!!

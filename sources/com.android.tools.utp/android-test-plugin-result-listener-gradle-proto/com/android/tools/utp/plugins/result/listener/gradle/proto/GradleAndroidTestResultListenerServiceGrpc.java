@@ -19,7 +19,7 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
  */
 @javax.annotation.Generated(
     value = "by gRPC proto compiler (version 1.21.1)",
-    comments = "Source: gradle_android_test_result_listener.proto")
+    comments = "Source: src/main/proto/gradle_android_test_result_listener.proto")
 public final class GradleAndroidTestResultListenerServiceGrpc {
 
   private GradleAndroidTestResultListenerServiceGrpc() {}

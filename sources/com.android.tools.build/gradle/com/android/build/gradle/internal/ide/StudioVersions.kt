@@ -28,20 +28,11 @@ import org.gradle.api.InvalidUserDataException
 
 /**
  * For AGP 7.0 and above, the minimum version of Studio that is required to open
- * the project is the lower of: the version of Studio released in tandem with this
- * version of AGP (though with a version number from a different scheme); and version
- * 2021.2.1 (Chipmunk), which includes in its sync AndroidExtraModelProviderWorker a
- * check for AGP versions that are too new.
- *
- * Since for all versions from AGP 7.2 onwards this minimum required version is
- * 2021.2.1, this value should not be changed in subsequent AGP/Studio versions.
+ * the project is different from the plugin version itself.
  */
-private val MINIMUM_REQUIRED_STUDIO_VERSION = MajorMinorVersion(2021, 2, 1)
+private val MINIMUM_REQUIRED_STUDIO_VERSION = MajorMinorVersion(2021, 1,1)
 
-/** Throws if the Intellij Android Support plugin version used has a lower major/minor version than each of:
- *  - the current Android Gradle plugin, and
- *  - the version of the Intellij Android Support plugin which performs its own version compatibility check.
- */
+/** Throws if the Intellij Android Support plugin version used has a lower major/minor version than the current Android Gradle plugin */
 fun verifyIDEIsNotOld(projectOptions: ProjectOptions) {
     if (!projectOptions[BooleanOption.ENABLE_STUDIO_VERSION_CHECK]) {
         return

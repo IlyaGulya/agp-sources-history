@@ -257,9 +257,9 @@ interface VariantDslInfo {
      */
     fun getResValues(): Map<ResValue.Key, ResValue>
 
-    val isTestCoverageEnabled: Boolean
-
     val isUnitTestCoverageEnabled: Boolean
+
+    val isAndroidTestCoverageEnabled: Boolean
 
     /**
      * Returns the merged manifest placeholders. All product flavors are merged first, then build
@@ -316,6 +316,8 @@ interface VariantDslInfo {
 
     val isEmbedMicroApp: Boolean
 
+    val isProfileable: Boolean
+
     val isPseudoLocalesEnabled: Boolean
 
     val isCrunchPngs: Boolean?
@@ -342,6 +344,17 @@ interface VariantDslInfo {
     val transforms: List<Transform>
 
     val lintOptions: Lint
+
+    /**
+     * Returns the component ids of those external library dependencies whose keep rules are ignored
+     * when building the project.
+     */
+    val ignoredLibraryKeepRules: Set<String>
+
+    /**
+     * Returns whether to ignore all keep rules from external library dependencies.
+     */
+    val ignoreAllLibraryKeepRules: Boolean
 
     ////////////////////////////////////////////////////////////////////////////////////////
     //  APIs below should only be used at CreationConfig/Variant instantiation time       //

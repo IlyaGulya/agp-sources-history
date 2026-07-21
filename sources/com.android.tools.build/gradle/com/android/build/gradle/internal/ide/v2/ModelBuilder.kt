@@ -68,11 +68,13 @@ import com.android.build.gradle.internal.scope.MutableTaskContainer
 import com.android.build.gradle.internal.services.getBuildService
 import com.android.build.gradle.internal.tasks.AnchorTaskNames
 import com.android.build.gradle.internal.tasks.DeviceProviderInstrumentTestTask
+import com.android.build.gradle.internal.utils.getDesugaredMethods
 import com.android.build.gradle.internal.utils.toImmutableSet
 import com.android.build.gradle.internal.variant.VariantModel
 import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.options.ProjectOptionService
 import com.android.build.gradle.tasks.sync.AbstractVariantModelTask
+import com.android.build.gradle.tasks.sync.AppIdListTask
 import com.android.builder.core.VariantTypeImpl
 import com.android.builder.errors.IssueReporter
 import com.android.builder.model.SyncIssue
@@ -83,6 +85,7 @@ import com.android.builder.model.v2.ide.BasicArtifact
 import com.android.builder.model.v2.ide.BundleInfo
 import com.android.builder.model.v2.ide.CodeShrinker
 import com.android.builder.model.v2.ide.JavaArtifact
+import com.android.builder.model.v2.ide.ProjectType
 import com.android.builder.model.v2.ide.SourceSetContainer
 import com.android.builder.model.v2.ide.TestInfo
 import com.android.builder.model.v2.ide.TestedTargetVariant
@@ -174,13 +177,16 @@ class ModelBuilder<
     }
 
     private fun buildModelVersions(): Versions {
+        val v2Version = VersionImpl(0,1)
         return VersionsImpl(
-            basicAndroidProject = VersionImpl(0, 1),
-            androidProject = VersionImpl(0, 1),
-            androidDsl = VersionImpl(0, 1),
-            variantDependencies = VersionImpl(0, 1),
-            nativeModule = VersionImpl(0, 1),
-            agp = Version.ANDROID_GRADLE_PLUGIN_VERSION
+            agp = Version.ANDROID_GRADLE_PLUGIN_VERSION,
+            versions = mapOf<String, Versions.Version>(
+                Versions.BASIC_ANDROID_PROJECT to v2Version,
+                Versions.ANDROID_PROJECT to v2Version,
+                Versions.ANDROID_DSL to v2Version,
+                Versions.VARIANT_DEPENDENCIES to v2Version,
+                Versions.NATIVE_MODULE to v2Version,
+            )
         )
     }
 
@@ -358,6 +364,18 @@ class ModelBuilder<
             createVariant(it, instantAppResultMap)
         }
 
+        val modelSyncFiles = if (variantModel.projectType == ProjectType.APPLICATION) {
+            listOf(
+                ModelSyncFileImpl(
+                    ModelSyncFile.ModelSyncType.APP_ID_LIST,
+                    AppIdListTask.getTaskName(),
+                    variantModel.globalArtifacts.get(InternalArtifactType.APP_ID_LIST_MODEL).get().asFile
+                )
+            )
+        } else {
+            listOf()
+        }
+
         return AndroidProjectImpl(
             namespace = namespace ?: "",
             androidTestNamespace = androidTestNamespace,
@@ -374,6 +392,7 @@ class ModelBuilder<
 
             flags = getFlags(),
             lintChecksJars = getLocalCustomLintChecksForModel(project, variantModel.syncIssueReporter),
+            modelSyncFiles = modelSyncFiles,
         )
     }
     /**
@@ -592,6 +611,13 @@ class ModelBuilder<
             },
             testedTargetVariant = getTestTargetVariant(variant),
             isInstantAppCompatible = inspectManifestForInstantTag(variant, instantAppResultMap),
+            desugaredMethods = getDesugaredMethods(
+                project,
+                variant.isCoreLibraryDesugaringEnabled,
+                variant.minSdkVersionForDexing,
+                variant.global.compileSdkHashString,
+                variant.global.bootClasspath
+            )
         )
     }
 

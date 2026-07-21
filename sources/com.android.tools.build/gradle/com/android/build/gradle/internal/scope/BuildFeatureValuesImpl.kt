@@ -44,24 +44,23 @@ open class BuildFeatureValuesImpl constructor(
 
     override val prefab: Boolean = buildFeatures.prefab ?: false
 
-    override val androidResources: Boolean =  when (buildFeatures) {
+    final override val androidResources: Boolean =  when (buildFeatures) {
         is LibraryBuildFeatures -> buildFeatures.androidResources ?: projectOptions[BooleanOption.BUILD_FEATURE_ANDROID_RESOURCES]
         else -> true
     }
 
-    private val _renderScript = buildFeatures.renderScript ?:
-    projectOptions[BooleanOption.BUILD_FEATURE_RENDERSCRIPT]
-
-    override val renderScript: Boolean
-        get() = androidResources && _renderScript
+    override val renderScript: Boolean =
+        if (androidResources) {
+            buildFeatures.renderScript ?: projectOptions[BooleanOption.BUILD_FEATURE_RENDERSCRIPT]
+        } else {
+            false
+        }
 
     override val resValues: Boolean = buildFeatures.resValues ?: projectOptions[BooleanOption.BUILD_FEATURE_RESVALUES]
 
     override val shaders: Boolean = buildFeatures.shaders ?: projectOptions[BooleanOption.BUILD_FEATURE_SHADERS]
 
-    private val _viewBinding: Boolean = buildFeatures.viewBinding ?: projectOptions[BooleanOption.BUILD_FEATURE_VIEWBINDING]
-    override val viewBinding: Boolean
-        get() = androidResources && _viewBinding
+    override val viewBinding: Boolean = buildFeatures.viewBinding ?: projectOptions[BooleanOption.BUILD_FEATURE_VIEWBINDING]
 
     // ------------------
     // Application flags
@@ -100,7 +99,7 @@ open class BuildFeatureValuesImpl constructor(
         }
         ?: projectOptions[BooleanOption.BUILD_FEATURE_MLMODELBINDING]
 
-    private val _dataBinding = (dataBindingOverride
+    override val dataBinding: Boolean = androidResources && (dataBindingOverride
         ?: when (buildFeatures) {
             is ApplicationBuildFeatures -> {
                 buildFeatures.dataBinding
@@ -114,7 +113,4 @@ open class BuildFeatureValuesImpl constructor(
             else -> null
         }
         ?: projectOptions[BooleanOption.BUILD_FEATURE_DATABINDING])
-
-    override val dataBinding: Boolean
-        get() = androidResources && _dataBinding
 }

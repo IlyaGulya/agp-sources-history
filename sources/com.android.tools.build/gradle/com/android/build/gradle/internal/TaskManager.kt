@@ -326,6 +326,10 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         for (testComponent in testComponents) {
             createTasksForTest(testComponent)
         }
+        createTopLevelTasks(variantType, variantModel)
+    }
+
+    open fun createTopLevelTasks(variantType: VariantType, variantModel: VariantModel) {
         lintTaskManager.createLintTasks(
             variantType,
             variantModel,
@@ -337,7 +341,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
 
         // Create C/C++ configuration, build, and clean tasks
         val androidLocationBuildService: Provider<AndroidLocationsBuildService> =
-                getBuildService(project.gradle.sharedServices)
+            getBuildService(project.gradle.sharedServices)
         createCxxTasks(
             androidLocationBuildService.get(),
             getBuildService<SdkComponentsBuildService>(globalConfig.services.buildServiceRegistry).get(),
@@ -399,6 +403,12 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
             }
         }
         createAssembleTask(variantProperties)
+        if (variantProperties.services.projectOptions.get(BooleanOption.IDE_INVOKED_FROM_IDE)) {
+            variantProperties.taskContainer.assembleTask.configure {
+                it.dependsOn(variantProperties.artifacts.get(InternalArtifactType.VARIANT_MODEL))
+            }
+        }
+
         if (variantType.isBaseModule) {
             createBundleTask(variantProperties)
         }
@@ -532,7 +542,8 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
             taskFactory.register(ExtractAnnotations.CreationAction(testFixturesComponent))
         }
 
-        val instrumented: Boolean = testFixturesComponent.variantDslInfo.isTestCoverageEnabled
+        val instrumented: Boolean =
+            testFixturesComponent.variantDslInfo.isAndroidTestCoverageEnabled
 
         if (instrumented) {
             createJacocoTask(testFixturesComponent)
@@ -1638,8 +1649,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                 test: Task -> test.dependsOn(runTestsTask)
         }
 
-        if (unitTestCreationConfig.isTestCoverageEnabled
-            || unitTestCreationConfig.variantDslInfo.isUnitTestCoverageEnabled) {
+        if (unitTestCreationConfig.variantDslInfo.isUnitTestCoverageEnabled) {
             project.plugins.withType(JacocoPlugin::class.java) {
                 // Jacoco plugin is applied and test coverage enabled, ∴ generate coverage report.
                 taskFactory.register(
@@ -1822,7 +1832,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         taskFactory.configure(
                 CONNECTED_ANDROID_TEST
         ) { connectedAndroidTest: Task -> connectedAndroidTest.dependsOn(connectedTask) }
-        if (testedVariant.variantDslInfo.isTestCoverageEnabled) {
+        if (testedVariant.variantDslInfo.isAndroidTestCoverageEnabled) {
             val jacocoAntConfiguration = JacocoConfigurations.getJacocoAntTaskConfiguration(
                     project, JacocoTask.getJacocoVersion(androidTestProperties))
             val reportTask = taskFactory.register(
@@ -1958,7 +1968,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
 
             // Register a test coverage report generation task to every managedDeviceCheck
             // task.
-            if (testedVariant.variantDslInfo.isTestCoverageEnabled) {
+            if (testedVariant.variantDslInfo.isAndroidTestCoverageEnabled) {
                 val jacocoAntConfiguration = JacocoConfigurations.getJacocoAntTaskConfiguration(
                     project, JacocoTask.getJacocoVersion(androidTestProperties))
                 val reportTask = taskFactory.register(
@@ -2020,21 +2030,11 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
 
         val jacocoTransformEnabled = creationConfig.services
                 .projectOptions[BooleanOption.ENABLE_JACOCO_TRANSFORM_INSTRUMENTATION]
-        val isTestCoverageEnabled =
-            variantDslInfo.isTestCoverageEnabled && !creationConfig.variantType.isForTesting
-
-        // -----------------------------------------------------------------------------------------
-        // The following task registrations MUST follow the order:
-        //   ASM API -> Legacy transforms -> jacoco transforms
-        // -----------------------------------------------------------------------------------------
-
-        maybeCreateTransformClassesWithAsmTask(
-            creationConfig as ComponentImpl,
-            isTestCoverageEnabled
-        )
+        val isAndroidTestCoverageEnabled =
+            variantDslInfo.isAndroidTestCoverageEnabled && !creationConfig.variantType.isForTesting
 
         // Previous (non-gradle-transform) jacoco instrumentation (pre-legacy-transform).
-        if (isTestCoverageEnabled && !jacocoTransformEnabled) {
+        if (isAndroidTestCoverageEnabled && !jacocoTransformEnabled) {
             createJacocoTask(creationConfig)
         }
 
@@ -2042,13 +2042,17 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         val registeredLegacyTransform = addExternalLegacyTransforms(transformManager, creationConfig)
 
         // New gradle-transform jacoco instrumentation support.
-        if (isTestCoverageEnabled && jacocoTransformEnabled) {
+        if (isAndroidTestCoverageEnabled && jacocoTransformEnabled) {
             if (registeredLegacyTransform) {
                 createJacocoTaskWithLegacyTransformSupport(creationConfig)
             } else {
                 createJacocoTask(creationConfig)
             }
         }
+        maybeCreateTransformClassesWithAsmTask(
+            creationConfig as ComponentImpl,
+            isAndroidTestCoverageEnabled
+        )
 
         // Add a task to create merged runtime classes if this is a dynamic-feature,
         // or a base module consuming feature jars. Merged runtime classes are needed if code
@@ -2307,7 +2311,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         val classesFromLegacyTransforms =
             creationConfig.transformManager.getPipelineOutputAsFileCollection(
                 { _, _ -> true},
-                { types, _ -> types.contains(
+                { _, scopes -> scopes == setOf(
                     com.android.build.api.transform.QualifiedContent.DefaultContentType.CLASSES) }
             )
 
@@ -2337,7 +2341,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
 
         val instrumentedClasses: FileCollection =
             if (jacocoTransformEnabled &&
-                creationConfig.variantDslInfo.isTestCoverageEnabled &&
+                creationConfig.variantDslInfo.isAndroidTestCoverageEnabled &&
                     creationConfig !is ApplicationCreationConfig) {
                 // For libraries that can be published,avoid publishing classes
                 // with runtime dependencies on Jacoco.
@@ -2904,7 +2908,8 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                 .assetGenTask =
                 taskFactory.register(creationConfig.computeTaskName("generate", "Assets"))
         if (!creationConfig.variantType.isForTesting
-                && creationConfig.variantDslInfo.isTestCoverageEnabled) {
+                && (creationConfig.variantDslInfo.isAndroidTestCoverageEnabled
+                    || creationConfig.variantDslInfo.isUnitTestCoverageEnabled)) {
             creationConfig
                     .taskContainer
                     .coverageReportTask = taskFactory.register(
@@ -3006,7 +3011,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                     project.dependencies.add("testAnnotationProcessor", dataBindingArtifact)
                 }
             }
-            if ((dataBindingOptions as DataBindingOptions).getAddDefaultAdapters()) {
+            if ((dataBindingOptions as DataBindingOptions).addDefaultAdapters) {
                 val libArtifact =
                         if (useAndroidX)
                             SdkConstants.ANDROIDX_DATA_BINDING_LIB_ARTIFACT

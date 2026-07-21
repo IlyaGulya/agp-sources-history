@@ -119,6 +119,16 @@ enum class StringOption(
     // 30.0.0-beta02
     LINT_VERSION_OVERRIDE("android.experimental.lint.version", ApiStage.Experimental),
 
+    // User-specified flag for using a profileable or debuggable build,
+    // if the flag is not set, the debuggable value will fallback to using the DSL 'debuggable'.
+    PROFILING_MODE("android.experimental.profilingMode", ApiStage.Experimental),
+
+    // User-specified flag to override the emulator gpu mode for Gradle Managed Devices,
+    // If the flag is not set, the emulator gpu mode will default to auto-no-window.
+    // Supported values are "auto", "auto-no-window", "host", "swiftshader_indirect",
+    // "angle_indirect"
+    GRADLE_MANAGED_DEVICE_EMULATOR_GPU_MODE("android.testoptions.manageddevices.emulator.gpu", ApiStage.Experimental),
+
     /* ---------------
      * DEPRECATED APIs
      */

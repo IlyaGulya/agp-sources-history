@@ -105,7 +105,7 @@ public final class SdkConstants {
      * The encoding we strive to use for all files we write.
      *
      * <p>When possible, use the APIs which take a {@link java.nio.charset.Charset} and pass in
-     * {@link com.google.common.base.Charsets#UTF_8} instead of using the String encoding method.
+     * {@link java.nio.charset.StandardCharsets#UTF_8} instead of using the String encoding method.
      */
     public static final String UTF_8 = "UTF-8";
 
@@ -229,8 +229,6 @@ public final class SdkConstants {
     public static final String FN_ART_PROFILE = "baseline-prof.txt";
 
     public static final String FN_BINART_ART_PROFILE_FOLDER_IN_APK = "assets/dexopt";
-    public static final String FN_BINART_ART_PROFILE_FOLDER_IN_AAB =
-            "com.android.tools.build.profiles";
     public static final String FN_BINARY_ART_PROFILE = "baseline.prof";
     public static final String FN_BINARY_ART_PROFILE_METADATA = "baseline.profm";
 

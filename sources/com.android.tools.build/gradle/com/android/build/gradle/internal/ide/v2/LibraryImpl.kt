@@ -44,13 +44,11 @@ data class LibraryImpl private constructor(
         fun createProjectLibrary(
             key: String,
             projectInfo: ProjectInfo,
-            artifactFile: File?,
             lintJar: File?,
         ) = LibraryImpl(
             key = key,
             type = LibraryType.PROJECT,
             projectInfo = projectInfo,
-            artifact = artifactFile,
             lintJar = lintJar,
         )
 

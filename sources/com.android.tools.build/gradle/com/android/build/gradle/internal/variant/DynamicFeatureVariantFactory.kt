@@ -35,8 +35,8 @@ import com.android.build.gradle.internal.scope.TestFixturesBuildFeaturesValuesIm
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.services.ProjectServices
 import com.android.build.gradle.internal.services.TaskCreationServices
-import com.android.build.gradle.internal.services.VariantApiServices
-import com.android.build.gradle.internal.services.VariantPropertiesApiServices
+import com.android.build.gradle.internal.services.VariantBuilderServices
+import com.android.build.gradle.internal.services.VariantServices
 import com.android.build.gradle.internal.tasks.factory.GlobalTaskCreationConfig
 import com.android.build.gradle.options.ProjectOptions
 import com.android.builder.core.VariantTypeImpl
@@ -51,7 +51,7 @@ internal class DynamicFeatureVariantFactory(
         globalVariantBuilderConfig: GlobalVariantBuilderConfig,
         componentIdentity: ComponentIdentity,
         variantDslInfo: VariantDslInfo,
-        variantApiServices: VariantApiServices
+        variantBuilderServices: VariantBuilderServices
     ): DynamicFeatureVariantBuilderImpl {
         return projectServices
             .objectFactory
@@ -60,7 +60,7 @@ internal class DynamicFeatureVariantFactory(
                 globalVariantBuilderConfig,
                 variantDslInfo,
                 componentIdentity,
-                variantApiServices
+                variantBuilderServices
             )
     }
 
@@ -76,7 +76,7 @@ internal class DynamicFeatureVariantFactory(
         variantScope: VariantScope,
         variantData: BaseVariantData,
         transformManager: TransformManager,
-        variantPropertiesApiServices: VariantPropertiesApiServices,
+        variantServices: VariantServices,
         taskCreationServices: TaskCreationServices,
         globalConfig: GlobalTaskCreationConfig,
         ): DynamicFeatureVariantImpl {
@@ -94,7 +94,7 @@ internal class DynamicFeatureVariantFactory(
                 variantScope,
                 variantData,
                 transformManager,
-                variantPropertiesApiServices,
+                variantServices,
                 taskCreationServices,
                 globalConfig,
             )
@@ -119,16 +119,14 @@ internal class DynamicFeatureVariantFactory(
 
     override fun createTestFixturesBuildFeatureValues(
         buildFeatures: BuildFeatures,
-        projectOptions: ProjectOptions,
-        androidResourcesEnabled: Boolean
+        projectOptions: ProjectOptions
     ): BuildFeatureValues {
         buildFeatures as? DynamicFeatureBuildFeatures
             ?: throw RuntimeException("buildFeatures not of type DynamicFeatureBuildFeatures")
 
         return TestFixturesBuildFeaturesValuesImpl(
             buildFeatures,
-            projectOptions,
-            androidResourcesEnabled
+            projectOptions
         )
     }
 
