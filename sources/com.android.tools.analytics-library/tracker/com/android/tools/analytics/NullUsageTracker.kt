@@ -27,6 +27,4 @@ object NullUsageTracker : UsageTrackerWriter() {
   override fun logDetails(logEvent: ClientAnalytics.LogEvent.Builder) {}
 
   override fun close() {}
-
-  override fun flush() {}
 }

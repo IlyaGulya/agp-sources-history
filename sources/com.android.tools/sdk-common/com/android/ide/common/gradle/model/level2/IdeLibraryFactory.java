@@ -21,7 +21,6 @@ import static com.android.builder.model.level2.Library.LIBRARY_MODULE;
 import static com.android.ide.common.gradle.model.IdeLibraries.computeAddress;
 import static com.android.ide.common.gradle.model.IdeLibraries.isLocalAarModule;
 import static com.android.utils.FileUtils.join;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.android.SdkConstants;
 import com.android.annotations.NonNull;
@@ -54,11 +53,6 @@ class IdeLibraryFactory {
                     library.getFolder(),
                     getFullPath(folder, library.getManifest()),
                     getFullPath(folder, library.getJarFile()),
-                    getFullPath(
-                            folder,
-                            checkNotNull(
-                                    defaultValueIfNotPresent(
-                                            library::getCompileJarFile, library.getJarFile()))),
                     getFullPath(folder, library.getResFolder()),
                     library.getResStaticLibrary(),
                     getFullPath(folder, library.getAssetsFolder()),
@@ -119,13 +113,8 @@ class IdeLibraryFactory {
                     androidLibrary.getFolder(),
                     androidLibrary.getManifest().getPath(),
                     androidLibrary.getJarFile().getPath(),
-                    checkNotNull(
-                                    defaultValueIfNotPresent(
-                                            androidLibrary::getCompileJarFile,
-                                            androidLibrary.getJarFile()))
-                            .getPath(),
                     androidLibrary.getResFolder().getPath(),
-                    defaultValueIfNotPresent(androidLibrary::getResStaticLibrary, null),
+                    nullIfNotPresent(androidLibrary::getResStaticLibrary),
                     androidLibrary.getAssetsFolder().getPath(),
                     androidLibrary
                             .getLocalJars()
@@ -159,12 +148,11 @@ class IdeLibraryFactory {
     }
 
     @Nullable
-    protected static <T> T defaultValueIfNotPresent(
-            @NonNull Supplier<T> propertyInvoker, @Nullable T defaultValue) {
+    protected static <T> T nullIfNotPresent(@NonNull Supplier<T> propertyInvoker) {
         try {
             return propertyInvoker.get();
         } catch (UnsupportedOperationException ignored) {
-            return defaultValue;
+            return null;
         }
     }
 
