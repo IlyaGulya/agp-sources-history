@@ -29,12 +29,14 @@ import com.android.build.api.dsl.DefaultConfig
 import com.android.build.api.dsl.Installation
 import com.android.build.api.dsl.ProductFlavor
 import com.android.build.api.dsl.TestExtension
+import com.android.build.api.variant.Component
 import com.android.build.api.variant.ScopedArtifacts.Scope.ALL
 import com.android.build.api.variant.ScopedArtifacts.Scope.PROJECT
 import com.android.build.api.variant.impl.BuiltArtifactsImpl
 import com.android.build.api.variant.impl.HasDeviceTestsCreationConfig
 import com.android.build.api.variant.impl.HasHostTestsCreationConfig
 import com.android.build.api.variant.impl.HasTestFixtures
+import com.android.build.api.variant.impl.HasTestSuitesCreationConfig
 import com.android.build.api.variant.impl.ManifestFilesImpl
 import com.android.build.gradle.internal.BuildTypeData
 import com.android.build.gradle.internal.ProductFlavorData
@@ -47,6 +49,7 @@ import com.android.build.gradle.internal.component.ComponentCreationConfig
 import com.android.build.gradle.internal.component.ConsumableCreationConfig
 import com.android.build.gradle.internal.component.DeviceTestCreationConfig
 import com.android.build.gradle.internal.component.LibraryCreationConfig
+import com.android.build.gradle.internal.component.TestSuiteCreationConfig
 import com.android.build.gradle.internal.component.TestVariantCreationConfig
 import com.android.build.gradle.internal.component.VariantCreationConfig
 import com.android.build.gradle.internal.dependency.AdditionalArtifactType
@@ -96,6 +99,7 @@ import com.android.builder.model.v2.ide.AndroidGradlePluginProjectFlags.BooleanF
 import com.android.builder.model.v2.ide.ArtifactDependencies
 import com.android.builder.model.v2.ide.ArtifactDependenciesAdjacencyList
 import com.android.builder.model.v2.ide.BasicArtifact
+import com.android.builder.model.v2.ide.BasicTestSuiteArtifact
 import com.android.builder.model.v2.ide.BundleInfo
 import com.android.builder.model.v2.ide.BytecodeTransformation
 import com.android.builder.model.v2.ide.CodeShrinker
@@ -104,6 +108,7 @@ import com.android.builder.model.v2.ide.PrivacySandboxSdkInfo
 import com.android.builder.model.v2.ide.SourceProvider
 import com.android.builder.model.v2.ide.SourceSetContainer
 import com.android.builder.model.v2.ide.TestInfo
+import com.android.builder.model.v2.ide.TestSuiteArtifact
 import com.android.builder.model.v2.ide.TestedTargetVariant
 import com.android.builder.model.v2.models.AndroidDsl
 import com.android.builder.model.v2.models.AndroidProject
@@ -878,11 +883,19 @@ class ModelBuilder<
                 createBasicArtifact(hostTest, features)
 
         }
+        val testSuiteArtifacts = mutableMapOf<String, BasicTestSuiteArtifact>()
+        (variant as? HasTestSuitesCreationConfig)?.suites?.values?.forEach { testSuite ->
+            testSuiteArtifacts[testSuite.name] =
+                BasicTestSuiteArtifactImpl(
+                    testSuite.sources.all().get().map { it.asFile }.toSet()
+                )
+        }
         return BasicVariantImpl(
             name = variant.name,
             mainArtifact = createBasicArtifact(variant, features),
             deviceTestArtifacts = deviceTestArtifacts,
             hostTestArtifacts = hostTestArtifacts,
+            testSuiteArtifacts = testSuiteArtifacts,
             testFixturesArtifact = (variant as? HasTestFixtures)?.testFixtures?.let {
                 createBasicArtifact(it, features)
             },
@@ -918,12 +931,17 @@ class ModelBuilder<
             hostTestArtifacts[hostTest.componentType.artifactName] =
                 createJavaArtifact(hostTest)
         }
+        val testSuiteArtifacts = mutableMapOf<String, TestSuiteArtifact>()
+        (variant as? HasTestSuitesCreationConfig)?.suites?.values?.forEach { testSuite ->
+            testSuiteArtifacts[testSuite.name] = createTestSuiteArtifact(testSuite)
+        }
         return VariantImpl(
             name = variant.name,
             displayName = variant.baseName,
             mainArtifact = createAndroidArtifact(variant),
             deviceTestArtifacts = deviceTestArtifacts,
             hostTestArtifacts = hostTestArtifacts,
+            testSuiteArtifacts = testSuiteArtifacts,
             testFixturesArtifact = (variant as? HasTestFixtures)?.testFixtures?.let {
                 createAndroidArtifact(it)
             },
@@ -940,6 +958,24 @@ class ModelBuilder<
             experimentalProperties = if (variant.experimentalProperties.isPresent) {
                 variant.experimentalProperties.get().mapValues { it.value.toString() }
             } else emptyMap()
+        )
+    }
+
+    private fun createTestSuiteArtifact(testSuite: TestSuiteCreationConfig): TestSuiteArtifactImpl {
+        return TestSuiteArtifactImpl(
+            testInfo = TestSuiteTestInfoImpl(
+                testTaskName = testSuite.testTaskName,
+                junitInfo = JUnitEngineInfoImpl(
+                    includedEngines = testSuite.junitEngineSpec.includeEngines
+                )
+            ),
+            compileTaskName = null,
+            assembleTaskName = null,
+            ideSetupTaskNames = emptySet(),
+            generatedSourceFolders = emptySet(),
+            classesFolders = emptySet(),
+            generatedClassPaths = emptyMap(),
+            bytecodeTransformations = emptyList(),
         )
     }
 

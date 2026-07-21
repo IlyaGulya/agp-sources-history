@@ -58,7 +58,6 @@ import com.android.build.gradle.internal.tasks.factory.TaskCreationAction
 import com.android.build.gradle.internal.tasks.factory.TaskFactoryImpl
 import com.android.build.gradle.internal.utils.createTargetSdkVersion
 import com.android.build.gradle.options.BooleanOption
-import com.android.build.gradle.options.IntegerOption
 import com.android.build.gradle.tasks.FusedLibraryMergeArtifactTask
 import com.android.build.gradle.tasks.FusedLibraryMergeClasses
 import com.android.build.gradle.tasks.GeneratePrivacySandboxAsar
@@ -84,7 +83,6 @@ import org.gradle.api.configuration.BuildFeatures
 import org.gradle.api.plugins.JvmEcosystemPlugin
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.build.event.BuildEventsListenerRegistry
-import org.gradle.internal.extensions.stdlib.filterKeysByPrefix
 import java.util.Locale
 import javax.inject.Inject
 
@@ -188,7 +186,7 @@ class PrivacySandboxSdkPlugin @Inject constructor(
             project.objects.named(TargetJvmEnvironment::class.java, TargetJvmEnvironment.ANDROID)
         // 'include' is the configuration that users will use to indicate which dependencies should
         // be fused.
-        val includeConfigurations = project.configurations.create("include").also {
+        val includeConfigurations = project.configurations.register("include") {
             it.isCanBeConsumed = false
             it.attributes.attribute(
                     BuildTypeAttr.ATTRIBUTE,
@@ -200,13 +198,13 @@ class PrivacySandboxSdkPlugin @Inject constructor(
         // on the classpath (inc. transitive SDKs dependencies). Required and optional SDK dependency
         // states will become encoded in the ASB's SdkBundleConfig.pb.
 
-        val requiredSdkConfiguration = project.configurations.create("requiredSdk").also {
+        val requiredSdkConfiguration = project.configurations.register("requiredSdk") {
             it.isCanBeConsumed = false
             it.isTransitive = false
             it.attributes.attribute(BuildTypeAttr.ATTRIBUTE, buildType)
         }
 
-        val optionalSdkConfiguration = project.configurations.create("optionalSdk").also {
+        val optionalSdkConfiguration = project.configurations.register("optionalSdk") {
             it.isCanBeConsumed = false
             it.isTransitive = false
             it.attributes.attribute(BuildTypeAttr.ATTRIBUTE, buildType)
@@ -215,7 +213,7 @@ class PrivacySandboxSdkPlugin @Inject constructor(
         // This is the internal configuration that will be used to feed tasks that require access
         // to the resolved 'include' dependency. It is for JAVA_API usage which mean all transitive
         // dependencies that are implementation() scoped will not be included.
-        val includeApiClasspath = project.configurations.create("includeApiClasspath").also {
+        val includeApiClasspath = project.configurations.register("includeApiClasspath") {
             it.isCanBeConsumed = false
             it.attributes.attribute(
                     Usage.USAGE_ATTRIBUTE,
@@ -229,13 +227,13 @@ class PrivacySandboxSdkPlugin @Inject constructor(
                 TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE,
                 jvmEnvironment
             )
-            it.extendsFrom(includeConfigurations)
+            it.extendsFrom(includeConfigurations.get())
         }
         // This is the internal configuration that will be used to feed tasks that require access
         // to the resolved 'include' dependency. It is for JAVA_RUNTIME usage which mean all transitive
         // dependencies that are implementation() scoped will  be included.
         val includeRuntimeClasspath =
-            project.configurations.create("includeRuntimeClasspath").also {
+            project.configurations.register("includeRuntimeClasspath") {
                 it.isCanBeConsumed = false
                 it.isCanBeResolved = true
 
@@ -252,14 +250,14 @@ class PrivacySandboxSdkPlugin @Inject constructor(
                     jvmEnvironment
                 )
 
-                it.extendsFrom(includeConfigurations)
-                it.extendsFrom(requiredSdkConfiguration)
-                it.extendsFrom(optionalSdkConfiguration)
+                it.extendsFrom(includeConfigurations.get())
+                it.extendsFrom(requiredSdkConfiguration.get())
+                it.extendsFrom(optionalSdkConfiguration.get())
             }
 
         if (!projectServices.projectOptions[BooleanOption.DISABLE_KOTLIN_ATTRIBUTE_SETUP]) {
             configureKotlinPlatformAttribute(
-                listOf(includeApiClasspath, includeRuntimeClasspath),
+                listOf(includeApiClasspath.get(), includeRuntimeClasspath.get()),
                 project
             )
         }
@@ -279,16 +277,16 @@ class PrivacySandboxSdkPlugin @Inject constructor(
             )
         }
         // this is the outgoing configuration for JAVA_API scoped declarations
-        project.configurations.create("apiElements") { apiElements ->
+        project.configurations.register("apiElements") { apiElements ->
             configurePrivacySandboxElements(apiElements, Usage.JAVA_API)
-            apiElements.extendsFrom(requiredSdkConfiguration)
+            apiElements.extendsFrom(requiredSdkConfiguration.get())
         }
         // this is the outgoing configuration for JAVA_RUNTIME scoped declarations
-        project.configurations.create("runtimeElements") { runtimeElements ->
+        project.configurations.register("runtimeElements") { runtimeElements ->
             configurePrivacySandboxElements(runtimeElements, Usage.JAVA_RUNTIME)
-            runtimeElements.extendsFrom(requiredSdkConfiguration)
+            runtimeElements.extendsFrom(requiredSdkConfiguration.get())
         }
-        val incomingConfigurationsToAdd = listOf(includeApiClasspath, includeRuntimeClasspath)
+        val incomingConfigurationsToAdd = listOf(includeApiClasspath.get(), includeRuntimeClasspath.get())
         variantScope.incomingConfigurations.addAll(incomingConfigurationsToAdd)
     }
 

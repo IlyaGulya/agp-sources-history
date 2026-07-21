@@ -17,6 +17,7 @@
 package com.android.build.gradle.internal.plugins
 
 import com.android.SdkConstants
+import com.android.build.api.dsl.AgpTestSuite
 import com.android.build.api.dsl.BuildFeatures
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.LibraryExtension
@@ -44,6 +45,7 @@ import com.android.build.gradle.internal.VariantTaskManager
 import com.android.build.gradle.internal.api.DefaultAndroidSourceSet
 import com.android.build.gradle.internal.component.TestComponentCreationConfig
 import com.android.build.gradle.internal.component.TestFixturesCreationConfig
+import com.android.build.gradle.internal.component.TestSuiteCreationConfig
 import com.android.build.gradle.internal.component.VariantCreationConfig
 import com.android.build.gradle.internal.core.dsl.VariantDslInfo
 import com.android.build.gradle.internal.core.dsl.impl.features.DeviceTestOptionsDslInfoImpl
@@ -257,19 +259,19 @@ abstract class BasePlugin<
         }
     }
 
-
     @get:VisibleForTesting
     val variantInputModel: LegacyVariantInputManager by lazy {
         withProject("LegacyVariantInputManager") { project ->
             LegacyVariantInputManager(
-            dslServices,
-            variantFactory.componentType,
-            SourceSetManager(
-                project,
-                isPackagePublished(),
                 dslServices,
-                DelayedActionsExecutor()
-            ))
+                variantFactory.componentType,
+                SourceSetManager(
+                    project,
+                    isPackagePublished(),
+                    dslServices,
+                    DelayedActionsExecutor()
+                )
+            )
         }
     }
 
@@ -439,10 +441,11 @@ abstract class BasePlugin<
 
     /** Creates the androidJdkImage configuration */
     private fun createAndroidJdkImageConfiguration(project: Project) {
-        val config = project.configurations.create(CONFIG_NAME_ANDROID_JDK_IMAGE)
-        config.isVisible = false
-        config.isCanBeConsumed = false
-        config.description = "Configuration providing JDK image for compiling Java 9+ sources"
+        project.configurations.register(CONFIG_NAME_ANDROID_JDK_IMAGE) { config ->
+            config.isVisible = false
+            config.isCanBeConsumed = false
+            config.description = "Configuration providing JDK image for compiling Java 9+ sources"
+        }
 
         project.dependencies
             .add(

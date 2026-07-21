@@ -38,10 +38,12 @@ import com.android.build.gradle.internal.core.dsl.features.OptimizationDslInfo
 import com.android.build.gradle.internal.core.dsl.features.RenderscriptDslInfo
 import com.android.build.gradle.internal.core.dsl.features.ShadersDslInfo
 import com.android.build.gradle.internal.dsl.AaptOptions
+import com.android.build.gradle.internal.dsl.AgpTestSuiteImpl
 import com.android.build.gradle.internal.dsl.KmpOptimizationImpl
 import com.android.build.gradle.internal.dsl.KotlinMultiplatformAndroidLibraryExtensionImpl
 import com.android.build.gradle.internal.dsl.LibraryKeepRulesImpl
 import com.android.build.gradle.internal.plugins.KotlinMultiplatformAndroidPlugin.Companion.ANDROID_EXTENSION_ON_KOTLIN_EXTENSION_NAME
+import com.android.build.gradle.internal.scope.ProjectDslInfo
 import com.android.build.gradle.internal.services.DslServices
 import com.android.build.gradle.internal.services.VariantServices
 import com.android.builder.core.ComponentTypeImpl
@@ -132,6 +134,7 @@ class KmpVariantDslInfoImpl(
     override val manifestPlaceholdersDslInfo: ManifestPlaceholdersDslInfo? = null
     override val dslDefinedHostTests: List<ComponentDslInfo.DslDefinedHostTest> = listOf()
     override val dslDefinedDeviceTests: List<ComponentDslInfo.DslDefinedDeviceTest> = listOf()
+    override val dslDefinedTestSuites: List<AgpTestSuiteImpl> = listOf()
 
     class KmpOptimizationDslInfoImpl(
         private val extension: KotlinMultiplatformAndroidLibraryExtension,
@@ -196,4 +199,8 @@ class KmpVariantDslInfoImpl(
             return postProcessingOptions.getProguardFiles(type)
         }
     }
+
+    // TODO: Figure out what to do for KMP
+    override val projectDslInfo: ProjectDslInfo
+        get() = ProjectDslInfo(emptyList())
 }

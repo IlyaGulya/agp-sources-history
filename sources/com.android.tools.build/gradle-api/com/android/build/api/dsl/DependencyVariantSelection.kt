@@ -22,9 +22,10 @@ import org.gradle.api.provider.MapProperty
 
 /**
  * Specifies options for doing variant selection for external Android dependencies
- * based on build types and product flavours
+ * based on build types and product flavors
  */
 @Incubating
+@Deprecated("Replaced by LocalDependencySelection")
 interface DependencyVariantSelection {
     /**
      * Specifies a list of build types that the plugin should try to use when a
@@ -34,6 +35,7 @@ interface DependencyVariantSelection {
      * consumed will be of build type "debug"
      */
     @get:Incubating
+    @Deprecated("Replaced by LocalDependencySelection.selectBuildTypeFrom")
     val buildTypes: ListProperty<String>
 
     /**
@@ -41,5 +43,6 @@ interface DependencyVariantSelection {
      * direct variant match with a dependency is not possible.
      */
     @get:Incubating
+    @Deprecated("Replaced by LocalDependencySelection.productFlavorDimension")
     val productFlavors: MapProperty<String, List<String>>
 }

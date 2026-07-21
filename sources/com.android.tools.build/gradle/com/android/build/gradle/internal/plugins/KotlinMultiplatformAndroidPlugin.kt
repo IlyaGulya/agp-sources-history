@@ -60,6 +60,7 @@ import com.android.build.gradle.internal.dependency.SingleVariantBuildTypeRule
 import com.android.build.gradle.internal.dependency.SingleVariantProductFlavorRule
 import com.android.build.gradle.internal.dependency.VariantDependencies
 import com.android.build.gradle.internal.dsl.KotlinMultiplatformAndroidLibraryExtensionImpl
+import com.android.build.gradle.internal.dsl.LocalDependencySelectionImpl
 import com.android.build.gradle.internal.dsl.ModulePropertyKey
 import com.android.build.gradle.internal.dsl.SdkComponentsImpl
 import com.android.build.gradle.internal.ide.dependencies.LibraryDependencyCacheBuildService
@@ -275,10 +276,11 @@ class KotlinMultiplatformAndroidPlugin @Inject constructor(
     }
 
     private fun createAndroidJdkImageConfiguration(project: Project) {
-        val config = project.configurations.create(CONFIG_NAME_ANDROID_JDK_IMAGE)
-        config.isVisible = false
-        config.isCanBeConsumed = false
-        config.description = "Configuration providing JDK image for compiling Java 9+ sources"
+        project.configurations.register(CONFIG_NAME_ANDROID_JDK_IMAGE) { config ->
+            config.isVisible = false
+            config.isCanBeConsumed = false
+            config.description = "Configuration providing JDK image for compiling Java 9+ sources"
+        }
 
         project.dependencies
             .add(
@@ -703,14 +705,14 @@ class KotlinMultiplatformAndroidPlugin @Inject constructor(
     private fun configureDisambiguationRules(
             project: Project, supportPrivacySandboxSdkConsumption: Boolean) {
         project.dependencies.attributesSchema { schema ->
-            val buildTypesToMatch = androidExtension.dependencyVariantSelection.buildTypes.get()
+            val buildTypesToMatch = androidExtension.localDependencySelection.selectBuildTypeFrom.get()
             schema.attribute(BuildTypeAttr.ATTRIBUTE)
                 .disambiguationRules
                 .add(SingleVariantBuildTypeRule::class.java) { config ->
                     config.setParams(buildTypesToMatch)
                 }
 
-            androidExtension.dependencyVariantSelection.productFlavors.get().forEach { (dimension, fallbacks) ->
+            (androidExtension.localDependencySelection as LocalDependencySelectionImpl).getDimensions().forEach { (dimension, fallbacks) ->
                 schema.attribute(ProductFlavorAttr.of(dimension))
                     .disambiguationRules
                     .add(SingleVariantProductFlavorRule::class.java) { config ->

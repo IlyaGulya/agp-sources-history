@@ -16,6 +16,8 @@
 
 package com.android.build.api.dsl
 
+import org.gradle.api.Action
+import org.gradle.api.ExtensiblePolymorphicDomainObjectContainer
 import org.gradle.api.Incubating
 import org.gradle.api.NamedDomainObjectContainer
 
@@ -27,10 +29,10 @@ interface TestOptions {
     /** Options for controlling unit tests execution. */
     fun unitTests(action: UnitTestOptions.() -> Unit)
 
-    /** Name of the results directory. */
+    /** Name of the results' directory. */
     var resultsDir: String?
 
-    /** Name of the reports directory. */
+    /** Name of the reports' directory. */
     var reportDir: String?
 
     /**
@@ -55,7 +57,7 @@ interface TestOptions {
      */
     @Deprecated("devices is deprecated in testOptions, use managedDevices.devices instead")
     @get:Incubating
-    val devices: org.gradle.api.ExtensiblePolymorphicDomainObjectContainer<Device>
+    val devices: ExtensiblePolymorphicDomainObjectContainer<Device>
 
     /**
      * List of DeviceGroups that can be run through connected check, using the Unified Test
@@ -180,4 +182,56 @@ interface TestOptions {
      * Important: Setting this value will cause an error for application and other module types.
      */
     var targetSdkPreview: String?
+
+    /**
+     * Available test suites in this project.
+     *
+     * Test suites provide a way to define groups of tests that can be executed together.  Each
+     * [AgpTestSuite] returned by this method will run against the variants identified by either the
+     * [AgpTestSuite.targetVariants] or [AgpTestSuite.targetProductFlavors] methods.
+     *
+     * This differs from [unitTests], which uses dedicated source set folders for variant-specific
+     * tests.  With [AgpTestSuite], you can create multiple suites to achieve variant-specific testing,
+     * with each suite targeting specific variants or product flavors.
+     *
+     * TODO: Update example when hostTest vs deviceTest is surfaced in a subsequent CL.
+     * For example, if your module has "red" and "blue" product flavors, you could create three test
+     * suites:
+     * ```
+     * android {
+     *     testOptions {
+     *         suites {
+     *             create("commonSuite") {
+     *                 targetProductFlavors += listOf(
+     *                     // Runs on both blue and red flavors
+     *                     Pair("device", "blue"),
+     *                     Pair("device", "red")
+     *                 )
+     *             }
+     *             create("redSuite") {
+     *                 targetProductFlavors += listOf(
+     *                     // Runs on red flavor only
+     *                     Pair("device", "red")
+     *                 )
+     *             }
+     *             create("blueSuite") {
+     *                 targetProductFlavors += listOf(
+     *                     // Runs on blue flavor only
+     *                     Pair("device", "blue"),
+     *                 )
+     *             }
+     *         }
+     *     }
+     * }
+     * ```
+     *
+     * Note: The built-in test suites "unitTests" and "androidTests" are not accessible through this
+     * API. Attempting to create test suites with these reserved names will result in a configuration-time
+     * exception.
+     *
+     * The types of test suites available depend on the other plugins applied to your project.
+     */
+    /** @suppress */
+    @get:Incubating
+    val suites: ExtensiblePolymorphicDomainObjectContainer<AgpTestSuite>
 }

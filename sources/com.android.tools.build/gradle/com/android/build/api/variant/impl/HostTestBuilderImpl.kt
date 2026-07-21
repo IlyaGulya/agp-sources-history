@@ -28,7 +28,7 @@ open class HostTestBuilderImpl(
     override var enable: Boolean,
     override var type: String,
     val componentType: ComponentType,
-    var _enableCodeCoverage: Boolean
+    internal var _enableCodeCoverage: Boolean
 ) : HostTestBuilder {
 
     override var enableCodeCoverage: Boolean
@@ -39,19 +39,18 @@ open class HostTestBuilderImpl(
 
     companion object {
         private fun forUnitTest(
-            variantBuilderServices: VariantBuilderServices,
             enableCodeCoverage: Boolean,
         ): HostTestBuilderImpl = HostTestBuilderImpl(
-            !variantBuilderServices.projectOptions[BooleanOption.ENABLE_NEW_TEST_DSL],
-            HostTestBuilder.UNIT_TEST_TYPE,
-            ComponentTypeImpl.UNIT_TEST,
-            enableCodeCoverage,
+            enable = true,
+            type = HostTestBuilder.UNIT_TEST_TYPE,
+            componentType = ComponentTypeImpl.UNIT_TEST,
+            _enableCodeCoverage = enableCodeCoverage,
         )
 
         private fun forScreenshotTest(
             experimentalProperties: Map<String, Any>,
             enableCodeCoverage: Boolean,
-            ): HostTestBuilderImpl = HostTestBuilderImpl(
+        ): HostTestBuilderImpl = HostTestBuilderImpl(
             ModulePropertyKey.BooleanWithDefault.SCREENSHOT_TEST.getValue(experimentalProperties),
             HostTestBuilder.SCREENSHOT_TEST_TYPE,
             ComponentTypeImpl.SCREENSHOT_TEST,
@@ -66,27 +65,23 @@ open class HostTestBuilderImpl(
         // TODO: Improve this once the Screenshot tests specific types are removed.
         fun create(
             dslDefinedHostTestsDefinitions: List<ComponentDslInfo.DslDefinedHostTest>,
-            variantBuilderServices: VariantBuilderServices,
             experimentalProperties: Map<String, Any>,
         ): Map<String, HostTestBuilder> =
             dslDefinedHostTestsDefinitions.associate { it.type to
                     when(it.type) {
                         HostTestBuilder.UNIT_TEST_TYPE ->
-                            HostTestBuilderImpl.forUnitTest(
-                                variantBuilderServices,
+                            forUnitTest(
                                 it.codeCoverageEnabled,
                             )
 
                         HostTestBuilder.SCREENSHOT_TEST_TYPE ->
-                            HostTestBuilderImpl.forScreenshotTest(
+                            forScreenshotTest(
                                 experimentalProperties,
                                 it.codeCoverageEnabled,
                             )
-                        else ->
-                            throw RuntimeException("Unknown host test type : ${it.type}")
+                        else -> throw RuntimeException("Unknown host test type : ${it.type}")
                     }
             }
-
     }
 }
 
