@@ -49,8 +49,7 @@ interface WorkerExecutorFacade : AutoCloseable, Closeable {
      */
     enum class IsolationMode {
         NONE,
-        CLASSLOADER,
-        PROCESS,
+        CLASSLOADER
     }
 
     /**
