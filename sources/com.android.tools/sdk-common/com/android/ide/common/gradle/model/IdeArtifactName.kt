@@ -13,27 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.ide.common.gradle.model
 
-package com.android.builder.internal
-
-import java.io.File
-
-class UnitTestManifestGenerator(
-    outputFile: File,
-    packageName: String,
-    minSdkVersion: String?,
-    targetSdkVersion: String?,
-    testedPackageName: String,
-    testRunnerName: String?,
-): TestManifestGenerator(
-    outputFile,
-    packageName,
-    minSdkVersion,
-    targetSdkVersion,
-    testedPackageName,
-    testRunnerName
-) {
-
-    override val templateResourceName: String =
-        "AndroidManifest.UnitTestTemplate"
+enum class IdeArtifactName {
+    MAIN, ANDROID_TEST, UNIT_TEST
 }
