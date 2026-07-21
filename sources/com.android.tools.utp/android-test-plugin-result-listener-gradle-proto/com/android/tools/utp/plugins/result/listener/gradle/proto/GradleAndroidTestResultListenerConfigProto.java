@@ -27,6 +27,68 @@ public final class GradleAndroidTestResultListenerConfigProto {
      * @return The resultListenerServerPort.
      */
     int getResultListenerServerPort();
+
+    /**
+     * <pre>
+     * A file path to the cert of the gRPC client.
+     * </pre>
+     *
+     * <code>string resultListenerClientCertFilePath = 2;</code>
+     * @return The resultListenerClientCertFilePath.
+     */
+    java.lang.String getResultListenerClientCertFilePath();
+    /**
+     * <pre>
+     * A file path to the cert of the gRPC client.
+     * </pre>
+     *
+     * <code>string resultListenerClientCertFilePath = 2;</code>
+     * @return The bytes for resultListenerClientCertFilePath.
+     */
+    com.google.protobuf.ByteString
+        getResultListenerClientCertFilePathBytes();
+
+    /**
+     * <pre>
+     * A file path to the private key of the gRPC client.
+     * This private key is used to enable mutual TLS.
+     * </pre>
+     *
+     * <code>string resultListenerClientPrivateKeyFilePath = 3;</code>
+     * @return The resultListenerClientPrivateKeyFilePath.
+     */
+    java.lang.String getResultListenerClientPrivateKeyFilePath();
+    /**
+     * <pre>
+     * A file path to the private key of the gRPC client.
+     * This private key is used to enable mutual TLS.
+     * </pre>
+     *
+     * <code>string resultListenerClientPrivateKeyFilePath = 3;</code>
+     * @return The bytes for resultListenerClientPrivateKeyFilePath.
+     */
+    com.google.protobuf.ByteString
+        getResultListenerClientPrivateKeyFilePathBytes();
+
+    /**
+     * <pre>
+     * A file path to the trusted cert chain.
+     * </pre>
+     *
+     * <code>string trustCertCollectionFilePath = 4;</code>
+     * @return The trustCertCollectionFilePath.
+     */
+    java.lang.String getTrustCertCollectionFilePath();
+    /**
+     * <pre>
+     * A file path to the trusted cert chain.
+     * </pre>
+     *
+     * <code>string trustCertCollectionFilePath = 4;</code>
+     * @return The bytes for trustCertCollectionFilePath.
+     */
+    com.google.protobuf.ByteString
+        getTrustCertCollectionFilePathBytes();
   }
   /**
    * <pre>
@@ -45,6 +107,9 @@ public final class GradleAndroidTestResultListenerConfigProto {
       super(builder);
     }
     private GradleAndroidTestResultListenerConfig() {
+      resultListenerClientCertFilePath_ = "";
+      resultListenerClientPrivateKeyFilePath_ = "";
+      trustCertCollectionFilePath_ = "";
     }
 
     @java.lang.Override
@@ -80,6 +145,24 @@ public final class GradleAndroidTestResultListenerConfigProto {
             case 8: {
 
               resultListenerServerPort_ = input.readInt32();
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              resultListenerClientCertFilePath_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              resultListenerClientPrivateKeyFilePath_ = s;
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              trustCertCollectionFilePath_ = s;
               break;
             }
             default: {
@@ -128,6 +211,140 @@ public final class GradleAndroidTestResultListenerConfigProto {
       return resultListenerServerPort_;
     }
 
+    public static final int RESULTLISTENERCLIENTCERTFILEPATH_FIELD_NUMBER = 2;
+    private volatile java.lang.Object resultListenerClientCertFilePath_;
+    /**
+     * <pre>
+     * A file path to the cert of the gRPC client.
+     * </pre>
+     *
+     * <code>string resultListenerClientCertFilePath = 2;</code>
+     * @return The resultListenerClientCertFilePath.
+     */
+    public java.lang.String getResultListenerClientCertFilePath() {
+      java.lang.Object ref = resultListenerClientCertFilePath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        resultListenerClientCertFilePath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * A file path to the cert of the gRPC client.
+     * </pre>
+     *
+     * <code>string resultListenerClientCertFilePath = 2;</code>
+     * @return The bytes for resultListenerClientCertFilePath.
+     */
+    public com.google.protobuf.ByteString
+        getResultListenerClientCertFilePathBytes() {
+      java.lang.Object ref = resultListenerClientCertFilePath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        resultListenerClientCertFilePath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int RESULTLISTENERCLIENTPRIVATEKEYFILEPATH_FIELD_NUMBER = 3;
+    private volatile java.lang.Object resultListenerClientPrivateKeyFilePath_;
+    /**
+     * <pre>
+     * A file path to the private key of the gRPC client.
+     * This private key is used to enable mutual TLS.
+     * </pre>
+     *
+     * <code>string resultListenerClientPrivateKeyFilePath = 3;</code>
+     * @return The resultListenerClientPrivateKeyFilePath.
+     */
+    public java.lang.String getResultListenerClientPrivateKeyFilePath() {
+      java.lang.Object ref = resultListenerClientPrivateKeyFilePath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        resultListenerClientPrivateKeyFilePath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * A file path to the private key of the gRPC client.
+     * This private key is used to enable mutual TLS.
+     * </pre>
+     *
+     * <code>string resultListenerClientPrivateKeyFilePath = 3;</code>
+     * @return The bytes for resultListenerClientPrivateKeyFilePath.
+     */
+    public com.google.protobuf.ByteString
+        getResultListenerClientPrivateKeyFilePathBytes() {
+      java.lang.Object ref = resultListenerClientPrivateKeyFilePath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        resultListenerClientPrivateKeyFilePath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int TRUSTCERTCOLLECTIONFILEPATH_FIELD_NUMBER = 4;
+    private volatile java.lang.Object trustCertCollectionFilePath_;
+    /**
+     * <pre>
+     * A file path to the trusted cert chain.
+     * </pre>
+     *
+     * <code>string trustCertCollectionFilePath = 4;</code>
+     * @return The trustCertCollectionFilePath.
+     */
+    public java.lang.String getTrustCertCollectionFilePath() {
+      java.lang.Object ref = trustCertCollectionFilePath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        trustCertCollectionFilePath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * A file path to the trusted cert chain.
+     * </pre>
+     *
+     * <code>string trustCertCollectionFilePath = 4;</code>
+     * @return The bytes for trustCertCollectionFilePath.
+     */
+    public com.google.protobuf.ByteString
+        getTrustCertCollectionFilePathBytes() {
+      java.lang.Object ref = trustCertCollectionFilePath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        trustCertCollectionFilePath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -145,6 +362,15 @@ public final class GradleAndroidTestResultListenerConfigProto {
       if (resultListenerServerPort_ != 0) {
         output.writeInt32(1, resultListenerServerPort_);
       }
+      if (!getResultListenerClientCertFilePathBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, resultListenerClientCertFilePath_);
+      }
+      if (!getResultListenerClientPrivateKeyFilePathBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, resultListenerClientPrivateKeyFilePath_);
+      }
+      if (!getTrustCertCollectionFilePathBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, trustCertCollectionFilePath_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -157,6 +383,15 @@ public final class GradleAndroidTestResultListenerConfigProto {
       if (resultListenerServerPort_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, resultListenerServerPort_);
+      }
+      if (!getResultListenerClientCertFilePathBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, resultListenerClientCertFilePath_);
+      }
+      if (!getResultListenerClientPrivateKeyFilePathBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, resultListenerClientPrivateKeyFilePath_);
+      }
+      if (!getTrustCertCollectionFilePathBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, trustCertCollectionFilePath_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -175,6 +410,12 @@ public final class GradleAndroidTestResultListenerConfigProto {
 
       if (getResultListenerServerPort()
           != other.getResultListenerServerPort()) return false;
+      if (!getResultListenerClientCertFilePath()
+          .equals(other.getResultListenerClientCertFilePath())) return false;
+      if (!getResultListenerClientPrivateKeyFilePath()
+          .equals(other.getResultListenerClientPrivateKeyFilePath())) return false;
+      if (!getTrustCertCollectionFilePath()
+          .equals(other.getTrustCertCollectionFilePath())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -188,6 +429,12 @@ public final class GradleAndroidTestResultListenerConfigProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + RESULTLISTENERSERVERPORT_FIELD_NUMBER;
       hash = (53 * hash) + getResultListenerServerPort();
+      hash = (37 * hash) + RESULTLISTENERCLIENTCERTFILEPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getResultListenerClientCertFilePath().hashCode();
+      hash = (37 * hash) + RESULTLISTENERCLIENTPRIVATEKEYFILEPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getResultListenerClientPrivateKeyFilePath().hashCode();
+      hash = (37 * hash) + TRUSTCERTCOLLECTIONFILEPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getTrustCertCollectionFilePath().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -327,6 +574,12 @@ public final class GradleAndroidTestResultListenerConfigProto {
         super.clear();
         resultListenerServerPort_ = 0;
 
+        resultListenerClientCertFilePath_ = "";
+
+        resultListenerClientPrivateKeyFilePath_ = "";
+
+        trustCertCollectionFilePath_ = "";
+
         return this;
       }
 
@@ -354,6 +607,9 @@ public final class GradleAndroidTestResultListenerConfigProto {
       public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerConfigProto.GradleAndroidTestResultListenerConfig buildPartial() {
         com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerConfigProto.GradleAndroidTestResultListenerConfig result = new com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerConfigProto.GradleAndroidTestResultListenerConfig(this);
         result.resultListenerServerPort_ = resultListenerServerPort_;
+        result.resultListenerClientCertFilePath_ = resultListenerClientCertFilePath_;
+        result.resultListenerClientPrivateKeyFilePath_ = resultListenerClientPrivateKeyFilePath_;
+        result.trustCertCollectionFilePath_ = trustCertCollectionFilePath_;
         onBuilt();
         return result;
       }
@@ -404,6 +660,18 @@ public final class GradleAndroidTestResultListenerConfigProto {
         if (other == com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerConfigProto.GradleAndroidTestResultListenerConfig.getDefaultInstance()) return this;
         if (other.getResultListenerServerPort() != 0) {
           setResultListenerServerPort(other.getResultListenerServerPort());
+        }
+        if (!other.getResultListenerClientCertFilePath().isEmpty()) {
+          resultListenerClientCertFilePath_ = other.resultListenerClientCertFilePath_;
+          onChanged();
+        }
+        if (!other.getResultListenerClientPrivateKeyFilePath().isEmpty()) {
+          resultListenerClientPrivateKeyFilePath_ = other.resultListenerClientPrivateKeyFilePath_;
+          onChanged();
+        }
+        if (!other.getTrustCertCollectionFilePath().isEmpty()) {
+          trustCertCollectionFilePath_ = other.trustCertCollectionFilePath_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -472,6 +740,299 @@ public final class GradleAndroidTestResultListenerConfigProto {
       public Builder clearResultListenerServerPort() {
         
         resultListenerServerPort_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object resultListenerClientCertFilePath_ = "";
+      /**
+       * <pre>
+       * A file path to the cert of the gRPC client.
+       * </pre>
+       *
+       * <code>string resultListenerClientCertFilePath = 2;</code>
+       * @return The resultListenerClientCertFilePath.
+       */
+      public java.lang.String getResultListenerClientCertFilePath() {
+        java.lang.Object ref = resultListenerClientCertFilePath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          resultListenerClientCertFilePath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A file path to the cert of the gRPC client.
+       * </pre>
+       *
+       * <code>string resultListenerClientCertFilePath = 2;</code>
+       * @return The bytes for resultListenerClientCertFilePath.
+       */
+      public com.google.protobuf.ByteString
+          getResultListenerClientCertFilePathBytes() {
+        java.lang.Object ref = resultListenerClientCertFilePath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          resultListenerClientCertFilePath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A file path to the cert of the gRPC client.
+       * </pre>
+       *
+       * <code>string resultListenerClientCertFilePath = 2;</code>
+       * @param value The resultListenerClientCertFilePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResultListenerClientCertFilePath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        resultListenerClientCertFilePath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A file path to the cert of the gRPC client.
+       * </pre>
+       *
+       * <code>string resultListenerClientCertFilePath = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearResultListenerClientCertFilePath() {
+        
+        resultListenerClientCertFilePath_ = getDefaultInstance().getResultListenerClientCertFilePath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A file path to the cert of the gRPC client.
+       * </pre>
+       *
+       * <code>string resultListenerClientCertFilePath = 2;</code>
+       * @param value The bytes for resultListenerClientCertFilePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResultListenerClientCertFilePathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        resultListenerClientCertFilePath_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object resultListenerClientPrivateKeyFilePath_ = "";
+      /**
+       * <pre>
+       * A file path to the private key of the gRPC client.
+       * This private key is used to enable mutual TLS.
+       * </pre>
+       *
+       * <code>string resultListenerClientPrivateKeyFilePath = 3;</code>
+       * @return The resultListenerClientPrivateKeyFilePath.
+       */
+      public java.lang.String getResultListenerClientPrivateKeyFilePath() {
+        java.lang.Object ref = resultListenerClientPrivateKeyFilePath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          resultListenerClientPrivateKeyFilePath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A file path to the private key of the gRPC client.
+       * This private key is used to enable mutual TLS.
+       * </pre>
+       *
+       * <code>string resultListenerClientPrivateKeyFilePath = 3;</code>
+       * @return The bytes for resultListenerClientPrivateKeyFilePath.
+       */
+      public com.google.protobuf.ByteString
+          getResultListenerClientPrivateKeyFilePathBytes() {
+        java.lang.Object ref = resultListenerClientPrivateKeyFilePath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          resultListenerClientPrivateKeyFilePath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A file path to the private key of the gRPC client.
+       * This private key is used to enable mutual TLS.
+       * </pre>
+       *
+       * <code>string resultListenerClientPrivateKeyFilePath = 3;</code>
+       * @param value The resultListenerClientPrivateKeyFilePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResultListenerClientPrivateKeyFilePath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        resultListenerClientPrivateKeyFilePath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A file path to the private key of the gRPC client.
+       * This private key is used to enable mutual TLS.
+       * </pre>
+       *
+       * <code>string resultListenerClientPrivateKeyFilePath = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearResultListenerClientPrivateKeyFilePath() {
+        
+        resultListenerClientPrivateKeyFilePath_ = getDefaultInstance().getResultListenerClientPrivateKeyFilePath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A file path to the private key of the gRPC client.
+       * This private key is used to enable mutual TLS.
+       * </pre>
+       *
+       * <code>string resultListenerClientPrivateKeyFilePath = 3;</code>
+       * @param value The bytes for resultListenerClientPrivateKeyFilePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResultListenerClientPrivateKeyFilePathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        resultListenerClientPrivateKeyFilePath_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object trustCertCollectionFilePath_ = "";
+      /**
+       * <pre>
+       * A file path to the trusted cert chain.
+       * </pre>
+       *
+       * <code>string trustCertCollectionFilePath = 4;</code>
+       * @return The trustCertCollectionFilePath.
+       */
+      public java.lang.String getTrustCertCollectionFilePath() {
+        java.lang.Object ref = trustCertCollectionFilePath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          trustCertCollectionFilePath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A file path to the trusted cert chain.
+       * </pre>
+       *
+       * <code>string trustCertCollectionFilePath = 4;</code>
+       * @return The bytes for trustCertCollectionFilePath.
+       */
+      public com.google.protobuf.ByteString
+          getTrustCertCollectionFilePathBytes() {
+        java.lang.Object ref = trustCertCollectionFilePath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          trustCertCollectionFilePath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A file path to the trusted cert chain.
+       * </pre>
+       *
+       * <code>string trustCertCollectionFilePath = 4;</code>
+       * @param value The trustCertCollectionFilePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTrustCertCollectionFilePath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        trustCertCollectionFilePath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A file path to the trusted cert chain.
+       * </pre>
+       *
+       * <code>string trustCertCollectionFilePath = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTrustCertCollectionFilePath() {
+        
+        trustCertCollectionFilePath_ = getDefaultInstance().getTrustCertCollectionFilePath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A file path to the trusted cert chain.
+       * </pre>
+       *
+       * <code>string trustCertCollectionFilePath = 4;</code>
+       * @param value The bytes for trustCertCollectionFilePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTrustCertCollectionFilePathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        trustCertCollectionFilePath_ = value;
         onChanged();
         return this;
       }
@@ -545,12 +1106,15 @@ public final class GradleAndroidTestResultListenerConfigProto {
       "\n0gradle_android_test_result_listener_co" +
       "nfig.proto\022:com.android.tools.utp.plugin" +
       "s.result.listener.gradle.proto\032\031google/p" +
-      "rotobuf/any.proto\"I\n%GradleAndroidTestRe" +
-      "sultListenerConfig\022 \n\030resultListenerServ" +
-      "erPort\030\001 \001(\005Bh\n:com.android.tools.utp.pl" +
-      "ugins.result.listener.gradle.protoB*Grad" +
-      "leAndroidTestResultListenerConfigProtob\006" +
-      "proto3"
+      "rotobuf/any.proto\"\310\001\n%GradleAndroidTestR" +
+      "esultListenerConfig\022 \n\030resultListenerSer" +
+      "verPort\030\001 \001(\005\022(\n resultListenerClientCer" +
+      "tFilePath\030\002 \001(\t\022.\n&resultListenerClientP" +
+      "rivateKeyFilePath\030\003 \001(\t\022#\n\033trustCertColl" +
+      "ectionFilePath\030\004 \001(\tBh\n:com.android.tool" +
+      "s.utp.plugins.result.listener.gradle.pro" +
+      "toB*GradleAndroidTestResultListenerConfi" +
+      "gProtob\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -562,7 +1126,7 @@ public final class GradleAndroidTestResultListenerConfigProto {
     internal_static_com_android_tools_utp_plugins_result_listener_gradle_proto_GradleAndroidTestResultListenerConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_android_tools_utp_plugins_result_listener_gradle_proto_GradleAndroidTestResultListenerConfig_descriptor,
-        new java.lang.String[] { "ResultListenerServerPort", });
+        new java.lang.String[] { "ResultListenerServerPort", "ResultListenerClientCertFilePath", "ResultListenerClientPrivateKeyFilePath", "TrustCertCollectionFilePath", });
     com.google.protobuf.AnyProto.getDescriptor();
   }
 
