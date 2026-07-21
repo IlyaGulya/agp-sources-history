@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,10 @@
 
 package com.android.build.gradle.internal.dsl
 
-import com.android.build.api.dsl.EmulatorControl
-import com.android.build.gradle.internal.dsl.decorator.annotation.WithLazyInitialization
+import com.android.build.api.dsl.AgpTestSuite
 
-abstract class EmulatorControl: EmulatorControl {
-
-    @WithLazyInitialization
-    @Suppress("unused") // the call is injected by DslDecorator
-    protected fun lazyInit() {
-        secondsValid = 3600
-        enable = false
-    }
+/**
+ * Implementation of the [AgpTestSuite] Dsl extension.
+ */
+abstract class AgpTestSuiteImpl: AgpTestSuite {
 }
