@@ -34,6 +34,7 @@ import com.android.build.gradle.internal.VariantManager;
 import com.android.build.gradle.internal.core.Abi;
 import com.android.build.gradle.internal.core.GradleVariantConfiguration;
 import com.android.build.gradle.internal.dsl.CoreNdkOptions;
+import com.android.build.gradle.internal.dsl.TestOptions;
 import com.android.build.gradle.internal.ide.level2.EmptyDependencyGraphs;
 import com.android.build.gradle.internal.ide.level2.GlobalLibraryMapImpl;
 import com.android.build.gradle.internal.incremental.BuildInfoWriterTask;
@@ -44,6 +45,7 @@ import com.android.build.gradle.internal.scope.BuildOutput;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.TaskOutputHolder;
 import com.android.build.gradle.internal.scope.VariantScope;
+import com.android.build.gradle.internal.tasks.DeviceProviderInstrumentTestTask;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.internal.variant.TaskContainer;
 import com.android.build.gradle.internal.variant.TestVariantData;
@@ -455,7 +457,9 @@ public class ModelBuilder implements ToolingModelBuilder {
 
         final VariantScope scope = variantData.getScope();
 
-        Pair<Dependencies, DependencyGraphs> result = getDependencies(scope);
+        Pair<Dependencies, DependencyGraphs> result =
+                getDependencies(
+                        scope, extraModelInfo, syncIssues, modelLevel, modelWithFullDependency);
 
         Set<File> additionalTestClasses = new HashSet<>();
         additionalTestClasses.addAll(variantData.getAllPreJavacGeneratedBytecode().getFiles());
@@ -481,17 +485,22 @@ public class ModelBuilder implements ToolingModelBuilder {
                 sourceProviders.multiFlavorSourceProvider);
     }
 
+    /** Gather the dependency graph for the specified <code>variantScope</code>. */
     @NonNull
-    private Pair<Dependencies, DependencyGraphs> getDependencies(@NonNull VariantScope scope) {
+    public static Pair<Dependencies, DependencyGraphs> getDependencies(
+            @NonNull VariantScope variantScope,
+            @NonNull ExtraModelInfo extraModelInfo,
+            @NonNull Set<SyncIssue> syncIssues,
+            int modelLevel,
+            boolean modelWithFullDependency) {
         Pair<Dependencies, DependencyGraphs> result;
 
         // If there is a missing flavor dimension then we don't even try to resolve dependencies
         // as it may fail due to improperly setup configuration attributes.
         if (extraModelInfo.hasSyncIssue(SyncIssue.TYPE_UNNAMED_FLAVOR_DIMENSION)) {
             result = Pair.of(EMPTY_DEPENDENCIES_IMPL, EMPTY_DEPENDENCY_GRAPH);
-
         } else {
-            final Project project = globalScope.getProject();
+            final Project project = variantScope.getGlobalScope().getProject();
             ArtifactDependencyGraph graph = new ArtifactDependencyGraph();
             // can't use ProjectOptions as this is likely to change from the initialization of
             // ProjectOptions due to how lint dynamically add/remove this property.
@@ -508,32 +517,18 @@ public class ModelBuilder implements ToolingModelBuilder {
                         Pair.of(
                                 EMPTY_DEPENDENCIES_IMPL,
                                 graph.createLevel2DependencyGraph(
-                                        scope, modelWithFullDependency, downloadSources));
+                                        variantScope, modelWithFullDependency, downloadSources));
             } else {
                 result =
                         Pair.of(
-                                graph.createDependencies(scope, downloadSources),
+                                graph.createDependencies(variantScope, downloadSources),
                                 EMPTY_DEPENDENCY_GRAPH);
             }
 
-            List<String> failures = graph.collectFailures();
-            if (!failures.isEmpty()) {
-                handleUnresolvedDependencies(failures);
-            }
+            graph.collectFailures(syncIssues::add);
         }
 
         return result;
-    }
-
-    private void handleUnresolvedDependencies(@NonNull List<String> failures) {
-        for (String failure : failures) {
-            syncIssues.add(
-                    new SyncIssueImpl(
-                            SyncIssue.TYPE_UNRESOLVED_DEPENDENCY,
-                            SyncIssue.SEVERITY_ERROR,
-                            failure,
-                            String.format("Unable to resolve dependency '%s'", failure)));
-        }
     }
 
     /**
@@ -601,24 +596,44 @@ public class ModelBuilder implements ToolingModelBuilder {
                 BuildInfoWriterTask.ConfigAction.getBuildInfoFile(scope),
                 variantConfiguration.getInstantRunSupportStatus());
 
-        Pair<Dependencies, DependencyGraphs> dependencies = getDependencies(scope);
+        Pair<Dependencies, DependencyGraphs> dependencies =
+                getDependencies(
+                        scope, extraModelInfo, syncIssues, modelLevel, modelWithFullDependency);
 
         Set<File> additionalTestClasses = new HashSet<>();
         additionalTestClasses.addAll(variantData.getAllPreJavacGeneratedBytecode().getFiles());
         additionalTestClasses.addAll(variantData.getAllPostJavacGeneratedBytecode().getFiles());
 
         List<File> additionalRuntimeApks = new ArrayList<>();
+        TestOptionsImpl testOptions = null;
+
         if (variantData.getType().isForTesting()) {
             Configuration testHelpers =
                     scope.getGlobalScope()
                             .getProject()
                             .getConfigurations()
-                            .findByName(SdkConstants.TEST_HELPERS_CONFIGURATION);
+                            .findByName(SdkConstants.GRADLE_ANDROID_TEST_UTIL_CONFIGURATION);
 
             // This may be the case with the experimental plugin.
             if (testHelpers != null) {
                 additionalRuntimeApks.addAll(testHelpers.getFiles());
             }
+
+            DeviceProviderInstrumentTestTask.checkForNonApks(
+                    additionalRuntimeApks,
+                    message ->
+                            syncIssues.add(
+                                    new SyncIssueImpl(
+                                            SyncIssue.TYPE_GENERIC,
+                                            SyncIssue.SEVERITY_ERROR,
+                                            null,
+                                            message)));
+
+            TestOptions testOptionsDsl = scope.getGlobalScope().getExtension().getTestOptions();
+            testOptions =
+                    new TestOptionsImpl(
+                            testOptionsDsl.getAnimationsDisabled(),
+                            testOptionsDsl.getExecutionEnum());
         }
 
         return new AndroidArtifactImpl(
@@ -658,7 +673,8 @@ public class ModelBuilder implements ToolingModelBuilder {
                 variantConfiguration.getMergedResValues(),
                 instantRun,
                 splitOutputsProxy,
-                manifestsProxy);
+                manifestsProxy,
+                testOptions);
     }
 
     private static BuildOutputSupplier<Collection<BuildOutput>> getBuildOutputSupplier(
@@ -671,10 +687,6 @@ public class ModelBuilder implements ToolingModelBuilder {
                                 VariantScope.TaskOutputType.APK,
                                 VariantScope.TaskOutputType.ABI_PACKAGED_SPLIT,
                                 VariantScope.TaskOutputType.DENSITY_OR_LANGUAGE_PACKAGED_SPLIT),
-                        ImmutableList.of(variantData.getScope().getApkLocation()));
-            case INSTANTAPP:
-                return new BuildOutputsSupplier(
-                        ImmutableList.of(VariantScope.TaskOutputType.INSTANTAPP_BUNDLE),
                         ImmutableList.of(variantData.getScope().getApkLocation()));
             case LIBRARY:
                 ApkInfo mainApkInfo =
@@ -705,6 +717,7 @@ public class ModelBuilder implements ToolingModelBuilder {
                                                                 .getVariantConfiguration()
                                                                 .getVersionCode()),
                                                 variantData.getScope().getJavaOutputDir()));
+            case INSTANTAPP:
             default:
                 throw new RuntimeException("Unhandled build type " + variantData.getType());
         }
@@ -732,7 +745,6 @@ public class ModelBuilder implements ToolingModelBuilder {
                                                 variantData.getScope().getManifestOutputDirectory(),
                                                 SdkConstants.ANDROID_MANIFEST_XML))));
             case INSTANTAPP:
-                return new BuildOutputsSupplier(ImmutableList.of(), ImmutableList.of());
             default:
                 throw new RuntimeException("Unhandled build type " + variantData.getType());
         }

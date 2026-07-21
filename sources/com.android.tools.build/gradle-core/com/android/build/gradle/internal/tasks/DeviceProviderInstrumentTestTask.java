@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.build.gradle.internal.tasks;
 
 import static com.android.builder.core.BuilderConstants.CONNECTED;
@@ -28,6 +29,7 @@ import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.VariantScope;
+import com.android.build.gradle.internal.test.AbstractTestDataImpl;
 import com.android.build.gradle.internal.test.report.ReportType;
 import com.android.build.gradle.internal.test.report.TestReport;
 import com.android.build.gradle.internal.variant.TestVariantData;
@@ -40,7 +42,6 @@ import com.android.builder.testing.ConnectedDeviceProvider;
 import com.android.builder.testing.OnDeviceOrchestratorTestRunner;
 import com.android.builder.testing.ShardedTestRunner;
 import com.android.builder.testing.SimpleTestRunner;
-import com.android.builder.testing.TestData;
 import com.android.builder.testing.TestRunner;
 import com.android.builder.testing.api.DeviceException;
 import com.android.builder.testing.api.DeviceProvider;
@@ -48,21 +49,30 @@ import com.android.builder.testing.api.TestException;
 import com.android.ide.common.process.ProcessExecutor;
 import com.android.utils.FileUtils;
 import com.android.utils.StringHelper;
+import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import org.gradle.api.GradleException;
+import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Nullable;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.internal.logging.ConsoleRenderer;
@@ -72,6 +82,9 @@ import org.xml.sax.SAXException;
  * Run instrumentation tests for a given variant
  */
 public class DeviceProviderInstrumentTestTask extends BaseTask implements AndroidTestTask {
+
+    private static final Predicate<File> IS_APK =
+            file -> SdkConstants.EXT_ANDROID_PACKAGE.equals(Files.getFileExtension(file.getName()));
 
     private interface TestRunnerFactory {
         TestRunner build(@Nullable File splitSelectExec, @NonNull ProcessExecutor processExecutor);
@@ -86,7 +99,7 @@ public class DeviceProviderInstrumentTestTask extends BaseTask implements Androi
     private ProcessExecutor processExecutor;
     private String flavorName;
     private Supplier<File> splitSelectExec;
-    private TestData testData;
+    private AbstractTestDataImpl testData;
     private TestRunnerFactory testRunnerFactory;
     private boolean ignoreFailures;
     private boolean testFailed;
@@ -97,6 +110,11 @@ public class DeviceProviderInstrumentTestTask extends BaseTask implements Androi
     protected void runTests() throws DeviceException, IOException, InterruptedException,
             TestRunner.NoAuthorizedDeviceFoundException, TestException,
             ParserConfigurationException, SAXException {
+        checkForNonApks(
+                buddyApks.getFiles(),
+                message -> {
+                    throw new InvalidUserDataException(message);
+                });
 
         File resultsOutDir = getResultsDir();
         FileUtils.cleanOutputDir(resultsOutDir);
@@ -171,6 +189,21 @@ public class DeviceProviderInstrumentTestTask extends BaseTask implements Androi
         testFailed = false;
     }
 
+    public static void checkForNonApks(
+            @NonNull Collection<File> buddyApksFiles, @NonNull Consumer<String> errorHandler) {
+        List<File> nonApks =
+                buddyApksFiles.stream().filter(IS_APK.negate()).collect(Collectors.toList());
+        if (!nonApks.isEmpty()) {
+            Collections.sort(nonApks);
+            String message =
+                    String.format(
+                            "Not all files in %s configuration are APKs: %s",
+                            SdkConstants.GRADLE_ANDROID_TEST_UTIL_CONFIGURATION,
+                            Joiner.on(' ').join(nonApks));
+            errorHandler.accept(message);
+        }
+    }
+
     /**
      * Determines if there are any tests to run.
      *
@@ -233,11 +266,11 @@ public class DeviceProviderInstrumentTestTask extends BaseTask implements Androi
         this.deviceProvider = deviceProvider;
     }
 
-    public TestData getTestData() {
+    public AbstractTestDataImpl getTestData() {
         return testData;
     }
 
-    public void setTestData(TestData testData) {
+    public void setTestData(@NonNull AbstractTestDataImpl testData) {
         this.testData = testData;
     }
 
@@ -285,20 +318,30 @@ public class DeviceProviderInstrumentTestTask extends BaseTask implements Androi
         return buddyApks;
     }
 
+    @InputFiles
+    FileCollection getTestApkDir() {
+        return testData.getTestApkDir();
+    }
+
+    @InputFiles
+    @Optional
+    FileCollection getTestedApksDir() {
+        return testData.getTestedApksDir();
+    }
+
     public static class ConfigAction implements TaskConfigAction<DeviceProviderInstrumentTestTask> {
 
         @NonNull
         private final VariantScope scope;
         @NonNull
         private final DeviceProvider deviceProvider;
-        @NonNull
-        private final TestData testData;
+        @NonNull private final AbstractTestDataImpl testData;
         @NonNull private final FileCollection testTargetManifests;
 
         public ConfigAction(
                 @NonNull VariantScope scope,
                 @NonNull DeviceProvider deviceProvider,
-                @NonNull TestData testData,
+                @NonNull AbstractTestDataImpl testData,
                 @NonNull FileCollection testTargetManifests) {
             this.scope = scope;
             this.deviceProvider = deviceProvider;
@@ -349,7 +392,7 @@ public class DeviceProviderInstrumentTestTask extends BaseTask implements Androi
             boolean shardBetweenDevices = projectOptions.get(BooleanOption.ENABLE_TEST_SHARDING);
 
             switch (scope.getGlobalScope().getExtension().getTestOptions().getExecutionEnum()) {
-                case ON_DEVICE_ORCHESTRATOR:
+                case ANDROID_TEST_ORCHESTRATOR:
                     Preconditions.checkArgument(
                             !shardBetweenDevices, "Sharding is not supported with Odo.");
                     task.testRunnerFactory = OnDeviceOrchestratorTestRunner::new;
@@ -429,7 +472,8 @@ public class DeviceProviderInstrumentTestTask extends BaseTask implements Androi
             task.buddyApks =
                     MoreObjects.firstNonNull(
                             project.getConfigurations()
-                                    .findByName(SdkConstants.TEST_HELPERS_CONFIGURATION),
+                                    .findByName(
+                                            SdkConstants.GRADLE_ANDROID_TEST_UTIL_CONFIGURATION),
                             project.files());
 
             task.setEnabled(deviceProvider.isConfigured());
