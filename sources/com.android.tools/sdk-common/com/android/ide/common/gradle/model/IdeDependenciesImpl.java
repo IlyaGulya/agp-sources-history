@@ -18,22 +18,21 @@ package com.android.ide.common.gradle.model;
 import static java.util.Objects.requireNonNull;
 
 import com.android.annotations.NonNull;
-import com.android.annotations.Nullable;
 import com.android.builder.model.AndroidLibrary;
 import com.android.builder.model.Dependencies;
 import com.android.builder.model.JavaLibrary;
-import com.android.ide.common.repository.GradleVersion;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 /** Creates a deep copy of a {@link Dependencies}. */
-public final class IdeDependenciesImpl extends IdeModel implements IdeDependencies {
+public final class IdeDependenciesImpl implements IdeDependencies, Serializable {
     // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 4L;
 
     @NonNull private final Collection<AndroidLibrary> myLibraries;
     @NonNull private final Collection<JavaLibrary> myJavaLibraries;
@@ -42,33 +41,40 @@ public final class IdeDependenciesImpl extends IdeModel implements IdeDependenci
     @NonNull private final Collection<File> myRuntimeOnlyClasses;
     private final int myHashCode;
 
-    public IdeDependenciesImpl(
-            @NonNull Dependencies dependencies,
-            @NonNull ModelCache modelCache,
-            @Nullable GradleVersion modelVersion) {
-        super(dependencies, modelCache);
+    // Used for serialization by the IDE.
+    IdeDependenciesImpl() {
+        myLibraries = Collections.emptyList();
+        myJavaLibraries = Collections.emptyList();
+        myProjects = Collections.emptyList();
+        myJavaModules = Collections.emptyList();
+        myRuntimeOnlyClasses = Collections.emptyList();
+
+        myHashCode = 0;
+    }
+
+    public IdeDependenciesImpl(@NonNull Dependencies dependencies, @NonNull ModelCache modelCache) {
 
         myLibraries =
-                copy(
+                IdeModel.copy(
                         dependencies.getLibraries(),
                         modelCache,
                         library -> new IdeAndroidLibrary(library, modelCache));
         myJavaLibraries =
-                copy(
+                IdeModel.copy(
                         dependencies.getJavaLibraries(),
                         modelCache,
                         library -> new IdeJavaLibrary(library, modelCache));
 
         myProjects = ImmutableList.copyOf(dependencies.getProjects());
         myJavaModules =
-                copy(
+                IdeModel.copy(
                         dependencies::getJavaModules,
                         modelCache,
-                        projectId -> new IdeProjectIdentifierImpl(projectId, modelCache));
+                        projectId -> new IdeProjectIdentifierImpl(projectId));
         myRuntimeOnlyClasses =
                 ImmutableList.copyOf(
                         requireNonNull(
-                                copyNewProperty(
+                                IdeModel.copyNewProperty(
                                         dependencies::getRuntimeOnlyClasses,
                                         Collections.emptyList())));
 

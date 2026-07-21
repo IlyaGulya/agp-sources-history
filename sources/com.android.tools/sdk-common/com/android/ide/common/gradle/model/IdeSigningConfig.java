@@ -19,12 +19,13 @@ import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.builder.model.SigningConfig;
 import java.io.File;
+import java.io.Serializable;
 import java.util.Objects;
 
 /** Creates a deep copy of a {@link SigningConfig}. */
-public final class IdeSigningConfig extends IdeModel implements SigningConfig {
+public final class IdeSigningConfig implements SigningConfig, Serializable {
     // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     @NonNull private final String myName;
     @Nullable private final File myStoreFile;
@@ -33,13 +34,24 @@ public final class IdeSigningConfig extends IdeModel implements SigningConfig {
     @Nullable private final Boolean myV1SigningEnabled;
     private final int myHashCode;
 
-    public IdeSigningConfig(@NonNull SigningConfig config, @NonNull ModelCache modelCache) {
-        super(config, modelCache);
+    // Used for serialization by the IDE.
+    @SuppressWarnings("unused")
+    IdeSigningConfig() {
+        myName = "";
+        myStoreFile = null;
+        myStorePassword = null;
+        myKeyAlias = null;
+        myV1SigningEnabled = null;
+
+        myHashCode = 0;
+    }
+
+    public IdeSigningConfig(@NonNull SigningConfig config) {
         myName = config.getName();
         myStoreFile = config.getStoreFile();
         myStorePassword = config.getStorePassword();
         myKeyAlias = config.getKeyAlias();
-        myV1SigningEnabled = copyNewProperty(config::isV1SigningEnabled, null);
+        myV1SigningEnabled = IdeModel.copyNewProperty(config::isV1SigningEnabled, null);
 
         myHashCode = calculateHashCode();
     }

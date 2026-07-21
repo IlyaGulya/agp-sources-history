@@ -27,34 +27,35 @@ import java.io.Serializable
  * Configuration for an `aapt package` or an `aapt2 link` operation.
  */
 data class AaptPackageConfig(
-        val manifestFile: File,
-        val options: AaptOptions,
-        val androidJarPath: String,
-        val variantType: VariantType,
-        val sourceOutputDir: File? = null,
-        val resourceOutputApk: File? = null,
-        val librarySymbolTableFiles: ImmutableCollection<File> = ImmutableList.of(),
-        val symbolOutputDir: File? = null,
-        val verbose: Boolean = false,
-        val resourceDirs: ImmutableList<File> = ImmutableList.of(),
-        val proguardOutputFile: File? = null,
-        val mainDexListProguardOutputFile: File? = null,
-        val splits: ImmutableCollection<String>? = null,
-        val debuggable: Boolean = false,
-        val customPackageForR: String? = null,
-        val preferredDensity: String? = null,
-        val resourceConfigs: ImmutableSet<String> = ImmutableSet.of(),
-        val generateProtos: Boolean = false,
-        val imports: ImmutableList<File> = ImmutableList.of(),
-        val packageId: Int? = null,
-        val allowReservedPackageId: Boolean = false,
-        val dependentFeatures: ImmutableCollection<File> = ImmutableList.of(),
-        val listResourceFiles: Boolean = false,
-        val staticLibrary: Boolean = false,
-        val staticLibraryDependencies: ImmutableList<File> = ImmutableList.of(),
-        val intermediateDir: File? = null,
-        val useConditionalKeepRules: Boolean = false,
-        val useFinalIds: Boolean = true
+    val manifestFile: File,
+    val options: AaptOptions,
+    val androidJarPath: String,
+    val variantType: VariantType,
+    val sourceOutputDir: File? = null,
+    val resourceOutputApk: File? = null,
+    val librarySymbolTableFiles: ImmutableCollection<File> = ImmutableList.of(),
+    val symbolOutputDir: File? = null,
+    val verbose: Boolean = false,
+    val resourceDirs: ImmutableList<File> = ImmutableList.of(),
+    val proguardOutputFile: File? = null,
+    val mainDexListProguardOutputFile: File? = null,
+    val splits: ImmutableCollection<String>? = null,
+    val debuggable: Boolean = false,
+    val customPackageForR: String? = null,
+    val preferredDensity: String? = null,
+    val resourceConfigs: ImmutableSet<String> = ImmutableSet.of(),
+    val generateProtos: Boolean = false,
+    val imports: ImmutableList<File> = ImmutableList.of(),
+    val packageId: Int? = null,
+    val allowReservedPackageId: Boolean = false,
+    val dependentFeatures: ImmutableCollection<File> = ImmutableList.of(),
+    val listResourceFiles: Boolean = false,
+    val staticLibrary: Boolean = false,
+    val staticLibraryDependencies: ImmutableList<File> = ImmutableList.of(),
+    val intermediateDir: File? = null,
+    val useConditionalKeepRules: Boolean = false,
+    val useMinimalKeepRules: Boolean = false,
+    val useFinalIds: Boolean = true
 ) : Serializable {
 
     fun isStaticLibrary() = staticLibrary
@@ -90,6 +91,7 @@ data class AaptPackageConfig(
         private var staticLibraryDependencies: ImmutableList<File> = ImmutableList.of()
         private var intermediateDir: File? = null
         private var useConditionalKeepRules: Boolean = false
+        private var useMinimalKeepRules: Boolean = false
         private var useFinalIds: Boolean = true
 
         /**
@@ -126,6 +128,7 @@ data class AaptPackageConfig(
                 staticLibraryDependencies = staticLibraryDependencies,
                 intermediateDir = intermediateDir,
                 useConditionalKeepRules = useConditionalKeepRules,
+                useMinimalKeepRules = useMinimalKeepRules,
                 useFinalIds = useFinalIds
             )
         }
@@ -277,6 +280,11 @@ data class AaptPackageConfig(
 
         fun setUseConditionalKeepRules(value: Boolean): Builder {
             this.useConditionalKeepRules = value
+            return this
+        }
+
+        fun setUseMinimalKeepRules(value: Boolean): Builder {
+            this.useMinimalKeepRules = value
             return this
         }
 

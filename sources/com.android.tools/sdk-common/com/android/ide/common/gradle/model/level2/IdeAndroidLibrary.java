@@ -18,16 +18,16 @@ package com.android.ide.common.gradle.model.level2;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.builder.model.level2.Library;
-import com.android.ide.common.gradle.model.IdeModel;
-import com.android.ide.common.gradle.model.ModelCache;
 import java.io.File;
+import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
 /** Creates a deep copy of {@link Library} of type LIBRARY_ANDROID. */
-public final class IdeAndroidLibrary extends IdeModel implements Library {
+public final class IdeAndroidLibrary implements Library, Serializable {
     // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 4L;
 
     @NonNull private final String myArtifactAddress;
     @NonNull private final File myFolder;
@@ -50,9 +50,35 @@ public final class IdeAndroidLibrary extends IdeModel implements Library {
     private final int myType;
     private final int myHashCode;
 
+    // Used for serialization by the IDE.
+    @SuppressWarnings("unused")
+    IdeAndroidLibrary() {
+        myArtifactAddress = "";
+        //noinspection ConstantConditions
+        myFolder = null;
+        myManifest = "";
+        myJarFile = "";
+        myCompileJarFile = "";
+        myResFolder = "";
+        resStaticLibrary = null;
+        myAssetsFolder = "";
+        myLocalJars = Collections.emptyList();
+        myJniFolder = "";
+        myAidlFolder = "";
+        myRenderscriptFolder = "";
+        myProguardRules = "";
+        myLintJar = "";
+        myExternalAnnotations = "";
+        myPublicResources = "";
+        //noinspection ConstantConditions
+        myArtifactFile = null;
+        mySymbolFile = "";
+        myType = 0;
+
+        myHashCode = 0;
+    }
+
     IdeAndroidLibrary(
-            @NonNull Object original,
-            @NonNull ModelCache modelCache,
             @NonNull String artifactAddress,
             @NonNull File folder,
             @NonNull String manifest,
@@ -71,7 +97,6 @@ public final class IdeAndroidLibrary extends IdeModel implements Library {
             @NonNull String publicResources,
             @NonNull File artifactFile,
             @NonNull String symbolFile) {
-        super(original, modelCache);
         myType = LIBRARY_ANDROID;
         myArtifactAddress = artifactAddress;
         myFolder = folder;

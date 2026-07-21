@@ -18,28 +18,33 @@ package com.android.ide.common.gradle.model.level2;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.builder.model.level2.Library;
-import com.android.ide.common.gradle.model.IdeModel;
-import com.android.ide.common.gradle.model.ModelCache;
 import java.io.File;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
 
 /** Creates a deep copy of {@link Library} of type LIBRARY_JAVA. */
-public final class IdeJavaLibrary extends IdeModel implements Library {
+public final class IdeJavaLibrary implements Library, Serializable {
     // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     @NonNull private final String myArtifactAddress;
     @NonNull private final File myArtifactFile;
     private final int myType;
     private final int myHashCode;
 
-    IdeJavaLibrary(
-            @NonNull String artifactAddress,
-            @NonNull File artifactFile,
-            @NonNull ModelCache modelCache,
-            @NonNull Object sourceObject) {
-        super(sourceObject, modelCache);
+    // Used for serialization by the IDE.
+    @SuppressWarnings("unused")
+    IdeJavaLibrary() {
+        myArtifactAddress = "";
+        //noinspection ConstantConditions
+        myArtifactFile = null;
+        myType = 0;
+
+        myHashCode = 0;
+    }
+
+    IdeJavaLibrary(@NonNull String artifactAddress, @NonNull File artifactFile) {
         myType = LIBRARY_JAVA;
         myArtifactAddress = artifactAddress;
         myArtifactFile = artifactFile;

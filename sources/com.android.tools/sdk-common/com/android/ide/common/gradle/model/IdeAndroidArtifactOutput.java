@@ -25,11 +25,22 @@ import java.util.Objects;
 public final class IdeAndroidArtifactOutput extends IdeVariantOutput
         implements AndroidArtifactOutput {
     // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     @Nullable private final File myOutputFile;
     @Nullable private final String myAssembleTaskName;
     private final int myHashCode;
+
+    // Used for serialization by the IDE.
+    @SuppressWarnings("unused")
+    IdeAndroidArtifactOutput() {
+        super();
+
+        myOutputFile = null;
+        myAssembleTaskName = null;
+
+        myHashCode = 0;
+    }
 
     public IdeAndroidArtifactOutput(
             @NonNull AndroidArtifactOutput output, @NonNull ModelCache modelCache) {
@@ -47,7 +58,8 @@ public final class IdeAndroidArtifactOutput extends IdeVariantOutput
         // When using the plugin v2.4 or older, we fall back to calling getMainOutputFile().getOutputFile(), which is the older plugins
         // do.
         myOutputFile =
-                copyNewProperty(output::getOutputFile, output.getMainOutputFile().getOutputFile());
+                IdeModel.copyNewProperty(
+                        output::getOutputFile, output.getMainOutputFile().getOutputFile());
 
         myHashCode = calculateHashCode();
     }
