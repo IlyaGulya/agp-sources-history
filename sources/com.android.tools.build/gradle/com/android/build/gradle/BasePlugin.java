@@ -66,6 +66,7 @@ import com.android.build.gradle.internal.scope.DelayedActionsExecutor;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.TaskInputHelper;
+import com.android.build.gradle.internal.tasks.Workers;
 import com.android.build.gradle.internal.transforms.DexTransform;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.internal.variant.VariantFactory;
@@ -251,6 +252,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
 
         this.project = project;
         this.projectOptions = new ProjectOptions(project);
+        checkGradleVersion(project, getLogger(), projectOptions);
 
         project.getPluginManager().apply(AndroidBasePlugin.class);
 
@@ -260,6 +262,13 @@ public abstract class BasePlugin<E extends BaseExtension2>
         PluginInitializer.initialize(project);
         ProfilerInitializer.init(project, projectOptions);
         threadRecorder = ThreadRecorder.get();
+        
+        // initialize our workers using the project's options.
+        Workers.INSTANCE.initFromProject(
+                projectOptions,
+                // possibly, in the future, consider using a pool with a dedicated size
+                // using the gradle parallelism settings.
+                ForkJoinPool.commonPool());
 
         ProcessProfileWriter.getProject(project.getPath())
                 .setAndroidPluginVersion(Version.ANDROID_GRADLE_PLUGIN_VERSION)
@@ -269,7 +278,6 @@ public abstract class BasePlugin<E extends BaseExtension2>
 
         BuildableArtifactImpl.Companion.disableResolution();
         if (!projectOptions.get(BooleanOption.ENABLE_NEW_DSL_AND_API)) {
-            TaskInputHelper.enableBypass();
 
             threadRecorder.record(
                     ExecutionType.BASE_PLUGIN_PROJECT_CONFIGURE,
@@ -335,7 +343,6 @@ public abstract class BasePlugin<E extends BaseExtension2>
         final Gradle gradle = project.getGradle();
 
         extraModelInfo = new ExtraModelInfo(project.getPath(), projectOptions, project.getLogger());
-        checkGradleVersion(project, getLogger(), projectOptions);
 
         sdkHandler = new SdkHandler(project, getLogger());
         if (!gradle.getStartParameter().isOffline()
@@ -392,7 +399,6 @@ public abstract class BasePlugin<E extends BaseExtension2>
                 new BuildListener() {
                     @Override
                     public void buildStarted(@NonNull Gradle gradle) {
-                        TaskInputHelper.enableBypass();
                         BuildableArtifactImpl.Companion.disableResolution();
                     }
 
@@ -436,7 +442,6 @@ public abstract class BasePlugin<E extends BaseExtension2>
         gradle.getTaskGraph()
                 .addTaskExecutionGraphListener(
                         taskGraph -> {
-                            TaskInputHelper.disableBypass();
                             for (Task task : taskGraph.getAllTasks()) {
                                 if (task instanceof TransformTask) {
                                     Transform transform = ((TransformTask) task).getTransform();
@@ -670,7 +675,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
                             ExecutionType.BASE_PLUGIN_CREATE_ANDROID_TASKS,
                             project.getPath(),
                             null,
-                            () -> createAndroidTasks(false));
+                            () -> createAndroidTasks());
                 });
     }
 
@@ -704,7 +709,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
     }
 
     @VisibleForTesting
-    final void createAndroidTasks(boolean force) {
+    final void createAndroidTasks() {
         // Make sure unit tests set the required fields.
         checkState(extension.getBuildToolsRevision() != null,
                 "buildToolsVersion is not specified.");
@@ -747,8 +752,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
         // Unless TEST_SDK_DIR is set in which case this is unit tests and we don't return.
         // This is because project don't get evaluated in the unit test setup.
         // See AppPluginDslTest
-        if (!force
-                && (!project.getState().getExecuted() || project.getState().getFailure() != null)
+        if ((!project.getState().getExecuted() || project.getState().getFailure() != null)
                 && SdkHandler.sTestSdkFolder == null) {
             return;
         }
@@ -855,6 +859,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
                     });
         }
         BuildableArtifactImpl.Companion.enableResolution();
+        variantManager.setHasCreatedTasks(true);
     }
 
     private void checkSplitConfiguration() {
