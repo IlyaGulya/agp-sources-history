@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.dsl
+package com.android.build.api.attributes
 
-/** DSL object for configuring AAR metadata. */
-open class AarMetadata : com.android.build.api.dsl.AarMetadata {
+import org.gradle.api.Named
+import org.gradle.api.attributes.Attribute
 
-    override var minCompileSdk: Int? = null
-
-    override var minAgpVersion: String? = null
+/**
+ * Type of the attribute holding Android Gradle Plugin version.
+ */
+interface AgpVersionAttr : Named {
+    companion object {
+        @JvmField
+        val ATTRIBUTE: Attribute<AgpVersionAttr> = Attribute.of(AgpVersionAttr::class.java)
+    }
 }
