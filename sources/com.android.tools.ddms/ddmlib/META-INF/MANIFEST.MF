@@ -1,2 +1,279 @@
 Manifest-Version: 1.0
 
+Name: com/android/ddmlib/NativeLibraryMapInfo.java
+SHA-256-Digest: tcMr6ei+p+a21+3A0/hjZs65BpISF96UZfTAN+tLHcU=
+
+Name: com/android/ddmlib/JdwpHandshake.java
+SHA-256-Digest: 9ZLX4sUNGXPhkcoBIABED1AH2ltASgs7xLv7qa08Bj0=
+
+Name: com/android/ddmlib/AllocationsParser.java
+SHA-256-Digest: c+IYVefnl4qys3NirLH3LmzScwaQOYywYCr0c6ROACg=
+
+Name: com/android/ddmlib/logcat/LogCatFilter.java
+SHA-256-Digest: QeV9RzSAngiN2MH+UI6gbz8ZxY+tJQl4wS/bcex1pUc=
+
+Name: com/android/ddmlib/jdwp/packets/IdSizesReply.java
+SHA-256-Digest: IL3tpQXbq1YdZudtuB5+WHAiAFw2PldA6JFNSimFCj8=
+
+Name: com/android/ddmlib/log/InvalidTypeException.java
+SHA-256-Digest: g9G5IQZ1OjreVb/7BM0cZoPXMJF99iraJkSGPmQqOLI=
+
+Name: com/android/ddmlib/log/EventLogParser.java
+SHA-256-Digest: 15Tff8sYku+jJIL3VAau77Iq8azqV+9l8kVbjo3seQM=
+
+Name: com/android/ddmlib/HandleHeap.java
+SHA-256-Digest: 4urlpCg+Img+Bu/CWA/JAGG1o2D2vkD8/SFkMva38Vc=
+
+Name: com/android/ddmlib/HandleProfiling.java
+SHA-256-Digest: 0C56WcMzkL19GwhIl64DFv317TzaHPN1K7a7i4UTS0g=
+
+Name: com/android/ddmlib/testrunner/TestResult.java
+SHA-256-Digest: dZAYMQUz1iUeEQq2u6eZwWLYE6jTdGdjlysudebyTtM=
+
+Name: com/android/ddmlib/log/EventValueDescription.java
+SHA-256-Digest: 6io3wuUa9qAmR3R63L4IiyEd2MHeWfs9r2mwt+M8bhw=
+
+Name: com/android/ddmlib/DdmPreferences.java
+SHA-256-Digest: g7SReOndppMvQoXozTef3ZYJ/6rCovt3QUW0lPUNW/o=
+
+Name: com/android/ddmlib/FileListingService.java
+SHA-256-Digest: tZmPY4Zr7dlVa7RUaIuqJiubi0HCu2mapssJ4iy1LEc=
+
+Name: com/android/ddmlib/AllocationInfo.java
+SHA-256-Digest: st2oDlLUSmcm2ElrJKy94gOtv3aMEm5siDdMIA/99f8=
+
+Name: com/android/ddmlib/AdbCommandRejectedException.java
+SHA-256-Digest: M40D1HD7Wl5tjjr0bdBkbgf8kN7n38IYMPqVfT9NtRw=
+
+Name: com/android/ddmlib/CanceledException.java
+SHA-256-Digest: DOpUOz8TJCiihRvu4LJzrEH5WKWzk9pJcw6Lgs5UOO8=
+
+Name: com/android/ddmlib/HandleViewDebug.java
+SHA-256-Digest: Vz+xoykz0AUnPiXAm9Mvgb5rZGvXxDmhOPDcRo6yu1o=
+
+Name: com/android/ddmlib/DebugPortManager.java
+SHA-256-Digest: 8kpEzwc+eO1HtpGeUgTv2IY7Ki49Cz4MOUtAP71xFXc=
+
+Name: com/android/ddmlib/BitmapDecoder.java
+SHA-256-Digest: YfZrVRAglvH3vCnw5NtsDtM/aVGy16gyDq7XXBv3NLs=
+
+Name: com/android/ddmlib/jdwp/JdwpAgent.java
+SHA-256-Digest: M8H4oeudJ8C+L9GS+6aLLeoZw4Yhjfo27hP+dll8kO8=
+
+Name: com/android/ddmlib/ChunkHandler.java
+SHA-256-Digest: t7aSObx7JO/+Ew388NWTWQbO/j7MtuftGV4T6htdSOk=
+
+Name: com/android/ddmlib/Debugger.java
+SHA-256-Digest: gWAwsNOGqs0TaLG6UmbicVpYGHp/rG9Ra4ao6xGB6Jk=
+
+Name: com/android/ddmlib/Log.java
+SHA-256-Digest: V38V1neBIdfSi/gIDzQdGN2SoRiOl+XnUAXbGssrlq4=
+
+Name: com/android/ddmlib/MonitorThread.java
+SHA-256-Digest: kfe9bbfgPKXpfosdQYfZuiQiliOf3dagmx2O+Pbb4+M=
+
+Name: com/android/ddmlib/NativeStackCallInfo.java
+SHA-256-Digest: AAZQE/e8BDfHDPU/0mDlzr0pVO7HiyUKdaAExthB9Dc=
+
+Name: com/android/ddmlib/HandleExit.java
+SHA-256-Digest: 8y0Qdw2DUcO+6VrfF2M7b7Fqw0+xLYy9v/bF0k0coiI=
+
+Name: com/android/ddmlib/ClientData.java
+SHA-256-Digest: vbEN8I0M/GewMH0SV0Gbgfr442aAVOAuqEpw6LklMLM=
+
+Name: com/android/ddmlib/AdbVersion.java
+SHA-256-Digest: KW/tsaQisP3u2VMjFXGrcwS2gfhmbShPuZt9MEW3pWo=
+
+Name: com/android/ddmlib/testrunner/InstrumentationResultParser.java
+SHA-256-Digest: c5cfUbzBDl0IXslyriWgE669d83jzWmVEprc9HdvsWQ=
+
+Name: com/android/ddmlib/DdmJdwpExtension.java
+SHA-256-Digest: IdmIwF/FlVha17l9Hed9eNwzIKMau7+Eo/7AyQr/t1I=
+
+Name: com/android/ddmlib/HandleHello.java
+SHA-256-Digest: jOON5OLmSxHbq4Rfj45sLt5biNNspKHj+SsYs8IFoY4=
+
+Name: com/android/ddmlib/JdwpPacket.java
+SHA-256-Digest: Rdu+he7ZFp1o55m+4yTNGHUvvWKl1xCehtK4YQsuUb8=
+
+Name: com/android/ddmlib/jdwp/JdwpExtension.java
+SHA-256-Digest: oCO0EOo+ri+v3EV2yb1wCxoYLY5JskLhBAB1AJNZ1HA=
+
+Name: com/android/ddmlib/DdmConstants.java
+SHA-256-Digest: 8g3HwldiqATvr+INsHntBhftZsACE2Twrv1CRexeQBU=
+
+Name: com/android/ddmlib/log/InvalidValueTypeException.java
+SHA-256-Digest: vnil3lSpUuOHSo8p25zqb6uyBjO1Zxx8nADO6c44IeE=
+
+Name: com/android/ddmlib/HandleWait.java
+SHA-256-Digest: MOU79V0py6dHh+UZ78IhaXi5V2Otf2FMIP4NBhM4yww=
+
+Name: com/android/ddmlib/IDevice.java
+SHA-256-Digest: PAy/GUM5ASi2bgqS3DpmEIOplLGILtF14DhbTSUnGtU=
+
+Name: com/android/ddmlib/BadPacketException.java
+SHA-256-Digest: qhnrmRYWMWpDMCvQmjDnKoihlifkJvXY1L8UyT1BYa4=
+
+Name: com/android/ddmlib/utils/ArrayHelper.java
+SHA-256-Digest: vN8+9I0aYAZ53iNfHyZ4T2g8xyJNth8P7+zqUqw02G4=
+
+Name: com/android/ddmlib/IStackTraceInfo.java
+SHA-256-Digest: kgFOsfUrYgh0Xbe9SGa92PEokWp5Oc52RWHv00gVhCc=
+
+Name: com/android/ddmlib/utils/DebuggerPorts.java
+SHA-256-Digest: JSs3lG/QbhrapbGT+ppVr4j6QHlb+vo05VgaaxHPxqE=
+
+Name: com/android/ddmlib/IShellOutputReceiver.java
+SHA-256-Digest: eGHXVyyFmm/FGnP988zMLruEdk47lLzR2ZweZX6wK9Y=
+
+Name: com/android/ddmlib/Device.java
+SHA-256-Digest: VJjeX2viExM7mp12iyzxfJklO7HvPD6xvSgF0w8f1VQ=
+
+Name: com/android/ddmlib/logcat/LogCatReceiverTask.java
+SHA-256-Digest: obBW79EH7FA7ypITvEGT/RbUk8TwE088Czlvu/PzY1Q=
+
+Name: com/android/ddmlib/PropertyFetcher.java
+SHA-256-Digest: QMaoy3gcYkgW5isRjvQYrBEA0O/4kBuZOV6DqDRyfnk=
+
+Name: com/android/ddmlib/EmulatorConsole.java
+SHA-256-Digest: ugTVnKSZdzXRv/KtPf6Ylqg8ZGJYrnFb2nmO7yVqEBo=
+
+Name: com/android/ddmlib/testrunner/TestIdentifier.java
+SHA-256-Digest: Hrbxaw2imjG3JE1ulL3SkRxcWau0T3Z3zGfOuOEbNIg=
+
+Name: com/android/ddmlib/IShellEnabledDevice.java
+SHA-256-Digest: FxASNuMlkbZb24D5yW2bKQcl70rv0Ll2KX4l2d9T74c=
+
+Name: com/android/ddmlib/testrunner/ITestRunListener.java
+SHA-256-Digest: n0D5kD+2Cgk5xmz4VurXD5RH8T1mmDCPuSsM/aG3t/M=
+
+Name: com/android/ddmlib/HandleThread.java
+SHA-256-Digest: vPyH8MpvNzdAugGfK9g/J5Xt9sCGlHavJ2PlwIkK8vg=
+
+Name: com/android/ddmlib/logcat/LogCatMessageParser.java
+SHA-256-Digest: 5w/W9G0wfDrmEDrf+QTGjUtfG2LnPcWXjDigRy9I66A=
+
+Name: com/android/ddmlib/RawImage.java
+SHA-256-Digest: xE8jDEXhJrlvC+HZCI3iZlmlRY4S6SdWhANh154S878=
+
+Name: com/android/ddmlib/jdwp/JdwpCommands.java
+SHA-256-Digest: sCuN1PoEocxODAHgP3uDH/ZcTosxiimu1n24Glds7oY=
+
+Name: com/android/ddmlib/InstallException.java
+SHA-256-Digest: c8vF5qAgZYlTxsq2tWCNAk/Swqo9yTVA4gZxC2XvRXw=
+
+Name: com/android/ddmlib/logcat/LogCatMessage.java
+SHA-256-Digest: +oC1uL3peX/I4igJOXotYYu0kDg/gQYhbRUxgv3hLEs=
+
+Name: com/android/ddmlib/testrunner/XmlTestRunListener.java
+SHA-256-Digest: Nu8iS+SpLpmIAJGebG/LqGLq+hWRKlexyDf+Ln5BPvs=
+
+Name: com/android/ddmlib/log/EventContainer.java
+SHA-256-Digest: RxcXP4YjEQmkHXnhjP7LXEb9vESBOFfCYnaBuwaQVYA=
+
+Name: com/android/ddmlib/ScreenRecorderOptions.java
+SHA-256-Digest: h7yAdpEzJBpXefZM24fagIqAypfKc3s43nuPUe8jw7s=
+
+Name: com/android/ddmlib/testrunner/TestRunResult.java
+SHA-256-Digest: v+26VMFHSBS2r595r0Cmmj6tWN/W8ryLcT6un9lWg30=
+
+Name: com/android/ddmlib/BatteryFetcher.java
+SHA-256-Digest: Zm2U32Rt1lOtWEG+ugjSMIcGW771M8TOQ7ZLDsK0YP0=
+
+Name: com/android/ddmlib/TimeoutException.java
+SHA-256-Digest: +jsiD4VIZL6W2F1cy58xKN0kVCYEitrcEZVb62Uvb7s=
+
+Name: com/android/ddmlib/testrunner/RemoteAndroidTestRunner.java
+SHA-256-Digest: Wf8BhlE4VcEt6MgG6h66hLr+NbQMwbjj93+T8CpQlI4=
+
+Name: com/android/ddmlib/log/LogReceiver.java
+SHA-256-Digest: Eya8v8+wGNkUiPcS2i7/1G0nlrYNsmA0JgZtsJbLGpE=
+
+Name: com/android/ddmlib/HandleNativeHeap.java
+SHA-256-Digest: gXAdoanqB4yQ7Gn9+w3Hofs7a6crufIG/xpGNRdkPqo=
+
+Name: com/android/ddmlib/testrunner/IRemoteAndroidTestRunner.java
+SHA-256-Digest: 3iwZSLykwyPCtxoW7VZOQYkOyKNZ4yqmwAK4XXZCUes=
+
+Name: com/android/ddmlib/jdwp/JdwpInterceptor.java
+SHA-256-Digest: gaJ/9TSpI17Y+sVtGD6MtFZN/41ypSY/UxZKVBh8Vr8=
+
+Name: com/android/ddmlib/MultiLineReceiver.java
+SHA-256-Digest: 362+OkTvX485L9LYt7KaBX+p9Nda4GbAXzS6ZEazBvE=
+
+Name: com/android/ddmlib/ClientTracker.java
+SHA-256-Digest: c9dcW8SssnFwh4E0/0IaOIIgt0vX8Ye7P7GQ6fnRIXo=
+
+Name: com/android/ddmlib/CollectingOutputReceiver.java
+SHA-256-Digest: bADV++97IhjfaiNVLnAZ70qft1CZGGR+YMDavnNWoFU=
+
+Name: com/android/ddmlib/log/GcEventContainer.java
+SHA-256-Digest: EEspnIAxnNPgJCQB/7/rHaFT2OwxcjGflMxwACxFvF8=
+
+Name: com/android/ddmlib/DeviceMonitor.java
+SHA-256-Digest: 7CUZ5QXCpX1HdD3w1d/5cqDtS22plRYHexZOwfHIYms=
+
+Name: com/android/ddmlib/ThreadInfo.java
+SHA-256-Digest: Nt4jmpW870fNa4z0epe27dSjaWKUne4cZzU6W8jEyuw=
+
+Name: com/android/ddmlib/SyncException.java
+SHA-256-Digest: VnXjNX34QPFqUbUQRw2dfcuGUovgDx6IhC7va/CUioE=
+
+Name: com/android/ddmlib/jdwp/JdwpProtocol.java
+SHA-256-Digest: ZXBY3wgtLy3OlAU/GXr9dysgwzxoDBVfoJfYHgm1wRU=
+
+Name: com/android/ddmlib/logcat/LogCatHeader.java
+SHA-256-Digest: Tz1DXhw9xl0ol/hDXpA7T+U6HWe+h6eHACqZoci/QTM=
+
+Name: com/android/ddmlib/logcat/LogCatTimestamp.java
+SHA-256-Digest: 5ol+uOyZhmnoL7qrSLYvHT7asrNsPRdbSV4nThGk2yk=
+
+Name: com/android/ddmlib/testrunner/OnDeviceOrchestratorRemoteAndroidT
+ estRunner.java
+SHA-256-Digest: VacWWMdCGHG24Z06xzCj8CbAqzsDGLn85Ai9Y6Tx37A=
+
+Name: com/android/ddmlib/jdwp/JdwpPayload.java
+SHA-256-Digest: wMasR5M5HR35nwJpYx/A6sf6jJSbZaR7qF2HeMNpbqU=
+
+Name: com/android/ddmlib/logcat/LogCatListener.java
+SHA-256-Digest: btYuoCQoPK4wptIKWS77shTpwAATyMNs1T2F6+iFXW4=
+
+Name: com/android/ddmlib/AndroidDebugBridge.java
+SHA-256-Digest: dynG1fUW+7Bybkx2x2phHjtq3UfSgHxCTUMl4uYYNNI=
+
+Name: com/android/ddmlib/ShellCommandUnresponsiveException.java
+SHA-256-Digest: B6tTXhtnpsTVje+PYj8oulYpHoaGkFv41sK7DGjgEdY=
+
+Name: com/android/ddmlib/Client.java
+SHA-256-Digest: x6SZUXpib5BihAys69RNwm19vjTDRHjJhp+i2LfMilg=
+
+Name: com/android/ddmlib/HeapSegment.java
+SHA-256-Digest: kQ1hN+o7fdf2M1UuDwn3mHKkRaXPQ9tHeObBYqVT1tQ=
+
+Name: com/android/ddmlib/HandleAppName.java
+SHA-256-Digest: zNa7mlc35AOZBIpGiKeCi7gPNag67daPB8TDSfQfytY=
+
+Name: com/android/ddmlib/AdbHelper.java
+SHA-256-Digest: iLC0FvtPWD+3J323InyIytSG78+XuPdxEqz7hEaZ+t0=
+
+Name: com/android/ddmlib/NullOutputReceiver.java
+SHA-256-Digest: l5NWMHzH66gSYmxCoEj5Q+GhgfXCEEOI9EMwTugs+58=
+
+Name: com/android/ddmlib/utils/FilePermissionUtil.java
+SHA-256-Digest: oHB/6xTqQlA/Cg7xCEGI6YOSaT5r9ypceu12wB46igo=
+
+Name: com/android/ddmlib/SplitApkInstaller.java
+SHA-256-Digest: HkgUx5h/0GPqrPn1cKQXAHTwpWPoUrPDe7iDNsxt2dU=
+
+Name: com/android/ddmlib/ByteBufferUtil.java
+SHA-256-Digest: L7uC7+Bg1KlG4QDCx81qADNBA4yMgbngYM+du9q6xoM=
+
+Name: com/android/ddmlib/NativeAllocationInfo.java
+SHA-256-Digest: r7lTzOVpoEMC42Gyr9eAq0bR/5e4A7Egcuq6b6cpeDs=
+
+Name: com/android/ddmlib/SyncService.java
+SHA-256-Digest: G/MPFZqsS9YeM6RXUP1ja3vuXNRyynNOWkWn1chLJjY=
+
+Name: com/android/ddmlib/HandleTest.java
+SHA-256-Digest: 3I+F/jbkGUF1TJzvIEziubNvuAZdfW1IGl2z2SeYqpA=
+

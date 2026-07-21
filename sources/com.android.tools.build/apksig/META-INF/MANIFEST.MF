@@ -1,2 +1,210 @@
 Manifest-Version: 1.0
 
+Name: com/android/apksig/internal/asn1/Asn1Type.java
+SHA-256-Digest: Zi7RkbXebhJ/O9DoRIBdGBOf1cuwqf4pzSM9Wk4ZXUU=
+
+Name: com/android/apksig/internal/asn1/ber/BerDataValueReader.java
+SHA-256-Digest: Qs0rqZMiXR0QKUqCigFZrTM6mcysGv/oBojfVF3AORA=
+
+Name: com/android/apksig/internal/apk/AndroidBinXmlParser.java
+SHA-256-Digest: yYgZOybcoFDTs+rHGs79iQhLw3zWwyyfcZr0cT/Dfcs=
+
+Name: com/android/apksig/internal/apk/v1/V1SchemeSigner.java
+SHA-256-Digest: LUIQ5V7a74w1yP/zYulnAkG1qEYxi3ZGBibAwjvlCFg=
+
+Name: com/android/apksig/internal/pkcs7/EncapsulatedContentInfo.java
+SHA-256-Digest: 9dlxQYe8EvJ0uBzPtmwkqWrGB2JSRY61J7f088/6LHo=
+
+Name: com/android/apksig/internal/apk/v1/V1SchemeVerifier.java
+SHA-256-Digest: mN26f00bxUSr8pP6NGKekk19utjyc9ku9WStFJdCBlM=
+
+Name: com/android/apksig/internal/pkcs7/SignedData.java
+SHA-256-Digest: AnxeMiNSlh8iUs916Vu6voSJto50ZeX7+x8LlvU+Stc=
+
+Name: com/android/apksig/internal/asn1/Asn1Tagging.java
+SHA-256-Digest: +1JP23PiMGKSVqXv5AHpP/wcIY0x9tRiBHViDcvKiBM=
+
+Name: com/android/apksig/internal/zip/LocalFileRecord.java
+SHA-256-Digest: vC2F8Iy5EPplIeYHOUYz7VAX1qKmHjztplGW6BV0jBU=
+
+Name: com/android/apksig/internal/pkcs7/SignerIdentifier.java
+SHA-256-Digest: mfD23g1zvKzB4/77KXZQn9r3RP8JCMQ8rS11Yd8El3c=
+
+Name: com/android/apksig/zip/ZipFormatException.java
+SHA-256-Digest: g7eMn3y55PNp95gChg1KsGd42ESIc0hDuDRJhlpVEpU=
+
+Name: com/android/apksig/internal/pkcs7/Attribute.java
+SHA-256-Digest: F4TQdCz7+VyuoPPCKUBhf+u8ERhJjjFu89jCmYYIA94=
+
+Name: com/android/apksig/apk/ApkUtils.java
+SHA-256-Digest: 1ewlGH5dFUlnABNHA1W1QSICHWFTyX4th5ffr8k8+Ds=
+
+Name: com/android/apksig/ApkSignerEngine.java
+SHA-256-Digest: v6+nlH/4A/jkpi0Mg0Z1dCiaAfw7a6Cu0Gjy9eAYUSM=
+
+Name: com/android/apksig/internal/util/AndroidSdkVersion.java
+SHA-256-Digest: mRkSJHv7EYpdWdkhTh6F2eyLAiQe9LDsaYRuIyT3tms=
+
+Name: com/android/apksig/internal/asn1/ber/BerEncoding.java
+SHA-256-Digest: 74faeDtdOVE4rEjglgMm6b6o+pZf1145ZXQh07vr63Q=
+
+Name: com/android/apksig/internal/apk/v2/V2SchemeSigner.java
+SHA-256-Digest: ieoIMY1Va2kk1Dl9NaJH22bLK8R5s++u2HEBsbr0tww=
+
+Name: com/android/apksig/internal/util/MessageDigestSink.java
+SHA-256-Digest: rqM0noNGKlXucJWVNrKgNkiFyW8zlrSqj9ZLrNg//3s=
+
+Name: com/android/apksig/internal/pkcs7/AlgorithmIdentifier.java
+SHA-256-Digest: f2thzQ9+bcdZIoJamaLSuCocI5bpjn1c2rXgGtQ6K4Y=
+
+Name: com/android/apksig/internal/asn1/Asn1OpaqueObject.java
+SHA-256-Digest: kYuoszPjqKtqoRuQbkYUf5DpL1e7pXfOB2rzIphC2Ow=
+
+Name: com/android/apksig/internal/asn1/Asn1DecodingException.java
+SHA-256-Digest: K+WeSZl2zGDU9vFpjpU0fJFtdURbGrnV4cWKc6VzkfM=
+
+Name: com/android/apksig/util/DataSink.java
+SHA-256-Digest: qg3Bw2QfZCHybNjJomSWSGcDhZkjdnc+6n0jDaqGd0s=
+
+Name: com/android/apksig/internal/asn1/Asn1EncodingException.java
+SHA-256-Digest: 27lSBQ5AQP0tkuX2A1xi004zF6YdVvEtSYY5eYq4NzY=
+
+Name: com/android/apksig/ApkVerifier.java
+SHA-256-Digest: +vpfYCoRKetOzurK13yAf6GJQgavbdfCpmlOdMUF5zg=
+
+Name: com/android/apksig/apk/ApkFormatException.java
+SHA-256-Digest: A0/FdnHTEaFf2PFttq73pM9RczvkNuJaKuqbhRpKGIY=
+
+Name: com/android/apksig/internal/asn1/Asn1Class.java
+SHA-256-Digest: EIK1wdl1fJNDpv3xvrYzud3LX0DsudM3+0FI4Gsd5FQ=
+
+Name: com/android/apksig/internal/asn1/ber/BerDataValue.java
+SHA-256-Digest: MijwnhaMaZzXmXUIGQlM1dL4MYnyOvzk+8H7+Nan7OE=
+
+Name: com/android/apksig/internal/pkcs7/SignerInfo.java
+SHA-256-Digest: fgCO6vu4VVKLFeF6UElPhHU0p9dFjfsCqt9HTN1y3qk=
+
+Name: com/android/apksig/internal/util/ByteArrayDataSink.java
+SHA-256-Digest: fB7yALmEymz7wz90nJm/DJc+58L+2tHcRt0yHj1fQsw=
+
+Name: com/android/apksig/internal/pkcs7/IssuerAndSerialNumber.java
+SHA-256-Digest: luGClirbYz+B/PXx3+ezoQNUyma5JeerArRR2I38DbU=
+
+Name: com/android/apksig/internal/apk/v1/DigestAlgorithm.java
+SHA-256-Digest: HPnDjTJP2VworFHl1+idyFFPIpdt13pap/2C7hTtpZU=
+
+Name: com/android/apksig/internal/util/GuaranteedEncodedFormX509Certif
+ icate.java
+SHA-256-Digest: HyG9YmUit3TAYdWH3VZwXlKGzMe6rxlA9d+c2omCI6A=
+
+Name: com/android/apksig/internal/asn1/Asn1TagClass.java
+SHA-256-Digest: 9bOzjMnzkGNUr9DpAitqIxEX01ZUlQkNp0oYD/9Z9yI=
+
+Name: com/android/apksig/internal/jar/ManifestParser.java
+SHA-256-Digest: Yv3Y/8kATdVdpKlwRLwDZXJ9WfFWERwIgfWoZRZyYEQ=
+
+Name: com/android/apksig/internal/util/Pair.java
+SHA-256-Digest: l9QOBwUSM488ZPGEW3gIIUp0v4qXnBM6Lhlf+gStTMU=
+
+Name: com/android/apksig/internal/pkcs7/ContentInfo.java
+SHA-256-Digest: H7SvbZ97J9OKf2amyKXS9OIHj93ZvNnOb31l7D7Mkfc=
+
+Name: com/android/apksig/apk/CodenameMinSdkVersionException.java
+SHA-256-Digest: 6SynnnC6tx8kXKAUMUHoucn/oIdXLJeDZjCHJElVFmM=
+
+Name: com/android/apksig/internal/apk/v2/SignatureAlgorithm.java
+SHA-256-Digest: gP7wfEGvDBkt548yRAxuZpNuGv2DkexCFSOpHCLhQqs=
+
+Name: com/android/apksig/internal/jar/SignatureFileWriter.java
+SHA-256-Digest: vhvBN5rVzcIeyptekXmmoVZpOtomA7AJYmh27OfgncE=
+
+Name: com/android/apksig/internal/util/ByteBufferSink.java
+SHA-256-Digest: nYUHKacRdrPrqWY0U0ASQ/oRLZ9uHQ0uyThKJPLTy6g=
+
+Name: com/android/apksig/internal/apk/v2/ContentDigestAlgorithm.java
+SHA-256-Digest: mmUhgv+KBBhY+cw4MXt5CRP4g0Tw5hrojQ0g2C3i750=
+
+Name: com/android/apksig/internal/apk/v2/V2SchemeVerifier.java
+SHA-256-Digest: HgTRtnWVrJillUmnAni6fAzGvtQRVUS/8cS5EREU06M=
+
+Name: com/android/apksig/ApkSigner.java
+SHA-256-Digest: BXwAEpakvy857tzZLIVprLXcnMx+BCUFlXjiMmykzLw=
+
+Name: com/android/apksig/DefaultApkSignerEngine.java
+SHA-256-Digest: J9P8l7bTLR+prUYmD5a4QS9mRG+2f0sGU5f+0NfiOKk=
+
+Name: com/android/apksig/internal/zip/CentralDirectoryRecord.java
+SHA-256-Digest: SeS/CRRqmyQasL0XMq+0eQUrBcOFLFxvPsdnVIkeCds=
+
+Name: com/android/apksig/internal/asn1/ber/InputStreamBerDataValueRead
+ er.java
+SHA-256-Digest: Bcx4cPlBAwCVs5WcqCGh0WOitojLy1+mAZG/5NG7IsE=
+
+Name: com/android/apksig/internal/asn1/ber/BerDataValueFormatException
+ .java
+SHA-256-Digest: d9UO0b2w+1KWsPpdvCJk7hFLsA8yvZo8d1UtOIYwBDY=
+
+Name: com/android/apksig/util/ReadableDataSink.java
+SHA-256-Digest: s8Oa5K1daB+Oo+5bolScR2LFJuVgfx8lBbRGTuvqsyA=
+
+Name: com/android/apksig/internal/util/OutputStreamDataSink.java
+SHA-256-Digest: ON7V0VZ25DcJOk/Q1CT87edJiTApfVUl6QmuFQdnhI4=
+
+Name: com/android/apksig/internal/util/DelegatingX509Certificate.java
+SHA-256-Digest: KhdUoy1ripA1PqWljfDOEL6TdA9+bUAp11NpQ+tYia0=
+
+Name: com/android/apksig/internal/asn1/Asn1Field.java
+SHA-256-Digest: KxY8fO54xw1fiBW6JJh/GehBfl2uP1TGtumINGzHlTU=
+
+Name: com/android/apksig/internal/asn1/Asn1DerEncoder.java
+SHA-256-Digest: jn7Q9MCl7G3/BKJdSziywXPaUb4v/5ylvtuk1mty/1o=
+
+Name: com/android/apksig/internal/pkcs7/Pkcs7Constants.java
+SHA-256-Digest: 6bxUY66oFw5Off5QOmu3NsoVlY6o7N3KotU/WWz2oXU=
+
+Name: com/android/apksig/internal/asn1/Asn1BerParser.java
+SHA-256-Digest: VauyT+RBImAAyvQyCSIY9DiiMKeOm6N6QWVlB6m0L+8=
+
+Name: com/android/apksig/internal/jar/ManifestWriter.java
+SHA-256-Digest: pgW5+I+ul9rLylqNs3MS7t17ldr01INNxHyvUC3ysDw=
+
+Name: com/android/apksig/internal/util/RandomAccessFileDataSink.java
+SHA-256-Digest: k4wkNhGbpacTBZkJnKceYn/+helg/9piD5SelXHGKYY=
+
+Name: com/android/apksig/internal/util/ByteBufferDataSource.java
+SHA-256-Digest: MAKMnl6JzzNH93e0+WIEx2KVwSlRAMT+vuM5c61z6F0=
+
+Name: com/android/apksig/util/DataSinks.java
+SHA-256-Digest: EBMk8Dehh5JSZuCb1aorlP8vC7wRg6YJ5v+bUkhhBFU=
+
+Name: com/android/apksig/internal/util/RandomAccessFileDataSource.java
+SHA-256-Digest: iHMh2/Em/GkmkRv3F+e746PQd0eyX00ryYJIZgNoZFs=
+
+Name: com/android/apksig/internal/util/ByteBufferUtils.java
+SHA-256-Digest: CQEf1csz4y6X3QlE/IdAFV8jxeqsEeQLF0cnOW7Y3Sk=
+
+Name: com/android/apksig/internal/asn1/ber/ByteBufferBerDataValueReade
+ r.java
+SHA-256-Digest: 6u79jsfM7JGOxcIBHq0Hk3XovL0TiJjqRyxKvjKr8r0=
+
+Name: com/android/apksig/internal/zip/EocdRecord.java
+SHA-256-Digest: lGPX3zzr76xKc3S+RxTdGm4Hm+uiYOr/pFwWfZvG1P8=
+
+Name: com/android/apksig/util/DataSource.java
+SHA-256-Digest: 7y6dIDtRXnqhE/iLzGAzE58xgLQvakH/ciPLBmWc3v0=
+
+Name: com/android/apksig/internal/util/InclusiveIntRange.java
+SHA-256-Digest: 0P4rBpHNPsVJ5U3V+C3J16LHzglvq8neBWZSzP5ml9Q=
+
+Name: com/android/apksig/internal/zip/ZipUtils.java
+SHA-256-Digest: NHnMlOmD5S1fn0trGPALUgfcolyDeSezo0On5AsNiOk=
+
+Name: com/android/apksig/apk/MinSdkVersionException.java
+SHA-256-Digest: JXNeCdyV8WaSGrWBiBkCqkHznsmnRhG9IOL08biVXy0=
+
+Name: com/android/apksig/util/DataSources.java
+SHA-256-Digest: OgO082FrUIPsbgxzrOwjt8XACs/08ymuPneHQnqNmpU=
+
+Name: com/android/apksig/internal/pkcs7/Pkcs7DecodingException.java
+SHA-256-Digest: F1woRG+JGI2DbIhY1jzcLxRi2vZQf138lhkKDNz46Xs=
+

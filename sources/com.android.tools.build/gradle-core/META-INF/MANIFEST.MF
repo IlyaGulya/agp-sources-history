@@ -1,2 +1,2239 @@
 Manifest-Version: 1.0
 
+Name: com/android/build/gradle/internal/pipeline/TransformTask.java
+SHA-256-Digest: c4JccVjs39t+KvwPnBs/qY2xW9kt4f5qxNVCmfHdXTk=
+
+Name: com/android/build/gradle/internal/tasks/SplitFileSupplier.java
+SHA-256-Digest: YR5tYzXA3Jt9OWGbyDuynEEzOhAhfxVlqNxCd5bJETI=
+
+Name: com/android/build/gradle/tasks/factory/TestServerTaskConfigActio
+ n.java
+SHA-256-Digest: M/qnvvxT85768jzTiTFbd5mwNG7BeXRHH1TpMgx06c0=
+
+Name: com/android/build/gradle/internal/dsl/AaptOptions.java
+SHA-256-Digest: s0ul3u5xteOi5eRJUraRse0tuRTuGtoy74e4eX08oHM=
+
+Name: com/android/build/gradle/internal/test/report/base-style.css
+SHA-256-Digest: KFHQsvFPT/G3Xw0BQ4iHkR60dOI1vpPlYXCSJ877GNs=
+
+Name: com/android/build/gradle/internal/ExtraModelInfo.java
+SHA-256-Digest: l2QjYyk/5pxp4IFj8lSf1OoefRqxyIzaJHGZoBmpZo8=
+
+Name: com/android/build/gradle/internal/scope/BuildOutputProperty.java
+SHA-256-Digest: d7Mktt4ngZwYxhN5Iu6TKLkkm2CNljkB4ICRfrHF5Ow=
+
+Name: com/android/build/gradle/external/cmake/server/Server.java
+SHA-256-Digest: Cl4BHxDb8Sw7Ds1p4PkeHQ4wdh4AUwpEGc6YDAZ8UIE=
+
+Name: com/android/build/gradle/internal/ide/level2/GlobalLibraryMapImp
+ l.java
+SHA-256-Digest: Qck3nV3W1rB5uB//dGtjSB1rG+cANOdmPkCErk6S5s0=
+
+Name: com/android/build/gradle/AndroidConfig.java
+SHA-256-Digest: IokkMgzjLB57bh+tKMLhElhF+3Mnhi9uVdx0/032FnI=
+
+Name: com/android/build/gradle/internal/pipeline/MutableDirectoryInput
+ .java
+SHA-256-Digest: E3gHmqBTS5/dBh4QnVxgNI4TuI2IF05lS7bpOuwRnS4=
+
+Name: com/android/build/gradle/internal/SdkHandler.java
+SHA-256-Digest: 1jQBI5xRv06Kb0nhsaZGsHbTNNrAeww8H27CI76P1n0=
+
+Name: com/android/build/gradle/internal/transforms/ProguardConfigurabl
+ e.java
+SHA-256-Digest: 6zMHJRDHejMSI2bMjpUo+o2z/hwshrHMhhlHCKxEHU8=
+
+Name: com/android/build/gradle/shrinker/parser/KeepModifier.java
+SHA-256-Digest: +F96Hqlq4pV6q77+VQBrPRi1i6tYl3SDeM4pZm6oWF0=
+
+Name: com/android/build/gradle/tasks/InvokeManifestMerger.java
+SHA-256-Digest: y3WlWfwJT/n119w8tT9I00OsJnbA8rlWZ0qVFrMS5sk=
+
+Name: com/android/build/gradle/internal/ndk/DefaultStlSpecificationFac
+ tory.java
+SHA-256-Digest: Ti7mDvnHBTAgpMz0Tor62p9KtfxdvkV2duImaD5ISNg=
+
+Name: com/android/build/gradle/internal/dependency/AlternateDisambigua
+ tionRule.java
+SHA-256-Digest: KFMPvp541M58AzVzF6b/Ffp0DXtxNgo1xH5RtRK7fcM=
+
+Name: com/android/build/gradle/shrinker/DependencyRemoverVisitor.java
+SHA-256-Digest: mpaP83joXo6+TNRuFVqaFUiP9EPjGiiadxOUOBrpcfw=
+
+Name: com/android/build/gradle/api/UnitTestVariant.java
+SHA-256-Digest: YMYQsoLh+liwe+RacWD1I2hVTDWCzmob8M2jmr8sW9c=
+
+Name: com/android/build/gradle/tasks/factory/AndroidJavaCompile.java
+SHA-256-Digest: 0ut8+Hjr3RM93v03IDF0EVBUiVmjzLcuxBCwcFsI7xQ=
+
+Name: com/android/build/gradle/api/AndroidArtifactVariant.java
+SHA-256-Digest: 7SoUDWE6ExbNfYK+YmnNvfUBRRsM4QgBzUMN2l463XQ=
+
+Name: com/android/build/gradle/internal/pipeline/TransformManager.java
+SHA-256-Digest: iw2jfrrm98sBLYwg0DONfYm4QkMo4tOKt+7GX2lfeww=
+
+Name: com/android/build/gradle/tasks/WorkerExecutorAdapter.java
+SHA-256-Digest: /BQzqovnwJmVUQ20dyIPMLmdcKbbd7r7Ct8NLk4SFOw=
+
+Name: com/android/build/gradle/tasks/CleanBuildCache.java
+SHA-256-Digest: 77HE9pG2701U6cUG3aIOD6IlgRy88j2qYI0zIGn55O0=
+
+Name: com/android/build/gradle/tasks/PackageApplication.java
+SHA-256-Digest: z4lAq0t0Sf9z7IjXatuIV/w66q4ODbvrtd6Tywezg0w=
+
+Name: com/android/build/gradle/internal/ndk/NdkR12Info.java
+SHA-256-Digest: GoEgSJbRF9iZTB2qt4wnDtDeeF0ayDAr62sMTswb1xc=
+
+Name: com/android/build/gradle/internal/ide/AndroidArtifactImpl.java
+SHA-256-Digest: HKaZnqC6XRSZbKWidOgwbUDB+E4dTTXRnDjWe8cebtE=
+
+Name: com/android/build/gradle/internal/ide/level2/ModuleLibraryImpl.j
+ ava
+SHA-256-Digest: OV5dO7+XyrCmkPMY8Idt3VVkgj1jTxQMPmxxAj4BVU0=
+
+Name: com/android/build/gradle/api/AndroidSourceFile.java
+SHA-256-Digest: 5iiHBxDhNkY20hpFUbP4RgU9UNGhuE/3r+pduLelsEI=
+
+Name: com/android/build/gradle/tasks/LintPerVariantTask.java
+SHA-256-Digest: jo8BM2eo3lNtDbyvJEVf5OGBXjEg5m3szYDLFL7Yq5c=
+
+Name: com/android/build/gradle/internal/ndk/DefaultStlNativeToolSpecif
+ ication.java
+SHA-256-Digest: WH0PD5aqzpkJ0jYvI7utZ/1wtPTCFRVzy2t/dUrr+kg=
+
+Name: com/android/build/gradle/internal/process/GradleProcessExecutor.
+ java
+SHA-256-Digest: KpqIlh7pr/a/lNlBvxIUzRNJj9R7GxK+WGKOT+jaL+E=
+
+Name: com/android/build/gradle/internal/aapt/AaptGradleFactory.java
+SHA-256-Digest: oLZ1PPXJv7hq86K/bHMc1Xv/TBwCuWAIouHZyN5TUJM=
+
+Name: com/android/build/gradle/internal/transforms/ShrinkResourcesTran
+ sform.java
+SHA-256-Digest: bCBvkk8IPWobFTvSoc3eHWZgxYwbTGMYrb1Mrv3LpsA=
+
+Name: com/android/build/gradle/tasks/ProcessAndroidResources.java
+SHA-256-Digest: VXCqeUdSOLnwxCRqOFWMBFDr42EJT+keiTu6f1y7Plg=
+
+Name: com/android/build/gradle/internal/core/Abi.java
+SHA-256-Digest: 9jTIHCN3Z3wQbNzZClYgjgu2pnjQxLRWH97OL01CyEE=
+
+Name: com/android/build/gradle/external/cmake/server/receiver/Interact
+ iveSignal.java
+SHA-256-Digest: 3clSXpqXoC2XitwUmbr3a3aDh+bPFAcLEsm6S4OLwfI=
+
+Name: com/android/build/gradle/internal/ide/DefaultInstantAppProjectBu
+ ildOutput.java
+SHA-256-Digest: hxNGG+Z3UANgEMp4h6GUReQl4YycbKF9kGboHzRnm8M=
+
+Name: com/android/build/gradle/internal/tasks/ExtractTryWithResourcesS
+ upportJar.java
+SHA-256-Digest: u+RxZ8xt1IgWV4vecz0soW1M17wp/ep8UZUQaVkYEDA=
+
+Name: com/android/build/gradle/internal/api/BaseVariantImpl.java
+SHA-256-Digest: +iaUlKb674ecMD0S6voLyf//C8KFZe2QCNvXuvlyhKk=
+
+Name: com/android/build/gradle/internal/ide/LibraryImpl.java
+SHA-256-Digest: d8iBX3eFSpLPsjMsiQg3/AEBw4uZAwHcc29+WAE169M=
+
+Name: com/android/build/gradle/internal/transforms/InstantRunSlicer.ja
+ va
+SHA-256-Digest: +9CluxSrnCkg7hoy8CiSF4f/syLgv5AyvgzK+pB+c0o=
+
+Name: com/android/build/gradle/internal/tasks/PlatformAttrExtractorTas
+ k.kt
+SHA-256-Digest: DHDCpRHZVNdscI5S1Gsjxy4es1VyiH/TJTKknv3zMQo=
+
+Name: com/android/build/gradle/tasks/CmakeServerExternalNativeJsonGene
+ rator.java
+SHA-256-Digest: xco9ClI2uo1vLDpD+8gtgjjhV1dDoj6TVH5evH/bSsw=
+
+Name: com/android/build/gradle/internal/LintGradleProject.java
+SHA-256-Digest: 8OPGg2sBU7s0pQu0Din+u22oXzje+dPhOVZssD0X0L8=
+
+Name: com/android/build/gradle/shrinker/parser/BytecodeVersion.java
+SHA-256-Digest: eNW4MJ5LwvQPs5oKVmtRCAueFY5WXapFsG1/flNkNQU=
+
+Name: com/android/build/gradle/internal/ide/SyncIssueImpl.java
+SHA-256-Digest: jhmKKkQwUVOWDsV+0N6aCj1gGxB6YSq6xWiH0X7EsK4=
+
+Name: com/android/build/gradle/internal/core/MergedExternalNativeNdkBu
+ ildOptions.java
+SHA-256-Digest: VIAmS+H5n1ZyvIEA9Wwzew9H37mfFNlP9FPSNNraI7c=
+
+Name: com/android/build/gradle/internal/transforms/InstantRunTransform
+ .java
+SHA-256-Digest: +PaQke7HtIgq1pm0L/texxxofn5AOkDwfkB/XzlCe1E=
+
+Name: com/android/build/gradle/internal/transforms/ChangeRecords.java
+SHA-256-Digest: CX8vhnfJ81ztjAsIwBFg1/sQOW5WKTC+R70NDO8MhI8=
+
+Name: com/android/build/gradle/internal/TaskFactory.java
+SHA-256-Digest: gj2zAGAmka/u2GUp5bBugR57OVDpX1EVPJ6HLQAURZ0=
+
+Name: com/android/build/gradle/external/cmake/server/ConfigureCommandR
+ esult.java
+SHA-256-Digest: njUOc3daiukQMHmaqTCFDZUei+EhxlTbR8iet5dGmto=
+
+Name: com/android/build/gradle/internal/transforms/LibraryIntermediate
+ JarsTransform.java
+SHA-256-Digest: n0QaFLKwbii3X5APHHmNXYi91093bssbH0a6hCyg7BM=
+
+Name: com/android/build/gradle/internal/test/report/TestResult.java
+SHA-256-Digest: n3lXaQkcTLDt54WUThobRnuBaZdTFJiCaY1uqHpAGPE=
+
+Name: com/android/build/gradle/internal/ndk/NdkR13StlSpecificationFact
+ ory.java
+SHA-256-Digest: CFGpZxpPtQVl87Xrz91WbN+c05LOUK9Re8b5uoLNfdA=
+
+Name: com/android/build/gradle/internal/test/TestApplicationTestData.j
+ ava
+SHA-256-Digest: qu5niagKJvUrXmpAI2yR5OJyv7AAys3HkeJxzk5vWmw=
+
+Name: com/android/build/gradle/internal/scope/MissingTaskOutputExcepti
+ on.java
+SHA-256-Digest: UeBU2cHmoPG6spuAlA7eHgSvDZC0KLD27EeIQ0AlOGE=
+
+Name: com/android/build/gradle/internal/ide/TestedTargetVariantImpl.ja
+ va
+SHA-256-Digest: /+7fDjHIoFvuoaLyFM9kinXWPibyE6gkLZQdSraAmZ4=
+
+Name: com/android/build/gradle/internal/externalBuild/ExternalBuildPac
+ kagingScope.java
+SHA-256-Digest: 4/ilPm1JtvrZTtym2RrBcRx8AebcEufcpuIsezLJ2v0=
+
+Name: com/android/build/gradle/internal/tasks/FilteredJarCopyTask.java
+SHA-256-Digest: 2yoeCHWFPkq7gOvau4Kgoy+1TpjICoctIo2PJHmYASM=
+
+Name: com/android/build/gradle/external/cmake/CmakeUtils.java
+SHA-256-Digest: /91SgKPCL/vogDwhRv8dzGdnkcb/0kLhAt33f1i5pMM=
+
+Name: com/android/build/gradle/internal/externalBuild/ExternalBuildAnc
+ horTask.java
+SHA-256-Digest: 4mf6JmoQ4DMiwm92oOjxgZo+7sluCwQBa8qPTccoS84=
+
+Name: com/android/build/gradle/api/FeatureVariant.java
+SHA-256-Digest: FnJzAZ/ys19oKHGb4Bbw6724CM/bq1u1dkZGx6OKQvA=
+
+Name: com/android/build/gradle/api/VersionedVariant.java
+SHA-256-Digest: 60G6/DT7LVyiDyA4jjlR4AStbjYdpK+Yd+u8sQRJ9fc=
+
+Name: com/android/build/gradle/internal/ide/DefaultTestVariantBuildOut
+ put.java
+SHA-256-Digest: Vk3ODROQlLLqRC0ukGpaEDqZ13fZB9XVQkUxV4hfUqM=
+
+Name: com/android/build/gradle/internal/incremental/InstantRunPatching
+ Policy.java
+SHA-256-Digest: u8Ko52shkafvV0s9SKAJcdFPu+PMsUAQ44t6Ir52BrI=
+
+Name: com/android/build/gradle/api/AnnotationProcessorOptions.java
+SHA-256-Digest: i45x4b3DCBT8KmrCZzaOMPlEDafrplaTY8gHZmD4nE4=
+
+Name: com/android/build/gradle/internal/variant/ApkVariantData.java
+SHA-256-Digest: hJEttOxiQf0bZn045yj2UW8Lh7RVGyK+DG03WSQgqkQ=
+
+Name: com/android/build/gradle/shrinker/tracing/Trace.java
+SHA-256-Digest: Om9TpjW/E7Cc8H3jK4KIGD59pxGp/wccxE6pWV37N10=
+
+Name: com/android/build/gradle/internal/dsl/SigningConfig.java
+SHA-256-Digest: vy6h6Qeu+F7BeLR0t9XRVoBrmnQ3b6I7lollpyLJ/yU=
+
+Name: com/android/build/gradle/internal/ide/level2/GraphItemImpl.java
+SHA-256-Digest: JtgWERmeJK+uEpNGmr6RFgh8uywehO0hWO/npG45S+c=
+
+Name: com/android/build/gradle/shrinker/parser/MatcherWithNegator.java
+SHA-256-Digest: 0dBIA5GdJM//BNpFa7N8itYUYfNmWMMVxEfsBy9vACE=
+
+Name: com/android/build/gradle/internal/packaging/ApkCreatorFactories.
+ java
+SHA-256-Digest: sgVZaJblKGvUuiMb7nEi9Royz9Asr9u08DNg7/WS5Uo=
+
+Name: com/android/build/gradle/internal/tasks/LintCompile.java
+SHA-256-Digest: wViQpFMdHBfVaORyR5H0HF2yOhyTaPh0TaqQ5QgNni4=
+
+Name: com/android/build/gradle/ReportingPlugin.java
+SHA-256-Digest: 6BuaxgwhyOB4QEJhBg8akvrP3GHVAMb9Y3QwPZGRFKE=
+
+Name: com/android/build/gradle/tasks/ExternalNativeBuildTask.java
+SHA-256-Digest: NQ8q6+Z2Zqt4R8CwNIODsHjBSnZ2OK+29c0QtbWejF0=
+
+Name: com/android/build/gradle/internal/transforms/MultiDexTransform.j
+ ava
+SHA-256-Digest: TXTK4Nf+JxNnoRJog8CScAJfqY2s6sBQS5Z1Rir1Ebk=
+
+Name: com/android/build/gradle/internal/transforms/MergeJavaResourcesT
+ ransform.java
+SHA-256-Digest: LLBB26G8Y3tUV6Y58/EUrGoW9NvAm3Xb0RjttADiCY8=
+
+Name: com/android/build/gradle/shrinker/ShrinkerGraph.java
+SHA-256-Digest: Ngrs4iNJWWnZFY4Ou69bvUDneIEsBW+maTP+oDJ8bUM=
+
+Name: com/android/build/gradle/shrinker/parser/FilterSpecification.jav
+ a
+SHA-256-Digest: nOUkA+FGfTGc3O72KXmfCk3RZGh+qf5NRPtg7oRDHgg=
+
+Name: com/android/build/gradle/internal/variant/TestVariantFactory.jav
+ a
+SHA-256-Digest: iTJQzKLdK7n6jFpdIUIyO2gBjXa8kMe5WmL4i/583O0=
+
+Name: com/android/build/gradle/api/LibraryVariant.java
+SHA-256-Digest: J9y0p9j/0CjQcWvCNMinp55UF5RvplO6ccJl4TOj8oE=
+
+Name: com/android/build/gradle/internal/tasks/TaskInputHelper.java
+SHA-256-Digest: kQguOG7LaXTduDZqv5EPBoMyzfJnO8jNe1hw0uPWg+U=
+
+Name: com/android/build/gradle/external/gnumake/PosixFileConventions.j
+ ava
+SHA-256-Digest: V0Lyy/KlIXnDKi/b8dWlK+UN8kCi6xhRHiQNtpP/yOs=
+
+Name: com/android/build/gradle/internal/coverage/JacocoPlugin.java
+SHA-256-Digest: HI2gVCbkwnqcoWhrZ9X4g0jXmAIHwuEsrP6KkVMiQbQ=
+
+Name: com/android/build/gradle/internal/transforms/JarMergingTransform
+ .java
+SHA-256-Digest: ak4Et68e4C4lkP44dC1lhb7eNDTSJ0Pro5a+0Dmpnak=
+
+Name: com/android/build/gradle/external/cmake/server/Capabilities.java
+SHA-256-Digest: lZcBy4RdWdtf5PGfA88q6U+2mWnzkorUYBmhQWOjv3w=
+
+Name: com/android/build/gradle/external/gnumake/WindowsFileConventions
+ .java
+SHA-256-Digest: bd0ghkL5DQtr1A6PY25jGBrwKxbM8Us1ERq2LXvK2uU=
+
+Name: com/android/build/gradle/internal/pipeline/ImmutableTransformInp
+ ut.java
+SHA-256-Digest: /KZfvqs1J1JC4vQKutN+3DoAaG8bagad51hnmNtovd4=
+
+Name: com/android/build/gradle/internal/test/report/AllTestResults.jav
+ a
+SHA-256-Digest: BjuawejlNcuP82xO5GRshq+fLyGposlRhQJPOtu7O+o=
+
+Name: com/android/build/gradle/internal/scope/TaskOutputHolder.java
+SHA-256-Digest: 8h33bb9YTy7kCJLnnDeIRSgL2lFrR/bWLjT4JF3dY0s=
+
+Name: com/android/build/gradle/external/cmake/server/receiver/Progress
+ Receiver.java
+SHA-256-Digest: OX6wm6VWibOAU+nvtIZ62FJVj6ZUUb9oIkdTQNMopYU=
+
+Name: com/android/build/gradle/internal/incremental/InstantRunVerifier
+ Status.java
+SHA-256-Digest: B7/XuqGCFzI+Qh5Ze8vaamjPpdLIF+knvpDSzEXA8KY=
+
+Name: com/android/build/gradle/tasks/ResourceUsageAnalyzer.java
+SHA-256-Digest: egEpzTUNFfA5dEnxeBIWGQn7Dwp46A9YHds1Hh6UMSw=
+
+Name: com/android/build/gradle/internal/ide/NativeFolderImpl.java
+SHA-256-Digest: HtJOJU41u+SrX6UFzC7r0mzchotDUqVClVkUIP25Tmk=
+
+Name: com/android/build/gradle/internal/core/Toolchain.java
+SHA-256-Digest: TGgIppzcu6R0ndd+KL7GJ5RJ3i5/3W8oKLq+7gIb/Yo=
+
+Name: com/android/build/gradle/internal/pipeline/TransformInvocationBu
+ ilder.java
+SHA-256-Digest: zRn/DtSkbSKKG9opDVW5oi8rz/WPlj/dYxb4u1mAz1w=
+
+Name: com/android/build/gradle/internal/pipeline/IntermediateStream.ja
+ va
+SHA-256-Digest: 5eGE4Lw2cKAlERxfIpSzPWWnzWLP7PCisMK1k6ahr8I=
+
+Name: com/android/build/gradle/internal/test/report/SimpleHtmlWriter.j
+ ava
+SHA-256-Digest: qjrcz5u3iE6ekjs9wXeD/IYWgCPVRLyO7kG5rDV41+Y=
+
+Name: com/android/build/gradle/internal/tasks/KnownFilesSaveData.java
+SHA-256-Digest: 2ez2UrwZ0Qtk5IfecI45PqCVqKAp9scFA9NlLq3D16U=
+
+Name: com/android/build/gradle/internal/transforms/InstantRunDex.java
+SHA-256-Digest: tuyqM71Zab5Kr3uu6ThG7rfRj9W0yxHh7HTv+oQD/yY=
+
+Name: com/android/build/gradle/internal/ApplicationTaskManager.java
+SHA-256-Digest: AGFy8oi1MdoloN3VldpwZ7GSZYOAcU6vFwQslZMEj7k=
+
+Name: com/android/build/gradle/internal/scope/PackagingScope.java
+SHA-256-Digest: N9JA5TebPaIZEMp/hdDRmxNAyy8+p9lJZCXJHR5N3xk=
+
+Name: com/android/build/gradle/external/cmake/server/ConfigureResult.j
+ ava
+SHA-256-Digest: S+z1Ai6i3p1RyMlWNcdiFI+v2qF9ge/sT/oPK3MYzyE=
+
+Name: com/android/build/gradle/internal/scope/InstantRunVariantScope.j
+ ava
+SHA-256-Digest: IJe9mcZf8vgkwDk2/JX1RL+Xw9tu5n9wsGx4nnDZVFc=
+
+Name: com/android/build/gradle/external/cmake/server/HelloResult.java
+SHA-256-Digest: 0KUU5VmTPgDPRQ1gVkAJLpQztshes3uf1uTCFl89kRs=
+
+Name: com/android/build/gradle/internal/pipeline/TransformOutputProvid
+ erImpl.java
+SHA-256-Digest: oHcs491bSoRJTtcWQUoxH0eAJ1Osrsbab38mqcTW4Gk=
+
+Name: com/android/build/gradle/internal/dsl/DensitySplitOptions.java
+SHA-256-Digest: 6GZ3QC3NKJlnlk9geBsTwL2wW7de0iKKJ/q26Sj99ro=
+
+Name: ProguardParser.java
+SHA-256-Digest: VAzpVvSmbi4Gent9erc7RWaSW70WrOFMY6XZGuTRCSw=
+
+Name: com/android/build/gradle/shrinker/tracing/RealTracer.java
+SHA-256-Digest: 2ErTW2vOJpMDATQ7I4ib7Aae2/q0i63yRzQOqaWawAg=
+
+Name: com/android/build/gradle/internal/api/VariantFilter.java
+SHA-256-Digest: 7osEa0/xdtSVLfo0O+u0EM8xv42TJXY9eFne4+z3eGo=
+
+Name: com/android/build/gradle/internal/test/report/ReportType.java
+SHA-256-Digest: QEUQ0/b1946wASbFg8/9dIn68v2mcCBJuRW8669BYJI=
+
+Name: com/android/build/gradle/internal/tasks/PackageRenderscriptConfi
+ gAction.java
+SHA-256-Digest: aYeGfh5E0DOxzTek02JWINFjBEafirg/I6BqR5KiwEo=
+
+Name: com/android/build/gradle/internal/variant/VariantHelper.java
+SHA-256-Digest: l+BFoxDRkwJr6MnEWSbItTeNUp/BZ7zqQxTScD4yJzY=
+
+Name: com/android/build/gradle/internal/api/LibraryVariantImpl.java
+SHA-256-Digest: q2PoeKTXX8fquB0/Be95df8nS1SqaMnUlOY2qBv1+Kc=
+
+Name: com/android/build/gradle/internal/scope/TaskConfigAction.java
+SHA-256-Digest: fCWpmCPF1UP6yD5EWhILsmVmpCiWn61uoInMAyISYPo=
+
+Name: com/android/build/gradle/internal/packaging/ParsedPackagingOptio
+ ns.java
+SHA-256-Digest: mJOc501TYEKi7m82MksInT31Li4t2ANkAe8DW6JRzQo=
+
+Name: com/android/build/gradle/internal/ndk/NdkR13Info.java
+SHA-256-Digest: 3q2QASa1VwnjT89bvktE2h9abzKblysJp3k9VINhd2g=
+
+Name: com/android/build/gradle/internal/incremental/InstantRunBuildCon
+ text.java
+SHA-256-Digest: +FiYwhTOJKCd8zpdVlfz0MGsF0pHrUmjOckIVnybfxU=
+
+Name: com/android/build/gradle/tasks/RenderscriptCompile.java
+SHA-256-Digest: crxsr9MXJwRmAskTHjv/8FluQw4PILmENjuofs4vGao=
+
+Name: com/android/build/gradle/shrinker/tracing/Tracer.java
+SHA-256-Digest: UAUSV+XPq6ODTJsZbZcrCaqVfGZIQpVseGSAi+wOZAg=
+
+Name: com/android/build/gradle/internal/scope/TaskOutputHolderImpl.jav
+ a
+SHA-256-Digest: DzjfU6597/tE3VQaXCFQH5upP/T2fnHwTw1H+3l4kUg=
+
+Name: com/android/build/gradle/internal/dsl/DefaultConfig.java
+SHA-256-Digest: Bx3DhOcbm0rIGtfQy3LGZ1dzSizq+2hP/NQJO/RTQoE=
+
+Name: com/android/build/gradle/internal/ndk/NdkR12StlSpecificationFact
+ ory.java
+SHA-256-Digest: av9fPDBoe1cUdt1HXMN9o4ZyQ3fhEpjIZKQGMHQPwNE=
+
+Name: com/android/build/gradle/internal/tasks/CheckManifest.java
+SHA-256-Digest: ui0OoVf0otfIwCCRHMoSQvqAr4W5ZiKhU3cpGapqKBQ=
+
+Name: com/android/build/gradle/internal/api/DefaultAndroidSourceDirect
+ orySet.java
+SHA-256-Digest: k0dYXudwhz10nldhaZ0NUaGvsolFXYQJZkd6mwJCeAw=
+
+Name: com/android/build/gradle/internal/transforms/InstantRunDependenc
+ iesApkBuilder.java
+SHA-256-Digest: D8voBRRptRyaLJIto3KWahxXH9xYGG7WO3ShSXX8RD0=
+
+Name: com/android/build/gradle/internal/tasks/featuresplit/FeatureSpli
+ tDeclaration.java
+SHA-256-Digest: dO1wOWVMuAhj9TVUPiENUkE1vKWRN3jop5w5olT9fRk=
+
+Name: com/android/build/gradle/internal/test/report/TestReport.java
+SHA-256-Digest: dhYY97wCokDt36nQmVGDGZhTWoeUMDIxpslvlUXoPOw=
+
+Name: com/android/build/gradle/internal/tasks/ValidateSigningTask.java
+SHA-256-Digest: lI0vrdqaoU1suJcUP4BTlCVFQcvCeObLeFoRj/HBc5A=
+
+Name: com/android/build/gradle/internal/ide/NativeModelBuilder.java
+SHA-256-Digest: IiQ/4iE/0kH7fwhOwUcRELov0RSsbuc88G48M0mKTks=
+
+Name: com/android/build/gradle/internal/ide/DefaultBaseBuildOutput.jav
+ a
+SHA-256-Digest: 8vvnNcMRqtD/cmVuu42FTbh61l6GzJ6gYLkFyjVGYWc=
+
+Name: com/android/build/gradle/internal/pipeline/OriginalStream.java
+SHA-256-Digest: cF/j2wIqUm+3VWok5YcTSYo3H1n0p+87p+Fy/BvzZTQ=
+
+Name: com/android/build/gradle/internal/pipeline/IntermediateFolderUti
+ ls.java
+SHA-256-Digest: CGmTqsAgMk19ELPpIkLLCKVWRWKPF55K2bDQNOW1nqs=
+
+Name: com/android/build/gradle/internal/variant/InstallableVariantData
+ .java
+SHA-256-Digest: +WsYCMtgsQy4IZQlJKSm9KXM7t3821m8QbJ5kNGMURg=
+
+Name: com/android/build/gradle/internal/dsl/VectorDrawablesOptions.jav
+ a
+SHA-256-Digest: O7meDOi8q+YPAE/GbyrJxpnGce/02qm1YzJCfbJMRxI=
+
+Name: com/android/build/gradle/internal/model/CoreExternalNativeBuild.
+ java
+SHA-256-Digest: hGXiSxY3pPg3qdVWcpKaEVHUQkTuQ/SdWg5sKKP1k8A=
+
+Name: com/android/build/gradle/internal/api/ApkVariantOutputImpl.java
+SHA-256-Digest: U8ZUgaltK1G15c2lFG6V+3Em8GvnYpQxZJuSKJr7RvI=
+
+Name: com/android/build/gradle/internal/externalBuild/ExternalBuildGlo
+ balScope.java
+SHA-256-Digest: bS5aeTrCxxVPP6xAaCfhIDdZhZNgfwcc13CX3N0vniQ=
+
+Name: com/android/build/gradle/internal/tasks/FileSupplier.java
+SHA-256-Digest: cYdFUh3la+GVH2K/npjs2NbWU0eNVsAXb3/mOiamMHA=
+
+Name: com/android/build/gradle/internal/profile/RecordingBuildListener
+ .java
+SHA-256-Digest: GaKZ5tZlV3QA9PsIcvguSZQd8AHj1ly3qCdiX44l65c=
+
+Name: com/android/build/gradle/internal/scope/CodeShrinker.java
+SHA-256-Digest: z/+5XrU1OQ6OYgLOiawUBOAZReWELbMAOQea2N9cVio=
+
+Name: com/android/build/gradle/internal/dsl/AnnotationProcessorOptions
+ .java
+SHA-256-Digest: PdsUWbYsjd5ME0M7EvX8fTjEcRSaDRCdsIjopHcBsGc=
+
+Name: com/android/build/gradle/internal/pipeline/StreamBasedTask.java
+SHA-256-Digest: ZlvjDZnsXKNX/72C0MNT12CAhlU8x0mezVRkMmeELZM=
+
+Name: com/android/build/gradle/internal/variant/InstantAppVariantFacto
+ ry.java
+SHA-256-Digest: nXEQPbQOdIiIL9xiWRGxR5NuHkUGA2nwOBsdQA3bvdk=
+
+Name: com/android/build/gradle/internal/ide/InstantAppModelBuilder.jav
+ a
+SHA-256-Digest: z8ocDJd01K4jI/Zm6eWCAain+lnLz838VU9dHc5BQVU=
+
+Name: com/android/build/gradle/internal/BadPluginException.java
+SHA-256-Digest: D/Geb86XP+ZLFnyyHnaIFXw8kIMPTg946vDIZc+LM0s=
+
+Name: com/android/build/gradle/tasks/PackageAndroidArtifact.java
+SHA-256-Digest: PuXtcdGd2l4TLmBhZFJmVg4T7sGmOkZH1dIS0amY8Ao=
+
+Name: com/android/build/gradle/options/IntegerOption.java
+SHA-256-Digest: SelYy1Ngqqp+7nIl/j3BHqiH/oq0SdjAAs4FNF+dodM=
+
+Name: com/android/build/gradle/internal/ide/SigningConfigImpl.java
+SHA-256-Digest: NORldNooCSMgQQewLnujRSxxqvVGz8MTjzBnZzgOh8Q=
+
+Name: com/android/build/gradle/internal/dsl/NdkBuildOptions.java
+SHA-256-Digest: mwrXOpSLh1YeBaPWvEELGD3oz2Rw2JjiCP5PXhsObmg=
+
+Name: com/android/build/gradle/api/BaseVariantOutput.java
+SHA-256-Digest: WdvQYqIVNKJoIZYF7Nkqu+MYC6hI0tz+B6xL7wXcY1A=
+
+Name: com/android/build/gradle/internal/test/report/ErroringAction.jav
+ a
+SHA-256-Digest: TceoTcWeCN7tJaDB3NRbtMP4oFZHWgUwzmWq2LdEgGU=
+
+Name: com/android/build/gradle/external/cmake/server/ServerFactory.jav
+ a
+SHA-256-Digest: YF3NbXqteMggKadnYA5QVE88lGmzgEFlAYgNGg+ucx0=
+
+Name: com/android/build/gradle/tasks/factory/JavaCompileConfigAction.j
+ ava
+SHA-256-Digest: ImgNLZN+tnYnaaxosIPHDYdE4esUah3d21L73QiDL5g=
+
+Name: com/android/build/gradle/internal/dsl/AdbOptions.java
+SHA-256-Digest: 7i7XjvlRdQWXbpBzFSYDsd5aahyUxfTJc11QGjO/Ty0=
+
+Name: com/android/build/gradle/internal/LintGradleClient.java
+SHA-256-Digest: uJV/MjX8vq/AUrpwAGk6452BtjzF/dMl8IFwRmU1YW4=
+
+Name: com/android/build/gradle/internal/scope/OutputScope.java
+SHA-256-Digest: /YppS9xpVnMQEEk2nR/5IGkp6OOYuEVkMgeLEQHlY/Y=
+
+Name: com/android/build/gradle/ndk/internal/NativeCompilerArgsUtil.jav
+ a
+SHA-256-Digest: o5N44Tvo7MqlNHhm5R6S3IM3PmBY55qhvYrRTJ9RfVk=
+
+Name: com/android/build/gradle/internal/model/CoreCmakeOptions.java
+SHA-256-Digest: uOF/hYa3Ip2onl9yCIsfpBYGCB/vqxISOggHtlrXPyY=
+
+Name: com/android/build/gradle/proguard-common.txt
+SHA-256-Digest: Jf+JdDR7uOZELZNa9uF8kFkmnYNlOyZq14R1F5Qba+o=
+
+Name: com/android/build/gradle/tasks/NdkBuildExternalNativeJsonGenerat
+ or.java
+SHA-256-Digest: zKjKntYc/DBAi2j0aKkMNQVB0euJbWWwQphAEi8S7ww=
+
+Name: com/android/build/gradle/shrinker/AbstractShrinker.java
+SHA-256-Digest: LZ5EVjFIo/f7Mz8QiilBKO9M8vacaRe/BW0NFS0W2H0=
+
+Name: com/android/build/gradle/external/gson/NativeSourceFileValue.jav
+ a
+SHA-256-Digest: 4avS6KkEXS85C4HhjWNpXYqTpPJb9i5aAWbzQEbjRrQ=
+
+Name: com/android/build/gradle/internal/variant/FeatureVariantData.jav
+ a
+SHA-256-Digest: DgrptTnqgh43rvfHzFVreBdLZdNW127uEwepAdO3QM8=
+
+Name: com/android/build/gradle/internal/ndk/NdkR14StlSpecificationFact
+ ory.java
+SHA-256-Digest: lmB5OFUtK2+OctlkdJrYwJF8nw8fnbvjjhhMF6VQ6yk=
+
+Name: com/android/build/gradle/tasks/CmakeExternalNativeJsonGenerator.
+ java
+SHA-256-Digest: p/JVLVx3xm9PZliTufQR085nhEdQfQaUdIPkbxH+Fkg=
+
+Name: com/android/build/gradle/internal/VariantManager.java
+SHA-256-Digest: Gx2XlSYMSzF/QaR3QYmH4NVB4twvg0PEb92Hsa1fbsU=
+
+Name: com/android/build/gradle/internal/transforms/DexTransform.java
+SHA-256-Digest: 8kuzSvKNz5BHEBQ+pRZxH/5qiXNAJp/vMrKVhg7GbFg=
+
+Name: com/android/build/gradle/external/cmake/server/Version.java
+SHA-256-Digest: 47PTkXxqfP1IKt2rICLt1XIZ3wTuUtd5bWK9eKGVW/g=
+
+Name: com/android/build/gradle/internal/ide/NativeAndroidProjectImpl.j
+ ava
+SHA-256-Digest: lmqkv5m6T2VjsoUSkx51lMMX8UWSSYE3ziE/LJyaekI=
+
+Name: com/android/build/gradle/internal/tasks/GenerateApkDataTask.java
+SHA-256-Digest: hdzYwZ86DsWjtYxxt+7Ac3AbpwEMOJnQN+NqIa9vD4c=
+
+Name: com/android/build/gradle/internal/dsl/CoreProductFlavor.java
+SHA-256-Digest: wPB7GlVyZ9r23V1C4rDRVGZepH5on0FZkMQuI/ARFp4=
+
+Name: Proguard.tokens
+SHA-256-Digest: HhO0Eh6zcTps4YtJBWpLMKFzsx/gq0o6Ete+RcvXWbM=
+
+Name: com/android/build/gradle/internal/coverage/JacocoOptions.java
+SHA-256-Digest: FDkBMW7LIW0c0PlpIcquXbrajxnJ5ZWjATnT1j60T6o=
+
+Name: com/android/build/gradle/internal/test/report/CompositeTestResul
+ ts.java
+SHA-256-Digest: BSwNn5GTm1jDADZ79oHfwh5uNbvFpBxF8+aHWTwcdTE=
+
+Name: com/android/build/gradle/internal/transforms/DexArchiveBuilderCa
+ cheHandler.java
+SHA-256-Digest: ZtqPbMdttHsY5cwCpOvILwm+IAJxec09U3QV+jM6d9I=
+
+Name: com/android/build/gradle/internal/ndk/StlNativeToolSpecification
+ .java
+SHA-256-Digest: 746IH4i5jpFzfC257Yt9xdzOCNyVwt+DcCgczJhjcfw=
+
+Name: com/android/build/gradle/internal/transforms/DexMergerTransform.
+ java
+SHA-256-Digest: zQhF8dXkxG0idG2rorGmPU4pLR6AYgF7HSGhD+dL/4I=
+
+Name: com/android/build/gradle/options/ProjectOptions.java
+SHA-256-Digest: hsrptCGdlLNmBjU/qkgx+O6JTd3Y3G50E3trP23J4Ho=
+
+Name: com/android/build/gradle/internal/pipeline/TransformStream.java
+SHA-256-Digest: 26WAI//ESP3K+PiWi5HUQykF1uaJWtz2KzfAu32wqU8=
+
+Name: com/android/build/gradle/internal/api/BaseVariantOutputImpl.java
+SHA-256-Digest: Oh5K8lHJGLz6VVoWePqNmERMpp18Bbhs107Cj+LFgBg=
+
+Name: com/android/build/gradle/internal/test/report/ClassTestResults.j
+ ava
+SHA-256-Digest: 1nGCxlHuYo55MZcYatXcPD6qzrHq9xdWSbbdOzLJ2+Q=
+
+Name: com/android/build/gradle/internal/ide/BuildOutputSupplier.java
+SHA-256-Digest: KhSOouuqC9khNEHUvn3hEWloJJ6tQP2ZC4ocxJZfMLs=
+
+Name: com/android/build/gradle/internal/dsl/ExternalNativeNdkBuildOpti
+ ons.java
+SHA-256-Digest: MTxq88y7U7IqI4rcEMccS5ya/9tF0vSoyt7WsNYOPxE=
+
+Name: com/android/build/gradle/tasks/InstantRunResourcesApkBuilder.jav
+ a
+SHA-256-Digest: R8x7l0EIx1X4QobisIBz9jX+ja00srDkYs0ELkpxAdA=
+
+Name: com/android/build/gradle/internal/api/InstallableVariantImpl.jav
+ a
+SHA-256-Digest: UHkOowXmaYgxu0WBR25IHwNi2YcG79hkRByNrvPdDg0=
+
+Name: com/android/build/gradle/internal/variant/InstantAppVariantData.
+ java
+SHA-256-Digest: tIeU6mlJhXhFfdZC17cr9CXUppayzP/rAdbWU3AKQig=
+
+Name: com/android/build/gradle/tasks/CmakeExternalNativeJsonGeneratorF
+ actory.java
+SHA-256-Digest: 69xcJUF5BOd3wzl5WopyPw8ggntuLCM0mhBhvyKYP1M=
+
+Name: com/android/build/gradle/internal/InstantRunTaskManager.java
+SHA-256-Digest: vRQ+cTFzgEDPNkbsbbMzPXXZSX5TrIC6nBH4Z3DB330=
+
+Name: com/android/build/gradle/internal/pipeline/IncrementalFileMerger
+ TransformUtils.java
+SHA-256-Digest: +squztcFIZPo9nSU5QDAEaPnhE+VmSr6A2id85rILcw=
+
+Name: com/android/build/gradle/internal/profile/AnalyticsUtil.java
+SHA-256-Digest: mSDqDwHt7RCOUcLevd54Ggbvcvq0X4s6pmY4iP4yZow=
+
+Name: com/android/build/gradle/external/cmake/server/receiver/ServerRe
+ ceiver.java
+SHA-256-Digest: 2ZSmnnxzDSw2lWvCeyEwZ5+ccE0KmKsr4iqKXoL93H8=
+
+Name: com/android/build/gradle/internal/ndk/Stl.java
+SHA-256-Digest: YGL7MhiSgQInzF8VDTCX4duffILfjndKrsfVK8bcqng=
+
+Name: com/android/build/gradle/internal/FeatureTaskManager.java
+SHA-256-Digest: RoQoGSo8Ur1KVCcFo7BTaYQQhD6G1n3ovhBLKSSa0Ro=
+
+Name: com/android/build/gradle/internal/LoggerWrapper.java
+SHA-256-Digest: TfnGDXHwdSD9I51CBTkzEyH4sJc1JiOg74BCJ36H4ZU=
+
+Name: com/android/build/gradle/internal/ndk/StlSpecification.java
+SHA-256-Digest: DJ8Z3+Z+FuTxZefv9to27+4MLPEvltSuUIkjImEpIUg=
+
+Name: com/android/build/gradle/internal/variant/TestVariantData.java
+SHA-256-Digest: PhvXxnhbeBnGRTFSIfHSgqupEcbxqdriyFK3MlC/9Kk=
+
+Name: com/android/build/gradle/internal/dsl/CoreNdkOptions.java
+SHA-256-Digest: elemBwF0IOo44lnkvtkwLCB3PN3saoXJEc3hHuSdwvg=
+
+Name: com/android/build/gradle/external/cmake/server/Project.java
+SHA-256-Digest: YTvJlm3wBcTWqWiu9neBX11+hNBizODtMdkfrED2Zio=
+
+Name: com/android/build/gradle/internal/incremental/BuildInfoWriterTas
+ k.java
+SHA-256-Digest: 8DrtgbDWMPJ7SlkZkqW3BAc83DRzWkXnK646duEs8R8=
+
+Name: com/android/build/gradle/internal/test/report/HtmlReportRenderer
+ .java
+SHA-256-Digest: hjDSbrEpsXd6vfIRylXSzGNYX7N/Pfx02Tc9TC4nJgk=
+
+Name: com/android/build/gradle/tasks/ProcessManifest.java
+SHA-256-Digest: I02BwdkMWbRKwWvFZQxqLTi1aIsH4mI/ViWXZkeyhx8=
+
+Name: com/android/build/gradle/internal/transforms/BaseProguardAction.
+ java
+SHA-256-Digest: ulQI+p+s8qgcP7wbKTNIYijBVc9QVlv/FU9MJO53/ZE=
+
+Name: com/android/build/gradle/external/gson/NativeSourceFolderValue.j
+ ava
+SHA-256-Digest: +TsIQs7RPB70kZ3GvL9JGuepi3e+k1CbRl+Y2YHUfeY=
+
+Name: com/android/build/gradle/internal/tasks/BaseTask.java
+SHA-256-Digest: ZQ8Jo+TLB9W9n4dHTw1mHIVtKomKje2ehb7Dn/gCPI8=
+
+Name: com/android/build/gradle/tasks/GenerateSplitAbiRes.java
+SHA-256-Digest: GgAXNTEjL6u6VV7+1PtEMCq14YsdytPI7HkwUhKj4ZI=
+
+Name: com/android/build/gradle/internal/transforms/BuiltInShrinkerTran
+ sform.java
+SHA-256-Digest: 56Cpa6uINuuuIibqIHbD3p8O53TDt2m22GrxcdOE/hc=
+
+Name: com/android/build/gradle/internal/incremental/DexPackagingPolicy
+ .java
+SHA-256-Digest: Z6TJ6qHxCZzNBGKls6xVQ6fFGGvpUd4W+4d+Fx0t71s=
+
+Name: com/android/build/gradle/tasks/CompatibleScreensManifest.java
+SHA-256-Digest: V6AggGsmGKGQPS4odvUZ3Mg71lGYyRGtIuZuO7lQAMY=
+
+Name: com/android/build/gradle/internal/test/TestDataImpl.java
+SHA-256-Digest: r2NqRWHBWE2U6VYgqWEXAEP5bso5Z5LrE5pM7VuMoww=
+
+Name: com/android/build/gradle/tasks/PackageSplitAbi.java
+SHA-256-Digest: rCOs45tc2Hi5qut+uxfXh44adVAD3vZSxUcZkqDtGtg=
+
+Name: com/android/build/gradle/tasks/factory/ProcessJavaResConfigActio
+ n.java
+SHA-256-Digest: XCUzlEtZBCCZE3XtOwdne4hrIcPyQBSKNwe5hck5Rnk=
+
+Name: com/android/build/gradle/shrinker/ShrinkerLogger.java
+SHA-256-Digest: HzISLO1d+oBkHH2FBrpNrWt+z0SiEe2yhKbfP8UZNQw=
+
+Name: com/android/build/gradle/internal/tasks/featuresplit/FeatureSpli
+ tPackageIds.java
+SHA-256-Digest: YZKyPyBeG8Fo+03/zYuB0UhPqMnVTrPoz1rtjlUmV00=
+
+Name: com/android/build/gradle/internal/dsl/DataBindingOptions.java
+SHA-256-Digest: zgv8IYNl2AulMViwPxCNJfiLsFypek2brV3ak+nIlhM=
+
+Name: com/android/build/gradle/external/cmake/server/ProtocolVersion.j
+ ava
+SHA-256-Digest: gmuZvnMBJqM1Z2wRYMbPZy9l2+ZgKrvkCzVT6140JmU=
+
+Name: com/android/build/gradle/tasks/NoIsolationModeConfigurator.java
+SHA-256-Digest: t1AmHxGxeqLM9JoLCburH3GySwaqyPIuZcTkDSlVmy8=
+
+Name: com/android/build/gradle/tasks/NativeBuildSystem.java
+SHA-256-Digest: RKCenaaO5UkE3cdpMyOD0iKL2bLRiqXXuSTs/0iTMkA=
+
+Name: com/android/build/gradle/internal/api/ApkVariantImpl.java
+SHA-256-Digest: gEebUL1G1ubBXm2MSLUYYxGKS9h5jhx7Ih6tKWWOfYo=
+
+Name: com/android/build/gradle/internal/core/MergedNdkConfig.java
+SHA-256-Digest: hW9LxAFN3crIvB4UlL1bmBqv2v3vs3TK6bZK0vCITdI=
+
+Name: com/android/build/gradle/api/TestedComponentIdentifier.java
+SHA-256-Digest: d20dBuerosPTEkM29z6VoGR9WTGive4941uXoZ0hrjg=
+
+Name: com/android/build/gradle/api/BaseVariant.java
+SHA-256-Digest: ktkq/dhxb0Fh1hqtPWTMQ/kmLhOO/60J4OVZJjmaBJA=
+
+Name: com/android/build/gradle/internal/test/report/TestResultModel.ja
+ va
+SHA-256-Digest: +6ys62HTikcw5l6yge3lMx9RLicUQcOcJIVlkewWuMY=
+
+Name: com/android/build/gradle/internal/dependency/ExtractAarTransform
+ .java
+SHA-256-Digest: tWH01hmw0ht7DM7XmybfFRfRbIiaBVkR4o1ylYe8lxE=
+
+Name: com/android/build/gradle/internal/incremental/BuildInfoLoaderTas
+ k.java
+SHA-256-Digest: Sxhlh4CixwV1Y24hW52O4ktZXZxowvoeK1VfY/pQoR0=
+
+Name: com/android/build/gradle/internal/dsl/DslAdapters.kt
+SHA-256-Digest: pLYeCrBOON1P5+FwZYvMCI7p51BXp9IH9h0EUAV5/xE=
+
+Name: com/android/build/gradle/internal/test/report/CodePanelRenderer.
+ java
+SHA-256-Digest: 5PgcPqQbH8Hcp9KVRS5OD4zzU6ygWWTIOsRMcUVXA30=
+
+Name: com/android/build/gradle/tasks/factory/AndroidUnitTest.java
+SHA-256-Digest: 9zSmiBW6iKdoGwBZywazJo7jJHtOGsGEHosZuWx5mLI=
+
+Name: com/android/build/gradle/shrinker/parser/InheritanceSpecificatio
+ n.java
+SHA-256-Digest: h3iICzRQUQfeMRVbwYT0WS+B/JzgMT66YcrTgvhb3ok=
+
+Name: com/android/build/gradle/internal/ConfigurationDependencies.java
+SHA-256-Digest: QpjFgJlfUTVvEqpuv1EQtcKfrHDb12HvStIowpuDaaQ=
+
+Name: com/android/build/gradle/internal/api/FeatureVariantImpl.java
+SHA-256-Digest: TF6nvM2lNlrww56jGSJ5evptubVAvPQxYQMmx536D3c=
+
+Name: com/android/build/gradle/internal/scope/TransformGlobalScope.jav
+ a
+SHA-256-Digest: wTHsTgurpxGmjImzj0tfBz41HQcGum3v9E2IRhONmFQ=
+
+Name: com/android/build/gradle/internal/BuildSessionImpl.java
+SHA-256-Digest: tEiufKDowScHKLlj8NDNs3pUmfjcayz9AMB/duKagss=
+
+Name: com/android/build/gradle/internal/scope/TransformVariantScope.ja
+ va
+SHA-256-Digest: jOwUNYvbCqi/5VJ450h+gv4/aMFtrP3o18VOwNKHEeE=
+
+Name: com/android/build/gradle/api/AndroidBasePlugin.java
+SHA-256-Digest: AaTvKOFaGOZK5OfzOufq8HIN5L4EakLmjnV2NrCi04A=
+
+Name: com/android/build/gradle/external/cmake/server/HandshakeRequest.
+ java
+SHA-256-Digest: s6NY/Pq5O6i+V1yk+E0daSzDu/y2cOB91wBqfAA96pM=
+
+Name: com/android/build/gradle/external/cmake/server/Target.java
+SHA-256-Digest: G4JBOJnKTGgTGOUgD6pCs+6jYx7CFs1Z5hWAquZ3wuM=
+
+Name: com/android/build/gradle/tasks/ResourceException.java
+SHA-256-Digest: A9i3QFN/FikAML1GaAZkg7/6sNaU0u/u/0mnIq6m5C4=
+
+Name: com/android/build/gradle/internal/ide/level2/FullDependencyGraph
+ sImpl.java
+SHA-256-Digest: DzaBJ2V5hOn1r/RrisApU+I3SmYjlwC/UwEW7JY+baE=
+
+Name: com/android/build/gradle/internal/tasks/PrepareLintJar.java
+SHA-256-Digest: 02nJSCPtvST9dc1h8bUb4Im3i2Sp9k5D1xUB1AAu8e4=
+
+Name: com/android/build/gradle/internal/incremental/AsmUtils.java
+SHA-256-Digest: /e7RKOLWznbxrHwHqxJiTTfilMmH1Rhi4TEeQpvzYSc=
+
+Name: com/android/build/gradle/shrinker/TypeHierarchyTraverser.java
+SHA-256-Digest: KFtWB45QfGCWPmMVo/eUkGbcTDkEMZmhI00UpUPe5t0=
+
+Name: com/android/build/gradle/shrinker/parser/ProguardFlags.java
+SHA-256-Digest: NT4YQirImotsd9kgiHErOREEV9bJ6Wc7w3BUJANkEU8=
+
+Name: com/android/build/gradle/internal/incremental/StringSwitch.java
+SHA-256-Digest: JMLe0YOwvnKMvvP655wfSXXj7JbhQuZOwXjHtxM5rsM=
+
+Name: com/android/build/gradle/external/gnumake/AbstractOsFileConventi
+ ons.java
+SHA-256-Digest: 4Ud6MXUCvfuIiT8xhIz9kFNb3uDRpefLQCW02akYhgE=
+
+Name: com/android/build/gradle/internal/core/MergedExternalNativeBuild
+ Options.java
+SHA-256-Digest: ZPHlgIgllfQg3CWTCzWO+oBYhD+slC9kwaIHZPPuLTY=
+
+Name: com/android/build/gradle/internal/core/MergedExternalNativeCmake
+ Options.java
+SHA-256-Digest: FrSp0mz7hnSXMAV49nPZWGivvC2y1457CkMUG8/8Gi4=
+
+Name: com/android/build/gradle/internal/test/report/TabbedPageRenderer
+ .java
+SHA-256-Digest: Btsh6ErNTfIkQGOsfwKaJTgPOZlZ1EYLxCTj2SUbi9k=
+
+Name: com/android/build/gradle/internal/test/report/PackagePageRendere
+ r.java
+SHA-256-Digest: VD+aJw94pdQwF5vo8ecYByCAZdjnGmAoAXzoksTo9NU=
+
+Name: com/android/build/gradle/internal/dsl/CoreExternalNativeCmakeOpt
+ ions.java
+SHA-256-Digest: EiXEAX1ncaeKgehcY41vRUJGJEn1d+4SyY2gt1jir6Y=
+
+Name: com/android/build/gradle/internal/dsl/CoreExternalNativeBuildOpt
+ ions.java
+SHA-256-Digest: IdvKl9ymWR6gekLfXcEV0m1FV8Q9FOJylYMqLZlAYSs=
+
+Name: com/android/build/gradle/tasks/NdkCompile.java
+SHA-256-Digest: 9+ZOQF2J3gFUUP+FVnKYd4cvO5F3ObBzTjY5TUayWNs=
+
+Name: com/android/build/gradle/external/cmake/server/receiver/Deserial
+ izationMonitor.java
+SHA-256-Digest: b/aemRPBvP9mrUgoo2bafaA9AQBXCDKldpj3BLO3z3E=
+
+Name: com/android/build/gradle/internal/transforms/DexMergerTransformC
+ allable.java
+SHA-256-Digest: uUT8gmjHpBDCmiYjVuuQgC4JyE768EnAm7Wchu4tWqo=
+
+Name: com/android/build/gradle/internal/test/report/SimpleMarkupWriter
+ .java
+SHA-256-Digest: DDA/EtO9f0Xzi9hFTPRXzJxpz/jBMqeXzXu736NNQP8=
+
+Name: com/android/build/gradle/internal/incremental/InstantRunVerifier
+ .java
+SHA-256-Digest: jvyB/46aMKUuhzcOVAHPw8ZZ2ktDByW2EcHjuhoelgw=
+
+Name: com/android/build/gradle/tasks/ir/GenerateInstantRunAppInfoTask.
+ java
+SHA-256-Digest: rcCgwsnHh1S+yyaYALh1YuhhCzoz3rLNyWyYwdv95Rw=
+
+Name: com/android/build/gradle/internal/scope/DefaultGradlePackagingSc
+ ope.java
+SHA-256-Digest: M+v4+PVH+MvzBZDE/uM2GE4FvEtTXnT+rGWl0WpqlQc=
+
+Name: com/android/build/gradle/internal/tasks/featuresplit/FeatureSpli
+ tPackageIdsWriterTask.java
+SHA-256-Digest: V/nRS3Tea8sAC8/LMhE/jUvVpKQSy79LmhcSDnHYhpE=
+
+Name: com/android/build/gradle/external/cmake/server/receiver/Diagnost
+ icReceiver.java
+SHA-256-Digest: BMOFRLas6F0WBsKikvtWsxELuZPpbGbaWM1g72vkX9o=
+
+Name: com/android/build/gradle/internal/scope/OutputFactory.java
+SHA-256-Digest: GaYCGWbKp8reSmbQvA6uFf/pWXf3KSRIbUuvVJl1Yc8=
+
+Name: com/android/build/gradle/internal/dependency/VariantDependencies
+ .java
+SHA-256-Digest: Eqj3yo2kCNT0brhFTrtDZqmXO1mQ6QA1GK/25qhorrA=
+
+Name: com/android/build/gradle/internal/tasks/ApplicationId.java
+SHA-256-Digest: zwKxYMJbzKoBQMxa5pLMZfeNA244Onq9QxaL0HGwYFc=
+
+Name: com/android/build/gradle/internal/core/GradleVariantConfiguratio
+ n.java
+SHA-256-Digest: YrXQbFn/Wr+ZXcx5Fxv54SSai+h7oDmbztXksx8eg6s=
+
+Name: com/android/build/gradle/internal/dsl/BaseFlavor.java
+SHA-256-Digest: 8eMkVHhk26lHR5GsnBxjHDwMJe980LmksXfOGp/hxYs=
+
+Name: com/android/build/gradle/internal/ndk/StlSpecificationFactory.ja
+ va
+SHA-256-Digest: 4y6ce31c3gaIWf6zWPrOqah6XUTDfIGSWCcIs86scMs=
+
+Name: com/android/build/gradle/internal/scope/BuildOutputs.java
+SHA-256-Digest: czKYCZuM2KpaVFS5Gdf2WI86L59RwwqpUuplY0woAfQ=
+
+Name: com/android/build/gradle/shrinker/parser/AnnotationSpecification
+ .java
+SHA-256-Digest: jAirTAci1aqcArLo0CqMikbtrOXxP6k6If54kr17BIg=
+
+Name: com/android/build/gradle/internal/dsl/VariantOutputFactory.java
+SHA-256-Digest: rxN3oX3ARzQUPElUPLhf49yByGQsftskgudgCPcRmv4=
+
+Name: com/android/build/gradle/internal/tasks/AppPreBuildTask.java
+SHA-256-Digest: 6YjAL8RDoziEZExU+A3UVCSpIwC8A+03IKtCU3CArZ8=
+
+Name: com/android/build/gradle/internal/incremental/InstantRunAnchorTa
+ skConfigAction.java
+SHA-256-Digest: flt7HXTwsFoqSeBWeBFFINExHWcbhxoD93V4vUz5cVU=
+
+Name: com/android/build/gradle/external/cmake/server/receiver/SignalRe
+ ceiver.java
+SHA-256-Digest: D18B2Q6ZHcKtezA4ug2p6mVYl/eomtiQrthcYUw6Z8M=
+
+Name: com/android/build/gradle/internal/ide/SourceProviderContainerImp
+ l.java
+SHA-256-Digest: fZG68+IGbblfHE9Vwi7WgxYnAS4t1uB1ZSIE0WXPvC8=
+
+Name: com/android/build/gradle/internal/pipeline/SubStream.java
+SHA-256-Digest: l27WuA7UkYSzuxgQaWWTQsHK0LqI4YqXDZTWhDxFHy0=
+
+Name: com/android/build/gradle/internal/variant/LibraryVariantData.jav
+ a
+SHA-256-Digest: dKk+hsdD1iG2g+SjtCwOBWfymmAuRI/BkElE5dbBNhU=
+
+Name: com/android/build/gradle/external/gnumake/CommandLineParser.java
+SHA-256-Digest: +3uKZTMBHCmK4RxhCskU7Qy2Bgph1LxdwPlGZSHAtBM=
+
+Name: com/android/build/gradle/external/cmake/Cmake.java
+SHA-256-Digest: ECVuh4b37Zu/FFhQQVYEkJVJol4sh2k43WzEbWKXSMs=
+
+Name: com/android/build/gradle/internal/api/ReadOnlyProductFlavor.java
+SHA-256-Digest: IqGgTvQ5p/p/5mKGxW8PAnR6Cmbc+wIFNLVdBPp+BXI=
+
+Name: com/android/build/gradle/external/cmake/server/receiver/MessageR
+ eceiver.java
+SHA-256-Digest: dXlvXULSqQ799f8k8Ksn+7AYiI7RFYfynJhfPlWKEf8=
+
+Name: com/android/build/gradle/external/cmake/server/GlobalSettings.ja
+ va
+SHA-256-Digest: NY8W4VV9/QgnYka061dir4ZLSFyJvgnIyiob4PNRYzw=
+
+Name: com/android/build/gradle/internal/ide/level2/EmptyDependencyGrap
+ hs.java
+SHA-256-Digest: sWc2YrYau94r44Ez6YBKDv7rYIAsAnL3xFkOGXNvDRU=
+
+Name: com/android/build/gradle/internal/api/TestedVariant.java
+SHA-256-Digest: UT7DcstGGacCB+tsXbDRnvFCKyPIwKuaItlEkD6KlOc=
+
+Name: com/android/build/gradle/api/ApkOutputFile.java
+SHA-256-Digest: aCLYIMbOJhfAdHGlScGN8ggTKCAgogV1GRkKRXPMluQ=
+
+Name: com/android/build/gradle/internal/ide/FilterDataImpl.java
+SHA-256-Digest: r8OHa+etV8gY9x7QK2QP7q5PXdO9CLUUYU99SsE/6UA=
+
+Name: com/android/build/gradle/internal/dependency/VariantAttr.java
+SHA-256-Digest: vNPK7hLhCoSYRFD3xeB0KjVzyR6b+jvMJNarXp+W3Ts=
+
+Name: com/android/build/gradle/tasks/ProcessTestManifest.java
+SHA-256-Digest: kLPG80yO7GDiE2tEWk6/ro/2iNkfwCfb67+4vlBfn8E=
+
+Name: com/android/build/gradle/internal/TaskContainerAdaptor.java
+SHA-256-Digest: wVwoHE6OSswhGX8lzPo4wVMbTK3fEgVsXLJt9fSHUwA=
+
+Name: com/android/build/gradle/internal/transforms/FixStackFramesTrans
+ form.java
+SHA-256-Digest: F00+nTgZfDgAckV2NH+6tv6b3NA8Quy/d9j36Nw+yiI=
+
+Name: com/android/build/gradle/internal/test/AbstractTestDataImpl.java
+SHA-256-Digest: /OlkaI+fJywMz63ZsHwL1HBOZPyPUbRUd1CFhTRjYlI=
+
+Name: com/android/build/gradle/shrinker/parser/MethodSpecification.jav
+ a
+SHA-256-Digest: bsa/3Kldhv+bHf2b+pc8Ss7NmfqpainWnHZ59HYok2s=
+
+Name: com/android/build/gradle/proguard-header.txt
+SHA-256-Digest: 3ZlX8OhJrpg5EalJU9b9ibH2An/Z1NMhsmlrQBzhOKE=
+
+Name: com/android/build/gradle/internal/tasks/MergeFileTask.java
+SHA-256-Digest: 9NLFrt6fO5YztrG77nCbV3b6cYmpui2DL6GTb36cEPg=
+
+Name: com/android/build/gradle/internal/tasks/DeviceProviderInstrument
+ TestTask.java
+SHA-256-Digest: GalYDjsFd+20W4AgPryx0AVA7aHOMWtCQAJKMwbxzVA=
+
+Name: com/android/build/gradle/internal/test/report/OverviewPageRender
+ er.java
+SHA-256-Digest: n9EvjVg/4bdErOWB34UmiraVRVTTp7Nowwd27abOg1A=
+
+Name: com/android/build/gradle/shrinker/KeepRules.java
+SHA-256-Digest: pyFrKbi8u5KXivLjaSBxMJBg1Mbh75EcJTQ09kle0tU=
+
+Name: com/android/build/gradle/internal/transforms/LibraryJniLibsTrans
+ form.java
+SHA-256-Digest: G4IQnN1SscY1YUbbgUBwBAd4w+C6PPgRmPd7hMorKw0=
+
+Name: com/android/build/gradle/tasks/JavaPreCompileTask.java
+SHA-256-Digest: yBsJKcgOwutPFyrb4B77RWmxZX1RxkGriW/ayBpD6AU=
+
+Name: Proguard.g
+SHA-256-Digest: 7Dx60k3rcHNlSKhZ2U7L3oHba7fzRwlMQ006dz7+oTA=
+
+Name: com/android/build/gradle/internal/scope/InstantAppOutputScope.ja
+ va
+SHA-256-Digest: KWY1mUJG8BaBO5h7zUfl+B+9vjMT6WRH6pMoIhxnuTI=
+
+Name: com/android/build/gradle/internal/dsl/BuildType.java
+SHA-256-Digest: l1gHOTX/s/AC8ZmZ8DGUw/jNkKIidPyJJynnjp26oBI=
+
+Name: com/android/build/gradle/internal/transforms/ProGuardTransform.j
+ ava
+SHA-256-Digest: QIUUESAsiEL/ohK1L0vxmvgwwvNavDvukR8l5j+lYCI=
+
+Name: com/android/build/gradle/internal/tasks/ExtractProguardFiles.jav
+ a
+SHA-256-Digest: 5ZzGQi9f9e7+PQ3HmaebP6QGPNLC0BhvwOjYMc6i7tY=
+
+Name: com/android/build/gradle/options/DeploymentDevice.java
+SHA-256-Digest: esW/r3eJkXVGo++/wQJQItKoBFbxmnhY15J4vTWnAE4=
+
+Name: com/android/build/gradle/internal/ide/VariantImpl.java
+SHA-256-Digest: GqTLoKHHZZ9iSl7jl5Sjce8a+Bplpc/5jv2yGtTk9sQ=
+
+Name: com/android/build/gradle/internal/dependency/ArtifactCollectionW
+ ithExtraArtifact.java
+SHA-256-Digest: 5OD1czQIwKPFwhClxC+lQhivzPHkj+uvz5lqyyHCStE=
+
+Name: com/android/build/gradle/internal/test/report/PackageTestResults
+ .java
+SHA-256-Digest: 6cAeyBoNl30o91wV2PZadXRO77V3vDQvj3cltHahHlA=
+
+Name: com/android/build/gradle/internal/transforms/InstantRunVerifierT
+ ransform.java
+SHA-256-Digest: UzmoJrFmHLjFSP9qHwbQvE9w9zyNtOelMyiGas5y/3M=
+
+Name: com/android/build/gradle/tasks/ir/FastDeployRuntimeExtractorTask
+ .java
+SHA-256-Digest: iK9DaM9Frd9WdjkkTq5NFCe90qsagD9e2LwRNNb+Azg=
+
+Name: com/android/build/gradle/tasks/SimpleWorkQueue.java
+SHA-256-Digest: cBJltA9hlorsjTRNDhUi9MZ7w2OYqFQ3ZRB+9R3PpOA=
+
+Name: com/android/build/gradle/internal/ide/DefaultVariantBuildOutput.
+ java
+SHA-256-Digest: uja5i3GKEc4cAtM4x/09Jn56oHL6sQnIG2Qn9Hr7XC0=
+
+Name: com/android/build/gradle/external/cmake/server/ConfigureRequest.
+ java
+SHA-256-Digest: nKAgPAOf8Bm4HEiTi1WLNqNyhudhZbDGAFEvptWcs2M=
+
+Name: com/android/build/gradle/shrinker/Dependency.java
+SHA-256-Digest: Y3rOuYc5bOjkTFtmjSGCLoGPqUn8jAL7ICq1+3J5+Mo=
+
+Name: com/android/build/gradle/internal/incremental/ConstructorRedirec
+ tion.java
+SHA-256-Digest: mTLfE8Bfa7pjEyLdQ6C9S8h1W+wcvdGBx7306lYp6YU=
+
+Name: com/android/build/gradle/tasks/CheckManifestInInstantRunMode.jav
+ a
+SHA-256-Digest: 5Q7HTPK6ro8qccRkMEn3BGAh0KFyakiitDzX/l4y68o=
+
+Name: com/android/build/gradle/options/LongOption.java
+SHA-256-Digest: s/H5Ev1Goa8n2crb+MHKr1HVhCJTs8Ztj8xemNzkCAQ=
+
+Name: com/android/build/gradle/shrinker/FullRunShrinker.java
+SHA-256-Digest: oCNnfnOtkmWcn6LAUEcdNf5pEDs3a6qsNEpErJ1krg8=
+
+Name: com/android/build/gradle/internal/dependency/AndroidTypeAttrDisa
+ mbRule.java
+SHA-256-Digest: KJFeoALEi0FSbuZAx4pzJwBXyY+7UyL3ymmJGBGJ8uQ=
+
+Name: com/android/build/gradle/internal/api/ReadOnlyObjectProvider.jav
+ a
+SHA-256-Digest: lsVpQXyKJF5UT4EL/72AEGBs9mPoejt1K9KW9r8Qk0M=
+
+Name: com/android/build/gradle/internal/test/report/TextReportRenderer
+ .java
+SHA-256-Digest: vIgLgwMDeJ4hmsEfyDYbMv4h0l2Ux61QhnxN1uSzVaI=
+
+Name: com/android/build/gradle/internal/transforms/LibraryBaseTransfor
+ m.java
+SHA-256-Digest: VvVcZOInz/GWLYZWIPXgDT726Yl1ZmxJh97lJO4KaNo=
+
+Name: com/android/build/gradle/internal/api/LibraryVariantOutputImpl.j
+ ava
+SHA-256-Digest: wFY5gyQx3/GUzsoF7lCRXVfMzBMO0aLis0cVomy4eis=
+
+Name: com/android/build/gradle/internal/ide/level2/AndroidLibraryImpl.
+ java
+SHA-256-Digest: ZGrTiipJi9Bt2+0xzgceGBOvEumtE/BDlptvFg6ycIQ=
+
+Name: com/android/build/gradle/internal/externalBuild/ExternalBuildAnd
+ roidTarget.java
+SHA-256-Digest: Lxo41y/j3U7gDwrcoHlxCnLtaXPxV4IvNhHsqn+oFq4=
+
+Name: com/android/build/gradle/internal/test/report/ClassPageRenderer.
+ java
+SHA-256-Digest: kwQU4WOyoG50IpYKWFUS8fv80GfbAXlXrLuV5E07JhE=
+
+Name: com/android/build/gradle/internal/variant/MultiOutputPolicy.java
+SHA-256-Digest: zVrX/Xfzuz4aKjWrr2AMGnbXjlCZdbw2sGMrGUIOwlw=
+
+Name: com/android/build/gradle/internal/model/NativeLibraryFactory.jav
+ a
+SHA-256-Digest: 8yXwDxEn2g9u71PmYn21cJBdLDiSMwskq8R9PiLBp20=
+
+Name: com/android/build/gradle/tasks/annotations/ApiDatabase.java
+SHA-256-Digest: 7YSKoE0ZZTvSPEqlMm+LH5TVCe67M3XC6rR4OlLZIhI=
+
+Name: com/android/build/gradle/internal/variant/LibraryVariantFactory.
+ java
+SHA-256-Digest: ZWjg68hCJtxzzWw1A4bzVOB1Fv5hIiNd1OptOXU99+4=
+
+Name: com/android/build/gradle/internal/LibraryTaskManager.java
+SHA-256-Digest: z4gZMOUxpUjXwDTD1ccLRBxOG9e6ycxxnmjFjH5PFfg=
+
+Name: com/android/build/gradle/internal/api/ReadOnlyBaseConfig.java
+SHA-256-Digest: zKnspPKxvAxnkhKuG7EFqpPgEJSCfSvXe0LPrpPDKOQ=
+
+Name: com/android/build/gradle/internal/pipeline/ImmutableJarInput.jav
+ a
+SHA-256-Digest: v8PD+dAoaxqhkMOsvUdU4UePCpX9w08H7YJhoV5cowM=
+
+Name: com/android/build/gradle/internal/api/TestVariantImpl.java
+SHA-256-Digest: dczhBlZk2kv/+NZYUwzsK/wfWE4lqyCZrRmUYwoUgWQ=
+
+Name: com/android/build/gradle/internal/transforms/InstantRunBuildType
+ .java
+SHA-256-Digest: eg47wkCctA5KBamCVVOnHuExrgnSuUZZwVRsx8lav6E=
+
+Name: com/android/build/gradle/internal/dependency/MutableDependencyDa
+ taMap.java
+SHA-256-Digest: 2VoYAa4dxuuc4wrVlh7KDSDibVsThU++Dt6vrO2Kb/g=
+
+Name: com/android/build/gradle/shrinker/ClassStructureVisitor.java
+SHA-256-Digest: NZeoo8xeEHh+qLuzPS+SC+N6daj0LaZLVIgWQwE54nU=
+
+Name: com/android/build/gradle/internal/tasks/MergeConsumerProguardFil
+ esConfigAction.java
+SHA-256-Digest: 7SLMIFXZZ23JBb7rcKHjmP7okpF8w8AbYlaqoT+Z12k=
+
+Name: com/android/build/gradle/internal/tasks/UninstallTask.java
+SHA-256-Digest: 8673uWeslKWUs14rrr37Q3IDtBk8fIctnKYkG86SgRQ=
+
+Name: com/android/build/gradle/internal/externalBuild/ExternalBuildVar
+ iantScope.java
+SHA-256-Digest: VuOPUJzTXMzjDs610Icj5JyOcjWCivqMHf9KuoxrtTk=
+
+Name: com/android/build/gradle/external/gson/NativeLibraryValue.java
+SHA-256-Digest: oNfc3zxlqiUYTX5bi4T797mmCrBsSX1FfaDHhasswVg=
+
+Name: com/android/build/gradle/internal/tasks/InstantAppSideLoadTask.j
+ ava
+SHA-256-Digest: 9snoVzBQ3VcXTUmdR9FDrS2RcSTome1MhCqC9Ivn1Aw=
+
+Name: com/android/build/gradle/tasks/GenerateBuildConfig.java
+SHA-256-Digest: D2PUZtBcKygkoTgfXKbFrDmRHcmeBUMQK5PSrtoEZ+A=
+
+Name: com/android/build/gradle/tasks/MergeSourceSetFolders.java
+SHA-256-Digest: eNomGR2wPD5r8jy6c7RZsIrmm66Kt6SSRwXmbbKv0i8=
+
+Name: com/android/build/gradle/external/gnumake/FlowAnalyzer.java
+SHA-256-Digest: UYCyLfVxpnIjv/bK9dsBl5aGA2w29C8Tw217L/x/jVs=
+
+Name: com/android/build/gradle/internal/ProductFlavorCombo.java
+SHA-256-Digest: AF9vzKTcT3J/8UWKe9Jbv5i8MiKHxVR7F3m7ifYCVjI=
+
+Name: com/android/build/gradle/external/cmake/server/FileGroup.java
+SHA-256-Digest: Lcp+lvdkTBBdBJ4uOgurKd2ko028ZcPvRAvLeM4mIBw=
+
+Name: com/android/build/gradle/internal/transforms/InstantRunSliceSpli
+ tApkBuilder.java
+SHA-256-Digest: XLq33dgseDv+1d6ZaY3PljEvUvwn9Oe2WGdRSjeifeQ=
+
+Name: com/android/build/gradle/shrinker/IncrementalShrinker.java
+SHA-256-Digest: pYsqEjavaChCDi3h+slIhLj+7mKeL2Z0Qp3PNVavleU=
+
+Name: com/android/build/gradle/internal/tasks/AbstractAndroidCompile.j
+ ava
+SHA-256-Digest: rLdD9g4bd+lN5AILYBpA2xKr5lQN6D5AREtfTV3x478=
+
+Name: com/android/build/gradle/internal/transforms/PreDexTransform.jav
+ a
+SHA-256-Digest: 4eeDbn9naxUGksMj2wsdH53gu0hzE20yyV0MBdNxhps=
+
+Name: com/android/build/gradle/internal/ide/NativeLibraryImpl.java
+SHA-256-Digest: LxXejW03FRz7ogx0jispjRsP/d21WS2m7G4YYzBsOtg=
+
+Name: com/android/build/gradle/internal/api/DefaultAndroidSourceFile.j
+ ava
+SHA-256-Digest: zGOypoLNehSp2PcIZj9i9dzoNtJf9gpgt0UerIwnWPo=
+
+Name: com/android/build/gradle/internal/tasks/TestPreBuildTask.java
+SHA-256-Digest: 4DEY3TMn01yXuTPMOCgrWDo7QhkbNFFF3hIz2O8XBao=
+
+Name: com/android/build/gradle/internal/process/GradleProcessResult.ja
+ va
+SHA-256-Digest: ZMix3Gq+twX43AHJPrVVPnF6JYkWmUiTjYwytuRlZ4M=
+
+Name: com/android/build/gradle/internal/pipeline/FilterableStreamColle
+ ction.java
+SHA-256-Digest: zHgCuHodC7siWYIzLs5qfYGLvPae7qk8xEaGCYc1wmU=
+
+Name: com/android/build/gradle/internal/tasks/ApplicationIdWriterTask.
+ java
+SHA-256-Digest: c9xZNI+kd3VJtMTe9u3D7IE6A1+fYT9fZEn20DZzMt8=
+
+Name: com/android/build/gradle/internal/api/ReadOnlyBuildType.java
+SHA-256-Digest: eBBqMTwex9rjrfnR0JrIBichXV4VKDQwhOXtjVrtkqE=
+
+Name: com/android/build/gradle/external/cmake/server/receiver/Interact
+ iveProgress.java
+SHA-256-Digest: av6BLRbiN1PmnP/9XRiqANv5FBXsyJkW1GbLVwbApW4=
+
+Name: com/android/build/gradle/internal/tasks/featuresplit/FeatureSpli
+ tTransitiveDepsWriterTask.kt
+SHA-256-Digest: EYd/DyHTSVbzsN1W07nshfoouShN+UDOIh40kN3cjDE=
+
+Name: com/android/build/gradle/internal/ide/TestOptionsImpl.java
+SHA-256-Digest: PPHJfbV7DK9bSiQNYBpuG/JLXmH427M21WAK2uH3NXg=
+
+Name: com/android/build/gradle/internal/dsl/CoreShaderOptions.java
+SHA-256-Digest: DAlofdPSGYo8qQeSIyNj6gA84IdEpLFp/d35Lvp+poA=
+
+Name: com/android/build/gradle/tasks/MergeManifests.java
+SHA-256-Digest: cjvuOG2d2YWBpDZmesFAwxdzydeeQCgGCzfRold+0bM=
+
+Name: com/android/build/gradle/TestAndroidConfig.java
+SHA-256-Digest: UzxAlH40ukoismt/4/WV3TSSqIakGWRKmjM73NclUPg=
+
+Name: com/android/build/gradle/internal/dsl/JackOptions.java
+SHA-256-Digest: Qmr0Me2Vr6hGQncRG1R3EkUmf1k+2HOQS3Oo4Nn37ok=
+
+Name: com/android/build/gradle/internal/ide/AndroidArtifactOutputImpl.
+ java
+SHA-256-Digest: sK0Ddfvm3hrPYoo3sBHlX6t0NK9A3RCkJRZbGWhgUu0=
+
+Name: com/android/build/gradle/internal/transforms/ExternalLibsMergerT
+ ransform.kt
+SHA-256-Digest: kRzkrRQxMYp/YoA1vYitqBq4AKfKlfFR444+dqngews=
+
+Name: com/android/build/gradle/internal/test/report/style.css
+SHA-256-Digest: VYanE34Mz1e2EklSb2aFwSwdTWdkps+whNyh+L5Q7a4=
+
+Name: com/android/build/gradle/internal/dsl/Splits.java
+SHA-256-Digest: bbruMejpCloyJtJ7RqDUytndnoC3RF5NiLKJSOYjF4g=
+
+Name: com/android/build/gradle/internal/tasks/TestServerTask.java
+SHA-256-Digest: kDqo1UZAFe9+Fgv5lHhgIz/Zg8W4V2Bz+KW6Oq/jVIE=
+
+Name: com/android/build/gradle/internal/BuildTypeData.java
+SHA-256-Digest: tE77E55GeN1v3h+M/MRGQaBvYzqURBtcFy47RhvALDA=
+
+Name: com/android/build/gradle/internal/pipeline/ImmutableDirectoryInp
+ ut.java
+SHA-256-Digest: /Q29DVgTYV9SnwGMlgpslLWg0NHxNQnsnpDYF27nSuM=
+
+Name: com/android/build/gradle/options/SyncOptions.java
+SHA-256-Digest: N/Rv/ENvWGAYE1JgNFXbHaWPo0sfCAEBBvNLdKoO8Xk=
+
+Name: com/android/build/gradle/internal/dependency/AndroidTypeAttrComp
+ atRule.java
+SHA-256-Digest: IW/42O0dc2tnargGuzIGDSFdyj/K/SQbX/kykWDtFms=
+
+Name: com/android/build/gradle/shrinker/PostProcessingData.java
+SHA-256-Digest: JOH3RJ8js+39fR1zZzG3FxytQuorR4y1V26ETNMlh6U=
+
+Name: com/android/build/gradle/internal/transforms/LibraryAarJarsTrans
+ form.java
+SHA-256-Digest: ChhW5gciYIYHQtosN5uzotAGLBmq+ezAurk30IJxSUM=
+
+Name: com/android/build/gradle/tasks/VerifyLibraryResourcesTask.java
+SHA-256-Digest: S8t6upTJEK5yatPRnt15yAnU/gAtyieS0U7IiA4CLMk=
+
+Name: com/android/build/gradle/internal/VariantDimensionData.java
+SHA-256-Digest: yZv03l8yCyS4Xo1VaL89iNCZDI3mSJXS46zusq7xb6A=
+
+Name: com/android/build/gradle/tasks/BinaryFileProviderTask.java
+SHA-256-Digest: ArzrZxXshFq52gg4buepfZKMqugyZB09FUWLtokQKps=
+
+Name: com/android/build/gradle/internal/incremental/ConstructorBuilder
+ .java
+SHA-256-Digest: L7ij0sHS7knaw8CqwZBmDStIcNTbaJLHSUNkLWMLOEQ=
+
+Name: com/android/build/gradle/tasks/ExternalNativeBuildJsonTask.java
+SHA-256-Digest: Ue/PwY/khEvruCWlnOa6Nr/E7Q4QMjHBlcFTculRoR8=
+
+Name: com/android/build/gradle/options/StringOption.java
+SHA-256-Digest: YLOvXP2O/8B8RiA/a1aDvDjB0fjsVZK46/W8u42jMqs=
+
+Name: com/android/build/gradle/internal/dependency/JarTransform.java
+SHA-256-Digest: 0qWubTu7fOnJbiD7te6kuEcB6t9HHMWjqi/SyG9rfQE=
+
+Name: com/android/build/gradle/internal/dsl/AndroidSourceSetFactory.ja
+ va
+SHA-256-Digest: uTWg8YHSaHqIOg6KghcA94KkdTXAJT1eJl3E6hw+naI=
+
+Name: com/android/build/gradle/internal/dependency/AarTransform.java
+SHA-256-Digest: YTK1++r9jf1cys4Qh9Y3c7A/1w6/9zI76YSzzF4Xxxc=
+
+Name: com/android/build/gradle/internal/incremental/IncrementalVisitor
+ .java
+SHA-256-Digest: fL4OdVOWBScl27IDVBgI4sijLAu4PaG3y2kRGDxTR5I=
+
+Name: com/android/build/gradle/internal/actions/AttrExtractor.kt
+SHA-256-Digest: 4EzHWB4ozdFwlcbeI5YwsBTUcfXwsfAntYyjX9IA4Yk=
+
+Name: com/android/build/gradle/internal/process/OutputHandlerFailedGra
+ dleProcessResult.java
+SHA-256-Digest: U4+F1VeaABGL7gJwFeXo5MezdPF/Qy7ieg29cOy92IQ=
+
+Name: com/android/build/gradle/internal/dsl/NdkOptions.java
+SHA-256-Digest: u1IsNRcbptOBhf8LAhrJ8+Pdgaq/WspDOqW+NaDqH/8=
+
+Name: com/android/build/gradle/tasks/GenerateTestConfig.java
+SHA-256-Digest: iv3Qzi/vEB4MW/ywBQXzElWE0U/AmTiHkgzcscrGrS0=
+
+Name: com/android/build/gradle/internal/tasks/SingleFileCopyTask.java
+SHA-256-Digest: Nby20zVlFED9rt65FrQasItOlry0y33oECLmBmoS/JI=
+
+Name: com/android/build/gradle/tasks/ShaderCompile.java
+SHA-256-Digest: hnqGGxHhwcLu+X0l1cVDHn9vEB+5dT+W32aEa2UNSt4=
+
+Name: com/android/build/gradle/tasks/GenerateResValues.java
+SHA-256-Digest: adee6+qdQ5sIXGlF81czln+j0y42Sg5snaVWfGGNwK0=
+
+Name: com/android/build/gradle/internal/scope/GenericVariantScopeImpl.
+ java
+SHA-256-Digest: J95A03WbIy97TJ5Dg/Ze3k7pVZc1APA/mdVAb7ONVU0=
+
+Name: com/android/build/gradle/internal/dependency/LibrarySymbolTableT
+ ransform.java
+SHA-256-Digest: yYwZCFUgyUNFUL/dMlUW3ODsi7a7IyFNZTiJRQBbPrM=
+
+Name: com/android/build/gradle/internal/api/ReadOnlySigningConfig.java
+SHA-256-Digest: gHM5785vzXRAnNPX8JOmaVCn2iY0ehR5vGRP9jJuXog=
+
+Name: com/android/build/gradle/internal/ndk/AbiInfo.java
+SHA-256-Digest: t/y6XTxxNCr3Rfk1Bj3XHLSmt5ggQHnXYTO+CA6WONs=
+
+Name: com/android/build/gradle/internal/dsl/CmakeOptions.java
+SHA-256-Digest: +2axqdIz6RcNCwGUvv6iP/uCBo8NvG+rCplT4SpVOaA=
+
+Name: com/android/build/gradle/internal/profile/ProfilerInitializer.ja
+ va
+SHA-256-Digest: EVX92OCKKCRYPEcGhpZfYTm4poGBY3eU1yshaTtenC4=
+
+Name: com/android/build/gradle/internal/api/ReadOnlyVectorDrawablesOpt
+ ions.java
+SHA-256-Digest: JBSb50dXDTVnF3dTZ0guMZ35FbcgGaZvGgF+/Et2/yg=
+
+Name: com/android/build/gradle/shrinker/parser/UnsupportedFlagsHandler
+ .java
+SHA-256-Digest: iUi2LN+7ZGhpBymSSCfn3BjP2gX6wcFuQRp69Us7U/E=
+
+Name: com/android/build/gradle/internal/ide/ProductFlavorContainerImpl
+ .java
+SHA-256-Digest: mmxHzuoTbW2+cBUuRmUBIJUrQr2Boy5MO79oZa1DLrY=
+
+Name: com/android/build/gradle/internal/transforms/DesugarWorkerItem.j
+ ava
+SHA-256-Digest: ThRXEukufext4OqHgUzWIqIkRGXrhMuI9FwY5J3l7bY=
+
+Name: com/android/build/gradle/tasks/TestModuleProGuardTask.java
+SHA-256-Digest: e+NY164P4jNVQ02aEpa7Fnn8tr1+uhAWwAFsYLnr47Q=
+
+Name: com/android/build/gradle/tasks/BundleInstantApp.java
+SHA-256-Digest: RABW6G6C9Ll8lF9/w5t+fvGQYsBS2hX7fraU1R02mH0=
+
+Name: com/android/build/gradle/internal/externalBuild/ExternalBuildPro
+ cessor.java
+SHA-256-Digest: hC/fwnVY0Rf+4MFh6715iAHduImLhl0U+XeCVMoaVeA=
+
+Name: com/android/build/gradle/internal/variant/DefaultSourceProviderC
+ ontainer.java
+SHA-256-Digest: 30QD8J6rYd0TECrsOLLega4Dj2OxNrBrPOAvn1o9bok=
+
+Name: com/android/build/gradle/internal/transforms/TransformInputUtil.
+ java
+SHA-256-Digest: u+Xk8UewRO7oa5mO78ZPnJaLRRwJqq9+wfFkZCHJ6/o=
+
+Name: com/android/build/gradle/internal/annotations/PackageFile.java
+SHA-256-Digest: n++qNhGaciVY2HqLHPRFJ4gEujuGuTNyUXzNsy/hBko=
+
+Name: com/android/build/gradle/tasks/annotations/TypedefRemover.java
+SHA-256-Digest: XtfXuJYEZVRjFvo40AiV0osbnoindukW23SzEVXOrSI=
+
+Name: com/android/build/gradle/internal/ExecutionConfigurationUtil.jav
+ a
+SHA-256-Digest: q53CFjsGjCfm4hDjYpbBmkwZDXEsd38fjqVHBC3nxAs=
+
+Name: com/android/build/gradle/internal/transforms/DesugarTransform.ja
+ va
+SHA-256-Digest: yGES4hsEqvpnN92JaszDNtAWAVcIfETz9smKulFv/Ro=
+
+Name: com/android/build/gradle/shrinker/parser/ClassTypeSpecification.
+ java
+SHA-256-Digest: jqDXedYcmyrbPv11us5Gze0alP+TNw1OmyhLSBBryWQ=
+
+Name: com/android/build/gradle/api/VariantFilter.java
+SHA-256-Digest: EV5ARyfDomVhPPNdRqCXYndho4pQHKUbLm13g3WWJcw=
+
+Name: com/android/build/gradle/internal/tasks/CheckProguardFiles.java
+SHA-256-Digest: qNiJ1FY5WSeXPR6pEBsuKrBbMczM15sZLINaWBbdy+Y=
+
+Name: com/android/build/gradle/internal/dsl/TestOptions.java
+SHA-256-Digest: asbXEBOUbM7B+IOpVHtDxabqIUYbKXylV/Q7JucVBxU=
+
+Name: com/android/build/gradle/internal/scope/BuildOutput.java
+SHA-256-Digest: 0ZAljbltvHGWq8GjSIGYLd/349ebXItAVv96zNV02aU=
+
+Name: com/android/build/gradle/internal/dsl/DexOptions.java
+SHA-256-Digest: 91zC0kfwJ0lJGoHR65sijmz+zbtZT6bo3bDn3QhqaP0=
+
+Name: com/android/build/gradle/shrinker/parser/GrammarActions.java
+SHA-256-Digest: 3NmxVRjuAwzLJqaQmpcOYvjZOxxvRfcV32kyUJqbHWU=
+
+Name: com/android/build/gradle/internal/variant/FeatureVariantFactory.
+ java
+SHA-256-Digest: 57pPpYr91RM5QhUsn+hCkytkd5gQYItcCpAKsX1wQr8=
+
+Name: com/android/build/gradle/external/gson/PlainFileGsonTypeAdaptor.
+ java
+SHA-256-Digest: SoSAQ1eb40PQGFjK3KafeA8UeoMhM3EvnPfNeRxqQYk=
+
+Name: com/android/build/gradle/internal/CompileOptions.java
+SHA-256-Digest: 5MUAiQ6qMJwEH0gtFmYs5f2Q72HjIYnlMBVaPnPjdag=
+
+Name: com/android/build/gradle/internal/TestApplicationTaskManager.jav
+ a
+SHA-256-Digest: czDT0ea7t7Py5P+gjeIVlISJnq0wTmnM66ueHtg906k=
+
+Name: com/android/build/gradle/internal/transforms/DexArchiveBuilderTr
+ ansform.java
+SHA-256-Digest: KYV1eG/m7NinUUaX6ELbyujeKQVT2fLsCGhoMrhl990=
+
+Name: com/android/build/gradle/internal/PostprocessingFeatures.java
+SHA-256-Digest: EZmmnXD7MUxT/c6dvnyVCE/jy7idJ3Hgl5wZYU4XCXs=
+
+Name: com/android/build/gradle/options/SigningOptions.java
+SHA-256-Digest: dhanBE4iWMGUzkQ/30fO/7aE+jTDgFcEx05V2VRty2Q=
+
+Name: com/android/build/gradle/internal/api/ApplicationVariantImpl.jav
+ a
+SHA-256-Digest: lrZBDSUODPuMyA8u8yfvet01cuPv1nXHodfyIB5AkDw=
+
+Name: com/android/build/gradle/external/cmake/server/CacheRequest.java
+SHA-256-Digest: NUHeQ9b+cBVUaTSWVIild6nRgXBu81AlDS1NEPY5dcA=
+
+Name: com/android/build/gradle/internal/BuildCacheUtils.java
+SHA-256-Digest: ioYU7PktGdXoFoCh/rhdvLbqv9cwkVhD+sa2RyUV7ts=
+
+Name: com/android/build/gradle/internal/variant/AndroidArtifactVariant
+ Data.java
+SHA-256-Digest: pjrBhqKMJGWUM0BXE/mfGGpaqBEDaD8zavaSvlPxlPs=
+
+Name: com/android/build/gradle/tasks/CmakeAndroidNinjaExternalNativeJs
+ onGenerator.java
+SHA-256-Digest: 5/zaOweC+0+OdqSWZ8w9sd4soz5otGw23/VoTjW7PLI=
+
+Name: com/android/build/gradle/internal/tasks/DependencyReportTask.jav
+ a
+SHA-256-Digest: UJAQ5cgVoWUHpcQK4kZwLI4lulpLkfEKtar5UoxLcnY=
+
+Name: com/android/build/gradle/internal/scope/SplitList.java
+SHA-256-Digest: /OLccvuZIrkMWD1YDRdwSdeoXDxgyZwvDleZhHkmQFE=
+
+Name: com/android/build/gradle/internal/transforms/MainDexListTransfor
+ m.java
+SHA-256-Digest: s9dpOox7c+R4u0gUJTV6x6YP8jmR9CIE1EFkSWlxogQ=
+
+Name: com/android/build/gradle/shrinker/parser/FieldSpecification.java
+SHA-256-Digest: wPCHAcmM8SHRsYV94w8DCs6lyXsfgizULzak5tiP0Fo=
+
+Name: com/android/build/gradle/internal/test/report/TabsRenderer.java
+SHA-256-Digest: 0HOlZKRMKKDlGv1E/u7wKs58OXTn0UYZEem36Of8LpY=
+
+Name: com/android/build/gradle/shrinker/parser/ClassSpecification.java
+SHA-256-Digest: yJGh7yrbA4YpYVnZLZPpEii580dt0INlAPo7gZAyr9g=
+
+Name: com/android/build/gradle/external/gnumake/CommandClassifier.java
+SHA-256-Digest: 8uRP5KzpYE05FCZ1cicDkbt1RHeoNeVgdfkQkA17u+Q=
+
+Name: com/android/build/gradle/internal/ToolingRegistryProvider.java
+SHA-256-Digest: 8mn1qRxYZ+0ch6Ss4EpZI8lZJmElteK5fhOuh4z5Wvc=
+
+Name: com/android/build/gradle/internal/api/AndroidArtifactVariantImpl
+ .java
+SHA-256-Digest: CngcM3CumQHoLZpAGNfsIvkdy/5hLTsrhtc30jCop58=
+
+Name: com/android/build/gradle/internal/tasks/InstantAppProvisionTask.
+ java
+SHA-256-Digest: 2jvKyaNEqyqniPuEwaNxramJIza6VuUkgCuAkEnTH7g=
+
+Name: com/android/build/gradle/internal/ide/DependenciesImpl.java
+SHA-256-Digest: 4W85iSBUzPf6/ck0ibZ3kSxDLLM+jYfK2pkkGYxP2XA=
+
+Name: com/android/build/gradle/internal/tasks/IncrementalTask.java
+SHA-256-Digest: yhjbhWsJbEnN+mdI+qGPx+hRy6ee6ejBdpRcbN9ScFI=
+
+Name: com/android/build/gradle/api/SourceKind.java
+SHA-256-Digest: ieO9tG8MXN/VluUSiH/3FGrQZP2euNJMN6Q+5/1qHiI=
+
+Name: com/android/build/gradle/internal/ide/ProductFlavorImpl.java
+SHA-256-Digest: NIIlmcNOvPNeyIUpPxKHhuWR/ZbSoWmbIDHjfFkyFcw=
+
+Name: com/android/build/gradle/internal/tasks/SigningReportTask.java
+SHA-256-Digest: WFI1V/IL5GrGp25lumpQTuIfcauL8AWaD0u+qAxyzrY=
+
+Name: com/android/build/gradle/external/cmake/server/HandshakeResult.j
+ ava
+SHA-256-Digest: s1gVo6eLycw07yoPJXZXZHl1cTrFdpRZdns/bc5x15Y=
+
+Name: com/android/build/gradle/tasks/annotations/Extractor.java
+SHA-256-Digest: UKoD739VKfCNFCfC2UHAoSS2oSb1IBnXeNf0JnMe2yM=
+
+Name: com/android/build/gradle/internal/scope/AndroidTaskRegistry.java
+SHA-256-Digest: AkBgXu+MogKXxmg9Wc2ohlVijJqEEXWb9mzld7aQ7B0=
+
+Name: com/android/build/gradle/internal/dsl/ProductFlavor.java
+SHA-256-Digest: M07qWLxKM+0xlHcULoSoYU4UxG7bi2T+8Qd0qmlFq7I=
+
+Name: com/android/build/gradle/proguard-optimizations.txt
+SHA-256-Digest: MFhoeOTGtKJrj8AcQquz6Lit1vK4v/Z01Z2wSQnieDs=
+
+Name: com/android/build/gradle/internal/transforms/NoChangesVerifierTr
+ ansform.java
+SHA-256-Digest: Nbc87VTB637yB0QqO/snynWma2RB7ZUqpBOr2xQZdq4=
+
+Name: com/android/build/gradle/shrinker/parser/Matcher.java
+SHA-256-Digest: VfsFv+Os0eoQW8k3rUexwaM8vSM+B2mexcQJqLOc2Kw=
+
+Name: com/android/build/gradle/internal/variant/MultiTypeVariantFactor
+ y.java
+SHA-256-Digest: ersibLnuaiz5HhDEZrGuNiVp4nJjdZxZehhJy/MdNWg=
+
+Name: com/android/build/gradle/internal/test/report/VariantTestResults
+ .java
+SHA-256-Digest: ZkynK17eTYWJ/Lo5GaRa5rgNGppaZSD/4nIr2B9HFDs=
+
+Name: com/android/build/gradle/external/gnumake/OsFileConventions.java
+SHA-256-Digest: xMKcLbHuD/2X5m/VL3nGZMvrtNWH934Wt0LcalkKotI=
+
+Name: com/android/build/gradle/internal/ide/InstantRunImpl.java
+SHA-256-Digest: ceqUMqm165K8XqodJLhCGqLpZ0BL4Gjblc5OzU3LleA=
+
+Name: com/android/build/gradle/internal/transforms/FileFilter.java
+SHA-256-Digest: nqFWviyl/HW6ZQxdRUj3qh/MRaeHXSDLGE/0HZy75Jg=
+
+Name: com/android/build/gradle/ProguardFiles.java
+SHA-256-Digest: HVuaeChdxd4hExBphiAdanYUbvHGS3448WW98U1HZHQ=
+
+Name: com/android/build/gradle/tasks/PackageSplitRes.java
+SHA-256-Digest: SqjtEeb3CyPv1xvXa3AH8v7kFLlmpvdGK4MrbcNNN4A=
+
+Name: com/android/build/gradle/internal/pipeline/ExtendedContentType.j
+ ava
+SHA-256-Digest: EmmwZpxiWaOrBEgRtzajMLX0a3I2An1Kh85YLL2gDt8=
+
+Name: com/android/build/gradle/internal/ide/DefaultJavaCompileOptions.
+ java
+SHA-256-Digest: OyGO9vYZBTkX9JjLF3esuMjjqsP4NjRxEjg+wExHPOA=
+
+Name: com/android/build/gradle/internal/test/report/report.js
+SHA-256-Digest: CqMG+UgFiQaCxjmy1cBhCIAdZLhZoXGjxu6mbIurTGo=
+
+Name: com/android/build/gradle/internal/ide/ModelBuilder.java
+SHA-256-Digest: DF72CC1Dk8YfBVBXKmwYF+WioZPJif9zegisd4p1zsY=
+
+Name: com/android/build/gradle/external/gson/NativeToolchainValue.java
+SHA-256-Digest: jmeHyYIOL/Ixka9R09lBQasHDdJdgRmSqq2sBW7V9IY=
+
+Name: com/android/build/gradle/internal/externalBuild/ExternalBuildCon
+ text.java
+SHA-256-Digest: TreCw9gbIowde6CKSS9/r+u682smUmvToddZHUwuVP0=
+
+Name: com/android/build/gradle/tasks/SplitsDiscovery.java
+SHA-256-Digest: TwfNs3a0meLaPnOK48pDMbhAMd94aEvsPigp1bceGu8=
+
+Name: com/android/build/gradle/internal/ide/ArtifactDependencyGraph.ja
+ va
+SHA-256-Digest: 29lAJ99O6Xe9dNvb2U7J2aXY4brjhVxHB0DrQ0LYSxY=
+
+Name: com/android/build/gradle/internal/incremental/Redirection.java
+SHA-256-Digest: mjEniMHMW2fwy+O83hBrgDm3thXBg8v0o4MelQbbgZk=
+
+Name: com/android/build/gradle/internal/api/UnitTestVariantImpl.java
+SHA-256-Digest: 0QqA86seMiZBu32gudIlOX/SpPywCQO6sXiB/25St8Y=
+
+Name: com/android/build/gradle/internal/transforms/StripDebugSymbolTra
+ nsform.java
+SHA-256-Digest: 6HAQL4JI+1azfiJDaJqDmbcB/wyJiiuPyHTpzTNKfHU=
+
+Name: com/android/build/gradle/internal/dsl/AbiSplitOptions.java
+SHA-256-Digest: 7nDvcXs1ihKOB0fyu4BpU1Q8ikvL78eN/3UjxSGwPrY=
+
+Name: com/android/build/gradle/internal/InternalScope.java
+SHA-256-Digest: DDlF5/gNWw1M608r9JGQDo68UGNH1NyEbe3dZDqgITs=
+
+Name: com/android/build/gradle/internal/VariantModel.java
+SHA-256-Digest: qjyLJIyooVYcVwbxHJe6Zb8lLqJ0ZnEB2JsFpdk2tkA=
+
+Name: com/android/build/gradle/internal/transforms/JacocoTransform.jav
+ a
+SHA-256-Digest: Dzl727LY4QfGAoKjM0fBYqgEffXfvP9hxGCB6goOx7E=
+
+Name: com/android/build/gradle/api/ApkVariant.java
+SHA-256-Digest: rprNZiYK1LhH/+YWSikWYXWeQIjf0IK6izBq0eIJLo8=
+
+Name: com/android/build/gradle/internal/dependency/SubtractingArtifact
+ Collection.java
+SHA-256-Digest: 5LEFUzpWpPomFM5O2MZKcuxON5EpFK/admdBCrSyGsU=
+
+Name: com/android/build/gradle/shrinker/JavaSerializationShrinkerGraph
+ .java
+SHA-256-Digest: a/xFVOcGLGiF668XmjVhm6UK8O1Lf6IQnD+8Wcq5ahk=
+
+Name: com/android/build/gradle/internal/ndk/NdkR11StlSpecificationFact
+ ory.java
+SHA-256-Digest: 8hE/zwSB6GGQJTSBfY4mkPG7w9goqT3CJ9EPgMg4hoE=
+
+Name: com/android/build/gradle/tasks/GroovyGradleDetector.java
+SHA-256-Digest: 3qVpfR69HtCDz9IaCyvoA+nke43khdbQGKoMM3RZa2E=
+
+Name: com/android/build/gradle/internal/tasks/AndroidReportTask.java
+SHA-256-Digest: LVG6gAuWDHjdLfR6m1Ob5vAgQh4+e76RCGopbMCQFkU=
+
+Name: com/android/build/gradle/internal/ide/BuildOutputsSupplier.java
+SHA-256-Digest: yeauN+bxctHNJRrXgUo7s9hMYUk8qRqsuTShqTyQWLc=
+
+Name: com/android/build/gradle/api/LibraryVariantOutput.java
+SHA-256-Digest: tC9LXRvj5U/O5RqD/X84K129sZzHrcEkO4N7bj1lttE=
+
+Name: com/android/build/gradle/shrinker/ProguardParserKeepRules.java
+SHA-256-Digest: KJWoGX8UG6mvVajEMQHrYKjiNt9iOkNlft9RKj7OBbQ=
+
+Name: com/android/build/gradle/external/gnumake/NativeBuildConfigValue
+ Builder.java
+SHA-256-Digest: LT/2JpwzcO3l8wX9Gn2and6FleSY0cnRcYwDUdGplSs=
+
+Name: com/android/build/gradle/options/BooleanOption.java
+SHA-256-Digest: qVnOJJyvzNzRRgwZqFoJ4/+CfKnwNcP37ZThz580700=
+
+Name: com/android/build/gradle/internal/ide/NativeFileImpl.java
+SHA-256-Digest: z4rkb388ol18gqpfyrediB5cJ1P3SxLtdtoTTpBg0ko=
+
+Name: com/android/build/gradle/internal/tasks/SourceSetsTask.java
+SHA-256-Digest: yfw0Ztj3XxihIjOevZpjNAQLBFpAAWJSbMlPuFwDjig=
+
+Name: com/android/build/gradle/internal/ide/ApiVersionImpl.java
+SHA-256-Digest: NbJKc7gUZF74GjYwxBdI6UtcVOrtA8gp9fcwKWIAqtE=
+
+Name: com/android/build/gradle/internal/incremental/FileType.java
+SHA-256-Digest: SZDXkqw9j/802tOHFnAA9o61Yzb06pgQ1NmdPDuAqew=
+
+Name: com/android/build/gradle/shrinker/RewriteOutputVisitor.java
+SHA-256-Digest: 8CVE1JQo+stYoanwSfjUdVHGxLeZfdO+WfIcH600XXc=
+
+Name: com/android/build/gradle/internal/ide/NativeToolchainImpl.java
+SHA-256-Digest: 9A2cLs1f/HtBi2WazC+7PxB5XtQ0doCKo8hE2pzNI64=
+
+Name: com/android/build/gradle/tasks/AndroidZip.java
+SHA-256-Digest: bucIeOIjI9rVTRkBrDoSGFmE6YfVNy/dR+2espKzNbo=
+
+Name: com/android/build/gradle/tasks/CopyOutputs.java
+SHA-256-Digest: lFR2043IShWFC7NQZnrID8vzdIfL/4rmYLR/pIBfgkI=
+
+Name: com/android/build/gradle/tasks/AidlCompile.java
+SHA-256-Digest: BpFLxMRhH3BRQ8T9+47uhdtYiYMR6pk8JTOOY55gS4Y=
+
+Name: com/android/build/gradle/internal/variant/ApplicationVariantFact
+ ory.java
+SHA-256-Digest: 9fb7syUwGNIwx6cr8eTq9S5UjGJ1I1Il0acJmsnr1j4=
+
+Name: com/android/build/gradle/internal/ndk/NdkR11Info.java
+SHA-256-Digest: rzwEX9yBhpaLKsislNlc9jTtDbco1nBHI+OQurz4ePU=
+
+Name: com/android/build/gradle/tasks/MergeResources.java
+SHA-256-Digest: AOFVVQNplBU37dl2IcF0NiwT9ioUt0LGCvGM9L7duoU=
+
+Name: com/android/build/gradle/shrinker/tracing/NoOpTrace.java
+SHA-256-Digest: BkFWpBKM6UQxm68wnyVJIYLPQLn5hbKK4kL70Y3KtOU=
+
+Name: com/android/build/gradle/internal/variant/BaseVariantData.java
+SHA-256-Digest: qKPqbTPKGPlnQwafrTUwKib1q1qt1YAa98/ccOVXqKQ=
+
+Name: com/android/build/gradle/internal/transforms/InstantRunSplitApkB
+ uilder.java
+SHA-256-Digest: fE2M+EMl1PmMg53vBudsRxCfaoQRid4wRCowN5yhc4A=
+
+Name: com/android/build/gradle/internal/coverage/JacocoReportTask.java
+SHA-256-Digest: TqqBKOC1TVGHqjxNI+FH5GJP/SCAGSbtZuf4S23VIHc=
+
+Name: com/android/build/gradle/internal/dependency/AndroidTypeAttr.jav
+ a
+SHA-256-Digest: c4mTQ/aSEX/ixat3MUnKOORDONTG8/tQ9KqXvVHqLR4=
+
+Name: com/android/build/gradle/api/AndroidSourceDirectorySet.java
+SHA-256-Digest: KIfUOuWLzXH7PCXyNgaUxKPIdT2pHD5nWwFf/qRmKbU=
+
+Name: com/android/build/gradle/internal/core/MergedJavaCompileOptions.
+ java
+SHA-256-Digest: O0f2au11wu7pW2P0Qt0a7AppK+71DtbW7njDlV5pOuQ=
+
+Name: com/android/build/gradle/internal/dsl/LintOptions.java
+SHA-256-Digest: 1CplmAIhXiQOE9iRc72NPeDPHVPNUuBztot7ylRe6qU=
+
+Name: com/android/build/gradle/internal/transforms/ExtractJarsTransfor
+ m.java
+SHA-256-Digest: Yh67ZInFpyGGyc2FAaY7gZKPXZfWWNJTrMhCrzAWxFk=
+
+Name: com/android/build/gradle/external/gnumake/BuildStepInfo.java
+SHA-256-Digest: zlNDjbZMRjYBt4oL4BAAb566gRhOVvIBK76dtarlZPg=
+
+Name: com/android/build/gradle/internal/dependency/AlternateCompatibil
+ ityRule.java
+SHA-256-Digest: wWSHaU39vfGzlz8nPO3lkNAbf+FBLnr1fQ+DzPTZD90=
+
+Name: com/android/build/gradle/internal/dsl/PackagingOptions.java
+SHA-256-Digest: hV6VPt6OLUovOky57DhTOclARhZHzGc6gLoNfy90B8E=
+
+Name: com/android/build/gradle/internal/aapt/AaptGeneration.java
+SHA-256-Digest: UTZq/bKWyVQ3nFR6bDOfMtzmTWkrKHnekbXIvlqDzhM=
+
+Name: com/android/build/gradle/tasks/LintBaseTask.java
+SHA-256-Digest: ZyWU3G1mNLMzJOkAGUsIN5EKv115XYIyBw3H8GJlg98=
+
+Name: com/android/build/gradle/shrinker/ClassLookupException.java
+SHA-256-Digest: DOFh7pZ/vStws748nznpe4w4lXsyEh9CampX7ZpA0d0=
+
+Name: com/android/build/gradle/internal/ide/BuildTypeImpl.java
+SHA-256-Digest: d8dV9+3m62Q0Rv0EZbGSL7yymDEzkyUdpNSWwuwgQ8s=
+
+Name: com/android/build/gradle/internal/dsl/LanguageSplitOptions.java
+SHA-256-Digest: qp1ppSPu13lBfXKO3GFAFJeGRtwwJZvMStWmY5if69M=
+
+Name: com/android/build/gradle/internal/dsl/BuildTypeFactory.java
+SHA-256-Digest: Dm0etWBsCjbeeXtuAGryJfZgUMTyMw1GH9d+XvkG87A=
+
+Name: com/android/build/gradle/internal/ndk/DefaultNdkInfo.java
+SHA-256-Digest: EOKl2qgoUdvXm4HMYLa3dDVwK5jC43ZBoN8uUbF3hVs=
+
+Name: com/android/build/gradle/internal/incremental/InstantRunBuildMod
+ e.java
+SHA-256-Digest: 05UgC9k0mwoZIXBB/KOE0trB/YbZ8c+n1akM/pDoq1M=
+
+Name: com/android/build/gradle/shrinker/DependencyType.java
+SHA-256-Digest: GU86Qw0dSVmQimqLurvrIeCgfDFWnk1yg5pxutmSvKw=
+
+Name: com/android/build/gradle/internal/ide/JavaLibraryImpl.java
+SHA-256-Digest: 8s4F2KfeJ9yphkHwv/2ZP0E2h8CObyEzgzwomnLYwks=
+
+Name: com/android/build/gradle/internal/externalBuild/ExternalBuildExt
+ ension.java
+SHA-256-Digest: UeH2yAnppUS7MCvmUVQ1Pby14X8i5b2cJg+rvlcbWlw=
+
+Name: com/android/build/gradle/internal/ide/DefaultAndroidProject.java
+SHA-256-Digest: cp9PAJs6jgqdIxthjxbxmoJe83MgpLvojJWAgKs1eP8=
+
+Name: com/android/build/gradle/shrinker/parser/ModifierSpecification.j
+ ava
+SHA-256-Digest: qEfUsNM4CdHESZBz8d+lm8jYCUkqDnMWrwkLGLA5hXg=
+
+Name: com/android/build/gradle/internal/tasks/featuresplit/FeatureSpli
+ tDeclarationWriterTask.java
+SHA-256-Digest: 4vxcjw0U5UeGXxYVF0A9Gzz+3/fOxo6BjAf/gWsh4co=
+
+Name: com/android/build/gradle/internal/ide/ArtifactMetaDataImpl.java
+SHA-256-Digest: 8/uAGb7HFjIDiSuYff0XPAIODkhln6S5qzq93aonO9E=
+
+Name: com/android/build/gradle/internal/publishing/AndroidArtifacts.ja
+ va
+SHA-256-Digest: IJOfTneVhPehkGC/4zwFn+3HgSqXgPEAtlxuVfdU0to=
+
+Name: com/android/build/gradle/internal/dsl/ExternalNativeBuild.java
+SHA-256-Digest: 13uiQvqnJ1gA44DXoTL7aH7QV/JB+1DfcycjdGeR258=
+
+Name: com/android/build/gradle/internal/packaging/PackagingFileAction.
+ java
+SHA-256-Digest: L4KHk9dY1PF6wxBG6eU0xhGGSiJi5ZCU6k2LaAVLa9U=
+
+Name: com/android/build/gradle/internal/SourceSetSourceProviderWrapper
+ .java
+SHA-256-Digest: FBQ+T70mekxqot/NCUpsDYnQkEm6JyY7r1CiYSx+D9U=
+
+Name: com/android/build/gradle/internal/variant/VariantFactory.java
+SHA-256-Digest: GuIpfaZUeiAD2+5zCh2/6iijOKkr2pXWzGTS+3Slb0A=
+
+Name: com/android/build/gradle/internal/dsl/ExternalNativeBuildOptions
+ .java
+SHA-256-Digest: PdZncZ8gP6Shpjt3PRD0/l4y7miYp4fcziwuCFD+g44=
+
+Name: com/android/build/gradle/tasks/factory/AbstractCompilesUtil.java
+SHA-256-Digest: o0MFv26rIst/HKWkQnLaqXh9VHMZznnVQfjFCEb/1OU=
+
+Name: com/android/build/gradle/tasks/LintGlobalTask.java
+SHA-256-Digest: pzvzhhyxKU5TY3Chs0YueogvFAO5asp+IdJQW4OqEIE=
+
+Name: com/android/build/gradle/internal/ide/BaseArtifactImpl.java
+SHA-256-Digest: Ot5iykwr/QB7O+xP2xCazoiFXlFA9mMr1t0XhQRMzzE=
+
+Name: com/android/build/gradle/tasks/ZipMergingTask.java
+SHA-256-Digest: +P02QmLWCMVsq1Dtz+LRkdGZzqG+067fcas7Ra5arzI=
+
+Name: com/android/build/gradle/tasks/ExternalNativeBuildTaskUtils.java
+SHA-256-Digest: sX+RrkG2CYdLrigD9kuaop5lo/dJH+VdKmjXg2tSR9E=
+
+Name: com/android/build/gradle/internal/tasks/AndroidTestTask.java
+SHA-256-Digest: cxWAoMe6JccHRy6f/xanhcFPvLXYojJ445Bn5bY+Dgg=
+
+Name: com/android/build/gradle/internal/pipeline/StreamFilter.java
+SHA-256-Digest: VO7LbjrarUy53xH3yrBI0F9fJ/Cix431yC168UvoOjw=
+
+Name: com/android/build/gradle/tasks/ExternalNativeJsonGenerator.java
+SHA-256-Digest: 8yvyisXU+2X8CJRRLNbQktmB+He/4n2P8jFZvM8WmI8=
+
+Name: com/android/build/gradle/internal/incremental/Constructor.java
+SHA-256-Digest: NH5/JJdZ0pv3PMqx6v0rXeMb/D/GdJdVrStSCPP4U5M=
+
+Name: com/android/build/gradle/shrinker/tracing/NoOpTracer.java
+SHA-256-Digest: UgVhO27tIAjZhORfTggog+wmO9WIim9K8+qTf5Vc29s=
+
+Name: com/android/build/gradle/internal/dsl/CoreExternalNativeNdkBuild
+ Options.java
+SHA-256-Digest: os2cmGxRtMmFHnn26x/sJ9MtvDNj1UjJxOp7Tde5hbo=
+
+Name: com/android/build/gradle/internal/tasks/DefaultAndroidTask.java
+SHA-256-Digest: vKMJRE3VPYbiOuH+9Yt+1/OlufWz5H0MWljooFyrdmQ=
+
+Name: com/android/build/gradle/internal/pipeline/IncrementalTransformI
+ nput.java
+SHA-256-Digest: /TAamoSgnKE5fz1s+dkVD2+5I4QdSigIA2ZcNCtfuno=
+
+Name: com/android/build/gradle/external/cmake/server/CompileCommand.ja
+ va
+SHA-256-Digest: GB52nxOueTmbVIk+PqQ1CcEDLxJE7WKR4NABVVnD2wk=
+
+Name: com/android/build/gradle/external/cmake/server/CacheResult.java
+SHA-256-Digest: hRQwdqV9rhXfQpkrpV7a/OUqqXu/txbhlehC2l/RZto=
+
+Name: com/android/build/gradle/internal/ide/AaptOptionsImpl.java
+SHA-256-Digest: T0XYRkC/Hvx9vNdtqaDSzE3wlBzWDAITbfMkewe2s3U=
+
+Name: com/android/build/gradle/tasks/ManifestProcessorTask.java
+SHA-256-Digest: PCZxfE68WATSaCV4yg2R54UUW5Os17+63pjYNaxi6vU=
+
+Name: com/android/build/gradle/internal/externalBuild/ExternalBuildMan
+ ifestLoader.java
+SHA-256-Digest: 6AD7U+DMke4UrvXedWyJJpH56nzALAEcL7Q6BuFLRao=
+
+Name: com/android/build/gradle/tasks/CheckTestedAppObfuscation.java
+SHA-256-Digest: GaG7XKn9qrrgDoj9SgTjCRrAWJUc0toF6+ghCrWKjNU=
+
+Name: com/android/build/gradle/external/cmake/server/ServerProtocolV1.
+ java
+SHA-256-Digest: sgK57sYAASVQzyCVe1CkGTi0zKpetL27WvdqqLCUryo=
+
+Name: com/android/build/gradle/internal/process/GradleJavaProcessExecu
+ tor.java
+SHA-256-Digest: YTqKsJMQ5itebSuBqA7OItDxEvPlTaueWIVAuovU5YI=
+
+Name: com/android/build/gradle/external/cmake/server/Generator.java
+SHA-256-Digest: Z2YHweIe2MMGPhXJ7z/i8cZ1gCKejjhmZeEtMtQgOCE=
+
+Name: com/android/build/gradle/options/OptionalBooleanOption.java
+SHA-256-Digest: 70pcWhvKJoU+fZD7wjint1fyhKCGIf1FLGplmBR9ciY=
+
+Name: com/android/build/gradle/external/gson/NativeBuildConfigValue.ja
+ va
+SHA-256-Digest: QP+Ji8nfa89XGoqGQ8mI9r4HhUiotWsi0LSpx2pRrMs=
+
+Name: com/android/build/gradle/AndroidGradleOptions.java
+SHA-256-Digest: Sv8o3l/PmxoIV/wOgwrPkrDzhvL2ovASz4qhC4CdnZs=
+
+Name: com/android/build/gradle/internal/ide/level2/SimpleDependencyGra
+ phsImpl.java
+SHA-256-Digest: QIVXtZTzoa/s6sr/2Tc2n4LCMXoTcoY87Ab50cp1850=
+
+Name: com/android/build/gradle/internal/ndk/NativeLibrarySpecification
+ .java
+SHA-256-Digest: kEaHf52Fk94KOkjQaGIQQFKzwO+zr4At+MfuuCRQH6w=
+
+Name: com/android/build/gradle/TestedAndroidConfig.java
+SHA-256-Digest: sT8dcv8g0f0Rxy/pIO49kchCw3Z1O6ZsD+Q0Mp4S6Lw=
+
+Name: com/android/build/gradle/internal/ide/NativeSettingsImpl.java
+SHA-256-Digest: GqwCVEIHLYGzbxEj6YdNIAG/qxu5qN4t5sVNcNIznPA=
+
+Name: com/android/build/gradle/options/EnumOptions.java
+SHA-256-Digest: 49fqE/N47SbpE1ViAS2nLRdpaIVEJn0dxiggKEp4AJA=
+
+Name: com/android/build/gradle/internal/scope/AndroidTask.java
+SHA-256-Digest: 01D0y0V09JdF3UJ62giXRZOejONyjyfffHxu4gqyfLo=
+
+Name: com/android/build/gradle/api/AndroidSourceSet.java
+SHA-256-Digest: xM1P3uIWv7W7CKt3yrCQ1wEVM5Q706njkPRnDYYyjLw=
+
+Name: com/android/build/gradle/internal/scope/TaskOutputAlreadyRegiste
+ redException.java
+SHA-256-Digest: 8iTgUi8n7+kGrW7Vu8DIK3IZomd+1ANMIK4NVqjU1B8=
+
+Name: com/android/build/gradle/internal/tasks/databinding/DataBindingE
+ xportBuildInfoTask.java
+SHA-256-Digest: RSsxCmy8bqxR93JsrU6xLYNAxPusamOEo+ZpSqkeyRg=
+
+Name: com/android/build/gradle/external/cmake/server/Configuration.jav
+ a
+SHA-256-Digest: nGXrSWkSuV4iB+Y/zB9hDloAV5a7h1s8uYZ6naGit5k=
+
+Name: com/android/build/gradle/internal/incremental/ByteCodeUtils.java
+SHA-256-Digest: KzEbR3MCYSwrbsymN4Ztzd0Vra3JqtkkCardrRfrf1c=
+
+Name: com/android/build/gradle/internal/variant/TaskContainer.java
+SHA-256-Digest: A4wfJia4zeY/LA2+IvepIEYbb8QzX8qIKVlXgcbb93M=
+
+Name: com/android/build/gradle/internal/packaging/IncrementalPackagerB
+ uilder.java
+SHA-256-Digest: glYaJ4Kc+PUrgnXTbbM2nCXxil9KrYUtCDzY0K/sAFI=
+
+Name: com/android/build/gradle/tasks/PreColdSwapTask.java
+SHA-256-Digest: B96H2uakptcUMr1LwrnKg3x81Y/krE/JrtfqSSjDETk=
+
+Name: com/android/build/gradle/tasks/ExternalNativeCleanTask.java
+SHA-256-Digest: uhwbD0kFa9ZpHk2Qh9hv6ewmsafvEIlsy8RUXXY4xQU=
+
+Name: com/android/build/gradle/internal/scope/VariantScope.java
+SHA-256-Digest: eBLi6otSldfqFD2+YWS3LDi0hZZICGP6jCmAa8LuvHA=
+
+Name: com/android/build/gradle/internal/LoggingUtil.java
+SHA-256-Digest: vc72qs0wzB5blSRzC0dQ2SWS/9ve34dlbcnYhM8Fwno=
+
+Name: com/android/build/gradle/internal/ndk/NdkInfo.java
+SHA-256-Digest: aLHqyPJJA9w3SK63ZJAzK/Gflde7x1gA3ybvgrqrFhc=
+
+Name: com/android/build/gradle/api/ApkVariantOutput.java
+SHA-256-Digest: va5xzpvRu3WqHxx6HFpadT/Fr8byTF3NO311KF+JCEg=
+
+Name: com/android/build/gradle/internal/test/report/DeviceTestResults.
+ java
+SHA-256-Digest: hKVr+es9TDpaUyaa20A+x7+pqIqsrnyXE8J+WQNbMnE=
+
+Name: com/android/build/gradle/internal/ndk/NdkR14Info.java
+SHA-256-Digest: 1OGXwIWef0BXpFOQ0vIb4BltOoC4S5wN91JVm5xASU4=
+
+Name: com/android/build/gradle/external/cmake/server/ServerUtils.java
+SHA-256-Digest: /MirHvDxCDSvRyDKhdHPFc4ijGtWrdaBHzrhVOPAZvg=
+
+Name: com/android/build/gradle/internal/incremental/LocalVariable.java
+SHA-256-Digest: vIxmr1V6uZUR/mSw4NIPtbRkboIn0oXtGDaT5KSpRKM=
+
+Name: com/android/build/gradle/options/NdkLease.java
+SHA-256-Digest: VDh+N/qdyKjyNH3adO1XBtIXqZiX47JfOpQvKCDufZo=
+
+Name: com/android/build/gradle/internal/dsl/JavaCompileOptions.java
+SHA-256-Digest: rQiJiZiTwKuMuuBcAufvn60qpyqgGvmJplBDeYwndLQ=
+
+Name: com/android/build/gradle/internal/test/report/PageRenderer.java
+SHA-256-Digest: RhzSUkCX3A5SYqq1b1XZg97vtv3+0mPhPxcazWvlU2g=
+
+Name: com/android/build/gradle/internal/ide/DefaultProjectBuildOutput.
+ java
+SHA-256-Digest: vH030nQcFVWIdjLgip12T2l+tC7qp4NaZX+4b7Iyomk=
+
+Name: com/android/build/gradle/api/JavaCompileOptions.java
+SHA-256-Digest: SpbB1lPlG1sFEj6seRxMo44N/ehXuDF4EKwvrPnbYtU=
+
+Name: com/android/build/gradle/internal/dsl/CoreJackOptions.java
+SHA-256-Digest: mEIt/O3m1JfxnndAwkAJi4NP6PzIo6Rpk57lnHYeZmY=
+
+Name: com/android/build/gradle/internal/dependency/ConfigurationDepend
+ encyGraphs.java
+SHA-256-Digest: d3YLnlBYVNKH9T4VEr5DE+Dmz/wkYnyinMPtF3OrgNc=
+
+Name: com/android/build/gradle/api/ApplicationVariant.java
+SHA-256-Digest: 8/GtgAxQXj9YZVUhM+bMSM/RqPhx6DtRZntMIBfTG7c=
+
+Name: com/android/build/gradle/external/cmake/server/ComputeResult.jav
+ a
+SHA-256-Digest: TPCROnbqcZ0dLqAppNH8yqKqsgGnprhjtc8MRbxs6ME=
+
+Name: com/android/build/gradle/internal/dsl/ShaderOptions.java
+SHA-256-Digest: bcuk46HjRKyfJ6AnG8rdnQ/M9WhS8Xi+///U4R3gcQk=
+
+Name: com/android/build/gradle/tasks/ExtractAnnotations.java
+SHA-256-Digest: PTKrqb7dNta0ZOr2oPtBvFwvYvuiyt5O25xnzjQffI8=
+
+Name: com/android/build/gradle/internal/tasks/MockableAndroidJarTask.j
+ ava
+SHA-256-Digest: AmTDgrKrvl+/MefZDunTUFCJFH52UP7JyS6xpXTWA9E=
+
+Name: com/android/build/gradle/internal/externalBuild/ExternalBuildTas
+ kManager.java
+SHA-256-Digest: HvIJg1Orx9cQVQHuLDvePnXHhJbgPH6sXeBu9F09oKE=
+
+Name: com/android/build/gradle/internal/variant/ApplicationVariantData
+ .java
+SHA-256-Digest: y22s319D+3eLum01Ji+aHoKwnXY63whoarFxRfhRiuQ=
+
+Name: com/android/build/gradle/internal/variant/TestedVariantData.java
+SHA-256-Digest: KPMO1wxYB3L7ad4YOMe/DDWtHPVgLaL+A6kBhNJmU/A=
+
+Name: com/android/build/gradle/options/Option.java
+SHA-256-Digest: +TFbX+QWr6/eNcbcsiOIOOwZ49PJ8/ZAvf3DyvpgG1M=
+
+Name: com/android/build/gradle/shrinker/IncrementalRunVisitor.java
+SHA-256-Digest: VsOGUtg10/AeotLQY6lKIbELp2owuI53sdydpd/xpl8=
+
+Name: com/android/build/gradle/shrinker/parser/ProguardParserException
+ .java
+SHA-256-Digest: z8GMsu6iFeELfneueDIyCpPgoGQaY1F6oi6N9ySynNE=
+
+Name: com/android/build/gradle/internal/PluginInitializer.java
+SHA-256-Digest: OBYAKxXwzPuzFVcFNPvRXIEptasuqBt2Na8Uk6gehDo=
+
+Name: com/android/build/gradle/internal/dsl/CoreSigningConfig.java
+SHA-256-Digest: nGO148ja+M4LlakqfNCgvuXSkyYWU/o4MhrwW0vvtKc=
+
+Name: com/android/build/gradle/internal/tasks/databinding/DataBindingM
+ ergeArtifactsTransform.java
+SHA-256-Digest: lAxOPycMO3HvS0rxtrd87S116Yzhelk1YpgMHt6zeX4=
+
+Name: com/android/build/gradle/internal/scope/VariantScopeImpl.java
+SHA-256-Digest: IQf2Cpb5368OWiealxqUTrVKOu8aUF7lSzJKyy/Aqx0=
+
+Name: com/android/build/gradle/internal/scope/GlobalScope.java
+SHA-256-Digest: InlkPIQ0GhB1Cvm3Gjqe235MMX2YNZZAgmvTyx6udjQ=
+
+Name: com/android/build/gradle/internal/variant/BaseVariantFactory.jav
+ a
+SHA-256-Digest: 83bm+ex4CwTiqybRTa5OVwExNUrNMq/V/Jtd1tvGooM=
+
+Name: com/android/build/gradle/internal/incremental/IncrementalChangeV
+ isitor.java
+SHA-256-Digest: v/TkAhJ56+ap7WmkWEhuZT25+EM7oCKmp8vdc8auXj8=
+
+Name: com/android/build/gradle/internal/dsl/PostprocessingOptions.java
+SHA-256-Digest: B20j23T3CTZpgxaOxS52Ffrnv14PljdXdrymMo0tHVs=
+
+Name: com/android/build/gradle/internal/publishing/VariantPublishingSp
+ ec.java
+SHA-256-Digest: qtUY8KCjX840HmlKKqM32qnvywhVafpC2LfsH/46Csw=
+
+Name: ProguardLexer.java
+SHA-256-Digest: kylSOfTf2XSfjRTa1I2zw7g+dDI1lIrCvlkMtCu6Ees=
+
+Name: com/android/build/gradle/internal/dsl/SigningConfigFactory.java
+SHA-256-Digest: ELJ1Sy41hcW113ZMX21ZRC3PHzXM5RoboG6pLhwAWk0=
+
+Name: com/android/build/gradle/internal/ide/DefaultInstantAppVariantBu
+ ildOutput.java
+SHA-256-Digest: GeKWrMsM0+akCjoIs0idZlH/BkibIa5HxzyhKIGx+uo=
+
+Name: com/android/build/gradle/internal/pipeline/QualifiedContentImpl.
+ java
+SHA-256-Digest: waxuvkzFZFk1y0knoVFnhWWnj93hx09uHjVp0dPVNpA=
+
+Name: com/android/build/gradle/internal/MultiTypeTaskManager.java
+SHA-256-Digest: RO6kKVVgpTKhEiuLqcaJzKut22BXBBQKXdb8zDmOjeE=
+
+Name: com/android/build/gradle/internal/api/DefaultAndroidSourceSet.ja
+ va
+SHA-256-Digest: 9pH5ln87C9WXVavU8tFxo/gIrCxlmm3wk2Djfndi1Y0=
+
+Name: com/android/build/gradle/internal/incremental/InstantRunAnalytic
+ sHelper.java
+SHA-256-Digest: aXm6doeJwf/ZW8fbsD0Z4lEKVn3h/+8J5x7e+p8J6+I=
+
+Name: META-INF/gradle-plugins/com.android.base.properties
+SHA-256-Digest: NbLI+4LCRfGcRT+WmvzLKUHJWY21RP5GSRJ/9pF+MeU=
+
+Name: com/android/build/gradle/external/cmake/server/IncludePath.java
+SHA-256-Digest: 1vBkKrusKZ6PXSx0JDPCEHwtfu1OxxNo5+LyMJRufow=
+
+Name: com/android/build/gradle/internal/tasks/InstallVariantTask.java
+SHA-256-Digest: fAkkmQCaX7+n6APuujgI+EAEsrMMu8KcH/1AO2bLj4w=
+
+Name: com/android/build/gradle/internal/incremental/MethodRedirection.
+ java
+SHA-256-Digest: G+IZwtLHnc6abs4JFKQ8EzdYjZFwnEHwa8DBpgl46j8=
+
+Name: com/android/build/gradle/internal/ide/AndroidLibraryImpl.java
+SHA-256-Digest: 6UFTIe3NXCJ8X0PXJOSGcYBeAG9zCSynNicPQLwd088=
+
+Name: com/android/build/gradle/shrinker/ProguardConfig.java
+SHA-256-Digest: +E0QCSwiBnXSG2pZ3sjZ5Cc+X/oDniJ3n7yZ9Hjbeus=
+
+Name: com/android/build/gradle/internal/ide/SourceProviderImpl.java
+SHA-256-Digest: sWfUp5uT6OvLcQkL4WI+zaW7Mn5VKxcXBREuzjDqhSI=
+
+Name: com/android/build/gradle/internal/ndk/NativeToolSpecification.ja
+ va
+SHA-256-Digest: 2i7S5DLhS29zy0dQCw+qh+ZJyhteyCoAFSGth246eQY=
+
+Name: com/android/build/gradle/internal/InstantAppTaskManager.java
+SHA-256-Digest: TRyvhw0NFNJnMn7C0gAqPd3oKkT/30WBfZbgQdw2Hwc=
+
+Name: com/android/build/gradle/internal/ide/level2/JavaLibraryImpl.jav
+ a
+SHA-256-Digest: bZamk/dp1urUMYkijCo2eyqMQySo3s8g6I1+67jOlhw=
+
+Name: com/android/build/gradle/internal/ndk/NdkHandler.java
+SHA-256-Digest: ekDqyZ0gFOHTBLBmFiSQYlGUW0VOYa/SjdQy9T9hPLI=
+
+Name: com/android/build/gradle/internal/transforms/CustomClassTransfor
+ m.java
+SHA-256-Digest: cOtpuNVNihjyO6kXIAOe7sIYL0S4dYkfM72oxR4DeSY=
+
+Name: com/android/build/gradle/external/cmake/server/TypeOfMessage.jav
+ a
+SHA-256-Digest: IcrPtFro+gWY0XVxFW5QTkjh6Gpv2IeXMv8VqV5lccw=
+
+Name: com/android/build/gradle/internal/dsl/CoreBuildType.java
+SHA-256-Digest: kc4t79BZjbBUF8iX7aJbmcsflfa0PX2pkVdQi7fL35k=
+
+Name: com/android/build/gradle/internal/api/ImmutableFlavorList.java
+SHA-256-Digest: Ieiv7qOg1LTOSZK8hyb2UYDDolRM1U8NhQCfbwJv6Yk=
+
+Name: com/android/build/gradle/external/gnumake/CompilerParser.java
+SHA-256-Digest: JLb8r4tAx6gPf2Ly96plWFou+d3HMO/UJDWkrOdZ3GI=
+
+Name: com/android/build/gradle/internal/TaskManager.java
+SHA-256-Digest: ESo7m3RTKNrDdCSCo9YTDBzAZUrqpc64WjoJLn8jZnk=
+
+Name: com/android/build/gradle/internal/dependency/FilteredArtifactCol
+ lection.kt
+SHA-256-Digest: R1GgXTiU0Z0OqGoELK2pjM27XKUqs+Ognyp6QxkJqvE=
+
+Name: com/android/build/gradle/internal/ide/NativeArtifactImpl.java
+SHA-256-Digest: UGG8m2/SRm5h38pJUQJKQH1hGZvhJ2YIXnerANKrpTE=
+
+Name: com/android/build/gradle/tasks/annotations/ExtractAnnotationsDri
+ ver.java
+SHA-256-Digest: sX2tzGtdSeYQMgn6H85Tjw9idFEuRFHA5CF5u9PmnsU=
+
+Name: com/android/build/gradle/internal/tasks/InstantAppProvisioner.ja
+ va
+SHA-256-Digest: u+iwNn63LWrEbmrQlaRNu/lkBS3qEY/kgK4EMULYaTs=
+
+Name: com/android/build/gradle/external/gnumake/CommandLine.java
+SHA-256-Digest: rlNFjO4LiuJRbDSftPgAue/R/bzIMhxvkxJ3/HeE0eE=
+
+Name: com/android/build/gradle/internal/ide/BaseConfigImpl.java
+SHA-256-Digest: UPrxiahRloswYcCLBvYzAGW99qg+adIiQe+1YX5q4pA=
+
+Name: com/android/build/gradle/internal/ProductFlavorData.java
+SHA-256-Digest: RgVkVUANuo9i1tGkzK7S5BBhFtTkcDP58yEPJNNKwO4=
+
+Name: com/android/build/gradle/internal/AndroidDependenciesRenderer.ja
+ va
+SHA-256-Digest: hHMxa2xUI5533Ebh4Efv4lB33EVsax3hddo0Aqg6XSg=
+
+Name: com/android/build/gradle/internal/ide/JavaArtifactImpl.java
+SHA-256-Digest: YU9gYlvq4GaxFA3eZJjm0bPQJRjx0S37aBPz+J7dbSg=
+
+Name: com/android/build/gradle/internal/transforms/PreDexCallable.java
+SHA-256-Digest: qKwlc6PExaMTPv1J8Igu1KNBcvk8O/CCezANKuRJIzA=
+
+Name: com/android/build/gradle/internal/incremental/InstantRunMethodVe
+ rifier.java
+SHA-256-Digest: y90pAcJENw9fnorw02tga8UB78z/9yc30bP3O1boJ1g=
+
+Name: com/android/build/gradle/options/DeprecatedOptions.java
+SHA-256-Digest: nXHByUGf42ehq4PM3Tv0CqcEvrfdU8VWq/KTDm5BsTo=
+
+Name: com/android/build/gradle/external/cmake/server/CodeModel.java
+SHA-256-Digest: u6DJ5QuiDe7bfxbtHBBT50FPG4HQmYC/sECJE40Uepc=
+
+Name: com/android/build/gradle/internal/BuildSession.java
+SHA-256-Digest: gBbQJTtF3Vwz8vtKSTJzwpbbCmLdtPxVmqqfMcasj6M=
+
+Name: com/android/build/gradle/internal/ide/BuildTypeContainerImpl.jav
+ a
+SHA-256-Digest: dqUdoySkw7HSjLBD99xtGrAH6m1aoD5QVtJItq4w03k=
+
+Name: com/android/build/gradle/external/cmake/server/receiver/Interact
+ iveMessage.java
+SHA-256-Digest: 96WB7megoFGiNGHnjRKqz8dWnp6DG0sZTIM3ZJpBONo=
+
+Name: com/android/build/gradle/internal/incremental/IncrementalSupport
+ Visitor.java
+SHA-256-Digest: 74gLxvYo+AgA65UE/NzMQbwnlArRQV2BUG0OsN8DTd0=
+
+Name: com/android/build/gradle/api/TestVariant.java
+SHA-256-Digest: qZoD1S6+JQiiDdjuz9Q8kOEUSN/lfc2ocqa25fOA4eE=
+
+Name: com/android/build/gradle/internal/model/CoreNdkBuildOptions.java
+SHA-256-Digest: hs4zZzMhXegCsc4+rKt5gnjqYqkjlGIJUM3hjYedglY=
+
+Name: com/android/build/gradle/api/InstallableVariant.java
+SHA-256-Digest: kvtyXis5uKTxwXhgdt2X3i1j9YG813/V9ieDuCY/qm0=
+
+Name: com/android/build/gradle/internal/dsl/ExternalNativeCmakeOptions
+ .java
+SHA-256-Digest: xU/ixDe5QBtpJEl2xwmMFGq7+QH4r23IFOQIFz/I4io=
+
+Name: com/android/build/gradle/internal/dsl/SplitOptions.java
+SHA-256-Digest: SBJfzBOc/ivbaFG9Tnn6cBUy1g9FecKko9AzgPRJp74=
+
+Name: com/android/build/gradle/shrinker/DependencyFinderVisitor.java
+SHA-256-Digest: 2fDpqS7/Glo2EGSi7BRfm1bin76YRPSz7toOMbrxy7M=
+
+Name: com/android/build/gradle/internal/tasks/NdkTask.java
+SHA-256-Digest: uZA3EG5Tjl1/7Y+XHKvmdnyMtJ4BSO46Bj3EPfRqz18=
+
+Name: com/android/build/gradle/shrinker/parser/NameSpecification.java
+SHA-256-Digest: 3rTW4WWoA41eImuY6Ill6e1DGKv7YwFQ15QseQUISZM=
+

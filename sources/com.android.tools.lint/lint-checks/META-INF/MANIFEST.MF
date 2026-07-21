@@ -1,2 +1,561 @@
 Manifest-Version: 1.0
 
+Name: com/android/tools/lint/checks/ChromeOsDetector.java
+SHA-256-Digest: N7OYrSdmCYtouysOz7ZJTDUDoyhqOyi782cYG5qqLOY=
+
+Name: com/android/tools/lint/checks/ByteOrderMarkDetector.kt
+SHA-256-Digest: JvVT7GRaLvTTrbcTme1ymXEOBlKRprobgdSxgLc+o6o=
+
+Name: com/android/tools/lint/checks/ApiClass.java
+SHA-256-Digest: viB7O6I3YXvMMTXKO5aQ0OWTWRg9Fa0A0J7sMz2HP0k=
+
+Name: com/android/tools/lint/checks/RequiredAttributeDetector.java
+SHA-256-Digest: lRC9F+XJD+2crgeQ+sxmLiReQG+yQ3+M7HcBCH538HA=
+
+Name: com/android/tools/lint/checks/PrivateKeyDetector.java
+SHA-256-Digest: NH8QYsN4t6DT81sIdzBHqd7k3OOFNJrQPGmrA1b5H2s=
+
+Name: com/android/tools/lint/checks/AndroidTvDetector.java
+SHA-256-Digest: zouUuCktF6IPT1nH5W/35Qsg6V1oYrxyMsrR4sOqHJQ=
+
+Name: com/android/tools/lint/checks/ExtraTextDetector.kt
+SHA-256-Digest: ZIx2tri61d2p8nJ9oAoDiezgjx+XcVC3/BfRRS4iUUA=
+
+Name: com/android/tools/lint/checks/UnpackedNativeCodeDetector.java
+SHA-256-Digest: Zoqk4dga0xliVgyX3hOwMOgLzzztdP9rFyirkgDnAd4=
+
+Name: com/android/tools/lint/checks/CallSuperDetector.kt
+SHA-256-Digest: tsbWKKk6ZzV3/v5U71BJ7W09v8FTUBsb28hhlRUcWzY=
+
+Name: com/android/tools/lint/checks/AccessibilityDetector.java
+SHA-256-Digest: g/XgW+zjufqNfakzo2R3bAgB9m4GtBbSEFAeMS00G1o=
+
+Name: com/android/tools/lint/checks/RegistrationDetector.java
+SHA-256-Digest: ncwoHHDF9nbUQO0T/nfzUHDQKEHyQZ3JcVuiQVtj4e4=
+
+Name: com/android/tools/lint/checks/JavaPerformanceDetector.java
+SHA-256-Digest: 2YABg6dl3uUuUcyo1Xo5DGZRaEvPliNgrTH71zIL2wg=
+
+Name: com/android/tools/lint/checks/GetSignaturesDetector.java
+SHA-256-Digest: sT7tCN6puBLob4NXc/9ubFKWavpN4AmOasIlN9PjFBk=
+
+Name: com/android/tools/lint/checks/TypoLookup.java
+SHA-256-Digest: vGwIkcdakgFi6aOSXuu/WAB8yrRVuEEmTmNcjIh1IUk=
+
+Name: com/android/tools/lint/checks/InvalidImeActionIdDetector.java
+SHA-256-Digest: 5Gpa1S4xldmNBv1laqODDLiN7ToT+EeOLPgFHq43MPo=
+
+Name: com/android/tools/lint/checks/CommentDetector.java
+SHA-256-Digest: aJdg9N90fsFpgx/58Jh40e/7o0SiQPT9b4PN6wX/B20=
+
+Name: com/android/tools/lint/checks/JobSchedulerDetector.java
+SHA-256-Digest: Teu/ax913UUmlQc9xzh/unLgPkqC0UZGyZTmny08LIc=
+
+Name: com/android/tools/lint/checks/ApiMember.java
+SHA-256-Digest: f8XWoJTkFl4pmIK6bKPWmbfIxqonVeRpLEI3YOl25I8=
+
+Name: com/android/tools/lint/checks/SecureRandomGeneratorDetector.java
+SHA-256-Digest: b2IxdVgRnXMK9PSGnuVop3GDlsiDHnmBTlKhnH8Zgg0=
+
+Name: com/android/tools/lint/checks/LocaleFolderDetector.java
+SHA-256-Digest: lSX+q3RQuvU6m2F1vpJxptm0OjR3q9qWGViw8Rpoqbo=
+
+Name: com/android/tools/lint/checks/ApiPackage.java
+SHA-256-Digest: a8DCCoG8Y1FO2eaG2O7WIArBMBVWb7v6JS0ihss3Xag=
+
+Name: com/android/tools/lint/checks/CipherGetInstanceDetector.java
+SHA-256-Digest: gZy3um+z6Osy0qLTeHIERa8CNJh3D4AReY6TsnXRhGM=
+
+Name: com/android/tools/lint/checks/LogDetector.kt
+SHA-256-Digest: X/NWRTKD7oBnDWDxOHCwepA0xuofB7CWpdaasc0wfFQ=
+
+Name: com/android/tools/lint/checks/BuiltinIssueRegistry.java
+SHA-256-Digest: YWXLaW63YQ/HXvTzbaf7faXSpjDF6Rj7c0rsNA97YVk=
+
+Name: com/android/tools/lint/checks/ManifestDetector.java
+SHA-256-Digest: rWJQ+XFcxUnrlwnMvFNIUzZCDFLl570bGdXs0BZy9Yg=
+
+Name: com/android/tools/lint/checks/ConstraintLayoutDetector.java
+SHA-256-Digest: edvWKzuuDqMoS3IHmi2f4UG00COPGtnEP0uKkZ9o3wg=
+
+Name: com/android/tools/lint/checks/ItemDecoratorDetector.java
+SHA-256-Digest: 9s7tFRMxPFBZhU0yyRUjlmeG8LqVYlmdbbnWRcM/5Mg=
+
+Name: com/android/tools/lint/checks/FirebaseMessagingDetector.java
+SHA-256-Digest: RhMbq3rzwaJ/OKS6UV5MCb6A7PESnQo1KUJ0u8PwprY=
+
+Name: com/android/tools/lint/checks/FontDetector.java
+SHA-256-Digest: FjqgoyGbiSMCs+o4ZtJ4pBDzGUmb9XtBtGXgq04CdWg=
+
+Name: com/android/tools/lint/checks/LayoutInflationDetector.java
+SHA-256-Digest: lM3fXDI9I7aaeJwiw4uHHLwJpp4JCEqOyVtgluKtke4=
+
+Name: com/android/tools/lint/checks/JavaScriptInterfaceDetector.java
+SHA-256-Digest: vDnOdQP1b5whBqEQ3xHGdgAlD2NaTPj0kO3QIeTZ95Y=
+
+Name: com/android/tools/lint/checks/CustomViewDetector.java
+SHA-256-Digest: z32i1DgqDD6rY+Rq//6LxqB3uE3LvpPfekXpn2VlesU=
+
+Name: com/android/tools/lint/checks/TypoDetector.java
+SHA-256-Digest: yvRH7/UaHRQHKHbJ+iq2K9EebUNj//XAAWsRl10zgAo=
+
+Name: com/android/tools/lint/checks/ParcelDetector.java
+SHA-256-Digest: d1x4zSdHGcZjEZSh4XQq2L9I3v4aP1p36l/ThUsV+qU=
+
+Name: com/android/tools/lint/checks/VectorPathDetector.java
+SHA-256-Digest: 96xjQM7ffVo2IwdbkWBxfsE4Lgw+eCNh7Po2Ef77ukw=
+
+Name: com/android/tools/lint/checks/DeprecationDetector.java
+SHA-256-Digest: Jpo2UjJByHsvewZ9WjZ+zcmNBi09QY7O3nBq6n0re3k=
+
+Name: com/android/tools/lint/checks/FloatRangeConstraint.java
+SHA-256-Digest: uxUlyYlEDTe0UHjdiI7D0PgR8WEAj/LKoROqOQ/Z2hM=
+
+Name: com/android/tools/lint/checks/SystemPermissionsDetector.java
+SHA-256-Digest: bXUVHN49tTF+cuiKYgxLlc6ExmFlcWaDUVu2OsVukFA=
+
+Name: com/android/tools/lint/checks/SdCardDetector.kt
+SHA-256-Digest: 1qiy8/PTnHQ8jKXdefwqRQlIYNF07D9IS+5N40Md3dk=
+
+Name: com/android/tools/lint/checks/IntRangeConstraint.java
+SHA-256-Digest: Ig7OJzXwEo8K/y6l6ApLyvBQdxxDTfRmJNK4UehCOx0=
+
+Name: com/android/tools/lint/checks/CordovaVersionDetector.java
+SHA-256-Digest: gN+qik6jmrLYV+qgefXYySLsinTUR/viEGWhrrqCJvM=
+
+Name: com/android/tools/lint/checks/ResourceUsageModel.java
+SHA-256-Digest: yftILT2tvKfVaqGe5l63m9qkU0g2CqC7zFQPjDm84DQ=
+
+Name: com/android/tools/lint/checks/InvalidPackageDetector.java
+SHA-256-Digest: 5W0TOr/M2jvL4tTczjlpQh/8EnT++DGWNNel0dr5m/0=
+
+Name: com/android/tools/lint/checks/NamespaceDetector.java
+SHA-256-Digest: ibeK3o7zeT8FpXDvap2MUT03aLdQ6ZbfTTCgSZF3of8=
+
+Name: com/android/tools/lint/checks/SetTextDetector.java
+SHA-256-Digest: A/4sWEHv7Iujm+CdWUl72OyoKVP6K8SRjR09k1cVW/E=
+
+Name: com/android/tools/lint/checks/IncludeDetector.java
+SHA-256-Digest: gmjOK1mQKqySTLnAwbrwQsfe4NJ8IGodiI/1JX/ICFM=
+
+Name: com/android/tools/lint/checks/SetJavaScriptEnabledDetector.java
+SHA-256-Digest: XRX2QX+TrR6eRfa1dEqkyxk/pY3W4lUzf+DGyYHT01M=
+
+Name: com/android/tools/lint/checks/WebViewDetector.java
+SHA-256-Digest: 8Kr9bvB1MwICpi8bW60E4SN1mYi/NK5QUScrTkF0p1s=
+
+Name: com/android/tools/lint/checks/FragmentDetector.java
+SHA-256-Digest: Q9n7Cq036aLJZR2n4du0E6SsbRpOTPObhyoNRZWnveI=
+
+Name: com/android/tools/lint/checks/LocaleDetector.java
+SHA-256-Digest: JG4VuTUYWSE4it9Pwarl7RKMRktXAQk6z27OTIpiRAY=
+
+Name: com/android/tools/lint/checks/UnsafeNativeCodeDetector.java
+SHA-256-Digest: H6MmsYa3qrxJqVvMNcJCrPYw7c6FyNHPll04HAmC2KY=
+
+Name: com/android/tools/lint/checks/ViewHolderDetector.java
+SHA-256-Digest: dzKj/3HAXA/JBgjGlbzYWxomk/1qzFVe5kF2JEF4ZU8=
+
+Name: com/android/tools/lint/checks/AppLinksValidDetector.java
+SHA-256-Digest: qLu/YXkTjp0CiqkEq3Z/JYab5pULiZvhAuTazmcPYYk=
+
+Name: com/android/tools/lint/checks/KeyboardNavigationDetector.java
+SHA-256-Digest: CMjy+eYW+xBi+g+Q6ibykdHlv+5L34nK5PgYbz4gbK0=
+
+Name: com/android/tools/lint/checks/ArraySizeDetector.java
+SHA-256-Digest: p1Jffj1brE69RXhhowP5fY6Tsj5yWQk1b1xmyNfJE30=
+
+Name: com/android/tools/lint/checks/NegativeMarginDetector.java
+SHA-256-Digest: 4oKXtw4Qf+FETPk6zZt3PR/K930V/OtMg83RgR45Orw=
+
+Name: com/android/tools/lint/checks/FullBackupContentDetector.java
+SHA-256-Digest: IqcoYqs3jHiGGmoo34Kx9/OFUwMd3C3T53iPs8lTBFo=
+
+Name: com/android/tools/lint/checks/AppCompatCallDetector.java
+SHA-256-Digest: KmoDjPiRWZEEkGiGNyHKql3ZG/iu37kQ+bBjGYZaUzI=
+
+Name: com/android/tools/lint/checks/WearStandaloneAppDetector.java
+SHA-256-Digest: DKqoKWnukJ4bd7UJT+gr30K0cB1eqlrVjBH1SNG0O38=
+
+Name: com/android/tools/lint/checks/WrongIdDetector.java
+SHA-256-Digest: Md9V5iCn6TK6VNzOWdL2kWcv58fAtHLoM8WZ0ZDzeAQ=
+
+Name: com/android/tools/lint/checks/ClickableViewAccessibilityDetector
+ .java
+SHA-256-Digest: vjO4qcpDhuR7ddXCuTkb5yIQbRGFKjYIayGfuiTkRPk=
+
+Name: com/android/tools/lint/checks/UselessViewDetector.java
+SHA-256-Digest: DfUtD0uz478alitKNfCAVdLgEUIPhvJn8kquQ6HYIDo=
+
+Name: com/android/tools/lint/checks/ExifInterfaceDetector.java
+SHA-256-Digest: s186fgSazf5nVMi0EXEe7VPfDHGkV37hPp+wqNM8uwU=
+
+Name: com/android/tools/lint/checks/PrivateResourceDetector.java
+SHA-256-Digest: Vd0w27hPZ8IeV9M5xHrH9MtT9b3VHbwtA2yxct65XS8=
+
+Name: com/android/tools/lint/checks/GradleDetector.java
+SHA-256-Digest: uYgVbPeI6EoL2m0bTXcnQVtDNxBZBZ6tO+ku3gEFPoo=
+
+Name: com/android/tools/lint/checks/LabelForDetector.java
+SHA-256-Digest: bQIPtOexKtcJIgVhfiCIj7nYhYaMDTeWxUVXITId4os=
+
+Name: com/android/tools/lint/checks/SupportAnnotationDetector.java
+SHA-256-Digest: J9eEE4GS+oC5ZSmtkkSdTfz8JJ0cDA99gx3Ax1o/G3I=
+
+Name: com/android/tools/lint/checks/NetworkSecurityConfigDetector.java
+SHA-256-Digest: E+mRyJEmgaOhABpmND5mhulsNBkAJ0Nxcqo5YV0MPNI=
+
+Name: com/android/tools/lint/checks/DateFormatDetector.java
+SHA-256-Digest: UM49huuVHuYyYT8I+vHI8OihubnDgfTbcr/shAThSoM=
+
+Name: com/android/tools/lint/checks/DosLineEndingDetector.kt
+SHA-256-Digest: F9NHsKeNVYm+EdMKoJ1niY/ClpIX0rFlypXRoZi3UJY=
+
+Name: com/android/tools/lint/checks/NestedScrollingWidgetDetector.java
+SHA-256-Digest: yIQFByO440w+5dIA1TIIaAlrYuzzFtZa+fviMoWPgSk=
+
+Name: com/android/tools/lint/checks/TooManyViewsDetector.java
+SHA-256-Digest: s1nu5Mz3rFfh0XH8n/wilCcAwrSC6SpcRcFLsDbiofU=
+
+Name: com/android/tools/lint/checks/ViewTypeDetector.java
+SHA-256-Digest: yUjoApbDKalG2SDQymxxMGvZcQVReJowha5YiRpRXNA=
+
+Name: com/android/tools/lint/checks/PreferenceActivityDetector.java
+SHA-256-Digest: zirL361NLPxZVqLH8jlw1ctxgONztxCg7eFqjz9zYyE=
+
+Name: com/android/tools/lint/checks/RecyclerViewDetector.java
+SHA-256-Digest: RaROmfGi/b3JvgYqVL30vSOJzcVeJUxhRxUmD8So6y4=
+
+Name: com/android/tools/lint/checks/PermissionRequirement.java
+SHA-256-Digest: CBM4wWneMf3Q7EkVoEgHd34jvx7pduhtKZQP16eU55o=
+
+Name: com/android/tools/lint/checks/TextFieldDetector.java
+SHA-256-Digest: iumFh+HtdkkKoRyG7Qmew5GYtNzrvFcc1VsLExbSF+w=
+
+Name: com/android/tools/lint/checks/WrongThreadInterproceduralDetector
+ .kt
+SHA-256-Digest: 3bswueMwGC8+wdmDaYG724AgV2Q6yPT6CsVHsxniosQ=
+
+Name: com/android/tools/lint/checks/PrivateApiDetector.kt
+SHA-256-Digest: y0RBIcxJG4zuUnLuM+8kK8W+OHdJYXujsyX6kD7UNig=
+
+Name: com/android/tools/lint/checks/AndroidPatternMatcher.java
+SHA-256-Digest: qTG3ytP0jwzOD5lgsXy8F49dHRgGmrqc2zpf/z9HT/g=
+
+Name: com/android/tools/lint/checks/MergeMarkerDetector.java
+SHA-256-Digest: lOLROKI5XgvWI3W0Mxib0NKe6bVeSYP3lG8bnLi/fQA=
+
+Name: com/android/tools/lint/checks/EllipsizeMaxLinesDetector.java
+SHA-256-Digest: e8vyDNfFUeRW1hAANbClyNAmds2In1k7HQFw/OuQyAg=
+
+Name: com/android/tools/lint/checks/MathDetector.java
+SHA-256-Digest: n5pBtqezgF3uyyGKJoqqPD3TEO2fOPix1J1czvfpNPc=
+
+Name: com/android/tools/lint/checks/WrongLocationDetector.kt
+SHA-256-Digest: 1zE0L6LlWLexnddDWCSbk+SDQsxKiEIQVf09CGCl5rg=
+
+Name: com/android/tools/lint/checks/AlarmDetector.kt
+SHA-256-Digest: elRnuL0pZcuW7cJBHuxWx5ugzkMZtWj/Up9MACrW7N8=
+
+Name: com/android/tools/lint/checks/AnnotationDetector.java
+SHA-256-Digest: YzZ1/zbaXZdR2G1ZhMI+5P3VwV64WLiaHM71JeclkWM=
+
+Name: com/android/tools/lint/checks/ObsoleteLayoutParamsDetector.java
+SHA-256-Digest: /XxNirANgOdRpYb5yptzxQbnT9Pww2UXYIHMRSigdp8=
+
+Name: com/android/tools/lint/checks/SslCertificateSocketFactoryDetecto
+ r.java
+SHA-256-Digest: 7tOnP4nHDrAPDM3og29jP/XMd7eT8jTp139wzMVmyHU=
+
+Name: com/android/tools/lint/checks/BadHostnameVerifierDetector.java
+SHA-256-Digest: RfYTUfCbqP2OC5cJBWw9pxeLBXpNFPuSs28BlAdzVek=
+
+Name: com/android/tools/lint/checks/CutPasteDetector.java
+SHA-256-Digest: UgdW8gEHBiHXS0lrCZE6y6Xgu6Mv/46uLFZQHd96KlI=
+
+Name: com/android/tools/lint/checks/WrongCaseDetector.java
+SHA-256-Digest: SJFRpw3zCqcvLdQtgjXo1TaoLw4QFKLSQutUBBsrMjQ=
+
+Name: com/android/tools/lint/checks/ViewTagDetector.java
+SHA-256-Digest: q7gI4HIQQclv93+t9X722kaisLy77qh9SEn8Ym4la54=
+
+Name: com/android/tools/lint/checks/PxUsageDetector.java
+SHA-256-Digest: 7SKRQ45lDOB1SuyyirU1j8Xu4McPX37Tl44Y3jUvStw=
+
+Name: com/android/tools/lint/checks/ObjectAnimatorDetector.java
+SHA-256-Digest: UWd+blNQSI/O71mJvqn7hHIqWCzb3ZHZ6NkCz6OSDRU=
+
+Name: com/android/tools/lint/checks/SizeConstraint.java
+SHA-256-Digest: l665ITDQeDRol0PphITPg+3PTfVMlqUjxOY/sU73edg=
+
+Name: com/android/tools/lint/checks/SignatureOrSystemDetector.java
+SHA-256-Digest: LveTOEm89eLoTiyoTXqSw2M3arHF1gpRPSfV1+r/OLE=
+
+Name: com/android/tools/lint/checks/PermissionHolder.java
+SHA-256-Digest: Q4HSd7aUAn1vDget8fLxOcIdoioSGKZP5TCE+C2UtF4=
+
+Name: com/android/tools/lint/checks/StringAuthLeakDetector.java
+SHA-256-Digest: i5SN08aymipE4u2UettRsC9CsBqvsRq5cLC5eLoubMc=
+
+Name: com/android/tools/lint/checks/HardcodedDebugModeDetector.java
+SHA-256-Digest: uSN4knAyzbjeWfvdusyjj57nVuveSn5HvoSRF0xy2Q8=
+
+Name: com/android/tools/lint/checks/DuplicateResourceDetector.java
+SHA-256-Digest: sPTtDpSCDhhSN7MidKOee5vHfWcDojclep9Nbrc1jnY=
+
+Name: com/android/tools/lint/checks/TranslationDetector.java
+SHA-256-Digest: ioHi5L2fptlJyg725j3Hup2V2PZU18OBAWX69C9tx6g=
+
+Name: com/android/tools/lint/checks/OverrideConcreteDetector.java
+SHA-256-Digest: vj7M9IWpxy5ayi4wL3qBc3QKXtRKP3PIXSD0DOq8+iA=
+
+Name: com/android/tools/lint/checks/UnsafeBroadcastReceiverDetector.ja
+ va
+SHA-256-Digest: mNsJzi9OsI1p9dCPClQcOCv5XjsddJwuM8qcjrgFXQA=
+
+Name: com/android/tools/lint/checks/NfcTechListDetector.java
+SHA-256-Digest: NQv6YZQsmeurKwal7n6ptXDQXItold4lcYlRgdLqf5s=
+
+Name: com/android/tools/lint/checks/RangeConstraint.java
+SHA-256-Digest: TP84/ETlSDWIPNZz4GvnCXmPXl9aP50JvUluQiW2K5o=
+
+Name: com/android/tools/lint/checks/AppLinksAutoVerifyDetector.java
+SHA-256-Digest: xkXA2xKx9PPUznGS5+/ZIu6v40q/z1EBQtx5bp2qL7Q=
+
+Name: com/android/tools/lint/checks/HardwareIdDetector.java
+SHA-256-Digest: QUtM34c3KD+dIMsIrUHORZU8apaqvQtNCVQpdPtvpzI=
+
+Name: com/android/tools/lint/checks/TextViewDetector.java
+SHA-256-Digest: u74ngCQDjFrGiFI7x3VwUEL4bw3FRMel5E9ruTE3FUM=
+
+Name: com/android/tools/lint/checks/OverrideDetector.java
+SHA-256-Digest: z4jP6898of1bY6dZHRH/kzXOfl1dUqq3ZGB3d5uXEpc=
+
+Name: com/android/tools/lint/checks/ProguardDetector.java
+SHA-256-Digest: x71QdEeIAMwbYVlfeO5zpXXTC6ZNDUED7yxX4YO0u8M=
+
+Name: com/android/tools/lint/checks/UnusedResourceDetector.java
+SHA-256-Digest: gOttN6oiR4iTp5rlGTdCAHBdAMkJpekUS1mbV/czr94=
+
+Name: com/android/tools/lint/checks/WakelockDetector.java
+SHA-256-Digest: qDm0wQtEUBYUfchOZSCpN3xcJHd6woa0moaS2RVyf4I=
+
+Name: com/android/tools/lint/checks/UseCompoundDrawableDetector.java
+SHA-256-Digest: xBBputECbKQ/RjbKHnk9k9R/yRRjbB7zISAplezwRfg=
+
+Name: com/android/tools/lint/checks/StringFormatDetector.java
+SHA-256-Digest: Cs2UPe3PsukrDgeYNVLKip5IftYs/x0BW4Yk9TxtRV4=
+
+Name: com/android/tools/lint/checks/DetectMissingPrefix.kt
+SHA-256-Digest: 8wmxoA6cI5F0PiJqiNkkU41XgbIsWMjFxenCICKURAI=
+
+Name: com/android/tools/lint/checks/ChildCountDetector.kt
+SHA-256-Digest: yMcXefPfol/qCPVBdc9bkEMFwREe9ck5V9BqXJgNdF8=
+
+Name: com/android/tools/lint/checks/PluralsDetector.java
+SHA-256-Digest: zv2/m7o7Hi5KoxcDgfaSPQ8qdm9tA6qaYV2+7F2K8es=
+
+Name: com/android/tools/lint/checks/FieldGetterDetector.java
+SHA-256-Digest: G+TEE6wUexVcTngcnNCC5z9X33GmB0JWS3I0/Rge4zo=
+
+Name: com/android/tools/lint/checks/RtlDetector.java
+SHA-256-Digest: eu5lsueN47xesZ2/iUATVD3UCU0dZlbBGw+aGKnFaDU=
+
+Name: com/android/tools/lint/checks/ToastDetector.java
+SHA-256-Digest: rY/rNnWgLl7RUo8oTrll1YFGkSx+bU9TkxZZlzBYaDc=
+
+Name: com/android/tools/lint/checks/BlacklistedDeps.kt
+SHA-256-Digest: eppBM45tYPZtlijQrCYWVuSeTjkg4c9n0v9LsCqc9ic=
+
+Name: com/android/tools/lint/checks/SecureRandomDetector.java
+SHA-256-Digest: aNZP5RZ4+428OY4Nx+S6Pczcx+8iG0HpMPTp7MFjdo8=
+
+Name: com/android/tools/lint/checks/AllCapsDetector.kt
+SHA-256-Digest: PPahPJa3UQ0gENzXthau0UMpzMRHU+s4uXmsxMJJ9yY=
+
+Name: com/android/tools/lint/checks/PluralsDatabase.java
+SHA-256-Digest: eG5uUh/AFodGhSGpY3wOLIvemtVPaH6R04jz9Z6soQU=
+
+Name: com/android/tools/lint/checks/ReadParcelableDetector.java
+SHA-256-Digest: yYle3mt7V0fhn2YCuprc1SyqyUK2ebTQB2P/KchZaiA=
+
+Name: com/android/tools/lint/checks/RelativeOverlapDetector.java
+SHA-256-Digest: W07C8zAGR89l3/0PJk9NRAl3wzuOxWBDzVxlZD3ASAg=
+
+Name: com/android/tools/lint/checks/Api.java
+SHA-256-Digest: 5YDVVUW2Dk4+peAdwdkmPv8SMNNiBiQDHxi9P0d1WTI=
+
+Name: com/android/tools/lint/checks/ViewConstructorDetector.java
+SHA-256-Digest: dEeln6XDTaQETmEvtnRPSkMey3j0+iCQjoz5hzxCe/U=
+
+Name: com/android/tools/lint/checks/FirebaseAnalyticsDetector.java
+SHA-256-Digest: xnvn5kUoZTG4raV1C4PlEW6LWezhAJZOEwRkSros8/I=
+
+Name: com/android/tools/lint/checks/AssertDetector.kt
+SHA-256-Digest: Jj7jUMcBekGUpA/zDEiMsaMb5H/JJDl01ErXmSHlLs8=
+
+Name: com/android/tools/lint/checks/RestrictionsDetector.java
+SHA-256-Digest: 2/AtIpIgZV5A+AQUHOYXWGh0yHpR2LrRHLF9Xnh7Too=
+
+Name: com/android/tools/lint/checks/TrustAllX509TrustManagerDetector.j
+ ava
+SHA-256-Digest: LyrDfX+XPmuvsmKvWCin7nJuADamOUxWYvu6LaIMCtE=
+
+Name: com/android/tools/lint/checks/SecurityDetector.java
+SHA-256-Digest: 4LQofuGKFhxqTj7N3MR+GYruVYvxfFomtRUVbpv+teI=
+
+Name: com/android/tools/lint/checks/PermissionFinder.java
+SHA-256-Digest: y7kdzkYZtYNhyvtkROVnGZE+0Iv1yjAw5eH6PV/Rip0=
+
+Name: com/android/tools/lint/checks/MediaBrowserServiceCompatVersionDe
+ tector.kt
+SHA-256-Digest: 7rfm1g8fJlIV83RRp4h5aRqVrvtfcdCriVdd5iH3L6E=
+
+Name: com/android/tools/lint/checks/Utf8Detector.java
+SHA-256-Digest: 8jnSBa1ipgDAlffp50uwCsIBhr0GTAHGsd8RSforrsE=
+
+Name: com/android/tools/lint/checks/OverdrawDetector.java
+SHA-256-Digest: j3V3b5Jeu11tyBjxmopxy9w9on5SRg2FsJIGReQOGOU=
+
+Name: com/android/tools/lint/checks/TitleDetector.java
+SHA-256-Digest: hzVr7JWmYOsLDHWzY2tPwsZuUjzM4RTc00GhNrtR0QA=
+
+Name: com/android/tools/lint/checks/ControlFlowGraph.java
+SHA-256-Digest: CUdfsaF8F+2lSYDW8HYuzGilyejpsIW/rOg2epkvEXo=
+
+Name: com/android/tools/lint/checks/GetContentDescriptionOverrideDetec
+ tor.java
+SHA-256-Digest: 1c46MEJ4/CaGHwjSUZLZRRtnmD4TRzrCDain6TbYrjo=
+
+Name: com/android/tools/lint/checks/MissingClassDetector.java
+SHA-256-Digest: BM4ZI8d34PW9AX4lwQ6s+Mdv49bnOLcqzi4pNOwWOlU=
+
+Name: com/android/tools/lint/checks/BatteryDetector.kt
+SHA-256-Digest: 0bBe5/5451ug95aErHXFjzRfP6omCJe4Q0ArU/8xKBA=
+
+Name: com/android/tools/lint/checks/OnClickDetector.java
+SHA-256-Digest: ApM1foezvcgODtmr8yiwKws1PBuc00A3Q9Qywvshde0=
+
+Name: com/android/tools/lint/checks/LeakDetector.java
+SHA-256-Digest: UGDkCDBeFVtTvPOGbHFVIpE2ZPikPmftsz7ozwy2YLQ=
+
+Name: com/android/tools/lint/checks/WrongCallDetector.java
+SHA-256-Digest: IsXFJCR/FQLkg0cfhP0Wlq2LPrGiIVMd8bd/x+kO56k=
+
+Name: com/android/tools/lint/checks/AlwaysShowActionDetector.java
+SHA-256-Digest: 23D6HwDQNfnjM4DnBg0+WFEbo3GoCoFgIrw3xtYaMb0=
+
+Name: com/android/tools/lint/checks/WrongImportDetector.java
+SHA-256-Digest: 1I4Es2ruGFMiPC8tCrJcGHJMb4Y3QL2VeCRXOS9YxUA=
+
+Name: com/android/tools/lint/checks/ResourceCycleDetector.java
+SHA-256-Digest: YTYFzGf4HLRXqNiU3sCrWCjRscpqxcixA7Wr2sONoG0=
+
+Name: com/android/tools/lint/checks/ScrollViewChildDetector.java
+SHA-256-Digest: UwEn3ABPryrwpb6DQQgSSA3paaf3abRUaw9QJoZza1Q=
+
+Name: com/android/tools/lint/checks/CleanupDetector.java
+SHA-256-Digest: H18ZEJPiirFMdrnGpJNY4WtkPZ0XVw8sAA0VOz7V0vs=
+
+Name: com/android/tools/lint/checks/MissingIdDetector.java
+SHA-256-Digest: ygTI5R+Bu1eLeOJ+gu4qXBPcHOWdOJfeSJvMWjTU99E=
+
+Name: com/android/tools/lint/checks/PropertyFileDetector.java
+SHA-256-Digest: qCel+63nHpD5qhNtrtCHEW6xUks2fok4Sj38o3pnRTE=
+
+Name: com/android/tools/lint/checks/AllowAllHostnameVerifierDetector.j
+ ava
+SHA-256-Digest: yFlYQcH/PftPnrcArDMHPbqUgogI7FVWyEInkkCzSbY=
+
+Name: com/android/tools/lint/checks/AndroidAutoDetector.java
+SHA-256-Digest: C13r4MI9YFtL9eAA4hDTt60ey6Y6dzhQNg3NNHoMLOQ=
+
+Name: com/android/tools/lint/checks/ApiLookup.java
+SHA-256-Digest: CaPozwSO395Z52/0JstY4xk7UAyAP5vAorGglU7QmQ8=
+
+Name: com/android/tools/lint/checks/ManifestPermissionAttributeDetecto
+ r.java
+SHA-256-Digest: 9UH6jQLPNHBmPCAdklJT/2Mw1GIe1vWhug5JCLBy5pA=
+
+Name: com/android/tools/lint/checks/MergeRootFrameLayoutDetector.java
+SHA-256-Digest: KKnJ2fPxdW2R6S4OIa3OR5flhMMrWREEa9wxieb2STM=
+
+Name: com/android/tools/lint/checks/VersionChecks.java
+SHA-256-Digest: 5ktwDZRFjhXTVBcviI3E9W83cA4KY9g6/JYK0h/kteI=
+
+Name: com/android/tools/lint/checks/ApiDetector.java
+SHA-256-Digest: 2SckMMde0jP4M4IyzpUCcqZUcC2/T1EMrOUBQ9Qu/yA=
+
+Name: com/android/tools/lint/checks/NonInternationalizedSmsDetector.ja
+ va
+SHA-256-Digest: Cx7YCjbWvIMO+UEWdiVryjue//aNl8AGJSxKNJZmx+k=
+
+Name: com/android/tools/lint/checks/IconDetector.java
+SHA-256-Digest: qdWjYR+0H0EhXWIFo80lLXRHglsF+vrhXNHUv2ervDs=
+
+Name: com/android/tools/lint/checks/ResourcePrefixDetector.java
+SHA-256-Digest: NAVccRtBPALt5DjiMkncenh98rthCCB3NShb68IbYDQ=
+
+Name: com/android/tools/lint/checks/AppIndexingApiDetector.java
+SHA-256-Digest: mLASbtoBvhEirwmAUH5FqnX17Cv0TW8crg4ulaJN4fY=
+
+Name: com/android/tools/lint/checks/ApiParser.java
+SHA-256-Digest: gT3Ak9jhHW/6ToaKsPjH/7Gu9e4pVfNtjBzrvlLgzcc=
+
+Name: com/android/tools/lint/checks/ManifestTypoDetector.java
+SHA-256-Digest: wUvQufKc/1IHN817cCEEKSEMHhKgwN7qSFimm7wBE64=
+
+Name: com/android/tools/lint/checks/ManifestResourceDetector.java
+SHA-256-Digest: L99kA5NRiBKVwzTilvAaBp+XarP0C5JlVazx6CKDCdw=
+
+Name: com/android/tools/lint/checks/StateListDetector.java
+SHA-256-Digest: sqppc5W9dHdLnF7lbiaaDEhRSlJCkrhef3tBXByKmuQ=
+
+Name: com/android/tools/lint/checks/ButtonDetector.java
+SHA-256-Digest: Hd+9y0zOxgME7lKFCGTsxeUEDBOFJ8JaQDhMur+o9HE=
+
+Name: com/android/tools/lint/checks/LayoutConsistencyDetector.java
+SHA-256-Digest: 6Hieun6VXziMP/Lk7xw130MakXHQf1GnYhkyMp8muTU=
+
+Name: com/android/tools/lint/checks/HandlerDetector.java
+SHA-256-Digest: 6QJefQ6vt7ZN27uM8Lq5f+NlMFz+hm5+puwE7VyHHhk=
+
+Name: com/android/tools/lint/checks/SQLiteDetector.java
+SHA-256-Digest: lsq1XuR0dbvRvFigMgrhqAXPzI5Wq9fFokbBHZVJ4uA=
+
+Name: com/android/tools/lint/checks/AppCompatResourceDetector.java
+SHA-256-Digest: M2Kz+MDXYFNcsxuW4X67wa70BCpiTwOjkxP5uGH1vXs=
+
+Name: com/android/tools/lint/checks/AppCompatCustomViewDetector.java
+SHA-256-Digest: jx62dYVkG58jobYUzRiMv2Mmyx3vPS4jOPBSpCEevLg=
+
+Name: com/android/tools/lint/checks/ServiceCastDetector.java
+SHA-256-Digest: XfljEl+jfYLNVnwfMWLvdeljpogc4GOVwVgsAGZ3MqM=
+
+Name: com/android/tools/lint/checks/VectorDrawableCompatDetector.java
+SHA-256-Digest: zZZmxTWhjtKtI8+7J/zkBEnSOVxplwaoOB9ttHSdEkk=
+
+Name: com/android/tools/lint/checks/GridLayoutDetector.java
+SHA-256-Digest: HLmMC+Jd3M4CkpWgipQPlskwzekyXLKIDYxhSTmfxAQ=
+
+Name: com/android/tools/lint/checks/InefficientWeightDetector.java
+SHA-256-Digest: ch2jhBPPK5KilWvmI1+1QLTefXtZwuIx5FUGafgupEI=
+
+Name: com/android/tools/lint/checks/AddJavascriptInterfaceDetector.kt
+SHA-256-Digest: pYTcBl2lpE0hSFcXe0KaJgENLuNVY0HcoMVleW25dGU=
+
+Name: com/android/tools/lint/checks/HardcodedValuesDetector.java
+SHA-256-Digest: K0tn08WxoNxIp5kWOKXrSZboSKOzS+SA3ScgPPesMmw=
+
+Name: com/android/tools/lint/checks/VectorDetector.java
+SHA-256-Digest: m8flBIwsKsRzq1vGOKGhP0yNoNbGQnBaEROtcURB2HQ=
+
+Name: com/android/tools/lint/checks/InstantAppDetector.java
+SHA-256-Digest: 4/IOBu0wITlN5/NxZ1U6iraeSZ1YTagL4Xlu0TOuEm8=
+
+Name: com/android/tools/lint/checks/TypographyDetector.java
+SHA-256-Digest: /keLU4JHMbJ6mibgPsXznWmrGLFVx0lcfAtvy05IQwU=
+
+Name: com/android/tools/lint/checks/DuplicateIdDetector.java
+SHA-256-Digest: aUIkdHih/gz2ao34r5OVUu7F1AmLWMTxto+782qy4i8=
+
