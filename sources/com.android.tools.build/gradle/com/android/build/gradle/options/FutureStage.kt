@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.build.api.dsl
+package com.android.build.gradle.options
+
+import com.android.ide.common.repository.AgpVersion
 
 /**
- * DSL object for configuring Android resource options for Library plugins.
- * This is accessed via [LibraryExtension.androidResources]
+ * Represents the proposed state of an [Option] in a future AGP version.
  */
-interface LibraryAndroidResources : AndroidResources {
-    /**
-     * Flag to enable Android resource processing in this library module
-     * Default value is 'true' for plain android libraries and 'false' for multiplatform libraries.
-     */
-    var enable: Boolean
-}
+data class FutureStage(val defaultValue: Boolean, val stage: Stage, val version: AgpVersion)
