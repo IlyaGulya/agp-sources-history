@@ -44,24 +44,28 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          imported=0
+          versions=($VERSIONS)
+          batch_size=20
 
-          for version in $VERSIONS; do
-            ./gradlew dumpSources -PagpVersion="$version"
-            mkdir -p sources
-            rsync -a --delete build/agp-sources/ sources/
-            printf '%s\n' "$version" > .agp-version
+          for ((start = 0; start < ${#versions[@]}; start += batch_size)); do
+            batch=("${versions[@]:start:batch_size}")
+            version_csv="$(IFS=,; echo "${batch[*]}")"
+            ./gradlew --parallel dumpSources -PagpVersions="$version_csv"
 
-            git add --all sources .agp-version
-            git commit -m "AGP $version"
-            git tag -f -a "agp-$version" -m "Android Gradle Plugin $version sources"
+            for version in "${batch[@]}"; do
+              mkdir -p sources
+              rsync -a --delete "build/agp-sources/$version/" sources/
+              printf '%s\n' "$version" > .agp-version
 
-            imported=$((imported + 1))
-            if (( imported % 20 == 0 )); then
-              git push origin "HEAD:${GITHUB_REF_NAME}"
-              git push origin --force --tags
-              git gc
-            fi
+              git add --all sources .agp-version
+              git commit -m "AGP $version"
+              git tag -f -a "agp-$version" -m "Android Gradle Plugin $version sources"
+            done
+
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+            git push origin --force --tags
+            git gc
+            find build/agp-sources -mindepth 1 -delete
           done
 
           git push origin "HEAD:${GITHUB_REF_NAME}"

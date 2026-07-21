@@ -1,48 +1,50 @@
 import org.gradle.api.attributes.java.TargetJvmEnvironment
 
-def agpVersion = providers.gradleProperty("agpVersion")
+def agpVersions = providers.gradleProperty("agpVersions")
+  .map { it.split(",").findAll { version -> !version.isBlank() } }
+  .getOrElse([])
 
 repositories {
   google()
   mavenCentral()
 }
 
-def agpConfiguration = configurations.create("agp") {
-  attributes.attribute(
-    TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE,
-    objects.named(TargetJvmEnvironment, TargetJvmEnvironment.STANDARD_JVM),
-  )
-}
+def dumpSources = tasks.register("dumpSources")
 
-dependencies.add("agp", agpVersion.map { "com.android.tools.build:gradle:${it}" })
-
-tasks.register("dumpSources", Copy) {
-  inputs.files agpConfiguration
-  into(layout.buildDirectory.dir("agp-sources"))
-
-  doFirst {
-    delete(layout.buildDirectory.dir("agp-sources"))
+agpVersions.eachWithIndex { agpVersion, index ->
+  def agpConfiguration = configurations.create("agp${index}") {
+    attributes.attribute(
+      TargetJvmEnvironment.TARGET_JVM_ENVIRONMENT_ATTRIBUTE,
+      objects.named(TargetJvmEnvironment, TargetJvmEnvironment.STANDARD_JVM),
+    )
   }
+  dependencies.add(agpConfiguration.name, "com.android.tools.build:gradle:${agpVersion}")
 
-  def componentIds = agpConfiguration
-    .incoming
-    .resolutionResult
-    .allDependencies
-    .findAll { it.selected.id.group.startsWith("com.android.tools") }
-    .collect { it.selected.id }
-    .toSet()
+  def dumpVersion = tasks.register("dumpSources${index}", Copy) {
+    inputs.files agpConfiguration
+    into(layout.buildDirectory.dir("agp-sources/${agpVersion}"))
 
-  dependencies.createArtifactResolutionQuery()
-    .forComponents(componentIds)
-    .withArtifacts(JvmLibrary, SourcesArtifact)
-    .execute()
-    .resolvedComponents
-    .collectMany { it.getArtifacts(SourcesArtifact) }
-    .findAll { it instanceof ResolvedArtifactResult }
-    .each { ResolvedArtifactResult artifact ->
-      ModuleComponentIdentifier id = artifact.id.componentIdentifier
-      from(zipTree(artifact.file)) {
-        into("${id.group}/${id.module}")
+    def componentIds = agpConfiguration
+      .incoming
+      .resolutionResult
+      .allDependencies
+      .findAll { it.selected.id.group.startsWith("com.android.tools") }
+      .collect { it.selected.id }
+      .toSet()
+
+    dependencies.createArtifactResolutionQuery()
+      .forComponents(componentIds)
+      .withArtifacts(JvmLibrary, SourcesArtifact)
+      .execute()
+      .resolvedComponents
+      .collectMany { it.getArtifacts(SourcesArtifact) }
+      .findAll { it instanceof ResolvedArtifactResult }
+      .each { ResolvedArtifactResult artifact ->
+        ModuleComponentIdentifier id = artifact.id.componentIdentifier
+        from(zipTree(artifact.file)) {
+          into("${id.group}/${id.module}")
+        }
       }
-    }
+  }
+  dumpSources.configure { it.dependsOn(dumpVersion) }
 }
