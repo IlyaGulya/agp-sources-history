@@ -16,6 +16,8 @@
 
 package com.android.builder.utils;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.annotations.VisibleForTesting;
@@ -25,7 +27,6 @@ import com.android.utils.concurrency.ReadWriteThreadLock;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-import com.google.common.base.Verify;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -137,11 +138,9 @@ public final class SynchronizedFile {
         this.lockingScope = lockingScope;
 
         if (lockingScope == LockingScope.MULTI_PROCESS) {
-            // Use a lock file that is unique to the file being synchronized
-            File lockFile =
-                    new File(
-                            fileToSynchronize.getParent(),
-                            fileToSynchronize.getName() + LOCK_FILE_EXTENSION);
+            // Since the file's path has been normalized, there is a 1-1 correspondence between the
+            // file being synchronized and the lock file
+            File lockFile = getLockFile(fileToSynchronize);
 
             this.readWriteProcessLock = new ReadWriteProcessLock(lockFile.toPath());
             this.readWriteThreadLock = null;
@@ -211,6 +210,19 @@ public final class SynchronizedFile {
     }
 
     /**
+     * Returns the path to the lock file that has been or will be created next to the file being
+     * synchronized under the same parent directory.
+     *
+     * @param fileToSynchronize the file whose access is synchronized, which may not yet exist
+     * @return the lock file, which may not yet exist
+     */
+    @NonNull
+    public static File getLockFile(@NonNull File fileToSynchronize) {
+        return new File(
+                fileToSynchronize.getParent(), fileToSynchronize.getName() + LOCK_FILE_EXTENSION);
+    }
+
+    /**
      * Executes an action that reads the file with a SHARED lock.
      *
      * @param action the action that will read the file
@@ -250,8 +262,8 @@ public final class SynchronizedFile {
             throws ExecutionException {
         ReadWriteProcessLock.Lock lock =
                 lockingType == LockingType.SHARED
-                        ? Verify.verifyNotNull(readWriteProcessLock).readLock()
-                        : Verify.verifyNotNull(readWriteProcessLock).writeLock();
+                        ? checkNotNull(readWriteProcessLock).readLock()
+                        : checkNotNull(readWriteProcessLock).writeLock();
         try {
             lock.lock();
         } catch (IOException e) {
@@ -277,8 +289,8 @@ public final class SynchronizedFile {
             throws ExecutionException {
         ReadWriteThreadLock.Lock lock =
                 lockingType == LockingType.SHARED
-                        ? Verify.verifyNotNull(readWriteThreadLock).readLock()
-                        : Verify.verifyNotNull(readWriteThreadLock).writeLock();
+                        ? checkNotNull(readWriteThreadLock).readLock()
+                        : checkNotNull(readWriteThreadLock).writeLock();
         lock.lock();
         try {
             return action.accept(fileToSynchronize);
