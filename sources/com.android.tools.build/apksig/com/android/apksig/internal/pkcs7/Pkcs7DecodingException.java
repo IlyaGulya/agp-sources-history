@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.ide.common.internal;
+package com.android.apksig.internal.pkcs7;
 
 /**
- * Exception in the png cruncher
+ * Indicates that an error was encountered while decoding a PKCS #7 structure.
  */
-public class PngException extends Exception {
+public class Pkcs7DecodingException extends Exception {
+    private static final long serialVersionUID = 1L;
 
-    public PngException() {
+    public Pkcs7DecodingException(String message) {
+        super(message);
     }
 
-    public PngException(String s) {
-        super(s);
-    }
-
-    public PngException(String s, Throwable throwable) {
-        super(s, throwable);
-    }
-
-    public PngException(Throwable throwable) {
-        super(throwable);
+    public Pkcs7DecodingException(String message, Throwable cause) {
+        super(message, cause);
     }
 }
