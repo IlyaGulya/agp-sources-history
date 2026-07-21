@@ -742,6 +742,8 @@ public final class SdkConstants {
             "android.support.design.widget.TabItem"; //$NON-NLS-1$
     public static final String CLASS_TEXT_INPUT_LAYOUT =
             "android.support.design.widget.TextInputLayout"; //$NON-NLS-1$
+    public static final String CLASS_TEXT_INPUT_EDIT_TEXT =
+            "android.support.design.widget.TextInputEditText"; //$NON-NLS-1$
     public static final String CLASS_NESTED_SCROLL_VIEW =
             "android.support.v4.widget.NestedScrollView"; //$NON-NLS-1$
     public static final String CLASS_VIEW_PAGER = "android.support.v4.view.ViewPager"; //$NON-NLS-1$
@@ -811,6 +813,17 @@ public final class SdkConstants {
     public static final String FLEXBOX_LAYOUT_LIB_ARTIFACT =
             FLEXBOX_LAYOUT_LIB_GROUP_ID + ":" + FLEXBOX_LAYOUT_LIB_ARTIFACT_ID;
     public static final String LATEST_FLEXBOX_LAYOUT_VERSION = "0.2.3";
+
+    public static final String CLASS_SIMPLE_EXO_PLAYER_VIEW =
+            "com.google.android.exoplayer2.ui.SimpleExoPlayerView";
+    public static final String CLASS_EXO_PLAYBACK_CONTROL_VIEW =
+            "com.google.android.exoplayer2.ui.PlaybackControlView";
+    public static final String SIMPLE_EXO_PLAYER_VIEW = CLASS_SIMPLE_EXO_PLAYER_VIEW;
+    public static final String EXO_PLAYBACK_CONTROL_VIEW = CLASS_EXO_PLAYBACK_CONTROL_VIEW;
+    public static final String EXO_PLAYER_GROUP_ID = "com.google.android.exoplayer";
+    public static final String EXO_PLAYER_ARTIFACT_ID = "exoplayer";
+    public static final String EXO_PLAYER_ARTIFACT =
+            EXO_PLAYER_GROUP_ID + ":" + EXO_PLAYER_ARTIFACT_ID;
 
     /**
      * Returns the appropriate name for the 'mksdcard' command, which is 'mksdcard.exe' for Windows
@@ -1096,6 +1109,7 @@ public final class SdkConstants {
     public static final String TAB_LAYOUT = CLASS_TAB_LAYOUT;
     public static final String TAB_ITEM = CLASS_TAB_ITEM;
     public static final String TEXT_INPUT_LAYOUT = CLASS_TEXT_INPUT_LAYOUT;
+    public static final String TEXT_INPUT_EDIT_TEXT = CLASS_TEXT_INPUT_EDIT_TEXT;
     public static final String NESTED_SCROLL_VIEW = CLASS_NESTED_SCROLL_VIEW;
     public static final String DRAWER_LAYOUT = CLASS_DRAWER_LAYOUT;
     public static final String VIEW_PAGER = CLASS_VIEW_PAGER;
@@ -1432,6 +1446,11 @@ public final class SdkConstants {
     public static final String LAYOUT_CONSTRAINT_DEPRECATED_GUIDE_PERCENT =
             "layout_constraintGuide_Percent"; //$NON-NLS-1$
     public static final String ATTR_LOCKED = "locked"; //$NON-NLS-1$
+
+    // SimpleExoPlayerView
+    public static final String ATTR_RESIZE_MODE = "resize_mode";
+    public static final String ATTR_FAST_FORWARD_INCREMENT = "fastforward_increment";
+    public static final String ATTR_REWIND_INCREMENT = "rewind_increment";
 
     // FlexboxLayout params
     public static final String ATTR_FLEX_DIRECTION = "flexDirection";
@@ -2158,7 +2177,7 @@ public final class SdkConstants {
     public static final String GRADLE_TEST_COMPILE_CONFIGURATION = "testCompile";
     public static final String GRADLE_ANDROID_TEST_COMPILE_CONFIGURATION = "androidTestCompile";
     public static final String TEST_HELPERS_CONFIGURATION = "androidTestUtil";
-    public static final String CURRENT_BUILD_TOOLS_VERSION = "25.0.2";
+    public static final String CURRENT_BUILD_TOOLS_VERSION = "26.0.0";
     public static final String SUPPORT_LIB_GROUP_ID = "com.android.support";
     public static final String SUPPORT_LIB_ARTIFACT = "com.android.support:support-v4";
     public static final String DESIGN_LIB_ARTIFACT = "com.android.support:design";
