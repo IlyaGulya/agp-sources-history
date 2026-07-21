@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package com.android.builder.core
 
+import com.android.build.api.dsl.ApkSigningConfig
 import com.android.builder.internal.BaseConfigImpl
 import com.android.builder.model.BuildType
 import com.android.builder.model.SigningConfig
@@ -50,7 +51,9 @@ abstract class AbstractBuildType : BaseConfigImpl(), BuildType {
         versionNameSuffix = that.versionNameSuffix
         isMinifyEnabled = that.isMinifyEnabled
         isZipAlignEnabled = (that.isZipAlignEnabled)
-        setSigningConfig(that.signingConfig)
+        if (that is AbstractBuildType) {
+            setSigningConfig(that.signingConfig as SigningConfig?)
+        }
         isEmbedMicroApp = that.isEmbedMicroApp
         isPseudoLocalesEnabled = that.isPseudoLocalesEnabled
         return this
@@ -122,7 +125,7 @@ abstract class AbstractBuildType : BaseConfigImpl(), BuildType {
         isZipAlignEnabled = zipAlign
     }
 
-    abstract override val signingConfig: SigningConfig?
+    abstract val signingConfig: ApkSigningConfig?
 
     abstract fun setSigningConfig(signingConfig: SigningConfig?): BuildType
 
