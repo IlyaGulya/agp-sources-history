@@ -17,16 +17,18 @@
 package com.android.build.gradle.internal.res.namespaced
 
 import com.android.SdkConstants
+import com.android.build.api.artifact.BuildableArtifact
 import com.android.build.gradle.internal.TaskFactory
 import com.android.build.gradle.internal.aapt.AaptGeneration
 import com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask
 import com.android.build.gradle.internal.scope.GlobalScope
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.VariantScope
+import com.android.build.gradle.options.BooleanOption
 import com.android.utils.FileUtils
 import com.google.common.base.Preconditions
-import org.gradle.api.Task
 import java.io.File
+import java.util.LinkedList
 
 /**
  * Responsible for the creation of tasks to build namespaced resources.
@@ -46,6 +48,8 @@ class NamespacedResourcesTaskManager(
      *  final ids in apps are a vital feature.
      *  2. Links the app and its dependency to produce the final APK. This re-uses the same
      *  [LinkApplicationAndroidResourcesTask] task, as it needs to be split aware.
+     *  3. If rewriting non-namespaced dependencies is enabled, the [AutoNamespaceDependenciesTask]
+     *  will rewrite classes.jar files from these libraries to be fully namespaced.
      *
      * TODO: Test support, Synthesize non-namespaced output.
      */
@@ -57,6 +61,13 @@ class NamespacedResourcesTaskManager(
         val aaptGeneration = AaptGeneration.fromProjectOptions(globalScope.projectOptions)
         Preconditions.checkState(aaptGeneration != AaptGeneration.AAPT_V1,
                 "Resource Namespacing can only be used with aapt2")
+
+        // Process dependencies making sure everything we consume will be fully namespaced.
+        if (globalScope.projectOptions.get(BooleanOption.CONVERT_NON_NAMESPACED_DEPENDENCIES)) {
+            // TODO: also rewrite the resources
+            createAutoNamespaceDependenciesTask()
+        }
+
         // Compile
         createCompileResourcesTask()
         createStaticLibraryManifestTask()
@@ -101,7 +112,8 @@ class NamespacedResourcesTaskManager(
         val task = taskFactory.create(
                 GenerateNamespacedLibraryRFilesTask.ConfigAction(
                         variantScope,
-                        variantScope.getOutput(InternalArtifactType.PARTIAL_R_FILES),
+                        variantScope.artifacts.getFinalArtifactFiles(
+                            InternalArtifactType.PARTIAL_R_FILES),
                         rClassJarFile,
                         resIdsFile))
 
@@ -190,52 +202,17 @@ class NamespacedResourcesTaskManager(
     }
 
     private fun createCompileResourcesTask() {
-        val compiledDirectory =
-                FileUtils.join(
-                        variantScope.globalScope.intermediatesDir,
-                        SdkConstants.FD_RES,
-                        SdkConstants.FD_COMPILED,
-                        variantScope.variantConfiguration.dirName)
-        val partialRDirectory =
-                FileUtils.join(
-                        variantScope.globalScope.intermediatesDir,
-                        SdkConstants.FD_RES,
-                        SdkConstants.FD_PARTIAL_R,
-                        variantScope.variantConfiguration.dirName)
-
-        val tasks = mutableListOf<Task>()
-        // Preserving the source-set order in overlays is important.
-        val directories = mutableListOf<File>()
-        val partialRDirectories = mutableListOf<File>()
-
-        for((sourceSetName, artifacts) in variantScope.variantData.androidResources){
-            val outputDir = File(compiledDirectory, sourceSetName)
-            val rOutputDir = File(partialRDirectory, sourceSetName)
+        
+        for((sourceSetName, artifacts) in variantScope.variantData.androidResources) {
             val name = "compile${sourceSetName.capitalize()}" +
                     "ResourcesFor${variantScope.fullVariantName.capitalize()}"
-            tasks.add(taskFactory.create(CompileSourceSetResources.ConfigAction(
+            // TODO : figure out when we need explicit task dependency and potentially remove it.
+            taskFactory.create(CompileSourceSetResources.ConfigAction(
                     name = name,
                     inputDirectories = artifacts,
-                    outputDirectory = outputDir,
-                    partialRDirectory = rOutputDir,
-                    variantScope = variantScope,
-                    aaptIntermediateDirectory = variantScope.getIncrementalDir(name))))
-            directories.add(outputDir)
-            partialRDirectories.add(rOutputDir)
+                    variantScope = variantScope))
+                .dependsOn(variantScope.resourceGenTask)
         }
-        val compiled = variantScope.globalScope.project.files(directories)
-        val partialR = variantScope.globalScope.project.files(partialRDirectories)
-
-        tasks.forEach {
-            it.dependsOn(variantScope.resourceGenTask)
-            compiled.builtBy(it)
-            partialR.builtBy(it)
-        }
-
-        variantScope.addTaskOutput(
-                InternalArtifactType.RES_COMPILED_FLAT_FILES, compiled, null)
-        variantScope.addTaskOutput(
-                InternalArtifactType.PARTIAL_R_FILES, partialR, null)
     }
 
     private fun createLinkResourcesTask() {
@@ -262,5 +239,9 @@ class NamespacedResourcesTaskManager(
                 InternalArtifactType.STATIC_LIBRARY_MANIFEST,
                 staticLibraryManifest,
                 task.name)
+    }
+
+    private fun createAutoNamespaceDependenciesTask() {
+        taskFactory.create(AutoNamespaceDependenciesTask.ConfigAction(variantScope))
     }
 }
