@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.cxx.gradle.generator
+package com.android.manifmerger
 
-import com.google.wireless.android.sdk.stats.GradleBuildVariant
-import org.gradle.api.provider.ProviderFactory
+/** List of other http://schemas.android.com/tools namespace instructions that can be present in a manifest file. */
+enum class OtherOperationType {
 
-/** NOP C/C++ metadata generator to be used when there was an earlier configuration error. */
-class CxxNopMetadataGenerator(override val variantBuilder: GradleBuildVariant.Builder?) : CxxMetadataGenerator {
-  override fun configure(providers: ProviderFactory, forceConfigure: Boolean) {}
+  // used to direct lint
+  ignore,
+
+  // used to direct lint
+  targetapi, // deliberately lowercase because we do lowercase before valueOf call
 }

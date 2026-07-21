@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.cxx.gradle.generator
+package com.android.build.gradle.internal.dsl
 
-import com.google.wireless.android.sdk.stats.GradleBuildVariant
-import org.gradle.api.provider.ProviderFactory
+import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.variant.AndroidLibraryModuleModel
+import com.android.build.gradle.internal.DependenciesExtension
+import org.gradle.api.internal.plugins.Definition
 
-/** NOP C/C++ metadata generator to be used when there was an earlier configuration error. */
-class CxxNopMetadataGenerator(override val variantBuilder: GradleBuildVariant.Builder?) : CxxMetadataGenerator {
-  override fun configure(providers: ProviderFactory, forceConfigure: Boolean) {}
+interface DeclarativeLibraryExtension : LibraryExtension, Definition<AndroidLibraryModuleModel> {
+  fun dependenciesDcl(action: DependenciesExtension.() -> Unit)
 }
