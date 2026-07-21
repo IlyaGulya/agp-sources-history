@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.builder.dexing
+package com.android.build.gradle.internal.ide.v2
 
-import com.android.ide.common.blame.MessageReceiver
+import com.android.builder.model.v2.models.ProjectGraph
+import java.io.Serializable
 
-/** Parameters required for dexing (with D8). */
-class DexParameters(
-    val minSdkVersion: Int,
-    val debuggable: Boolean,
-    val dexPerClass: Boolean,
-    val withDesugaring: Boolean,
-    val desugarBootclasspath: com.android.builder.dexing.r8.ClassFileProviderFactory,
-    val desugarClasspath: com.android.builder.dexing.r8.ClassFileProviderFactory,
-    val coreLibDesugarConfig: String?,
-    val enableApiModeling: Boolean,
-    val messageReceiver: MessageReceiver
-)
+data class ProjectGraphImpl(override val resolvedVariants: Map<String, String>)
+    : ProjectGraph, Serializable {
+    companion object {
+        @JvmStatic
+        private val serialVersionUID: Long = 1L
+    }
+}
