@@ -1,4 +1,4 @@
-// $ANTLR 3.5.2 Proguard.g 2017-05-15 18:43:01
+// $ANTLR 3.5.2 Proguard.g 2017-05-26 15:13:45
 
 package com.android.build.gradle.shrinker.parser;
 import static com.android.build.gradle.shrinker.parser.ModifierSpecification.*;
@@ -160,7 +160,7 @@ public class ProguardParser extends Parser {
 
 
 	// $ANTLR start "prog"
-	// Proguard.g:37:1: prog[Flags flags, String baseDirectory] : ( ( '-basedirectory' baseDir= NAME ) | ( '-include' | '@' ) proguardFile= NAME | ( '-keepclassmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keepclasseswithmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keep' keepModifier= keepOptionModifier classSpec= classSpecification ) | (igFlag= ignoredFlag ) | (nopFlag= noOpFlag ) | (unFlag= unsupportedFlag ) | ( '-dontwarn' filter[class_filter, FilterSeparator.CLASS] ) | ( '-ignorewarnings' ) | ( '-target' target= NAME ) | ( '-whyareyoukeeping' classSpec= classSpecification ) )* EOF ;
+	// Proguard.g:37:1: prog[Flags flags, String baseDirectory] : ( ( '-basedirectory' baseDir= NAME ) | ( '-include' | '@' ) proguardFile= NAME | ( '-keepclassmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keepclasseswithmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keep' keepModifier= keepOptionModifier classSpec= classSpecification ) | (igFlag= ignoredFlag ) | (nopFlag= noOpFlag ) | (unFlag= unsupportedFlag ) | ( '-dontwarn' filter[class_filter, FilterSeparator.CLASS] ) | ( '-ignorewarnings' ) | ( '-target' target= NAME ) | ( '-whyareyoukeeping' classSpec= classSpecification ) | ( '-dontshrink' ) | ( '-dontoptimize' ) | ( '-dontobfuscate' ) )* EOF ;
 	public final void prog(Flags flags, String baseDirectory) throws RecognitionException {
 		Token baseDir=null;
 		Token proguardFile=null;
@@ -172,13 +172,13 @@ public class ProguardParser extends Parser {
 		ParserRuleReturnScope unFlag =null;
 
 		try {
-			// Proguard.g:38:3: ( ( ( '-basedirectory' baseDir= NAME ) | ( '-include' | '@' ) proguardFile= NAME | ( '-keepclassmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keepclasseswithmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keep' keepModifier= keepOptionModifier classSpec= classSpecification ) | (igFlag= ignoredFlag ) | (nopFlag= noOpFlag ) | (unFlag= unsupportedFlag ) | ( '-dontwarn' filter[class_filter, FilterSeparator.CLASS] ) | ( '-ignorewarnings' ) | ( '-target' target= NAME ) | ( '-whyareyoukeeping' classSpec= classSpecification ) )* EOF )
-			// Proguard.g:39:3: ( ( '-basedirectory' baseDir= NAME ) | ( '-include' | '@' ) proguardFile= NAME | ( '-keepclassmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keepclasseswithmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keep' keepModifier= keepOptionModifier classSpec= classSpecification ) | (igFlag= ignoredFlag ) | (nopFlag= noOpFlag ) | (unFlag= unsupportedFlag ) | ( '-dontwarn' filter[class_filter, FilterSeparator.CLASS] ) | ( '-ignorewarnings' ) | ( '-target' target= NAME ) | ( '-whyareyoukeeping' classSpec= classSpecification ) )* EOF
+			// Proguard.g:38:3: ( ( ( '-basedirectory' baseDir= NAME ) | ( '-include' | '@' ) proguardFile= NAME | ( '-keepclassmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keepclasseswithmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keep' keepModifier= keepOptionModifier classSpec= classSpecification ) | (igFlag= ignoredFlag ) | (nopFlag= noOpFlag ) | (unFlag= unsupportedFlag ) | ( '-dontwarn' filter[class_filter, FilterSeparator.CLASS] ) | ( '-ignorewarnings' ) | ( '-target' target= NAME ) | ( '-whyareyoukeeping' classSpec= classSpecification ) | ( '-dontshrink' ) | ( '-dontoptimize' ) | ( '-dontobfuscate' ) )* EOF )
+			// Proguard.g:39:3: ( ( '-basedirectory' baseDir= NAME ) | ( '-include' | '@' ) proguardFile= NAME | ( '-keepclassmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keepclasseswithmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keep' keepModifier= keepOptionModifier classSpec= classSpecification ) | (igFlag= ignoredFlag ) | (nopFlag= noOpFlag ) | (unFlag= unsupportedFlag ) | ( '-dontwarn' filter[class_filter, FilterSeparator.CLASS] ) | ( '-ignorewarnings' ) | ( '-target' target= NAME ) | ( '-whyareyoukeeping' classSpec= classSpecification ) | ( '-dontshrink' ) | ( '-dontoptimize' ) | ( '-dontobfuscate' ) )* EOF
 			{
-			// Proguard.g:39:3: ( ( '-basedirectory' baseDir= NAME ) | ( '-include' | '@' ) proguardFile= NAME | ( '-keepclassmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keepclasseswithmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keep' keepModifier= keepOptionModifier classSpec= classSpecification ) | (igFlag= ignoredFlag ) | (nopFlag= noOpFlag ) | (unFlag= unsupportedFlag ) | ( '-dontwarn' filter[class_filter, FilterSeparator.CLASS] ) | ( '-ignorewarnings' ) | ( '-target' target= NAME ) | ( '-whyareyoukeeping' classSpec= classSpecification ) )*
+			// Proguard.g:39:3: ( ( '-basedirectory' baseDir= NAME ) | ( '-include' | '@' ) proguardFile= NAME | ( '-keepclassmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keepclasseswithmembers' keepModifier= keepOptionModifier classSpec= classSpecification ) | ( '-keep' keepModifier= keepOptionModifier classSpec= classSpecification ) | (igFlag= ignoredFlag ) | (nopFlag= noOpFlag ) | (unFlag= unsupportedFlag ) | ( '-dontwarn' filter[class_filter, FilterSeparator.CLASS] ) | ( '-ignorewarnings' ) | ( '-target' target= NAME ) | ( '-whyareyoukeeping' classSpec= classSpecification ) | ( '-dontshrink' ) | ( '-dontoptimize' ) | ( '-dontobfuscate' ) )*
 			loop1:
 			while (true) {
-				int alt1=13;
+				int alt1=16;
 				switch ( input.LA(1) ) {
 				case 18:
 					{
@@ -228,10 +228,7 @@ public class ProguardParser extends Parser {
 					}
 					break;
 				case 20:
-				case 21:
-				case 22:
 				case 23:
-				case 24:
 				case 25:
 				case 26:
 				case 27:
@@ -280,6 +277,21 @@ public class ProguardParser extends Parser {
 				case 64:
 					{
 					alt1=12;
+					}
+					break;
+				case 24:
+					{
+					alt1=13;
+					}
+					break;
+				case 22:
+					{
+					alt1=14;
+					}
+					break;
+				case 21:
+					{
+					alt1=15;
 					}
 					break;
 				}
@@ -475,13 +487,49 @@ public class ProguardParser extends Parser {
 
 					}
 					break;
+				case 13 :
+					// Proguard.g:52:7: ( '-dontshrink' )
+					{
+					// Proguard.g:52:7: ( '-dontshrink' )
+					// Proguard.g:52:8: '-dontshrink'
+					{
+					match(input,24,FOLLOW_24_in_prog278); 
+					 GrammarActions.dontShrink(flags); 
+					}
+
+					}
+					break;
+				case 14 :
+					// Proguard.g:53:7: ( '-dontoptimize' )
+					{
+					// Proguard.g:53:7: ( '-dontoptimize' )
+					// Proguard.g:53:8: '-dontoptimize'
+					{
+					match(input,22,FOLLOW_22_in_prog291); 
+					 GrammarActions.dontOptimize(flags); 
+					}
+
+					}
+					break;
+				case 15 :
+					// Proguard.g:54:7: ( '-dontobfuscate' )
+					{
+					// Proguard.g:54:7: ( '-dontobfuscate' )
+					// Proguard.g:54:8: '-dontobfuscate'
+					{
+					match(input,21,FOLLOW_21_in_prog304); 
+					 GrammarActions.dontObfuscate(flags); 
+					}
+
+					}
+					break;
 
 				default :
 					break loop1;
 				}
 			}
 
-			match(input,EOF,FOLLOW_EOF_in_prog278); 
+			match(input,EOF,FOLLOW_EOF_in_prog316); 
 			}
 
 		}
@@ -503,7 +551,7 @@ public class ProguardParser extends Parser {
 
 
 	// $ANTLR start "noOpFlag"
-	// Proguard.g:59:9: private noOpFlag : ( '-verbose' | ( '-dontnote' filter[class_filter, FilterSeparator.CLASS] ) | '-dontusemixedcaseclassnames' | '-dontskipnonpubliclibraryclasses' | '-dontskipnonpubliclibraryclassmembers' | '-skipnonpubliclibraryclasses' | '-keepparameternames' | ( '-keepnames' classSpec= classSpecification ) | ( '-keepclassmembernames' classSpec= classSpecification ) | ( '-keepclasseswithmembernames' classSpec= classSpecification ) | ( '-keepattributes' filter[attribute_filter, FilterSeparator.ATTRIBUTE] ) | ( '-keeppackagenames' filter[package_filter, FilterSeparator.GENERAL] ) | ( '-dontshrink' ) | ( '-dontoptimize' ) | ( '-dontpreverify' ) | ( '-dontobfuscate' ) ) ;
+	// Proguard.g:62:9: private noOpFlag : ( '-verbose' | ( '-dontnote' filter[class_filter, FilterSeparator.CLASS] ) | '-dontusemixedcaseclassnames' | '-dontskipnonpubliclibraryclasses' | '-dontskipnonpubliclibraryclassmembers' | '-skipnonpubliclibraryclasses' | '-keepparameternames' | ( '-keepnames' classSpec= classSpecification ) | ( '-keepclassmembernames' classSpec= classSpecification ) | ( '-keepclasseswithmembernames' classSpec= classSpecification ) | ( '-keepattributes' filter[attribute_filter, FilterSeparator.ATTRIBUTE] ) | ( '-keeppackagenames' filter[package_filter, FilterSeparator.GENERAL] ) | ( '-dontpreverify' ) ) ;
 	public final ProguardParser.noOpFlag_return noOpFlag() throws RecognitionException {
 		ProguardParser.noOpFlag_return retval = new ProguardParser.noOpFlag_return();
 		retval.start = input.LT(1);
@@ -511,11 +559,11 @@ public class ProguardParser extends Parser {
 		ClassSpecification classSpec =null;
 
 		try {
-			// Proguard.g:60:3: ( ( '-verbose' | ( '-dontnote' filter[class_filter, FilterSeparator.CLASS] ) | '-dontusemixedcaseclassnames' | '-dontskipnonpubliclibraryclasses' | '-dontskipnonpubliclibraryclassmembers' | '-skipnonpubliclibraryclasses' | '-keepparameternames' | ( '-keepnames' classSpec= classSpecification ) | ( '-keepclassmembernames' classSpec= classSpecification ) | ( '-keepclasseswithmembernames' classSpec= classSpecification ) | ( '-keepattributes' filter[attribute_filter, FilterSeparator.ATTRIBUTE] ) | ( '-keeppackagenames' filter[package_filter, FilterSeparator.GENERAL] ) | ( '-dontshrink' ) | ( '-dontoptimize' ) | ( '-dontpreverify' ) | ( '-dontobfuscate' ) ) )
-			// Proguard.g:61:3: ( '-verbose' | ( '-dontnote' filter[class_filter, FilterSeparator.CLASS] ) | '-dontusemixedcaseclassnames' | '-dontskipnonpubliclibraryclasses' | '-dontskipnonpubliclibraryclassmembers' | '-skipnonpubliclibraryclasses' | '-keepparameternames' | ( '-keepnames' classSpec= classSpecification ) | ( '-keepclassmembernames' classSpec= classSpecification ) | ( '-keepclasseswithmembernames' classSpec= classSpecification ) | ( '-keepattributes' filter[attribute_filter, FilterSeparator.ATTRIBUTE] ) | ( '-keeppackagenames' filter[package_filter, FilterSeparator.GENERAL] ) | ( '-dontshrink' ) | ( '-dontoptimize' ) | ( '-dontpreverify' ) | ( '-dontobfuscate' ) )
+			// Proguard.g:63:3: ( ( '-verbose' | ( '-dontnote' filter[class_filter, FilterSeparator.CLASS] ) | '-dontusemixedcaseclassnames' | '-dontskipnonpubliclibraryclasses' | '-dontskipnonpubliclibraryclassmembers' | '-skipnonpubliclibraryclasses' | '-keepparameternames' | ( '-keepnames' classSpec= classSpecification ) | ( '-keepclassmembernames' classSpec= classSpecification ) | ( '-keepclasseswithmembernames' classSpec= classSpecification ) | ( '-keepattributes' filter[attribute_filter, FilterSeparator.ATTRIBUTE] ) | ( '-keeppackagenames' filter[package_filter, FilterSeparator.GENERAL] ) | ( '-dontpreverify' ) ) )
+			// Proguard.g:64:3: ( '-verbose' | ( '-dontnote' filter[class_filter, FilterSeparator.CLASS] ) | '-dontusemixedcaseclassnames' | '-dontskipnonpubliclibraryclasses' | '-dontskipnonpubliclibraryclassmembers' | '-skipnonpubliclibraryclasses' | '-keepparameternames' | ( '-keepnames' classSpec= classSpecification ) | ( '-keepclassmembernames' classSpec= classSpecification ) | ( '-keepclasseswithmembernames' classSpec= classSpecification ) | ( '-keepattributes' filter[attribute_filter, FilterSeparator.ATTRIBUTE] ) | ( '-keeppackagenames' filter[package_filter, FilterSeparator.GENERAL] ) | ( '-dontpreverify' ) )
 			{
-			// Proguard.g:61:3: ( '-verbose' | ( '-dontnote' filter[class_filter, FilterSeparator.CLASS] ) | '-dontusemixedcaseclassnames' | '-dontskipnonpubliclibraryclasses' | '-dontskipnonpubliclibraryclassmembers' | '-skipnonpubliclibraryclasses' | '-keepparameternames' | ( '-keepnames' classSpec= classSpecification ) | ( '-keepclassmembernames' classSpec= classSpecification ) | ( '-keepclasseswithmembernames' classSpec= classSpecification ) | ( '-keepattributes' filter[attribute_filter, FilterSeparator.ATTRIBUTE] ) | ( '-keeppackagenames' filter[package_filter, FilterSeparator.GENERAL] ) | ( '-dontshrink' ) | ( '-dontoptimize' ) | ( '-dontpreverify' ) | ( '-dontobfuscate' ) )
-			int alt2=16;
+			// Proguard.g:64:3: ( '-verbose' | ( '-dontnote' filter[class_filter, FilterSeparator.CLASS] ) | '-dontusemixedcaseclassnames' | '-dontskipnonpubliclibraryclasses' | '-dontskipnonpubliclibraryclassmembers' | '-skipnonpubliclibraryclasses' | '-keepparameternames' | ( '-keepnames' classSpec= classSpecification ) | ( '-keepclassmembernames' classSpec= classSpecification ) | ( '-keepclasseswithmembernames' classSpec= classSpecification ) | ( '-keepattributes' filter[attribute_filter, FilterSeparator.ATTRIBUTE] ) | ( '-keeppackagenames' filter[package_filter, FilterSeparator.GENERAL] ) | ( '-dontpreverify' ) )
+			int alt2=13;
 			switch ( input.LA(1) ) {
 			case 63:
 				{
@@ -577,24 +625,9 @@ public class ProguardParser extends Parser {
 				alt2=12;
 				}
 				break;
-			case 24:
-				{
-				alt2=13;
-				}
-				break;
-			case 22:
-				{
-				alt2=14;
-				}
-				break;
 			case 23:
 				{
-				alt2=15;
-				}
-				break;
-			case 21:
-				{
-				alt2=16;
+				alt2=13;
 				}
 				break;
 			default:
@@ -604,20 +637,20 @@ public class ProguardParser extends Parser {
 			}
 			switch (alt2) {
 				case 1 :
-					// Proguard.g:61:7: '-verbose'
+					// Proguard.g:64:7: '-verbose'
 					{
-					match(input,63,FOLLOW_63_in_noOpFlag307); 
+					match(input,63,FOLLOW_63_in_noOpFlag345); 
 					}
 					break;
 				case 2 :
-					// Proguard.g:62:7: ( '-dontnote' filter[class_filter, FilterSeparator.CLASS] )
+					// Proguard.g:65:7: ( '-dontnote' filter[class_filter, FilterSeparator.CLASS] )
 					{
-					// Proguard.g:62:7: ( '-dontnote' filter[class_filter, FilterSeparator.CLASS] )
-					// Proguard.g:62:8: '-dontnote' filter[class_filter, FilterSeparator.CLASS]
+					// Proguard.g:65:7: ( '-dontnote' filter[class_filter, FilterSeparator.CLASS] )
+					// Proguard.g:65:8: '-dontnote' filter[class_filter, FilterSeparator.CLASS]
 					{
-					match(input,20,FOLLOW_20_in_noOpFlag316); 
+					match(input,20,FOLLOW_20_in_noOpFlag354); 
 					List<FilterSpecification> class_filter = new ArrayList<FilterSpecification>();
-					pushFollow(FOLLOW_filter_in_noOpFlag320);
+					pushFollow(FOLLOW_filter_in_noOpFlag358);
 					filter(class_filter, FilterSeparator.CLASS);
 					state._fsp--;
 
@@ -626,43 +659,43 @@ public class ProguardParser extends Parser {
 					}
 					break;
 				case 3 :
-					// Proguard.g:64:7: '-dontusemixedcaseclassnames'
+					// Proguard.g:67:7: '-dontusemixedcaseclassnames'
 					{
-					match(input,27,FOLLOW_27_in_noOpFlag335); 
+					match(input,27,FOLLOW_27_in_noOpFlag373); 
 					}
 					break;
 				case 4 :
-					// Proguard.g:65:7: '-dontskipnonpubliclibraryclasses'
+					// Proguard.g:68:7: '-dontskipnonpubliclibraryclasses'
 					{
-					match(input,25,FOLLOW_25_in_noOpFlag343); 
+					match(input,25,FOLLOW_25_in_noOpFlag381); 
 					}
 					break;
 				case 5 :
-					// Proguard.g:66:7: '-dontskipnonpubliclibraryclassmembers'
+					// Proguard.g:69:7: '-dontskipnonpubliclibraryclassmembers'
 					{
-					match(input,26,FOLLOW_26_in_noOpFlag351); 
+					match(input,26,FOLLOW_26_in_noOpFlag389); 
 					}
 					break;
 				case 6 :
-					// Proguard.g:67:7: '-skipnonpubliclibraryclasses'
+					// Proguard.g:70:7: '-skipnonpubliclibraryclasses'
 					{
-					match(input,60,FOLLOW_60_in_noOpFlag359); 
+					match(input,60,FOLLOW_60_in_noOpFlag397); 
 					}
 					break;
 				case 7 :
-					// Proguard.g:69:7: '-keepparameternames'
+					// Proguard.g:72:7: '-keepparameternames'
 					{
-					match(input,44,FOLLOW_44_in_noOpFlag372); 
+					match(input,44,FOLLOW_44_in_noOpFlag410); 
 					}
 					break;
 				case 8 :
-					// Proguard.g:70:7: ( '-keepnames' classSpec= classSpecification )
+					// Proguard.g:73:7: ( '-keepnames' classSpec= classSpecification )
 					{
-					// Proguard.g:70:7: ( '-keepnames' classSpec= classSpecification )
-					// Proguard.g:70:8: '-keepnames' classSpec= classSpecification
+					// Proguard.g:73:7: ( '-keepnames' classSpec= classSpecification )
+					// Proguard.g:73:8: '-keepnames' classSpec= classSpecification
 					{
-					match(input,42,FOLLOW_42_in_noOpFlag381); 
-					pushFollow(FOLLOW_classSpecification_in_noOpFlag385);
+					match(input,42,FOLLOW_42_in_noOpFlag419); 
+					pushFollow(FOLLOW_classSpecification_in_noOpFlag423);
 					classSpec=classSpecification();
 					state._fsp--;
 
@@ -671,13 +704,13 @@ public class ProguardParser extends Parser {
 					}
 					break;
 				case 9 :
-					// Proguard.g:71:7: ( '-keepclassmembernames' classSpec= classSpecification )
+					// Proguard.g:74:7: ( '-keepclassmembernames' classSpec= classSpecification )
 					{
-					// Proguard.g:71:7: ( '-keepclassmembernames' classSpec= classSpecification )
-					// Proguard.g:71:8: '-keepclassmembernames' classSpec= classSpecification
+					// Proguard.g:74:7: ( '-keepclassmembernames' classSpec= classSpecification )
+					// Proguard.g:74:8: '-keepclassmembernames' classSpec= classSpecification
 					{
-					match(input,39,FOLLOW_39_in_noOpFlag396); 
-					pushFollow(FOLLOW_classSpecification_in_noOpFlag400);
+					match(input,39,FOLLOW_39_in_noOpFlag434); 
+					pushFollow(FOLLOW_classSpecification_in_noOpFlag438);
 					classSpec=classSpecification();
 					state._fsp--;
 
@@ -686,13 +719,13 @@ public class ProguardParser extends Parser {
 					}
 					break;
 				case 10 :
-					// Proguard.g:72:7: ( '-keepclasseswithmembernames' classSpec= classSpecification )
+					// Proguard.g:75:7: ( '-keepclasseswithmembernames' classSpec= classSpecification )
 					{
-					// Proguard.g:72:7: ( '-keepclasseswithmembernames' classSpec= classSpecification )
-					// Proguard.g:72:8: '-keepclasseswithmembernames' classSpec= classSpecification
+					// Proguard.g:75:7: ( '-keepclasseswithmembernames' classSpec= classSpecification )
+					// Proguard.g:75:8: '-keepclasseswithmembernames' classSpec= classSpecification
 					{
-					match(input,37,FOLLOW_37_in_noOpFlag412); 
-					pushFollow(FOLLOW_classSpecification_in_noOpFlag416);
+					match(input,37,FOLLOW_37_in_noOpFlag450); 
+					pushFollow(FOLLOW_classSpecification_in_noOpFlag454);
 					classSpec=classSpecification();
 					state._fsp--;
 
@@ -701,14 +734,14 @@ public class ProguardParser extends Parser {
 					}
 					break;
 				case 11 :
-					// Proguard.g:73:7: ( '-keepattributes' filter[attribute_filter, FilterSeparator.ATTRIBUTE] )
+					// Proguard.g:76:7: ( '-keepattributes' filter[attribute_filter, FilterSeparator.ATTRIBUTE] )
 					{
-					// Proguard.g:73:7: ( '-keepattributes' filter[attribute_filter, FilterSeparator.ATTRIBUTE] )
-					// Proguard.g:73:8: '-keepattributes' filter[attribute_filter, FilterSeparator.ATTRIBUTE]
+					// Proguard.g:76:7: ( '-keepattributes' filter[attribute_filter, FilterSeparator.ATTRIBUTE] )
+					// Proguard.g:76:8: '-keepattributes' filter[attribute_filter, FilterSeparator.ATTRIBUTE]
 					{
-					match(input,36,FOLLOW_36_in_noOpFlag428); 
+					match(input,36,FOLLOW_36_in_noOpFlag466); 
 					List<FilterSpecification> attribute_filter = new ArrayList<FilterSpecification>();
-					pushFollow(FOLLOW_filter_in_noOpFlag432);
+					pushFollow(FOLLOW_filter_in_noOpFlag470);
 					filter(attribute_filter, FilterSeparator.ATTRIBUTE);
 					state._fsp--;
 
@@ -717,14 +750,14 @@ public class ProguardParser extends Parser {
 					}
 					break;
 				case 12 :
-					// Proguard.g:74:7: ( '-keeppackagenames' filter[package_filter, FilterSeparator.GENERAL] )
+					// Proguard.g:77:7: ( '-keeppackagenames' filter[package_filter, FilterSeparator.GENERAL] )
 					{
-					// Proguard.g:74:7: ( '-keeppackagenames' filter[package_filter, FilterSeparator.GENERAL] )
-					// Proguard.g:74:8: '-keeppackagenames' filter[package_filter, FilterSeparator.GENERAL]
+					// Proguard.g:77:7: ( '-keeppackagenames' filter[package_filter, FilterSeparator.GENERAL] )
+					// Proguard.g:77:8: '-keeppackagenames' filter[package_filter, FilterSeparator.GENERAL]
 					{
-					match(input,43,FOLLOW_43_in_noOpFlag444); 
+					match(input,43,FOLLOW_43_in_noOpFlag482); 
 					List<FilterSpecification> package_filter = new ArrayList<FilterSpecification>();
-					pushFollow(FOLLOW_filter_in_noOpFlag448);
+					pushFollow(FOLLOW_filter_in_noOpFlag486);
 					filter(package_filter, FilterSeparator.GENERAL);
 					state._fsp--;
 
@@ -733,45 +766,12 @@ public class ProguardParser extends Parser {
 					}
 					break;
 				case 13 :
-					// Proguard.g:75:7: ( '-dontshrink' )
+					// Proguard.g:78:7: ( '-dontpreverify' )
 					{
-					// Proguard.g:75:7: ( '-dontshrink' )
-					// Proguard.g:75:8: '-dontshrink'
+					// Proguard.g:78:7: ( '-dontpreverify' )
+					// Proguard.g:78:8: '-dontpreverify'
 					{
-					match(input,24,FOLLOW_24_in_noOpFlag460); 
-					}
-
-					}
-					break;
-				case 14 :
-					// Proguard.g:76:7: ( '-dontoptimize' )
-					{
-					// Proguard.g:76:7: ( '-dontoptimize' )
-					// Proguard.g:76:8: '-dontoptimize'
-					{
-					match(input,22,FOLLOW_22_in_noOpFlag471); 
-					}
-
-					}
-					break;
-				case 15 :
-					// Proguard.g:77:7: ( '-dontpreverify' )
-					{
-					// Proguard.g:77:7: ( '-dontpreverify' )
-					// Proguard.g:77:8: '-dontpreverify'
-					{
-					match(input,23,FOLLOW_23_in_noOpFlag483); 
-					}
-
-					}
-					break;
-				case 16 :
-					// Proguard.g:78:7: ( '-dontobfuscate' )
-					{
-					// Proguard.g:78:7: ( '-dontobfuscate' )
-					// Proguard.g:78:8: '-dontobfuscate'
-					{
-					match(input,21,FOLLOW_21_in_noOpFlag495); 
+					match(input,23,FOLLOW_23_in_noOpFlag498); 
 					}
 
 					}
@@ -917,9 +917,9 @@ public class ProguardParser extends Parser {
 					// Proguard.g:84:7: ( '-optimizations' filter[optimization_filter, FilterSeparator.GENERAL] )
 					// Proguard.g:84:8: '-optimizations' filter[optimization_filter, FilterSeparator.GENERAL]
 					{
-					match(input,50,FOLLOW_50_in_ignoredFlag523); 
+					match(input,50,FOLLOW_50_in_ignoredFlag527); 
 					List<FilterSpecification> optimization_filter = new ArrayList<FilterSpecification>();
-					pushFollow(FOLLOW_filter_in_ignoredFlag527);
+					pushFollow(FOLLOW_filter_in_ignoredFlag531);
 					filter(optimization_filter, FilterSeparator.GENERAL);
 					state._fsp--;
 
@@ -930,13 +930,13 @@ public class ProguardParser extends Parser {
 				case 2 :
 					// Proguard.g:85:7: '-useuniqueclassmembernames'
 					{
-					match(input,62,FOLLOW_62_in_ignoredFlag537); 
+					match(input,62,FOLLOW_62_in_ignoredFlag541); 
 					}
 					break;
 				case 3 :
 					// Proguard.g:86:7: '-allowaccessmodification'
 					{
-					match(input,15,FOLLOW_15_in_ignoredFlag545); 
+					match(input,15,FOLLOW_15_in_ignoredFlag549); 
 					}
 					break;
 				case 4 :
@@ -945,8 +945,8 @@ public class ProguardParser extends Parser {
 					// Proguard.g:87:7: ( '-optimizationpasses' NAME )
 					// Proguard.g:87:8: '-optimizationpasses' NAME
 					{
-					match(input,49,FOLLOW_49_in_ignoredFlag554); 
-					match(input,NAME,FOLLOW_NAME_in_ignoredFlag556); 
+					match(input,49,FOLLOW_49_in_ignoredFlag558); 
+					match(input,NAME,FOLLOW_NAME_in_ignoredFlag560); 
 					}
 
 					}
@@ -957,8 +957,8 @@ public class ProguardParser extends Parser {
 					// Proguard.g:88:7: ( '-assumenosideeffects' classSpecification )
 					// Proguard.g:88:8: '-assumenosideeffects' classSpecification
 					{
-					match(input,17,FOLLOW_17_in_ignoredFlag567); 
-					pushFollow(FOLLOW_classSpecification_in_ignoredFlag569);
+					match(input,17,FOLLOW_17_in_ignoredFlag571); 
+					pushFollow(FOLLOW_classSpecification_in_ignoredFlag573);
 					classSpecification();
 					state._fsp--;
 
@@ -969,13 +969,13 @@ public class ProguardParser extends Parser {
 				case 6 :
 					// Proguard.g:89:7: '-mergeinterfacesaggressively'
 					{
-					match(input,46,FOLLOW_46_in_ignoredFlag578); 
+					match(input,46,FOLLOW_46_in_ignoredFlag582); 
 					}
 					break;
 				case 7 :
 					// Proguard.g:90:7: '-overloadaggressively'
 					{
-					match(input,52,FOLLOW_52_in_ignoredFlag586); 
+					match(input,52,FOLLOW_52_in_ignoredFlag590); 
 					}
 					break;
 				case 8 :
@@ -984,7 +984,7 @@ public class ProguardParser extends Parser {
 					// Proguard.g:91:7: ( '-renamesourcefileattribute' (sourceFile= NAME )? )
 					// Proguard.g:91:8: '-renamesourcefileattribute' (sourceFile= NAME )?
 					{
-					match(input,58,FOLLOW_58_in_ignoredFlag595); 
+					match(input,58,FOLLOW_58_in_ignoredFlag599); 
 					// Proguard.g:91:47: (sourceFile= NAME )?
 					int alt3=2;
 					int LA3_0 = input.LA(1);
@@ -995,7 +995,7 @@ public class ProguardParser extends Parser {
 						case 1 :
 							// Proguard.g:91:47: sourceFile= NAME
 							{
-							sourceFile=(Token)match(input,NAME,FOLLOW_NAME_in_ignoredFlag599); 
+							sourceFile=(Token)match(input,NAME,FOLLOW_NAME_in_ignoredFlag603); 
 							}
 							break;
 
@@ -1011,9 +1011,9 @@ public class ProguardParser extends Parser {
 					// Proguard.g:92:7: ( '-adaptclassstrings' filter[filter, FilterSeparator.GENERAL] )
 					// Proguard.g:92:8: '-adaptclassstrings' filter[filter, FilterSeparator.GENERAL]
 					{
-					match(input,12,FOLLOW_12_in_ignoredFlag610); 
+					match(input,12,FOLLOW_12_in_ignoredFlag614); 
 					List<FilterSpecification> filter = new ArrayList<FilterSpecification>();
-					pushFollow(FOLLOW_filter_in_ignoredFlag614);
+					pushFollow(FOLLOW_filter_in_ignoredFlag618);
 					filter(filter, FilterSeparator.GENERAL);
 					state._fsp--;
 
@@ -1027,8 +1027,8 @@ public class ProguardParser extends Parser {
 					// Proguard.g:93:7: ( '-applymapping' mapping= NAME )
 					// Proguard.g:93:8: '-applymapping' mapping= NAME
 					{
-					match(input,16,FOLLOW_16_in_ignoredFlag625); 
-					mapping=(Token)match(input,NAME,FOLLOW_NAME_in_ignoredFlag629); 
+					match(input,16,FOLLOW_16_in_ignoredFlag629); 
+					mapping=(Token)match(input,NAME,FOLLOW_NAME_in_ignoredFlag633); 
 					}
 
 					}
@@ -1036,22 +1036,22 @@ public class ProguardParser extends Parser {
 				case 11 :
 					// Proguard.g:94:7: '-obfuscationdictionary' obfuscationDictionary= NAME
 					{
-					match(input,48,FOLLOW_48_in_ignoredFlag639); 
-					obfuscationDictionary=(Token)match(input,NAME,FOLLOW_NAME_in_ignoredFlag643); 
+					match(input,48,FOLLOW_48_in_ignoredFlag643); 
+					obfuscationDictionary=(Token)match(input,NAME,FOLLOW_NAME_in_ignoredFlag647); 
 					}
 					break;
 				case 12 :
 					// Proguard.g:95:7: '-classobfuscationdictionary' classObfuscationDictionary= NAME
 					{
-					match(input,19,FOLLOW_19_in_ignoredFlag651); 
-					classObfuscationDictionary=(Token)match(input,NAME,FOLLOW_NAME_in_ignoredFlag655); 
+					match(input,19,FOLLOW_19_in_ignoredFlag655); 
+					classObfuscationDictionary=(Token)match(input,NAME,FOLLOW_NAME_in_ignoredFlag659); 
 					}
 					break;
 				case 13 :
 					// Proguard.g:96:7: '-packageobfuscationdictionary' packageObfuscationDictionary= NAME
 					{
-					match(input,53,FOLLOW_53_in_ignoredFlag663); 
-					packageObfuscationDictionary=(Token)match(input,NAME,FOLLOW_NAME_in_ignoredFlag667); 
+					match(input,53,FOLLOW_53_in_ignoredFlag667); 
+					packageObfuscationDictionary=(Token)match(input,NAME,FOLLOW_NAME_in_ignoredFlag671); 
 					}
 					break;
 				case 14 :
@@ -1060,7 +1060,7 @@ public class ProguardParser extends Parser {
 					// Proguard.g:97:7: ( '-repackageclasses' ( '\\'' (newPackage= NAME )? '\\'' )? )
 					// Proguard.g:97:8: '-repackageclasses' ( '\\'' (newPackage= NAME )? '\\'' )?
 					{
-					match(input,59,FOLLOW_59_in_ignoredFlag676); 
+					match(input,59,FOLLOW_59_in_ignoredFlag680); 
 					// Proguard.g:97:28: ( '\\'' (newPackage= NAME )? '\\'' )?
 					int alt5=2;
 					int LA5_0 = input.LA(1);
@@ -1071,7 +1071,7 @@ public class ProguardParser extends Parser {
 						case 1 :
 							// Proguard.g:97:29: '\\'' (newPackage= NAME )? '\\''
 							{
-							match(input,72,FOLLOW_72_in_ignoredFlag679); 
+							match(input,72,FOLLOW_72_in_ignoredFlag683); 
 							// Proguard.g:97:44: (newPackage= NAME )?
 							int alt4=2;
 							int LA4_0 = input.LA(1);
@@ -1082,13 +1082,13 @@ public class ProguardParser extends Parser {
 								case 1 :
 									// Proguard.g:97:44: newPackage= NAME
 									{
-									newPackage=(Token)match(input,NAME,FOLLOW_NAME_in_ignoredFlag683); 
+									newPackage=(Token)match(input,NAME,FOLLOW_NAME_in_ignoredFlag687); 
 									}
 									break;
 
 							}
 
-							match(input,72,FOLLOW_72_in_ignoredFlag686); 
+							match(input,72,FOLLOW_72_in_ignoredFlag690); 
 							}
 							break;
 
@@ -1104,7 +1104,7 @@ public class ProguardParser extends Parser {
 					// Proguard.g:98:7: ( '-flattenpackagehierarchy' ( '\\'' (newPackage= NAME )? '\\'' )? )
 					// Proguard.g:98:8: '-flattenpackagehierarchy' ( '\\'' (newPackage= NAME )? '\\'' )?
 					{
-					match(input,30,FOLLOW_30_in_ignoredFlag699); 
+					match(input,30,FOLLOW_30_in_ignoredFlag703); 
 					// Proguard.g:98:35: ( '\\'' (newPackage= NAME )? '\\'' )?
 					int alt7=2;
 					int LA7_0 = input.LA(1);
@@ -1115,7 +1115,7 @@ public class ProguardParser extends Parser {
 						case 1 :
 							// Proguard.g:98:36: '\\'' (newPackage= NAME )? '\\''
 							{
-							match(input,72,FOLLOW_72_in_ignoredFlag702); 
+							match(input,72,FOLLOW_72_in_ignoredFlag706); 
 							// Proguard.g:98:51: (newPackage= NAME )?
 							int alt6=2;
 							int LA6_0 = input.LA(1);
@@ -1126,13 +1126,13 @@ public class ProguardParser extends Parser {
 								case 1 :
 									// Proguard.g:98:51: newPackage= NAME
 									{
-									newPackage=(Token)match(input,NAME,FOLLOW_NAME_in_ignoredFlag706); 
+									newPackage=(Token)match(input,NAME,FOLLOW_NAME_in_ignoredFlag710); 
 									}
 									break;
 
 							}
 
-							match(input,72,FOLLOW_72_in_ignoredFlag709); 
+							match(input,72,FOLLOW_72_in_ignoredFlag713); 
 							}
 							break;
 
@@ -1148,9 +1148,9 @@ public class ProguardParser extends Parser {
 					// Proguard.g:99:7: ( '-adaptresourcefilenames' filter[file_filter, FilterSeparator.FILE] )
 					// Proguard.g:99:8: '-adaptresourcefilenames' filter[file_filter, FilterSeparator.FILE]
 					{
-					match(input,14,FOLLOW_14_in_ignoredFlag722); 
+					match(input,14,FOLLOW_14_in_ignoredFlag726); 
 					List<FilterSpecification> file_filter = new ArrayList<FilterSpecification>();
-					pushFollow(FOLLOW_filter_in_ignoredFlag726);
+					pushFollow(FOLLOW_filter_in_ignoredFlag730);
 					filter(file_filter, FilterSeparator.FILE);
 					state._fsp--;
 
@@ -1164,9 +1164,9 @@ public class ProguardParser extends Parser {
 					// Proguard.g:100:7: ( '-adaptresourcefilecontents' filter[file_filter, FilterSeparator.FILE] )
 					// Proguard.g:100:8: '-adaptresourcefilecontents' filter[file_filter, FilterSeparator.FILE]
 					{
-					match(input,13,FOLLOW_13_in_ignoredFlag738); 
+					match(input,13,FOLLOW_13_in_ignoredFlag742); 
 					List<FilterSpecification> file_filter = new ArrayList<FilterSpecification>();
-					pushFollow(FOLLOW_filter_in_ignoredFlag742);
+					pushFollow(FOLLOW_filter_in_ignoredFlag746);
 					filter(file_filter, FilterSeparator.FILE);
 					state._fsp--;
 
@@ -1278,8 +1278,8 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:106:5: '-injars' inJars= classpath
 					{
-					match(input,34,FOLLOW_34_in_unsupportedFlag768); 
-					pushFollow(FOLLOW_classpath_in_unsupportedFlag772);
+					match(input,34,FOLLOW_34_in_unsupportedFlag772); 
+					pushFollow(FOLLOW_classpath_in_unsupportedFlag776);
 					classpath();
 					state._fsp--;
 
@@ -1288,8 +1288,8 @@ public class ProguardParser extends Parser {
 				case 2 :
 					// Proguard.g:107:7: '-outjars' outJars= classpath
 					{
-					match(input,51,FOLLOW_51_in_unsupportedFlag780); 
-					pushFollow(FOLLOW_classpath_in_unsupportedFlag784);
+					match(input,51,FOLLOW_51_in_unsupportedFlag784); 
+					pushFollow(FOLLOW_classpath_in_unsupportedFlag788);
 					classpath();
 					state._fsp--;
 
@@ -1298,8 +1298,8 @@ public class ProguardParser extends Parser {
 				case 3 :
 					// Proguard.g:108:7: '-libraryjars' libraryJars= classpath
 					{
-					match(input,45,FOLLOW_45_in_unsupportedFlag792); 
-					pushFollow(FOLLOW_classpath_in_unsupportedFlag796);
+					match(input,45,FOLLOW_45_in_unsupportedFlag796); 
+					pushFollow(FOLLOW_classpath_in_unsupportedFlag800);
 					classpath();
 					state._fsp--;
 
@@ -1308,7 +1308,7 @@ public class ProguardParser extends Parser {
 				case 4 :
 					// Proguard.g:109:7: '-forceprocessing'
 					{
-					match(input,31,FOLLOW_31_in_unsupportedFlag804); 
+					match(input,31,FOLLOW_31_in_unsupportedFlag808); 
 					}
 					break;
 				case 5 :
@@ -1317,8 +1317,8 @@ public class ProguardParser extends Parser {
 					// Proguard.g:110:7: ( '-printusage' NAME )
 					// Proguard.g:110:8: '-printusage' NAME
 					{
-					match(input,57,FOLLOW_57_in_unsupportedFlag813); 
-					match(input,NAME,FOLLOW_NAME_in_unsupportedFlag815); 
+					match(input,57,FOLLOW_57_in_unsupportedFlag817); 
+					match(input,NAME,FOLLOW_NAME_in_unsupportedFlag819); 
 					}
 
 					}
@@ -1326,7 +1326,7 @@ public class ProguardParser extends Parser {
 				case 6 :
 					// Proguard.g:111:7: '-microedition'
 					{
-					match(input,47,FOLLOW_47_in_unsupportedFlag825); 
+					match(input,47,FOLLOW_47_in_unsupportedFlag829); 
 					}
 					break;
 				case 7 :
@@ -1335,7 +1335,7 @@ public class ProguardParser extends Parser {
 					// Proguard.g:112:7: ( '-printconfiguration' ( NAME )? )
 					// Proguard.g:112:8: '-printconfiguration' ( NAME )?
 					{
-					match(input,54,FOLLOW_54_in_unsupportedFlag834); 
+					match(input,54,FOLLOW_54_in_unsupportedFlag838); 
 					// Proguard.g:112:30: ( NAME )?
 					int alt9=2;
 					int LA9_0 = input.LA(1);
@@ -1346,7 +1346,7 @@ public class ProguardParser extends Parser {
 						case 1 :
 							// Proguard.g:112:30: NAME
 							{
-							match(input,NAME,FOLLOW_NAME_in_unsupportedFlag836); 
+							match(input,NAME,FOLLOW_NAME_in_unsupportedFlag840); 
 							}
 							break;
 
@@ -1362,7 +1362,7 @@ public class ProguardParser extends Parser {
 					// Proguard.g:113:7: ( '-dump' ( NAME )? )
 					// Proguard.g:113:8: '-dump' ( NAME )?
 					{
-					match(input,29,FOLLOW_29_in_unsupportedFlag848); 
+					match(input,29,FOLLOW_29_in_unsupportedFlag852); 
 					// Proguard.g:113:16: ( NAME )?
 					int alt10=2;
 					int LA10_0 = input.LA(1);
@@ -1373,7 +1373,7 @@ public class ProguardParser extends Parser {
 						case 1 :
 							// Proguard.g:113:16: NAME
 							{
-							match(input,NAME,FOLLOW_NAME_in_unsupportedFlag850); 
+							match(input,NAME,FOLLOW_NAME_in_unsupportedFlag854); 
 							}
 							break;
 
@@ -1386,7 +1386,7 @@ public class ProguardParser extends Parser {
 				case 9 :
 					// Proguard.g:114:7: '-printmapping' (outputMapping= NAME )?
 					{
-					match(input,55,FOLLOW_55_in_unsupportedFlag861); 
+					match(input,55,FOLLOW_55_in_unsupportedFlag865); 
 					// Proguard.g:114:36: (outputMapping= NAME )?
 					int alt11=2;
 					int LA11_0 = input.LA(1);
@@ -1397,7 +1397,7 @@ public class ProguardParser extends Parser {
 						case 1 :
 							// Proguard.g:114:36: outputMapping= NAME
 							{
-							outputMapping=(Token)match(input,NAME,FOLLOW_NAME_in_unsupportedFlag865); 
+							outputMapping=(Token)match(input,NAME,FOLLOW_NAME_in_unsupportedFlag869); 
 							}
 							break;
 
@@ -1411,7 +1411,7 @@ public class ProguardParser extends Parser {
 					// Proguard.g:115:7: ( '-printseeds' (seedOutputFile= NAME )? )
 					// Proguard.g:115:8: '-printseeds' (seedOutputFile= NAME )?
 					{
-					match(input,56,FOLLOW_56_in_unsupportedFlag875); 
+					match(input,56,FOLLOW_56_in_unsupportedFlag879); 
 					// Proguard.g:115:36: (seedOutputFile= NAME )?
 					int alt12=2;
 					int LA12_0 = input.LA(1);
@@ -1422,7 +1422,7 @@ public class ProguardParser extends Parser {
 						case 1 :
 							// Proguard.g:115:36: seedOutputFile= NAME
 							{
-							seedOutputFile=(Token)match(input,NAME,FOLLOW_NAME_in_unsupportedFlag879); 
+							seedOutputFile=(Token)match(input,NAME,FOLLOW_NAME_in_unsupportedFlag883); 
 							}
 							break;
 
@@ -1438,9 +1438,9 @@ public class ProguardParser extends Parser {
 					// Proguard.g:116:7: ( '-keepdirectories' filter[directory_filter, FilterSeparator.FILE] )
 					// Proguard.g:116:8: '-keepdirectories' filter[directory_filter, FilterSeparator.FILE]
 					{
-					match(input,41,FOLLOW_41_in_unsupportedFlag891); 
+					match(input,41,FOLLOW_41_in_unsupportedFlag895); 
 					List<FilterSpecification> directory_filter = new ArrayList<FilterSpecification>();
-					pushFollow(FOLLOW_filter_in_unsupportedFlag895);
+					pushFollow(FOLLOW_filter_in_unsupportedFlag899);
 					filter(directory_filter, FilterSeparator.FILE);
 					state._fsp--;
 
@@ -1476,7 +1476,7 @@ public class ProguardParser extends Parser {
 			// Proguard.g:121:3: ( NAME ( ( ':' | ';' ) classpath )? )
 			// Proguard.g:121:6: NAME ( ( ':' | ';' ) classpath )?
 			{
-			match(input,NAME,FOLLOW_NAME_in_classpath917); 
+			match(input,NAME,FOLLOW_NAME_in_classpath921); 
 			// Proguard.g:121:11: ( ( ':' | ';' ) classpath )?
 			int alt14=2;
 			int LA14_0 = input.LA(1);
@@ -1495,7 +1495,7 @@ public class ProguardParser extends Parser {
 						MismatchedSetException mse = new MismatchedSetException(null,input);
 						throw mse;
 					}
-					pushFollow(FOLLOW_classpath_in_classpath926);
+					pushFollow(FOLLOW_classpath_in_classpath930);
 					classpath();
 					state._fsp--;
 
@@ -1543,7 +1543,7 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:126:3: nonEmptyFilter[filter, separator]
 					{
-					pushFollow(FOLLOW_nonEmptyFilter_in_filter947);
+					pushFollow(FOLLOW_nonEmptyFilter_in_filter951);
 					nonEmptyFilter(filter, separator);
 					state._fsp--;
 
@@ -1595,14 +1595,14 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:136:5: NEGATOR
 					{
-					match(input,NEGATOR,FOLLOW_NEGATOR_in_nonEmptyFilter981); 
+					match(input,NEGATOR,FOLLOW_NEGATOR_in_nonEmptyFilter985); 
 					negator=true;
 					}
 					break;
 
 			}
 
-			NAME1=(Token)match(input,NAME,FOLLOW_NAME_in_nonEmptyFilter987); 
+			NAME1=(Token)match(input,NAME,FOLLOW_NAME_in_nonEmptyFilter991); 
 			GrammarActions.filter(filter, negator, (NAME1!=null?NAME1.getText():null), separator);
 			// Proguard.g:136:102: ( ',' nonEmptyFilter[filter, separator] )?
 			int alt17=2;
@@ -1614,8 +1614,8 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:136:103: ',' nonEmptyFilter[filter, separator]
 					{
-					match(input,11,FOLLOW_11_in_nonEmptyFilter992); 
-					pushFollow(FOLLOW_nonEmptyFilter_in_nonEmptyFilter994);
+					match(input,11,FOLLOW_11_in_nonEmptyFilter996); 
+					pushFollow(FOLLOW_nonEmptyFilter_in_nonEmptyFilter998);
 					nonEmptyFilter(filter, separator);
 					state._fsp--;
 
@@ -1673,7 +1673,7 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:145:4: annotation
 					{
-					pushFollow(FOLLOW_annotation_in_classSpecification1024);
+					pushFollow(FOLLOW_annotation_in_classSpecification1028);
 					annotation3=annotation();
 					state._fsp--;
 
@@ -1682,11 +1682,11 @@ public class ProguardParser extends Parser {
 
 			}
 
-			pushFollow(FOLLOW_classModifierAndType_in_classSpecification1032);
+			pushFollow(FOLLOW_classModifierAndType_in_classSpecification1036);
 			cType=classModifierAndType(modifier);
 			state._fsp--;
 
-			pushFollow(FOLLOW_classNames_in_classSpecification1037);
+			pushFollow(FOLLOW_classNames_in_classSpecification1041);
 			classNames2=classNames();
 			state._fsp--;
 
@@ -1701,7 +1701,7 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:148:4: inheritanceSpec= inheritance
 					{
-					pushFollow(FOLLOW_inheritance_in_classSpecification1046);
+					pushFollow(FOLLOW_inheritance_in_classSpecification1050);
 					inheritanceSpec=inheritance();
 					state._fsp--;
 
@@ -1721,7 +1721,7 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:149:3: members[classSpec]
 					{
-					pushFollow(FOLLOW_members_in_classSpecification1054);
+					pushFollow(FOLLOW_members_in_classSpecification1058);
 					members(classSpec);
 					state._fsp--;
 
@@ -1762,7 +1762,7 @@ public class ProguardParser extends Parser {
 			// Proguard.g:156:3: (firstName= className ( ',' otherName= className )* )
 			// Proguard.g:157:3: firstName= className ( ',' otherName= className )*
 			{
-			pushFollow(FOLLOW_className_in_classNames1083);
+			pushFollow(FOLLOW_className_in_classNames1087);
 			firstName=className();
 			state._fsp--;
 
@@ -1780,8 +1780,8 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:158:4: ',' otherName= className
 					{
-					match(input,11,FOLLOW_11_in_classNames1090); 
-					pushFollow(FOLLOW_className_in_classNames1094);
+					match(input,11,FOLLOW_11_in_classNames1094); 
+					pushFollow(FOLLOW_className_in_classNames1098);
 					otherName=className();
 					state._fsp--;
 
@@ -1835,14 +1835,14 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:166:4: NEGATOR
 					{
-					match(input,NEGATOR,FOLLOW_NEGATOR_in_className1123); 
+					match(input,NEGATOR,FOLLOW_NEGATOR_in_className1127); 
 					hasNameNegator = true;
 					}
 					break;
 
 			}
 
-			NAME4=(Token)match(input,NAME,FOLLOW_NAME_in_className1131); 
+			NAME4=(Token)match(input,NAME,FOLLOW_NAME_in_className1135); 
 			nameSpec=GrammarActions.className((NAME4!=null?NAME4.getText():null), hasNameNegator);
 			}
 
@@ -1886,7 +1886,7 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:175:4: NEGATOR
 					{
-					match(input,NEGATOR,FOLLOW_NEGATOR_in_classModifierAndType1158); 
+					match(input,NEGATOR,FOLLOW_NEGATOR_in_classModifierAndType1162); 
 					hasNegator = true;
 					}
 					break;
@@ -1928,9 +1928,9 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:177:3: 'public' cmat= classModifierAndType[modifier]
 					{
-					match(input,87,FOLLOW_87_in_classModifierAndType1170); 
+					match(input,87,FOLLOW_87_in_classModifierAndType1174); 
 					GrammarActions.addAccessFlag(modifier, AccessFlag.PUBLIC, hasNegator);
-					pushFollow(FOLLOW_classModifierAndType_in_classModifierAndType1176);
+					pushFollow(FOLLOW_classModifierAndType_in_classModifierAndType1180);
 					cmat=classModifierAndType(modifier);
 					state._fsp--;
 
@@ -1940,9 +1940,9 @@ public class ProguardParser extends Parser {
 				case 2 :
 					// Proguard.g:178:5: 'abstract' cmat= classModifierAndType[modifier]
 					{
-					match(input,73,FOLLOW_73_in_classModifierAndType1185); 
+					match(input,73,FOLLOW_73_in_classModifierAndType1189); 
 					GrammarActions.addModifier(modifier, Modifier.ABSTRACT, hasNegator);
-					pushFollow(FOLLOW_classModifierAndType_in_classModifierAndType1191);
+					pushFollow(FOLLOW_classModifierAndType_in_classModifierAndType1195);
 					cmat=classModifierAndType(modifier);
 					state._fsp--;
 
@@ -1952,9 +1952,9 @@ public class ProguardParser extends Parser {
 				case 3 :
 					// Proguard.g:179:5: 'final' cmat= classModifierAndType[modifier]
 					{
-					match(input,81,FOLLOW_81_in_classModifierAndType1200); 
+					match(input,81,FOLLOW_81_in_classModifierAndType1204); 
 					GrammarActions.addModifier(modifier, Modifier.FINAL, hasNegator);
-					pushFollow(FOLLOW_classModifierAndType_in_classModifierAndType1206);
+					pushFollow(FOLLOW_classModifierAndType_in_classModifierAndType1210);
 					cmat=classModifierAndType(modifier);
 					state._fsp--;
 
@@ -1964,7 +1964,7 @@ public class ProguardParser extends Parser {
 				case 4 :
 					// Proguard.g:180:5: classType
 					{
-					pushFollow(FOLLOW_classType_in_classModifierAndType1215);
+					pushFollow(FOLLOW_classType_in_classModifierAndType1219);
 					classType5=classType();
 					state._fsp--;
 
@@ -2013,7 +2013,7 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:189:4: '@'
 					{
-					match(input,70,FOLLOW_70_in_classType1248); 
+					match(input,70,FOLLOW_70_in_classType1252); 
 					type |= ACC_ANNOTATION;
 					}
 					break;
@@ -2047,21 +2047,21 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:190:4: 'interface'
 					{
-					match(input,83,FOLLOW_83_in_classType1257); 
+					match(input,83,FOLLOW_83_in_classType1261); 
 					type |= ACC_INTERFACE;
 					}
 					break;
 				case 2 :
 					// Proguard.g:191:5: 'enum'
 					{
-					match(input,79,FOLLOW_79_in_classType1265); 
+					match(input,79,FOLLOW_79_in_classType1269); 
 					type |= ACC_ENUM;
 					}
 					break;
 				case 3 :
 					// Proguard.g:192:5: 'class'
 					{
-					match(input,78,FOLLOW_78_in_classType1273); 
+					match(input,78,FOLLOW_78_in_classType1277); 
 					}
 					break;
 
@@ -2090,7 +2090,7 @@ public class ProguardParser extends Parser {
 			// Proguard.g:197:3: ( '{' ( member[classSpec] )* '}' )
 			// Proguard.g:198:3: '{' ( member[classSpec] )* '}'
 			{
-			match(input,95,FOLLOW_95_in_members1296); 
+			match(input,95,FOLLOW_95_in_members1300); 
 			// Proguard.g:199:5: ( member[classSpec] )*
 			loop27:
 			while (true) {
@@ -2104,7 +2104,7 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:199:5: member[classSpec]
 					{
-					pushFollow(FOLLOW_member_in_members1302);
+					pushFollow(FOLLOW_member_in_members1306);
 					member(classSpec);
 					state._fsp--;
 
@@ -2116,7 +2116,7 @@ public class ProguardParser extends Parser {
 				}
 			}
 
-			match(input,96,FOLLOW_96_in_members1308); 
+			match(input,96,FOLLOW_96_in_members1312); 
 			}
 
 		}
@@ -2155,7 +2155,7 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:205:5: annotation
 					{
-					pushFollow(FOLLOW_annotation_in_member1329);
+					pushFollow(FOLLOW_annotation_in_member1333);
 					annotation6=annotation();
 					state._fsp--;
 
@@ -2164,7 +2164,7 @@ public class ProguardParser extends Parser {
 
 			}
 
-			pushFollow(FOLLOW_modifiers_in_member1332);
+			pushFollow(FOLLOW_modifiers_in_member1336);
 			modifiers7=modifiers();
 			state._fsp--;
 
@@ -2213,7 +2213,7 @@ public class ProguardParser extends Parser {
 						case 1 :
 							// Proguard.g:207:8: typeSig= type
 							{
-							pushFollow(FOLLOW_type_in_member1349);
+							pushFollow(FOLLOW_type_in_member1353);
 							typeSig=type();
 							state._fsp--;
 
@@ -2251,7 +2251,7 @@ public class ProguardParser extends Parser {
 						case 1 :
 							// Proguard.g:207:45: signature= arguments
 							{
-							pushFollow(FOLLOW_arguments_in_member1364);
+							pushFollow(FOLLOW_arguments_in_member1368);
 							signature=arguments();
 							state._fsp--;
 
@@ -2272,7 +2272,7 @@ public class ProguardParser extends Parser {
 				case 2 :
 					// Proguard.g:209:9: '<methods>'
 					{
-					match(input,69,FOLLOW_69_in_member1399); 
+					match(input,69,FOLLOW_69_in_member1403); 
 					GrammarActions.method(classSpec, annotation6,
 					          GrammarActions.getSignature("***", 0), "*", "\\("+ GrammarActions.getSignature("...", 0) + "\\)",
 					          modifiers7);
@@ -2281,14 +2281,14 @@ public class ProguardParser extends Parser {
 				case 3 :
 					// Proguard.g:212:9: '<fields>'
 					{
-					match(input,67,FOLLOW_67_in_member1411); 
+					match(input,67,FOLLOW_67_in_member1415); 
 					GrammarActions.field(classSpec, annotation6, null, "*", modifiers7);
 					}
 					break;
 
 			}
 
-			match(input,66,FOLLOW_66_in_member1421); 
+			match(input,66,FOLLOW_66_in_member1425); 
 			}
 
 		}
@@ -2319,7 +2319,7 @@ public class ProguardParser extends Parser {
 			// Proguard.g:220:3: ( '@' ( NEGATOR )? NAME )
 			// Proguard.g:220:6: '@' ( NEGATOR )? NAME
 			{
-			match(input,70,FOLLOW_70_in_annotation1445); 
+			match(input,70,FOLLOW_70_in_annotation1449); 
 			// Proguard.g:220:10: ( NEGATOR )?
 			int alt32=2;
 			int LA32_0 = input.LA(1);
@@ -2330,14 +2330,14 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:220:11: NEGATOR
 					{
-					match(input,NEGATOR,FOLLOW_NEGATOR_in_annotation1448); 
+					match(input,NEGATOR,FOLLOW_NEGATOR_in_annotation1452); 
 					hasNameNegator = true;
 					}
 					break;
 
 			}
 
-			NAME8=(Token)match(input,NAME,FOLLOW_NAME_in_annotation1454); 
+			NAME8=(Token)match(input,NAME,FOLLOW_NAME_in_annotation1458); 
 			annotSpec = GrammarActions.annotation((NAME8!=null?NAME8.getText():null), hasNameNegator);
 			}
 
@@ -2381,7 +2381,7 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:227:3: modifier[modifiers]
 					{
-					pushFollow(FOLLOW_modifier_in_modifiers1478);
+					pushFollow(FOLLOW_modifier_in_modifiers1482);
 					modifier(modifiers);
 					state._fsp--;
 
@@ -2429,7 +2429,7 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:235:4: NEGATOR
 					{
-					match(input,NEGATOR,FOLLOW_NEGATOR_in_modifier1504); 
+					match(input,NEGATOR,FOLLOW_NEGATOR_in_modifier1508); 
 					hasNegator = true;
 					}
 					break;
@@ -2518,98 +2518,98 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:237:5: 'public'
 					{
-					match(input,87,FOLLOW_87_in_modifier1518); 
+					match(input,87,FOLLOW_87_in_modifier1522); 
 					modifiers.addAccessFlag(AccessFlag.PUBLIC, hasNegator);
 					}
 					break;
 				case 2 :
 					// Proguard.g:238:7: 'private'
 					{
-					match(input,85,FOLLOW_85_in_modifier1528); 
+					match(input,85,FOLLOW_85_in_modifier1532); 
 					modifiers.addAccessFlag(AccessFlag.PRIVATE, hasNegator);
 					}
 					break;
 				case 3 :
 					// Proguard.g:239:7: 'protected'
 					{
-					match(input,86,FOLLOW_86_in_modifier1538); 
+					match(input,86,FOLLOW_86_in_modifier1542); 
 					modifiers.addAccessFlag(AccessFlag.PROTECTED, hasNegator);
 					}
 					break;
 				case 4 :
 					// Proguard.g:240:7: 'static'
 					{
-					match(input,88,FOLLOW_88_in_modifier1548); 
+					match(input,88,FOLLOW_88_in_modifier1552); 
 					modifiers.addModifier(Modifier.STATIC, hasNegator);
 					}
 					break;
 				case 5 :
 					// Proguard.g:241:7: 'synchronized'
 					{
-					match(input,90,FOLLOW_90_in_modifier1558); 
+					match(input,90,FOLLOW_90_in_modifier1562); 
 					modifiers.addModifier(Modifier.SYNCHRONIZED, hasNegator);
 					}
 					break;
 				case 6 :
 					// Proguard.g:242:7: 'volatile'
 					{
-					match(input,94,FOLLOW_94_in_modifier1568); 
+					match(input,94,FOLLOW_94_in_modifier1572); 
 					modifiers.addModifier(Modifier.VOLATILE, hasNegator);
 					}
 					break;
 				case 7 :
 					// Proguard.g:243:7: 'native'
 					{
-					match(input,84,FOLLOW_84_in_modifier1578); 
+					match(input,84,FOLLOW_84_in_modifier1582); 
 					modifiers.addModifier(Modifier.NATIVE, hasNegator);
 					}
 					break;
 				case 8 :
 					// Proguard.g:244:7: 'abstract'
 					{
-					match(input,73,FOLLOW_73_in_modifier1588); 
+					match(input,73,FOLLOW_73_in_modifier1592); 
 					modifiers.addModifier(Modifier.ABSTRACT, hasNegator);
 					}
 					break;
 				case 9 :
 					// Proguard.g:245:7: 'strictfp'
 					{
-					match(input,89,FOLLOW_89_in_modifier1598); 
+					match(input,89,FOLLOW_89_in_modifier1602); 
 					modifiers.addModifier(Modifier.STRICTFP, hasNegator);
 					}
 					break;
 				case 10 :
 					// Proguard.g:246:7: 'final'
 					{
-					match(input,81,FOLLOW_81_in_modifier1608); 
+					match(input,81,FOLLOW_81_in_modifier1612); 
 					modifiers.addModifier(Modifier.FINAL, hasNegator);
 					}
 					break;
 				case 11 :
 					// Proguard.g:247:7: 'transient'
 					{
-					match(input,92,FOLLOW_92_in_modifier1618); 
+					match(input,92,FOLLOW_92_in_modifier1622); 
 					modifiers.addModifier(Modifier.TRANSIENT, hasNegator);
 					}
 					break;
 				case 12 :
 					// Proguard.g:248:7: 'synthetic'
 					{
-					match(input,91,FOLLOW_91_in_modifier1628); 
+					match(input,91,FOLLOW_91_in_modifier1632); 
 					modifiers.addModifier(Modifier.SYNTHETIC, hasNegator);
 					}
 					break;
 				case 13 :
 					// Proguard.g:249:7: 'bridge'
 					{
-					match(input,77,FOLLOW_77_in_modifier1638); 
+					match(input,77,FOLLOW_77_in_modifier1642); 
 					modifiers.addModifier(Modifier.BRIDGE, hasNegator);
 					}
 					break;
 				case 14 :
 					// Proguard.g:250:7: 'varargs'
 					{
-					match(input,93,FOLLOW_93_in_modifier1648); 
+					match(input,93,FOLLOW_93_in_modifier1652); 
 					modifiers.addModifier(Modifier.VARARGS, hasNegator);
 					}
 					break;
@@ -2665,7 +2665,7 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:260:3: annotation
 					{
-					pushFollow(FOLLOW_annotation_in_inheritance1689);
+					pushFollow(FOLLOW_annotation_in_inheritance1693);
 					annotation10=annotation();
 					state._fsp--;
 
@@ -2684,14 +2684,14 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:260:16: NEGATOR
 					{
-					match(input,NEGATOR,FOLLOW_NEGATOR_in_inheritance1693); 
+					match(input,NEGATOR,FOLLOW_NEGATOR_in_inheritance1697); 
 					hasNameNegator = true;
 					}
 					break;
 
 			}
 
-			NAME9=(Token)match(input,NAME,FOLLOW_NAME_in_inheritance1699); 
+			NAME9=(Token)match(input,NAME,FOLLOW_NAME_in_inheritance1703); 
 			inheritanceSpec = GrammarActions.createInheritance((NAME9!=null?NAME9.getText():null), hasNameNegator, annotation10);
 			}
 
@@ -2721,7 +2721,7 @@ public class ProguardParser extends Parser {
 			// Proguard.g:263:3: ( '(' ( (parameterSig= type ( ',' parameterSig= type )* )? ) ')' )
 			// Proguard.g:264:3: '(' ( (parameterSig= type ( ',' parameterSig= type )* )? ) ')'
 			{
-			match(input,9,FOLLOW_9_in_arguments1719); 
+			match(input,9,FOLLOW_9_in_arguments1723); 
 			signature = "\\(";
 			// Proguard.g:265:5: ( (parameterSig= type ( ',' parameterSig= type )* )? )
 			// Proguard.g:266:7: (parameterSig= type ( ',' parameterSig= type )* )?
@@ -2736,7 +2736,7 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:267:9: parameterSig= type ( ',' parameterSig= type )*
 					{
-					pushFollow(FOLLOW_type_in_arguments1747);
+					pushFollow(FOLLOW_type_in_arguments1751);
 					parameterSig=type();
 					state._fsp--;
 
@@ -2754,8 +2754,8 @@ public class ProguardParser extends Parser {
 						case 1 :
 							// Proguard.g:268:10: ',' parameterSig= type
 							{
-							match(input,11,FOLLOW_11_in_arguments1760); 
-							pushFollow(FOLLOW_type_in_arguments1764);
+							match(input,11,FOLLOW_11_in_arguments1764); 
+							pushFollow(FOLLOW_type_in_arguments1768);
 							parameterSig=type();
 							state._fsp--;
 
@@ -2775,7 +2775,7 @@ public class ProguardParser extends Parser {
 
 			}
 
-			match(input,10,FOLLOW_10_in_arguments1793); 
+			match(input,10,FOLLOW_10_in_arguments1797); 
 			signature += "\\)";
 			}
 
@@ -2833,7 +2833,7 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:280:28: '[]'
 					{
-					match(input,71,FOLLOW_71_in_type1838); 
+					match(input,71,FOLLOW_71_in_type1842); 
 					dim++;
 					}
 					break;
@@ -2888,7 +2888,7 @@ public class ProguardParser extends Parser {
 				case 1 :
 					// Proguard.g:288:6: ',' ( 'allowshrinking' | 'allowoptimization' | 'allowobfuscation' )
 					{
-					match(input,11,FOLLOW_11_in_keepOptionModifier1873); 
+					match(input,11,FOLLOW_11_in_keepOptionModifier1877); 
 					// Proguard.g:289:3: ( 'allowshrinking' | 'allowoptimization' | 'allowobfuscation' )
 					int alt41=3;
 					switch ( input.LA(1) ) {
@@ -2916,20 +2916,20 @@ public class ProguardParser extends Parser {
 						case 1 :
 							// Proguard.g:289:4: 'allowshrinking'
 							{
-							match(input,76,FOLLOW_76_in_keepOptionModifier1878); 
+							match(input,76,FOLLOW_76_in_keepOptionModifier1882); 
 							modifier.setAllowShrinking();
 							}
 							break;
 						case 2 :
 							// Proguard.g:290:5: 'allowoptimization'
 							{
-							match(input,75,FOLLOW_75_in_keepOptionModifier1886); 
+							match(input,75,FOLLOW_75_in_keepOptionModifier1890); 
 							}
 							break;
 						case 3 :
 							// Proguard.g:291:5: 'allowobfuscation'
 							{
-							match(input,74,FOLLOW_74_in_keepOptionModifier1893); 
+							match(input,74,FOLLOW_74_in_keepOptionModifier1897); 
 							modifier.setAllowObfuscation();
 							}
 							break;
@@ -2985,156 +2985,156 @@ public class ProguardParser extends Parser {
 	public static final BitSet FOLLOW_NAME_in_prog250 = new BitSet(new long[]{0xFFFFFFFFFFFFF000L,0x0000000000000041L});
 	public static final BitSet FOLLOW_64_in_prog262 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
 	public static final BitSet FOLLOW_classSpecification_in_prog266 = new BitSet(new long[]{0xFFFFFFFFFFFFF000L,0x0000000000000041L});
-	public static final BitSet FOLLOW_EOF_in_prog278 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_63_in_noOpFlag307 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_20_in_noOpFlag316 = new BitSet(new long[]{0x0000000000000060L});
-	public static final BitSet FOLLOW_filter_in_noOpFlag320 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_27_in_noOpFlag335 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_25_in_noOpFlag343 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_26_in_noOpFlag351 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_60_in_noOpFlag359 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_44_in_noOpFlag372 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_42_in_noOpFlag381 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
-	public static final BitSet FOLLOW_classSpecification_in_noOpFlag385 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_39_in_noOpFlag396 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
-	public static final BitSet FOLLOW_classSpecification_in_noOpFlag400 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_37_in_noOpFlag412 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
-	public static final BitSet FOLLOW_classSpecification_in_noOpFlag416 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_36_in_noOpFlag428 = new BitSet(new long[]{0x0000000000000060L});
-	public static final BitSet FOLLOW_filter_in_noOpFlag432 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_43_in_noOpFlag444 = new BitSet(new long[]{0x0000000000000060L});
-	public static final BitSet FOLLOW_filter_in_noOpFlag448 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_24_in_noOpFlag460 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_22_in_noOpFlag471 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_23_in_noOpFlag483 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_21_in_noOpFlag495 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_50_in_ignoredFlag523 = new BitSet(new long[]{0x0000000000000060L});
-	public static final BitSet FOLLOW_filter_in_ignoredFlag527 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_62_in_ignoredFlag537 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_15_in_ignoredFlag545 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_49_in_ignoredFlag554 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_NAME_in_ignoredFlag556 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_17_in_ignoredFlag567 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
-	public static final BitSet FOLLOW_classSpecification_in_ignoredFlag569 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_46_in_ignoredFlag578 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_52_in_ignoredFlag586 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_58_in_ignoredFlag595 = new BitSet(new long[]{0x0000000000000022L});
-	public static final BitSet FOLLOW_NAME_in_ignoredFlag599 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_12_in_ignoredFlag610 = new BitSet(new long[]{0x0000000000000060L});
-	public static final BitSet FOLLOW_filter_in_ignoredFlag614 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_16_in_ignoredFlag625 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_NAME_in_ignoredFlag629 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_48_in_ignoredFlag639 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_NAME_in_ignoredFlag643 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_19_in_ignoredFlag651 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_NAME_in_ignoredFlag655 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_53_in_ignoredFlag663 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_NAME_in_ignoredFlag667 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_59_in_ignoredFlag676 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000100L});
-	public static final BitSet FOLLOW_72_in_ignoredFlag679 = new BitSet(new long[]{0x0000000000000020L,0x0000000000000100L});
-	public static final BitSet FOLLOW_NAME_in_ignoredFlag683 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000100L});
-	public static final BitSet FOLLOW_72_in_ignoredFlag686 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_30_in_ignoredFlag699 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000100L});
-	public static final BitSet FOLLOW_72_in_ignoredFlag702 = new BitSet(new long[]{0x0000000000000020L,0x0000000000000100L});
-	public static final BitSet FOLLOW_NAME_in_ignoredFlag706 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000100L});
-	public static final BitSet FOLLOW_72_in_ignoredFlag709 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_14_in_ignoredFlag722 = new BitSet(new long[]{0x0000000000000060L});
-	public static final BitSet FOLLOW_filter_in_ignoredFlag726 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_13_in_ignoredFlag738 = new BitSet(new long[]{0x0000000000000060L});
-	public static final BitSet FOLLOW_filter_in_ignoredFlag742 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_34_in_unsupportedFlag768 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_classpath_in_unsupportedFlag772 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_51_in_unsupportedFlag780 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_classpath_in_unsupportedFlag784 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_45_in_unsupportedFlag792 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_classpath_in_unsupportedFlag796 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_31_in_unsupportedFlag804 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_57_in_unsupportedFlag813 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_NAME_in_unsupportedFlag815 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_47_in_unsupportedFlag825 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_54_in_unsupportedFlag834 = new BitSet(new long[]{0x0000000000000022L});
-	public static final BitSet FOLLOW_NAME_in_unsupportedFlag836 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_29_in_unsupportedFlag848 = new BitSet(new long[]{0x0000000000000022L});
-	public static final BitSet FOLLOW_NAME_in_unsupportedFlag850 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_55_in_unsupportedFlag861 = new BitSet(new long[]{0x0000000000000022L});
-	public static final BitSet FOLLOW_NAME_in_unsupportedFlag865 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_56_in_unsupportedFlag875 = new BitSet(new long[]{0x0000000000000022L});
-	public static final BitSet FOLLOW_NAME_in_unsupportedFlag879 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_41_in_unsupportedFlag891 = new BitSet(new long[]{0x0000000000000060L});
-	public static final BitSet FOLLOW_filter_in_unsupportedFlag895 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_NAME_in_classpath917 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000006L});
-	public static final BitSet FOLLOW_set_in_classpath920 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_classpath_in_classpath926 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_nonEmptyFilter_in_filter947 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_NEGATOR_in_nonEmptyFilter981 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_NAME_in_nonEmptyFilter987 = new BitSet(new long[]{0x0000000000000802L});
-	public static final BitSet FOLLOW_11_in_nonEmptyFilter992 = new BitSet(new long[]{0x0000000000000060L});
-	public static final BitSet FOLLOW_nonEmptyFilter_in_nonEmptyFilter994 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_annotation_in_classSpecification1024 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
-	public static final BitSet FOLLOW_classModifierAndType_in_classSpecification1032 = new BitSet(new long[]{0x0000000000000060L});
-	public static final BitSet FOLLOW_classNames_in_classSpecification1037 = new BitSet(new long[]{0x0000000000000002L,0x0000000080050000L});
-	public static final BitSet FOLLOW_inheritance_in_classSpecification1046 = new BitSet(new long[]{0x0000000000000002L,0x0000000080000000L});
-	public static final BitSet FOLLOW_members_in_classSpecification1054 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_className_in_classNames1083 = new BitSet(new long[]{0x0000000000000802L});
-	public static final BitSet FOLLOW_11_in_classNames1090 = new BitSet(new long[]{0x0000000000000060L});
-	public static final BitSet FOLLOW_className_in_classNames1094 = new BitSet(new long[]{0x0000000000000802L});
-	public static final BitSet FOLLOW_NEGATOR_in_className1123 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_NAME_in_className1131 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_NEGATOR_in_classModifierAndType1158 = new BitSet(new long[]{0x0000000000000000L,0x00000000008AC240L});
-	public static final BitSet FOLLOW_87_in_classModifierAndType1170 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
-	public static final BitSet FOLLOW_classModifierAndType_in_classModifierAndType1176 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_73_in_classModifierAndType1185 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
-	public static final BitSet FOLLOW_classModifierAndType_in_classModifierAndType1191 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_81_in_classModifierAndType1200 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
-	public static final BitSet FOLLOW_classModifierAndType_in_classModifierAndType1206 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_classType_in_classModifierAndType1215 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_70_in_classType1248 = new BitSet(new long[]{0x0000000000000000L,0x000000000008C000L});
-	public static final BitSet FOLLOW_83_in_classType1257 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_79_in_classType1265 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_78_in_classType1273 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_95_in_members1296 = new BitSet(new long[]{0x0000000000000160L,0x000000017FF22278L});
-	public static final BitSet FOLLOW_member_in_members1302 = new BitSet(new long[]{0x0000000000000160L,0x000000017FF22278L});
-	public static final BitSet FOLLOW_96_in_members1308 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_annotation_in_member1329 = new BitSet(new long[]{0x0000000000000160L,0x000000007FF22238L});
-	public static final BitSet FOLLOW_modifiers_in_member1332 = new BitSet(new long[]{0x0000000000000120L,0x0000000000000038L});
-	public static final BitSet FOLLOW_type_in_member1349 = new BitSet(new long[]{0x0000000000000020L,0x0000000000000010L});
-	public static final BitSet FOLLOW_set_in_member1355 = new BitSet(new long[]{0x0000000000000200L,0x0000000000000004L});
-	public static final BitSet FOLLOW_arguments_in_member1364 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000004L});
-	public static final BitSet FOLLOW_69_in_member1399 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000004L});
-	public static final BitSet FOLLOW_67_in_member1411 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000004L});
-	public static final BitSet FOLLOW_66_in_member1421 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_70_in_annotation1445 = new BitSet(new long[]{0x0000000000000060L});
-	public static final BitSet FOLLOW_NEGATOR_in_annotation1448 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_NAME_in_annotation1454 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_modifier_in_modifiers1478 = new BitSet(new long[]{0x0000000000000042L,0x000000007FF22200L});
-	public static final BitSet FOLLOW_NEGATOR_in_modifier1504 = new BitSet(new long[]{0x0000000000000000L,0x000000007FF22200L});
-	public static final BitSet FOLLOW_87_in_modifier1518 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_85_in_modifier1528 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_86_in_modifier1538 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_88_in_modifier1548 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_90_in_modifier1558 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_94_in_modifier1568 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_84_in_modifier1578 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_73_in_modifier1588 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_89_in_modifier1598 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_81_in_modifier1608 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_92_in_modifier1618 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_91_in_modifier1628 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_77_in_modifier1638 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_93_in_modifier1648 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_set_in_inheritance1679 = new BitSet(new long[]{0x0000000000000060L,0x0000000000000040L});
-	public static final BitSet FOLLOW_annotation_in_inheritance1689 = new BitSet(new long[]{0x0000000000000060L});
-	public static final BitSet FOLLOW_NEGATOR_in_inheritance1693 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_NAME_in_inheritance1699 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_9_in_arguments1719 = new BitSet(new long[]{0x0000000000000520L});
-	public static final BitSet FOLLOW_type_in_arguments1747 = new BitSet(new long[]{0x0000000000000C00L});
-	public static final BitSet FOLLOW_11_in_arguments1760 = new BitSet(new long[]{0x0000000000000120L});
-	public static final BitSet FOLLOW_type_in_arguments1764 = new BitSet(new long[]{0x0000000000000C00L});
-	public static final BitSet FOLLOW_10_in_arguments1793 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_set_in_type1829 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000080L});
-	public static final BitSet FOLLOW_71_in_type1838 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000080L});
-	public static final BitSet FOLLOW_11_in_keepOptionModifier1873 = new BitSet(new long[]{0x0000000000000000L,0x0000000000001C00L});
-	public static final BitSet FOLLOW_76_in_keepOptionModifier1878 = new BitSet(new long[]{0x0000000000000802L});
-	public static final BitSet FOLLOW_75_in_keepOptionModifier1886 = new BitSet(new long[]{0x0000000000000802L});
-	public static final BitSet FOLLOW_74_in_keepOptionModifier1893 = new BitSet(new long[]{0x0000000000000802L});
+	public static final BitSet FOLLOW_24_in_prog278 = new BitSet(new long[]{0xFFFFFFFFFFFFF000L,0x0000000000000041L});
+	public static final BitSet FOLLOW_22_in_prog291 = new BitSet(new long[]{0xFFFFFFFFFFFFF000L,0x0000000000000041L});
+	public static final BitSet FOLLOW_21_in_prog304 = new BitSet(new long[]{0xFFFFFFFFFFFFF000L,0x0000000000000041L});
+	public static final BitSet FOLLOW_EOF_in_prog316 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_63_in_noOpFlag345 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_20_in_noOpFlag354 = new BitSet(new long[]{0x0000000000000060L});
+	public static final BitSet FOLLOW_filter_in_noOpFlag358 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_27_in_noOpFlag373 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_25_in_noOpFlag381 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_26_in_noOpFlag389 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_60_in_noOpFlag397 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_44_in_noOpFlag410 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_42_in_noOpFlag419 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
+	public static final BitSet FOLLOW_classSpecification_in_noOpFlag423 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_39_in_noOpFlag434 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
+	public static final BitSet FOLLOW_classSpecification_in_noOpFlag438 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_37_in_noOpFlag450 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
+	public static final BitSet FOLLOW_classSpecification_in_noOpFlag454 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_36_in_noOpFlag466 = new BitSet(new long[]{0x0000000000000060L});
+	public static final BitSet FOLLOW_filter_in_noOpFlag470 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_43_in_noOpFlag482 = new BitSet(new long[]{0x0000000000000060L});
+	public static final BitSet FOLLOW_filter_in_noOpFlag486 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_23_in_noOpFlag498 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_50_in_ignoredFlag527 = new BitSet(new long[]{0x0000000000000060L});
+	public static final BitSet FOLLOW_filter_in_ignoredFlag531 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_62_in_ignoredFlag541 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_15_in_ignoredFlag549 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_49_in_ignoredFlag558 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_NAME_in_ignoredFlag560 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_17_in_ignoredFlag571 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
+	public static final BitSet FOLLOW_classSpecification_in_ignoredFlag573 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_46_in_ignoredFlag582 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_52_in_ignoredFlag590 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_58_in_ignoredFlag599 = new BitSet(new long[]{0x0000000000000022L});
+	public static final BitSet FOLLOW_NAME_in_ignoredFlag603 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_12_in_ignoredFlag614 = new BitSet(new long[]{0x0000000000000060L});
+	public static final BitSet FOLLOW_filter_in_ignoredFlag618 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_16_in_ignoredFlag629 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_NAME_in_ignoredFlag633 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_48_in_ignoredFlag643 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_NAME_in_ignoredFlag647 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_19_in_ignoredFlag655 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_NAME_in_ignoredFlag659 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_53_in_ignoredFlag667 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_NAME_in_ignoredFlag671 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_59_in_ignoredFlag680 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000100L});
+	public static final BitSet FOLLOW_72_in_ignoredFlag683 = new BitSet(new long[]{0x0000000000000020L,0x0000000000000100L});
+	public static final BitSet FOLLOW_NAME_in_ignoredFlag687 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000100L});
+	public static final BitSet FOLLOW_72_in_ignoredFlag690 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_30_in_ignoredFlag703 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000100L});
+	public static final BitSet FOLLOW_72_in_ignoredFlag706 = new BitSet(new long[]{0x0000000000000020L,0x0000000000000100L});
+	public static final BitSet FOLLOW_NAME_in_ignoredFlag710 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000100L});
+	public static final BitSet FOLLOW_72_in_ignoredFlag713 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_14_in_ignoredFlag726 = new BitSet(new long[]{0x0000000000000060L});
+	public static final BitSet FOLLOW_filter_in_ignoredFlag730 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_13_in_ignoredFlag742 = new BitSet(new long[]{0x0000000000000060L});
+	public static final BitSet FOLLOW_filter_in_ignoredFlag746 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_34_in_unsupportedFlag772 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_classpath_in_unsupportedFlag776 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_51_in_unsupportedFlag784 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_classpath_in_unsupportedFlag788 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_45_in_unsupportedFlag796 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_classpath_in_unsupportedFlag800 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_31_in_unsupportedFlag808 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_57_in_unsupportedFlag817 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_NAME_in_unsupportedFlag819 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_47_in_unsupportedFlag829 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_54_in_unsupportedFlag838 = new BitSet(new long[]{0x0000000000000022L});
+	public static final BitSet FOLLOW_NAME_in_unsupportedFlag840 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_29_in_unsupportedFlag852 = new BitSet(new long[]{0x0000000000000022L});
+	public static final BitSet FOLLOW_NAME_in_unsupportedFlag854 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_55_in_unsupportedFlag865 = new BitSet(new long[]{0x0000000000000022L});
+	public static final BitSet FOLLOW_NAME_in_unsupportedFlag869 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_56_in_unsupportedFlag879 = new BitSet(new long[]{0x0000000000000022L});
+	public static final BitSet FOLLOW_NAME_in_unsupportedFlag883 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_41_in_unsupportedFlag895 = new BitSet(new long[]{0x0000000000000060L});
+	public static final BitSet FOLLOW_filter_in_unsupportedFlag899 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_NAME_in_classpath921 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000006L});
+	public static final BitSet FOLLOW_set_in_classpath924 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_classpath_in_classpath930 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_nonEmptyFilter_in_filter951 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_NEGATOR_in_nonEmptyFilter985 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_NAME_in_nonEmptyFilter991 = new BitSet(new long[]{0x0000000000000802L});
+	public static final BitSet FOLLOW_11_in_nonEmptyFilter996 = new BitSet(new long[]{0x0000000000000060L});
+	public static final BitSet FOLLOW_nonEmptyFilter_in_nonEmptyFilter998 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_annotation_in_classSpecification1028 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
+	public static final BitSet FOLLOW_classModifierAndType_in_classSpecification1036 = new BitSet(new long[]{0x0000000000000060L});
+	public static final BitSet FOLLOW_classNames_in_classSpecification1041 = new BitSet(new long[]{0x0000000000000002L,0x0000000080050000L});
+	public static final BitSet FOLLOW_inheritance_in_classSpecification1050 = new BitSet(new long[]{0x0000000000000002L,0x0000000080000000L});
+	public static final BitSet FOLLOW_members_in_classSpecification1058 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_className_in_classNames1087 = new BitSet(new long[]{0x0000000000000802L});
+	public static final BitSet FOLLOW_11_in_classNames1094 = new BitSet(new long[]{0x0000000000000060L});
+	public static final BitSet FOLLOW_className_in_classNames1098 = new BitSet(new long[]{0x0000000000000802L});
+	public static final BitSet FOLLOW_NEGATOR_in_className1127 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_NAME_in_className1135 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_NEGATOR_in_classModifierAndType1162 = new BitSet(new long[]{0x0000000000000000L,0x00000000008AC240L});
+	public static final BitSet FOLLOW_87_in_classModifierAndType1174 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
+	public static final BitSet FOLLOW_classModifierAndType_in_classModifierAndType1180 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_73_in_classModifierAndType1189 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
+	public static final BitSet FOLLOW_classModifierAndType_in_classModifierAndType1195 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_81_in_classModifierAndType1204 = new BitSet(new long[]{0x0000000000000040L,0x00000000008AC240L});
+	public static final BitSet FOLLOW_classModifierAndType_in_classModifierAndType1210 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_classType_in_classModifierAndType1219 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_70_in_classType1252 = new BitSet(new long[]{0x0000000000000000L,0x000000000008C000L});
+	public static final BitSet FOLLOW_83_in_classType1261 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_79_in_classType1269 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_78_in_classType1277 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_95_in_members1300 = new BitSet(new long[]{0x0000000000000160L,0x000000017FF22278L});
+	public static final BitSet FOLLOW_member_in_members1306 = new BitSet(new long[]{0x0000000000000160L,0x000000017FF22278L});
+	public static final BitSet FOLLOW_96_in_members1312 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_annotation_in_member1333 = new BitSet(new long[]{0x0000000000000160L,0x000000007FF22238L});
+	public static final BitSet FOLLOW_modifiers_in_member1336 = new BitSet(new long[]{0x0000000000000120L,0x0000000000000038L});
+	public static final BitSet FOLLOW_type_in_member1353 = new BitSet(new long[]{0x0000000000000020L,0x0000000000000010L});
+	public static final BitSet FOLLOW_set_in_member1359 = new BitSet(new long[]{0x0000000000000200L,0x0000000000000004L});
+	public static final BitSet FOLLOW_arguments_in_member1368 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000004L});
+	public static final BitSet FOLLOW_69_in_member1403 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000004L});
+	public static final BitSet FOLLOW_67_in_member1415 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000004L});
+	public static final BitSet FOLLOW_66_in_member1425 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_70_in_annotation1449 = new BitSet(new long[]{0x0000000000000060L});
+	public static final BitSet FOLLOW_NEGATOR_in_annotation1452 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_NAME_in_annotation1458 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_modifier_in_modifiers1482 = new BitSet(new long[]{0x0000000000000042L,0x000000007FF22200L});
+	public static final BitSet FOLLOW_NEGATOR_in_modifier1508 = new BitSet(new long[]{0x0000000000000000L,0x000000007FF22200L});
+	public static final BitSet FOLLOW_87_in_modifier1522 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_85_in_modifier1532 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_86_in_modifier1542 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_88_in_modifier1552 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_90_in_modifier1562 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_94_in_modifier1572 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_84_in_modifier1582 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_73_in_modifier1592 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_89_in_modifier1602 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_81_in_modifier1612 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_92_in_modifier1622 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_91_in_modifier1632 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_77_in_modifier1642 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_93_in_modifier1652 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_set_in_inheritance1683 = new BitSet(new long[]{0x0000000000000060L,0x0000000000000040L});
+	public static final BitSet FOLLOW_annotation_in_inheritance1693 = new BitSet(new long[]{0x0000000000000060L});
+	public static final BitSet FOLLOW_NEGATOR_in_inheritance1697 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_NAME_in_inheritance1703 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_9_in_arguments1723 = new BitSet(new long[]{0x0000000000000520L});
+	public static final BitSet FOLLOW_type_in_arguments1751 = new BitSet(new long[]{0x0000000000000C00L});
+	public static final BitSet FOLLOW_11_in_arguments1764 = new BitSet(new long[]{0x0000000000000120L});
+	public static final BitSet FOLLOW_type_in_arguments1768 = new BitSet(new long[]{0x0000000000000C00L});
+	public static final BitSet FOLLOW_10_in_arguments1797 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_set_in_type1833 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000080L});
+	public static final BitSet FOLLOW_71_in_type1842 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000080L});
+	public static final BitSet FOLLOW_11_in_keepOptionModifier1877 = new BitSet(new long[]{0x0000000000000000L,0x0000000000001C00L});
+	public static final BitSet FOLLOW_76_in_keepOptionModifier1882 = new BitSet(new long[]{0x0000000000000802L});
+	public static final BitSet FOLLOW_75_in_keepOptionModifier1890 = new BitSet(new long[]{0x0000000000000802L});
+	public static final BitSet FOLLOW_74_in_keepOptionModifier1897 = new BitSet(new long[]{0x0000000000000802L});
 }
