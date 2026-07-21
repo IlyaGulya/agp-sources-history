@@ -1,2 +1,345 @@
 Manifest-Version: 1.0
 
+Name: com/android/repository/impl/generated/v1/ObjectFactory.java
+SHA-256-Digest: UxHrZzcK0R50TUImTdinAmIYdVEqsYm8yZZCNMPZG6E=
+
+Name: com/android/repository/impl/manager/RemoteRepoLoader.java
+SHA-256-Digest: crU+RVF/i466m2MZnu3T3yx8RskcKYno4Ib3fVFjiQc=
+
+Name: com/android/repository/api/repo-sites-common-1.xsd
+SHA-256-Digest: LPVmwgZxnz8BymrTcU4vXtiqJZiffxR+TlmlXKuO4us=
+
+Name: com/android/repository/api/Uninstaller.java
+SHA-256-Digest: itqmOoZ7X/jiney1Pg3Q7gklc1pHmrbzJfs09hEqlmI=
+
+Name: com/android/repository/impl/generated/v1/RepositoryType.java
+SHA-256-Digest: SwEIhTuCqtx6CkPMb5uK6hD/Nvk6+PnFDj1ygl7g1qw=
+
+Name: com/android/repository/testframework/FakeDependency.java
+SHA-256-Digest: ChNpVVYV6tA7Pk3lIirx/9KqiQixsGIZjUrA1tRl2Sk=
+
+Name: com/android/repository/impl/generated/v1/ArchiveType.java
+SHA-256-Digest: HDEd4tv5EIxw327umgBaPlnLI4HeCHeS0x8pL89+vmI=
+
+Name: com/android/repository/api/PackageOperation.java
+SHA-256-Digest: J4UfjDKvNQdq8PFlRGs2EX6bOoJO8mAPwED4jsLdryU=
+
+Name: com/android/repository/impl/meta/Archive.java
+SHA-256-Digest: iWmK+CDPCIb4zHqPp7RM+LS4xBb9LM7yf8EM5VShdio=
+
+Name: com/android/repository/impl/generated/v1/PatchesType.java
+SHA-256-Digest: NqLETOyY0ZY4ZBaUtuqskX/3eIo9ieHrk9dyoLTV1w0=
+
+Name: com/android/repository/api/RemoteListSourceProvider.java
+SHA-256-Digest: kog3fIPDAPog3PCzaKTMDI3MxrhVjakjPiR+pSL1rUE=
+
+Name: com/android/repository/api/ConstantSourceProvider.java
+SHA-256-Digest: tgr08KUtcJg/fCBrnKJRmIFBimuWMKOIIolSwrekhPw=
+
+Name: com/android/repository/api/catalog.xml
+SHA-256-Digest: e+YD3MJFaPVty8GMTjPe49cCWRZi67p51HywO6uasUc=
+
+Name: com/android/repository/impl/installer/AbstractInstallerFactory.j
+ ava
+SHA-256-Digest: jtCW7cNLZcSBLb37yXPNDfPHtwpSDa2TFT6lx3LlIt4=
+
+Name: com/android/repository/api/generic.xjb
+SHA-256-Digest: P9+wcOI2e/egn2UdiYLVqQzTuBJH4rrXfVSW44KOUJs=
+
+Name: com/android/repository/testframework/FakeRepoManager.java
+SHA-256-Digest: lMeLSDBHCi+jhlCRpHPXnaOZXrvXfqWxt1xn04G36RA=
+
+Name: com/android/repository/impl/generated/v1/ArchivesType.java
+SHA-256-Digest: PfQx+jxE96fqKsyFyrH0FFFBjT90X5Z0y4vN0qWI6sI=
+
+Name: com/android/repository/impl/sources/generated/v1/SiteType.java
+SHA-256-Digest: daO9pOZxijgJc9ahkSUcMCtBXxRlKr5Z/S3s6EjA7xE=
+
+Name: com/android/repository/impl/manager/LocalRepoLoaderImpl.java
+SHA-256-Digest: 9ktewL4lFyhVpyGRMfwmgkzWh7HU5oEAkAdfZ56xkq0=
+
+Name: com/android/repository/impl/generated/generic/v1/ObjectFactory.j
+ ava
+SHA-256-Digest: mEhOZ3EAFOn+3h8J6EWwUycjTOBEKgHIbRGdEwr2JzA=
+
+Name: com/android/repository/impl/meta/GenericFactory.java
+SHA-256-Digest: 7Xrrr+MCWnZ1SVezQf2Q8KO3SgWluM8W5xzyffqCi08=
+
+Name: com/android/repository/impl/meta/common-custom.xjb
+SHA-256-Digest: 0AS0NzT3UiOFTv7bPWyGeZ65BaPv4xKuIQWei10W0oI=
+
+Name: com/android/repository/api/RepositorySourceProvider.java
+SHA-256-Digest: gdBO/FUxAIthZ7aCfJZNy2IZs/aapVJNSDJAoZdftxY=
+
+Name: com/android/repository/impl/generated/generic/v1/GenericDetailsT
+ ype.java
+SHA-256-Digest: JYrFsDthK4DXgSh0KvLb1xmFsVBM1zyUKAuyHl+rdyQ=
+
+Name: com/android/repository/api/ProgressIndicator.java
+SHA-256-Digest: q9T7jbka6BfrHsUWDMAAJEd160Cs+h6Wqd0t5GvMgI8=
+
+Name: com/android/repository/impl/meta/TrimStringAdapter.java
+SHA-256-Digest: X8RoTYr91+aPV6389x2Q72mB14yPCmTTZqZtBRXvxdE=
+
+Name: com/android/repository/impl/installer/AbstractPackageOperation.j
+ ava
+SHA-256-Digest: XkbzEhwoXfnj8/UgoXeBma3hOCAVpkPD1ucj9sDc9rg=
+
+Name: com/android/repository/impl/meta/generic-custom.xjb
+SHA-256-Digest: myaYa8Nm5GtFf8+acQaFCa+Up6nzqLGB4cMT87A/wC4=
+
+Name: com/android/repository/impl/generated/v1/ChannelRefType.java
+SHA-256-Digest: 7L7vPT8ABQ5jfNIZSLNZvCwEwdvU2UyfKiZ8YojSQlY=
+
+Name: com/android/repository/api/Dependency.java
+SHA-256-Digest: 1x2eqDWH3hHlmFAVlLtQ/kjKZ8aTgJCA/waViClQn0A=
+
+Name: com/android/repository/impl/installer/BasicInstallerFactory.java
+SHA-256-Digest: muo1kA2bRiEaaT5uJrY+1OHZ2V+uLEqY/BLcpZsmDIE=
+
+Name: com/android/repository/io/FileOpUtils.java
+SHA-256-Digest: 5Ei+Bz0Ddey+sFM9e1RumQZbe+9rYf3O24pF4kj+z0g=
+
+Name: com/android/repository/impl/meta/CommonFactory.java
+SHA-256-Digest: 0AB7DRwupi87raGQHuQ5hLYz+ZCQV8sUG8NslYvLsVk=
+
+Name: com/android/repository/impl/meta/RepositoryPackages.java
+SHA-256-Digest: EqMhyTotDH7HV1frHnbxSVnzjkJ//cdVX21dmh0Nj7s=
+
+Name: com/android/repository/api/Installer.java
+SHA-256-Digest: sJUwfLGVp/pQywfrysUKBVHn/7wJQeCHysasRO0Fo7I=
+
+Name: com/android/repository/impl/installer/AbstractInstaller.java
+SHA-256-Digest: 6R0ycqqJivO/6Nb+aFAMIKnMPWpay6ma5VXoMBsm5iM=
+
+Name: com/android/repository/impl/sources/RemoteListSourceProviderImpl
+ .java
+SHA-256-Digest: 49jrHy3JWR3Xz/eD7j+OygRQ0xeH/BPsRrx3ZQN8lPE=
+
+Name: com/android/repository/api/common.xjb
+SHA-256-Digest: HrI+HjLUP19kp5moD+fRffi06jZfCWkB5BfHwF3QMX0=
+
+Name: com/android/repository/testframework/FakeSettingsController.java
+SHA-256-Digest: ePCyVKRnzfQWs+XBl3fDtIKK1RmwMnkj+cb7DQo/1FY=
+
+Name: com/android/repository/api/global.xjb
+SHA-256-Digest: FURQ+HUJH1XSemxqzB6OjFJF1n1EaqEJ4YmGowITm/I=
+
+Name: com/android/repository/api/RemotePackage.java
+SHA-256-Digest: 8mVrh/HfkkTCryLFXvNxWej+b96wlkNWHy8MvTUDHgA=
+
+Name: com/android/repository/impl/generated/v1/TypeDetails.java
+SHA-256-Digest: COX8HgSqkM6IwS4vo6fP2av3H2pRx2IxcsHurYEdAvc=
+
+Name: com/android/repository/api/generic-01.xsd
+SHA-256-Digest: Ec+AXEIPls4hd4HPyfVK3LWUq6qR5rx1fEn1rZH/XWE=
+
+Name: com/android/repository/api/License.java
+SHA-256-Digest: +QWzdBUtBke660S0GZLYN3ycwt6x+vOZEKO+VaeLgg0=
+
+Name: com/android/repository/api/SettingsController.java
+SHA-256-Digest: pGPLjxwhkCpEqLKpn2+8E700jNwzLaBs5TmVAQU6ZfU=
+
+Name: com/android/repository/impl/generated/v1/DependencyType.java
+SHA-256-Digest: DtJaltkmtnRMdpRRe+Vyu99hAlM2uYjTTbakdna7sZk=
+
+Name: com/android/repository/impl/installer/BasicInstaller.java
+SHA-256-Digest: 6UI1snj6xBkzh2WgDVHpRx81yg+al+MFNHAqn579PkU=
+
+Name: com/android/repository/api/FallbackLocalRepoLoader.java
+SHA-256-Digest: 6/Gy1BeZeGsYl4EBsmfoJTbSKl0fIS43H6es7aDFkTs=
+
+Name: com/android/repository/impl/installer/BasicUninstaller.java
+SHA-256-Digest: NNiI21RbK4B3RkVZGVHbeMnU636Lc9w1HSzmQU9sK4E=
+
+Name: com/android/repository/testframework/FakeProgressIndicator.java
+SHA-256-Digest: FNwbn2vMgpNXz/TRdxfczWTc8onhoYc1i3ym9IBC4LA=
+
+Name: com/android/repository/testframework/FakeDownloader.java
+SHA-256-Digest: tcZz5x87G9BDQEW0vxUGEh8OWVJh0JWOlnYn03n27AY=
+
+Name: com/android/repository/api/RepositorySource.java
+SHA-256-Digest: stBJBvqYGQJhyfZFn1Y2SC23f91UttyfODUURBEcIsc=
+
+Name: com/android/repository/impl/sources/LocalSourceProvider.java
+SHA-256-Digest: fOK7pETL3RozX2G399KlPNm0a1pvipJjOqKW3zwV1uk=
+
+Name: com/android/repository/io/impl/FileOpImpl.java
+SHA-256-Digest: GsSPr2ZelwA7woFNgH+1W33orwT/YduEYkrPZAd6FjI=
+
+Name: com/android/repository/impl/generated/v1/CompleteType.java
+SHA-256-Digest: VGPcDlQ8Vz4PCNY3VV7fcJak09YKIS0P3fWs1UMcTPM=
+
+Name: com/android/repository/impl/meta/RemotePackageImpl.java
+SHA-256-Digest: kHAGbZguwVxkjwQJuXq6Rdh0odRgr9t58oyWmPpZfAU=
+
+Name: com/android/repository/impl/generated/v1/PatchType.java
+SHA-256-Digest: BPRTAtEkCVpjPOK9r5O3xfueFPuVcCxLjQNJMSGXTNc=
+
+Name: com/android/repository/impl/manager/RemoteRepoLoaderImpl.java
+SHA-256-Digest: OVDQcbodIqwn4GR/QtVs/fv7rkUnpi0flkFP9VcC4aA=
+
+Name: com/android/repository/util/InstallerUtil.java
+SHA-256-Digest: DCPcOo0Q0BgdvtvalayO8hZAIydB6if4ZOEC6fJAq5w=
+
+Name: com/android/repository/testframework/MockFileOp.java
+SHA-256-Digest: 62nDnLQTxxSCHd1N5JpKEQJYerj7ARb5uyIsyrE2KCA=
+
+Name: com/android/repository/api/ProgressIndicatorAdapter.java
+SHA-256-Digest: h8vFsKa6PFunWP2wDE4kPofZV+FMBYassY0p41sAFVM=
+
+Name: com/android/repository/testframework/FakeInstallListenerFactory.
+ java
+SHA-256-Digest: gpz0qvYWk/A6eEpuTKm2dm01PQ6VMiiad7FZwRFvMP0=
+
+Name: com/android/repository/io/FileOp.java
+SHA-256-Digest: qrzb2exPzV/UM9yPhLHUTXTvXbsIeciJ6GqDCJqUfpE=
+
+Name: com/android/repository/api/Repository.java
+SHA-256-Digest: pzNY1IUEytDHl3WPwQSVCKl5CikYxT3eCMmPEbUuZcI=
+
+Name: com/android/repository/impl/meta/package-info.java
+SHA-256-Digest: 78BRKyvieVbOZBFSCNYhhoJer0JJT1uGJUV/s8obF+s=
+
+Name: com/android/repository/impl/generated/v1/RemotePackage.java
+SHA-256-Digest: 2SI00X/cbqKL+T3QvAL1NfJVlRGbf2OgH7BQx0k4vNc=
+
+Name: com/android/repository/io/impl/FileSystemFileOp.java
+SHA-256-Digest: J5Y5jVGPkdn+3D6fo1vv09sE2QasA5TyW7i3cjJoxzc=
+
+Name: com/android/repository/api/SimpleRepositorySource.java
+SHA-256-Digest: LbqTwzx487HTtPlIw8rYoLGLtpmOpuIfIS+g/7Nb7/8=
+
+Name: com/android/repository/impl/generated/generic/v1/package-info.ja
+ va
+SHA-256-Digest: sTka9cWwZXTo0rqRxivUKmw0Ldk4fK4LnB5llW+KtdE=
+
+Name: com/android/repository/impl/manager/LocalRepoLoader.java
+SHA-256-Digest: AUdFQqk1hJMggKyjHGf9XakL0PLE8RYbgLZMLGduPaY=
+
+Name: com/android/repository/impl/installer/AbstractUninstaller.java
+SHA-256-Digest: 9kkW8+PWNUAPVehAQMkqXvrRANG8jl1wMK4KwR3fSyc=
+
+Name: com/android/repository/impl/sources/generated/v1/GenericSiteType
+ .java
+SHA-256-Digest: fJNlf7VNM2iBvLBmDZbOCdYy7kBXDJIWBROZeRQes+o=
+
+Name: com/android/repository/api/RemoteSource.java
+SHA-256-Digest: WNpFkahc4qgKdWT5nNTt5ZdrthgFxOu0QL6IhGZvZeM=
+
+Name: com/android/repository/testframework/FakePackage.java
+SHA-256-Digest: V+i4L56zf4Py4gLbJvlcmwCb7jvKAVL1+c8VRAcASAY=
+
+Name: com/android/repository/impl/sources/generated/v1/ObjectFactory.j
+ ava
+SHA-256-Digest: eqjVz1UwmeHhTK9RZENvKc5Yy79cic9vXBkGSDyr9xY=
+
+Name: com/android/repository/testframework/FakeRepositorySourceProvide
+ r.java
+SHA-256-Digest: /9pbtnwRdLeztiRy2V7MF1QewPRu9KVvrAa8VrVGyOc=
+
+Name: com/android/repository/impl/meta/RepoPackageImpl.java
+SHA-256-Digest: vLH0uAXgrYgsLjhNJWSBwu0WaW7v6/UCK0ihXGp6o8o=
+
+Name: com/android/repository/api/UpdatablePackage.java
+SHA-256-Digest: zL1mHE/XSBFMA9ggr4xmUYJSsWhndsPeeXoFep+isL0=
+
+Name: com/android/repository/impl/meta/SchemaModuleUtil.java
+SHA-256-Digest: EWhslhJrf8kwR2ymDxPtPk0B1Y9i0dZnIjnY4Lbncds=
+
+Name: com/android/repository/api/Downloader.java
+SHA-256-Digest: lnzOvPB/30AYRf5kbyod8IZEhnqrrv1dhrBvowOry2o=
+
+Name: com/android/repository/api/LocalPackage.java
+SHA-256-Digest: r05XG836nSeYTzGrW0ajNflTwHG6QeiW5AoQprhfLaY=
+
+Name: com/android/repository/api/repo-common-01.xsd
+SHA-256-Digest: AJvmzgBlSebwkceMWsuRawsievgBTsZdQjQj+UDdels=
+
+Name: com/android/repository/Revision.java
+SHA-256-Digest: yROvTumPgu5R+pBzzg2jON+1AUwfHdvu2YtSaKfqhRE=
+
+Name: com/android/repository/impl/sources/generated/v1/SiteListType.ja
+ va
+SHA-256-Digest: 5IjYzxRdV1Mf8vBzIkPQNW5CZN1v1MfvXnMRI/5O9wg=
+
+Name: com/android/repository/impl/generated/v1/LicenseRefType.java
+SHA-256-Digest: n5fw/gdv7VAktFpuOkDzsuyPY/ATqa3zFJDknFmiEjM=
+
+Name: com/android/repository/api/list-common.xjb
+SHA-256-Digest: mj8w19/LTQVssDp1v5ktscI6gAwHqb9eQBD74FJPTDg=
+
+Name: com/android/repository/impl/generated/v1/RevisionType.java
+SHA-256-Digest: QEAJhr/d8/FJYbZiw0WDAA+7uzcMyP1jTvp8XbyljZU=
+
+Name: com/android/repository/impl/sources/generated/v1/package-info.ja
+ va
+SHA-256-Digest: 20hJ6UW0WEbRHT3vfjTt2tI/kxlqBvpQ2Ctfs33SgUk=
+
+Name: com/android/repository/impl/manager/RepoManagerImpl.java
+SHA-256-Digest: G0BaysGLXY/Pvc9A/Cq3mljdfpa/lECQx3+jy5P2GUw=
+
+Name: com/android/repository/impl/generated/v1/ChannelType.java
+SHA-256-Digest: XRFsbrZMhoQmuJit6hmhb4H78ALQ856hWN/7PK7MJKU=
+
+Name: com/android/repository/impl/meta/RevisionType.java
+SHA-256-Digest: 6KejSbphLjhpaaC4IxgoSEec8K1O/k82ZCpEQlvqc6A=
+
+Name: com/android/repository/api/SchemaModule.java
+SHA-256-Digest: ce+ilGWr1kK2p4bI96nkU99wVIllpuNZqr4AwRwpEfE=
+
+Name: com/android/repository/impl/sources/repo-sites-common-custom.xjb
+SHA-256-Digest: ns89N2F5f50KroR8X7Xy42KXGvFjhGBLgNmTIUS5bUg=
+
+Name: com/android/repository/testframework/FakeProgressRunner.java
+SHA-256-Digest: sLsCeEguwMhX6vm37v1x3I29gSiUp5DEGEa9LyRjOGo=
+
+Name: com/android/repository/api/RepoPackage.java
+SHA-256-Digest: Kb4oYyN+KDXI9hL6POTbUnp5s8i2BN4Y+n0Aet2I5qQ=
+
+Name: com/android/repository/impl/meta/LocalPackageImpl.java
+SHA-256-Digest: IAseDHL3609XilLMjhthZEUgaMN9orZaVFQnP8+VE2w=
+
+Name: com/android/repository/impl/generated/v1/LocalPackage.java
+SHA-256-Digest: tA73JtewULp8786EB8rniA5WfAFKh1FCdoNkVx8fA6o=
+
+Name: com/android/repository/api/DelegatingProgressIndicator.java
+SHA-256-Digest: z9tgo+OHoK6vyk4ho6d4rwPzi60T+se2z8CNO7CqqHw=
+
+Name: com/android/repository/testframework/FakeLoader.java
+SHA-256-Digest: cbNPmm6qPugwu4TKTcEwCYAej11+aBKEsRjXTHyg7wQ=
+
+Name: com/android/repository/impl/downloader/LocalFileAwareDownloader.
+ java
+SHA-256-Digest: KKx39kH33VjI4zVemnaXe09LdkngokQE2e6NE2PgqSc=
+
+Name: com/android/repository/api/InstallerFactory.java
+SHA-256-Digest: 4fmAuPM7Wj2f65iI/ekYqb5P92MlEEcjAo8cGXHGruU=
+
+Name: com/android/repository/impl/generated/v1/package-info.java
+SHA-256-Digest: 263YVQj9H7ckKas5EIk1us79WT7IBwVnCo8v+2tILbs=
+
+Name: com/android/repository/impl/generated/v1/DependenciesType.java
+SHA-256-Digest: 9CycrEnqdjPGqcD2wrnEUxhEn7XA9DXiYlKkZpJY5yY=
+
+Name: com/android/repository/api/Channel.java
+SHA-256-Digest: Lc7Adzx5gxqkCwQ+4TUSVW3FbTo4wDgFRqyAs1pMYbw=
+
+Name: com/android/repository/api/ProgressRunner.java
+SHA-256-Digest: wYzDI/FDQcPBxcPNdalaiUeq+3KSzeo5kUHyQkjkqFQ=
+
+Name: com/android/repository/api/FallbackRemoteRepoLoader.java
+SHA-256-Digest: e0KJOmf9kLGEOpc2Pw4OmdRJCSJcvTpgyf/FNMifayM=
+
+Name: com/android/repository/api/RepoManager.java
+SHA-256-Digest: a3d9SrnDVOEPOkCiuZbk8zJuIxUV1pOMTcgj0epjSL8=
+
+Name: com/android/repository/api/ConsoleProgressIndicator.java
+SHA-256-Digest: SS/1JKA8aGtheUb+RcveQ+0QUCREB5u+OUu7TvNPmCs=
+
+Name: com/android/repository/impl/generated/v1/LicenseType.java
+SHA-256-Digest: xQ4+g2jMztUPUwF9ibffEmn7GW8AYHWrKrif+Cfy/Oo=
+
+Name: com/android/repository/impl/meta/TypeDetails.java
+SHA-256-Digest: A+enxIrCTjmA28S01tsiPM/tXG1HV+5amfkmvofcfGs=
+

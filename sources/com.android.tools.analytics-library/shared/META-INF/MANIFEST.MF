@@ -1,2 +1,23 @@
 Manifest-Version: 1.0
 
+Name: com/android/tools/analytics/HostData.java
+SHA-256-Digest: 07cU1UNU4SkcoGRaEvHPxtuSlB+0BXqz8mg8gn95I7M=
+
+Name: com/android/tools/analytics/Anonymizer.java
+SHA-256-Digest: r8FhxP7oZ8WqLZb57h2MG3uEJmL30gol3zUpA7XzpM8=
+
+Name: com/android/tools/analytics/AnalyticsPaths.java
+SHA-256-Digest: hv8okao6mr3vh1lT5Cx/beEOdeHMpsRf24fSDoHCGOU=
+
+Name: com/android/tools/analytics/CommonMetricsData.java
+SHA-256-Digest: z0eBF1XZE4ck3bFBo2OluhBNeIWvAxgG882MJfJAN0E=
+
+Name: com/android/tools/analytics/AnalyticsSettings.java
+SHA-256-Digest: bPCZzoSCrw5/Oa2VG+eK/fne8m+velw/RcquR585hVg=
+
+Name: com/android/tools/analytics/Environment.java
+SHA-256-Digest: rxQNGEEamOtNOXhioJG36MKr4ACl/pf7/59Ef9g04ag=
+
+Name: com/android/tools/analytics/EnvironmentFakes.java
+SHA-256-Digest: B2CBdPtVJiMqnkHrApFORAp9evtR0lbQo0Rsvin3vP4=
+

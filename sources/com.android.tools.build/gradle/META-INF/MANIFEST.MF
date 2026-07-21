@@ -1,2 +1,99 @@
 Manifest-Version: 1.0
 
+Name: com/android/build/gradle/internal/ApiObjectFactory.java
+SHA-256-Digest: ON91vf8Pk8kRIH5oL641jx8C14jX4JU87Tx/RIbD8rg=
+
+Name: com/android/build/gradle/AppExtension.java
+SHA-256-Digest: Jvo71u7dTwu4jRcIaxykWDDr12PWrcgRfzYFNJ3MMQQ=
+
+Name: com/android/build/gradle/internal/NonFinalPluginExpiry.java
+SHA-256-Digest: hX0DF6g4ScuzYsus8DzsyVXNbN/zv4wzi17CJoNXzuI=
+
+Name: META-INF/gradle-plugins/android-reporting.properties
+SHA-256-Digest: vg249GCrqL0AbQFp80ubSj158LmeIAAxvb8cIHUtf+c=
+
+Name: com/android/build/gradle/TestedExtension.java
+SHA-256-Digest: ZBOU5KtS8+ryuz7zROTc5JzTyWjsqDxWPJ5kKigDmb4=
+
+Name: com/android/build/gradle/internal/version.properties
+SHA-256-Digest: tFFxlGSoNRtTmA8akiDUxPxz+9HPYJhxL1GCxt2J7Ds=
+
+Name: com/android/build/gradle/FeaturePlugin.java
+SHA-256-Digest: VdVdAbkAniIEa4ksKkehpMoQWK9x7qqw7VeEtDxW9co=
+
+Name: META-INF/gradle-plugins/android.properties
+SHA-256-Digest: wQpt5b3J+SRBBhCkX3SjtAp8XOEobwbHyAgvJCBqJWM=
+
+Name: META-INF/gradle-plugins/com.android.library.properties
+SHA-256-Digest: HhMtvOjCBQ1Ixns+rQZxKDxLDJ4E6/nTP7khWOB2mSQ=
+
+Name: com/android/build/gradle/BasePlugin.java
+SHA-256-Digest: avjBSKn9hqEr2vK5CLiLzTLGjEHOrkd5uS2agD0weFE=
+
+Name: com/android/build/gradle/InstantAppPlugin.java
+SHA-256-Digest: nbG6+H+EqTCSGqwvt1gSktRNkRXJuE4zoaMYIAUkBc0=
+
+Name: META-INF/gradle-plugins/com.android.feature.properties
+SHA-256-Digest: Pkq+jZag3YdDQZb900vWydnjvW6xvuyLei0VJu5PhsI=
+
+Name: com/android/build/gradle/internal/NativeLibraryFactoryImpl.java
+SHA-256-Digest: yYJGu4TZl51ybUuc9l9MMvdHXMDK2p2eSHaZdDrHRVo=
+
+Name: com/android/build/gradle/TestPlugin.java
+SHA-256-Digest: htQdJ5REixPE9tY2mMaw6/KHXEnJhm7m+sJA01OBQmc=
+
+Name: META-INF/gradle-plugins/com.android.atom.properties
+SHA-256-Digest: Ay0paUGcdckl64VIiuLcOsvWEB3THNEXBKhW1vbjdl4=
+
+Name: com/android/build/gradle/LibraryPlugin.java
+SHA-256-Digest: JbDpZg2t31r/ynFKyZXYP2RL/rQBZDacE4qS2etu4mo=
+
+Name: com/android/build/gradle/TestExtension.java
+SHA-256-Digest: 5/tiliU1wBBBi8QjGrpLRNU8t4fH2117vF2YDXpxg3o=
+
+Name: com/android/build/gradle/internal/ClasspathVerifier.java
+SHA-256-Digest: KKPqAdEIA+xJRyXCMj3IdF8QEI9N/dizi2pO0w909ro=
+
+Name: META-INF/gradle-plugins/android-library.properties
+SHA-256-Digest: HhMtvOjCBQ1Ixns+rQZxKDxLDJ4E6/nTP7khWOB2mSQ=
+
+Name: com/android/build/gradle/internal/externalBuild/ExternalBuildPlu
+ gin.java
+SHA-256-Digest: L0YfCUJVuU07FgVWOGPUSEiUwUUP7luy3AArdL1d7Do=
+
+Name: com/android/build/gradle/AppPlugin.java
+SHA-256-Digest: uqHtuNJGgBaEGJia/X0zfufQiAiDnESbkJ1Ma3uDnfQ=
+
+Name: com/android/build/gradle/internal/Version.java
+SHA-256-Digest: LlNeZVGwAupsrSE6dwUBArhQfvRJoshXogyLcF+bAmk=
+
+Name: com/android/build/gradle/LibraryExtension.java
+SHA-256-Digest: pboZxT/SsST5plr6lMQvWE42lTUUqRolokUpBFIGK60=
+
+Name: com/android/build/gradle/BaseExtension.java
+SHA-256-Digest: PMG+wqkDN0hozRk+I5XdKxqXVI12j3d5p/+RKfeVFE4=
+
+Name: com/android/build/gradle/AtomPlugin.java
+SHA-256-Digest: nCRtV3F1p0Ra+cjbvXFypwnV8bCz8qNlp1Wnlr+HbtI=
+
+Name: META-INF/gradle-plugins/com.android.test.properties
+SHA-256-Digest: AdbhYnPwSKKfMMMQQz1EESMZZWVBc1kuMNScihzN//s=
+
+Name: com/android/build/gradle/internal/dsl/ProductFlavorFactory.java
+SHA-256-Digest: pK/qbh2XdCWfOm958o6ibXlBnda0kj1UIbSgOAWv7/U=
+
+Name: META-INF/gradle-plugins/com.android.instantapp.properties
+SHA-256-Digest: Fr9qT6IODHBnPZkYecq8JqFfXQY3tWjd3tppsm64rTQ=
+
+Name: com/android/build/gradle/InstantAppExtension.java
+SHA-256-Digest: VrswTdC7EeU6wlA/flEXH65CL5F7nV7Gwn5t5mY8KD8=
+
+Name: META-INF/gradle-plugins/com.android.external.build.properties
+SHA-256-Digest: nWat5MqlAYITRvnThspzI71JmuLJTf/0TpB+DuKPQQ8=
+
+Name: META-INF/gradle-plugins/com.android.application.properties
+SHA-256-Digest: wQpt5b3J+SRBBhCkX3SjtAp8XOEobwbHyAgvJCBqJWM=
+
+Name: com/android/build/gradle/FeatureExtension.java
+SHA-256-Digest: G6yYIiyeiSwUgNlH4VRxZGqRC3vtM5IhLY6t0NBP2kg=
+

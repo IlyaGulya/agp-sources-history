@@ -1,2 +1,176 @@
 Manifest-Version: 1.0
 
+Name: com/android/builder/model/Variant.java
+SHA-256-Digest: qoztdiuzJPw2QxOjQXECoy5P+f1gk1O3FdCkw9fu5q0=
+
+Name: com/android/builder/model/OptionalCompilationStep.java
+SHA-256-Digest: osInuRaMNsTuJojICn/8JAWu9Uwzb5qOEKEPpTGFlgA=
+
+Name: com/android/builder/model/NativeFile.java
+SHA-256-Digest: 1XZ39OEy3GrIuFv4L7Ae1kVfuGZR6vGN/VL17VICOg8=
+
+Name: com/android/builder/model/DimensionAware.java
+SHA-256-Digest: Q4MVms3Qogel94juesX7VeP0sfKVaNiFIqc12jubJQY=
+
+Name: com/android/builder/model/PackagingOptions.java
+SHA-256-Digest: TZJk6KxorQGhRfWc+Io4nDEwuydJsphCPzLaPNhFLKM=
+
+Name: com/android/builder/model/ApiVersion.java
+SHA-256-Digest: uckEMjl2euLaFIE+hcdQvwH8B85Ec2ceF+pGoKEUeDk=
+
+Name: com/android/builder/model/NativeLibrary.java
+SHA-256-Digest: ccD9xYuFocDXWUeIj3DcPGUGrrWq4DURr5h7xULWnSk=
+
+Name: com/android/builder/model/JavaCompileOptions.java
+SHA-256-Digest: dRI8z0vjg9kwmFNm3OFiyBpFBRw4I/PvR2cwkzZMsfE=
+
+Name: com/android/builder/model/JavaArtifact.java
+SHA-256-Digest: UL7ljZE+XCxBQIJ8SSxOJiHcToIkjDLFIvNftKDumdE=
+
+Name: com/android/builder/model/SourceProvider.java
+SHA-256-Digest: 4NCWPqqv4Z6gu6GRaQAhoq47BOslD2ldXyJKMaCgfbY=
+
+Name: com/android/builder/model/ProductFlavorContainer.java
+SHA-256-Digest: ZgrgWXBmibCI0ij+ZPTZZPjdaOPt2t+cIC0uj7v36dY=
+
+Name: com/android/builder/model/TestedTargetVariant.java
+SHA-256-Digest: hubfYN3RyxIp98Az2tUi+L/EWqd7DgzR8Hnl8yGEQzs=
+
+Name: com/android/build/VariantOutput.java
+SHA-256-Digest: ETAudhUjEc53PEk3QMiMbpOBWjS80c979qmvGAq1tlA=
+
+Name: com/android/builder/model/Version.java
+SHA-256-Digest: da/pmuqXyVeI+w/ruesvfrhPetv/8d8IKmAUhOM4ZCE=
+
+Name: com/android/builder/model/Library.java
+SHA-256-Digest: ohFCj2G/ck4Vj8/8vtH1AgQUQf9FvR0DEFffmkG+kHM=
+
+Name: com/android/builder/model/AndroidArtifact.java
+SHA-256-Digest: fHj9U2ek+lApn2ZM+7r1Y3Xp0lIggydf9QeLJFqJNJI=
+
+Name: com/android/builder/model/TestOptions.java
+SHA-256-Digest: 188r0g0kAFsvQUPTWcv26BuKNncaNfC29kSAGU6TGek=
+
+Name: com/android/builder/model/level2/DependencyGraphs.java
+SHA-256-Digest: kNMzcUQVA+jkh8tcIFHjsvuyJIFSMKqOmxm6YYP5ePY=
+
+Name: com/android/builder/model/VectorDrawablesOptions.java
+SHA-256-Digest: amPOKwf7Pq4ibNXvuhW6wOpo3GXH7B8wAtg70/f9cqM=
+
+Name: com/android/builder/model/ClassField.java
+SHA-256-Digest: EGvlfce3gxADW2zyuB2kHm8IYZjrnQ0g/f2RiiTz5a0=
+
+Name: com/android/builder/model/SourceProviderContainer.java
+SHA-256-Digest: gJikWOeh5Jl1orjVulAixNmaXecmK9QDtCWTHTaQN28=
+
+Name: com/android/builder/model/AndroidArtifactOutput.java
+SHA-256-Digest: a2+VmZ3mM0Eyys03lvVUD9syM06b5w2blUtBcVXga+c=
+
+Name: com/android/builder/model/NativeFolder.java
+SHA-256-Digest: XuM6qa1penBGRmWNUZYCuIQR/wpzPnHwz9wSTzMqeJk=
+
+Name: com/android/builder/model/version.properties
+SHA-256-Digest: tFFxlGSoNRtTmA8akiDUxPxz+9HPYJhxL1GCxt2J7Ds=
+
+Name: com/android/builder/model/InstantRun.java
+SHA-256-Digest: MwloycDVPwqb2TIj/ZzIwyv08nAWhayCbCXEgLIXBJo=
+
+Name: com/android/builder/model/level2/GlobalLibraryMap.java
+SHA-256-Digest: G2M9LINCXIgXNmw0QTg5xtomNgYV7U2Zt0M9LSTq9QA=
+
+Name: com/android/builder/model/NativeToolchain.java
+SHA-256-Digest: kTQwJYYsEldP8zanYRVyZNtuOSa9hssxo1Opao2HaY4=
+
+Name: com/android/builder/model/level2/GraphItem.java
+SHA-256-Digest: QtZN81EYGjXG3aGQJriq2BQhGTdAPFplVtsjbNIi5Qs=
+
+Name: com/android/builder/model/AndroidBundle.java
+SHA-256-Digest: L3N1xK/dsDw7cd0Q5//2CXuqr3yC6BnoJI9yDiGkQsw=
+
+Name: com/android/builder/model/NativeSettings.java
+SHA-256-Digest: Sn2SaeYJU7ng9ndWQJV6YWk3WZTtm6OrygemdXHdIcM=
+
+Name: com/android/builder/model/ProductFlavor.java
+SHA-256-Digest: Pi26VCWdcNTC5QllwpioMmNkeV3Wh7OD+rEN3jqlVIY=
+
+Name: com/android/builder/model/AdbOptions.java
+SHA-256-Digest: MEvV4fjES3R8edrlUo4uFduKuiFkXysUeLBbltDXKzk=
+
+Name: com/android/builder/model/BaseConfig.java
+SHA-256-Digest: 3G7iVINXMNG7uIa2HOBabncZkqqmgDHORYoReHFmbfE=
+
+Name: com/android/builder/model/JavaLibrary.java
+SHA-256-Digest: Cs+Stl2vW/xQ2yGKqAeR6O+Bnl1fK5npjBScFCCtX7I=
+
+Name: com/android/builder/model/LintOptions.java
+SHA-256-Digest: +IWmS5vaFRVJ4o9V5EjHfoulPCo/YDM1//OVLW8VTT0=
+
+Name: com/android/builder/model/AaptOptions.java
+SHA-256-Digest: ifFIvEQtBIGVZ7nfyuXKpBd+wbJyi1UG8/ClYcklP38=
+
+Name: com/android/builder/model/NativeAndroidProject.java
+SHA-256-Digest: gFo1HdOnDvin0n/ReQeHReKiLIyE8TDTg4VgfETTLa0=
+
+Name: com/android/builder/model/AndroidProject.java
+SHA-256-Digest: 03TW0M8mo0qGOdcASzE1oZJz7dVRV79QCw/DioN9aBI=
+
+Name: com/android/build/FilterData.java
+SHA-256-Digest: GcK47guapj0a1FjSBtOGBuQQRJald4i7z5nsIZM4WpU=
+
+Name: com/android/builder/model/AndroidLibrary.java
+SHA-256-Digest: mgP9WZO0JlBNUALikm+EIcPV2mUVsBbNaFrDVBlcxQg=
+
+Name: com/android/builder/model/DataBindingOptions.java
+SHA-256-Digest: /CfThG4CLilEycIbkUqxQID3Ow0KzOS0IdLJw70xcys=
+
+Name: com/android/builder/model/level2/Library.java
+SHA-256-Digest: Gz4a8a131vZavxh+Bw7ErDItXEIYk+srNiWkJv/SzKw=
+
+Name: com/android/build/OutputFile.java
+SHA-256-Digest: 0iMNLAed2TZxqvJDkCzJS+9vV8WARQOSeuOZ7XuLzOk=
+
+Name: com/android/builder/model/ArtifactMetaData.java
+SHA-256-Digest: 6gifj9KaGKOlE/YZa/H5WbUgkq/KvIjXOH3PBCoKasg=
+
+Name: com/android/builder/model/MavenCoordinates.java
+SHA-256-Digest: Xgwgaa3tPhTvXHqqnOZ3Onqf/+VRrFM/I5KaT96HnrE=
+
+Name: com/android/builder/model/InstantAppProjectBuildOutput.java
+SHA-256-Digest: V49FKEX36A9lfttagjwGmOGOuma3dngWc7YUblGXC+U=
+
+Name: com/android/builder/model/ProjectBuildOutput.java
+SHA-256-Digest: hKl5wlpTcxhDFo6W7gnhnb86U8oCI4O4HLMExJeYD74=
+
+Name: com/android/builder/model/BuildType.java
+SHA-256-Digest: tFU6089REfh7LRAQPhUdAYs3hsuZsFhrzZEkvgccOTA=
+
+Name: com/android/builder/model/SyncIssue.java
+SHA-256-Digest: kIJYXPnf26/dw6a/5Yxx8+u+7bldxq2JVEvD0Zf2Czo=
+
+Name: com/android/builder/model/NativeArtifact.java
+SHA-256-Digest: mdKBkRl0KporXChzJwyt9mHYv3daev62OPRGEpxp5mY=
+
+Name: com/android/builder/model/BaseBuildOutput.java
+SHA-256-Digest: rzyTuVxeV3w22C02NvGa96awJB9+u62wtBB7IRH7XGs=
+
+Name: com/android/builder/model/BaseArtifact.java
+SHA-256-Digest: pMxIRxsH3irhjHbXgeJVWvpEEoAA8e6Mfn7XEYFeZDo=
+
+Name: com/android/builder/model/Dependencies.java
+SHA-256-Digest: LoQzDXAmDYQ2n2JBWCbcn1v1XoDPNufzWv0Fr5MuasA=
+
+Name: com/android/builder/model/SigningConfig.java
+SHA-256-Digest: svs30MI7F2wdSyqXe+bVKY3V8tw3KN/ZQcu0idUng+4=
+
+Name: com/android/builder/model/BuildTypeContainer.java
+SHA-256-Digest: NF7tDM3665FLmX/2SGkQnWgSAuusx97tgJr3ib90OMg=
+
+Name: com/android/builder/model/TestVariantBuildOutput.java
+SHA-256-Digest: 0PCZo/KTNzBhL67Bb7f4Fg+z69MSZs/Vqyhu5e7ibV0=
+
+Name: com/android/builder/model/InstantAppVariantBuildOutput.java
+SHA-256-Digest: dyGPXmRAQ+tzytEj0DbpD6weSNiiVC1TtPPIH7jPsWE=
+
+Name: com/android/builder/model/VariantBuildOutput.java
+SHA-256-Digest: KZ84iTOFYmrY7h8RBDE/m6+9XJAAeeM8HNRQJy/Zh4s=
+

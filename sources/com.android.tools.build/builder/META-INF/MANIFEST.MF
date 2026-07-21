@@ -1,2 +1,2046 @@
 Manifest-Version: 1.0
 
+Name: com/android/dx/rop/code/CstInsn.java
+SHA-256-Digest: usvX4NBGMIwRqJN4zV9n4/YjKKPAyVZ5kkLKEIFIzrQ=
+
+Name: com/android/dx/rop/cst/TypedConstant.java
+SHA-256-Digest: tzB++8rzJN72BLOaDjAw7lctENz6HwfFR71cUaGnMk0=
+
+Name: com/android/dx/util/ByteArrayAnnotatedOutput.java
+SHA-256-Digest: T6o7DDVF5q5GhcytTTlqBrT41/LyDEvbmAntM6Cx5P4=
+
+Name: com/android/dx/dex/cf/AttributeTranslator.java
+SHA-256-Digest: 7R/nZl27R7C+rft+G7CSGmUBfIJkWcopjevR553fyOw=
+
+Name: com/android/dx/dex/file/MapItem.java
+SHA-256-Digest: Ppw6z2mL+yryFmpnQnG/o8/ekvX7XQSNcLrY+exyxsg=
+
+Name: com/android/apkzlib/utils/IOExceptionConsumer.java
+SHA-256-Digest: rEBzuHabceQM7n3gdmzpjllfBNiymk+2MbSMzS+IyUY=
+
+Name: com/android/dx/cf/direct/MemberListParser.java
+SHA-256-Digest: /vuR/E4iXYOlJssB9IVfEZFWvhcnuhjRndfgUPRxa2M=
+
+Name: com/android/builder/merge/IncrementalFileMergerState.java
+SHA-256-Digest: HIRhdpiNred9RflRbDHa1H7fq3mxJl/HM0RxlUEO+uA=
+
+Name: com/android/builder/internal/compiler/ShaderProcessor.java
+SHA-256-Digest: 8IvVFoLeZFC33ExDUP/Ont19gX0fA7KFiO7K5J3WFsc=
+
+Name: com/android/apkzlib/zfile/package-info.java
+SHA-256-Digest: 9sVdpAyEzkk4HrLIKJii3liq/Ydhj+4CyD4rhwPGJ0A=
+
+Name: com/android/dx/command/UsageException.java
+SHA-256-Digest: zH0XIKUORq1cakN0o3/ma8Jgk7E4P9169N2vGbgXr+g=
+
+Name: com/android/tools/aapt2/Aapt2Result.java
+SHA-256-Digest: tOf6j9hw4oToru3OOLMDnZ6lPqE7JJdt9AIIz1dInVg=
+
+Name: com/android/dx/dex/file/AnnotationSetItem.java
+SHA-256-Digest: 22Te+rrTp3/lgHjVSYfh6koAc+yYLSoGW4o41Q6/JMc=
+
+Name: com/android/dx/dex/file/CodeItem.java
+SHA-256-Digest: ZAb/SCjL9UdypcQsRCr7RR21Bh9WWpZ6PMGIv3jRgTc=
+
+Name: com/android/dx/util/Hex.java
+SHA-256-Digest: jZi+80hkSfet3eu0dlkVEzESXB0/5RDURQucGmIP2Uo=
+
+Name: com/android/dx/util/MutabilityException.java
+SHA-256-Digest: SR85lGiOdeHQfMxPRY4O5EuuYvzHeNunqQw/9UGz6ok=
+
+Name: com/android/builder/utils/FileCache.java
+SHA-256-Digest: pHK26EQXOQzFMJzWBareylawKE/BTU8xfGU4lxwrz9E=
+
+Name: com/android/dx/cf/attrib/AttExceptions.java
+SHA-256-Digest: nNXpl+ohu1odA/0vlPlqSoz426UUclHbMW+XEz/GVrU=
+
+Name: com/android/builder/signing/SigningException.java
+SHA-256-Digest: 61z4fxn1WDN4LHIvTrupapjeQXF9p6bDaE2RZVsBxAg=
+
+Name: com/android/builder/tasks/QueueThreadContextAdapter.java
+SHA-256-Digest: mAcjZh5T+Cfp35QmslJprmWJPD6AdHdshf/d7HdvqvQ=
+
+Name: com/android/dx/dex/cf/OptimizerOptions.java
+SHA-256-Digest: O/Xzn/9d/K8/AzoSOv+TFdwPJBeodIziteXtK5xU5RA=
+
+Name: com/android/dx/rop/code/RegisterSpec.java
+SHA-256-Digest: cSzrhz2DoZkgEmK+S8F8XM4FXWAqKP1DE0RH/lRId60=
+
+Name: com/android/apkzlib/utils/CachedFileContents.java
+SHA-256-Digest: heOmgWowkeAvZNQBgtsUyapwwHM/+s6yFnBnGkg3X3c=
+
+Name: com/android/dx/rop/type/Prototype.java
+SHA-256-Digest: AirqBCvjWjUEYv1CsHhcrYLN1fZNzPAM8nEoKhPOsec=
+
+Name: com/android/dx/cf/iface/Method.java
+SHA-256-Digest: e4/vuvzCMM4lZCPTKBNLzcJESWl62Bz2Z9w4crAM4oc=
+
+Name: com/android/dx/io/instructions/FillArrayDataPayloadDecodedInstru
+ ction.java
+SHA-256-Digest: HBDDpBHBtZa6s6Ao3l3LvaK+QY6G3zgXDSOx5h+Dae8=
+
+Name: com/android/dx/command/findusages/FindUsages.java
+SHA-256-Digest: utg3juodlf2UXTZ8+ZeWPU4SqfHEfpWlS4JPJ1yXxmg=
+
+Name: com/android/dx/dex/file/EncodedMember.java
+SHA-256-Digest: z3cuyvAMmvRkxjY22YR1LfoZRtgV1SsZV7TAkeUJvqU=
+
+Name: com/android/multidex/ClassReferenceListBuilder.java
+SHA-256-Digest: hYI68ZOQVPeFmVAFj6GCMWnNQgFtW08+I8CUw93GiWs=
+
+Name: com/android/dx/dex/file/Section.java
+SHA-256-Digest: 2apcXCUl3tFsXoMhIm9uBeW56WurouZZJHfkuJwXcBQ=
+
+Name: com/android/dx/rop/code/BasicBlock.java
+SHA-256-Digest: L0cvUUzMmpwuAsZheWgTuVBKalCEPJveFE1WrarfG90=
+
+Name: com/android/dx/util/ListIntSet.java
+SHA-256-Digest: RXLZJVqhRNJUo1siEnupXEluNlRAmnOWFSotuYetpPk=
+
+Name: com/android/builder/signing/DefaultSigningConfig.java
+SHA-256-Digest: EGIBqO9ZBFYNyWgHgFZ2dyED8KtUS/TdnsH9kmSpGS0=
+
+Name: com/android/builder/internal/compiler/RenderScriptProcessor.java
+SHA-256-Digest: FpskoI/y7luEkPD73IV1USzLGcuu1RM37OKDmmUpEKc=
+
+Name: com/android/dx/cf/direct/ClassPathOpener.java
+SHA-256-Digest: nKgAVJCqy7gLnTR45zi4q4fSxuWqRZ+d4erpXilvBHA=
+
+Name: com/android/builder/merge/CombinedInputStream.java
+SHA-256-Digest: YBQk+iIsO6NGAuC8I/ASPX1zqNvDMI1edhmpOc2iKRc=
+
+Name: com/android/dx/rop/annotation/Annotations.java
+SHA-256-Digest: Wy+KBKnkeplkitAQtxoE5fJQGNBnyx8hScnJxqeT2ow=
+
+Name: com/android/dx/rop/cst/StdConstantPool.java
+SHA-256-Digest: otB541PQd4BhWT+VvYw4SFx3PMT6nhZtyW3UkXNyI5Y=
+
+Name: com/android/dx/ssa/LocalVariableExtractor.java
+SHA-256-Digest: zUA1vxDL/5emYVZYFiKdVfhCD8g6R8Dg3Loj0mQc4nU=
+
+Name: com/android/dx/io/instructions/FourRegisterDecodedInstruction.ja
+ va
+SHA-256-Digest: Z4sCaPpveHOU0VM28tsK0hd3b2DTT8VqcrzqQ9hh+nk=
+
+Name: com/android/builder/internal/aapt/Aapt.java
+SHA-256-Digest: VkA1ZLVzBDGBW2xM5uNdFpffPf8LHfSbe4omHBktZgE=
+
+Name: com/android/dx/cf/iface/Member.java
+SHA-256-Digest: UCuhn0QclLIzNCvH6HzaGNbJ6jr6GK80yWIvLvWVJzA=
+
+Name: com/android/dx/rop/code/AccessFlags.java
+SHA-256-Digest: kEO4t1GCBC8U47H1HG+Qm8/h842P5yncY4utDFJAsJM=
+
+Name: com/android/dx/rop/code/Rops.java
+SHA-256-Digest: Kq2mOdAJmcG+UwdnoVw64KetZkkpavarfiXik5j6+pI=
+
+Name: com/android/builder/core/BootClasspathBuilder.java
+SHA-256-Digest: mjr2odRgG6mT8R9V4aVtEH8MvFdASovMJQwHEx9KUPQ=
+
+Name: com/android/apkzlib/sign/SigningExtension.java
+SHA-256-Digest: LDSXVOlZRmdfmr9Qw9Dz9QRwFpC48gTU0SHYlNgXpQ4=
+
+Name: com/android/dx/command/dump/ClassDumper.java
+SHA-256-Digest: ZsnLh1RO9aH3tVNyjZTDkxqIUlMzAKh89DDlubvhS5E=
+
+Name: com/android/dx/cf/attrib/package.html
+SHA-256-Digest: ElBMo4Nfc9Goc/ekXbUW8zB2YvsuMlitafbCplvDzug=
+
+Name: com/android/dx/dex/file/EncodedMethod.java
+SHA-256-Digest: 6fXzIxlvUF/K+7Pyabd4OZQN+g3UTKixz3dhAJNBBe4=
+
+Name: com/android/dx/util/Output.java
+SHA-256-Digest: RJl+G8c9evBs+7tx0kqRQGlbgvE1wsjyWMnsxOAllXY=
+
+Name: com/android/dx/ssa/BasicRegisterMapper.java
+SHA-256-Digest: NGOvEkSWgwjbAy8o8bzAqL+GwN2tkNPcFEFy9zY+LJE=
+
+Name: com/android/dx/dex/code/FixedSizeInsn.java
+SHA-256-Digest: fwyfmaSCdT/V2OvURNmazFkfnHbZPUq4PnP0ejFerDM=
+
+Name: win32/libwinpthread-1.dll
+SHA-256-Digest: WIHqaNrt0GCi6FZtQKY/q6M6LUbnQPtAMY2dTEAemY0=
+
+Name: com/android/dex/CallSiteId.java
+SHA-256-Digest: ek8nmFnCJ5ODvzIHRzSecaJf5aeKlNU5ShDiuS2zDcI=
+
+Name: com/android/dx/ssa/RegisterMapper.java
+SHA-256-Digest: BfJ8biMsjOHM8x6C4D6fVCPhC+XG2PSGrxT8HgQ7xlM=
+
+Name: com/android/builder/dependency/DependencyMutableData.java
+SHA-256-Digest: rst5NeGz0NQiLHHVxGXFUa6rXO1dtAX9PwnZM/odkB0=
+
+Name: com/android/dx/util/ByteArray.java
+SHA-256-Digest: p9W6hd+QQol7p97id6HqhNfGr6HOY4J8N5pmnuOPwp0=
+
+Name: com/android/builder/core/DexOptions.java
+SHA-256-Digest: qR9RZuYsOCEtqDAHOB3KhrsS2H1lCTgUXKm7DA3G/28=
+
+Name: com/android/apkzlib/zip/InflaterByteSource.java
+SHA-256-Digest: AsDQbRtFywrt1bLjIIEFrzNB/OrwVHGpjbbcZGCVCxY=
+
+Name: com/android/builder/internal/aapt/AaptException.java
+SHA-256-Digest: XMVRnP3z4QnUX311/0P+u5S3DGdJNJeHUh749LKHNLA=
+
+Name: com/android/apkzlib/zip/compress/package-info.java
+SHA-256-Digest: l6RgkNaJfqP4zJcFIDx6nHRJyPdDdn/BEudsZCqZ6oU=
+
+Name: com/android/dx/rop/cst/CstEnumRef.java
+SHA-256-Digest: bYOX7QBwq/+gvXdKWpLDpH8IhTWXYICf2tEmZKx3NFg=
+
+Name: com/android/dx/merge/SortableType.java
+SHA-256-Digest: VnzxrN5yM/97moecnnvVrBGo3qljaKX93UluthgHnj8=
+
+Name: com/android/dx/util/IntSet.java
+SHA-256-Digest: EYbDmXY9J59S8L8ZLEnUII4g4oTeNs6GF90YipZ+Xy4=
+
+Name: com/android/dx/cf/attrib/AttRuntimeVisibleParameterAnnotations.j
+ ava
+SHA-256-Digest: d46yUk+yAF8SWHfNfYPHSxXbB+DIModGNoKHhMvwPyw=
+
+Name: com/android/dx/ssa/LiteralOpUpgrader.java
+SHA-256-Digest: XeQ8vdhoXZRwG7+r+5F45iH4IyHL91gYHSeexNK0bEQ=
+
+Name: com/android/dx/dex/code/form/Form32x.java
+SHA-256-Digest: bX/heynCgt+CqiPehMLw9+uT9/FLKwbWYbFjAVS0bEQ=
+
+Name: com/android/builder/utils/PerformanceUtils.java
+SHA-256-Digest: p4i1h/l57bu8dq93pouWwwWF6ImWd7wyEjZq/+c2FXg=
+
+Name: com/android/dx/io/instructions/PackedSwitchPayloadDecodedInstruc
+ tion.java
+SHA-256-Digest: nZePXSlYbBio/zES+F19SjW5Un4aBmM6sVBmgOmseM0=
+
+Name: com/android/dx/rop/code/Exceptions.java
+SHA-256-Digest: FxS04ZmX0B+JeefKXWWn/Vn2JAFgYTNa1XCTOQ7K7Gc=
+
+Name: com/android/dx/dex/file/FieldAnnotationStruct.java
+SHA-256-Digest: jg2V0sYuEJZo9BU/8OkRbsZYUYkYAyNOYiJ9+6X36ko=
+
+Name: com/android/dx/ssa/MoveParamCombiner.java
+SHA-256-Digest: mixvcIXQr+Pe9Z/Ta3CfNT3mWtsMgVv44/o+tYiket0=
+
+Name: com/android/dx/dex/code/DalvInsn.java
+SHA-256-Digest: BAN9Awl4r7oiaDPBiq3Q20BWIWJfLynSyR2HWOSaWVM=
+
+Name: com/android/dx/dex/code/MultiCstInsn.java
+SHA-256-Digest: xsrRkSjCNxr2T90jymZxwR4uhqVm0LFv97Xc4gGc3MY=
+
+Name: Android.mk
+SHA-256-Digest: Olk+nO+VmhejlAK/V5fwC12fDGaeHCMi9FnJe5sDNoc=
+
+Name: com/android/dx/dex/DexOptions.java
+SHA-256-Digest: wcp8Mchip7iZH+l+iXnj8pKlaLBEzmIL9q23ey+iHVI=
+
+Name: com/android/dx/io/instructions/BaseCodeCursor.java
+SHA-256-Digest: wheoAbMoAjpjdOsWZ7zKMIJIGlpBjVdIW8CIowKMHsM=
+
+Name: com/android/apkzlib/zip/StoredEntry.java
+SHA-256-Digest: T8zzdQtbG7z24cApWKfG52XPJUTH/SCiytHGscSzYpk=
+
+Name: com/android/builder/merge/OpenableCloseable.java
+SHA-256-Digest: qjbTxX1zfAAWt/pHLL4b9CgpfSDZ5ofiKAU+AGMgMvI=
+
+Name: com/android/builder/packaging/SigningException.java
+SHA-256-Digest: wxrzGsPNXSxBMDYystCY0ZtrO/3Bm6EIwhc2uSzmwbw=
+
+Name: com/android/dx/dex/file/DebugInfoDecoder.java
+SHA-256-Digest: fupNVb4p0cCuC0saJ7rBJhLuIPpV4kq/SO0IFtCmuag=
+
+Name: com/android/builder/packaging/ZipEntryFilter.java
+SHA-256-Digest: mh8zUXJ8Pkk6fAnRj8TSX+oNmkJdUMukq0u3tSm+Yes=
+
+Name: com/android/dx/ssa/EscapeAnalysis.java
+SHA-256-Digest: lcdh8rTbV6FYyT6jC/asUQ2kqqTh1icJ7jVN/aVe1ls=
+
+Name: com/android/dx/io/DexIndexPrinter.java
+SHA-256-Digest: H6y/BqFgTB/0KzyC2lN3KDGvqkCydIZ855IEA2jZrE0=
+
+Name: com/android/dx/rop/cst/CstFloat.java
+SHA-256-Digest: H7he/fPZAVTbL7AjPDUxgYloIb2rQJbEcwS4cYYBMwY=
+
+Name: com/android/builder/dexing/DexArchiveMerger.java
+SHA-256-Digest: 4rDMdKJes0K7p8RhXbKMl7ngZ7BqhZ9G8GlTPnai7aQ=
+
+Name: com/android/dx/io/CodeReader.java
+SHA-256-Digest: aLlyITwnKd2GGj3i/wsLMGz7NudX4hx6kTgIbNt4TuM=
+
+Name: com/android/builder/files/FileCacheByPath.java
+SHA-256-Digest: gzq3c1L8acQIClLGsT2RHnFBMC1ldXMgKLw9l5Mcdcg=
+
+Name: com/android/dx/cf/iface/ClassFile.java
+SHA-256-Digest: 9E6pV1f8XuirP+EZAEWfCkzNvfPPeV0NboHYQX774sQ=
+
+Name: com/android/dx/dex/code/form/Form31c.java
+SHA-256-Digest: mBZ8WQndan6qO39vBJtY2N+rwefjsnnuDe9T+54lUzc=
+
+Name: com/android/dex/TypeList.java
+SHA-256-Digest: LZv12KWFpZlLLYyudZcq0e4Am4fV4tkarL3UeUFcHWg=
+
+Name: com/android/dx/dex/code/form/Form21c.java
+SHA-256-Digest: c7L88DIvifYoHsPLQRsJbGF0jI5C1ZiSY8hSj9nckGg=
+
+Name: com/android/dx/dex/code/PositionList.java
+SHA-256-Digest: sbT9jq8RRr+Gi2urJDBIJQ91/hVXFfMxKxAU9Et5tqM=
+
+Name: com/android/dx/dex/file/FieldIdsSection.java
+SHA-256-Digest: iHZH3X/ARYxjeD9NysRwhCPeNL3PuOmP3YmRZz+gYQc=
+
+Name: com/android/dx/rop/cst/CstShort.java
+SHA-256-Digest: Ckj4UWoFFPKnZ0a0SVWGStrKqFiBLSnA9l6I3A9MbHM=
+
+Name: mac64/libc++.dylib
+SHA-256-Digest: gWHwPlL5noYhWZZ3MJKeiVksxd8CbfVILYoTZIj5gsU=
+
+Name: com/android/builder/internal/incremental/DependencyDataStore.jav
+ a
+SHA-256-Digest: 8iZe496FWEuk12WbcI8k+P1M0w/1qMHBl0oF/A1Hu8E=
+
+Name: com/android/builder/dexing/DexArchiveMergerException.java
+SHA-256-Digest: W6SUCAju8Vqh+r533bs6z4lvTvDYJiV/o8DDg0WM6Tc=
+
+Name: com/android/builder/internal/aapt/package-info.java
+SHA-256-Digest: /QX0sLYwUvRYRnb6/c5qm5zpaXzgeXv2uCUNSRllJ+I=
+
+Name: com/android/dx/io/instructions/FiveRegisterDecodedInstruction.ja
+ va
+SHA-256-Digest: AHDJ7XAE3iXqvmUVQ9wby/4PJooH4j8Ij92l5S65fC0=
+
+Name: com/android/dx/dex/code/CstInsn.java
+SHA-256-Digest: zdjBkFUbRYQOf7gnZbcyCVQkaAy3TUXvuAZDANj/86w=
+
+Name: com/android/dx/cf/code/LocalsArraySet.java
+SHA-256-Digest: Fk2MyQmrp/Q2clnyvgs93NpqqRbj0L/y1gV1N/yRG5I=
+
+Name: com/android/dx/rop/cst/CstLiteralBits.java
+SHA-256-Digest: 59Tiq55SKQq0gfDSgF8cQXvMmAAqWf0BgL1KZFZvVMI=
+
+Name: com/android/multidex/Path.java
+SHA-256-Digest: vG9x/5hi/dLG6OgQ3l/nj6WZRK3Rgpdk3ou+U1st9ZE=
+
+Name: com/android/dx/rop/code/LocalVariableInfo.java
+SHA-256-Digest: MY/FBEksXud8HfGZeJBGHoQBfzPysZRcWQLL1WJUFNU=
+
+Name: com/android/apkzlib/zfile/ApkCreatorFactory.java
+SHA-256-Digest: ZwKTB9JaYZqaXJiBpoGlMK8rABGUnr1TlRXo7WK/tyA=
+
+Name: com/android/builder/internal/AndroidManifest.template
+SHA-256-Digest: vkUjEnIoIcqSlIWTAacHMIslmQSctZlLplhI4RWcHxQ=
+
+Name: com/android/dx/cf/attrib/InnerClassList.java
+SHA-256-Digest: 8+79/9gzo0Q1aQxVcHADkRUHGAJslnm2d5Awee8n0g4=
+
+Name: com/android/dx/cf/iface/package.html
+SHA-256-Digest: mZMLgVuFKR2lxXjn0hTAKZSEFz8yCjGKwpYB0SBbvtI=
+
+Name: com/android/builder/testing/MockableJarGenerator.java
+SHA-256-Digest: 0CXGkQQtf+dDtpYoOB2Ir9VA9EL+0EYGWJuIt/zPXrA=
+
+Name: com/android/dx/dex/code/HighRegisterPrefix.java
+SHA-256-Digest: qQN7cKsBoc11FZeGjTgMvf0dY7wMru3T24pUcOoQ+Gc=
+
+Name: com/android/dx/rop/cst/CstLiteral64.java
+SHA-256-Digest: i5hEcXQdk3Bmvltgu004z2zZS6UHbJBR8iyf03bRnL4=
+
+Name: com/android/apkzlib/utils/ApkZLibPair.java
+SHA-256-Digest: s6tkNIfM4+CqAP5W8oNw16qg9UTBWK9O8Sin4a8u3u4=
+
+Name: com/android/dx/dex/file/TypeIdItem.java
+SHA-256-Digest: 99U+3lm1tWapwHCKXoGOZMm7lGD4pTB8UCQp+XOWdY4=
+
+Name: com/android/dx/ssa/DomFront.java
+SHA-256-Digest: 1NXOqWvGsfKKSn4OwPjCQ+Ag9+Adtqm+Kwbf/M+i/FQ=
+
+Name: com/android/dx/ssa/SsaBasicBlock.java
+SHA-256-Digest: SHD0wuHlFvJ+tDSbgUEs6G63Mu/AhF1mLaAsgTdTRdU=
+
+Name: com/android/builder/merge/FilterIncrementalFileMergerInput.java
+SHA-256-Digest: x8ATnyx1YVJrLDDhylEanlhCB5EHjAAV8KhDQPBYU4Q=
+
+Name: com/android/builder/dexing/D8DexArchiveMerger.java
+SHA-256-Digest: F+rs4OQvdxFoTLiODgEXnSOtFrzbWWbhNkALOYs2rIk=
+
+Name: com/android/dx/cf/code/BytecodeArray.java
+SHA-256-Digest: N1iVy86hf2op9eT2iQ5Zpfsw/ZQUQGq+rmsx3jQWG4Y=
+
+Name: com/android/apkzlib/zip/ZFile.java
+SHA-256-Digest: KMxX+ObG/Es9RcDw0yFi7HJ/HYGZOs1Mjk3/w2D6xgg=
+
+Name: com/android/dx/util/Writers.java
+SHA-256-Digest: scjdOPkvdVtIazxy4ol719eDGCog7maCgXqiRbvWh9s=
+
+Name: com/android/dex/EncodedValueCodec.java
+SHA-256-Digest: eWMbdj1ce4XgotWLp9vVMLfFKLfGbVvOMkIlsGvhKSs=
+
+Name: com/android/dx/cf/iface/StdMethodList.java
+SHA-256-Digest: iVMjFL9eNqVu7R1ypmN6XL1eD5OcLQSZdapsMmpEDGE=
+
+Name: com/android/dx/dex/file/MethodIdItem.java
+SHA-256-Digest: AXunyiBiw/+ZrrG6UvpQAtbMReq266xA80J6l7Kq6pQ=
+
+Name: com/android/dx/dex/file/MethodHandleItem.java
+SHA-256-Digest: zjFUm/G+Q1lnp+RTxEtgZTZU8gPfXTRvA/tR1zYiRpQ=
+
+Name: com/android/dx/dex/code/form/Form30t.java
+SHA-256-Digest: 0HQErmcY0IuSOFJbMkCvzTr9reGp2H7rCNRfv9zAJIc=
+
+Name: com/android/builder/profile/NameAnonymizer.java
+SHA-256-Digest: rZToK1lsqTwcd0sCsie4iAqdWIdnA/whY8XO++vTqS4=
+
+Name: win32/libaapt2_jni.dll
+SHA-256-Digest: 03BAJqjp8ahaN8fhjK9cw7rvnNK9t1J3R5vaQHt8o0E=
+
+Name: com/android/builder/compiling/ResValueGenerator.java
+SHA-256-Digest: P/FSgv+AOO8fua45Li6oMnW5XOLsdG3AzQyyfO4gyiU=
+
+Name: com/android/builder/core/DefaultVectorDrawablesOptions.java
+SHA-256-Digest: 4I9Rm2ZZJNx/qG2hGT/q7mhUSLa0ogug2dITH4sSl5E=
+
+Name: com/android/dx/dex/cf/CodeStatistics.java
+SHA-256-Digest: Lbn02QOWZeDmx/mlxNG1e4x2dnNdWB9h0aLom3new8k=
+
+Name: com/android/builder/internal/aapt/v1/AaptV1.java
+SHA-256-Digest: OD/rGyYzn8V8FHfwV/veUACyp53CLe/R9T0jkeAUBL4=
+
+Name: com/android/builder/dependency/level2/JavaDependency.java
+SHA-256-Digest: ug4dvFszvwTroR+e4ji2AtJCeqRHLV1XODrP92Jkm5Q=
+
+Name: com/android/dx/dex/code/form/Form11x.java
+SHA-256-Digest: xt/NTkPKjtXdGi3owZybxHBhvK5sbpi0/+K47pNa2kE=
+
+Name: com/android/dx/rop/code/SourcePosition.java
+SHA-256-Digest: eD5TkOszUWTfW8FU8D+yuvdxklwC9Wxbh5T3fSiaEnQ=
+
+Name: com/android/dx/dex/file/MethodAnnotationStruct.java
+SHA-256-Digest: QnHzVic6+XBf/uelr8lb5eCJ7rgI2MsDDaeWN0u2IfY=
+
+Name: com/android/dx/io/instructions/InstructionCodec.java
+SHA-256-Digest: hLV9rCcTKV4ENaU5+aVMLzVZ9xhleys6o0ZQS2RBMCA=
+
+Name: com/android/builder/core/AndroidBuilder.java
+SHA-256-Digest: W+dOolBrCZHcZwjtHe0X51ZU7y8Gm2ZRAo7IkbBAp70=
+
+Name: com/android/dx/dex/code/CodeAddress.java
+SHA-256-Digest: Zjtn0DpLOQjsqeyFePYtSX4YQd5wLY5j6ZJZxVsgbp8=
+
+Name: com/android/tools/aapt2/Aapt2JniLogCallback.java
+SHA-256-Digest: a6VcHcpFAqtB1tkUeBTYxM85weaTqlwVBUXNkh5skKU=
+
+Name: com/android/dx/dex/file/UniformListItem.java
+SHA-256-Digest: q5Ed7EDOTuqsY4V69FUyEgqex42JMNRtHQ4DSuGERNY=
+
+Name: com/android/dx/dex/file/MethodHandlesSection.java
+SHA-256-Digest: +w7bvZBqFftUde9SDYp/GATd2ysj3IT6sKipib3h5fY=
+
+Name: com/android/dx/rop/cst/CstFieldRef.java
+SHA-256-Digest: 2Pw5ZbpyAW+0RgOR+l3h+2Knh65lFe2dNAM6FyLPmLs=
+
+Name: com/android/builder/core/DexProcessBuilder.java
+SHA-256-Digest: 6pInInZJiEEJw/DDq2sIjdD2rjBbGhte4cCBi2Qbesg=
+
+Name: com/android/dx/dex/file/HeaderSection.java
+SHA-256-Digest: oFeZ7DxaUxKuVXi3wjOT/As4ju+zlxikLoBd15PMd8U=
+
+Name: com/android/dx/dex/file/IdItem.java
+SHA-256-Digest: 0w5bIkk4dnCP908WedvI/pDT1E0S98p4wP7DKaR4rnU=
+
+Name: com/android/dx/util/HexParser.java
+SHA-256-Digest: 6zuW2Oyy5Dha7bjI8Bh7KXczlqpLcTURnHmhlDAY/xk=
+
+Name: com/android/builder/merge/LazyIncrementalFileMergerInputs.java
+SHA-256-Digest: G2Dg2nUmgQvmdB0hyYH+fNNT6SecpSw/cP1rgbZMXUk=
+
+Name: com/android/builder/internal/TemplateProcessor.java
+SHA-256-Digest: z6dgpmiSMAIiU0+lyy02Gqnn2LMR8BSh69YAN6dR1ts=
+
+Name: com/android/dx/ssa/back/FirstFitLocalCombiningAllocator.java
+SHA-256-Digest: zqQP4CEyO6OO7KA+ohRCElOJa47PqYxqC+UrOzJ623U=
+
+Name: com/android/apkzlib/zip/compress/ExecutorCompressor.java
+SHA-256-Digest: hkjQpk/MKQyEo/WvRPJ8MYwcRSyN/nGdxrxNzQqBKew=
+
+Name: com/android/dx/rop/cst/ConstantPool.java
+SHA-256-Digest: YVPvrqsvymScIctRJEZrfWs9gYRSOmCmnzHSG7BBpcs=
+
+Name: com/android/builder/testing/ConnectedDevice.java
+SHA-256-Digest: EmkMET2KBPDmlhH9d4hoFFwthGVENieLKD4gkL3Eq78=
+
+Name: com/android/builder/packaging/SealedPackageException.java
+SHA-256-Digest: s2RFDPyoKGP+Og0FWQjHMbXdKuTypBpoxLUvwUDrmaE=
+
+Name: com/android/builder/internal/packaging/DexIncrementalRenameManag
+ er.java
+SHA-256-Digest: xcWQhYL5gRCyBhwNNzRdzNr+xRxGQct68VraLOx2xJs=
+
+Name: com/android/dx/cf/code/ValueAwareMachine.java
+SHA-256-Digest: FUFwQtMQRLPEfHAKJrO1BoPrrSoWWEkOGeVROxVm8Yc=
+
+Name: com/android/builder/core/DesugarProcessBuilder.java
+SHA-256-Digest: RiZ580PtivFJMH47GzYvlvD0syM4hy3g9hKgjeAqAaI=
+
+Name: com/android/apkzlib/zfile/ApkZFileCreator.java
+SHA-256-Digest: sTCgMK1YBaalpBfAf+noD3J4fktK6cE3AxDqz+2iKyM=
+
+Name: com/android/apkzlib/zfile/ManifestAttributes.java
+SHA-256-Digest: aMzNcDz1JolZwi7BkdLrBqvZcH/WW2h83hW25gRb+UM=
+
+Name: com/android/builder/dexing/DexArchiveEntry.java
+SHA-256-Digest: EBiowwIXvIPelJKUenlK52YgJ3VWgMQSkiNQsDhNLWE=
+
+Name: com/android/builder/sdk/SdkInfo.java
+SHA-256-Digest: HeHjrQI8eOzxTKt4AdgZlZFH8m4VPbPCZcFMW6QZ0bo=
+
+Name: com/android/builder/core/DefaultManifestParser.java
+SHA-256-Digest: 16iDt0K9BMz/V8nCsZFLxsHpBbkhjN0Xro4QPCgOyws=
+
+Name: com/android/dx/dex/file/ProtoIdItem.java
+SHA-256-Digest: Gl6niyBbe6loSZFd9XztsduFEw+kMh6ahItwVwD+NRg=
+
+Name: com/android/builder/png/AaptProcess.java
+SHA-256-Digest: zUdgWfB8bYepqGu7lB3SvsDCvAkEYz7mBxQUcnCSZMQ=
+
+Name: com/android/dex/util/Unsigned.java
+SHA-256-Digest: mT4VywWzYs+vrgEJV3vO2fs5O+R/DCQyMKgnFoijV1o=
+
+Name: com/android/builder/dexing/DexerTool.java
+SHA-256-Digest: WYd6Lhq2BUzh54YDlmDssHjFY4WZ3PiVhh4QqmEQPXc=
+
+Name: com/android/dx/dex/code/form/Form22b.java
+SHA-256-Digest: uocijk8dwUrf8uRauOqzkwUIZ45GGdYlin+39h24A9o=
+
+Name: com/android/builder/files/RelativeFile.java
+SHA-256-Digest: eB02q/75JE0SU25lZ4RIAe0Dh36rx2kpYJnuwP2RQGY=
+
+Name: com/android/builder/compiling/BuildConfigGenerator.java
+SHA-256-Digest: BdRBAFRjtzGQOlefXA+Ai7kiNS1f0HT6CcIrdc02zJQ=
+
+Name: linux64/libaapt2_jni.so
+SHA-256-Digest: sNGcHwiwIh7/i9nqnEx+lBTW89RRJffIV5veVzR2QNg=
+
+Name: com/android/dx/ssa/SsaConverter.java
+SHA-256-Digest: F5pOZ8PE4UnalUhhklP3MsMqNDRBhsBxfu0OtfjK668=
+
+Name: com/android/builder/profile/ProcessProfileWriter.java
+SHA-256-Digest: Na25/yIt/1eREYmk9SHxb1kdMfx2lo7wgCS7OEsW9ww=
+
+Name: com/android/dx/ssa/back/IdenticalBlockCombiner.java
+SHA-256-Digest: oKvfnUH8t5468yXMOD52F7Cx0Y1HMSwDsQSvNmdtO+Q=
+
+Name: com/android/dx/cf/attrib/AttSignature.java
+SHA-256-Digest: 9W5LhdIEvyu+WMFElaqoDG8Y0lWZ8bnSI2YqW6P3SMI=
+
+Name: com/android/dx/cf/code/LocalsArray.java
+SHA-256-Digest: 4QmdnHwN5IBFzPRp6iHumTVg0LU/7tzvzPKmbPPP0TE=
+
+Name: com/android/dx/dex/code/TargetInsn.java
+SHA-256-Digest: m8uB0eFfzITeK4t2Vsx/UueN6ZAyPWhoh9Gf40lhKGQ=
+
+Name: com/android/dx/rop/code/Insn.java
+SHA-256-Digest: KTpUIBZl/q1YV6DN+s5EIuHD7H59mlU9GTCHRqGD438=
+
+Name: com/android/dx/command/grep/Grep.java
+SHA-256-Digest: 6fD3RE8RIcX/dPe7ayi+hfIrgU31CaUaGzdsqUi/A1w=
+
+Name: com/android/dx/cf/code/RopperMachine.java
+SHA-256-Digest: bx0AqFSTyUoHFds8WoxeWTkwYIzzUXlvkbEW6iNc0Dw=
+
+Name: com/android/dx/dex/file/FieldIdItem.java
+SHA-256-Digest: aGkGNdG2zJGsFmkjOsG4zaLBHoy8LvGfBMAgPNdbP5E=
+
+Name: com/android/dx/io/instructions/ZeroRegisterDecodedInstruction.ja
+ va
+SHA-256-Digest: QQfJbl36nTKeTG6WByPhE8JScRC55cmXKZWSr/FghCc=
+
+Name: com/android/builder/dexing/NaiveDexMergingStrategy.java
+SHA-256-Digest: DuiP5lkwoVFqGazhgcbmoXNLBagePT6OrGDI1R+vMyA=
+
+Name: com/android/apkzlib/zip/VerifyLog.java
+SHA-256-Digest: VUMr7NfFE0yg6e8KlcWPIYbSzK91EvrnjXWPNnJmJEo=
+
+Name: com/android/dx/dex/code/form/Form22x.java
+SHA-256-Digest: Ic/yCCdxL/2/HdhAuBz9qOIaOc7bBi2bBv1zU8dNwpI=
+
+Name: com/android/dx/cf/code/ByteCatchList.java
+SHA-256-Digest: W1Xfdj+yT8nsbE85b+sHmJXc9bxAu8Te5wozdcfYIjM=
+
+Name: com/android/builder/packaging/ZipAbortException.java
+SHA-256-Digest: CsiT8CA2D41qEsbk9tmlNDmnCXVi4VNDPwPqRkmA/xY=
+
+Name: com/android/dx/io/instructions/RegisterRangeDecodedInstruction.j
+ ava
+SHA-256-Digest: G6VrTMfPOw8I5jMcLwWxzyJlDJblQE0Kfhdvmpzjygw=
+
+Name: com/android/dx/cf/iface/Attribute.java
+SHA-256-Digest: pDULGdNFN9k1i4FJcHZlEkSQc3n1hHFUdGTtEYgHb9s=
+
+Name: com/android/dx/cf/attrib/BaseAnnotations.java
+SHA-256-Digest: t3BA17AspYLWfsIo/yPGRdJP6g5Wb4EMG2eVolEsXPI=
+
+Name: com/android/builder/dependency/level2/ExtractedDependency.java
+SHA-256-Digest: e47Md/jfCwPkS9wWFLfdtqCuK0CTZ4orpeJLoUJc4xg=
+
+Name: com/android/dx/cf/attrib/AttEnclosingMethod.java
+SHA-256-Digest: LYhoCJADlM+dbPQxxgDUuRGbVBuRAQoqcfvb/nzvX/o=
+
+Name: com/android/dx/dex/file/EncodedField.java
+SHA-256-Digest: 3VFnOjY4cvJXimuEE0ReNAyKlwy7DL7RW95SZ83zPCU=
+
+Name: com/android/builder/sdk/SdkLoader.java
+SHA-256-Digest: JTlQlDMJfvjnM8bYBh3kdM3lUuePt+khhOnILkGxIvY=
+
+Name: com/android/dx/dex/code/ArrayData.java
+SHA-256-Digest: boZL4umwTuLC17wWx+tlZGuHQgGU2Nrcw1XIseHKqjE=
+
+Name: com/android/apkzlib/zip/ZFileExtension.java
+SHA-256-Digest: 9B7M+K+QPK/nWF5m5plw66kBmqN2yTtmWCRRBdR2HM8=
+
+Name: com/android/dx/dex/code/SwitchData.java
+SHA-256-Digest: GUAFEHb+uZ+eyv4Wvx5lrQLexiedGA9drYrGFbbUa08=
+
+Name: com/android/dx/dex/file/HeaderItem.java
+SHA-256-Digest: UTa5pwmYViC9SmVrx0YEnVGxcvZ8Ak1lQtXTnRbSOFw=
+
+Name: com/android/dx/rop/code/ConservativeTranslationAdvice.java
+SHA-256-Digest: T3N8PPhuGPMtLBA3HbRAaRkAw5ZtnCT5zXUe1gtGRe4=
+
+Name: com/android/dx/dex/code/form/Form4rcc.java
+SHA-256-Digest: pfyHGsthDRMbXNzpQ9A3Op/bu/JLZJvJT7wpZZbCO6U=
+
+Name: com/android/builder/internal/testing/CustomTestRunListener.java
+SHA-256-Digest: M+PkTdr0qG3FOVPxBrpOdxXgxnUuqo0HYkJ4L7Bdw4A=
+
+Name: com/android/apkzlib/utils/package-info.java
+SHA-256-Digest: dv8nB+LcUnffgHwTBtIAowo4DjU6DSSyxMnBmBVWhJY=
+
+Name: com/android/dx/command/findusages/Main.java
+SHA-256-Digest: 6qsoTD0kHZ3Clg78rKYOhRD+ascrsGkn4ORv5FMazrU=
+
+Name: com/android/dx/rop/code/RegisterSpecSet.java
+SHA-256-Digest: B/IjoC4oQ6pgmMyxp+P/wJGILVeH7gvzZurOIAAZDBU=
+
+Name: com/android/dx/rop/code/RopMethod.java
+SHA-256-Digest: +WV2OIXHw0ClOGyUh/X5L7jMpcB7O2FXUMwnMkXGvRM=
+
+Name: com/android/builder/core/ErrorReporter.java
+SHA-256-Digest: 79jkPSz3HSoN5xvdfTRZNOTMoy2JolGODVYxVM1j+yU=
+
+Name: com/android/dx/ssa/PhiInsn.java
+SHA-256-Digest: 76GSXOTD/tjc2+HG+Vukjzk577+NoyzUEDXf47jkLhw=
+
+Name: com/android/dex/MethodHandle.java
+SHA-256-Digest: L+Imm5JpciEj4hd6U8Ls0qp8Wo+95u4Srs3palEeHkg=
+
+Name: com/android/apkzlib/sign/package-info.java
+SHA-256-Digest: 6LTreFncD8SuHwqAaKjln1ikqfi1u9KEOd/WakwNg70=
+
+Name: com/android/dx/io/instructions/CodeCursor.java
+SHA-256-Digest: i02rhE98NRXdIQEUlDQADLuNHREQ3V/iy5VCtcEmB9c=
+
+Name: com/android/multidex/FolderPathElement.java
+SHA-256-Digest: dD7C+9nCHXlNhi4h33V3CrEfpOV5rfcb8d3PzPWkVQ8=
+
+Name: com/android/dx/dex/file/ClassDataItem.java
+SHA-256-Digest: aUegZKdH+/HSE/KzPhlJrtq8IRRwoFJF/8LHsYEEg6A=
+
+Name: com/android/dx/cf/attrib/AttLineNumberTable.java
+SHA-256-Digest: Axl/uO2K6QVlLRUzdCTaV+FWn8w2zerbo9/fgKiZ5Cs=
+
+Name: com/android/dx/dex/file/UniformItemSection.java
+SHA-256-Digest: d/ZzzzCYjDgLqDc/A9HHTY2ozRawp3QDbIbJYX1uxPI=
+
+Name: com/android/dx/cf/code/LineNumberList.java
+SHA-256-Digest: 0OW60/SBxn2y49Oe2mn2Ox5gSgS/YQC+W1MhYy4aPzk=
+
+Name: com/android/dx/cf/code/Ropper.java
+SHA-256-Digest: xFAsqHKMKGwOx7J3FND+KQDjMlCAjRTK5Yr6LbbZ680=
+
+Name: com/android/dx/cf/iface/StdMember.java
+SHA-256-Digest: k2vxpqz6EF78BQXWnW+7X86vG5oceLCqhg1oZ2ZLv0I=
+
+Name: com/android/dx/cf/attrib/AttRuntimeVisibleAnnotations.java
+SHA-256-Digest: mSHioJoisfNfaywOzYTMQ9HN0T+7QJIcWvMJyrnBqJ0=
+
+Name: com/android/dx/util/Warning.java
+SHA-256-Digest: 2Xll+BaOllrSIKYWeGIWtiLlrKKQHY8q1XA+9HQUa7w=
+
+Name: com/android/builder/merge/MergeOutputWriter.java
+SHA-256-Digest: qlJIxfLP+YU949t7hlQ3jlYYkgOt9im7Rp4GWeWRogo=
+
+Name: com/android/dx/dex/code/form/Form11n.java
+SHA-256-Digest: QNCkFbCq5A/98MxuA4w1yoM0xBaXH91vrf0LO/wd0nY=
+
+Name: com/android/dx/rop/code/LocalItem.java
+SHA-256-Digest: +O562ao7DBtchGFbZ7N8NqbNjkSjA4ggglBeACwc1HA=
+
+Name: com/android/builder/dexing/DexArchives.java
+SHA-256-Digest: GZN/SfefVXg29zazc/bFZ17O00w9xlHWHa+QcaMZ0z8=
+
+Name: com/android/builder/core/SyncIssueHandler.java
+SHA-256-Digest: wLKLsKcJBg9CTjQ1VQBv0gkTZI/2z4AYUsfhA6aEin8=
+
+Name: com/android/dx/io/instructions/OneRegisterDecodedInstruction.jav
+ a
+SHA-256-Digest: WsmBbAd7j8udOOqB7pYticWzL5Goxc+R8Ycyx4STpoM=
+
+Name: com/android/builder/merge/DelegateIncrementalFileMergerInput.jav
+ a
+SHA-256-Digest: AXFyiXQn8G9DB8Yy0wrNR/SknX2s2dTLlfr27JVvXfM=
+
+Name: com/android/builder/internal/BaseConfigImpl.java
+SHA-256-Digest: fyY2BHnxSHkw0C51qN5SoN24CThNcDa+Bnfla1zeYtU=
+
+Name: com/android/dx/rop/cst/CstType.java
+SHA-256-Digest: 4O7a/iSazLr/VO5+I3VQOlOa+BW/tYbNaeD/Hzb/ldc=
+
+Name: com/android/builder/dependency/level2/Dependency.java
+SHA-256-Digest: WAn1EsjX8rrmk/M7kkR9YI0ybzBPMiCO2W+pGSVaXJc=
+
+Name: com/android/builder/packaging/JarMerger.java
+SHA-256-Digest: 6o0hZ1iKqH9ID4Y2Y7FxiqPW8pH2X8/09PZXgXdvouA=
+
+Name: com/android/builder/internal/ClassFieldImpl.java
+SHA-256-Digest: UsZ4BmGxOi8owEdRl/5PVa8R3Vi5RUGaFVJggFKUrao=
+
+Name: com/android/builder/dexing/JarClassFileInput.java
+SHA-256-Digest: L8WKy8dFRwnNUuU1KVjVk9tUyQwsNRoi4Q5Hg91zblk=
+
+Name: com/android/dx/dex/code/OutputFinisher.java
+SHA-256-Digest: HxaFvfQ2w+Zx1C8+5uVqqpQWB5HMNLP5F6plY9G44i4=
+
+Name: com/android/dx/dex/file/Item.java
+SHA-256-Digest: i5U2kYqFz1Tt5SQ7W6vqbzvj0bJO2HiXnhWk3bhYdYQ=
+
+Name: com/android/dx/dex/file/TypeIdsSection.java
+SHA-256-Digest: AXGE1TLssLQ1M2VCJE6ewPTFESnT48+P1VW760iV0rY=
+
+Name: com/android/builder/internal/testing/ShardedTestCallable.java
+SHA-256-Digest: Xu0Ny83Lws6abEjplwa4je+Khkqt7x/VXkhgoWYGyGM=
+
+Name: com/android/dx/util/FixedSizeList.java
+SHA-256-Digest: apzf8l92E42NglbqdvSK9TQZavOYmrJqgTO4cqYQxd4=
+
+Name: com/android/dx/cf/attrib/AttCode.java
+SHA-256-Digest: /2tgLjGbtBZGypD6f89r0aADTCpM75p2Tp6Jz4vTY78=
+
+Name: com/android/dx/dex/code/DalvInsnList.java
+SHA-256-Digest: UYHKjHD7Xm6Y4/HdPcybjBOQcuOK926DBBIKzyqp3/A=
+
+Name: com/android/builder/dexing/DexArchiveBuilderException.java
+SHA-256-Digest: CPuYtU5/japaUQ++SL+n4HuYHaIqKqzHxi31sClRWkA=
+
+Name: com/android/builder/dexing/ClassFileInput.java
+SHA-256-Digest: Vhi4iqZfXrm0GWuX8fMmVHzjFynNvCSDYDxk2WsJpcQ=
+
+Name: linux64/libc++.so
+SHA-256-Digest: pVS8kkR/Ji8Pf3Iia/UusN9EluOfd7YFqgETUOB4v14=
+
+Name: com/android/apkzlib/zip/Eocd.java
+SHA-256-Digest: HMDbsE3XPluDAEbLUqlOBfeMj3itdohxdsa2jyeujbQ=
+
+Name: com/android/dx/dex/file/MethodIdsSection.java
+SHA-256-Digest: Q3VDPQrKErNcxLSCCG222ZWY9MeueLTUC/eZ3Ij2ClQ=
+
+Name: com/android/dx/cf/iface/Field.java
+SHA-256-Digest: JPRxu6W+g7R2lhp6NYaHspjUNLaaD56uf+OD8iOlaBw=
+
+Name: com/android/dx/cf/attrib/AttSynthetic.java
+SHA-256-Digest: H4Nw9+WBEV69QdDdL50O7j9DjTvWlpjpAWbMkhp234s=
+
+Name: com/android/tools/aapt2/Aapt2Exception.java
+SHA-256-Digest: E93OSSktVqkQ4ikamhN+1RfYPojHb9yTouiMRls6YfE=
+
+Name: com/android/dx/rop/cst/CstCallSite.java
+SHA-256-Digest: ngXCU4H+veLAA39UyiTJKUwXDDUoPXSl7pPkjtKIV4c=
+
+Name: com/android/builder/profile/ProfileRecordWriter.java
+SHA-256-Digest: Opykm9vfNA1FiP2x1s00K3Hg0L90hd+/Q8yIZFn444Y=
+
+Name: com/android/dx/cf/attrib/BaseLocalVariables.java
+SHA-256-Digest: oUoJF167uc7eDAV6W2E45kOaFuHPREUoo2xK2Rtlooo=
+
+Name: com/android/dx/cf/cst/MethodHandleKind.java
+SHA-256-Digest: WqoXktlfWUdzVj8sbVmphKr4StYYSsk/t4TiZCzHpKM=
+
+Name: com/android/dex/Annotation.java
+SHA-256-Digest: ejlFpuS4oPsC4/9zz51QTtgJOpAL0bXlTAK3qU2fSVM=
+
+Name: com/android/builder/core/LibraryRequest.java
+SHA-256-Digest: sN5+a/yUXpKm2sVWMxvUg41XtIWgkDWg2q6s4MJxVWE=
+
+Name: com/android/dx/dex/code/form/Form22s.java
+SHA-256-Digest: m25w/Wpbiw2QZw4KVu9C5koRzguZyH5cMPGKjRo7KKI=
+
+Name: com/android/dx/ssa/package-info.java
+SHA-256-Digest: gpM8uUlCTAX5bUpYtftlVGfdb3IYqys3ICUOubfT2Yo=
+
+Name: com/android/builder/tasks/Task.java
+SHA-256-Digest: AN8vAL996P9deQ8WwsBYtEFHnk1gIVh/AAuf9up1Nlw=
+
+Name: com/android/dx/io/instructions/DecodedInstruction.java
+SHA-256-Digest: A1RXu72XTQAxg3Dsa4VUetMksJnETTgEjRClzX4yQ4c=
+
+Name: com/android/dx/ssa/SetFactory.java
+SHA-256-Digest: 7iFZti01UbUcK3gtmxRhWavny92BD0CuMD4fmEkFHqs=
+
+Name: com/android/builder/internal/aapt/AaptOptions.kt
+SHA-256-Digest: R6T5EsMcFdUqqzfl0SnbuHYE9HYpQK3oAkJWJ/3sxiU=
+
+Name: com/android/builder/core/DefaultDexOptions.java
+SHA-256-Digest: oG/n3VSGDbb2IG/4S6mXuchTg/D8bU7shdfx495et24=
+
+Name: com/android/builder/tasks/QueueThreadContext.java
+SHA-256-Digest: TCuJqhn1FPFz9eY7GHpGwzye58pfzf45W5GJEXeB63o=
+
+Name: com/android/dx/rop/cst/CstMemberRef.java
+SHA-256-Digest: JEIXOQx1q0YckU+UURDI7NWgmtsxXom6SsOHAclb1CY=
+
+Name: com/android/builder/core/ApkInfoParser.java
+SHA-256-Digest: ZVq/3JWb3CKEFVk1+sbSN4c5Cn0J7JSJ0k/Z8goys3I=
+
+Name: com/android/builder/dependency/MavenCoordinatesImpl.java
+SHA-256-Digest: Ge4jZ7+Am/vf3NLfpkO1sTvAUQfMYbsmuUmIcauohbI=
+
+Name: com/android/dx/dex/code/InsnFormat.java
+SHA-256-Digest: pYDaRjXuMElatITuxEvcAUaKHQWqcYFbGGpTi7fR0CE=
+
+Name: com/android/dx/rop/cst/CstProtoRef.java
+SHA-256-Digest: uPprF/B4wSrCCQO0YhgZbzbVKXHOcauHNLVF6ML6dFU=
+
+Name: com/android/dx/dex/code/form/Form23x.java
+SHA-256-Digest: 3Mpk20cjpBTxfZPyTGsC+McejhX6R0yOSwOguMo2Vo4=
+
+Name: com/android/dx/io/instructions/SparseSwitchPayloadDecodedInstruc
+ tion.java
+SHA-256-Digest: dDjDc7X96wvf+Cizj+WR+LJ7BRt090nPH0z1qBsC93k=
+
+Name: com/android/dx/rop/type/TypeList.java
+SHA-256-Digest: MbT1HZSr+W/ktNBxOdKsaShckkjyF2yd8rYNY9a9d9E=
+
+Name: com/android/builder/core/DefaultApiVersion.java
+SHA-256-Digest: AoRxJWXdEzlpM3HcWpLKzNmfQuZhhrPo3KFHvKUrvmw=
+
+Name: com/android/dx/cf/code/Machine.java
+SHA-256-Digest: s76C3wgrC3Ac2hhQCrt1rZYPuPquG44z2u4nnNb9ht0=
+
+Name: com/android/dx/rop/cst/CstMethodHandle.java
+SHA-256-Digest: eExw2jzCq41dmbT1EVvIloKO6yoI+FGnRLR2Swv5grs=
+
+Name: com/android/builder/profile/Recorder.java
+SHA-256-Digest: Ku6wPyvyaX3UAbeH2646a9RhdVryVXuuLY6VwyPNY0U=
+
+Name: com/android/builder/profile/ChromeTracingProfileConverter.java
+SHA-256-Digest: 3YylaUdtjhGxCJBEW9RrqSdPxZKZ7JC4ToS2Zwk0a1U=
+
+Name: com/android/dx/cf/cst/ConstantPoolParser.java
+SHA-256-Digest: krUQ6KgA+CzejCKDsozpAGp9xERr7/Bcat8fKK+Uzg4=
+
+Name: com/android/apkzlib/utils/CachedSupplier.java
+SHA-256-Digest: Tk3M0RWmxDNvYQWNwX26OPTbp/Jgft6NIMQdZ6jFshc=
+
+Name: com/android/dx/ssa/LocalVariableInfo.java
+SHA-256-Digest: sHopzM07p9EieRA5JCFVVAIszNSLAvosyMB8OBJueJk=
+
+Name: com/android/dx/util/IntIterator.java
+SHA-256-Digest: Le3RDKPZoUsN9Kz3EIyo2zmpDuXfho/8IIO+eHX2Z0k=
+
+Name: com/android/builder/internal/aapt/v2/QueueableAapt2.java
+SHA-256-Digest: gG0oId90WfgyAWS7RX8tJu0ocq0eo2WIlqA8wk5WxSc=
+
+Name: com/android/dx/rop/code/Rop.java
+SHA-256-Digest: lVga0Tz9Kn982zg0u6Im7zlDIEosdPrQuTlrGWkGdoA=
+
+Name: com/android/builder/dexing/DexingType.java
+SHA-256-Digest: StLrfOWhudl1UQ9pFjs3MUxCvXuNmS2ji14TJjXAksU=
+
+Name: com/android/apkzlib/zip/GPFlags.java
+SHA-256-Digest: 9u71CGTROkBH9aHMRLC0vQf7wDHw4FJ9fdLXZ1Wnikc=
+
+Name: com/android/dx/rop/code/InvokePolymorphicInsn.java
+SHA-256-Digest: zoAeiuuIRT+3AMlZzQJYfVkmYJdrJHVlLaqB8PuvwVo=
+
+Name: com/android/builder/internal/aapt/v2/AaptV2Jni.java
+SHA-256-Digest: s2Z5B1OnW6QWn/KClx3mE5AbAKbBIjYMbM1hfoU06dk=
+
+Name: com/android/dx/ssa/DeadCodeRemover.java
+SHA-256-Digest: xIBq9Q05IYAmqELPwu5kFKV6/nWHoaH8uWSF5H4BL1Q=
+
+Name: com/android/dx/cf/code/Frame.java
+SHA-256-Digest: Q2Mff0c+Pj8cZaazWUAipeiNSHZzl3tGt+/WcYnQvPA=
+
+Name: com/android/dx/util/IntList.java
+SHA-256-Digest: IyZOCUZS4/YW5Nqa9xBQK/t0k9yn7RQq+GFhWo3w4Ic=
+
+Name: com/android/dx/rop/cst/CstInterfaceMethodRef.java
+SHA-256-Digest: azDpm+T1aQlOz9p5/7EJF/FV6FQiyjsJNh3PPXUYEC4=
+
+Name: com/android/dx/dex/file/StringDataItem.java
+SHA-256-Digest: 0Rd7LD1MqlkjbVnnx74uO2ZEYqNaEdlf02j2hYPgnRw=
+
+Name: com/android/builder/merge/DelegateIncrementalFileMergerOutput.ja
+ va
+SHA-256-Digest: Uf8HcAYlAUg8JLzsTXzHBsYoa1JoKks/b77w7CIwTBU=
+
+Name: com/android/builder/internal/packaging/PackagedFileUpdate.java
+SHA-256-Digest: Jgdd1SfAmI5rMbs2YR5aXgsig1Ub/o1Fy3q6eRW2azc=
+
+Name: com/android/apkzlib/zip/DataDescriptorType.java
+SHA-256-Digest: FFe1rRXUAyUUhsVj8Prt0ufEI2U7ZskAUwj2Zz41m3I=
+
+Name: com/android/builder/packaging/PackagerException.java
+SHA-256-Digest: /VHQwux6UU0BuP6G3cY/R7zC3hd/U5/N9ioxd6ZnGcE=
+
+Name: com/android/builder/merge/DuplicateRelativeFileException.java
+SHA-256-Digest: RYef0IXGgeWJ3Q6q15aMCgpytTz3hIqMV0BZ8S3TnB4=
+
+Name: com/android/apkzlib/zip/ZipField.java
+SHA-256-Digest: Mghi76tZZc42i3scRvgU2bfAOPrlV28+QnWG+G18+uI=
+
+Name: com/android/dx/dex/code/SimpleInsn.java
+SHA-256-Digest: ZM9E7Wkbvrie6kFBawxtOwBpyfGi4a2m/gbLuQJsvZY=
+
+Name: com/android/builder/merge/LazyIncrementalFileMergerInput.java
+SHA-256-Digest: gEb2mxKU8rUt573K6ev4YaCkbu47WG1G/Cnhxez0Ulo=
+
+Name: com/android/dx/dex/code/form/Form21s.java
+SHA-256-Digest: f7r4HEi6ztynt9tk5Yl8j+y3MZTEHySg9CKxuhJDoDw=
+
+Name: com/android/apkzlib/sign/ManifestGenerationExtension.java
+SHA-256-Digest: me/HI/CABQA0BPKDPx4bLHmvdgJ2uisCxDWVIVcbdlQ=
+
+Name: com/android/dx/rop/cst/CstLiteral32.java
+SHA-256-Digest: Tz1CjUgBmgkp12q4TXk+yv1uXIykZtGk4y5QXbt1v88=
+
+Name: com/android/apkzlib/zip/ZipFieldInvariantNonNegative.java
+SHA-256-Digest: PC5OyxjpgClS8RdnIAsqzTs9yrQAbc99B+41pZmF++c=
+
+Name: com/android/dx/dex/code/LocalSnapshot.java
+SHA-256-Digest: ukB7eP9jEMqeRGhMy65tey/8gY5vYXjbR5IMKwv6vPk=
+
+Name: com/android/builder/internal/compiler/DirectoryWalker.java
+SHA-256-Digest: slLylFKqQmjDqLfL+RoUZB6xvf5iQSsuCaFuI+REnnc=
+
+Name: com/android/dex/ProtoId.java
+SHA-256-Digest: E3MnSnPgFQGUinAM3vGOCEGrdesXbbFhJJ6I0i816zo=
+
+Name: com/android/builder/utils/ExceptionFunction.java
+SHA-256-Digest: Pa6hOvppusgJ9NschND7WQrdVJsOj4tMnDh3zqLcpNk=
+
+Name: com/android/dex/MethodId.java
+SHA-256-Digest: E6tAbtcZyiz3KaGn1ZtR6rm9VVHzqIb7HXhTrnaP+0I=
+
+Name: com/android/dex/EncodedValueReader.java
+SHA-256-Digest: CHKZo61T4B9Koj1WZopXJkDW7ZUDZsaCKTsG4PiBQ/w=
+
+Name: com/android/dx/ssa/back/SsaToRop.java
+SHA-256-Digest: uPR6pz46HWHIgc1/SkfrH1u+YTPfHJr4OnNpTMNPmH0=
+
+Name: com/android/dx/rop/cst/CstInteger.java
+SHA-256-Digest: xxRnroQSQd2EKx2iLR9Xzi9S+8gINWfvUhkuzUkuad0=
+
+Name: com/android/dx/io/instructions/TwoRegisterDecodedInstruction.jav
+ a
+SHA-256-Digest: AmngZyC3L4B9Plz7MoM5o6mk5asDL+TnESpoXG+UqLE=
+
+Name: com/android/builder/dependency/HashCodeUtils.java
+SHA-256-Digest: qy5dail4en+XeSuqAmphwzxETuI7GJpCQxz6gcnKEW8=
+
+Name: com/android/dex/FieldId.java
+SHA-256-Digest: u9dgnNHkoEVy4H+5DJGfwE2L4nJ5gTDAxsf3/sg05UQ=
+
+Name: com/android/builder/internal/FakeAndroidTarget.java
+SHA-256-Digest: erVdoJKYS7W61BTS0XYOAIWj2qOqoS9KzykOmga70H8=
+
+Name: com/android/dex/Dex.java
+SHA-256-Digest: 8Ai7yr+1eQcp+eAQKV3eWriZCuDmmgjUnEI1UI7ftKM=
+
+Name: com/android/builder/dexing/ClassFileEntry.java
+SHA-256-Digest: JRcN5tTNzrD4qCM+q9LJrWCBja8AJgPrLWYEB7vxPe0=
+
+Name: com/android/multidex/MainDexListBuilder.java
+SHA-256-Digest: TvkzNZF2BYFMv3BJ5BvIoHFsm+GL7kOa+wssOMLc8Gc=
+
+Name: com/android/apkzlib/utils/IOExceptionFunction.java
+SHA-256-Digest: w9hPfMgUPEkKYTXGV3NSQ1tpL9rvOuqjoQB78XmAWDM=
+
+Name: com/android/builder/core/VariantType.java
+SHA-256-Digest: r+UmXrOvdarXZ6ynNYSXeAEPsz1SdO+ST9LIKsm34eE=
+
+Name: com/android/dx/ssa/SsaMethod.java
+SHA-256-Digest: SZ35oAScXSRf2HRkWimlP35Uec7dvdt0sk3H5BWOp9w=
+
+Name: com/android/dx/cf/cst/ConstantTags.java
+SHA-256-Digest: xt5qS1bhOlB9ztm5hQ71Vc3+E2xnGPKaIgSTs7gAzNg=
+
+Name: com/android/dex/util/ByteArrayByteInput.java
+SHA-256-Digest: jBtm35SaYgaJt+2AJWHSZWsnYnUwFJgXKf/ojOfX87A=
+
+Name: com/android/dx/cf/iface/FieldList.java
+SHA-256-Digest: et96TIaqQxDB56VoIwkxNt/HayO7ZJFV+IiQIrhEQVs=
+
+Name: com/android/dx/ssa/InterferenceRegisterMapper.java
+SHA-256-Digest: K2+afVErgSQsIaRl4lQ3u4T1f/neXQdCNy5m0L9b/HU=
+
+Name: com/android/dx/cf/iface/MethodList.java
+SHA-256-Digest: tmOH6Y0PjZ06SmulkzmML1x7t2UORysMQzuZjiECqdU=
+
+Name: com/android/dx/rop/cst/CstDouble.java
+SHA-256-Digest: c7m/5NdzUV7KIxUWUdSNjIcJgqZzyqYUNLw9DZfETDE=
+
+Name: com/android/dx/cf/attrib/AttLocalVariableTable.java
+SHA-256-Digest: EnqqsBmcJchng0SeI4Mt96lye6HIu9mLKskSOxa6XS0=
+
+Name: com/android/dx/command/dump/Main.java
+SHA-256-Digest: IKfGofNxx8gQTha1f8jm0nzoRrJc0QFqBOWiaAzsWTo=
+
+Name: com/android/dx/cf/iface/StdMethod.java
+SHA-256-Digest: vX3wDej51pqh6Fp5PVspCU6+DUIlAOyVs0+xi+qO4S0=
+
+Name: com/android/dx/util/IndentingWriter.java
+SHA-256-Digest: Uf33vzkqNOiG70IkdTqe0RC+exXqxd0fKiclaWzD3PA=
+
+Name: com/android/dx/dex/code/RopTranslator.java
+SHA-256-Digest: k0bkwsKRiswCKfmIw3gE+Al3Gjyqzvy9AK9MjUhiHXw=
+
+Name: com/android/dx/merge/CollisionPolicy.java
+SHA-256-Digest: pgDsDfL8MlxS2wS3ZMzSXwYtq7t6yE92DxIX9s0dF1o=
+
+Name: com/android/builder/internal/compiler/DxDexKey.java
+SHA-256-Digest: leSnTn8+YZVkFttARNjJJeqd9RkHwCh/et5jURkl4Hg=
+
+Name: com/android/builder/testing/ConnectedDeviceProvider.java
+SHA-256-Digest: YsXFyMx1QE/4n48vWsHMxGD4Ae1JO+rbaphX+Y38jb4=
+
+Name: mac64/libaapt2_jni.dylib
+SHA-256-Digest: 6jNCupAEKKxwluO4cXP/NWasEfO3euAjQHH1AiZjfJc=
+
+Name: com/android/dx/cf/code/SwitchList.java
+SHA-256-Digest: K310THYPKdrw2QkirIyQovVyuJq7U0dWKmuXMWxAUPs=
+
+Name: com/android/dx/dex/code/OddSpacer.java
+SHA-256-Digest: 7Bh6L0gwNw/7hBsQErXaVjiW1FxTdbrXcAJkPQHTCR8=
+
+Name: com/android/dx/dex/file/MemberIdItem.java
+SHA-256-Digest: /hTw60RTJzFJeNpl8QdL/K7mglrZqRsWl+LXv0wdlVY=
+
+Name: com/android/multidex/ArchivePathElement.java
+SHA-256-Digest: EScyhOXp2NhG7Zm01/dpxYvQWFfZAxpNU0qqglmUdOM=
+
+Name: com/android/builder/dexing/DexArchiveBuilder.java
+SHA-256-Digest: u8EiarjVRpVMyrkwUem+p7f2ypaR7d+Ul7aiAidpayo=
+
+Name: com/android/apkzlib/zip/CompressionMethod.java
+SHA-256-Digest: YBXL+m7dF8CT//2I49rEv06d/4mRhrw+xSUx21sLRXw=
+
+Name: com/android/builder/core/BuilderConstants.java
+SHA-256-Digest: PXKe6LFsoCbnFE44JJwZHNw8rNIXOYg5XKt2Mx4znWU=
+
+Name: com/android/dx/cf/iface/ParseObserver.java
+SHA-256-Digest: I107Dctymtuqn0RLz3ChbtFH9vxdjw3Z84bFCMeMr+g=
+
+Name: com/android/builder/testing/ShardedTestRunner.java
+SHA-256-Digest: rdF0OrlVrrgLebigs1MQL/4eud2JneMZ6BDuU1NtkyU=
+
+Name: com/android/builder/compiling/DependencyFileProcessor.java
+SHA-256-Digest: mSd7bu1tumonJo1PFi5v6TyNG9+j/YoajfORE6w29Gs=
+
+Name: com/android/dx/dex/code/form/Form35c.java
+SHA-256-Digest: 744UoppipR7IQyLeKK5lC/pZfAF+9L/8qN0rg53Fzsg=
+
+Name: com/android/dx/dex/file/DebugInfoConstants.java
+SHA-256-Digest: d/R+6hisK25jcuiM5bfo3P9duGgYiH8DvoI/tCqUino=
+
+Name: com/android/dx/io/instructions/InvokePolymorphicRangeDecodedInst
+ ruction.java
+SHA-256-Digest: eUu7RMjOitq9tlHC35/Zq0WsAHH4frj5hpYWbcV42nQ=
+
+Name: com/android/dx/cf/attrib/AttSourceDebugExtension.java
+SHA-256-Digest: Z25y4SksuPeyammJzigyQ7HADm9UmyVT3YLA57cEuDo=
+
+Name: com/android/dx/io/instructions/ShortArrayCodeOutput.java
+SHA-256-Digest: 1ThzsXSiXb3NmIFGJgAUiG+c57EGMWGe0a6FLR1puCc=
+
+Name: com/android/apkzlib/zip/FileUseMapEntry.java
+SHA-256-Digest: svkhnbEAgw3qMtKZCBPx4f7FFlvUYrUcIZFVj5z+dWs=
+
+Name: com/android/apkzlib/zip/utils/ByteTracker.java
+SHA-256-Digest: 2HPWE5iXtoOq5H5qDeFTCPjCh9WQ7pHkAXQL5eFSL/Y=
+
+Name: com/android/dx/cf/code/ReturnAddress.java
+SHA-256-Digest: qNH6jtPL43Hw+JBU6OLlGrAeRcO9Bu89LALTYre3jsU=
+
+Name: com/android/builder/internal/aapt/AaptPackageConfig.java
+SHA-256-Digest: qfx6xDwuZewtzOEqyhHZ2wqnpbUPlYGu54567uZyO6o=
+
+Name: com/android/builder/internal/packaging/IncrementalPackager.java
+SHA-256-Digest: QY1FyVNa83NNQfHClcuOPioJ3LgnTsm9gWKNLIW35YY=
+
+Name: com/android/builder/dexing/DexMergingStrategy.java
+SHA-256-Digest: Ve6mlsHSCbOHbmEEMR8nuRldnk/kh5Ku8zADQGqSXBg=
+
+Name: com/android/dx/io/instructions/ThreeRegisterDecodedInstruction.j
+ ava
+SHA-256-Digest: CmgSIfnXmWpab4IH+vejeh9cllLVQ5+Ee/1HvyaT2Eg=
+
+Name: com/android/dx/dex/code/form/Form31i.java
+SHA-256-Digest: j4DMfVOX2GZxWGkHNRQEEVX75lNhXoquRlk5WPWb4bo=
+
+Name: com/android/builder/core/DefaultProductFlavor.java
+SHA-256-Digest: 3gnrkFVeQ10wenvaEuBGJ/oY7xt+MoZJ0ebhqYcI0N8=
+
+Name: com/android/builder/dexing/DexMergerTool.java
+SHA-256-Digest: xjL5xrdHd3YElPJQ6PrmU2kasQNjfB0c5Uvb2pXNdKo=
+
+Name: com/android/dx/cf/direct/package.html
+SHA-256-Digest: TpcRUBIIR7aWuduyldpEYAxuxJhb7HyXsZVwFhhApgc=
+
+Name: com/android/dx/dex/file/DebugInfoEncoder.java
+SHA-256-Digest: dxtkOAaSOdVjorHnNAlaFrZkrH/tRwkA8fnrwKpsNsI=
+
+Name: com/android/dx/dex/file/Statistics.java
+SHA-256-Digest: losauYbhXqnLpF2sGXIr/k8vCHY3swonfSpymBxtzrA=
+
+Name: com/android/dx/dex/code/form/Form21h.java
+SHA-256-Digest: ivojpXjXx/fKRn6YnFFVN7hAwt7mF80f1xEFtfVo/YE=
+
+Name: com/android/dx/cf/code/Simulator.java
+SHA-256-Digest: jmNZeQdj80m6YZoCwchFVdP4X0b73d3KK/xyRvUfWS0=
+
+Name: com/android/builder/internal/packaging/PackagedFileUpdates.java
+SHA-256-Digest: dBSS8Gz2xC5LfAXitFCSzhumigJII89VL/gbUOdrSDE=
+
+Name: com/android/builder/files/NativeLibraryAbiPredicate.java
+SHA-256-Digest: fHarz/9jDKOfFE7PcoRGULTyZxzHvNDPw3bUbEiB72s=
+
+Name: com/android/dx/dex/code/form/Form22c.java
+SHA-256-Digest: gXtZlgQpLeE9n0C/kfuPszxBPQmo650Xsl34vRXEUig=
+
+Name: com/android/builder/dexing/DirectoryBasedClassFileInput.java
+SHA-256-Digest: nuYKvCDS1cObWMz8CLCdzvDyjUM2peMEjeumEw0wX10=
+
+Name: com/android/dx/dex/code/StdCatchBuilder.java
+SHA-256-Digest: bz8pnQ+gTa39Jzscl7mryilOd1sdYk7RnbkUsu1lLp0=
+
+Name: com/android/builder/internal/aapt/AbstractAapt.java
+SHA-256-Digest: ZQGfwABQyS5eQEmLpxTnyB2aUmnrkiABCqaJxttUkfo=
+
+Name: com/android/apkzlib/zip/AlignmentRules.java
+SHA-256-Digest: 4RQJUARdcKxgjRYIEZqEzMeVUQMz62nN1BS9/lOcRLg=
+
+Name: com/android/dx/ssa/SsaInsn.java
+SHA-256-Digest: oUKIGCcbM5kW8zejg5Al4cv3GkhVQHSQnjRxdJK/CqI=
+
+Name: com/android/dx/rop/package-info.java
+SHA-256-Digest: eXkiCVnRBJ3ok9pvDYLPl76FkZzoeeN8SQ/m5vPp4KA=
+
+Name: com/android/dx/dex/file/CatchStructs.java
+SHA-256-Digest: AqzwDNXGlEEk2IdR+NxA1MfbGuqXlA4UUkQus002X7g=
+
+Name: com/android/apkzlib/zfile/NativeLibrariesPackagingMode.java
+SHA-256-Digest: ey0j8CrIUtPhrReyW2GmHKAd2APOPZnyg0P0ZC6gTSU=
+
+Name: com/android/dx/rop/cst/CstKnownNull.java
+SHA-256-Digest: 2Xhtx+/Y3umHuxCbP77l5cIc8ETTs5mxKO/AeJ/s7aE=
+
+Name: com/android/builder/internal/incremental/DependencyData.java
+SHA-256-Digest: Y9hM6309eEcgxIOOgpEVuVb3KyKQZa/xBluD1Ufjo6w=
+
+Name: com/android/dx/command/annotool/AnnotationLister.java
+SHA-256-Digest: +RvpTxVTmxW7y8//0n9ZJy4dmHRDeuybmlEknqK8bzk=
+
+Name: com/android/builder/internal/aapt/AbstractProcessExecutionAapt.j
+ ava
+SHA-256-Digest: nuv7nM4gY+XvE4YTohzELtORlWvauXrBmuUg6ML4bFQ=
+
+Name: com/android/dx/ssa/ConstCollector.java
+SHA-256-Digest: Y9unr8GSiGPr2qbEBus3632rhLnN+mMoc2JGaOoTxmI=
+
+Name: com/android/dex/ClassData.java
+SHA-256-Digest: OogREtslz1DxIJ8VV7LbVuzTIxzGmvLRXu+UUAkkmtU=
+
+Name: com/android/builder/internal/compiler/DexWrapper.java
+SHA-256-Digest: dYqFnyb7ZRXSvlhzFSO6OU1sxaQoY/6T/0M2f0dwRL8=
+
+Name: com/android/tools/aapt2/Aapt2JniPlatform.java
+SHA-256-Digest: SWBDV/LyLK/VtNEDz1P25DovPWknqdaa8nP3gMMtWuI=
+
+Name: com/android/builder/sdk/DefaultSdkLoader.java
+SHA-256-Digest: HbXNsbgvhxlBf7aivKi0B0TRiidg7yy5VE71MjG4llc=
+
+Name: com/android/apkzlib/zip/CentralDirectory.java
+SHA-256-Digest: 6+T2B7OShN5gkzJ56UHx4iRG/B/F9IhLL/kS2B+3lwQ=
+
+Name: com/android/dx/io/instructions/CodeInput.java
+SHA-256-Digest: etTtrkLp+ow7bOAlrdFfuOVarvNQONA+hnoa0WQYtG8=
+
+Name: com/android/dx/dex/file/AnnotationItem.java
+SHA-256-Digest: ByRBfOF+KasMbaplEWApQrrqtWegyjSPK5sLQogfiEk=
+
+Name: com/android/dx/dex/code/form/Form10t.java
+SHA-256-Digest: R3G/AUgJwFzS8SpADJYQfGpO9AjfNRBi/kZHhn7CSlw=
+
+Name: com/android/builder/internal/compiler/PreDexCache.java
+SHA-256-Digest: ve6aO2YLkxnmKfFoJBHRLHqgTPCpGH1e+OM5vJRpMMU=
+
+Name: com/android/dx/cf/attrib/BaseAttribute.java
+SHA-256-Digest: lXZEiuuAgqUqScDWtOteUjoQDhqQZ8O1Ccilx4UCrD4=
+
+Name: com/android/dx/dex/code/LocalStart.java
+SHA-256-Digest: /a2ujz8PvysOMWbKk0M99unpCzmo7HBhSIGONcSNUf0=
+
+Name: com/android/builder/merge/DuplicatePathInIncrementalInputExcepti
+ on.java
+SHA-256-Digest: wDSBExzpaC/GX+p4kza1ZuO5Y09piVqsR0l+qf7D4jg=
+
+Name: com/android/builder/tasks/JobContext.java
+SHA-256-Digest: reQ4mu9xa79e1aRBpS29rlrkFiIIVE6LiPfxo15gMhY=
+
+Name: com/android/dx/dex/file/OffsettedItem.java
+SHA-256-Digest: 46EhgRdJx2kUZwlakc3AHmLbmx6kvM+EAsjDioHFvh4=
+
+Name: com/android/builder/merge/StreamMergeAlgorithm.java
+SHA-256-Digest: OUB6/h1XoLXQS7fF1Ojl4Aodo9uh+ps9Xy+edOikhB4=
+
+Name: com/android/dx/dex/file/AnnotationUtils.java
+SHA-256-Digest: mddJ7VoxiWzt0XrOUioHhY+ehXwh947Wt26yRSMCL74=
+
+Name: com/android/dex/DexFormat.java
+SHA-256-Digest: Cq9QzFaxN+2MCWLD9fkUqrd4/cLLeYBwjWM7oO8qbF4=
+
+Name: com/android/dx/rop/code/InsnList.java
+SHA-256-Digest: 7GGBRIDM2j24rHhNeCtoYNk4T5Vy1aMyly6EO/Ko/S4=
+
+Name: com/android/dex/util/ByteOutput.java
+SHA-256-Digest: 16APSEZnjQBxOVdh6JeLRO1aDC4r0R6J9zgJLBMO0cc=
+
+Name: com/android/dx/cf/code/BasicBlocker.java
+SHA-256-Digest: /S8CNAzrqmCK6MRiGLeB3EQ0UV2QA1eqFw/4J9bSo2U=
+
+Name: com/android/apkzlib/zip/ProcessedAndRawByteSources.java
+SHA-256-Digest: nLGuMa9vedTp5oXEwPixvjWwCx/x5geR4OjmtMOdOBY=
+
+Name: com/android/dx/dex/file/IndexedItem.java
+SHA-256-Digest: An2/venbt401CjzdgAk+Eb+IOgs7TXPHCIKMQDMNAcg=
+
+Name: com/android/dx/rop/code/TranslationAdvice.java
+SHA-256-Digest: A5rfJld3wsR3ZKB9z/GJGT0ip1QLQeRMxJ+6m5ahFF4=
+
+Name: com/android/dx/rop/code/DexTranslationAdvice.java
+SHA-256-Digest: cEuyi3Xrbkw1rT9uTCQPFCIt+C6NRIJYZfE/kLqjfzc=
+
+Name: com/android/dx/rop/annotation/Annotation.java
+SHA-256-Digest: ixdnhHcHQ1+j6GsXt7CHlLnyCk96rMhzVjhHqKLbhZ0=
+
+Name: com/android/dx/ssa/NormalSsaInsn.java
+SHA-256-Digest: Z98/PZTqVZPZYcsbkteaDtH0MSWT3BGEcqH693xCnLg=
+
+Name: com/android/apkzlib/zip/ZipFieldInvariant.java
+SHA-256-Digest: emkyoWpfoqoFCRwqCz6DHd7CftxYOKrQXs3oBHEqbZE=
+
+Name: com/android/dx/cf/iface/StdAttributeList.java
+SHA-256-Digest: EMq9EKLxvvGSqKdrbVVOFhtMUN1EN1AFcK2bu5n2FT4=
+
+Name: com/android/dx/command/dump/BaseDumper.java
+SHA-256-Digest: lVvIxLTzfEtvyPZ/D7i27t/QFwoUbu+YL9iqSsLEpqA=
+
+Name: com/android/dx/util/ToHuman.java
+SHA-256-Digest: VjWvU9UTMGXadUYMSV6J1r8AiiytInHxZ3R852OdPOI=
+
+Name: com/android/builder/internal/compiler/AidlProcessor.java
+SHA-256-Digest: J5HPHYUpgQFlSpGInP5tSuSlIlHI696hnmGO3xWUNqs=
+
+Name: com/android/builder/utils/SynchronizedFile.java
+SHA-256-Digest: ngslaB2VVFHhYGOnJcf+nOPN2cxn9+n1557RkAVZkQI=
+
+Name: com/android/dx/ssa/back/RegisterAllocator.java
+SHA-256-Digest: 6yrwBg/DLXoD4OWvPYG+2sio5Xng/XWCw+yD2hjg9HQ=
+
+Name: com/android/dx/rop/code/PlainCstInsn.java
+SHA-256-Digest: 4Osz/SfRD8Pu33JTMPh/TVdkpV7h9w5MjkKn9/gkiBg=
+
+Name: com/android/dx/dex/file/ClassDefItem.java
+SHA-256-Digest: rrGCXzRqMCuZo+/VqYBhGKG4wmYEhoVNyOlvCj/Ey7Q=
+
+Name: com/android/builder/dependency/level2/AndroidDependency.java
+SHA-256-Digest: dg9aO4cl+VvAuKJiljoydrugpEp+4wOXjcpsIvGC0NQ=
+
+Name: com/android/dx/dex/cf/CfTranslator.java
+SHA-256-Digest: wf53LId6LfI5/q5LJ+t0zRfRfk69nok4ShuZMHCZUVc=
+
+Name: com/android/dx/rop/cst/CstBoolean.java
+SHA-256-Digest: ePlqEnfMD4liuSusYC/d91wlMpaTvf0qRDsBtC0dF/0=
+
+Name: com/android/dx/ssa/SsaRenamer.java
+SHA-256-Digest: XS5HHxgumGtu+26aVizxTcF0gaEBYTEozBAxf2uwEs0=
+
+Name: com/android/builder/dexing/RuntimeAnnotatedClassDetector.java
+SHA-256-Digest: Jknhd3PLHNfryHoZqkY64c5c5iZTOS7gEsXJSh6WvA0=
+
+Name: com/android/dx/cf/direct/AttributeListParser.java
+SHA-256-Digest: 6DMsxhtNzMuRW9arV0O1PNa1YmoAkFWKJcQl+Iu22Jg=
+
+Name: com/android/dx/rop/code/LocalVariableExtractor.java
+SHA-256-Digest: 5IzFYh1NlWbCJ8OTLkWE+BhXShqjxZbemTuQGI7jS2c=
+
+Name: com/android/dex/TableOfContents.java
+SHA-256-Digest: Ot6u2h3b0lAIN6K92U7xB5JGVDvvGWfy8WmWq63Hapo=
+
+Name: com/android/dx/cf/code/package.html
+SHA-256-Digest: BLIgXiWWf+EX87UJsZafB551KsUplle/CQUCYMPcU9E=
+
+Name: com/android/builder/testing/SimpleTestRunner.java
+SHA-256-Digest: v9tE2VR0kn0EJbtFO/42VEvTMrfCMzR1GG+UHyGT+Oo=
+
+Name: com/android/builder/version.properties
+SHA-256-Digest: tFFxlGSoNRtTmA8akiDUxPxz+9HPYJhxL1GCxt2J7Ds=
+
+Name: com/android/dx/ssa/SCCP.java
+SHA-256-Digest: btlC3D54tHzp1WldaLai5N8D5ADBWsf8IYKK+Ks5cYQ=
+
+Name: com/android/builder/internal/aapt/QueuedResourceProcessor.java
+SHA-256-Digest: vxNowaDG5kK2c7EbHK47dfX7miV1euvfdx8ONh8ePWw=
+
+Name: com/android/dx/command/dexer/DxContext.java
+SHA-256-Digest: offqWlNxjKSJ6sExkIPP2bXU9ixuEPABiwl8gxjZ1YY=
+
+Name: com/android/dx/cf/code/Merger.java
+SHA-256-Digest: X5qs5Pwy6MEnX+P1ubrs+kid+ToEK01jkxJLr3zr1SM=
+
+Name: com/android/dx/dex/file/CallSiteItem.java
+SHA-256-Digest: nt0shycysA8AsLl5Isz3iVhVD11JrBA/5qdliQK5ZrU=
+
+Name: com/android/apkzlib/zip/ZipFieldInvariantMaxValue.java
+SHA-256-Digest: ON0pmWp0imvqT71OBCHqfTDzpF4mHKJXoyJjxaR1XVo=
+
+Name: com/android/dx/cf/attrib/AttLocalVariableTypeTable.java
+SHA-256-Digest: PVI/oeeTgdjfXHtzU+R2PryrxDzoSdpz3Jnr7ZWv8Yw=
+
+Name: com/android/dx/command/annotool/Main.java
+SHA-256-Digest: 3COicZFJ5yGRQGj/i6QN/IjigL5xoGN/vT2POsR+yG4=
+
+Name: com/android/dx/ssa/back/FirstFitAllocator.java
+SHA-256-Digest: hL3euFgku6PztSa9LPptPvp16xLf6xQOUk2nxKwgtz8=
+
+Name: com/android/dx/dex/code/form/Form10x.java
+SHA-256-Digest: wRIrlwzvwZkzPVzhVnYJyTSNNuc/TnhqHqZg4u5fPXw=
+
+Name: com/android/dx/dex/code/form/Form3rc.java
+SHA-256-Digest: tGRDXk7ImH7pTWyJRGXa+6WWuxmFL4nrY3Khc0ZuOqg=
+
+Name: com/android/dx/dex/code/CatchTable.java
+SHA-256-Digest: iB2g0jEnVk4KIJ9VU+pTRwH+EgwlfWNqMcq8luiArcM=
+
+Name: com/android/dx/ssa/Optimizer.java
+SHA-256-Digest: 4FCdwGqsNbOiALFJdlMzG/FNI9gu9t3hI525/WTH9HM=
+
+Name: com/android/apkzlib/zip/ExtraField.java
+SHA-256-Digest: MKKECjZ78DAQP0DVScdu7P8AJw6XMy+wT/o9a8m6u+w=
+
+Name: com/android/dx/cf/code/OneLocalsArray.java
+SHA-256-Digest: B0B48cyMD7OKT7UyeNN9uiwCIlG2Ajuju/n1b6r6NTw=
+
+Name: com/android/dx/rop/cst/CstMethodRef.java
+SHA-256-Digest: D2im7/+GuYpXxFWQWYrz4ygmSGv2jBXV8oMJnZyeTqI=
+
+Name: com/android/dx/merge/DexMerger.java
+SHA-256-Digest: D+WyIBPh14jed0lyHrUQYjz3wd76Yu9xz19weGJR214=
+
+Name: com/android/dx/command/dump/DotDumper.java
+SHA-256-Digest: iU42iPbpdvqMXtfB30C9Ofu4JBTqGVB+tMSaf13fKpc=
+
+Name: com/android/dx/cf/attrib/AttInnerClasses.java
+SHA-256-Digest: 4yiwh0hYAC9xw6lYBKoDAM0KNOMXdLEVKahhdAY+WJo=
+
+Name: com/android/dex/util/ExceptionWithContext.java
+SHA-256-Digest: DAxy1I0j2wjXsOjSDx3CYtEo3MtrxwuFjfxfYqqWkjM=
+
+Name: com/android/dx/cf/code/ByteOps.java
+SHA-256-Digest: uO2P+mNOucUN8TwroOxPZhnBguo660EJa22iYbZG/KI=
+
+Name: com/android/dx/ssa/PhiTypeResolver.java
+SHA-256-Digest: fqa5oRZN0mxrpzk+6akfVeBRQ0Uwzb/FbNEIfbMIi6Q=
+
+Name: com/android/apkzlib/utils/IOExceptionRunnable.java
+SHA-256-Digest: kRQHW05WjSxVbESxWndC26Q7lAm0WZxW5JN5UxSyW4o=
+
+Name: com/android/dx/cf/direct/DirectClassFile.java
+SHA-256-Digest: /Iccuo+8wH3ujw6ne3yqmrQT12sI43I3rwRY1XtnKsQ=
+
+Name: com/android/dx/ssa/back/LivenessAnalyzer.java
+SHA-256-Digest: T2h9yiuh4u6dEigyKqEA9Pa0EplsGz847aTQonDtRAo=
+
+Name: win64/libwinpthread-1.dll
+SHA-256-Digest: hfB4FQ0MHe73GCsnQ0xPPlMxRRLrIcd8zi/HLfMlsnA=
+
+Name: com/android/dx/dex/cf/CfOptions.java
+SHA-256-Digest: oxPX18hCluhSPkXDpFOjlTJhq/gB+2TuabNkpm2VL7Y=
+
+Name: com/android/dx/util/AnnotatedOutput.java
+SHA-256-Digest: o/BwEfDo0OqPW+W5Eao0ozdQMNmnzWxeRaHrpJkbI5A=
+
+Name: com/android/dx/cf/code/ByteBlock.java
+SHA-256-Digest: klLijS3h+FfjfSFNPhqTgC3yXEvVK1wfnlXba3akFX4=
+
+Name: com/android/dx/cf/code/ByteBlockList.java
+SHA-256-Digest: 3a9Vs5HwD4CKG/n/BCOm0qm65SHOyLy4EB9YKXHxNYw=
+
+Name: com/android/dx/rop/cst/CstArray.java
+SHA-256-Digest: I3MbD08S5WQNDdAgs0HFs36N3VUxA+YNUj6bBYqOZ3E=
+
+Name: com/android/builder/testing/TestRunner.java
+SHA-256-Digest: LPQKTbbjxcD3ElSXPoDqCkzwm38x1L/pvN7iyOAjUI4=
+
+Name: com/android/dx/io/instructions/InvokePolymorphicDecodedInstructi
+ on.java
+SHA-256-Digest: iJxk9A+fZF47nEmrSEMtua/exjtnlPeKwZqEGt97uLo=
+
+Name: com/android/apkzlib/zfile/ApkZFileCreatorFactory.java
+SHA-256-Digest: CdqR82rvNFOgBI2g2SdYlimnDG2ZcMGisjD4k3mMCvM=
+
+Name: com/android/dx/dex/file/ClassDefsSection.java
+SHA-256-Digest: Q6E1MzdfA/pq1aG12QVehE2N2ysVTHIti5FE3Qkbn5g=
+
+Name: com/android/apkzlib/zip/compress/DeflateExecutionCompressor.java
+SHA-256-Digest: PSaNJJeWSWJigpYNTcN6m+Ez4nRFthoxLfegwlVJoZw=
+
+Name: com/android/builder/profile/ThreadRecorder.java
+SHA-256-Digest: q8OgYd0yqUsrgiwfrBckRH2xYOtUMY09d//3wpBoPMM=
+
+Name: com/android/dx/command/dump/SsaDumper.java
+SHA-256-Digest: t/xMXeCGJ5lj339SXUIzDSeQiavH3oo0fg2t5Eb3a00=
+
+Name: com/android/dx/dex/code/form/SpecialFormat.java
+SHA-256-Digest: P1MVpAWrZ5rkf5GYiKzd1c3w1Ww28uSbUCT/l6BXVxc=
+
+Name: com/android/dx/command/Main.java
+SHA-256-Digest: m/EQVZDwJol4YgmaEsRMFO+QcMe6Vwyx36fcb9xiymU=
+
+Name: com/android/dx/rop/cst/package.html
+SHA-256-Digest: ifyyp/x99mdV0Ox3hJ0b22baYsDsGH2Oyhgx953QXQ0=
+
+Name: com/android/dx/command/dump/BlockDumper.java
+SHA-256-Digest: /0DwQTy19cwOSUyqfA30xCB4i/lDetM6iGRSYrbj9nU=
+
+Name: com/android/dx/command/grep/Main.java
+SHA-256-Digest: LWehooujgCUAD4vxAB/AWaCecPOEHErFIbrYIRtQrOQ=
+
+Name: com/android/dx/dex/code/Dops.java
+SHA-256-Digest: yWsP6+L9emA+TP8nT4BVGC3wvjQ1eorfMcqhexaHM80=
+
+Name: com/android/dex/Mutf8.java
+SHA-256-Digest: GknXHvWDmf83AVje45pclt94DdCJbuD4+QWQApHnQm0=
+
+Name: com/android/dx/cf/code/BaseMachine.java
+SHA-256-Digest: uPhBjH+rYOVCM1JWcdd3I4nb99Xot08uPIDIBuo5kfE=
+
+Name: com/android/builder/sdk/SdkLibData.java
+SHA-256-Digest: Ax3voXzq2i/zz3h+KXegrhc2Xw2WTfXbEzmG807ZOAA=
+
+Name: com/android/dx/rop/annotation/NameValuePair.java
+SHA-256-Digest: avyWgILOT8OqN0ChYywFdleTIvn9W/0nF7qjX45bUiI=
+
+Name: com/android/builder/core/DexByteCodeConverter.java
+SHA-256-Digest: fNPgJLbXncfOMzqmVt4P6BSOmdQs6+sE3fUQxbFl4/Q=
+
+Name: com/android/dx/command/dump/Args.java
+SHA-256-Digest: ijA/igzQsbdOwJNjdKSJIIqJkjbowg10GwGGPAlrpRQ=
+
+Name: com/android/dx/dex/code/form/Form12x.java
+SHA-256-Digest: bSFNs1xJw8UVXJtc0UCUGtf5rcP8DjpaCOsBt4ofs+o=
+
+Name: com/android/dx/dex/code/RopToDop.java
+SHA-256-Digest: aThjQQQzbXANZMHf5nixqaXxytSJGPJDw6KNrdeUgVI=
+
+Name: com/android/builder/merge/IncrementalFileMerger.java
+SHA-256-Digest: cX4Y2+LdfXnr4WyJzLMn5MkNQZo46qCTCs0cZAke0Fk=
+
+Name: com/android/builder/dexing/DexArchiveBuilderConfig.java
+SHA-256-Digest: 00oNKETcrlPsG2bvareli0ntIi7sIv4Wq2sm8ErFDSs=
+
+Name: com/android/dx/io/instructions/AddressMap.java
+SHA-256-Digest: G8J2BURDJSB5Fe59jxJddfCi2sg78niBOOUYiinpa6E=
+
+Name: com/android/apkzlib/zip/ZipFileState.java
+SHA-256-Digest: iJDnCpnZXkLlxXhIXjVcx9mABlFgQkoK1/mUVwhtOng=
+
+Name: com/android/dx/rop/annotation/AnnotationsList.java
+SHA-256-Digest: OdNiUHvqPNq+2QY4F4FCfvwigqzCBwbcIAQ/hTFS4WI=
+
+Name: com/android/builder/dependency/level2/DependencyNode.java
+SHA-256-Digest: BO2O8CXSkVLbtyMRSttcRd2qu1Q10GCIb665qdRGfkU=
+
+Name: com/android/apkzlib/zfile/ApkCreator.java
+SHA-256-Digest: KSB+GpcHY6YwgDCjPwj7Uxmxuf5ggPZoEZJchCzzLxM=
+
+Name: com/android/dx/cf/iface/StdField.java
+SHA-256-Digest: qPwij0PyiU0DLKpeR/pyRznHOlrKIo/GRy4Xi/iFbdk=
+
+Name: com/android/dx/rop/type/TypeBearer.java
+SHA-256-Digest: 3aqeG3hzSkXRHKAxqRvpzKkdHqCLSOeqxrK/7mbOriU=
+
+Name: com/android/dx/cf/code/ConcreteMethod.java
+SHA-256-Digest: 2BClumUCi9zvVUYVSIrKg3FubM7PeNmO454lN78Uui0=
+
+Name: com/android/dx/dex/file/AnnotationsDirectoryItem.java
+SHA-256-Digest: T6Fg+VL2oTtpvioVYTRhdTBYl/hYiaSZOuhGfyNjvi0=
+
+Name: com/android/dx/rop/code/RegisterSpecList.java
+SHA-256-Digest: yYa3aN7cl8Ac6syxnUCprubcFCLFtokVLtYWZ0+uDSM=
+
+Name: com/android/builder/dexing/DexArchive.java
+SHA-256-Digest: +ZP9dmI3yfX57xA/vEcKhOCmVk4KuWkPZR5zwQAanAk=
+
+Name: com/android/dx/dex/file/TypeListItem.java
+SHA-256-Digest: 5ZBLL4bXuVBr8A4cjfM7ClkYdtZDBKTzBB2p4Fh+wZw=
+
+Name: com/android/builder/utils/ExceptionConsumer.java
+SHA-256-Digest: IvuioXRfaPorzxBG8zUDklwLKoEpPcn6ueYQPCFySEI=
+
+Name: com/android/builder/tasks/Job.java
+SHA-256-Digest: 4GN59AvOiJ2yc728PgcJQpJILXCJWcMMtcbZtrJJHjs=
+
+Name: com/android/dx/dex/code/form/Form31t.java
+SHA-256-Digest: 7kNvf+n3b6yPmpDyUMFG0taoEW8nsaMLPXWDOvCZS0s=
+
+Name: com/android/builder/dexing/DxDexArchiveBuilder.java
+SHA-256-Digest: 4zVRU3/6BaYjq4nXsh48uDRoBd4ahnbHzl0Lrp6f5yA=
+
+Name: com/android/dx/dex/file/CallSiteIdItem.java
+SHA-256-Digest: lEGLDbi0Q5dDSwqchRuIXIaAkNsIgoGipRDfbT1aQ1k=
+
+Name: com/android/dx/dex/file/DexFile.java
+SHA-256-Digest: +sinf/TR47s0wJjS/sSRCMDF2Toeoz0iMeV8WXFQC8U=
+
+Name: com/android/dx/rop/cst/CstChar.java
+SHA-256-Digest: s8KhIw4f5AFFncdSKKReBrkTg6VcHurRhTrRFYZ5w+Y=
+
+Name: com/android/builder/internal/aapt/AaptUtils.java
+SHA-256-Digest: gv3pES0uVYxFfmUaiX8bvIdiMwk4Bmvmk1gDazUZ2nM=
+
+Name: com/android/builder/dexing/ReferenceCountMergingStrategy.java
+SHA-256-Digest: WamQ42KAM8tQzUhiPeEfyu7adcpp3YD0+TOTCQzUSWQ=
+
+Name: com/android/dx/cf/direct/FieldListParser.java
+SHA-256-Digest: LpvO0Bn30ndZdIhafGfbf89N5OW07dcWA8Y2exIOQs4=
+
+Name: com/android/builder/internal/TestManifestGenerator.java
+SHA-256-Digest: tRMPNjv79vOXPgbHFc5wNeN0IyMaUm0w7DPj8E5mtDg=
+
+Name: com/android/dx/cf/attrib/BaseParameterAnnotations.java
+SHA-256-Digest: sFqC0SwEqc+C0IvkRrLo7JEpSlO1+1ztmsEpNYOgLRE=
+
+Name: com/android/builder/png/VectorDrawableRenderer.java
+SHA-256-Digest: hs/J1nPJVMV0rCpLJJilAZWxLUlXSvmGkS/WOJeMrtw=
+
+Name: com/android/apkzlib/sign/DigestAlgorithm.java
+SHA-256-Digest: 70PiN7NPeBCnSnxOGYgr/m3MqcLmxXh1L6ZS5cV8h3Q=
+
+Name: com/android/dx/cf/iface/ParseException.java
+SHA-256-Digest: 6dGZpqZ2C3fbXsZs+ec6nDDxyL2lZSE3glzHkz0jS2M=
+
+Name: com/android/dx/rop/annotation/AnnotationVisibility.java
+SHA-256-Digest: hOsUieXWaKgdj9spB6HKFh3Vz6bi2+UwrgzUFxxHYYE=
+
+Name: com/android/dx/dex/code/VariableSizeInsn.java
+SHA-256-Digest: kWpPVeBwmlVagyyAeo+tLpSMlHSo9Y2jBR2S/nqYRtI=
+
+Name: com/android/dx/merge/IndexMap.java
+SHA-256-Digest: RxmEDrbHnCax/9Lfv2HPde6eICuiMZCpHwaXl7INnhU=
+
+Name: com/android/dx/rop/code/package.html
+SHA-256-Digest: EXn3aYBaY/hgMWFvFp99g2YMtaoHXsrR8QBJF14V97w=
+
+Name: com/android/dex/EncodedValue.java
+SHA-256-Digest: t+odMKfomrJgFdQwPh8GnWwHNtQnSn61RZJiMvj58YU=
+
+Name: com/android/builder/testing/BaseTestRunner.java
+SHA-256-Digest: RIlK3tlTxpIm/4gZE4XjE2KD1WSis7tGP/zPVMdTgQ8=
+
+Name: com/android/dx/Version.java
+SHA-256-Digest: a2zaDTNI4ZhDcdw1GewUWzfi4f8t7/ifqyoBlxyXd5k=
+
+Name: com/android/dx/dex/code/LocalList.java
+SHA-256-Digest: YdbiuVZGYVWeNo/9vMSPjyl+NCVvJxIq4oLGAuEruNA=
+
+Name: com/android/dex/DexIndexOverflowException.java
+SHA-256-Digest: iF4n8yx5X1HCgLiI6OCz4BWCsQ/zW+Q0SQmT7gamy+A=
+
+Name: com/android/dx/rop/code/PlainInsn.java
+SHA-256-Digest: BjUz1SWmyxN0EXVrUNgsZSHE/0u7pW98Xhdc+yor1uw=
+
+Name: com/android/builder/internal/aapt/AaptQueueThreadContext.java
+SHA-256-Digest: 9398GFWfISq9zZ5CmeEZ6M5SWJ11YChMCjbcBxd5sYQ=
+
+Name: com/android/builder/packaging/PackagingUtils.java
+SHA-256-Digest: 7T8gXiexkCAdtU1Mitcuu3DCNaqckxSbAbaMspCJYEY=
+
+Name: com/android/apkzlib/zip/compress/Zip64NotSupportedException.java
+SHA-256-Digest: ysy+rMuTThdGRdWJ42gvspwRSNeoR+Zm78HxnGT4IOg=
+
+Name: com/android/builder/internal/packaging/DexFileNameSupplier.java
+SHA-256-Digest: wJzXud5FrnEY5AHcBYLGk9UNzxB4c5mBaJ+wNv2Ak24=
+
+Name: com/android/dx/rop/cst/CstByte.java
+SHA-256-Digest: 7fQStTGJSg2yuXJKtBEri7PoZ3//rY0TkcE+F2hePX0=
+
+Name: com/android/apkzlib/zip/CompressionResult.java
+SHA-256-Digest: O2sEaCi+oP/ypOqoz/5Uysyvvp2i3YAtSkQpK1GIbhQ=
+
+Name: com/android/builder/merge/package-info.java
+SHA-256-Digest: /DPttsenGSMKkE8OHUHX44/Ok4Ey6o/fsA658UlmZiU=
+
+Name: com/android/dx/io/OpcodeInfo.java
+SHA-256-Digest: jqKQgBslhxIvR51dZxV7Uar32LnmiJNe4kEI/tlhv94=
+
+Name: win64/libaapt2_jni.dll
+SHA-256-Digest: DsQHMdg/qh4NChz4VQyZALv6vnK90Dw2wbW/nCpstHc=
+
+Name: com/android/dx/dex/code/Dop.java
+SHA-256-Digest: LUgIHWIybMH1zF2ngWlT8JKNTTAcSQpRzcI3nkTggFk=
+
+Name: com/android/dx/dex/file/ValueEncoder.java
+SHA-256-Digest: Qab6C1snKV1uiChh0lylO/aQnxLFTvqf7tOue4358FA=
+
+Name: com/android/builder/internal/aapt/v2/OutOfProcessAaptV2.java
+SHA-256-Digest: 8Kjyw+1vdCNOCpEbFgNKFFYHhdiKMfX0NEaOAlCkJZo=
+
+Name: com/android/builder/profile/NoOpRecorder.java
+SHA-256-Digest: 9RdvIIgnNhOYhWC7ww8S0ZYBOzlqTH4TcCjUkrkRvAM=
+
+Name: com/android/dx/dex/file/StringIdsSection.java
+SHA-256-Digest: pkkeK39ACBfP/mRJzd+9mnVkykgtmxkiHYYuEa5NpDQ=
+
+Name: com/android/apkzlib/zip/compress/BestAndDefaultDeflateExecutorCo
+ mpressor.java
+SHA-256-Digest: 85FyCi6lY+nShsxDuO5jPB09VwrjWmgmP80tbf54VaU=
+
+Name: com/android/apkzlib/zip/CentralDirectoryHeader.java
+SHA-256-Digest: vZ3zypNt8AVtuZVQ9JeeAVfYzVBzhRlU4Q3h9MwBC5w=
+
+Name: com/android/dx/rop/cst/CstInvokeDynamic.java
+SHA-256-Digest: 9nYVvFee8uq/LYYLtDN43UiIo+++03UHBkx+W+rYm/s=
+
+Name: com/android/builder/internal/testing/SimpleTestCallable.java
+SHA-256-Digest: aBipVosPtDvqRvwzUHpv50hTkaUnLMKISvj7TJ4rOe0=
+
+Name: com/android/dx/rop/cst/CstString.java
+SHA-256-Digest: gl4+T/pOafzWjVOrkMDctF51QFnFlOl0Ov3bOjFbTYQ=
+
+Name: com/android/tools/aapt2/Aapt2Jni.java
+SHA-256-Digest: fUSYZ3jWzdfiXpWhHjYlq9TPA8pL5CJcUaRA5gwUXIQ=
+
+Name: com/android/dx/cf/attrib/AttRuntimeInvisibleParameterAnnotations
+ .java
+SHA-256-Digest: k9ksVj/9pn6D2AtQyBWVTwcVNNSHIDOnBnOQeAymJIA=
+
+Name: com/android/tools/aapt2/Aapt2RenamingConventions.java
+SHA-256-Digest: Q8bDA+iOrJP4jXY5K3tNFSYvSjwSZ/4mdC49fG/qdBc=
+
+Name: com/android/dx/cf/iface/AttributeList.java
+SHA-256-Digest: A4NadW8nWF4zd+zqufFGk6YFVz6ugJMYsmQyJl6Uzms=
+
+Name: com/android/builder/merge/IncrementalFileMergerOutput.java
+SHA-256-Digest: 7DR5D1SUYPcG9iYzCYK+2RT8LGGzjiiN0k+OQtPvai0=
+
+Name: com/android/builder/utils/ExceptionRunnable.java
+SHA-256-Digest: 5VDAcZLdyDeX9zfSWspSHegmjCZK20IRNgxCi/O7pM0=
+
+Name: com/android/builder/png/QueuedCruncher.java
+SHA-256-Digest: FwJxh1N3tnBXGnBVXdYmymW1dNKbx+bWhf2g1P5x2q0=
+
+Name: com/android/dx/rop/cst/Zeroes.java
+SHA-256-Digest: trpLlPW3hAR7vA2tBA806/Ke89fRUqGQURtbKPGp8ic=
+
+Name: com/android/builder/merge/RenameIncrementalFileMergerInput.java
+SHA-256-Digest: MnidxQ1TxESw2vGe3uJDnLnniicwqD7XbYz/A5WzSD4=
+
+Name: com/android/dex/Leb128.java
+SHA-256-Digest: VKd9SrOLjAp9c+90PP02ePHgfUFoKTIsrcvVDqfhZFI=
+
+Name: com/android/dx/dex/code/form/Form21t.java
+SHA-256-Digest: 0N5S7HB532BC2HN3kG2mmlVNboEFdfqxw8ee4vPrUOo=
+
+Name: com/android/builder/files/RelativeFiles.java
+SHA-256-Digest: OCeevrYdwE+VtzxdJegulZxNDHAHekT7/OGOrQ6zGd4=
+
+Name: com/android/dx/util/LabeledItem.java
+SHA-256-Digest: qGxua8CwzPw/dWKvuNtkdgo8XSZc/Hb4HK+nB3E1YyI=
+
+Name: com/android/apkzlib/utils/IOExceptionWrapper.java
+SHA-256-Digest: c+/BUTGiZgdDGvwwGFrGDRDupENDBycDTvtATYq+6W8=
+
+Name: com/android/dx/cf/code/LocalVariableList.java
+SHA-256-Digest: APzDMVVszOhIK2K+DhyrnPnDOuZC41vVJ3B3c+Nxr8E=
+
+Name: com/android/dx/rop/cst/CstCallSiteRef.java
+SHA-256-Digest: QbkfJ3dyDsCshMHL4wESXUpMToK33pQ0S4preqqvus4=
+
+Name: com/android/builder/internal/compiler/DexKey.java
+SHA-256-Digest: kS5+pongFNb085s0gMNl9ma02oO53+m0dHsLC/4FolM=
+
+Name: com/android/dex/DexException.java
+SHA-256-Digest: FVNFMshBRmWT4xWsesw7of8OSrF2QTDHvj9S63/ZoZM=
+
+Name: com/android/dx/cf/code/SimException.java
+SHA-256-Digest: iG5HJtRd+QYvki1p/W0PBSxWhAU2d2FTcw0hoHwPW9Q=
+
+Name: com/android/dx/cf/attrib/AttBootstrapMethods.java
+SHA-256-Digest: qPAFQTpsZfNnaJydwlOJIRkauqrivoffP1HFFp5LGBc=
+
+Name: com/android/dx/cf/direct/CodeObserver.java
+SHA-256-Digest: cPrMc9R304t13jhOG/3BIyAGC/3GvybEw1PA51yxlBM=
+
+Name: com/android/builder/internal/aapt/v2/Aapt2QueuedResourceProcesso
+ r.java
+SHA-256-Digest: vZ2waOZIOWB5W9baDe8YjQ+zwTQzo5ZOUdRaIw5G5g0=
+
+Name: com/android/builder/dexing/DxDexArchiveMerger.java
+SHA-256-Digest: Yn/G5LS0iNnNZMlK3NocgK7QVIK9xZtRhOyG6/94Ey8=
+
+Name: com/android/builder/tasks/BooleanLatch.java
+SHA-256-Digest: dGy/JtdGlVGlPpBehvvEqoxjAqp3quurKOzl8/I/UxE=
+
+Name: com/android/dx/dex/cf/package.html
+SHA-256-Digest: XkApscOyL0TGB+Z6OT8qvdZQUsY7tbJFulp25o0pwe0=
+
+Name: com/android/dx/cf/attrib/AttRuntimeInvisibleAnnotations.java
+SHA-256-Digest: ykF5md9+m7mmbea4gSY+lE2UBF1B0E4PlbbDTMqYImM=
+
+Name: com/android/dx/rop/code/BasicBlockList.java
+SHA-256-Digest: 1SJHn+WHQqY/DbGU6IZXKVt0PSJHZIwYjIZU8u2+G94=
+
+Name: com/android/apkzlib/zip/utils/CloseableDelegateByteSource.java
+SHA-256-Digest: kVmQWCG9cFgicJTGgEB9isc/C7duCTQF2et/LxAUeSQ=
+
+Name: com/android/dx/dex/file/EncodedArrayItem.java
+SHA-256-Digest: XJf4fkWIB/+VBNXjBLc7pUCrDGbXUAPEHwVL2SgwIgI=
+
+Name: com/android/dx/rop/cst/Constant.java
+SHA-256-Digest: OtX1s6q8Lmd10JB5U/LiTywaEiFA79nMO+GYGuRZ+/s=
+
+Name: com/android/builder/internal/compiler/PreProcessCache.java
+SHA-256-Digest: H51RaFu3E98005kd7fj4Q44OuXYY2jqDw9ULmuxmF7c=
+
+Name: com/android/dex/ClassDef.java
+SHA-256-Digest: RmPcSt8W2gXU9hH/st+oEZr+QzwdRcSTeHl40DEyPmA=
+
+Name: com/android/dx/cf/direct/AnnotationParser.java
+SHA-256-Digest: tienfsOY8W5WuWkNkTXBbeM4zVBxcfhxxL4kbCORG8E=
+
+Name: com/android/dx/rop/type/Type.java
+SHA-256-Digest: r1xg2aMEpvyrRo403wWcrGuVr/viF33jMnJE2Q6BkCE=
+
+Name: com/android/dx/rop/code/ThrowingCstInsn.java
+SHA-256-Digest: Qv4cdgAHdKSBeu3H4hhHGdd5vnBRL50f4Of41ISwkXY=
+
+Name: com/android/dex/util/FileUtils.java
+SHA-256-Digest: BP7bZLfWqx/45W0vCpD9E0AvppUhq6w9Rom7P6cTTUY=
+
+Name: com/android/dx/io/instructions/ShortArrayCodeInput.java
+SHA-256-Digest: sta6GuxalDkd77WSgftX0fPMYsx8LoKSdZXpdEjcFl0=
+
+Name: com/android/dx/dex/file/ParameterAnnotationStruct.java
+SHA-256-Digest: xwoR/xJvmQiIq98NMlbWygByFYzXgAAFGL3YfCTepcU=
+
+Name: com/android/builder/dexing/RuntimeAnnotatedClassCollector.java
+SHA-256-Digest: 6jz69SQhIOvgy9HKJQb9eWmK4A48Py0XylaWW8uuIP0=
+
+Name: com/android/apkzlib/zip/EncodeUtils.java
+SHA-256-Digest: Q+QQaYUTWW50wT+OTgAUye5X4MMBZketnZ7p+wrxin0=
+
+Name: com/android/dx/cf/code/ExecutionStack.java
+SHA-256-Digest: HQ+02wodXIpjga1PPf6ESpgKysejaAIkVK1n0LaFDMw=
+
+Name: com/android/dx/dex/file/AnnotationSetRefItem.java
+SHA-256-Digest: XjFUtzTz/T3CizUg+2G9Kd7ZMSPW4m3ZUjL70sNWwC8=
+
+Name: com/android/dx/merge/InstructionTransformer.java
+SHA-256-Digest: qlZQeOlrO+tWyAa2xCITqSP3qzbvvFAZsUVSo3EQdxw=
+
+Name: com/android/dx/io/IndexType.java
+SHA-256-Digest: 3dpKndfJdiq1cKtDA2JGO6Usi7kXD+c9JPRG8ueEWzc=
+
+Name: com/android/builder/internal/InstallUtils.java
+SHA-256-Digest: PvkbXb660AiQ+a5BCV2KdQDeqoz3KfjFiAtLtXgztO0=
+
+Name: com/android/apkzlib/zip/utils/MsDosDateTimeUtils.java
+SHA-256-Digest: JNM+x1O5AXwr/RZWz+lWDa1od1zU4VugQQQfgO6+mjE=
+
+Name: com/android/builder/core/ManifestAttributeSupplier.java
+SHA-256-Digest: ZVtHFHMzmy1zBsG4w2B2XmYUNOpuGMUUH+LPqBUPeyY=
+
+Name: com/android/apkzlib/zip/utils/LittleEndianUtils.java
+SHA-256-Digest: ViK80Bh6RQ/IKuOkbAZWB9fPoGO+voYmiNbkOYTWhwc=
+
+Name: com/android/dx/cf/direct/MethodListParser.java
+SHA-256-Digest: KWEAry8S9SW+sTYb97nay2KQGakFXJPVo6lqrcOdPIs=
+
+Name: com/android/dx/cf/attrib/AttAnnotationDefault.java
+SHA-256-Digest: tuMYrui66pllxd94Yc6XCUsLE5PkrBGfr1ojKsD0INE=
+
+Name: com/android/dx/dex/code/BlockAddresses.java
+SHA-256-Digest: +dBYVnPHCETa6fR+Wbejk5s+vX26pGws+9wbGkIpCDc=
+
+Name: com/android/dx/dex/file/ProtoIdsSection.java
+SHA-256-Digest: 1jaOB5zrguSvM0IpdvAQRjxGHpzT/nJZOnalYhc6skM=
+
+Name: com/android/dx/rop/code/FillArrayDataInsn.java
+SHA-256-Digest: VfszT3AVUlfK4H6VwhJC0C9wP/M3nw3DQTkkG/lXD+k=
+
+Name: com/android/dex/SizeOf.java
+SHA-256-Digest: 49WOYwctxgK2e292+8bQSkxzU9Of7ZwEg+DDMOYwWlQ=
+
+Name: com/android/dx/command/dexer/Main.java
+SHA-256-Digest: ojGjI8tZ6Dlw9fJWBBENUKsEZFjLMUwAx3BnQrXXGGk=
+
+Name: com/android/dx/dex/code/CatchBuilder.java
+SHA-256-Digest: 2dCVTjaltw4kQFVAiRwTKEyqQXoH5yOVRqgMlgk0/1Q=
+
+Name: com/android/builder/files/IncrementalRelativeFileSets.java
+SHA-256-Digest: vnylj9gGUMRkGGHgB/8gBiPFxNE4lm5GvntC+QVpjY4=
+
+Name: com/android/builder/core/VariantConfiguration.java
+SHA-256-Digest: v4QKYe8T6h8g3P8GFIi3DiJi8Q7My+JHQynEAvD/PfU=
+
+Name: com/android/dx/util/BitIntSet.java
+SHA-256-Digest: YkNHTal2JeqSJbrT85zKimrq1pFfUCIFXfjif9h6RRY=
+
+Name: com/android/builder/sdk/TargetInfo.java
+SHA-256-Digest: rhHwsrmfJrPEjExb0cHKKlAqXSMNlIajLVxXLjxPUOU=
+
+Name: com/android/apkzlib/zip/utils/RandomAccessFileUtils.java
+SHA-256-Digest: RFCAcp4TK4jSKF5xfNaQQ2otUhNmkZVuoSsG9449iFA=
+
+Name: com/android/multidex/ClassPathElement.java
+SHA-256-Digest: NmdAqupx6fO+f07K5SAp5kwYQ18AhffMveLIu9uEvMc=
+
+Name: com/android/dx/cf/direct/AttributeFactory.java
+SHA-256-Digest: q4sd4tYn9/1aNzkds4iOUMHF8cHqr/Zx4+uDR3CMZ2s=
+
+Name: com/android/dx/ssa/back/NullRegisterAllocator.java
+SHA-256-Digest: 8FKWzRpztA75Aj1B2oIRDD1JEbKCpVAvaxGWFWexnQ0=
+
+Name: com/android/apkzlib/zip/FileUseMap.java
+SHA-256-Digest: shy9RfCizcKjsI1pvPdTnouVbuO5JO79Bp/lPaKH3fM=
+
+Name: com/android/builder/packaging/DuplicateFileException.java
+SHA-256-Digest: niITmaLrcU9R824lPgktvykI5WUN6iltmtg0EJkU0m4=
+
+Name: com/android/dx/dex/code/form/Form45cc.java
+SHA-256-Digest: bdJhRO0oshF7jC9hNbsRk7NeVU5921VpaUJ5Mp7AtEY=
+
+Name: com/android/dx/rop/code/RegOps.java
+SHA-256-Digest: eGggCBqvpV82fyB3lUbKpC/hl5rvc1ZUf4rQHlXRWZY=
+
+Name: com/android/builder/merge/IncrementalFileMergerOutputs.java
+SHA-256-Digest: NyylADWV8KI11CU6NypFaZ+SCnFkdJaT32DnX4UqlAk=
+
+Name: com/android/dx/rop/type/package.html
+SHA-256-Digest: pUpzcB3MnsVDl9y48HNV9t/vujFVQQNgan9nCgE4uf4=
+
+Name: com/android/dx/util/TwoColumnOutput.java
+SHA-256-Digest: 1SD/Mf8u0+q9FfkQN8ueEu4TbNJgGKe8vskG0Fqokx4=
+
+Name: com/android/dx/dex/code/ZeroSizeInsn.java
+SHA-256-Digest: UR7Z+EGY4/mLAeWTokyq4agACHOj1IYGdP3x3eyya/g=
+
+Name: com/android/apkzlib/zfile/ZFiles.java
+SHA-256-Digest: bRN0h923PjgjPK5r2yiZIDWE4d1TQ4K+lJz2hyXmVbY=
+
+Name: com/android/builder/dexing/ClassFileInputs.java
+SHA-256-Digest: GsN8/5Tg0cj4luAKZiegHKzl10GWpahmlvBe6oNjZjU=
+
+Name: com/android/dx/dex/code/form/Form22t.java
+SHA-256-Digest: WwC7sY4t7gazHAXPFU3tPVTznK2fYGoNLoodmCJUVrQ=
+
+Name: com/android/dx/cf/attrib/AttSourceFile.java
+SHA-256-Digest: jHrIfMald8oFOU1I63YHPE/Js7aLBVAyCFW36TFGiK8=
+
+Name: com/android/builder/dexing/D8DexArchiveBuilder.java
+SHA-256-Digest: e11IELzHqkjw0qT4zhqK4tY/+M2hfGejmDoJucOYPYY=
+
+Name: com/android/dex/util/ByteInput.java
+SHA-256-Digest: mDv+iQj0Q3gwiIALqf1/ivVc21y6NQnBRk0kszR3DPQ=
+
+Name: com/android/dx/dex/file/CallSiteIdsSection.java
+SHA-256-Digest: XYEVRMkfE0KIDY8PrL1INSlBuwZ9tpZU1RqewBj5e68=
+
+Name: com/android/builder/testing/OnDeviceOrchestratorTestRunner.java
+SHA-256-Digest: 9wHgNAtO2EiilNSnJ25voIbucylLfUoR36jg5hefPl8=
+
+Name: com/android/dx/util/LabeledList.java
+SHA-256-Digest: hYjaalm8OJHcu8eurRedfi40oXCXdnQrACYX4xi0mNI=
+
+Name: com/android/dx/io/instructions/CodeOutput.java
+SHA-256-Digest: BJTXacjWNcK+T0FwPkx73U//0uOlFTZvfaIqQBU2YdE=
+
+Name: com/android/apkzlib/zip/Compressor.java
+SHA-256-Digest: tPVsgIp8W4wR5CJ19dATsj19nbxzsbNM9HGx0E5VDB4=
+
+Name: com/android/dx/cf/attrib/AttDeprecated.java
+SHA-256-Digest: wta+D5q12ARgz5tcpJuGMzExtxXtz2w4p4oPncP4zbs=
+
+Name: com/android/apkzlib/sign/ZFileDataSource.java
+SHA-256-Digest: +q9/Vn55RNlkMWkfL63FY7nuvgfpoIO45L8EdRUs6u0=
+
+Name: com/android/dx/dex/code/DalvCode.java
+SHA-256-Digest: DzqQhPvf+WIBXpLceU6HsXUUVO/NhpY6XPieUCNWSe4=
+
+Name: com/android/dx/rop/code/ThrowingInsn.java
+SHA-256-Digest: 31bJZu1BNWGj5rnLHCXXo8EyMDMOfPGdYOdev1oi8Hw=
+
+Name: com/android/builder/merge/StreamMergeAlgorithms.java
+SHA-256-Digest: UwvELNjCPVUMELJ26R96vnAQry3MhsPatswk536u4hM=
+
+Name: com/android/apkzlib/zip/ZFileOptions.java
+SHA-256-Digest: ggCvfuBHQS5sKNs4Zu8CRYgY7Z7S7S6+rV7pWoKi0MY=
+
+Name: com/android/apkzlib/zip/utils/CloseableByteSource.java
+SHA-256-Digest: nmWkQKTO32PbULItTcJQamu1NRDNQ70YmowUkOrnbzg=
+
+Name: com/android/builder/dexing/FileBasedClassFileEntry.java
+SHA-256-Digest: cxxFRG2P3twoYIu0tyBmSBFcJdyLxV9nruZxKGVd6m8=
+
+Name: com/android/apkzlib/zip/AlignmentRule.java
+SHA-256-Digest: 79TLs66H7OK0cjwS3TqD47COWLcA/m6CU9IvHf3ct9k=
+
+Name: com/android/dx/ssa/back/InterferenceGraph.java
+SHA-256-Digest: oFal9qV2JPAN8LZ4NJ5pHluLIQSsDR9QVILJuaCE75U=
+
+Name: com/android/apkzlib/zip/LazyDelegateByteSource.java
+SHA-256-Digest: sEkU+h4pEM5fnktk3aEKH7SW93+877KPivSZ3p/iKRQ=
+
+Name: com/android/dx/dex/code/form/Form20t.java
+SHA-256-Digest: ayElFRsGUhlChAYBFaf9+WwdUTyAvu1fhtyv8FOIHrs=
+
+Name: com/android/dx/cf/attrib/AttConstantValue.java
+SHA-256-Digest: U4mth5MrgzbuoAOEyArcI9FV0sAffQ6G9t3WUsVw09M=
+
+Name: com/android/dx/cf/code/BootstrapMethodArgumentsList.java
+SHA-256-Digest: h/90HR2ucG0+XaB8kcSzYgoBMv03zT/GYfuQYK7LlBM=
+
+Name: com/android/dx/io/Opcodes.java
+SHA-256-Digest: YzZfQtKInRZ2m6XMfk6xznrLceH6tei+dEI6cmYa590=
+
+Name: com/android/apkzlib/sign/SignatureAlgorithm.java
+SHA-256-Digest: m121KuNg6L20SSpSluoeLn2Eg00SdCnz7Ov6Slk8efc=
+
+Name: com/android/dex/Code.java
+SHA-256-Digest: cIDokZweotOx5IsxmEbp5hmAMHGecBhhFy+pCIN/hAA=
+
+Name: com/android/dx/dex/file/DebugInfoItem.java
+SHA-256-Digest: M4tPqWiTAvdp/sKRDaVBAHkqQb+W0ZQcdvgQ8h52Jq0=
+
+Name: com/android/builder/tasks/WorkQueue.java
+SHA-256-Digest: /e7fc/3f4zU7HMulns5j9jZFiGEp2IE6BlczQ01rAUQ=
+
+Name: com/android/dx/cf/code/BootstrapMethodsList.java
+SHA-256-Digest: 07fPXioBmvh6ae3E+dIppUJbZEVTMCaVK6MnYktepiI=
+
+Name: com/android/dx/rop/cst/CstLong.java
+SHA-256-Digest: i0qfSpvOyP0HB2u5y+tbjdqnz8JYx6VdXe3CNKE5PMs=
+
+Name: com/android/builder/Version.java
+SHA-256-Digest: o1MOhBeCc/6k8unGewVKBv9myEETvISpAlCMRs8AmB8=
+
+Name: com/android/dx/rop/code/SwitchInsn.java
+SHA-256-Digest: jf5dpcNC3SbW8rcwnB8FJsf0UnjOSrG9RHRJtuat+j4=
+
+Name: com/android/dx/dex/file/MemberIdsSection.java
+SHA-256-Digest: 9HrwmQ1BD5GZJWCob6oNbG4XahWEO0IfCcLGYBVVPzg=
+
+Name: com/android/dx/rop/cst/CstBaseMethodRef.java
+SHA-256-Digest: +zLV2qi2mvm1838NSigjdcW7EaIWBg8C0wBa9evRr84=
+
+Name: com/android/dx/cf/iface/StdFieldList.java
+SHA-256-Digest: 1F212M/2gd9WyvcZYMqV/JP/2BVaDEV+ecYSGUd69vw=
+
+Name: com/android/builder/internal/aapt/v2/AaptV2CommandBuilder.java
+SHA-256-Digest: VYq3lCeN9mI+FTbYAflGZq6tHPRM6hkPNL0CsltP/Jc=
+
+Name: com/android/builder/dexing/DexArchiveMergerCallable.java
+SHA-256-Digest: GPlPQeSBSu9yH4xvjFL5TdS7yl6S3WHsDGPd17quWZ0=
+
+Name: com/android/builder/dexing/NoCacheJarClassFileEntry.java
+SHA-256-Digest: OaDvI0HP8DcT9865tkABKDkD1s/aNEVnvTV9MSwpLTk=
+
+Name: com/android/dx/cf/iface/HasAttribute.java
+SHA-256-Digest: Q0lRyEhf9yChfyYxS06u3FN09EdhbmL3uiXw2DIfexo=
+
+Name: com/android/dx/dex/code/OutputCollector.java
+SHA-256-Digest: cPYuNAhlDeRVqX2tDIPFI8N9xlU0/GO5ZkKmCS/3oEE=
+
+Name: com/android/dx/dex/code/form/Form51l.java
+SHA-256-Digest: +KSRcCLnEgAy1PtNniHLPVPUAGFDS19CDH2bFWQPS7U=
+
+Name: com/android/dx/util/package.html
+SHA-256-Digest: 01A3sflhXdVmHNoL61gquWbErZauGNHW4yGpcJoEznY=
+
+Name: com/android/dx/util/MutabilityControl.java
+SHA-256-Digest: agm5iq3QuasgAfCUTA68qHdZwYYgdj6mbc228sfqw3c=
+
+Name: com/android/builder/sdk/PlatformLoader.java
+SHA-256-Digest: nsXBB6XLbP6Cvm1+rKlqrGiuRepsKw7lt8k828T6xhM=
+
+Name: com/android/dx/rop/cst/CstNat.java
+SHA-256-Digest: mkw9YWFm+scJ0r/VXead0LExHUF+DYpl0bYQJ/A4Tc4=
+
+Name: com/android/builder/merge/IncrementalFileMergerInput.java
+SHA-256-Digest: j4KOqft/X+COR+X1Gs6ndRpUuA+GRdf2qLaQfStvM2E=
+
+Name: com/android/dx/cf/direct/StdAttributeFactory.java
+SHA-256-Digest: sXuh7slEWom/78eH07VlFVa04Cr6JNcg/FpP/PaWp+8=
+
+Name: com/android/dx/ssa/Dominators.java
+SHA-256-Digest: qRNA3pYjS3WFxItD5eoY6UfX4B7haQcWDwlA2nqDbZo=
+
+Name: com/android/apkzlib/zip/VerifyLogs.java
+SHA-256-Digest: 2TLaRxbk+QDfQU3XUNOPksh0wycWxkeBQ2g3BqlTjEc=
+
+Name: com/android/dx/dex/file/ItemType.java
+SHA-256-Digest: chcFhedKjE7Ou6Q8grfRXboSmvpIZpc1+whLQx8ULnw=
+
+Name: com/android/builder/dexing/DirDexArchive.java
+SHA-256-Digest: tyf30EoSZyh9UuI2meXB5z1SNo0+LC54cbueLeeq/xk=
+
+Name: com/android/dx/dex/file/StringIdItem.java
+SHA-256-Digest: 5HKHflxvNjea5sG1K53Rdg/JTG7t/hcJWbokacIofQU=
+
+Name: com/android/builder/core/DefaultBuildType.java
+SHA-256-Digest: 5QGzxMmM2/EulVGqNMA75mMfPpAe7qMvJMyCrj8QgSU=
+
+Name: com/android/builder/dexing/NonIncrementalJarDexArchive.java
+SHA-256-Digest: QNljs46O3sXsZyYnMJZd/Tagb8mhXPRr9x8F9/gLFyU=
+
+Name: com/android/dx/util/Bits.java
+SHA-256-Digest: g2w21yBP6FCfjuA1Oenisd70PRDAARbsAszVbOkr0kI=
+
+Name: com/android/dx/dex/file/MixedItemSection.java
+SHA-256-Digest: VVvxhdoEC845QhxY6nQ5RohmJ0STqfnE+y+QdqvL1NQ=
+
+Name: com/android/builder/testing/TestData.java
+SHA-256-Digest: pjRteQZBnpR+TWhWG7XgDweWW6f3bhK5fa3YL9GFfDI=
+
+Name: com/android/apkzlib/zip/StoredEntryType.java
+SHA-256-Digest: hrVpNT3/6l3eUv9qCm3K5xcBJD3ZYGOJEN/X1XtzTKY=
+
+Name: com/android/dx/cf/attrib/RawAttribute.java
+SHA-256-Digest: RueXInpLFkrRkcsvrlaKrjycukdBRBD7FurCiuFjqOc=
+
+Name: com/android/dx/rop/cst/CstAnnotation.java
+SHA-256-Digest: bz1TaaAP9URh4H31aT+WuWoiHf0BxLcAqR+N1xx2714=
+
+Name: com/android/dx/dex/code/CatchHandlerList.java
+SHA-256-Digest: hAE03Kvce5djqUOdYR8+CIWpXAE1xCzE2Ngyy1XY1fA=
+
+Name: com/android/builder/profile/ProcessProfileWriterFactory.java
+SHA-256-Digest: 3DFyYs0McJLK+/07qpCb4wBGe7FangrMzES9bZGmYF0=
+
+Name: com/android/apkzlib/zip/CentralDirectoryHeaderCompressInfo.java
+SHA-256-Digest: kI39Qr5kolWOI9MAlQo5W0Df5TAGKyc5f7uroZ0MdG0=
+
+Name: com/android/dx/rop/type/StdTypeList.java
+SHA-256-Digest: JCxXkfPdX5aLUz4kdUqLrHpEhP+vdtdcjLlxe3si/P4=
+
+Name: com/android/builder/merge/MergeOutputWriters.java
+SHA-256-Digest: 3LTzrTjHd4TB8unuQbqKHS/FPltonBGSSuE9uECp9a4=
+

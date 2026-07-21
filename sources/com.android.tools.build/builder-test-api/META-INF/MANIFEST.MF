@@ -1,2 +1,26 @@
 Manifest-Version: 1.0
 
+Name: com/android/builder/testing/api/TestServer.java
+SHA-256-Digest: 0AHuR4xx7Un8obESP2GNjhqxK+/tSoE2oqfEvsCiolE=
+
+Name: com/android/builder/testing/api/DeviceConfigProviderImpl.java
+SHA-256-Digest: Lc0TxraPVAmfcF/DfRfKpZfWxHJ/HF3nNtywn5JeK3E=
+
+Name: com/android/builder/testing/api/DeviceConnector.java
+SHA-256-Digest: MhuhQHbJoyfEjaNwaL5xUkNWikOhquXZ8kGqmIIxkok=
+
+Name: com/android/builder/testing/api/DeviceConfigProvider.java
+SHA-256-Digest: MNHOxYDCwOKvIfdPRFPcYkdCuHtya2WEXWxDrmSrhI0=
+
+Name: com/android/builder/testing/api/DeviceException.java
+SHA-256-Digest: 4VdpjpiSpjCXk/AWtN2czk5xwcPVpXmFQQJt9kQz1IQ=
+
+Name: com/android/builder/testing/api/DeviceConfig.java
+SHA-256-Digest: iVFvpMJhQt0k993IUm5XY+o08xgu9gadxMMuwX1o1y8=
+
+Name: com/android/builder/testing/api/DeviceProvider.java
+SHA-256-Digest: WQjD2TzoFs+eEo2/IXl1TNjsEBkZBslGk8bexGB1gcQ=
+
+Name: com/android/builder/testing/api/TestException.java
+SHA-256-Digest: XRQERR+JL/Kygr4DMiQtCLERK5D+OIi8cQvnxuBHwyw=
+
