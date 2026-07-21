@@ -21,19 +21,12 @@ import static com.android.SdkConstants.*;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.*;
+import com.android.ide.common.resources.sampledata.SampleDataManager;
 import com.android.resources.ResourceType;
 import com.android.resources.ResourceUrl;
-import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.io.Files;
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -441,73 +434,24 @@ public class ResourceResolver extends RenderResources {
     }
 
     // ---- Private helper methods.
-    /** Holder for the sample data cache */
-    private static class CachedMockHolder {
-        private final long myLastModification;
-        private final List<String> myContents;
-        private final int myFileSizeMb;
 
-        CachedMockHolder(@NonNull File input) throws IOException {
-            if (!input.isFile()) {
-                throw new IOException("Sample data needs to be contained in a file");
-            }
+    private SampleDataManager mSampleDataManager = new SampleDataManager();
 
-            myLastModification = input.lastModified();
-            myFileSizeMb = (int) (input.length() / 1_000_000);
-            myContents = Files.readLines(input, Charsets.UTF_8);
-        }
-    }
-
-    private static final Cache<String, CachedMockHolder> sMockList =
-            CacheBuilder.newBuilder()
-                    .expireAfterAccess(2, TimeUnit.MINUTES)
-                    .softValues()
-                    .weigher((String key, CachedMockHolder value) -> value.myFileSizeMb)
-                    .maximumWeight(50) // MB
-                    .build();
-
-    /**
-     * Holds the current cursor position for the sample data file so a consistent view is provided
-     * for a given resolver (i.e. entries are not repeated and they are different for each element).
-     */
-    private final Map<String, AtomicInteger> mMockPosition = new HashMap<>();
-
-    private ResourceValue findMockValue(String name) {
+    private ResourceValue findSampleDataValue(@NonNull ResourceUrl url) {
+        // TODO: Remove this once repositories have namespace support
+        // Resource repositories do not support namespaces yet. Because of this
+        // we currently hack the namespace support as part of the item name.
+        String name = (url.namespace == null ? "" : url.namespace + ":") + url.name;
         return Optional.ofNullable(mProjectResources.get(ResourceType.SAMPLE_DATA))
-                .map(t -> t.get(name))
+                .map(t -> t.get(SampleDataManager.getResourceNameFromSampleReference(name)))
                 .map(ResourceValue::getValue)
+                .map(content -> mSampleDataManager.getSampleDataLine(name, content))
                 .map(
-                        fileName -> {
-                            AtomicInteger mockPosition = mMockPosition.get(fileName);
-                            if (mockPosition == null) {
-                                mockPosition = new AtomicInteger(0);
-                                mMockPosition.put(fileName, mockPosition);
-                            }
-
-                            File mockFile = new File(fileName);
-                            try {
-                                CachedMockHolder value = sMockList.getIfPresent(fileName);
-                                if (value == null
-                                        || value.myLastModification == 0
-                                        || value.myLastModification != mockFile.lastModified()) {
-                                    value = new CachedMockHolder(mockFile);
-                                    sMockList.put(fileName, value);
-                                }
-
-                                int lineCount = value.myContents.size();
-                                String lineContent =
-                                        lineCount > 0
-                                                ? value.myContents.get(
-                                                        mockPosition.getAndIncrement() % lineCount)
-                                                : null;
-
-                                return new ResourceValue(
-                                        ResourceUrl.create(null, ResourceType.SAMPLE_DATA, name),
-                                        lineContent);
-                            } catch (IOException ignore) {
-                            }
-                            return null;
-                        })
+                        lineContent ->
+                                new ResourceValue(
+                                        ResourceUrl.create(
+                                                url.namespace, ResourceType.SAMPLE_DATA, name),
+                                        lineContent))
                 .orElse(null);
     }
 
@@ -523,8 +467,8 @@ public class ResourceResolver extends RenderResources {
             // Aapt resources are synthetic references that do not need to be resolved.
             return null;
         } else if (url.type == ResourceType.SAMPLE_DATA) {
-            // Mock resources are only available within the tools namespace
-            return findMockValue(url.name);
+            // Sample data resources are only available within the tools namespace
+            return findSampleDataValue(url);
         }
 
         // map of ResourceValue for the given type

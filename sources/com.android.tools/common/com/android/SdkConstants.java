@@ -1318,6 +1318,12 @@ public final class SdkConstants {
     public static final String ATTR_ADJUST_VIEW_BOUNDS = "adjustViewBounds"; //$NON-NLS-1$
     public static final String ATTR_CROP_TO_PADDING = "cropToPadding"; //$NON-NLS-1$
 
+    // Font attributes of a TAG_FONT_FAMILY element
+    public static final String ATTR_FONT_PROVIDER_AUTHORITY = "fontProviderAuthority";
+    public static final String ATTR_FONT_PROVIDER_QUERY = "fontProviderQuery";
+    public static final String ATTR_FONT_PROVIDER_PACKAGE = "fontProviderPackage";
+    public static final String ATTR_FONT_PROVIDER_CERTS = "fontProviderCerts";
+
     // Font attributes of a TAG_FONT element
     public static final String ATTR_FONT_STYLE = "fontStyle";
     public static final String ATTR_FONT_WEIGHT = "fontWeight";
@@ -1667,6 +1673,8 @@ public final class SdkConstants {
     public static final String EXT_HPROF = "hprof"; //$NON-NLS-1$
     public static final String EXT_GZ = "gz"; //$NON-NLS-1$
 
+    public static final String EXT_JSON = "json";
+
     private static final String DOT = "."; //$NON-NLS-1$
 
     /** Dot-Extension of the Application package Files, i.e. ".apk". */
@@ -1754,6 +1762,9 @@ public final class SdkConstants {
     public static final String MIPMAP_PREFIX = "@mipmap/"; //$NON-NLS-1$
     public static final String FONT_PREFIX = "@font/"; //$NON-NLS-1$
     public static final String AAPT_ATTR_PREFIX = "@aapt:_aapt/";
+    public static final String SAMPLE_PREFIX = "@sample/";
+
+    public static final String TOOLS_SAMPLE_PREFIX = "@tools:sample/";
 
     public static final String ANDROID_LAYOUT_RESOURCE_PREFIX = "@android:layout/"; //$NON-NLS-1$
     public static final String ANDROID_STYLE_RESOURCE_PREFIX = "@android:style/"; //$NON-NLS-1$
@@ -2138,7 +2149,7 @@ public final class SdkConstants {
     public static final String GRADLE_TEST_COMPILE_CONFIGURATION = "testCompile";
     public static final String GRADLE_ANDROID_TEST_COMPILE_CONFIGURATION = "androidTestCompile";
     public static final String TEST_HELPERS_CONFIGURATION = "androidTestUtil";
-    public static final String MIN_BUILD_TOOLS_VERSION = "19.1.0";
+    public static final String CURRENT_BUILD_TOOLS_VERSION = "25.0.2";
     public static final String SUPPORT_LIB_GROUP_ID = "com.android.support";
     public static final String SUPPORT_LIB_ARTIFACT = "com.android.support:support-v4";
     public static final String DESIGN_LIB_ARTIFACT = "com.android.support:design";
