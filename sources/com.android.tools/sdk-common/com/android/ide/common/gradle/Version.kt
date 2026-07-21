@@ -18,9 +18,6 @@ package com.android.ide.common.gradle
 import com.android.ide.common.repository.GradleVersionRange
 import com.google.common.annotations.Beta
 import java.lang.IllegalArgumentException
-import java.math.BigInteger
-import java.math.BigInteger.ONE
-import java.math.BigInteger.ZERO
 import java.util.Locale
 import java.util.Objects
 import kotlin.math.max
@@ -77,13 +74,12 @@ class Version: Comparable<Version> {
     // These are reasonably well-defined concepts, and convenient for users of this class wanting
     // to layer e.g. pragmatic semantic versioning on top.
     val major
-        get() = (parts.takeIf { it.isNotEmpty() }?.get(0) as? Numeric)?.number.toIntOrNull()
+        get() = (parts.takeIf { it.isNotEmpty() }?.get(0) as? Numeric)?.number
     val minor
-        get() = (parts.takeIf { it.size > 1 && it[0] is Numeric }
-            ?.get(1) as? Numeric)?.number.toIntOrNull()
+        get() = (parts.takeIf { it.size > 1 && it[0] is Numeric }?.get(1) as? Numeric)?.number
     val micro
         get() = (parts.takeIf { it.size > 2 && it[0] is Numeric && it[1] is Numeric }
-            ?.get(2) as? Numeric)?.number.toIntOrNull()
+            ?.get(2) as? Numeric)?.number
 
     /**
      * Return a Version suitable as an exclusive upper bound from considering the parts
@@ -92,7 +88,7 @@ class Version: Comparable<Version> {
     fun nextPrefix(prefixSize: Int): Version {
         if (parts.size < prefixSize) {
             return Version(
-                parts + List(prefixSize - parts.size) { Numeric("0", ZERO) },
+                parts + List(prefixSize - parts.size) { Numeric("0", 0) },
                 separators.let {
                     it.dropLast(1) + List(prefixSize - parts.size) { Separator.DOT } + it.last()
                 },
@@ -177,7 +173,7 @@ class Version: Comparable<Version> {
             object NUMERIC: ParseState {
                 override fun createPart(sb: StringBuffer): Part {
                     val string = sb.toString()
-                    return Numeric(string, BigInteger(string))
+                    return Numeric(string, string.toInt())
                 }
             }
             object NONNUMERIC: ParseState {
@@ -250,13 +246,6 @@ class Version: Comparable<Version> {
     }
 }
 
-fun BigInteger?.toIntOrNull() = when {
-    this == null -> null
-    this > BigInteger.valueOf(Int.MAX_VALUE.toLong()) -> null
-    this < BigInteger.valueOf(Int.MIN_VALUE.toLong()) -> null
-    else -> this.intValueExact()
-}
-
 enum class Separator(val char: Char?) {
     EMPTY(null),
     DOT('.'),
@@ -323,11 +312,11 @@ class RELEASE(string: String): Special(string, 4) {
     override fun next() = SP("sp")
 }
 class SP(string: String): Special(string, 5) {
-    override fun next() = Numeric("0", ZERO)
+    override fun next() = Numeric("0", 0)
 }
 
-class Numeric(string: String, val number: BigInteger) : Part(string) {
-    override fun next() = Numeric("${number + ONE}", number + ONE)
+class Numeric(string: String, val number: Int) : Part(string) {
+    override fun next() = Numeric("${number+1}", number+1) // TODO(xof): contemplate overflow
     override fun compareTo(other: Part) = when (other) {
         is Numeric -> this.number.compareTo(other.number)
         is DEV, is NonNumeric, is Special -> 1

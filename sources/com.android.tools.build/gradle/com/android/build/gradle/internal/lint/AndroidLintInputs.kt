@@ -28,6 +28,7 @@ import com.android.build.api.variant.impl.LayeredSourceDirectoriesImpl
 import com.android.build.gradle.internal.component.ApkCreationConfig
 import com.android.build.gradle.internal.component.ComponentCreationConfig
 import com.android.build.gradle.internal.component.ConsumableCreationConfig
+import com.android.build.gradle.internal.component.LibraryCreationConfig
 import com.android.build.gradle.internal.component.UnitTestCreationConfig
 import com.android.build.gradle.internal.component.VariantCreationConfig
 import com.android.build.gradle.internal.dependency.VariantDependencies
@@ -948,7 +949,11 @@ abstract class VariantInputs {
 
         minSdkVersion.initialize(creationConfig.minSdkVersion)
 
-        targetSdkVersion.initialize(creationConfig.targetSdkVersion)
+        if (creationConfig is ApkCreationConfig) {
+            targetSdkVersion.initialize(creationConfig.targetSdkVersion)
+        } else if (creationConfig is LibraryCreationConfig) {
+            targetSdkVersion.initialize(creationConfig.targetSdkVersion)
+        }
 
         resValues.setDisallowChanges(
             creationConfig.resValuesCreationConfig?.resValues,
@@ -1351,11 +1356,11 @@ abstract class SourceProviderInput {
             project.layout.buildDirectory.file("fakeAndroidManifest/${sourceSet.name}/AndroidManifest.xml")
         this.manifestFiles.add(fakeManifestFile.map { it.asFile })
         this.manifestFiles.disallowChanges()
-        this.javaDirectories.fromDisallowChanges(sourceSet.allJava.sourceDirectories)
+        this.javaDirectories.fromDisallowChanges(project.provider { sourceSet.allSource.srcDirs })
         this.resDirectories.disallowChanges()
         this.assetsDirectories.disallowChanges()
         if (lintMode == LintMode.ANALYSIS) {
-            this.javaDirectoriesClasspath.from(sourceSet.allJava.sourceDirectories)
+            this.javaDirectoriesClasspath.from(project.provider { sourceSet.allSource.srcDirs })
         }
         this.javaDirectoriesClasspath.disallowChanges()
         this.resDirectoriesClasspath.disallowChanges()

@@ -110,7 +110,14 @@ class AvdManager(
 
     private fun <V> runWithMultiProcessLocking(deviceName: String, runnable: () -> V): V {
         return SynchronizedFile.getInstanceWithMultiProcessLocking(avdFolder.resolve(deviceName))
-            .write { runnable() }
+            .write {
+                val result = try {
+                    runnable()
+                } finally {
+                    SynchronizedFile.getLockFile(it).delete()
+                }
+                return@write result
+            }
     }
 
     internal fun createAvd(

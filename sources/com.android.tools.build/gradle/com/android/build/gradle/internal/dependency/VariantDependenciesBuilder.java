@@ -334,13 +334,6 @@ public class VariantDependenciesBuilder {
                         dependencies,
                         true,
                         stringCachingService);
-                if (testedVariant.getComponentType().isApk()) {
-                    ConstraintHandler.checkConfigurationAlignments(
-                            runtimeClasspath,
-                            testedRuntimeClasspath,
-                            issueReporter,
-                            project.getBuildFile());
-                }
             }
         }
 

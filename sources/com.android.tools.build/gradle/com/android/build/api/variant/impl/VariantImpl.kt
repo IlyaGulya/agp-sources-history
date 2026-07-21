@@ -46,9 +46,7 @@ import com.android.build.gradle.internal.component.features.OptimizationCreation
 import com.android.build.gradle.internal.component.features.RenderscriptCreationConfig
 import com.android.build.gradle.internal.component.features.ShadersCreationConfig
 import com.android.build.gradle.internal.core.VariantSources
-import com.android.build.gradle.internal.core.dsl.ConsumableComponentDslInfo
 import com.android.build.gradle.internal.core.dsl.VariantDslInfo
-import com.android.build.gradle.internal.core.dsl.features.ManifestPlaceholdersDslInfo
 import com.android.build.gradle.internal.dependency.VariantDependencies
 import com.android.build.gradle.internal.scope.BuildFeatureValues
 import com.android.build.gradle.internal.scope.MutableTaskContainer
@@ -113,10 +111,6 @@ abstract class VariantImpl<DslInfoT: VariantDslInfo>(
         variantBuilder.minSdkVersion
     }
 
-    override val targetSdkVersion: AndroidVersion by lazy {
-        variantBuilder.targetSdkVersion
-    }
-
     override val maxSdkVersion: Int?
         get() = variantBuilder.maxSdk
 
@@ -175,6 +169,13 @@ abstract class VariantImpl<DslInfoT: VariantDslInfo>(
         }
     }
 
+    override val manifestPlaceholdersCreationConfig: ManifestPlaceholdersCreationConfig by lazy(LazyThreadSafetyMode.NONE) {
+        ManifestPlaceholdersCreationConfigImpl(
+            dslInfo.manifestPlaceholdersDslInfo!!,
+            internalServices
+        )
+    }
+
     override val shadersCreationConfig: ShadersCreationConfig by lazy(LazyThreadSafetyMode.NONE) {
         ShadersCreationConfigImpl(
             dslInfo.shadersDslInfo!!
@@ -205,9 +206,6 @@ abstract class VariantImpl<DslInfoT: VariantDslInfo>(
     private val externalExtensions: Map<Class<*>, Any>? by lazy {
         variantBuilder.getRegisteredExtensions()
     }
-
-    override val targetSdkVersionOverride: AndroidVersion?
-        get() = variantBuilder.mutableTargetSdk?.sanitize()
 
     override val resValues: MapProperty<ResValue.Key, ResValue> by lazy {
         resValuesCreationConfig?.resValues
@@ -262,11 +260,6 @@ abstract class VariantImpl<DslInfoT: VariantDslInfo>(
 
     override val manifestPlaceholders: MapProperty<String, String>
         get() = manifestPlaceholdersCreationConfig.placeholders
-
-    override val manifestPlaceholdersCreationConfig: ManifestPlaceholdersCreationConfig by lazy(LazyThreadSafetyMode.NONE) {
-        createManifestPlaceholdersCreationConfig(
-                dslInfo.manifestPlaceholdersDslInfo?.placeholders)
-    }
 
     override val isAndroidTestCoverageEnabled: Boolean
         get() = (this as? HasAndroidTest)?.androidTest?.isAndroidTestCoverageEnabled == true

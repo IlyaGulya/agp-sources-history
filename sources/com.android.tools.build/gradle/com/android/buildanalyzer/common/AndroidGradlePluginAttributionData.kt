@@ -294,9 +294,7 @@ data class AndroidGradlePluginAttributionData(
 
         private fun String.readTaskCategoryIssue(): TaskCategoryIssue? {
             return try {
-                TaskCategoryIssue.valueOf(this).takeIf {
-                    it != TaskCategoryIssue.RESOURCE_VALIDATION_ENABLED
-                }
+                TaskCategoryIssue.valueOf(this)
             } catch (e: IllegalArgumentException) {
                 null
             }

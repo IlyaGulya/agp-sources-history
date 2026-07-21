@@ -21,12 +21,21 @@ import com.android.build.api.dsl.BuildType
 import com.android.build.api.dsl.ProductFlavor
 import com.android.build.api.variant.AnnotationProcessor
 import com.android.build.api.variant.BuildConfigField
+import com.android.build.api.variant.VariantOutputConfiguration
 import com.android.build.api.variant.impl.TaskProviderBasedDirectoryEntryImpl
+import com.android.build.api.variant.impl.VariantOutputConfigurationImpl
+import com.android.build.api.variant.impl.VariantOutputImpl
+import com.android.build.api.variant.impl.VariantOutputList
+import com.android.build.api.variant.impl.baseName
+import com.android.build.api.variant.impl.fullName
 import com.android.build.gradle.api.AnnotationProcessorOptions
 import com.android.build.gradle.api.JavaCompileOptions
 import com.android.build.gradle.internal.DependencyConfigurator
 import com.android.build.gradle.internal.VariantManager
+import com.android.build.gradle.internal.component.ApplicationCreationConfig
 import com.android.build.gradle.internal.component.ComponentCreationConfig
+import com.android.build.gradle.internal.component.DynamicFeatureCreationConfig
+import com.android.build.gradle.internal.component.LibraryCreationConfig
 import com.android.build.gradle.internal.component.TestComponentCreationConfig
 import com.android.build.gradle.internal.component.legacy.OldVariantApiLegacySupport
 import com.android.build.gradle.internal.core.MergedFlavor
@@ -34,14 +43,13 @@ import com.android.build.gradle.internal.core.VariantSources
 import com.android.build.gradle.internal.core.dsl.ApkProducingComponentDslInfo
 import com.android.build.gradle.internal.core.dsl.ComponentDslInfo
 import com.android.build.gradle.internal.core.dsl.MultiVariantComponentDslInfo
-import com.android.build.gradle.internal.core.dsl.features.ManifestPlaceholdersDslInfo
 import com.android.build.gradle.internal.core.dsl.impl.ComponentDslInfoImpl
-import com.android.build.gradle.internal.core.dsl.impl.features.ManifestPlaceholdersDslInfoImpl
 import com.android.build.gradle.internal.dependency.ArtifactCollectionWithExtraArtifact
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.publishing.PublishingSpecs.Companion.getVariantPublishingSpec
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.services.BaseServices
+import com.android.build.gradle.internal.services.VariantServices
 import com.android.build.gradle.internal.variant.BaseVariantData
 import com.android.build.gradle.options.BooleanOption
 import com.android.builder.errors.IssueReporter
@@ -49,15 +57,18 @@ import com.google.common.collect.ImmutableMap
 import org.gradle.api.artifacts.ArtifactCollection
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.process.CommandLineArgumentProvider
 import java.io.Serializable
+import java.util.concurrent.atomic.AtomicBoolean
 
 class OldVariantApiLegacySupportImpl(
     private val component: ComponentCreationConfig,
     private val dslInfo: ComponentDslInfo,
     override val variantData: BaseVariantData,
-    override val variantSources: VariantSources
+    override val variantSources: VariantSources,
+    private val internalServices: VariantServices
 ): OldVariantApiLegacySupport {
 
     override val buildTypeObj: BuildType
@@ -68,13 +79,6 @@ class OldVariantApiLegacySupportImpl(
         get() = (dslInfo as ComponentDslInfoImpl).mergedFlavor
     override val dslSigningConfig: com.android.build.gradle.internal.dsl.SigningConfig? =
         (dslInfo as? ApkProducingComponentDslInfo)?.signingConfig
-
-    override val manifestPlaceholdersDslInfo: ManifestPlaceholdersDslInfo? by lazy(LazyThreadSafetyMode.NONE) {
-        ManifestPlaceholdersDslInfoImpl(
-                mergedFlavor,
-                buildTypeObj
-        )
-    }
 
     /**
      * The old variant API runs after the new variant API, yet we need to make sure that whatever
@@ -149,6 +153,64 @@ class OldVariantApiLegacySupportImpl(
             component.javaCompilation.annotationProcessor
         )
 
+    override val outputs: VariantOutputList by lazy(LazyThreadSafetyMode.NONE) {
+        if (component is ApplicationCreationConfig) {
+            return@lazy component.outputs
+        }
+
+        val versionCodeProperty = if (component is DynamicFeatureCreationConfig) {
+            component.baseModuleVersionCode
+        } else {
+            internalServices.nullablePropertyOf(Int::class.java, null).also {
+                it.disallowChanges()
+            }
+        }
+
+        val versionNameProperty = if (component is DynamicFeatureCreationConfig) {
+            component.baseModuleVersionName
+        } else {
+            internalServices.nullablePropertyOf(String::class.java, null).also {
+                it.disallowChanges()
+            }
+        }
+
+        return@lazy VariantOutputList(
+            getVariantOutputs(
+                variantOutputConfiguration = VariantOutputConfigurationImpl(),
+                versionCodeProperty = versionCodeProperty,
+                versionNameProperty = versionNameProperty,
+                outputFileName = (component as? LibraryCreationConfig)?.aarOutputFileName
+            )
+        )
+    }
+
+    private fun getVariantOutputs(
+        variantOutputConfiguration: VariantOutputConfiguration,
+        versionCodeProperty: Property<Int?>,
+        versionNameProperty: Property<String?>,
+        outputFileName: Property<String>?
+    ): List<VariantOutputImpl> {
+        return listOf(
+            VariantOutputImpl(
+                versionCodeProperty,
+                versionNameProperty,
+                internalServices.newPropertyBackingDeprecatedApi(Boolean::class.java, true),
+                variantOutputConfiguration,
+                variantOutputConfiguration.baseName(component),
+                variantOutputConfiguration.fullName(component),
+                outputFileName ?:
+                internalServices.newPropertyBackingDeprecatedApi(
+                    String::class.java,
+                    internalServices.projectInfo.getProjectBaseName().map {
+                        component.paths.getOutputFileName(
+                            it,
+                            variantOutputConfiguration.baseName(component)
+                        )
+                    },
+                )
+            )
+        )
+    }
 
     override fun getJavaClasspathArtifacts(
         configType: AndroidArtifacts.ConsumedConfigType,
@@ -286,5 +348,29 @@ class OldVariantApiLegacySupportImpl(
             dimension,
             ImmutableMap.of(requestedValue, alternatedValues)
         )
+    }
+
+
+    // registrar for all post old variant API actions.
+    private val postOldVariantActions = mutableListOf<() -> Unit>()
+
+    private val oldVariantAPICompleted = AtomicBoolean(false)
+
+    override fun oldVariantApiCompleted() {
+        synchronized(postOldVariantActions) {
+            oldVariantAPICompleted.set(true)
+            postOldVariantActions.forEach { action -> action() }
+            postOldVariantActions.clear()
+        }
+    }
+
+    override fun registerPostOldVariantApiAction(action: () -> Unit) {
+        synchronized(postOldVariantActions) {
+            if (oldVariantAPICompleted.get()) {
+                action()
+            } else {
+                postOldVariantActions.add(action)
+            }
+        }
     }
 }

@@ -52,7 +52,6 @@ import com.android.builder.testing.api.TestServer
 import com.android.repository.Revision
 import com.android.utils.HelpfulEnumConverter
 import org.gradle.api.Action
-import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.attributes.AttributeContainer
@@ -242,9 +241,4 @@ class GlobalTaskCreationConfigImpl(
                 services.buildServiceRegistry
             )
         }
-
-    override val enableGlobalSynthetics: Boolean
-        get() = services.projectOptions.get(BooleanOption.ENABLE_GLOBAL_SYNTHETICS)
-                && compileOptions.targetCompatibility.isCompatibleWith(JavaVersion.VERSION_14)
-                && compileOptions.sourceCompatibility.isCompatibleWith(JavaVersion.VERSION_14)
 }

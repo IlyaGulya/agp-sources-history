@@ -338,7 +338,7 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
                     artifacts.get(InternalArtifactType.DESUGAR_LIB_DEX)
                 )
             }
-            if (creationConfig.global.enableGlobalSynthetics
+            if (creationConfig.services.projectOptions[BooleanOption.ENABLE_GLOBAL_SYNTHETICS]
                 && creationConfig.dexingCreationConfig.dexingType == DexingType.NATIVE_MULTIDEX
                 && !creationConfig.optimizationCreationConfig.minifiedEnabled) {
                 task.dexFiles.from(

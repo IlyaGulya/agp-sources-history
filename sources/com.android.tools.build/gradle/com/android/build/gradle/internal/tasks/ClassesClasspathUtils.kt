@@ -77,7 +77,7 @@ class ClassesClasspathUtils(
             mixedScopeClasses = creationConfig.services.fileCollection()
             dexExternalLibsInArtifactTransform = false
         } else if (enableDexingArtifactTransform) {
-            subProjectsClasses = creationConfig.artifacts.forScope(InternalScopedArtifacts.InternalScope.SUB_PROJECT)
+            subProjectsClasses = creationConfig.artifacts.forScope(InternalScopedArtifacts.InternalScope.SUB_PROJECTS)
                 .getFinalArtifacts(ScopedArtifact.CLASSES)
             externalLibraryClasses = creationConfig.services.fileCollection()
             mixedScopeClasses = creationConfig.services.fileCollection()
@@ -92,7 +92,7 @@ class ClassesClasspathUtils(
         } else {
             // legacy Transform API
             @Suppress("DEPRECATION") // Legacy support
-            subProjectsClasses = creationConfig.artifacts.forScope(InternalScopedArtifacts.InternalScope.SUB_PROJECT)
+            subProjectsClasses = creationConfig.artifacts.forScope(InternalScopedArtifacts.InternalScope.SUB_PROJECTS)
                 .getFinalArtifacts(ScopedArtifact.CLASSES)
             externalLibraryClasses = creationConfig.artifacts.forScope(InternalScopedArtifacts.InternalScope.EXTERNAL_LIBS)
                 .getFinalArtifacts(ScopedArtifact.CLASSES)
@@ -124,15 +124,13 @@ class ClassesClasspathUtils(
                         AndroidArtifacts.PublishedConfigType.RUNTIME_ELEMENTS
                     )!!.outputType
                 creationConfig.services.fileCollection(
-                    it.artifacts.get(artifactType)
+                    it.artifacts.get(artifactType), testedExternalLibs, externalLibraryClasses
                 )
             } ?: creationConfig.services.fileCollection()
 
-            creationConfig.services.fileCollection(
-                getArtifactFiles(desugaringClasspathScopes, ScopedArtifact.CLASSES),
-                testedExternalLibs,
-                externalLibraryClasses
-            ).minus(testedProject)
+            getArtifactFiles(desugaringClasspathScopes, ScopedArtifact.CLASSES)
+                .minus(testedProject)
+
         } else {
             creationConfig.services.fileCollection()
         }
@@ -158,7 +156,7 @@ class ClassesClasspathUtils(
             }
             if (inputScopes.contains(QualifiedContent.Scope.SUB_PROJECTS)) {
                 it.from(
-                    creationConfig.artifacts.forScope(InternalScopedArtifacts.InternalScope.SUB_PROJECT)
+                    creationConfig.artifacts.forScope(InternalScopedArtifacts.InternalScope.SUB_PROJECTS)
                         .getFinalArtifacts(type)
                 )
             }
@@ -170,7 +168,7 @@ class ClassesClasspathUtils(
             }
             if (inputScopes.contains(QualifiedContent.Scope.PROVIDED_ONLY)) {
                 it.from(
-                    creationConfig.artifacts.forScope(InternalScopedArtifacts.InternalScope.PROVIDED)
+                    creationConfig.artifacts.forScope(InternalScopedArtifacts.InternalScope.COMPILE_ONLY)
                         .getFinalArtifacts(type)
                 )
             }

@@ -17,18 +17,19 @@
 package com.android.build.api.component.impl.features
 
 import com.android.build.gradle.internal.component.features.ManifestPlaceholdersCreationConfig
+import com.android.build.gradle.internal.core.dsl.features.ManifestPlaceholdersDslInfo
 import com.android.build.gradle.internal.services.VariantServices
 import org.gradle.api.provider.MapProperty
 
 class ManifestPlaceholdersCreationConfigImpl(
-    placeholders: Map<String, String>,
+    dslInfo: ManifestPlaceholdersDslInfo,
     internalServices: VariantServices
 ): ManifestPlaceholdersCreationConfig {
     override val placeholders: MapProperty<String, String> by lazy {
         internalServices.mapPropertyOf(
             String::class.java,
             String::class.java,
-            placeholders
+            dslInfo.placeholders
         )
     }
 }

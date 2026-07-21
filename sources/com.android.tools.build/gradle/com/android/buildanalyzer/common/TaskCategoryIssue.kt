@@ -34,7 +34,11 @@ enum class TaskCategoryIssue(val taskCategory: TaskCategory, val severity: Sever
      */
     NON_TRANSITIVE_R_CLASS_DISABLED(TaskCategory.ANDROID_RESOURCES, Severity.WARNING),
 
-    @Deprecated("We no longer warn about this flag in the build analyzer.")
+    /**
+     * Informational message for when resource validation is enabled.
+     * Ideally this warning would only be shown for debug variant.
+     * BooleanOption android.disableResourceValidation = false.
+     */
     RESOURCE_VALIDATION_ENABLED(TaskCategory.ANDROID_RESOURCES, Severity.WARNING),
 
     /**

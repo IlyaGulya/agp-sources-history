@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.build.gradle
 
-import org.gradle.api.Project
+package com.android.build.api.dsl
 
-/**
- * Plugin for running lint **without** the Android Gradle plugin, such as in a pure Kotlin
- * project.
- */
-abstract class LintPlugin : BasePlugin() {
+import org.gradle.api.Incubating
 
-    override fun apply(project: Project) {
-        super.apply(project)
-        project.apply { it.plugin("com.android.internal.lint") }
-    }
+@Incubating
+interface BundleCountrySet {
+
+    @get:Incubating
+    @set:Incubating
+    var enableSplit: Boolean?
+
+    /**
+     * Specifies the default country set value for the bundle. Used for filtering splits for
+     * standalone, system and universal APKs.
+     */
+    @get:Incubating
+    @set:Incubating
+    var defaultSet: String?
 }

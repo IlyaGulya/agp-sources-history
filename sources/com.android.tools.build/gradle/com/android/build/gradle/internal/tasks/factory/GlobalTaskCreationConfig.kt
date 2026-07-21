@@ -136,6 +136,4 @@ interface GlobalTaskCreationConfig: BootClasspathConfig {
     val settingsOptions: SettingsOptions
 
     val buildAnalyzerIssueReporter: BuildAnalyzerIssueReporter?
-
-    val enableGlobalSynthetics: Boolean
 }
