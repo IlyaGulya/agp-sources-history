@@ -19,6 +19,7 @@ package com.android.build.gradle.internal.services
 import org.gradle.api.Named
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.ConfigurableFileTree
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import java.io.File
@@ -58,6 +59,17 @@ interface VariantPropertiesApiServices:
     fun <T> propertyOf(type: Class<T>, value: Provider<T>, id: String = ""): Property<T>
 
     /**
+     * Creates a new nullable property.
+     *
+     * This should be used for properties used in the new API. If the property is backing an
+     * old API that returns T, use [VariantPropertiesApiServices.newPropertyBackingDeprecatedApi]
+     *
+     * The property will be marked as [Property.finalizeValueOnRead], and will be locked
+     * with [Property.disallowChanges] after the variant API(s) have run.
+     */
+    fun <T> nullablePropertyOf(type: Class<T>, value: Provider<T?>): Property<T?>
+
+    /**
      * Creates a new property.
      *
      * This should be used for properties used in the new API. If the property is backing an
@@ -78,6 +90,38 @@ interface VariantPropertiesApiServices:
      * with [Property.disallowChanges] after the variant API(s) have run.
      */
     fun <T> propertyOf(type: Class<T>, value: Callable<T>, id: String = ""): Property<T>
+
+    /**
+     * Creates a new nullable property.
+     *
+     * This should be used for properties used in the new API. If the property is backing an
+     * old API that returns T, use [VariantPropertiesApiServices.newPropertyBackingDeprecatedApi]
+     *
+     * The property will be marked as [Property.finalizeValueOnRead], and will be locked
+     * with [Property.disallowChanges] after the variant API(s) have run.
+     */
+    fun <T> nullablePropertyOf(type: Class<T>, value: T?, id: String = ""): Property<T?>
+
+    /**
+     * Creates a new nullable property.
+     *
+     * This should be used for properties used in the new API. If the property is backing an
+     * old API that returns T, use [VariantPropertiesApiServices.newPropertyBackingDeprecatedApi]
+     *
+     * The property will be marked as [Property.finalizeValueOnRead], and will be locked
+     * with [Property.disallowChanges] after the variant API(s) have run.
+     */
+    fun <T> nullablePropertyOf(type: Class<T>, value: Provider<T?>, id: String = ""): Property<T?>
+
+    /**
+     * Creates a new [ListProperty].
+     *
+     * This should be used for properties used in the new API.
+     *
+     * The [ListProperty] will be marked as [Property.finalizeValueOnRead], and will be locked
+     * with [Property.disallowChanges] after the variant API(s) have run.
+     */
+    fun <T> listPropertyOf(type: Class<T>, value: Collection<T>, id: String): ListProperty<T>
 
     /**
      * Creates a new property that is backing an old API returning T.

@@ -21,6 +21,7 @@ import com.android.build.gradle.options.BooleanOption
 import org.gradle.api.Named
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.ConfigurableFileTree
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import java.io.File
@@ -32,6 +33,8 @@ class VariantPropertiesApiServicesImpl(
     VariantPropertiesApiServices {
     // list of properties to lock when [.lockProperties] is called.
     private val properties = mutableListOf<Property<*>>()
+    // [ListProperty] list to lock when [.lockProperties] is called.
+    private val listProperties = mutableListOf<ListProperty<*>>()
     // whether the properties have been locked already
     private var propertiesLockStatus = false
 
@@ -63,6 +66,18 @@ class VariantPropertiesApiServicesImpl(
         }
     }
 
+    override fun <T> nullablePropertyOf(type: Class<T>, value: Provider<T?>): Property<T?> {
+        return initializeNullableProperty(type, "").also {
+            it.set(value)
+            it.finalizeValueOnRead()
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
+
+            delayedLock(it)
+        }
+    }
+
     override fun <T> propertyOf(type: Class<T>, value: () -> T, id: String): Property<T> {
         return initializeProperty(type, id).also {
             it.set(projectServices.providerFactory.provider(value))
@@ -78,6 +93,46 @@ class VariantPropertiesApiServicesImpl(
     override fun <T> propertyOf(type: Class<T>, value: Callable<T>, id: String): Property<T> {
         return initializeProperty(type, id).also {
             it.set(projectServices.providerFactory.provider(value))
+            it.finalizeValueOnRead()
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
+
+            delayedLock(it)
+        }
+    }
+
+    override fun <T> nullablePropertyOf(type: Class<T>, value: T?, id: String): Property<T?> {
+        return initializeNullableProperty(type, id).also {
+            it.set(value)
+            it.finalizeValueOnRead()
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
+
+            delayedLock(it)
+        }
+    }
+
+    override fun <T> nullablePropertyOf(type: Class<T>, value: Provider<T?>, id: String): Property<T?> {
+        return initializeNullableProperty(type, id).also {
+            it.set(value)
+            it.finalizeValueOnRead()
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
+
+            delayedLock(it)
+        }
+    }
+
+    override fun <T> listPropertyOf(
+        type: Class<T>,
+        value: Collection<T>,
+        id: String
+    ): ListProperty<T> {
+        return projectServices.objectFactory.listProperty(type).also {
+            it.set(value)
             it.finalizeValueOnRead()
 
             // FIXME when Gradle supports this
@@ -130,7 +185,8 @@ class VariantPropertiesApiServicesImpl(
         }
     }
 
-    override fun <T> newNullablePropertyBackingDeprecatedApi(type: Class<T>, value: Provider<T?>, id: String): Property<T?> {
+    override fun <T> newNullablePropertyBackingDeprecatedApi(type: Class<T>, value: Provider<T?>, id: String
+    ): Property<T?> {
         return initializeNullableProperty(type, id).also {
             it.set(value)
             if (!compatibilityMode) {
@@ -205,14 +261,26 @@ class VariantPropertiesApiServicesImpl(
 
     override fun fileTree(): ConfigurableFileTree = projectServices.objectFactory.fileTree()
 
-    override fun fileTree(dir: Any): ConfigurableFileTree =
-        projectServices.objectFactory.fileTree().setDir(dir)
+    override fun fileTree(dir: Any): ConfigurableFileTree {
+        val result = projectServices.objectFactory.fileTree().setDir(dir)
+
+        // workaround issue in Gradle <=6.3 where setDir does not set dependencies
+        // TODO remove when 6.4 ships
+        if (dir is Provider<*>) {
+            result.builtBy(dir)
+        }
+        return result
+    }
 
     override fun lockProperties() {
         for (property in properties) {
             property.disallowChanges()
         }
         properties.clear()
+        for (listProperty in listProperties) {
+            listProperty.disallowChanges()
+        }
+        listProperties.clear()
         propertiesLockStatus = true
     }
 
@@ -224,6 +292,17 @@ class VariantPropertiesApiServicesImpl(
             property.disallowChanges()
         } else {
             properties.add(property)
+        }
+    }
+
+    // register a [ListProperty] to be locked later.
+    // if the properties have already been locked, listProperty is locked right away.
+    // (this can happen for objects that are lazily created)
+    private fun delayedLock(listProperty: ListProperty<*>) {
+        if (propertiesLockStatus) {
+            listProperty.disallowChanges()
+        } else {
+            listProperties.add(listProperty)
         }
     }
 

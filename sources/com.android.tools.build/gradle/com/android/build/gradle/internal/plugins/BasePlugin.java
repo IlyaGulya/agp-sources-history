@@ -18,6 +18,7 @@ package com.android.build.gradle.internal.plugins;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import android.databinding.tool.processing.Scope;
 import com.android.SdkConstants;
 import com.android.Version;
 import com.android.annotations.NonNull;
@@ -317,7 +318,8 @@ public abstract class BasePlugin<
         project.getPlugins().apply(JavaBasePlugin.class);
 
         dslServices =
-                new DslServicesImpl(projectServices, new DslVariableFactory(syncIssueReporter));
+                new DslServicesImpl(
+                        projectServices, new DslVariableFactory(syncIssueReporter), sdkComponents);
 
         MessageReceiverImpl messageReceiver =
                 new MessageReceiverImpl(
@@ -363,6 +365,7 @@ public abstract class BasePlugin<
                                 null,
                                 Main::clearInternTables);
                         DeprecationReporterImpl.Companion.clean();
+                        Scope.clear();
                     }
                 });
 

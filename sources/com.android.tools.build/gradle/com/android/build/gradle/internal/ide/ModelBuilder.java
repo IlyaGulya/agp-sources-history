@@ -72,6 +72,7 @@ import com.android.builder.core.DefaultManifestParser;
 import com.android.builder.core.ManifestAttributeSupplier;
 import com.android.builder.core.VariantType;
 import com.android.builder.core.VariantTypeImpl;
+import com.android.builder.dexing.D8DesugaredMethodsGenerator;
 import com.android.builder.errors.IssueReporter;
 import com.android.builder.errors.IssueReporter.Type;
 import com.android.builder.model.AaptOptions;
@@ -272,11 +273,8 @@ public class ModelBuilder<Extension extends BaseExtension>
         List<String> bootClasspath;
         if (globalScope.getSdkComponents().getSdkSetupCorrectly().get()) {
             bootClasspath =
-                    globalScope
-                            .getFilteredBootClasspath()
-                            .getFiles()
-                            .stream()
-                            .map(File::getAbsolutePath)
+                    globalScope.getFilteredBootClasspath().get().stream()
+                            .map(it -> it.getAsFile().getAbsolutePath())
                             .collect(Collectors.toList());
         } else {
             // SDK not set up, error will be reported as a sync issue.
@@ -665,13 +663,6 @@ public class ModelBuilder<Extension extends BaseExtension>
 
         checkProguardFiles(componentProperties);
 
-        Collection<File> desugarLibLint =
-                DesugarLibUtils.getDesugarLibLintFiles(
-                        componentProperties.getGlobalScope().getProject(),
-                        componentProperties.getVariantScope().isCoreLibraryDesugaringEnabled(),
-                        componentProperties.getMinSdkVersion(),
-                        componentProperties.getGlobalScope().getExtension().getCompileSdkVersion());
-
         return new VariantImpl(
                 variantName,
                 componentProperties.getBaseName(),
@@ -683,7 +674,7 @@ public class ModelBuilder<Extension extends BaseExtension>
                 clonedExtraJavaArtifacts,
                 testTargetVariants,
                 inspectManifestForInstantTag(componentProperties),
-                desugarLibLint);
+                getDesugaredMethods(componentProperties));
     }
 
     private void checkProguardFiles(@NonNull ComponentPropertiesImpl componentProperties) {
@@ -899,7 +890,7 @@ public class ModelBuilder<Extension extends BaseExtension>
         try {
             // This can throw an exception if no package name can be found.
             // Normally, this is fine to throw an exception, but we don't want to crash in sync.
-            applicationId = variantDslInfo.getApplicationId();
+            applicationId = variantDslInfo.getApplicationId().get();
         } catch (RuntimeException e) {
             // don't crash. just throw a sync error.
             applicationId = "";
@@ -1124,4 +1115,19 @@ public class ModelBuilder<Extension extends BaseExtension>
         }
     }
 
+    @NonNull
+    private List<String> getDesugaredMethods(@NonNull ComponentPropertiesImpl componentProperties) {
+        List<String> desugaredMethodsFromDesugarLib =
+                DesugarLibUtils.getDesugaredMethods(
+                        componentProperties.getGlobalScope().getProject(),
+                        componentProperties.getVariantScope().isCoreLibraryDesugaringEnabled(),
+                        componentProperties.getMinSdkVersion(),
+                        componentProperties.getGlobalScope().getExtension().getCompileSdkVersion());
+
+        List<String> desugaredMethodsFromD8 = D8DesugaredMethodsGenerator.INSTANCE.generate();
+
+        List<String> desugaredMethods = new ArrayList<>(desugaredMethodsFromDesugarLib);
+        desugaredMethods.addAll(desugaredMethodsFromD8);
+        return desugaredMethods;
+    }
 }

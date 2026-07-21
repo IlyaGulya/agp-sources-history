@@ -16,21 +16,17 @@
 package com.android.build.gradle.tasks
 
 import com.android.SdkConstants
-import com.android.build.api.variant.BuiltArtifact
 import com.android.build.api.variant.BuiltArtifacts
 import com.android.build.api.variant.impl.BuiltArtifactsImpl
-import com.android.build.api.variant.impl.BuiltArtifactsLoaderImpl.Companion.loadFromDirectory
 import com.android.build.api.variant.impl.VariantOutputImpl
 import com.android.build.api.variant.impl.dirName
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.component.BaseCreationConfig
 import com.android.build.gradle.internal.component.TestComponentCreationConfig
 import com.android.build.gradle.internal.component.TestCreationConfig
-import com.android.build.gradle.internal.core.VariantDslInfo
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType
-import com.android.build.gradle.internal.scope.BuiltArtifactProperty
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.InternalArtifactType.PACKAGED_MANIFESTS
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
@@ -71,22 +67,19 @@ import java.io.IOException
 /**
  * A task that processes the manifest for test modules and tests in androidTest.
  *
- *
  * For both test modules and tests in androidTest process is the same, except for how the tested
  * application id is extracted.
  *
- *
- * Tests in androidTest get that info from the [VariantDslInfo.testedApplicationId],
+ * Tests in androidTest get that info from the [BaseCreationConfig.getApplicationId] on
+ * the [TestComponentCreationConfig.getTestedConfig()] object,
  * while the test modules get the info from the published intermediate manifest with type
- * TYPE_METADATA of the tested app.
+ * [AndroidArtifacts.TYPE_METADATA] of the tested app.
  */
 abstract class ProcessTestManifest : ManifestProcessorTask() {
 
     @get:OutputDirectory
     abstract val packagedManifestOutputDirectory: DirectoryProperty
 
-    /** Whether there's just a single APK with both test and tested code.  */
-    private var onlyTestApk = false
     @get:Internal
     var tmpDir: File? = null
 
@@ -133,8 +126,7 @@ abstract class ProcessTestManifest : ManifestProcessorTask() {
             variantName,
             listOf(
                 apkData.get().toBuiltArtifact(
-                    manifestOutputFile,
-                    mapOf()
+                    manifestOutputFile
                 )
             )
         )
@@ -346,9 +338,6 @@ abstract class ProcessTestManifest : ManifestProcessorTask() {
         logger.verbose("Merged manifest saved to $outFile")
     }
 
-    override val aaptFriendlyManifestOutputFile: File?
-        get() = null
-
     @get:Optional
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:InputFile
@@ -357,7 +346,6 @@ abstract class ProcessTestManifest : ManifestProcessorTask() {
     @get:Input
     abstract val testApplicationId: Property<String>
 
-    @get:Optional
     @get:Input
     abstract val testedApplicationId: Property<String>
 
@@ -401,8 +389,8 @@ abstract class ProcessTestManifest : ManifestProcessorTask() {
     }
 
     class CreationAction(
-        creationConfig: BaseCreationConfig
-    ) : VariantTaskCreationAction<ProcessTestManifest, BaseCreationConfig>(creationConfig) {
+        creationConfig: TestCreationConfig
+    ) : VariantTaskCreationAction<ProcessTestManifest, TestCreationConfig>(creationConfig) {
         override val name = computeTaskName("process", "Manifest")
         override val type = ProcessTestManifest::class.java
 
@@ -463,30 +451,8 @@ abstract class ProcessTestManifest : ManifestProcessorTask() {
                 )
             task.targetSdkVersion.disallowChanges()
 
-            task.testApplicationId.setDisallowChanges(project.provider(variantDslInfo::testApplicationId))
-
-            val testedConfig = variantDslInfo.testedVariant
-            // Whether there's just a single APK with both test and tested code.
-            val onlyTestApk = testedConfig != null && testedConfig.variantType.isAar
-
-            task.testedApplicationId.setDisallowChanges(when {
-                creationConfig is TestCreationConfig -> {
-                    // test module, get the tested app ID from the creation Config. This is going
-                    // to be dynamic.
-                    creationConfig.testedApplicationId
-                }
-                onlyTestApk -> {
-                    // for AAR this is self tested
-                    project.provider(variantDslInfo::applicationId)
-                }
-                creationConfig is TestComponentCreationConfig -> {
-                    // otherwise get the tested config application ID
-                    project.provider { testedConfig!!.applicationId }
-                }
-                else -> {
-                    throw RuntimeException("unsupported code path")
-                }
-            })
+            task.testApplicationId.setDisallowChanges(creationConfig.applicationId)
+            task.testedApplicationId.setDisallowChanges(creationConfig.testedApplicationId)
 
             task.instrumentationRunner.setDisallowChanges(variantDslInfo.instrumentationRunner)
             task.handleProfiling.setDisallowChanges(variantDslInfo.handleProfiling)
@@ -518,7 +484,6 @@ abstract class ProcessTestManifest : ManifestProcessorTask() {
                 )
             }
         }
-
     }
 
     companion object {

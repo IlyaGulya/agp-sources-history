@@ -30,7 +30,23 @@ interface ApplicationVariantProperties : VariantProperties {
      */
     override val applicationId: Property<String>
 
+    /**
+     * Returns the final list of variant outputs.
+     * @return read only list of [VariantOutput] for this variant.
+     */
+    val outputs: List<VariantOutput>
+
     /** Specify whether to include SDK dependency information in APKs and Bundles. */
     val dependenciesInfo: DependenciesInfo
+
+    /**
+     * Variant's aaptOptions, initialized by the corresponding global DSL element.
+     */
+    val aaptOptions: AaptOptions
+
+    /**
+     * Variant's aaptOptions, initialized by the corresponding global DSL element.
+     */
+    fun aaptOptions(action: AaptOptions.() -> Unit)
 
 }

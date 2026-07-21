@@ -19,7 +19,6 @@ package com.android.build.api.component
 import com.android.build.api.artifact.Operations
 import com.android.build.api.variant.VariantOutput
 import org.gradle.api.Incubating
-import org.gradle.api.provider.Property
 
 @Incubating
 interface ComponentProperties: ComponentIdentity,
@@ -29,12 +28,4 @@ interface ComponentProperties: ComponentIdentity,
      * Access to the variant's buildable artifacts for build customization.
      */
     val operations: Operations
-
-    /**
-     * Returns the final list of variant outputs.
-     * @return read only list of [VariantOutput] for this variant.
-     *
-     * FIXME this does not belong here, but this is needed by AndroidTest. We need an extension that crosses AndroidTest and APK-based Variants
-     */
-    val outputs: List<VariantOutput>
 }

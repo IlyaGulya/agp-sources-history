@@ -69,7 +69,7 @@ import kotlin.streams.toList
  * It declares no inputs or outputs, as it's supposed to always run when invoked. Incrementality
  * is left to the underlying build system.
  */
-abstract class ExternalNativeBuildTask : UnsafeOutputsTask() {
+abstract class ExternalNativeBuildTask : UnsafeOutputsTask("External Native Build task is always run as incrementality is left to the external build system.") {
 
     private lateinit var generator: Provider<ExternalNativeJsonGenerator>
 
@@ -104,7 +104,7 @@ abstract class ExternalNativeBuildTask : UnsafeOutputsTask() {
     abstract val execOperations: ExecOperations
 
     private val stlSharedObjectFiles: Map<Abi, File>
-        get() = generator.get().stlSharedObjectFiles
+        get() = generator.get().getStlSharedObjectFiles()
 
     private val stats: GradleBuildVariant.Builder
         get() = generator.get().stats
@@ -205,8 +205,7 @@ abstract class ExternalNativeBuildTask : UnsafeOutputsTask() {
                     // Only need to check existence of output files we expect to create
                     continue
                 }
-                val output = library.output
-                if (output == null) continue
+                val output = library.output ?: continue
                 if (!output.exists()) {
                     throw GradleException(
                         "Expected output file at $output for target ${library.artifactName} but there was none")

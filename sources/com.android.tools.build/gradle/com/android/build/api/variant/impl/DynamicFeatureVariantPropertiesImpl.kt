@@ -17,6 +17,7 @@
 package com.android.build.api.variant.impl
 
 import com.android.build.api.component.ComponentIdentity
+import com.android.build.api.variant.AaptOptions
 import com.android.build.api.variant.DynamicFeatureVariantProperties
 import com.android.build.gradle.internal.component.DynamicFeatureCreationConfig
 import com.android.build.gradle.internal.core.VariantDslInfo
@@ -51,7 +52,7 @@ open class DynamicFeatureVariantPropertiesImpl @Inject constructor(
     variantScope: VariantScope,
     variantData: BaseVariantData,
     transformManager: TransformManager,
-    variantApiServices: VariantPropertiesApiServices,
+    internalServices: VariantPropertiesApiServices,
     taskCreationServices: TaskCreationServices,
     globalScope: GlobalScope
 ) : VariantPropertiesImpl(
@@ -65,7 +66,7 @@ open class DynamicFeatureVariantPropertiesImpl @Inject constructor(
     variantScope,
     variantData,
     transformManager,
-    variantApiServices,
+    internalServices,
     taskCreationServices,
     globalScope
 ), DynamicFeatureVariantProperties, DynamicFeatureCreationConfig {
@@ -83,11 +84,22 @@ open class DynamicFeatureVariantPropertiesImpl @Inject constructor(
     override val debuggable: Boolean
         get() = variantDslInfo.isDebuggable
 
-    override val applicationId: Property<String> =
-        variantApiServices.propertyOf(String::class.java, baseModuleMetadata.map { it.applicationId })
+    override val applicationId: Provider<String> =
+        internalServices.providerOf(String::class.java, baseModuleMetadata.map { it.applicationId })
 
     override val manifestPlaceholders: Map<String, Any>
         get() = variantDslInfo.manifestPlaceholders
+
+    override val aaptOptions: AaptOptions by lazy {
+        initializeAaptOptionsFromDsl(
+            globalScope.extension.aaptOptions,
+            internalServices
+        )
+    }
+
+    override fun aaptOptions(action: AaptOptions.() -> Unit) {
+        action.invoke(aaptOptions)
+    }
 
     // ---------------------------------------------------------------------------------------------
     // INTERNAL API
@@ -100,20 +112,12 @@ open class DynamicFeatureVariantPropertiesImpl @Inject constructor(
     override val testOnlyApk: Boolean
         get() = variantScope.isTestOnly
 
-    override val baseModuleDebuggable: Provider<Boolean> = variantApiServices.providerOf(
+    override val baseModuleDebuggable: Provider<Boolean> = internalServices.providerOf(
         Boolean::class.java,
         baseModuleMetadata.map { it.debuggable })
 
-    override val baseModuleVersionCode: Provider<Int?> = variantApiServices.nullableProviderOf(
-        Int::class.java,
-        baseModuleMetadata.map { it.versionCode?.toInt() })
-
-    override val baseModuleVersionName: Provider<String?> = variantApiServices.nullableProviderOf(
-        String::class.java,
-        baseModuleMetadata.map { it.versionName })
-
     override val featureName: Provider<String> =
-        variantApiServices.providerOf(String::class.java, featureSetMetadata.map {
+        internalServices.providerOf(String::class.java, featureSetMetadata.map {
             val path = globalScope.project.path
             it.getFeatureNameFor(path)
                 ?: throw RuntimeException("Failed to find feature name for $path in ${it.sourceFile}")
@@ -123,7 +127,7 @@ open class DynamicFeatureVariantPropertiesImpl @Inject constructor(
      * resource offset for resource compilation of a feature.
      * This is computed by the base module and consumed by the features. */
     override val resOffset: Provider<Int> =
-        variantApiServices.providerOf(Int::class.java, featureSetMetadata.map {
+        internalServices.providerOf(Int::class.java, featureSetMetadata.map {
             val path = globalScope.project.path
             it.getResOffsetFor(path)
                 ?: throw RuntimeException("Failed to find resource offset for $path in ${it.sourceFile}")
@@ -167,4 +171,34 @@ open class DynamicFeatureVariantPropertiesImpl @Inject constructor(
             FeatureSetMetadata::class.java,
             artifact.elements.map { FeatureSetMetadata.load(it.single().asFile) })
     }
+
+    // version name is coming from the base module via a published artifact, and therefore
+    // is ready only
+    // The public API does not expose this so this is ok, but it's safer to make it read-only
+    // directly to catch potential errors.
+    // The old API has a check for this type of plugins to avoid calling set() on it.
+    override fun createVersionNameProperty(): Property<String?> =
+        internalServices.nullablePropertyOf(
+            String::class.java,
+            baseModuleMetadata.map { it.versionName },
+            "$name::versionName"
+        ).also {
+            it.disallowChanges()
+            it.finalizeValueOnRead()
+        }
+
+    // version code is coming from the base module via a published artifact, and therefore
+    // is ready only
+    // The public API does not expose this so this is ok, but it's safer to make it read-only
+    // directly to catch potential errors.
+    // The old API has a check for this type of plugins to avoid calling set() on it.
+    override fun createVersionCodeProperty() : Property<Int?> =
+        internalServices.nullablePropertyOf(
+            Int::class.java,
+            baseModuleMetadata.map { it.versionCode?.toInt() },
+            id = "$name::versionCode"
+        ).also {
+            it.disallowChanges()
+            it.finalizeValueOnRead()
+        }
 }

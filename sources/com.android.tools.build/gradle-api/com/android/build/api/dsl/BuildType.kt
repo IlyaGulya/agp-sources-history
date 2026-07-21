@@ -23,7 +23,8 @@ import org.gradle.api.Named
 @Incubating
 interface BuildType<AnnotationProcessorOptionsT : AnnotationProcessorOptions,
         SigningConfigT : SigningConfig> : Named,
-    BaseConfig<AnnotationProcessorOptionsT> {
+    VariantDimension<AnnotationProcessorOptionsT,
+            SigningConfigT> {
     /** Whether this build type should generate a debuggable apk. */
     var isDebuggable: Boolean
 
@@ -115,9 +116,6 @@ interface BuildType<AnnotationProcessorOptionsT : AnnotationProcessorOptions,
      */
     var isEmbedMicroApp: Boolean
 
-    /** The associated signing config or null if none are set on the build type. */
-    var signingConfig: SigningConfigT?
-
     /** Whether this product flavor should be selected in Studio by default  */
     var isDefault: Boolean
 
@@ -175,5 +173,16 @@ interface BuildType<AnnotationProcessorOptionsT : AnnotationProcessorOptions,
      *
      * @return the names of product flavors to use, in descending priority order
      */
-    var matchingFallbacks: List<String>
+    var matchingFallbacks: MutableList<String>
+
+    /**
+     * Whether to crunch PNGs.
+     *
+     * Setting this property to `true` reduces of PNG resources that are not already
+     * optimally compressed. However, this process increases build times.
+     *
+     * PNG crunching is enabled by default in the release build type and disabled by default in
+     * the debug build type.
+     */
+    var isCrunchPngs: Boolean?
 }
