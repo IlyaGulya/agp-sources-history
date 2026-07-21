@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.tools.lint.model
+package com.android.builder.model.v2.ide
 
-enum class LintModelNamespacingMode {
-    /**
-     * Resources are not namespaced.
-     *
-     * They are merged at the application level, as was the behavior
-     * with AAPT1.
-     */
-    DISABLED,
-
-    /**
-     * Resources must be namespaced.
-     *
-     * Each library is compiled in to an AAPT2 static library with its
-     * own namespace.
-     *
-     * Projects using this *cannot* consume non-namespaced dependencies.
-     */
-    REQUIRED
+/**
+ * The type of a Library dependency.
+ *
+ * @since 7.0
+ */
+enum class LibraryType {
+    PROJECT, ANDROID_LIBRARY, JAVA_LIBRARY;
 }
