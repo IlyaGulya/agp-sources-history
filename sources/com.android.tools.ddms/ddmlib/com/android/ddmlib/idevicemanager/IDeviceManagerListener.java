@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.ddmlib.idevicemanager;
 
-package com.android.utils.reflection
+import com.android.annotations.NonNull;
+import com.android.annotations.concurrency.WorkerThread;
+import com.android.ddmlib.IDevice;
+import java.util.List;
 
-import kotlin.reflect.KProperty
+public interface IDeviceManagerListener {
+    @WorkerThread
+    void addedDevices(@NonNull List<IDevice> deviceList);
 
-/**
- * Computes the qualified name of a property.
- *
- * Can be used for creating instances of `Key` or `Logger` that should know their own name:
- *
- * `val MY_KEY: Key<Boolean> = Key.create(::MY_KEY.qualifiedName<T>())`.
- */
-inline fun <reified T>  KProperty<*>.qualifiedName(): String = T::class.java.name + "." + this.name
+    @WorkerThread
+    void removedDevices(@NonNull List<IDevice> deviceList);
+}

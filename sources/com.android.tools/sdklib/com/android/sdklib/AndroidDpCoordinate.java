@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.sdklib;
 
-package com.android.utils.reflection
+import static java.lang.annotation.ElementType.*;
 
-import kotlin.reflect.KProperty
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/**
- * Computes the qualified name of a property.
- *
- * Can be used for creating instances of `Key` or `Logger` that should know their own name:
- *
- * `val MY_KEY: Key<Boolean> = Key.create(::MY_KEY.qualifiedName<T>())`.
- */
-inline fun <reified T>  KProperty<*>.qualifiedName(): String = T::class.java.name + "." + this.name
+@Documented
+@Retention(RetentionPolicy.SOURCE)
+@Target({METHOD, PARAMETER, LOCAL_VARIABLE, FIELD})
+public @interface AndroidDpCoordinate {}
