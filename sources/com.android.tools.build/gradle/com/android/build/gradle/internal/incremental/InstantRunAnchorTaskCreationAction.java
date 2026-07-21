@@ -17,23 +17,21 @@
 package com.android.build.gradle.internal.incremental;
 
 import com.android.annotations.NonNull;
-import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.TransformVariantScope;
 import com.android.build.gradle.internal.scope.VariantScope;
+import com.android.build.gradle.internal.tasks.factory.EagerTaskCreationAction;
 import org.gradle.api.DefaultTask;
 
 /**
  * Simple task used as an anchor task for all instant run related tasks. An anchor task can be used
  * to conveniently set dependencies.
  */
-public class InstantRunAnchorTaskConfigAction extends TaskConfigAction<DefaultTask> {
+public class InstantRunAnchorTaskCreationAction extends EagerTaskCreationAction<DefaultTask> {
 
     private final TransformVariantScope variantScope;
 
-    /**
-     * Creates a new anchor task with a dedicated prefix.
-     */
-    public InstantRunAnchorTaskConfigAction(@NonNull VariantScope scope) {
+    /** Creates a new anchor task with a dedicated prefix. */
+    public InstantRunAnchorTaskCreationAction(@NonNull VariantScope scope) {
         this.variantScope = scope;
     }
 

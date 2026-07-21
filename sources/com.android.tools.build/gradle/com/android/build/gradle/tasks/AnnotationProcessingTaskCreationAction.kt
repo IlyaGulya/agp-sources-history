@@ -16,33 +16,30 @@
 
 package com.android.build.gradle.tasks
 
-import com.android.build.gradle.internal.scope.BuildArtifactsHolder
-import com.android.build.gradle.internal.scope.TaskConfigAction
 import com.android.build.gradle.internal.scope.VariantScope
+import com.android.build.gradle.internal.tasks.factory.LazyTaskCreationAction
 import org.gradle.api.Task
-import org.gradle.api.tasks.TaskProvider
 
 /**
- * Convenient super class for ConfigAction implementation that will process all annotated
+ * Convenient super class for CreationAction implementation that will process all annotated
  * input and output properties. Each input and output will be looked up in the scope and
- * pre-allocated during the [TaskConfigAction.preConfigure] call.
+ * pre-allocated during the [LazyTaskCreationAction.preConfigure] call.
  *
- * Once the task is created and the [TaskConfigAction.execute] is invoked, the pre-allocated
+ * Once the task is created and the [LazyTaskCreationAction.configure] is invoked, the pre-allocated
  * are transferred to the relevant input and output fields of the task instance.
  */
-open class AnnotationProcessingTaskConfigAction<T: Task>(
+open class AnnotationProcessingTaskCreationAction<T: Task>(
     protected val scope: VariantScope,
     override val name: String,
-    override val type: Class<T>): TaskConfigAction<T>() {
+    override val type: Class<T>): LazyTaskCreationAction<T>() {
 
     private val artifactsHolder= TaskArtifactsHolder<T>(scope.artifacts)
 
-    override fun preConfigure(taskProvider: TaskProvider<out T>, taskName: String) {
-        super.preConfigure(taskProvider, taskName)
-        artifactsHolder.allocateArtifacts(this, taskProvider)
+    override fun preConfigure(taskName: String) {
+        artifactsHolder.allocateArtifacts(this)
     }
 
-    override fun execute(task: T)  {
+    override fun configure(task: T)  {
         artifactsHolder.transfer(task)
     }
 }

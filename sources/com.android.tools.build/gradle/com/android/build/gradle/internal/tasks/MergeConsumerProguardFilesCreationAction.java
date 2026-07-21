@@ -22,8 +22,8 @@ import com.android.build.gradle.FeaturePlugin;
 import com.android.build.gradle.ProguardFiles;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
-import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.VariantScope;
+import com.android.build.gradle.internal.tasks.factory.EagerTaskCreationAction;
 import com.android.builder.errors.EvalIssueException;
 import com.android.builder.errors.EvalIssueReporter;
 import com.android.builder.errors.EvalIssueReporter.Type;
@@ -35,11 +35,12 @@ import org.gradle.api.Project;
 import org.gradle.api.file.ConfigurableFileCollection;
 
 /** Configuration action for a merge-Proguard-files task. */
-public class MergeConsumerProguardFilesConfigAction extends TaskConfigAction<MergeFileTask> {
+public class MergeConsumerProguardFilesCreationAction
+        extends EagerTaskCreationAction<MergeFileTask> {
 
     @NonNull private final VariantScope variantScope;
 
-    public MergeConsumerProguardFilesConfigAction(@NonNull VariantScope variantScope) {
+    public MergeConsumerProguardFilesCreationAction(@NonNull VariantScope variantScope) {
         this.variantScope = variantScope;
     }
 
