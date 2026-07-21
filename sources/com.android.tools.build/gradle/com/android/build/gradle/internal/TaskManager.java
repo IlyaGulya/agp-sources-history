@@ -944,6 +944,7 @@ public abstract class TaskManager {
                 taskFactory.create(
                         new MergeResources.ConfigAction(
                                 scope,
+                                mergeType,
                                 taskNamePrefix,
                                 mergedOutputDir,
                                 mergedNotCompiledDir,
@@ -2522,7 +2523,8 @@ public abstract class TaskManager {
                         variantScope.getDexMerger(),
                         variantScope.getMinSdkVersion().getFeatureLevel(),
                         isDebuggable,
-                        variantScope.consumesFeatureJars());
+                        variantScope.consumesFeatureJars(),
+                        variantScope.getInstantRunBuildContext().isInInstantRunMode());
         Optional<TransformTask> dexTask =
                 transformManager.addTransform(taskFactory, variantScope, dexTransform);
         // need to manually make dex task depend on MultiDexTransform since there's no stream
@@ -2846,10 +2848,7 @@ public abstract class TaskManager {
 
         scope.setDataBindingExportBuildInfoTask(exportBuildInfo);
 
-        // setup generate base class task
-        DataBindingGenBaseClassesTask generateBaseClasses =
-                taskFactory.create(new DataBindingGenBaseClassesTask.ConfigAction(scope));
-        generateBaseClasses.dependsOn(scope.getTaskContainer().getMergeResourcesTask());
+        taskFactory.create(new DataBindingGenBaseClassesTask.ConfigAction(scope));
 
         setDataBindingAnnotationProcessorParams(scope, mergeType);
     }
