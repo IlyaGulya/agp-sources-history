@@ -18,13 +18,14 @@ package com.android.build.gradle.options;
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.build.gradle.internal.errors.DeprecationReporter;
 
 /**
  * The list of options that have been removed.
  *
  * <p>If any of the deprecated options are set, a sync error will be raised.
  */
-public enum DeprecatedOptions implements Option<String> {
+public enum RemovedOptions implements Option<String> {
     INCREMENTAL_JAVA_COMPILE(
             "android.incrementalJavaCompile",
             "The android.incrementalJavaCompile property has been replaced by a DSL property. "
@@ -55,7 +56,7 @@ public enum DeprecatedOptions implements Option<String> {
     @NonNull private final String propertyName;
     @NonNull private final String errorMessage;
 
-    DeprecatedOptions(@NonNull String propertyName, @NonNull String errorMessage) {
+    RemovedOptions(@NonNull String propertyName, @NonNull String errorMessage) {
         this.propertyName = propertyName;
         this.errorMessage = errorMessage;
     }
@@ -76,5 +77,19 @@ public enum DeprecatedOptions implements Option<String> {
     @Override
     public String parse(@NonNull Object value) {
         return errorMessage;
+    }
+
+    @Override
+    public boolean isDeprecated() {
+        // The option is already removed, so it shouldn't be counted as deprecated (but not yet
+        // removed).
+        return false;
+    }
+
+    @Nullable
+    @Override
+    public DeprecationReporter.DeprecationTarget getDeprecationTarget() {
+        // Already removed.
+        return null;
     }
 }
