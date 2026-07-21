@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,27 @@
 
 package com.android.build.api.component.analytics
 
-import com.android.build.api.variant.ApkPackaging
-import com.android.build.api.variant.DexPackagingOptions
-import com.android.build.api.variant.JniLibsApkPackaging
+import com.android.build.api.dsl.AgpTestSuiteDependencies
+import com.android.build.api.variant.TestSuiteSource
+import com.android.build.api.variant.TestSuiteSourceType
+import com.android.tools.build.gradle.internal.profile.VariantMethodType
 import com.android.tools.build.gradle.internal.profile.VariantPropertiesMethodType
 import com.google.wireless.android.sdk.stats.GradleBuildVariant
-import javax.inject.Inject
 
-open class AnalyticsEnabledApkPackaging @Inject constructor(
-    override val delegate: ApkPackaging,
-    stats: GradleBuildVariant.Builder
-) : AnalyticsEnabledPackaging(delegate, stats), ApkPackaging {
+open class AnalyticsEnabledTestSuiteSource(
+    private val source: TestSuiteSource,
+    private val stats: GradleBuildVariant.Builder
+): TestSuiteSource {
 
-    override val dex: DexPackagingOptions
+    override val type: TestSuiteSourceType
+        get() = source.type
+
+    override val dependencies: AgpTestSuiteDependencies?
         get() {
             stats.variantApiAccessBuilder.addVariantPropertiesAccessBuilder().type =
-                VariantPropertiesMethodType.DEX_PACKAGING_OPTIONS_VALUE
-            return delegate.dex
+                VariantPropertiesMethodType.TEST_SUITE_SOURCE_DEPENDENCIES_VALUE
+            return source.dependencies
         }
 
-    override val jniLibs: JniLibsApkPackaging
-        get() {
-            stats.variantApiAccessBuilder.addVariantPropertiesAccessBuilder().type =
-                VariantPropertiesMethodType.JNI_LIBS_PACKAGING_OPTIONS_VALUE
-            return delegate.jniLibs
-        }
+    override fun getName(): String = source.name
 }

@@ -95,13 +95,14 @@ public final class KotlinMultiplatformAndroidModelsProto {
       "d_idB\014\n\n_with_java\"E\n\016SourceProvider\022!\n\r" +
       "manifest_file\030\001 \001(\0132\005.FileH\000\210\001\001B\020\n\016_mani" +
       "fest_file\"1\n\020GeneratedSources\022\035\n\016source_" +
-      "folders\030\001 \003(\0132\005.File\"\347\002\n\017MainVariantInfo" +
+      "folders\030\001 \003(\0132\005.File\"\217\003\n\017MainVariantInfo" +
       "\022\026\n\tnamespace\030\001 \001(\tH\000\210\001\001\022\037\n\022compile_sdk_" +
       "target\030\002 \001(\tH\001\210\001\001\022-\n\017min_sdk_version\030\003 \001" +
       "(\0132\017.AndroidVersionH\002\210\001\001\022\034\n\017max_sdk_vers" +
       "ion\030\004 \001(\005H\003\210\001\001\022\035\n\016proguard_files\030\005 \003(\0132\005" +
       ".File\022&\n\027consumer_proguard_files\030\006 \003(\0132\005" +
       ".File\022!\n\024minification_enabled\030\007 \001(\010H\004\210\001\001" +
+      "\022&\n\027generated_asset_folders\030\010 \003(\0132\005.File" +
       "B\014\n\n_namespaceB\025\n\023_compile_sdk_targetB\022\n" +
       "\020_min_sdk_versionB\022\n\020_max_sdk_versionB\027\n" +
       "\025_minification_enabled\"\263\001\n\014UnitTestInfo\022" +
@@ -109,14 +110,15 @@ public final class KotlinMultiplatformAndroidModelsProto {
       "form_jar\030\002 \001(\0132\005.FileH\001\210\001\001\022 \n\023unit_test_" +
       "task_name\030\003 \001(\tH\002\210\001\001B\014\n\n_namespaceB\030\n\026_m" +
       "ockable_platform_jarB\026\n\024_unit_test_task_" +
-      "name\"\334\003\n\024InstrumentedTestInfo\022\026\n\tnamespa" +
+      "name\"\204\004\n\024InstrumentedTestInfo\022\026\n\tnamespa" +
       "ce\030\001 \001(\tH\000\210\001\001\022(\n\033test_instrumentation_ru" +
       "nner\030\002 \001(\tH\001\210\001\001\022l\n%test_instrumentation_" +
       "runner_arguments\030\003 \003(\0132=.InstrumentedTes" +
       "tInfo.TestInstrumentationRunnerArguments" +
       "Entry\022+\n\016signing_config\030\004 \001(\0132\016.SigningC" +
       "onfigH\002\210\001\001\0225\n!assemble_task_output_listi" +
-      "ng_file\030\005 \001(\0132\005.FileH\003\210\001\001\032I\n\'TestInstrum" +
+      "ng_file\030\005 \001(\0132\005.FileH\003\210\001\001\022&\n\027generated_a" +
+      "sset_folders\030\006 \003(\0132\005.File\032I\n\'TestInstrum" +
       "entationRunnerArgumentsEntry\022\013\n\003key\030\001 \001(" +
       "\t\022\r\n\005value\030\002 \001(\t:\0028\001B\014\n\n_namespaceB\036\n\034_t" +
       "est_instrumentation_runnerB\021\n\017_signing_c" +
@@ -170,7 +172,7 @@ public final class KotlinMultiplatformAndroidModelsProto {
     internal_static_MainVariantInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_MainVariantInfo_descriptor,
-        new java.lang.String[] { "Namespace", "CompileSdkTarget", "MinSdkVersion", "MaxSdkVersion", "ProguardFiles", "ConsumerProguardFiles", "MinificationEnabled", "Namespace", "CompileSdkTarget", "MinSdkVersion", "MaxSdkVersion", "MinificationEnabled", });
+        new java.lang.String[] { "Namespace", "CompileSdkTarget", "MinSdkVersion", "MaxSdkVersion", "ProguardFiles", "ConsumerProguardFiles", "MinificationEnabled", "GeneratedAssetFolders", "Namespace", "CompileSdkTarget", "MinSdkVersion", "MaxSdkVersion", "MinificationEnabled", });
     internal_static_UnitTestInfo_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_UnitTestInfo_fieldAccessorTable = new
@@ -182,7 +184,7 @@ public final class KotlinMultiplatformAndroidModelsProto {
     internal_static_InstrumentedTestInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_InstrumentedTestInfo_descriptor,
-        new java.lang.String[] { "Namespace", "TestInstrumentationRunner", "TestInstrumentationRunnerArguments", "SigningConfig", "AssembleTaskOutputListingFile", "Namespace", "TestInstrumentationRunner", "SigningConfig", "AssembleTaskOutputListingFile", });
+        new java.lang.String[] { "Namespace", "TestInstrumentationRunner", "TestInstrumentationRunnerArguments", "SigningConfig", "AssembleTaskOutputListingFile", "GeneratedAssetFolders", "Namespace", "TestInstrumentationRunner", "SigningConfig", "AssembleTaskOutputListingFile", });
     internal_static_InstrumentedTestInfo_TestInstrumentationRunnerArgumentsEntry_descriptor =
       internal_static_InstrumentedTestInfo_descriptor.getNestedTypes().get(0);
     internal_static_InstrumentedTestInfo_TestInstrumentationRunnerArgumentsEntry_fieldAccessorTable = new

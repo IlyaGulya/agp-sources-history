@@ -131,4 +131,48 @@ java.lang.String defaultValue);
    * <code>optional .File assemble_task_output_listing_file = 5;</code>
    */
   com.android.builder.model.proto.ide.FileOrBuilder getAssembleTaskOutputListingFileOrBuilder();
+
+  /**
+   * <pre>
+   * Folders containing assets generated during the build and should be included in the test APK.
+   * </pre>
+   *
+   * <code>repeated .File generated_asset_folders = 6;</code>
+   */
+  java.util.List<com.android.builder.model.proto.ide.File> 
+      getGeneratedAssetFoldersList();
+  /**
+   * <pre>
+   * Folders containing assets generated during the build and should be included in the test APK.
+   * </pre>
+   *
+   * <code>repeated .File generated_asset_folders = 6;</code>
+   */
+  com.android.builder.model.proto.ide.File getGeneratedAssetFolders(int index);
+  /**
+   * <pre>
+   * Folders containing assets generated during the build and should be included in the test APK.
+   * </pre>
+   *
+   * <code>repeated .File generated_asset_folders = 6;</code>
+   */
+  int getGeneratedAssetFoldersCount();
+  /**
+   * <pre>
+   * Folders containing assets generated during the build and should be included in the test APK.
+   * </pre>
+   *
+   * <code>repeated .File generated_asset_folders = 6;</code>
+   */
+  java.util.List<? extends com.android.builder.model.proto.ide.FileOrBuilder> 
+      getGeneratedAssetFoldersOrBuilderList();
+  /**
+   * <pre>
+   * Folders containing assets generated during the build and should be included in the test APK.
+   * </pre>
+   *
+   * <code>repeated .File generated_asset_folders = 6;</code>
+   */
+  com.android.builder.model.proto.ide.FileOrBuilder getGeneratedAssetFoldersOrBuilder(
+      int index);
 }

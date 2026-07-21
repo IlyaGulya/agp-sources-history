@@ -22,6 +22,7 @@ private static final long serialVersionUID = 0L;
   private InstrumentedTestInfo() {
     namespace_ = "";
     testInstrumentationRunner_ = "";
+    generatedAssetFolders_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -309,6 +310,67 @@ java.lang.String defaultValue) {
     return assembleTaskOutputListingFile_ == null ? com.android.builder.model.proto.ide.File.getDefaultInstance() : assembleTaskOutputListingFile_;
   }
 
+  public static final int GENERATED_ASSET_FOLDERS_FIELD_NUMBER = 6;
+  @SuppressWarnings("serial")
+  private java.util.List<com.android.builder.model.proto.ide.File> generatedAssetFolders_;
+  /**
+   * <pre>
+   * Folders containing assets generated during the build and should be included in the test APK.
+   * </pre>
+   *
+   * <code>repeated .File generated_asset_folders = 6;</code>
+   */
+  @java.lang.Override
+  public java.util.List<com.android.builder.model.proto.ide.File> getGeneratedAssetFoldersList() {
+    return generatedAssetFolders_;
+  }
+  /**
+   * <pre>
+   * Folders containing assets generated during the build and should be included in the test APK.
+   * </pre>
+   *
+   * <code>repeated .File generated_asset_folders = 6;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends com.android.builder.model.proto.ide.FileOrBuilder> 
+      getGeneratedAssetFoldersOrBuilderList() {
+    return generatedAssetFolders_;
+  }
+  /**
+   * <pre>
+   * Folders containing assets generated during the build and should be included in the test APK.
+   * </pre>
+   *
+   * <code>repeated .File generated_asset_folders = 6;</code>
+   */
+  @java.lang.Override
+  public int getGeneratedAssetFoldersCount() {
+    return generatedAssetFolders_.size();
+  }
+  /**
+   * <pre>
+   * Folders containing assets generated during the build and should be included in the test APK.
+   * </pre>
+   *
+   * <code>repeated .File generated_asset_folders = 6;</code>
+   */
+  @java.lang.Override
+  public com.android.builder.model.proto.ide.File getGeneratedAssetFolders(int index) {
+    return generatedAssetFolders_.get(index);
+  }
+  /**
+   * <pre>
+   * Folders containing assets generated during the build and should be included in the test APK.
+   * </pre>
+   *
+   * <code>repeated .File generated_asset_folders = 6;</code>
+   */
+  @java.lang.Override
+  public com.android.builder.model.proto.ide.FileOrBuilder getGeneratedAssetFoldersOrBuilder(
+      int index) {
+    return generatedAssetFolders_.get(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -340,6 +402,9 @@ java.lang.String defaultValue) {
     }
     if (((bitField0_ & 0x00000008) != 0)) {
       output.writeMessage(5, getAssembleTaskOutputListingFile());
+    }
+    for (int i = 0; i < generatedAssetFolders_.size(); i++) {
+      output.writeMessage(6, generatedAssetFolders_.get(i));
     }
     getUnknownFields().writeTo(output);
   }
@@ -373,6 +438,10 @@ java.lang.String defaultValue) {
     if (((bitField0_ & 0x00000008) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(5, getAssembleTaskOutputListingFile());
+    }
+    for (int i = 0; i < generatedAssetFolders_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(6, generatedAssetFolders_.get(i));
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -411,6 +480,8 @@ java.lang.String defaultValue) {
       if (!getAssembleTaskOutputListingFile()
           .equals(other.getAssembleTaskOutputListingFile())) return false;
     }
+    if (!getGeneratedAssetFoldersList()
+        .equals(other.getGeneratedAssetFoldersList())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -441,6 +512,10 @@ java.lang.String defaultValue) {
     if (hasAssembleTaskOutputListingFile()) {
       hash = (37 * hash) + ASSEMBLE_TASK_OUTPUT_LISTING_FILE_FIELD_NUMBER;
       hash = (53 * hash) + getAssembleTaskOutputListingFile().hashCode();
+    }
+    if (getGeneratedAssetFoldersCount() > 0) {
+      hash = (37 * hash) + GENERATED_ASSET_FOLDERS_FIELD_NUMBER;
+      hash = (53 * hash) + getGeneratedAssetFoldersList().hashCode();
     }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
@@ -598,6 +673,7 @@ java.lang.String defaultValue) {
               .alwaysUseFieldBuilders) {
         getSigningConfigFieldBuilder();
         getAssembleTaskOutputListingFileFieldBuilder();
+        getGeneratedAssetFoldersFieldBuilder();
       }
     }
     @java.lang.Override
@@ -617,6 +693,13 @@ java.lang.String defaultValue) {
         assembleTaskOutputListingFileBuilder_.dispose();
         assembleTaskOutputListingFileBuilder_ = null;
       }
+      if (generatedAssetFoldersBuilder_ == null) {
+        generatedAssetFolders_ = java.util.Collections.emptyList();
+      } else {
+        generatedAssetFolders_ = null;
+        generatedAssetFoldersBuilder_.clear();
+      }
+      bitField0_ = (bitField0_ & ~0x00000020);
       return this;
     }
 
@@ -643,9 +726,22 @@ java.lang.String defaultValue) {
     @java.lang.Override
     public com.android.kotlin.multiplatform.models.InstrumentedTestInfo buildPartial() {
       com.android.kotlin.multiplatform.models.InstrumentedTestInfo result = new com.android.kotlin.multiplatform.models.InstrumentedTestInfo(this);
+      buildPartialRepeatedFields(result);
       if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
+    }
+
+    private void buildPartialRepeatedFields(com.android.kotlin.multiplatform.models.InstrumentedTestInfo result) {
+      if (generatedAssetFoldersBuilder_ == null) {
+        if (((bitField0_ & 0x00000020) != 0)) {
+          generatedAssetFolders_ = java.util.Collections.unmodifiableList(generatedAssetFolders_);
+          bitField0_ = (bitField0_ & ~0x00000020);
+        }
+        result.generatedAssetFolders_ = generatedAssetFolders_;
+      } else {
+        result.generatedAssetFolders_ = generatedAssetFoldersBuilder_.build();
+      }
     }
 
     private void buildPartial0(com.android.kotlin.multiplatform.models.InstrumentedTestInfo result) {
@@ -709,6 +805,32 @@ java.lang.String defaultValue) {
       if (other.hasAssembleTaskOutputListingFile()) {
         mergeAssembleTaskOutputListingFile(other.getAssembleTaskOutputListingFile());
       }
+      if (generatedAssetFoldersBuilder_ == null) {
+        if (!other.generatedAssetFolders_.isEmpty()) {
+          if (generatedAssetFolders_.isEmpty()) {
+            generatedAssetFolders_ = other.generatedAssetFolders_;
+            bitField0_ = (bitField0_ & ~0x00000020);
+          } else {
+            ensureGeneratedAssetFoldersIsMutable();
+            generatedAssetFolders_.addAll(other.generatedAssetFolders_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.generatedAssetFolders_.isEmpty()) {
+          if (generatedAssetFoldersBuilder_.isEmpty()) {
+            generatedAssetFoldersBuilder_.dispose();
+            generatedAssetFoldersBuilder_ = null;
+            generatedAssetFolders_ = other.generatedAssetFolders_;
+            bitField0_ = (bitField0_ & ~0x00000020);
+            generatedAssetFoldersBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getGeneratedAssetFoldersFieldBuilder() : null;
+          } else {
+            generatedAssetFoldersBuilder_.addAllMessages(other.generatedAssetFolders_);
+          }
+        }
+      }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
@@ -768,6 +890,19 @@ java.lang.String defaultValue) {
               bitField0_ |= 0x00000010;
               break;
             } // case 42
+            case 50: {
+              com.android.builder.model.proto.ide.File m =
+                  input.readMessage(
+                      com.android.builder.model.proto.ide.File.parser(),
+                      extensionRegistry);
+              if (generatedAssetFoldersBuilder_ == null) {
+                ensureGeneratedAssetFoldersIsMutable();
+                generatedAssetFolders_.add(m);
+              } else {
+                generatedAssetFoldersBuilder_.addMessage(m);
+              }
+              break;
+            } // case 50
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -1387,6 +1522,318 @@ java.lang.String defaultValue) {
         assembleTaskOutputListingFile_ = null;
       }
       return assembleTaskOutputListingFileBuilder_;
+    }
+
+    private java.util.List<com.android.builder.model.proto.ide.File> generatedAssetFolders_ =
+      java.util.Collections.emptyList();
+    private void ensureGeneratedAssetFoldersIsMutable() {
+      if (!((bitField0_ & 0x00000020) != 0)) {
+        generatedAssetFolders_ = new java.util.ArrayList<com.android.builder.model.proto.ide.File>(generatedAssetFolders_);
+        bitField0_ |= 0x00000020;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        com.android.builder.model.proto.ide.File, com.android.builder.model.proto.ide.File.Builder, com.android.builder.model.proto.ide.FileOrBuilder> generatedAssetFoldersBuilder_;
+
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public java.util.List<com.android.builder.model.proto.ide.File> getGeneratedAssetFoldersList() {
+      if (generatedAssetFoldersBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(generatedAssetFolders_);
+      } else {
+        return generatedAssetFoldersBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public int getGeneratedAssetFoldersCount() {
+      if (generatedAssetFoldersBuilder_ == null) {
+        return generatedAssetFolders_.size();
+      } else {
+        return generatedAssetFoldersBuilder_.getCount();
+      }
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public com.android.builder.model.proto.ide.File getGeneratedAssetFolders(int index) {
+      if (generatedAssetFoldersBuilder_ == null) {
+        return generatedAssetFolders_.get(index);
+      } else {
+        return generatedAssetFoldersBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public Builder setGeneratedAssetFolders(
+        int index, com.android.builder.model.proto.ide.File value) {
+      if (generatedAssetFoldersBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureGeneratedAssetFoldersIsMutable();
+        generatedAssetFolders_.set(index, value);
+        onChanged();
+      } else {
+        generatedAssetFoldersBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public Builder setGeneratedAssetFolders(
+        int index, com.android.builder.model.proto.ide.File.Builder builderForValue) {
+      if (generatedAssetFoldersBuilder_ == null) {
+        ensureGeneratedAssetFoldersIsMutable();
+        generatedAssetFolders_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        generatedAssetFoldersBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public Builder addGeneratedAssetFolders(com.android.builder.model.proto.ide.File value) {
+      if (generatedAssetFoldersBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureGeneratedAssetFoldersIsMutable();
+        generatedAssetFolders_.add(value);
+        onChanged();
+      } else {
+        generatedAssetFoldersBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public Builder addGeneratedAssetFolders(
+        int index, com.android.builder.model.proto.ide.File value) {
+      if (generatedAssetFoldersBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureGeneratedAssetFoldersIsMutable();
+        generatedAssetFolders_.add(index, value);
+        onChanged();
+      } else {
+        generatedAssetFoldersBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public Builder addGeneratedAssetFolders(
+        com.android.builder.model.proto.ide.File.Builder builderForValue) {
+      if (generatedAssetFoldersBuilder_ == null) {
+        ensureGeneratedAssetFoldersIsMutable();
+        generatedAssetFolders_.add(builderForValue.build());
+        onChanged();
+      } else {
+        generatedAssetFoldersBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public Builder addGeneratedAssetFolders(
+        int index, com.android.builder.model.proto.ide.File.Builder builderForValue) {
+      if (generatedAssetFoldersBuilder_ == null) {
+        ensureGeneratedAssetFoldersIsMutable();
+        generatedAssetFolders_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        generatedAssetFoldersBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public Builder addAllGeneratedAssetFolders(
+        java.lang.Iterable<? extends com.android.builder.model.proto.ide.File> values) {
+      if (generatedAssetFoldersBuilder_ == null) {
+        ensureGeneratedAssetFoldersIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, generatedAssetFolders_);
+        onChanged();
+      } else {
+        generatedAssetFoldersBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public Builder clearGeneratedAssetFolders() {
+      if (generatedAssetFoldersBuilder_ == null) {
+        generatedAssetFolders_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000020);
+        onChanged();
+      } else {
+        generatedAssetFoldersBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public Builder removeGeneratedAssetFolders(int index) {
+      if (generatedAssetFoldersBuilder_ == null) {
+        ensureGeneratedAssetFoldersIsMutable();
+        generatedAssetFolders_.remove(index);
+        onChanged();
+      } else {
+        generatedAssetFoldersBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public com.android.builder.model.proto.ide.File.Builder getGeneratedAssetFoldersBuilder(
+        int index) {
+      return getGeneratedAssetFoldersFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public com.android.builder.model.proto.ide.FileOrBuilder getGeneratedAssetFoldersOrBuilder(
+        int index) {
+      if (generatedAssetFoldersBuilder_ == null) {
+        return generatedAssetFolders_.get(index);  } else {
+        return generatedAssetFoldersBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public java.util.List<? extends com.android.builder.model.proto.ide.FileOrBuilder> 
+         getGeneratedAssetFoldersOrBuilderList() {
+      if (generatedAssetFoldersBuilder_ != null) {
+        return generatedAssetFoldersBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(generatedAssetFolders_);
+      }
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public com.android.builder.model.proto.ide.File.Builder addGeneratedAssetFoldersBuilder() {
+      return getGeneratedAssetFoldersFieldBuilder().addBuilder(
+          com.android.builder.model.proto.ide.File.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public com.android.builder.model.proto.ide.File.Builder addGeneratedAssetFoldersBuilder(
+        int index) {
+      return getGeneratedAssetFoldersFieldBuilder().addBuilder(
+          index, com.android.builder.model.proto.ide.File.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * Folders containing assets generated during the build and should be included in the test APK.
+     * </pre>
+     *
+     * <code>repeated .File generated_asset_folders = 6;</code>
+     */
+    public java.util.List<com.android.builder.model.proto.ide.File.Builder> 
+         getGeneratedAssetFoldersBuilderList() {
+      return getGeneratedAssetFoldersFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        com.android.builder.model.proto.ide.File, com.android.builder.model.proto.ide.File.Builder, com.android.builder.model.proto.ide.FileOrBuilder> 
+        getGeneratedAssetFoldersFieldBuilder() {
+      if (generatedAssetFoldersBuilder_ == null) {
+        generatedAssetFoldersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            com.android.builder.model.proto.ide.File, com.android.builder.model.proto.ide.File.Builder, com.android.builder.model.proto.ide.FileOrBuilder>(
+                generatedAssetFolders_,
+                ((bitField0_ & 0x00000020) != 0),
+                getParentForChildren(),
+                isClean());
+        generatedAssetFolders_ = null;
+      }
+      return generatedAssetFoldersBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

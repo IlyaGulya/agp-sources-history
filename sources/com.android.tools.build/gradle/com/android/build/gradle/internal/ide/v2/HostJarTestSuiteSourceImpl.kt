@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.builder.model.v2.models
+package com.android.build.gradle.internal.ide.v2
 
-/**
- * Types of source associated to the test suite with its own set of dependencies
- */
-enum class SourceType { ASSETS, HOST_JAR, TEST_APK }
+import com.android.builder.model.v2.models.HostJarTestSuiteSource
+import java.io.File
+
+class HostJarTestSuiteSourceImpl(
+    override val name: String,
+    override val java: Collection<File>,
+    override val kotlin: Collection<File>
+): HostJarTestSuiteSource
