@@ -117,7 +117,7 @@ public final class GradleAndroidTestResultListenerConfigProto {
    *
    * Protobuf type {@code com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerConfig}
    */
-  public  static final class GradleAndroidTestResultListenerConfig extends
+  public static final class GradleAndroidTestResultListenerConfig extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerConfig)
       GradleAndroidTestResultListenerConfigOrBuilder {
@@ -234,6 +234,7 @@ public final class GradleAndroidTestResultListenerConfigProto {
      * <code>int32 resultListenerServerPort = 1;</code>
      * @return The resultListenerServerPort.
      */
+    @java.lang.Override
     public int getResultListenerServerPort() {
       return resultListenerServerPort_;
     }
@@ -248,6 +249,7 @@ public final class GradleAndroidTestResultListenerConfigProto {
      * <code>string resultListenerClientCertFilePath = 2;</code>
      * @return The resultListenerClientCertFilePath.
      */
+    @java.lang.Override
     public java.lang.String getResultListenerClientCertFilePath() {
       java.lang.Object ref = resultListenerClientCertFilePath_;
       if (ref instanceof java.lang.String) {
@@ -268,6 +270,7 @@ public final class GradleAndroidTestResultListenerConfigProto {
      * <code>string resultListenerClientCertFilePath = 2;</code>
      * @return The bytes for resultListenerClientCertFilePath.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getResultListenerClientCertFilePathBytes() {
       java.lang.Object ref = resultListenerClientCertFilePath_;
@@ -293,6 +296,7 @@ public final class GradleAndroidTestResultListenerConfigProto {
      * <code>string resultListenerClientPrivateKeyFilePath = 3;</code>
      * @return The resultListenerClientPrivateKeyFilePath.
      */
+    @java.lang.Override
     public java.lang.String getResultListenerClientPrivateKeyFilePath() {
       java.lang.Object ref = resultListenerClientPrivateKeyFilePath_;
       if (ref instanceof java.lang.String) {
@@ -314,6 +318,7 @@ public final class GradleAndroidTestResultListenerConfigProto {
      * <code>string resultListenerClientPrivateKeyFilePath = 3;</code>
      * @return The bytes for resultListenerClientPrivateKeyFilePath.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getResultListenerClientPrivateKeyFilePathBytes() {
       java.lang.Object ref = resultListenerClientPrivateKeyFilePath_;
@@ -338,6 +343,7 @@ public final class GradleAndroidTestResultListenerConfigProto {
      * <code>string trustCertCollectionFilePath = 4;</code>
      * @return The trustCertCollectionFilePath.
      */
+    @java.lang.Override
     public java.lang.String getTrustCertCollectionFilePath() {
       java.lang.Object ref = trustCertCollectionFilePath_;
       if (ref instanceof java.lang.String) {
@@ -358,6 +364,7 @@ public final class GradleAndroidTestResultListenerConfigProto {
      * <code>string trustCertCollectionFilePath = 4;</code>
      * @return The bytes for trustCertCollectionFilePath.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getTrustCertCollectionFilePathBytes() {
       java.lang.Object ref = trustCertCollectionFilePath_;
@@ -382,6 +389,7 @@ public final class GradleAndroidTestResultListenerConfigProto {
      * <code>string deviceId = 5;</code>
      * @return The deviceId.
      */
+    @java.lang.Override
     public java.lang.String getDeviceId() {
       java.lang.Object ref = deviceId_;
       if (ref instanceof java.lang.String) {
@@ -402,6 +410,7 @@ public final class GradleAndroidTestResultListenerConfigProto {
      * <code>string deviceId = 5;</code>
      * @return The bytes for deviceId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDeviceIdBytes() {
       java.lang.Object ref = deviceId_;
@@ -799,6 +808,7 @@ public final class GradleAndroidTestResultListenerConfigProto {
        * <code>int32 resultListenerServerPort = 1;</code>
        * @return The resultListenerServerPort.
        */
+      @java.lang.Override
       public int getResultListenerServerPort() {
         return resultListenerServerPort_;
       }

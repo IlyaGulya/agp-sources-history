@@ -67,7 +67,7 @@ public final class AndroidDeviceProviderDdmlibConfigProto {
    *
    * Protobuf type {@code com.android.tools.utp.plugins.deviceprovider.ddmlib.proto.DdmlibAndroidDeviceProviderConfig}
    */
-  public  static final class DdmlibAndroidDeviceProviderConfig extends
+  public static final class DdmlibAndroidDeviceProviderConfig extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:com.android.tools.utp.plugins.deviceprovider.ddmlib.proto.DdmlibAndroidDeviceProviderConfig)
       DdmlibAndroidDeviceProviderConfigOrBuilder {
@@ -170,6 +170,7 @@ public final class AndroidDeviceProviderDdmlibConfigProto {
      * <code>.google.protobuf.Any local_android_device_provider_config = 1;</code>
      * @return Whether the localAndroidDeviceProviderConfig field is set.
      */
+    @java.lang.Override
     public boolean hasLocalAndroidDeviceProviderConfig() {
       return localAndroidDeviceProviderConfig_ != null;
     }
@@ -182,6 +183,7 @@ public final class AndroidDeviceProviderDdmlibConfigProto {
      * <code>.google.protobuf.Any local_android_device_provider_config = 1;</code>
      * @return The localAndroidDeviceProviderConfig.
      */
+    @java.lang.Override
     public com.google.protobuf.Any getLocalAndroidDeviceProviderConfig() {
       return localAndroidDeviceProviderConfig_ == null ? com.google.protobuf.Any.getDefaultInstance() : localAndroidDeviceProviderConfig_;
     }
@@ -193,6 +195,7 @@ public final class AndroidDeviceProviderDdmlibConfigProto {
      *
      * <code>.google.protobuf.Any local_android_device_provider_config = 1;</code>
      */
+    @java.lang.Override
     public com.google.protobuf.AnyOrBuilder getLocalAndroidDeviceProviderConfigOrBuilder() {
       return getLocalAndroidDeviceProviderConfig();
     }
@@ -209,6 +212,7 @@ public final class AndroidDeviceProviderDdmlibConfigProto {
      * <code>bool uninstall_incompatible_apks = 2;</code>
      * @return The uninstallIncompatibleApks.
      */
+    @java.lang.Override
     public boolean getUninstallIncompatibleApks() {
       return uninstallIncompatibleApks_;
     }
@@ -725,6 +729,7 @@ public final class AndroidDeviceProviderDdmlibConfigProto {
        * <code>bool uninstall_incompatible_apks = 2;</code>
        * @return The uninstallIncompatibleApks.
        */
+      @java.lang.Override
       public boolean getUninstallIncompatibleApks() {
         return uninstallIncompatibleApks_;
       }
