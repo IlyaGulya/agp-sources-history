@@ -323,7 +323,7 @@ abstract class LintPlugin : Plugin<Project> {
                     ?.targets
                     ?.filter {
                         it.platformType == KotlinPlatformType.jvm
-                                && it.name != KotlinMultiplatformAndroidPlugin.androidTargetName
+                                && it.name != KotlinMultiplatformAndroidPlugin.ANDROID_TARGET_NAME
                     }
                     ?.map { it.name }
                     ?: listOf("jvm")
@@ -826,6 +826,7 @@ abstract class LintPlugin : Plugin<Project> {
             projectOptions,
             project.gradle.sharedServices,
             lintFromMaven,
+            null,
             maxWorkerCount = project.gradle.startParameter.maxWorkerCount,
             projectInfo = projectInfo,
             fileResolver = { o: Any -> project.file(o) },
