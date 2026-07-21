@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,21 @@ package com.android.ddmlib;
 
 import com.android.annotations.NonNull;
 
-public interface JdwpTracerFactory {
+public interface JdwpTrafficResponse {
 
+    /**
+     * Packet to be transmitted on the wire.
+     *
+     * @return Upstream and Downstream packets to be send to the debugger/debugged.
+     */
     @NonNull
-    DDMLibJdwpTracer newJwpTracer();
+    JdwpTraffic getEdict();
+
+    /**
+     * Packet to be reported in tracer / inspector. See scache README.md for further explanations.
+     *
+     * @return Upstream and Downstream packets to be reported to tracer.
+     */
+    @NonNull
+    JdwpTraffic getJournal();
 }

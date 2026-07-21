@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,16 @@
 package com.android.ddmlib;
 
 import com.android.annotations.NonNull;
+import java.nio.ByteBuffer;
+import java.util.List;
 
-public interface JdwpTracerFactory {
+public interface JdwpTraffic {
 
+    /** @return List of JDWP packets to be sent to the debugged process. */
     @NonNull
-    DDMLibJdwpTracer newJwpTracer();
+    List<ByteBuffer> getToUpstream();
+
+    /** @return List of JDWP packets to be sent to the debugger. */
+    @NonNull
+    List<ByteBuffer> getToDownstream();
 }
