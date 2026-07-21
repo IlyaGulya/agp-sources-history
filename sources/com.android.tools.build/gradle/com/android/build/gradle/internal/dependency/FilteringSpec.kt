@@ -68,14 +68,16 @@ class FilteringSpec(
             .flatMap { list: List<String> -> list.stream() }
             .collect(Collectors.toSet<String>())
 
-    fun getArtifactFiles(): Set<ResolvedArtifactResult> {
+    // Returns a MutableSet as FilteredArtifactCollection#getIterator expects this to be mutable to
+    // returns a mutable iterator.
+    fun getArtifactFiles(): MutableSet<ResolvedArtifactResult> {
 
         if (excluded.isEmpty()) {
             return artifacts.artifacts
         }
 
         return artifacts.artifacts.asSequence()
-            .filter { !excluded.contains(compIdToString(it)) }.toSet()
+            .filter { !excluded.contains(compIdToString(it)) }.toMutableSet()
     }
 
     fun getFilteredFileCollection(project: Project): FileCollection =
