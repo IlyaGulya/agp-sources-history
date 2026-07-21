@@ -13,25 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.incfs.install;
 
-package com.android.builder.internal
+import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
 
-import java.io.File
+/**
+ * Interface used to display warnings/errors. Pulled into IncFS package to break the dependency from
+ * the rest of ddmlib.
+ *
+ * @see com.android.utils.ILogger
+ */
+public interface ILogger {
+    void error(@Nullable Throwable t, @Nullable String msgFormat, Object... args);
 
-class UnitTestManifestGenerator(
-    outputFile: File,
-    packageName: String,
-    minSdkVersion: String?,
-    targetSdkVersion: String?,
-    testRunnerName: String?,
-): TestManifestGenerator(
-    outputFile,
-    packageName,
-    minSdkVersion,
-    targetSdkVersion,
-    testRunnerName
-) {
+    void warning(@NonNull String msgFormat, Object... args);
 
-    override val templateResourceName: String =
-        "AndroidManifest.UnitTestTemplate"
+    void info(@NonNull String msgFormat, Object... args);
+
+    void verbose(@NonNull String msgFormat, Object... args);
 }
