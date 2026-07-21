@@ -50,6 +50,7 @@ import com.android.ide.common.process.ProcessException;
 import com.google.common.primitives.UnsignedInts;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -141,6 +142,7 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
     @Override
     List<String> getCacheArguments(@NonNull String abi, int abiPlatformVersion) {
         List<String> cacheArguments = getCommonCacheArguments(abi, abiPlatformVersion);
+        cacheArguments.add("-DCMAKE_SYSTEM_NAME=Android");
         cacheArguments.add(String.format("-DCMAKE_ANDROID_ARCH_ABI=%s", abi));
         cacheArguments.add(String.format("-DCMAKE_SYSTEM_VERSION=%s", abiPlatformVersion));
         // Generates the compile_commands json file that will help us get the compiler executable
@@ -148,23 +150,9 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
         cacheArguments.add("-DCMAKE_EXPORT_COMPILE_COMMANDS=ON");
         cacheArguments.add(String.format("-DCMAKE_ANDROID_NDK=%s", getNdkFolder()));
 
-        File toolchainFile = null;
-
-        // NDK versions r15 and above have the fix in android.toolchain.cmake to work with CMake
-        // version 3.7+, but if the user has NDK r14 or below, we add the (hacky) fix
-        // programmatically.
-        if (getNdkHandler().getRevision().getMajor() >= 15) {
-            // Add our toolchain file.
-            // Note: When setting this flag, Cmake's android toolchain would end up calling our
-            // toolchain via ndk-cmake-hooks, but our toolchains will (ideally) be executed only
-            // once.
-            toolchainFile = getToolChainFile();
-        } else {
-            toolchainFile = getPreNDKr15WrapperToolchainFile();
-        }
-
         cacheArguments.add(
-                String.format("-DCMAKE_TOOLCHAIN_FILE=%s", toolchainFile.getAbsolutePath()));
+                String.format(
+                        "-DCMAKE_TOOLCHAIN_FILE=%s", getToolchainFile(abi).getAbsolutePath()));
 
         // By default, use the ninja generator.
         cacheArguments.add("-G Ninja");
@@ -181,13 +169,26 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
         // - perform a handshake
         // - configure and compute.
         // Create the NativeBuildConfigValue and write the required JSON file.
-        Server cmakeServer = createServerAndConnect();
+        PrintWriter serverLogWriter =
+                getCmakeServerLogWriter(getOutputFolder(getJsonFolder(), abi));
+        Server cmakeServer = createServerAndConnect(abi, serverLogWriter);
+
         doHandshake(outputJsonDir, cmakeServer);
         ConfigureCommandResult configureCommandResult =
                 doConfigure(abi, abiPlatformVersion, cmakeServer);
         doCompute(cmakeServer);
+
+        serverLogWriter.close();
         generateAndroidGradleBuild(abi, cmakeServer);
         return configureCommandResult.interactiveMessages;
+    }
+
+    /** Returns PrintWriter object to write CMake server logs. */
+    @NonNull
+    private static PrintWriter getCmakeServerLogWriter(@NonNull File outputFolder)
+            throws IOException {
+        File serverLog = new File(outputFolder, "cmake_server_log.txt");
+        return new PrintWriter(serverLog.getAbsoluteFile(), "UTF-8");
     }
 
     /**
@@ -198,15 +199,15 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
      *     to create or connect to Cmake server.
      */
     @NonNull
-    private Server createServerAndConnect() throws IOException {
+    private Server createServerAndConnect(@NonNull String abi, @NonNull PrintWriter writer)
+            throws IOException {
         // Create a new cmake server for the given Cmake and configure the given project.
         ServerReceiver serverReceiver =
                 new ServerReceiver()
                         .setMessageReceiver(
-                                message ->
-                                        System.err.print("CMAKE SERVER: " + message.message + "\n"))
+                                message -> writer.println("CMAKE SERVER: " + message.message))
                         .setDiagnosticReceiver(
-                                message -> System.err.print("CMAKE SERVER: " + message + "\n"));
+                                message -> writer.println("CMAKE SERVER: " + message));
         Server cmakeServer = ServerFactory.create(getCmakeBinFolder(), serverReceiver);
         if (cmakeServer == null) {
             throw new RuntimeException(
@@ -265,9 +266,9 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
         handshakeRequest.cookie = "gradle-cmake-cookie";
         handshakeRequest.generator = getGenerator(getBuildArguments());
         handshakeRequest.protocolVersion = cmakeServerProtocolVersion;
-        handshakeRequest.buildDirectory = outputDir.getParentFile().getPath();
-        handshakeRequest.sourceDirectory = getMakefile().getParentFile().getPath();
-
+        handshakeRequest.buildDirectory = normalizeFilePath(outputDir.getParentFile());
+        handshakeRequest.sourceDirectory = normalizeFilePath(getMakefile().getParentFile());
+        
         return handshakeRequest;
     }
 
@@ -286,6 +287,7 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
             @NonNull String abi, int abiPlatformVersion, @NonNull Server cmakeServer)
             throws IOException {
         List<String> cacheArgumentsList = getCacheArguments(abi, abiPlatformVersion);
+        cacheArgumentsList.addAll(getBuildArguments());
         ConfigureCommandResult configureCommandResult =
                 cmakeServer.configure(
                         cacheArgumentsList.toArray(new String[cacheArgumentsList.size()]));
@@ -579,24 +581,35 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
      * should install NDK r15+ so it works with CMake 3.7+.
      */
     @NonNull
-    private File getPreNDKr15WrapperToolchainFile() {
+    private File getPreNDKr15WrapperToolchainFile(@NonNull File outputFolder) {
         StringBuilder tempAndroidToolchain =
                 new StringBuilder(
-                        String.format("include(%s)\n", getToolChainFile().getAbsolutePath()));
+                        String.format("include(%s)", normalizeFilePath(getToolChainFile())));
         tempAndroidToolchain.append(
-                "set(CMAKE_ANDROID_NDK ${ANDROID_NDK})\n"
-                        + "  if(ANDROID_TOOLCHAIN STREQUAL gcc)\n"
-                        + "    set(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION 4.9)\n"
-                        + "  else()\n"
-                        + "    set(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION clang)\n"
-                        + "  endif()\n"
-                        + "  set(CMAKE_ANDROID_STL_TYPE ${ANDROID_STL})\n"
-                        + "  if(ANDROID_ABI MATCHES \"^armeabi(-v7a)?$\")\n"
-                        + "    set(CMAKE_ANDROID_ARM_NEON ${ANDROID_ARM_NEON})\n"
-                        + "    set(CMAKE_ANDROID_ARM_MODE ${ANDROID_ARM_MODE})\n"
+                System.lineSeparator()
+                        + "set(CMAKE_ANDROID_NDK ${ANDROID_NDK})"
+                        + System.lineSeparator()
+                        + "  if(ANDROID_TOOLCHAIN STREQUAL gcc)"
+                        + System.lineSeparator()
+                        + "    set(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION 4.9)"
+                        + System.lineSeparator()
+                        + "  else()"
+                        + System.lineSeparator()
+                        + "    set(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION clang)"
+                        + System.lineSeparator()
+                        + "  endif()"
+                        + System.lineSeparator()
+                        + "  set(CMAKE_ANDROID_STL_TYPE ${ANDROID_STL})"
+                        + System.lineSeparator()
+                        + "  if(ANDROID_ABI MATCHES \"^armeabi(-v7a)?$\")"
+                        + System.lineSeparator()
+                        + "    set(CMAKE_ANDROID_ARM_NEON ${ANDROID_ARM_NEON})"
+                        + System.lineSeparator()
+                        + "    set(CMAKE_ANDROID_ARM_MODE ${ANDROID_ARM_MODE})"
+                        + System.lineSeparator()
                         + "  endif()");
 
-        File toolchainFile = getTempToolchainFile();
+        File toolchainFile = getTempToolchainFile(outputFolder);
         try {
             FileUtils.writeStringToFile(toolchainFile, tempAndroidToolchain.toString());
         } catch (IOException e) {
@@ -614,8 +627,40 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
      * Returns a pre-ndk-r15-wrapper cmake toolchain file within the object folder for the project.
      */
     @NonNull
-    private File getTempToolchainFile() {
+    private static File getTempToolchainFile(@NonNull File outputFolder) {
         String tempAndroidToolchainFile = "pre-ndk-r15-wrapper-android.toolchain.cmake";
-        return new File(getObjFolder(), tempAndroidToolchainFile);
+        return new File(outputFolder, tempAndroidToolchainFile);
+    }
+
+    /**
+     * Returns the normalized path for the given file. The normalized path for Unix is the default
+     * string returned by getPath. For Microsoft Windows, getPath returns a path with "\\" (example:
+     * "C:\\Android\\Sdk") while Vanilla-CMake prefers a forward slash (example "C:/Android/Sdk"),
+     * without the forward slash, CMake would mix backward slash and forward slash causing compiler
+     * issues. This function replaces the backward slashes with forward slashes for Microsoft
+     * Windows.
+     */
+    @NonNull
+    private static String normalizeFilePath(@NonNull File file) {
+        if (isWindows()) {
+            return (file.getPath().replace("\\", "/"));
+        }
+        return file.getPath();
+    }
+
+    /** Returns the toolchain file to be used. */
+    @NonNull
+    private File getToolchainFile(@NonNull String abi) {
+        // NDK versions r15 and above have the fix in android.toolchain.cmake to work with CMake
+        // version 3.7+, but if the user has NDK r14 or below, we add the (hacky) fix
+        // programmatically.
+        if (getNdkHandler().getRevision().getMajor() >= 15) {
+            // Add our toolchain file.
+            // Note: When setting this flag, Cmake's android toolchain would end up calling our
+            // toolchain via ndk-cmake-hooks, but our toolchains will (ideally) be executed only
+            // once.
+            return getToolChainFile();
+        }
+        return getPreNDKr15WrapperToolchainFile(getOutputFolder(getJsonFolder(), abi));
     }
 }

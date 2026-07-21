@@ -1,20 +1,2 @@
 Manifest-Version: 1.0
 
-Name: com/android/annotations/concurrency/Immutable.java
-SHA-256-Digest: 7o2/f5dldi1BmBrnzUTS0CU5kInIHmYNgX4Fbv1/Gws=
-
-Name: com/android/annotations/VisibleForTesting.java
-SHA-256-Digest: s6l1oGEO1HYi497m0e4SKnm+IR0HLuKPI/GOnaN1tek=
-
-Name: com/android/annotations/Nullable.java
-SHA-256-Digest: tZFPS3Hrmkp8e7IeI4wP2kiDpE+lwu//WHUhQOC3mdA=
-
-Name: com/android/annotations/NonNullByDefault.java
-SHA-256-Digest: YhNC8YIQljxxaU2Ux7b93SvIdLYupilXFA1a7z/fHSI=
-
-Name: com/android/annotations/NonNull.java
-SHA-256-Digest: MpZNFEQexesrzQkfQEkj7sHZUs6OBymy+djDrn5fpgk=
-
-Name: com/android/annotations/concurrency/GuardedBy.java
-SHA-256-Digest: dzsD9mKcM+MR4fipP+Fp+sYPRJEfP38qtWzJ8fO6+YI=
-
