@@ -22,6 +22,7 @@ private static final long serialVersionUID = 0L;
   }
   private BuildStamp() {
     repositories_ = java.util.Collections.emptyList();
+    generateErrorReason_ = "";
   }
 
   @java.lang.Override
@@ -75,6 +76,12 @@ private static final long serialVersionUID = 0L;
               buildInfo_ = subBuilder.buildPartial();
             }
 
+            break;
+          }
+          case 26: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            generateErrorReason_ = s;
             break;
           }
           default: {
@@ -210,6 +217,52 @@ private static final long serialVersionUID = 0L;
     return getBuildInfo();
   }
 
+  public static final int GENERATE_ERROR_REASON_FIELD_NUMBER = 3;
+  private volatile java.lang.Object generateErrorReason_;
+  /**
+   * <pre>
+   * Extra debug info which will help users identify issues
+   * </pre>
+   *
+   * <code>string generate_error_reason = 3;</code>
+   * @return The generateErrorReason.
+   */
+  @java.lang.Override
+  public java.lang.String getGenerateErrorReason() {
+    java.lang.Object ref = generateErrorReason_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      generateErrorReason_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * Extra debug info which will help users identify issues
+   * </pre>
+   *
+   * <code>string generate_error_reason = 3;</code>
+   * @return The bytes for generateErrorReason.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getGenerateErrorReasonBytes() {
+    java.lang.Object ref = generateErrorReason_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      generateErrorReason_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -230,6 +283,9 @@ private static final long serialVersionUID = 0L;
     if (buildInfo_ != null) {
       output.writeMessage(2, getBuildInfo());
     }
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(generateErrorReason_)) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, generateErrorReason_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -246,6 +302,9 @@ private static final long serialVersionUID = 0L;
     if (buildInfo_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(2, getBuildInfo());
+    }
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(generateErrorReason_)) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, generateErrorReason_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -269,6 +328,8 @@ private static final long serialVersionUID = 0L;
       if (!getBuildInfo()
           .equals(other.getBuildInfo())) return false;
     }
+    if (!getGenerateErrorReason()
+        .equals(other.getGenerateErrorReason())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -288,6 +349,8 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + BUILD_INFO_FIELD_NUMBER;
       hash = (53 * hash) + getBuildInfo().hashCode();
     }
+    hash = (37 * hash) + GENERATE_ERROR_REASON_FIELD_NUMBER;
+    hash = (53 * hash) + getGenerateErrorReason().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -439,6 +502,8 @@ private static final long serialVersionUID = 0L;
         buildInfo_ = null;
         buildInfoBuilder_ = null;
       }
+      generateErrorReason_ = "";
+
       return this;
     }
 
@@ -480,6 +545,7 @@ private static final long serialVersionUID = 0L;
       } else {
         result.buildInfo_ = buildInfoBuilder_.build();
       }
+      result.generateErrorReason_ = generateErrorReason_;
       onBuilt();
       return result;
     }
@@ -556,6 +622,10 @@ private static final long serialVersionUID = 0L;
       }
       if (other.hasBuildInfo()) {
         mergeBuildInfo(other.getBuildInfo());
+      }
+      if (!other.getGenerateErrorReason().isEmpty()) {
+        generateErrorReason_ = other.generateErrorReason_;
+        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1052,6 +1122,102 @@ private static final long serialVersionUID = 0L;
         buildInfo_ = null;
       }
       return buildInfoBuilder_;
+    }
+
+    private java.lang.Object generateErrorReason_ = "";
+    /**
+     * <pre>
+     * Extra debug info which will help users identify issues
+     * </pre>
+     *
+     * <code>string generate_error_reason = 3;</code>
+     * @return The generateErrorReason.
+     */
+    public java.lang.String getGenerateErrorReason() {
+      java.lang.Object ref = generateErrorReason_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        generateErrorReason_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Extra debug info which will help users identify issues
+     * </pre>
+     *
+     * <code>string generate_error_reason = 3;</code>
+     * @return The bytes for generateErrorReason.
+     */
+    public com.google.protobuf.ByteString
+        getGenerateErrorReasonBytes() {
+      java.lang.Object ref = generateErrorReason_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        generateErrorReason_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Extra debug info which will help users identify issues
+     * </pre>
+     *
+     * <code>string generate_error_reason = 3;</code>
+     * @param value The generateErrorReason to set.
+     * @return This builder for chaining.
+     */
+    public Builder setGenerateErrorReason(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      generateErrorReason_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Extra debug info which will help users identify issues
+     * </pre>
+     *
+     * <code>string generate_error_reason = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearGenerateErrorReason() {
+      
+      generateErrorReason_ = getDefaultInstance().getGenerateErrorReason();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Extra debug info which will help users identify issues
+     * </pre>
+     *
+     * <code>string generate_error_reason = 3;</code>
+     * @param value The bytes for generateErrorReason to set.
+     * @return This builder for chaining.
+     */
+    public Builder setGenerateErrorReasonBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      generateErrorReason_ = value;
+      onChanged();
+      return this;
     }
     @java.lang.Override
     public final Builder setUnknownFields(
