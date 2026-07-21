@@ -40,8 +40,17 @@ sealed interface WellKnownMavenArtifactId {
     val displayName get() = "$groupId:$artifactId"
 
     companion object {
+        @JvmField val IDS_BY_GROUP_ARTIFACT_PAIR = mutableMapOf<Pair<String,String>,WellKnownMavenArtifactId>()
         @JvmField val KOTLIN_STDLIB: WellKnownMavenArtifactId = WellKnownKotlinArtifactId("kotlin-stdlib")
         @JvmField val KOTLIN_REFLECT: WellKnownMavenArtifactId = WellKnownKotlinArtifactId("kotlin-reflect")
+        @JvmField val TFLITE_GPU: WellKnownMavenArtifactId = WellKnownTfliteArtifactId("tensorflow-lite-gpu")
+        @JvmField val TFLITE_METADATA: WellKnownMavenArtifactId = WellKnownTfliteArtifactId("tensorflow-lite-metadata")
+        @JvmField val TFLITE_SUPPORT: WellKnownMavenArtifactId = WellKnownTfliteArtifactId("tensorflow-lite-support")
+
+        @JvmStatic
+        fun find(groupId: String, artifactId: String) =
+            GoogleMavenArtifactId.find(groupId, artifactId)
+                ?: IDS_BY_GROUP_ARTIFACT_PAIR[groupId to artifactId]
     }
 }
 
@@ -49,6 +58,22 @@ private data class WellKnownKotlinArtifactId(
     override val artifactId: String
 ) : WellKnownMavenArtifactId {
     override val groupId = "org.jetbrains.kotlin"
+
+    init {
+        WellKnownMavenArtifactId.IDS_BY_GROUP_ARTIFACT_PAIR[groupId to artifactId] = this
+    }
+
+    override fun toString() = displayName
+}
+
+private data class WellKnownTfliteArtifactId(
+    override val artifactId: String
+) : WellKnownMavenArtifactId {
+    override val groupId = "org.tensorflow"
+
+    init {
+        WellKnownMavenArtifactId.IDS_BY_GROUP_ARTIFACT_PAIR[groupId to artifactId] = this
+    }
 
     override fun toString() = displayName
 }
