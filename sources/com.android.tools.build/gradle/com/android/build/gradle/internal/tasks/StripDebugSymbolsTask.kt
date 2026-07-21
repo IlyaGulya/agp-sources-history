@@ -16,13 +16,13 @@
 
 package com.android.build.gradle.internal.tasks
 
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.core.Abi
 import com.android.build.gradle.internal.cxx.stripping.SymbolStripExecutableFinder
 import com.android.build.gradle.internal.process.GradleProcessExecutor
 import com.android.build.gradle.internal.scope.InternalArtifactType.MERGED_NATIVE_LIBS
 import com.android.build.gradle.internal.scope.InternalArtifactType.STRIPPED_NATIVE_LIBS
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.ide.common.process.LoggedProcessOutputHandler
@@ -134,19 +134,23 @@ abstract class StripDebugSymbolsTask : IncrementalTask() {
     }
 
     class CreationAction(
-        variantScope: VariantScope
-    ) : VariantTaskCreationAction<StripDebugSymbolsTask>(variantScope) {
+        componentProperties: ComponentPropertiesImpl
+    ) : VariantTaskCreationAction<StripDebugSymbolsTask, ComponentPropertiesImpl>(
+        componentProperties
+    ) {
 
         override val name: String
-            get() = variantScope.getTaskName("strip", "DebugSymbols")
+            get() = computeTaskName("strip", "DebugSymbols")
 
         override val type: Class<StripDebugSymbolsTask>
             get() = StripDebugSymbolsTask::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out StripDebugSymbolsTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out StripDebugSymbolsTask>
+        ) {
             super.handleProvider(taskProvider)
 
-            variantScope.artifacts.producesDir(
+            creationConfig.artifacts.producesDir(
                 STRIPPED_NATIVE_LIBS,
                 taskProvider,
                 StripDebugSymbolsTask::outputDir,
@@ -154,17 +158,19 @@ abstract class StripDebugSymbolsTask : IncrementalTask() {
             )
         }
 
-        override fun configure(task: StripDebugSymbolsTask) {
+        override fun configure(
+            task: StripDebugSymbolsTask
+        ) {
             super.configure(task)
 
-            variantScope.artifacts.setTaskInputToFinalProduct(MERGED_NATIVE_LIBS, task.inputDir)
+            creationConfig.artifacts.setTaskInputToFinalProduct(MERGED_NATIVE_LIBS, task.inputDir)
             task.excludePatterns =
-                variantScope.globalScope.extension.packagingOptions.doNotStrip.sorted()
+                creationConfig.globalScope.extension.packagingOptions.doNotStrip.sorted()
             task.stripToolFinderProvider =
-                variantScope.globalScope.sdkComponents.stripExecutableFinderProvider
+                creationConfig.globalScope.sdkComponents.stripExecutableFinderProvider
             task.inputFiles.setDisallowChanges(
-                variantScope.globalScope.project.provider {
-                    variantScope.globalScope.project.layout.files(task.inputDir).asFileTree
+                creationConfig.globalScope.project.provider {
+                    creationConfig.globalScope.project.layout.files(task.inputDir).asFileTree
                 }
             )
         }

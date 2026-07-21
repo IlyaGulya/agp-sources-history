@@ -35,6 +35,7 @@ import com.android.builder.model.ProductFlavorContainer;
 import com.android.builder.model.SigningConfig;
 import com.android.builder.model.SyncIssue;
 import com.android.builder.model.Variant;
+import com.android.builder.model.VariantBuildInformation;
 import com.android.builder.model.ViewBindingOptions;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
@@ -102,6 +103,8 @@ final class DefaultAndroidProject implements AndroidProject, Serializable {
 
     @NonNull private final AndroidGradlePluginProjectFlags flags;
 
+    @NonNull private final Collection<VariantBuildInformation> variantsBuildInformation;
+
     DefaultAndroidProject(
             @NonNull String name,
             @Nullable String groupId,
@@ -131,7 +134,8 @@ final class DefaultAndroidProject implements AndroidProject, Serializable {
             @NonNull Collection<String> dynamicFeatures,
             @NonNull ViewBindingOptions viewBindingOptions,
             @Nullable DependenciesInfo dependenciesInfo,
-            @NonNull AndroidGradlePluginProjectFlags flags) {
+            @NonNull AndroidGradlePluginProjectFlags flags,
+            @NonNull Collection<VariantBuildInformation> variantsBuildInformation) {
         this.name = name;
         this.groupId = groupId;
         this.defaultConfig = defaultConfig;
@@ -161,6 +165,7 @@ final class DefaultAndroidProject implements AndroidProject, Serializable {
         this.viewBindingOptions = viewBindingOptions;
         this.dependenciesInfo = dependenciesInfo;
         this.flags = flags;
+        this.variantsBuildInformation = variantsBuildInformation;
     }
 
     @Override
@@ -356,6 +361,12 @@ final class DefaultAndroidProject implements AndroidProject, Serializable {
         return flags;
     }
 
+    @NonNull
+    @Override
+    public Collection<VariantBuildInformation> getVariantsBuildInformation() {
+        return variantsBuildInformation;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -393,7 +404,8 @@ final class DefaultAndroidProject implements AndroidProject, Serializable {
                 && Objects.equals(dynamicFeatures, that.dynamicFeatures)
                 && Objects.equals(viewBindingOptions, that.viewBindingOptions)
                 && Objects.equals(dependenciesInfo, that.dependenciesInfo)
-                && Objects.equals(flags, that.flags);
+                && Objects.equals(flags, that.flags)
+                && Objects.equals(variantsBuildInformation, that.variantsBuildInformation);
     }
 
     @Override
@@ -427,6 +439,7 @@ final class DefaultAndroidProject implements AndroidProject, Serializable {
                 dynamicFeatures,
                 viewBindingOptions,
                 dependenciesInfo,
-                flags);
+                flags,
+                variantsBuildInformation);
     }
 }

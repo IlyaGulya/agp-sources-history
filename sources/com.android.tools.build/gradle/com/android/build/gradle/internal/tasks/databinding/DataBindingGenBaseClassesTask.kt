@@ -21,8 +21,8 @@ import android.databinding.tool.DataBindingBuilder
 import android.databinding.tool.processing.ScopedException
 import android.databinding.tool.store.LayoutInfoInput
 import android.databinding.tool.util.L
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.AndroidVariantTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.options.BooleanOption
@@ -153,49 +153,54 @@ abstract class DataBindingGenBaseClassesTask : AndroidVariantTask() {
         )
     }
 
-    class CreationAction(variantScope: VariantScope) :
-        VariantTaskCreationAction<DataBindingGenBaseClassesTask>(variantScope) {
+    class CreationAction(componentProperties: ComponentPropertiesImpl) :
+        VariantTaskCreationAction<DataBindingGenBaseClassesTask, ComponentPropertiesImpl>(
+            componentProperties
+        ) {
 
         override val name: String
-            get() = variantScope.getTaskName("dataBindingGenBaseClasses")
+            get() = computeTaskName("dataBindingGenBaseClasses")
         override val type: Class<DataBindingGenBaseClassesTask>
             get() = DataBindingGenBaseClassesTask::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out DataBindingGenBaseClassesTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out DataBindingGenBaseClassesTask>
+        ) {
             super.handleProvider(taskProvider)
-            variantScope.artifacts.producesDir(
+            creationConfig.artifacts.producesDir(
                 InternalArtifactType.DATA_BINDING_BASE_CLASS_LOG_ARTIFACT,
                 taskProvider,
                 DataBindingGenBaseClassesTask::classInfoBundleDir
             )
-            variantScope.artifacts.producesDir(
+            creationConfig.artifacts.producesDir(
                 InternalArtifactType.DATA_BINDING_BASE_CLASS_SOURCE_OUT,
                 taskProvider,
                 DataBindingGenBaseClassesTask::sourceOutFolder
             )
         }
 
-        override fun configure(task: DataBindingGenBaseClassesTask) {
+        override fun configure(
+            task: DataBindingGenBaseClassesTask
+        ) {
             super.configure(task)
 
-            variantScope.artifacts.setTaskInputToFinalProduct(
-                DataBindingCompilerArguments.getLayoutInfoArtifactType(variantScope),
+            creationConfig.artifacts.setTaskInputToFinalProduct(
+                DataBindingCompilerArguments.getLayoutInfoArtifactType(creationConfig),
                 task.layoutInfoDirectory)
-            val variantData = variantScope.variantData
-            val artifacts = variantScope.artifacts
-            task.packageNameSupplier = { variantData.variantDslInfo.originalApplicationId }
+            val artifacts = creationConfig.artifacts
+            task.packageNameSupplier = { creationConfig.variantDslInfo.originalApplicationId }
             artifacts.setTaskInputToFinalProduct(
                 InternalArtifactType.DATA_BINDING_BASE_CLASS_LOGS_DEPENDENCY_ARTIFACTS,
                 task.mergedArtifactsFromDependencies
             )
             artifacts.setTaskInputToFinalProduct(
                     InternalArtifactType.DATA_BINDING_DEPENDENCY_ARTIFACTS, task.v1Artifacts)
-            task.logOutFolder = variantScope.getIncrementalDir(task.name)
-            task.useAndroidX = variantScope.globalScope.projectOptions[BooleanOption.USE_ANDROID_X]
+            task.logOutFolder = creationConfig.paths.getIncrementalDir(task.name)
+            task.useAndroidX = creationConfig.services.projectOptions[BooleanOption.USE_ANDROID_X]
             // needed to decide whether data binding should encode errors or not
-            task.encodeErrors = variantScope.globalScope
+            task.encodeErrors = creationConfig.services
                 .projectOptions[BooleanOption.IDE_INVOKED_FROM_IDE]
-            task.enableViewBinding = variantScope.globalScope.buildFeatures.viewBinding
+            task.enableViewBinding = creationConfig.buildFeatures.viewBinding
         }
     }
 

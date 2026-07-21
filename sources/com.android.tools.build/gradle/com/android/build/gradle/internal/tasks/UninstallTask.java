@@ -18,15 +18,13 @@ package com.android.build.gradle.internal.tasks;
 import com.android.annotations.NonNull;
 import com.android.build.gradle.internal.LoggerWrapper;
 import com.android.build.gradle.internal.TaskManager;
-import com.android.build.gradle.internal.scope.VariantScope;
+import com.android.build.gradle.internal.component.ApkCreationConfig;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
 import com.android.build.gradle.internal.testing.ConnectedDeviceProvider;
-import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.builder.testing.api.DeviceConnector;
 import com.android.builder.testing.api.DeviceException;
 import com.android.builder.testing.api.DeviceProvider;
 import com.android.utils.ILogger;
-import com.android.utils.StringHelper;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -34,17 +32,17 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
-import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskProvider;
 
 public abstract class UninstallTask extends NonIncrementalTask {
 
-    private BaseVariantData variant;
+    private String variantName;
+    // these are not inputs so we don't need the task to have its own Property
+    private Provider<String> applicationId;
 
     private int mTimeOutInMs = 0;
-
     private Provider<File> adbExecutableProvider;
 
     public UninstallTask() {
@@ -57,7 +55,6 @@ public abstract class UninstallTask extends NonIncrementalTask {
     @Override
     protected void doTaskAction() throws DeviceException, ExecutionException {
         final Logger logger = getLogger();
-        final String applicationId = variant.getVariantDslInfo().getApplicationId();
 
         logger.info("Uninstalling app: {}", applicationId);
 
@@ -70,12 +67,12 @@ public abstract class UninstallTask extends NonIncrementalTask {
                     final List<? extends DeviceConnector> devices = deviceProvider.getDevices();
 
                     for (DeviceConnector device : devices) {
-                        device.uninstallPackage(applicationId, getTimeOutInMs(), iLogger);
+                        device.uninstallPackage(applicationId.get(), getTimeOutInMs(), iLogger);
                         logger.lifecycle(
                                 "Uninstalling {} (from {}:{}) from device '{}' ({}).",
                                 applicationId,
                                 getProject().getName(),
-                                variant.getName(),
+                                variantName,
                                 device.getName(),
                                 device.getSerialNumber());
                     }
@@ -97,15 +94,6 @@ public abstract class UninstallTask extends NonIncrementalTask {
         return adbExecutableProvider.get();
     }
 
-    @Internal("This task is always executed")
-    public BaseVariantData getVariant() {
-        return variant;
-    }
-
-    public void setVariant(BaseVariantData variant) {
-        this.variant = variant;
-    }
-
     @Input
     public int getTimeOutInMs() {
         return mTimeOutInMs;
@@ -115,16 +103,17 @@ public abstract class UninstallTask extends NonIncrementalTask {
         mTimeOutInMs = timeoutInMs;
     }
 
-    public static class CreationAction extends VariantTaskCreationAction<UninstallTask> {
+    public static class CreationAction
+            extends VariantTaskCreationAction<UninstallTask, ApkCreationConfig> {
 
-        public CreationAction(VariantScope scope) {
-            super(scope);
+        public CreationAction(@NonNull ApkCreationConfig creationConfig) {
+            super(creationConfig);
         }
 
         @NonNull
         @Override
         public String getName() {
-            return StringHelper.appendCapitalized("uninstall", getVariantScope().getName());
+            return computeTaskName("uninstall");
         }
 
         @NonNull
@@ -136,23 +125,27 @@ public abstract class UninstallTask extends NonIncrementalTask {
         @Override
         public void configure(@NonNull UninstallTask task) {
             super.configure(task);
-            VariantScope scope = getVariantScope();
 
-            task.setVariant(scope.getVariantData());
-            task.setDescription("Uninstalls the " + scope.getVariantData().getDescription() + ".");
+            task.variantName = creationConfig.getName();
+            task.applicationId = creationConfig.getApplicationId();
+            task.setDescription("Uninstalls the " + creationConfig.getDescription() + ".");
             task.setGroup(TaskManager.INSTALL_GROUP);
             task.setTimeOutInMs(
-                    scope.getGlobalScope().getExtension().getAdbOptions().getTimeOutInMs());
+                    creationConfig
+                            .getGlobalScope()
+                            .getExtension()
+                            .getAdbOptions()
+                            .getTimeOutInMs());
 
             task.adbExecutableProvider =
-                    scope.getGlobalScope().getSdkComponents().getAdbExecutableProvider();
-
+                    creationConfig.getGlobalScope().getSdkComponents().getAdbExecutableProvider();
         }
 
         @Override
-        public void handleProvider(@NonNull TaskProvider<? extends UninstallTask> taskProvider) {
+        public void handleProvider(
+                @NonNull TaskProvider<? extends UninstallTask> taskProvider) {
             super.handleProvider(taskProvider);
-            getVariantScope().getTaskContainer().setUninstallTask(taskProvider);
+            creationConfig.getTaskContainer().setUninstallTask(taskProvider);
         }
     }
 }

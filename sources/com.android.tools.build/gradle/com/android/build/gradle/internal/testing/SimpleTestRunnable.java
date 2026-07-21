@@ -33,7 +33,6 @@ import com.android.ddmlib.testrunner.TestIdentifier;
 import com.android.ddmlib.testrunner.TestRunResult;
 import com.android.utils.FileUtils;
 import com.android.utils.ILogger;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -51,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 import javax.inject.Inject;
 
 /**
@@ -113,7 +111,21 @@ public class SimpleTestRunnable implements Runnable {
         long time = System.currentTimeMillis();
         boolean success = false;
 
-        String coverageFile = getCoverageFile();
+        String coverageFile;
+        switch (runner.getCoverageOutputType()) {
+            case DIR:
+                coverageFile =
+                        "/data/data/" + testData.getTestedApplicationId() + "/coverage_data/";
+                break;
+            case FILE:
+                coverageFile =
+                        String.format(
+                                "/data/data/%s/%s",
+                                testData.getTestedApplicationId(), FILE_COVERAGE_EC);
+                break;
+            default:
+                throw new AssertionError("Unknown coverage type.");
+        }
 
         String additionalTestOutputDir = null;
 
@@ -358,28 +370,6 @@ public class SimpleTestRunnable implements Runnable {
             finalCommand = asTestedApplication(finalCommand);
         }
         executeShellCommand(finalCommand, receiver);
-    }
-
-    @VisibleForTesting
-    String getCoverageFile() {
-        final Supplier<String> defaultDir =
-                () -> {
-                    switch (runner.getCoverageOutputType()) {
-                        case DIR:
-                            return "/data/data/"
-                                    + testData.getTestedApplicationId()
-                                    + "/coverage_data/";
-                        case FILE:
-                            return String.format(
-                                    "/data/data/%s/%s",
-                                    testData.getTestedApplicationId(), FILE_COVERAGE_EC);
-                        default:
-                            throw new AssertionError("Unknown coverage type.");
-                    }
-                };
-
-        return testData.getInstrumentationRunnerArguments()
-                .getOrDefault("coverageFile", defaultDir.get());
     }
 
     @NonNull

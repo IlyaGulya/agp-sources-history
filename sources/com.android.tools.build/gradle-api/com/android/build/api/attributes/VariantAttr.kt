@@ -26,7 +26,7 @@ import org.gradle.api.attributes.Attribute
  */
 interface VariantAttr : org.gradle.api.Named {
     companion object {
-        @JvmField
+        @JvmStatic
         val ATTRIBUTE: Attribute<VariantAttr> = Attribute.of(VariantAttr::class.java)
     }
 }

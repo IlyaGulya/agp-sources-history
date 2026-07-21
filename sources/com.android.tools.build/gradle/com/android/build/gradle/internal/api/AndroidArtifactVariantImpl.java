@@ -18,51 +18,54 @@ package com.android.build.gradle.internal.api;
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.build.api.component.impl.ComponentPropertiesImpl;
 import com.android.build.gradle.api.AndroidArtifactVariant;
 import com.android.build.gradle.api.BaseVariantOutput;
-import com.android.build.gradle.internal.variant.AndroidArtifactVariantData;
+import com.android.build.gradle.internal.services.BaseServices;
+import com.android.build.gradle.internal.variant.ApkVariantData;
 import com.android.builder.model.SigningConfig;
 import java.util.Set;
 import org.gradle.api.NamedDomainObjectContainer;
-import org.gradle.api.model.ObjectFactory;
 
 /**
- * Implementation of the {@link AndroidArtifactVariant} interface around a
- * {@link AndroidArtifactVariantData} object.
+ * Implementation of the {@link AndroidArtifactVariant} interface around a {@link ApkVariantData}
+ * object.
  */
-public abstract class AndroidArtifactVariantImpl extends BaseVariantImpl implements AndroidArtifactVariant {
+public abstract class AndroidArtifactVariantImpl extends BaseVariantImpl
+        implements AndroidArtifactVariant {
 
     protected AndroidArtifactVariantImpl(
-            @NonNull ObjectFactory objectFactory,
+            @NonNull ComponentPropertiesImpl componentProperties,
+            @NonNull BaseServices services,
             @NonNull ReadOnlyObjectProvider immutableObjectProvider,
             @NonNull NamedDomainObjectContainer<BaseVariantOutput> outputs) {
-        super(objectFactory, immutableObjectProvider, outputs);
+        super(componentProperties, services, immutableObjectProvider, outputs);
     }
 
     @NonNull
     @Override
-    protected abstract AndroidArtifactVariantData getVariantData();
+    protected abstract ApkVariantData getVariantData();
 
     @Override
     public SigningConfig getSigningConfig() {
         return readOnlyObjectProvider.getSigningConfig(
-                getVariantData().getVariantDslInfo().getSigningConfig());
+                componentProperties.getVariantDslInfo().getSigningConfig());
     }
 
     @Override
     public boolean isSigningReady() {
-        return getVariantData().isSigned();
+        return componentProperties.getVariantDslInfo().isSigningReady();
     }
 
     @Nullable
     @Override
     public String getVersionName() {
-        return getVariantData().getVariantDslInfo().getVersionName();
+        return componentProperties.getVariantDslInfo().getVersionName();
     }
 
     @Override
     public int getVersionCode() {
-        return getVariantData().getVariantDslInfo().getVersionCode();
+        return componentProperties.getVariantDslInfo().getVersionCode();
     }
 
     @NonNull

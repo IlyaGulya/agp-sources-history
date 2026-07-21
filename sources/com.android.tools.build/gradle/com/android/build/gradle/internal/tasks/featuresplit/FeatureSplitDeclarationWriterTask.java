@@ -17,8 +17,8 @@
 package com.android.build.gradle.internal.tasks.featuresplit;
 
 import com.android.annotations.NonNull;
+import com.android.build.api.component.impl.ComponentPropertiesImpl;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
-import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.NonIncrementalTask;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
 import com.google.common.annotations.VisibleForTesting;
@@ -56,16 +56,17 @@ public abstract class FeatureSplitDeclarationWriterTask extends NonIncrementalTa
     }
 
     public static class CreationAction
-            extends VariantTaskCreationAction<FeatureSplitDeclarationWriterTask> {
+            extends VariantTaskCreationAction<
+                    FeatureSplitDeclarationWriterTask, ComponentPropertiesImpl> {
 
-        public CreationAction(@NonNull VariantScope variantScope) {
-            super(variantScope);
+        public CreationAction(@NonNull ComponentPropertiesImpl componentProperties) {
+            super(componentProperties);
         }
 
         @NonNull
         @Override
         public String getName() {
-            return getVariantScope().getTaskName("feature", "Writer");
+            return computeTaskName("feature", "Writer");
         }
 
         @NonNull
@@ -79,7 +80,7 @@ public abstract class FeatureSplitDeclarationWriterTask extends NonIncrementalTa
                 @NonNull TaskProvider<? extends FeatureSplitDeclarationWriterTask> taskProvider) {
             super.handleProvider(taskProvider);
 
-            getVariantScope()
+            creationConfig
                     .getArtifacts()
                     .producesDir(
                             InternalArtifactType.METADATA_FEATURE_DECLARATION.INSTANCE,
@@ -89,16 +90,16 @@ public abstract class FeatureSplitDeclarationWriterTask extends NonIncrementalTa
         }
 
         @Override
-        public void configure(@NonNull FeatureSplitDeclarationWriterTask task) {
+        public void configure(
+                @NonNull FeatureSplitDeclarationWriterTask task) {
             super.configure(task);
 
-            final VariantScope variantScope = getVariantScope();
-            final Project project = variantScope.getGlobalScope().getProject();
+            final Project project = creationConfig.getGlobalScope().getProject();
             task.uniqueIdentifier = project.getPath();
             task.getApplicationId()
                     .set(
                             project.provider(
-                                    variantScope.getVariantDslInfo()::getOriginalApplicationId));
+                                    creationConfig.getVariantDslInfo()::getOriginalApplicationId));
             task.getApplicationId().disallowChanges();
         }
     }

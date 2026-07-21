@@ -15,12 +15,12 @@
  */
 package com.android.build.gradle.internal.coverage;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.android.Version;
 import com.android.annotations.NonNull;
+import com.android.build.api.component.impl.TestComponentPropertiesImpl;
+import com.android.build.api.variant.impl.VariantPropertiesImpl;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
-import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.NonIncrementalTask;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
 import com.google.common.annotations.VisibleForTesting;
@@ -170,19 +170,21 @@ public abstract class JacocoReportTask extends NonIncrementalTask {
                         });
     }
 
-    public static class CreationAction extends VariantTaskCreationAction<JacocoReportTask> {
+    public static class CreationAction
+            extends VariantTaskCreationAction<JacocoReportTask, TestComponentPropertiesImpl> {
         @NonNull private final Configuration jacocoAntConfiguration;
 
         public CreationAction(
-                @NonNull VariantScope scope, @NonNull Configuration jacocoAntConfiguration) {
-            super(scope);
+                @NonNull TestComponentPropertiesImpl testComponentProperties,
+                @NonNull Configuration jacocoAntConfiguration) {
+            super(testComponentProperties);
             this.jacocoAntConfiguration = jacocoAntConfiguration;
         }
 
         @NonNull
         @Override
         public String getName() {
-            return getVariantScope().getTaskName("create", "CoverageReport");
+            return computeTaskName("create", "CoverageReport");
         }
 
         @NonNull
@@ -192,39 +194,44 @@ public abstract class JacocoReportTask extends NonIncrementalTask {
         }
 
         @Override
-        public void handleProvider(@NonNull TaskProvider<? extends JacocoReportTask> taskProvider) {
+        public void handleProvider(
+                @NonNull TaskProvider<? extends JacocoReportTask> taskProvider) {
             super.handleProvider(taskProvider);
-            getVariantScope().getTaskContainer().setCoverageReportTask(taskProvider);
+            creationConfig.getTaskContainer().setCoverageReportTask(taskProvider);
         }
 
         @Override
         public void configure(@NonNull JacocoReportTask task) {
             super.configure(task);
-            VariantScope scope = getVariantScope();
 
             task.setDescription("Creates JaCoCo test coverage report from data gathered on the "
                     + "device.");
 
-            task.setReportName(scope.getName());
+            task.setReportName(creationConfig.getName());
 
-            checkNotNull(scope.getTestedVariantData());
-            final VariantScope testedScope = scope.getTestedVariantData().getScope();
+            VariantPropertiesImpl testedVariant = creationConfig.getTestedVariant();
 
             task.jacocoClasspath = jacocoAntConfiguration;
 
-            scope.getArtifacts()
+            creationConfig
+                    .getArtifacts()
                     .setTaskInputToFinalProduct(
                             InternalArtifactType.CODE_COVERAGE.INSTANCE,
                             task.getCoverageDirectories());
 
-            task.classFileCollection = testedScope.getArtifacts().getAllClasses();
+            task.classFileCollection = testedVariant.getArtifacts().getAllClasses();
 
             task.sourceFolders =
-                    scope.getGlobalScope()
-                            .getProject()
-                            .files((Callable) () -> testedScope.getVariantData().getJavaSources());
+                    creationConfig
+                            .getServices()
+                            .fileCollection(
+                                    (Callable<Iterable<File>>)
+                                            () ->
+                                                    testedVariant
+                                                            .getVariantData()
+                                                            .getJavaSourceFoldersForCoverage());
 
-            task.setReportDir(testedScope.getCoverageReportDir());
+            task.setReportDir(testedVariant.getPaths().getCoverageReportDir());
         }
     }
 

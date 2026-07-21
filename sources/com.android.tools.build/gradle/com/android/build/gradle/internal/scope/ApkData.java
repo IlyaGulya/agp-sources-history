@@ -137,10 +137,6 @@ public abstract class ApkData implements VariantOutput, Comparable<ApkData>, Ser
         return ApkData.getFilter(getFilters(), VariantOutput.FilterType.valueOf(filterType));
     }
 
-    public boolean requiresAapt() {
-        return true;
-    }
-
     @NonNull
     @Input
     public abstract String getBaseName();
@@ -174,7 +170,7 @@ public abstract class ApkData implements VariantOutput, Comparable<ApkData>, Ser
 
     // TODO : We need to remove this from this API and always go directly to the
     // Variant API variantOutput.
-    @Input
+    @Internal
     @Override
     public int getVersionCode() {
         if (variantOutput != null) {

@@ -19,6 +19,9 @@ package com.android.build.gradle.internal.tasks
 import com.android.SdkConstants
 import com.android.SdkConstants.FD_ASSETS
 import com.android.SdkConstants.FD_DEX
+import com.android.build.gradle.internal.component.ApkCreationConfig
+import com.android.build.gradle.internal.component.BaseCreationConfig
+import com.android.build.gradle.internal.component.DynamicFeatureCreationConfig
 import com.android.build.gradle.internal.packaging.JarCreatorFactory
 import com.android.build.gradle.internal.packaging.JarCreatorType
 import com.android.build.gradle.internal.pipeline.StreamFilter
@@ -28,10 +31,10 @@ import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.InternalArtifactType.MERGED_NATIVE_LIBS
 import com.android.build.gradle.internal.scope.InternalArtifactType.STRIPPED_NATIVE_LIBS
 import com.android.build.gradle.internal.scope.MultipleArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.getDesugarLibDexFromTransform
 import com.android.builder.files.NativeLibraryAbiPredicate
+import com.android.builder.model.CodeShrinker
 import com.android.builder.packaging.JarCreator
 import com.android.builder.packaging.JarMerger
 import com.android.utils.FileUtils
@@ -96,6 +99,11 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
     var abiFilters: Set<String>? = null
         private set
 
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.NAME_ONLY)
+    @get:Optional
+    abstract val appMetadata: ConfigurableFileCollection
+
     @get:Input
     abstract val fileName: Property<String>
 
@@ -103,6 +111,7 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
     val jarCreatorType: Property<JarCreatorType> = objects.property(JarCreatorType::class.java)
 
     public override fun doTaskAction() {
+        FileUtils.cleanOutputDir(outputDir.get().asFile)
         val jarCreator =
             JarCreatorFactory.make(
                 File(outputDir.get().asFile, fileName.get()).toPath(), jarCreatorType.get()
@@ -112,8 +121,11 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
         // will need to uncompress them anyway.
         jarCreator.setCompressionLevel(Deflater.NO_COMPRESSION)
 
-        val filters = abiFilters
-        val abiFilter: Predicate<String>? = if (filters != null) NativeLibraryAbiPredicate(filters, false) else null
+        val filters = appMetadata.singleOrNull()?.let {
+            ModuleMetadata.load(it).abiFilters?.toSet()
+        } ?: abiFilters
+
+        val abiFilter = filters?.let { NativeLibraryAbiPredicate(it, false) }
 
         jarCreator.use {
             it.addDirectory(
@@ -176,32 +188,38 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
     private fun hasFeatureDexFiles() = featureDexFiles.files.isNotEmpty()
 
     class CreationAction(
-        variantScope: VariantScope,
+        creationConfig: ApkCreationConfig,
         private val packageCustomClassDependencies: Boolean
-    ) : VariantTaskCreationAction<PerModuleBundleTask>(variantScope) {
+    ) : VariantTaskCreationAction<PerModuleBundleTask, ApkCreationConfig>(
+        creationConfig
+    ) {
 
         override val name: String
-            get() = variantScope.getTaskName("build", "PreBundle")
+            get() = computeTaskName("build", "PreBundle")
         override val type: Class<PerModuleBundleTask>
             get() = PerModuleBundleTask::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out PerModuleBundleTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out PerModuleBundleTask>
+        ) {
             super.handleProvider(taskProvider)
-            variantScope.artifacts.producesDir(
+            creationConfig.artifacts.producesDir(
                 InternalArtifactType.MODULE_BUNDLE,
                 taskProvider,
                 PerModuleBundleTask::outputDir
             )
         }
 
-        override fun configure(task: PerModuleBundleTask) {
+        override fun configure(
+            task: PerModuleBundleTask
+        ) {
             super.configure(task)
-            val artifacts = variantScope.artifacts
+            val artifacts = creationConfig.artifacts
 
-            if (variantScope.type.isBaseModule) {
-                task.fileName.set("base.zip")
+            if (creationConfig is DynamicFeatureCreationConfig) {
+                task.fileName.set(creationConfig.featureName.map { "$it.zip" })
             } else {
-                task.fileName.set(variantScope.featureName.map { "$it.zip" })
+                task.fileName.set("base.zip")
             }
             task.fileName.disallowChanges()
 
@@ -209,7 +227,7 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
                  InternalArtifactType.MERGED_ASSETS, task.assetsFiles)
 
             task.resFiles.set(
-                if (variantScope.useResourceShrinker()) {
+                if (creationConfig.variantScope.useResourceShrinker()) {
                     artifacts.getOperations().get(InternalArtifactType.SHRUNK_LINKED_RES_FOR_BUNDLE)
                 } else {
                     artifacts.getOperations().get(InternalArtifactType.LINKED_RES_FOR_BUNDLE)
@@ -218,57 +236,64 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
             task.resFiles.disallowChanges()
 
             val programDexFiles =
-                if (variantScope.artifacts.hasFinalProduct(InternalArtifactType.BASE_DEX)) {
-                    variantScope
-                        .artifacts
-                        .getFinalProductAsFileCollection(InternalArtifactType.BASE_DEX).get()
-                } else if (variantScope.artifacts.hasFinalProducts(MultipleArtifactType.DEX)) {
-                    variantScope.globalScope.project.files(variantScope
-                        .artifacts
+                creationConfig.globalScope.project.files(
+                    if (creationConfig.variantScope.consumesFeatureJars()) {
+                        artifacts.getFinalProductAsFileCollection(InternalArtifactType.BASE_DEX)
+                    } else {
+                        artifacts
                         .getOperations()
-                        .getAll(MultipleArtifactType.DEX))
-                } else {
-                    variantScope.transformManager.getPipelineOutputAsFileCollection(StreamFilter.DEX)
-                }
+                        .getAll(MultipleArtifactType.DEX)
+                    })
             val desugarLibDexFile =
-                if (variantScope.artifacts.hasFinalProduct(InternalArtifactType.DESUGAR_LIB_DEX)) {
-                    variantScope
-                        .artifacts
+                if (creationConfig.variantScope.needsShrinkDesugarLibrary) {
+                    artifacts
                         .getFinalProductAsFileCollection(InternalArtifactType.DESUGAR_LIB_DEX)
                         .get()
                 } else {
-                    getDesugarLibDexFromTransform(variantScope)
+                    getDesugarLibDexFromTransform(creationConfig)
                 }
 
             task.dexFiles.from(programDexFiles.plus(desugarLibDexFile))
 
             task.featureDexFiles.from(
-                variantScope.getArtifactFileCollection(
+                creationConfig.variantDependencies.getArtifactFileCollection(
                     AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
                     AndroidArtifacts.ArtifactScope.PROJECT,
                     AndroidArtifacts.ArtifactType.FEATURE_DEX,
-                    mapOf(MODULE_PATH to variantScope.globalScope.project.path)
+                    mapOf(MODULE_PATH to creationConfig.globalScope.project.path)
                 )
             )
             task.javaResFiles.from(
-                if (variantScope.artifacts.hasFinalProduct(InternalArtifactType.SHRUNK_JAVA_RES)) {
-                    variantScope.globalScope.project.layout.files(
+                if (creationConfig.variantScope.codeShrinker == CodeShrinker.R8) {
+                    creationConfig.globalScope.project.layout.files(
                         artifacts.getFinalProduct(InternalArtifactType.SHRUNK_JAVA_RES)
                     )
-                } else if (variantScope.needsMergedJavaResStream) {
-                    variantScope.transformManager
+                } else if (creationConfig.variantScope.needsMergedJavaResStream) {
+                    creationConfig.transformManager
                         .getPipelineOutputAsFileCollection(StreamFilter.RESOURCES)
                 } else {
-                    variantScope.globalScope.project.layout.files(
+                    creationConfig.globalScope.project.layout.files(
                         artifacts.getFinalProduct(InternalArtifactType.MERGED_JAVA_RES)
                     )
                 }
             )
-            task.nativeLibsFiles.from(getNativeLibsFiles(variantScope, packageCustomClassDependencies))
+            task.nativeLibsFiles.from(getNativeLibsFiles(creationConfig, packageCustomClassDependencies))
 
-            task.abiFilters = variantScope.variantDslInfo.supportedAbis
+            if (creationConfig.variantType.isDynamicFeature) {
+                // If this is a dynamic feature, we use the abiFilters published by the base module.
+                task.appMetadata.from(
+                    creationConfig.variantDependencies.getArtifactFileCollection(
+                        AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH,
+                        AndroidArtifacts.ArtifactScope.PROJECT,
+                        AndroidArtifacts.ArtifactType.BASE_MODULE_METADATA
+                    )
+                )
+            } else {
+                task.abiFilters = creationConfig.variantDslInfo.supportedAbis
+            }
+            task.appMetadata.disallowChanges()
 
-            task.jarCreatorType.set(variantScope.jarCreatorType)
+            task.jarCreatorType.set(creationConfig.variantScope.jarCreatorType)
             task.jarCreatorType.disallowChanges()
         }
     }
@@ -321,17 +346,17 @@ private class ResRelocator : JarCreator.Relocator {
  * Returns a file collection containing all of the native libraries to be packaged.
  */
 fun getNativeLibsFiles(
-    scope: VariantScope,
+    creationConfig: BaseCreationConfig,
     packageCustomClassDependencies: Boolean
 ): FileCollection {
-    val nativeLibs = scope.globalScope.project.files()
-    if (scope.type.isForTesting) {
-        return nativeLibs.from(scope.artifacts.getFinalProduct(MERGED_NATIVE_LIBS))
+    val nativeLibs = creationConfig.globalScope.project.files()
+    if (creationConfig.variantType.isForTesting) {
+        return nativeLibs.from(creationConfig.artifacts.getFinalProduct(MERGED_NATIVE_LIBS))
     }
-    nativeLibs.from(scope.artifacts.getFinalProduct(STRIPPED_NATIVE_LIBS))
+    nativeLibs.from(creationConfig.artifacts.getFinalProduct(STRIPPED_NATIVE_LIBS))
     if (packageCustomClassDependencies) {
         nativeLibs.from(
-            scope.transformManager.getPipelineOutputAsFileCollection(StreamFilter.NATIVE_LIBS)
+            creationConfig.transformManager.getPipelineOutputAsFileCollection(StreamFilter.NATIVE_LIBS)
         )
     }
     return nativeLibs

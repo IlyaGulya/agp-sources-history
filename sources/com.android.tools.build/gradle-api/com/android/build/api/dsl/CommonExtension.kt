@@ -31,21 +31,62 @@ import org.gradle.api.NamedDomainObjectContainer
  */
 @Incubating
 interface CommonExtension<
-        BuildFeaturesT: BuildFeatures,
-        BuildTypeT : BuildType,
-        CMakeOptionsT: CmakeOptions,
+        AaptOptionsT : AaptOptions,
+        AbiSplitT : AbiSplit,
+        AdbOptionsT : AdbOptions,
+        AnnotationProcessorOptionsT : AnnotationProcessorOptions,
+        BuildFeaturesT : BuildFeatures,
+        BuildTypeT : BuildType<AnnotationProcessorOptionsT>,
+        CMakeT : Cmake,
         CompileOptionsT : CompileOptions,
-        DefaultConfigT : DefaultConfig,
-        ExternalNativeBuildT: ExternalNativeBuild<CMakeOptionsT, NdkBuildOptionsT>,
+        DataBindingT : DataBinding,
+        DefaultConfigT : DefaultConfig<AnnotationProcessorOptionsT>,
+        DensitySplitT : DensitySplit,
+        ExternalNativeBuildT : ExternalNativeBuild<CMakeT, NdkBuildT>,
         JacocoOptionsT : JacocoOptions,
-        NdkBuildOptionsT: NdkBuildOptions,
-        ProductFlavorT : ProductFlavor,
+        LintOptionsT : LintOptions,
+        NdkBuildT : NdkBuild,
+        PackagingOptionsT : PackagingOptions,
+        ProductFlavorT : ProductFlavor<AnnotationProcessorOptionsT>,
         SigningConfigT : SigningConfig,
-        TestOptionsT: TestOptions<UnitTestOptionsT>,
-        UnitTestOptionsT: UnitTestOptions,
+        SplitsT : Splits<AbiSplitT, DensitySplitT>,
+        TestOptionsT : TestOptions<UnitTestOptionsT>,
+        UnitTestOptionsT : UnitTestOptions,
         VariantT : Variant<VariantPropertiesT>,
         VariantPropertiesT : VariantProperties> {
     // TODO(b/140406102)
+
+    /**
+     * Specifies options for the Android Asset Packaging Tool (AAPT).
+     *
+     * For more information about the properties you can configure in this block, see [AaptOptions].
+     */
+    val aaptOptions: AaptOptionsT
+
+    /**
+     * Specifies options for the Android Asset Packaging Tool (AAPT).
+     *
+     * For more information about the properties you can configure in this block, see [AaptOptions].
+     */
+    fun aaptOptions(action: AaptOptionsT.() -> Unit)
+
+    /**
+     * Specifies options for the
+     * [Android Debug Bridge (ADB)](https://developer.android.com/studio/command-line/adb.html),
+     * such as APK installation options.
+     *
+     * For more information about the properties you can configure in this block, see [AdbOptions].
+     */
+    val adbOptions: AdbOptionsT
+
+    /**
+     * Specifies options for the
+     * [Android Debug Bridge (ADB)](https://developer.android.com/studio/command-line/adb.html),
+     * such as APK installation options.
+     *
+     * For more information about the properties you can configure in this block, see [AdbOptions].
+     */
+    fun adbOptions(action: AdbOptionsT.() -> Unit)
 
     /**
      * Specifies Java compiler options, such as the language level of the Java source code and
@@ -121,6 +162,21 @@ interface CommonExtension<
      */
     fun buildTypes(action: Action<in NamedDomainObjectContainer<BuildTypeT>>)
 
+    /**
+     * Specifies options for the
+     * [Data Binding Library](https://developer.android.com/topic/libraries/data-binding/index.html).
+     *
+     * For more information about the properties you can configure in this block, see [DataBinding]
+     */
+    val dataBinding: DataBindingT
+
+    /**
+     * Specifies options for the
+     * [Data Binding Library](https://developer.android.com/topic/libraries/data-binding/index.html).
+     *
+     * For more information about the properties you can configure in this block, see [DataBinding]
+     */
+    fun dataBinding(action: DataBindingT.() -> Unit)
 
     /**
      * Configure JaCoCo version that is used for offline instrumentation and coverage report.
@@ -152,6 +208,36 @@ interface CommonExtension<
      * ```
      */
     fun jacoco(action: JacocoOptionsT.() -> Unit)
+
+    /**
+     * Specifies options for the lint tool.
+     *
+     * For more information about the properties you can configure in this block, see [LintOptions].
+     */
+    val lintOptions: LintOptionsT
+
+    /**
+     * Specifies options for the lint tool.
+     *
+     * For more information about the properties you can configure in this block, see [LintOptions].
+     */
+    fun lintOptions(action: LintOptionsT.() -> Unit)
+
+    /**
+     * Specifies options and rules that determine which files the Android plugin packages into your
+     * APK.
+     *
+     * For more information about the properties you can configure in this block, see [PackagingOptions].
+     */
+    val packagingOptions: PackagingOptionsT
+
+    /**
+     * Specifies options and rules that determine which files the Android plugin packages into your
+     * APK.
+     *
+     * For more information about the properties you can configure in this block, see [PackagingOptions].
+     */
+    fun packagingOptions(action: PackagingOptionsT.() -> Unit)
 
     /**
      * Encapsulates all product flavors configurations for this project.
@@ -353,4 +439,22 @@ interface CommonExtension<
      * @areturn a [GenericFilteredComponentActionRegistrar] of [VariantPropertiesT]
      */
     val onVariantProperties: GenericFilteredComponentActionRegistrar<VariantPropertiesT>
+
+    /**
+     * Specifies configurations for
+     * [building multiple APKs](https://developer.android.com/studio/build/configure-apk-splits.html)
+     * or APK splits.
+     *
+     * For more information about the properties you can configure in this block, see [Splits].
+     */
+    val splits: SplitsT
+
+    /**
+     * Specifies configurations for
+     * [building multiple APKs](https://developer.android.com/studio/build/configure-apk-splits.html)
+     * or APK splits.
+     *
+     * For more information about the properties you can configure in this block, see [Splits].
+     */
+    fun splits(action: SplitsT.() -> Unit)
 }

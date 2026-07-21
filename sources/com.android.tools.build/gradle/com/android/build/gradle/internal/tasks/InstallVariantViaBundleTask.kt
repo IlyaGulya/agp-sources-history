@@ -15,10 +15,11 @@
  */
 package com.android.build.gradle.internal.tasks
 
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.TaskManager
+import com.android.build.gradle.internal.component.ApkCreationConfig
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.builder.internal.InstallUtils
 import com.android.build.gradle.internal.testing.ConnectedDeviceProvider
@@ -182,41 +183,47 @@ abstract class InstallVariantViaBundleTask : NonIncrementalTask() {
         }
      }
 
-    internal class CreationAction(variantScope: VariantScope) :
-        VariantTaskCreationAction<InstallVariantViaBundleTask>(variantScope) {
+    internal class CreationAction(creationConfig: ApkCreationConfig) :
+        VariantTaskCreationAction<InstallVariantViaBundleTask, ApkCreationConfig>(
+            creationConfig
+        ) {
 
         override val name: String
-            get() = variantScope.getTaskName("install")
+            get() = computeTaskName("install")
         override val type: Class<InstallVariantViaBundleTask>
             get() = InstallVariantViaBundleTask::class.java
 
-        override fun configure(task: InstallVariantViaBundleTask) {
+        override fun configure(
+            task: InstallVariantViaBundleTask
+        ) {
             super.configure(task)
 
-            task.description = "Installs the " + variantScope.variantData.description + ""
+            task.description = "Installs the " + creationConfig.description + ""
             task.group = TaskManager.INSTALL_GROUP
 
-            variantScope.variantDslInfo.minSdkVersion.let {
+            creationConfig.minSdkVersion.let {
                 task.minSdkVersion = it.apiLevel
                 task.minSdkCodename = it.codename
             }
-            variantScope.globalScope.extension.adbOptions.installOptions?.let {
+            creationConfig.globalScope.extension.adbOptions.installOptions?.let {
                 task.installOptions.addAll(it)
             }
 
-            variantScope.artifacts.setTaskInputToFinalProduct(
+            creationConfig.artifacts.setTaskInputToFinalProduct(
                 InternalArtifactType.APKS_FROM_BUNDLE,
                 task.apkBundle
             )
 
-            task.timeOutInMs = variantScope.globalScope.extension.adbOptions.timeOutInMs
+            task.timeOutInMs = creationConfig.globalScope.extension.adbOptions.timeOutInMs
 
-            task.adbExecutableProvider = variantScope.globalScope.sdkComponents.adbExecutableProvider
+            task.adbExecutableProvider = creationConfig.globalScope.sdkComponents.adbExecutableProvider
         }
 
-        override fun handleProvider(taskProvider: TaskProvider<out InstallVariantViaBundleTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out InstallVariantViaBundleTask>
+        ) {
             super.handleProvider(taskProvider)
-            variantScope.taskContainer.installTask = taskProvider
+            creationConfig.taskContainer.installTask = taskProvider
         }
     }
 }

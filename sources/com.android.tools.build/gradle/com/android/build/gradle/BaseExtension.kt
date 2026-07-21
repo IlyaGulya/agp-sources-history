@@ -15,7 +15,6 @@
  */
 package com.android.build.gradle
 
-import com.android.SdkConstants
 import com.android.annotations.NonNull
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.BuildFeatures
@@ -31,11 +30,9 @@ import com.android.build.gradle.api.ViewBindingOptions
 import com.android.build.gradle.internal.CompileOptions
 import com.android.build.gradle.internal.ExtraModelInfo
 import com.android.build.gradle.internal.SourceSetSourceProviderWrapper
-import com.android.build.gradle.internal.api.dsl.DslScope
 import com.android.build.gradle.internal.coverage.JacocoOptions
 import com.android.build.gradle.internal.dependency.SourceSetManager
 import com.android.build.gradle.internal.dsl.AaptOptions
-import com.android.build.gradle.internal.dsl.ActionableVariantObjectOperationsExecutor
 import com.android.build.gradle.internal.dsl.AdbOptions
 import com.android.build.gradle.internal.dsl.BuildType
 import com.android.build.gradle.internal.dsl.ComposeOptions
@@ -51,9 +48,7 @@ import com.android.build.gradle.internal.dsl.SigningConfig
 import com.android.build.gradle.internal.dsl.Splits
 import com.android.build.gradle.internal.dsl.TestOptions
 import com.android.build.gradle.internal.scope.GlobalScope
-import com.android.build.gradle.internal.scope.VariantScope
-import com.android.build.gradle.options.BooleanOption
-import com.android.build.gradle.options.ProjectOptions
+import com.android.build.gradle.internal.services.DslServices
 import com.android.builder.core.LibraryRequest
 import com.android.builder.core.ToolsRevisionUtils
 import com.android.builder.errors.IssueReporter
@@ -67,7 +62,6 @@ import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Incubating
 import org.gradle.api.NamedDomainObjectContainer
-import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
@@ -102,8 +96,7 @@ import java.io.File
 // All the public methods are meant to be exposed in the DSL. We can't use lambdas in this class
 // (yet), because the DSL reference generator doesn't understand them.
 abstract class BaseExtension protected constructor(
-    protected val dslScope: DslScope,
-    projectOptions: ProjectOptions,
+    protected val dslServices: DslServices,
     protected val globalScope: GlobalScope,
     /** All build outputs for all variants, can be used by users to customize a build output. */
     override val buildOutputs: NamedDomainObjectContainer<BaseVariantOutput>,
@@ -116,21 +109,8 @@ abstract class BaseExtension protected constructor(
     /** Secondary dependencies for the custom transform. */
     private val _transformDependencies: MutableList<List<Any>> = mutableListOf()
 
-    override val aaptOptions: AaptOptions =
-        dslScope.objectFactory.newInstance(
-            AaptOptions::class.java,
-            projectOptions.get(BooleanOption.ENABLE_RESOURCE_NAMESPACING_DEFAULT)
-        )
-    override val lintOptions: LintOptions =
-        dslScope.objectFactory.newInstance(LintOptions::class.java)
     override val dexOptions: DexOptions =
-        dslScope.objectFactory.newInstance(DexOptions::class.java, dslScope.deprecationReporter)
-    override val packagingOptions: PackagingOptions =
-        dslScope.objectFactory.newInstance(PackagingOptions::class.java)
-    override val splits: Splits =
-        dslScope.objectFactory.newInstance(Splits::class.java, dslScope.objectFactory)
-    override val adbOptions: AdbOptions =
-        dslScope.objectFactory.newInstance(AdbOptions::class.java)
+        dslServices.newInstance(DexOptions::class.java, dslServices.deprecationReporter)
 
     private val deviceProviderList: MutableList<DeviceProvider> = Lists.newArrayList()
     private val testServerList: MutableList<TestServer> = Lists.newArrayList()
@@ -139,7 +119,7 @@ abstract class BaseExtension protected constructor(
     @Incubating
     @get:Incubating
     val composeOptions: ComposeOptions =
-        dslScope.objectFactory.newInstance(ComposeOptionsImpl::class.java)
+        dslServices.newInstance(ComposeOptionsImpl::class.java)
 
     abstract override val dataBinding: DataBindingOptions
     abstract val viewBinding: ViewBindingOptions
@@ -166,11 +146,6 @@ abstract class BaseExtension protected constructor(
     private var isWritable = true
 
     override var ndkVersion: String? = null
-
-    init {
-        sourceSetManager.setUpSourceSet(SdkConstants.FD_MAIN)
-    }
-
 
     /**
      * Disallow further modification on the extension.
@@ -353,26 +328,10 @@ abstract class BaseExtension protected constructor(
         sourceSetManager.executeAction(action)
     }
 
-    /**
-     * Encapsulates source set configurations for all variants.
-     *
-     * Note that the Android plugin uses its own implementation of source sets. For more
-     * information about the properties you can configure in this block, see [AndroidSourceSet].
-     */
-    fun sourceSets(action: NamedDomainObjectContainer<AndroidSourceSet>.() -> Unit) {
-        checkWritability()
-        sourceSetManager.executeAction(action)
-    }
-
     override val sourceSets: NamedDomainObjectContainer<AndroidSourceSet>
         get() = sourceSetManager.sourceSetsContainer
 
 
-    /**
-     * Specifies options for the Android Asset Packaging Tool (AAPT).
-     *
-     * For more information about the properties you can configure in this block, see [AaptOptions].
-     */
     fun aaptOptions(action: Action<AaptOptions>) {
         checkWritability()
         action.execute(aaptOptions)
@@ -388,11 +347,6 @@ abstract class BaseExtension protected constructor(
         action.execute(dexOptions)
     }
 
-    /**
-     * Specifies options for the lint tool.
-     *
-     * For more information about the properties you can configure in this block, see [LintOptions].
-     */
     fun lintOptions(action: Action<LintOptions>) {
         checkWritability()
         action.execute(lintOptions)
@@ -418,12 +372,6 @@ abstract class BaseExtension protected constructor(
         action.execute(compileOptions)
     }
 
-    /**
-     * Specifies options and rules that determine which files the Android plugin packages into your
-     * APK.
-     *
-     * For more information about the properties you can configure in this block, see [PackagingOptions].
-     */
     fun packagingOptions(action: Action<PackagingOptions>) {
         checkWritability()
         action.execute(packagingOptions)
@@ -447,13 +395,6 @@ abstract class BaseExtension protected constructor(
         action.execute(adbOptions)
     }
 
-    /**
-     * Specifies configurations for
-     * [building multiple APKs](https://developer.android.com/studio/build/configure-apk-splits.html)
-     * or APK splits.
-     *
-     * For more information about the properties you can configure in this block, see [Splits].
-     */
     fun splits(action: Action<Splits>) {
         checkWritability()
         action.execute(splits)
@@ -523,7 +464,7 @@ abstract class BaseExtension protected constructor(
         _resourcePrefix = prefix
     }
 
-    abstract fun addVariant(variant: BaseVariant, variantScope: VariantScope)
+    abstract fun addVariant(variant: BaseVariant)
 
     fun registerArtifactType(name: String, isTest: Boolean, artifactType: Int) {
         extraModelInfo.registerArtifactType(name, isTest, artifactType)
@@ -629,13 +570,13 @@ abstract class BaseExtension protected constructor(
 
     fun getDefaultProguardFile(name: String): File {
         if (!ProguardFiles.KNOWN_FILE_NAMES.contains(name)) {
-            dslScope
+            dslServices
                 .issueReporter
                 .reportError(
                     IssueReporter.Type.GENERIC, ProguardFiles.UNKNOWN_FILENAME_MESSAGE
                 )
         }
-        return ProguardFiles.getDefaultProguardFile(name, dslScope.projectLayout)
+        return ProguardFiles.getDefaultProguardFile(name, dslServices.buildDirectory)
     }
 
     // ---------------
@@ -661,6 +602,10 @@ abstract class BaseExtension protected constructor(
     }
 
     // Kept for binary and source compatibility until the old DSL interfaces can go away.
+    abstract override val aaptOptions: AaptOptions
+
+    abstract override val adbOptions: AdbOptions
+
     abstract override val buildTypes: NamedDomainObjectContainer<BuildType>
     abstract fun buildTypes(action: Action<in NamedDomainObjectContainer<BuildType>>)
 
@@ -677,11 +622,17 @@ abstract class BaseExtension protected constructor(
 
     abstract override val jacoco: JacocoOptions
 
+    abstract override val lintOptions: LintOptions
+
+    abstract override val packagingOptions: PackagingOptions
+
     abstract override val productFlavors: NamedDomainObjectContainer<ProductFlavor>
     abstract fun productFlavors(action: Action<NamedDomainObjectContainer<ProductFlavor>>)
 
     abstract override val signingConfigs: NamedDomainObjectContainer<SigningConfig>
     abstract fun signingConfigs(action: Action<NamedDomainObjectContainer<SigningConfig>>)
+
+    abstract override val splits: Splits
 
     abstract override val testOptions: TestOptions
 

@@ -122,11 +122,11 @@ fun mergeAndRenumberSymbols(
             val value = idProvider.next(resourceType)
             val newSymbol: Symbol
             if (resourceType == ResourceType.ATTR) {
-                newSymbol = Symbol.attributeSymbol(symbolName, value, false)
+                newSymbol = Symbol.AttributeSymbol(symbolName, value, false)
                 // Also store the new ATTR value in the map.
                 attrToValue[symbolName] = newSymbol
             } else {
-                newSymbol = Symbol.normalSymbol(
+                newSymbol = Symbol.NormalSymbol(
                     resourceType = resourceType,
                     name = symbolName, // All names are canonical at this point.
                     canonicalName = symbolName,
@@ -173,7 +173,7 @@ fun mergeAndRenumberSymbols(
         }
 
         tableBuilder.add(
-            Symbol.styleableSymbol(
+            Symbol.StyleableSymbol(
                 arrayName,
                 attributeValues.build(),
                 ImmutableList.copyOf(attributes),
@@ -193,7 +193,11 @@ fun mergeAndRenumberSymbols(
  */
 @Throws(IOException::class)
 fun loadDependenciesSymbolTables(libraries: Iterable<File>): ImmutableSet<SymbolTable> {
-    return SymbolIo().loadDependenciesSymbolTables(libraries)
+    return ImmutableSet.builder<SymbolTable>().apply {
+        for (dependency in libraries) {
+            add(SymbolIo.readSymbolListWithPackageName(dependency.toPath()))
+        }
+    }.build()
 }
 
 /**
@@ -584,7 +588,7 @@ class SymbolTableBuilder(packageName: String) : SymbolListVisitor {
 
     private fun writeCurrentStyleable() {
         currentStyleable?.let {
-            symbolTableBuilder.add(Symbol.styleableSymbol(it, ImmutableList.of(), children.build()))
+            symbolTableBuilder.add(Symbol.StyleableSymbol(it, ImmutableList.of(), children.build()))
             currentStyleable = null
             children = ImmutableList.builder()
         }
@@ -594,8 +598,8 @@ class SymbolTableBuilder(packageName: String) : SymbolListVisitor {
         writeCurrentStyleable()
         when (resourceType) {
             ResourceType.STYLEABLE -> currentStyleable = name
-            ResourceType.ATTR -> symbolTableBuilder.add(Symbol.attributeSymbol(name, 0))
-            else -> symbolTableBuilder.add(Symbol.normalSymbol(resourceType, name, 0))
+            ResourceType.ATTR -> symbolTableBuilder.add(Symbol.AttributeSymbol(name, 0))
+            else -> symbolTableBuilder.add(Symbol.NormalSymbol(resourceType, name, 0))
         }
     }
 

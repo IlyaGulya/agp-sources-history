@@ -23,40 +23,74 @@ import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantProperties
 import com.android.build.api.variant.impl.VariantOperations
 import com.android.build.gradle.internal.CompileOptions
-import com.android.build.gradle.internal.api.dsl.DslScope
 import com.android.build.gradle.internal.coverage.JacocoOptions
+import com.android.build.gradle.internal.plugins.DslContainerProvider
+import com.android.build.gradle.internal.services.DslServices
+import com.android.build.gradle.options.BooleanOption
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
+import java.util.function.Supplier
 
 /** Internal implementation of the 'new' DSL interface */
 abstract class CommonExtensionImpl<
-        BuildFeaturesT: BuildFeatures,
-        BuildTypeT: com.android.build.api.dsl.BuildType,
-        DefaultConfigT: DefaultConfig,
-        ProductFlavorT: com.android.build.api.dsl.ProductFlavor,
-        SigningConfigT: com.android.build.api.dsl.SigningConfig,
-        VariantT: Variant<VariantPropertiesT>,
-        VariantPropertiesT: VariantProperties>(
-    protected val dslScope: DslScope,
-    override val buildTypes: NamedDomainObjectContainer<BuildTypeT>,
-    override val defaultConfig: DefaultConfigT,
-    override val productFlavors: NamedDomainObjectContainer<ProductFlavorT>,
-    override val signingConfigs: NamedDomainObjectContainer<SigningConfigT>
+        AnnotationProcessorOptionsT : com.android.build.api.dsl.AnnotationProcessorOptions,
+        BuildFeaturesT : BuildFeatures,
+        BuildTypeT : com.android.build.api.dsl.BuildType<AnnotationProcessorOptionsT>,
+        DefaultConfigT : DefaultConfig<AnnotationProcessorOptionsT>,
+        ProductFlavorT : com.android.build.api.dsl.ProductFlavor<AnnotationProcessorOptionsT>,
+        SigningConfigT : com.android.build.api.dsl.SigningConfig,
+        VariantT : Variant<VariantPropertiesT>,
+        VariantPropertiesT : VariantProperties>(
+    protected val dslServices: DslServices,
+    dslContainers: DslContainerProvider<DefaultConfigT, BuildTypeT, ProductFlavorT, SigningConfigT>
 ) : CommonExtension<
+        AaptOptions,
+        AbiSplitOptions,
+        AdbOptions,
+        AnnotationProcessorOptionsT,
         BuildFeaturesT,
         BuildTypeT,
         CmakeOptions,
         CompileOptions,
+        DataBindingOptions,
         DefaultConfigT,
+        DensitySplitOptions,
         ExternalNativeBuild,
         JacocoOptions,
+        LintOptions,
         NdkBuildOptions,
+        PackagingOptions,
         ProductFlavorT,
         SigningConfigT,
+        Splits,
         TestOptions,
         TestOptions.UnitTestOptions,
         VariantT,
         VariantPropertiesT>, ActionableVariantObjectOperationsExecutor<VariantT, VariantPropertiesT> {
+
+    override val buildTypes: NamedDomainObjectContainer<BuildTypeT> = dslContainers.buildTypeContainer
+
+    override val defaultConfig: DefaultConfigT = dslContainers.defaultConfig
+
+    override val productFlavors: NamedDomainObjectContainer<ProductFlavorT> = dslContainers.productFlavorContainer
+
+    override val signingConfigs: NamedDomainObjectContainer<SigningConfigT> = dslContainers.signingConfigContainer
+
+    override val aaptOptions: AaptOptions =
+        dslServices.newInstance(
+            AaptOptions::class.java,
+            dslServices.projectOptions[BooleanOption.ENABLE_RESOURCE_NAMESPACING_DEFAULT]
+        )
+
+    override fun aaptOptions(action: AaptOptions.() -> Unit) {
+        action.invoke(aaptOptions)
+    }
+
+    override val adbOptions: AdbOptions = dslServices.newInstance(AdbOptions::class.java)
+
+    override fun adbOptions(action: AdbOptions.() -> Unit) {
+        action.invoke(adbOptions)
+    }
 
     fun buildFeatures(action: Action<BuildFeaturesT>) {
         action.execute(buildFeatures)
@@ -69,13 +103,13 @@ abstract class CommonExtensionImpl<
     protected val variantOperations = VariantOperations<VariantT>()
     protected val variantPropertiesOperations = VariantOperations<VariantPropertiesT>()
 
-    override val compileOptions: CompileOptions = dslScope.objectFactory.newInstance(CompileOptions::class.java)
+    override val compileOptions: CompileOptions = dslServices.newInstance(CompileOptions::class.java)
 
     override fun compileOptions(action: CompileOptions.() -> Unit) {
         action.invoke(compileOptions)
     }
 
-    override var compileSdkVersion: String? by dslScope.variableFactory.newProperty(null)
+    override var compileSdkVersion: String? by dslServices.newVar(null)
 
     override fun compileSdkVersion(version: String) {
         this.compileSdkVersion = version
@@ -89,21 +123,45 @@ abstract class CommonExtensionImpl<
         action.execute(buildTypes)
     }
 
+    override val dataBinding: DataBindingOptions =
+        dslServices.newInstance(
+            DataBindingOptions::class.java,
+            Supplier { buildFeatures },
+            dslServices
+        )
+
+    override fun dataBinding(action: DataBindingOptions.() -> Unit) {
+        action.invoke(dataBinding)
+    }
+
     override fun defaultConfig(action: Action<DefaultConfigT>) {
         action.execute(defaultConfig)
     }
 
     override val externalNativeBuild: ExternalNativeBuild =
-        dslScope.objectFactory.newInstance(ExternalNativeBuild::class.java, dslScope)
+        dslServices.newInstance(ExternalNativeBuild::class.java, dslServices)
 
     override fun externalNativeBuild(action: (ExternalNativeBuild) -> Unit) {
         action.invoke(externalNativeBuild)
     }
 
-    override val jacoco: JacocoOptions = dslScope.objectFactory.newInstance(JacocoOptions::class.java)
+    override val jacoco: JacocoOptions = dslServices.newInstance(JacocoOptions::class.java)
 
     override fun jacoco(action: JacocoOptions.() -> Unit) {
         action.invoke(jacoco)
+    }
+
+    override val lintOptions: LintOptions = dslServices.newInstance(LintOptions::class.java)
+
+    override fun lintOptions(action: LintOptions.() -> Unit) {
+        action.invoke(lintOptions)
+    }
+
+    override val packagingOptions: PackagingOptions =
+        dslServices.newInstance(PackagingOptions::class.java)
+
+    override fun packagingOptions(action: PackagingOptions.() -> Unit) {
+        action.invoke(packagingOptions)
     }
 
     override fun productFlavors(action: Action<NamedDomainObjectContainer<ProductFlavorT>>) {
@@ -114,8 +172,15 @@ abstract class CommonExtensionImpl<
         action.execute(signingConfigs)
     }
 
+    override val splits: Splits =
+        dslServices.newInstance(Splits::class.java, dslServices)
+
+    override fun splits(action: Splits.() -> Unit) {
+        action.invoke(splits)
+    }
+
     override val testOptions: TestOptions =
-        dslScope.objectFactory.newInstance(TestOptions::class.java, dslScope)
+        dslServices.newInstance(TestOptions::class.java, dslServices)
 
     override fun testOptions(action: TestOptions.() -> Unit) {
         action.invoke(testOptions)

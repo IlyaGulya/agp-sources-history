@@ -17,15 +17,15 @@
 package com.android.build.gradle.tasks
 
 import com.android.aaptcompiler.canCompileResourceInJvm
+import com.android.build.api.component.impl.ComponentPropertiesImpl
+import com.android.build.api.variant.impl.BuiltArtifactsLoaderImpl
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.res.Aapt2CompileRunnable
 import com.android.build.gradle.internal.res.Aapt2ProcessResourcesRunnable
 import com.android.build.gradle.internal.res.ResourceCompilerRunnable
 import com.android.build.gradle.internal.res.getAapt2FromMavenAndVersion
-import com.android.build.gradle.internal.scope.ExistingBuildElements
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.services.Aapt2DaemonBuildService
 import com.android.build.gradle.internal.services.Aapt2DaemonServiceKey
 import com.android.build.gradle.internal.services.Aapt2WorkersBuildService
@@ -52,7 +52,6 @@ import com.google.common.annotations.VisibleForTesting
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Iterables
 import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
@@ -83,13 +82,6 @@ abstract class VerifyLibraryResourcesTask : NewIncrementalTask() {
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val inputDirectory: DirectoryProperty
-
-    lateinit var taskInputType: InternalArtifactType<Directory> private set
-
-    @Input
-    fun getTaskInputType(): String {
-        return taskInputType.javaClass.name
-    }
 
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -130,11 +122,12 @@ abstract class VerifyLibraryResourcesTask : NewIncrementalTask() {
     private lateinit var errorFormatMode: SyncOptions.ErrorFormatMode
 
     override fun doTaskAction(inputChanges: InputChanges) {
-        val manifestsOutputs = ExistingBuildElements.from(taskInputType, manifestFiles.get().asFile)
-        val manifestFile = Iterables.getOnlyElement(manifestsOutputs).outputFile
+        val manifestsOutputs = BuiltArtifactsLoaderImpl().load(manifestFiles)
+            ?: throw RuntimeException("Cannot load manifests from $manifestFiles")
+        val manifestFile = Iterables.getOnlyElement(manifestsOutputs.elements).outputFile
 
         val aapt2ServiceKey =
-            aapt2DaemonBuildService.get().registerAaptService(aapt2FromMaven.singleFile, LoggerWrapper(logger))
+            aapt2DaemonBuildService.get().registerAaptService(aapt2FromMaven, LoggerWrapper(logger))
         val aapt2WorkersBuildServiceKey = aapt2WorkersBuildService.get().getWorkersServiceKey()
         val parameter = Params(
             projectName = projectName,
@@ -144,13 +137,15 @@ abstract class VerifyLibraryResourcesTask : NewIncrementalTask() {
             aapt2WorkersBuildServiceKey = aapt2WorkersBuildServiceKey,
             errorFormatMode = errorFormatMode,
             inputs = inputChanges.getChangesInSerializableForm(inputDirectory),
-            manifestFile = manifestFile,
+            manifestFile = File(manifestFile),
             compiledDependenciesResources = compiledDependenciesResources.files,
             manifestMergeBlameFile = manifestMergeBlameFile.get().asFile,
             compiledDirectory = compiledDirectory,
             mergeBlameFolder = mergeBlameFolder,
             useJvmResourceCompiler = useJvmResourceCompiler)
-        getWorkerFacadeWithWorkers().submit(Action::class.java, parameter)
+        getWorkerFacadeWithWorkers().use {
+            it.submit(Action::class.java, parameter)
+        }
     }
 
     private data class Params(
@@ -210,54 +205,52 @@ abstract class VerifyLibraryResourcesTask : NewIncrementalTask() {
     }
 
     class CreationAction(
-        variantScope: VariantScope
-    ) : VariantTaskCreationAction<VerifyLibraryResourcesTask>(variantScope) {
+        componentProperties: ComponentPropertiesImpl
+    ) : VariantTaskCreationAction<VerifyLibraryResourcesTask, ComponentPropertiesImpl>(
+        componentProperties
+    ) {
 
         override val name: String
-            get() = variantScope.getTaskName("verify", "Resources")
+            get() = computeTaskName("verify", "Resources")
         override val type: Class<VerifyLibraryResourcesTask>
             get() = VerifyLibraryResourcesTask::class.java
 
         /** Configure the given newly-created task object.  */
-        override fun configure(task: VerifyLibraryResourcesTask) {
+        override fun configure(
+            task: VerifyLibraryResourcesTask
+        ) {
             super.configure(task)
 
-            val (aapt2FromMaven, aapt2Version) = getAapt2FromMavenAndVersion(variantScope.globalScope)
+            val (aapt2FromMaven, aapt2Version) = getAapt2FromMavenAndVersion(creationConfig.globalScope)
             task.aapt2FromMaven.fromDisallowChanges(aapt2FromMaven)
             task.aapt2Version = aapt2Version
 
-            variantScope.artifacts.setTaskInputToFinalProduct(
+            creationConfig.artifacts.setTaskInputToFinalProduct(
                 InternalArtifactType.MERGED_RES,
                 task.inputDirectory
             )
 
-            task.compiledDirectory = variantScope.compiledResourcesOutputDir
+            task.compiledDirectory = creationConfig.paths.compiledResourcesOutputDir
+            creationConfig.artifacts.setTaskInputToFinalProduct(
+                InternalArtifactType.AAPT_FRIENDLY_MERGED_MANIFESTS,
+                task.manifestFiles
+            )
 
-            val aaptFriendlyManifestsFilePresent = variantScope.artifacts
-                .hasFinalProduct(InternalArtifactType.AAPT_FRIENDLY_MERGED_MANIFESTS)
-            task.taskInputType = when {
-                aaptFriendlyManifestsFilePresent ->
-                    InternalArtifactType.AAPT_FRIENDLY_MERGED_MANIFESTS
-                else ->
-                    InternalArtifactType.MERGED_MANIFESTS
-            }
-            variantScope.artifacts.setTaskInputToFinalProduct(task.taskInputType, task.manifestFiles)
+            task.androidJar = creationConfig.globalScope.sdkComponents.androidJarProvider
 
-            task.androidJar = variantScope.globalScope.sdkComponents.androidJarProvider
+            task.mergeBlameFolder = creationConfig.paths.resourceBlameLogDir
 
-            task.mergeBlameFolder = variantScope.resourceBlameLogDir
-
-            task.manifestMergeBlameFile = variantScope.artifacts.getFinalProduct(
+            task.manifestMergeBlameFile = creationConfig.artifacts.getFinalProduct(
                 InternalArtifactType.MANIFEST_MERGE_BLAME_FILE
             )
 
             task.errorFormatMode = SyncOptions.getErrorFormatMode(
-                variantScope.globalScope.projectOptions
+                creationConfig.services.projectOptions
             )
 
-            if (variantScope.isPrecompileDependenciesResourcesEnabled) {
+            if (creationConfig.variantScope.isPrecompileDependenciesResourcesEnabled) {
                 task.compiledDependenciesResources.fromDisallowChanges(
-                    variantScope.getArtifactFileCollection(
+                    creationConfig.variantDependencies.getArtifactFileCollection(
                         AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
                         AndroidArtifacts.ArtifactScope.ALL,
                         AndroidArtifacts.ArtifactType.COMPILED_DEPENDENCIES_RESOURCES
@@ -265,7 +258,7 @@ abstract class VerifyLibraryResourcesTask : NewIncrementalTask() {
             }
 
             task.useJvmResourceCompiler =
-              variantScope.globalScope.projectOptions[BooleanOption.ENABLE_JVM_RESOURCE_COMPILER]
+              creationConfig.services.projectOptions[BooleanOption.ENABLE_JVM_RESOURCE_COMPILER]
             task.aapt2WorkersBuildService.set(getAapt2WorkersBuildService(task.project))
             task.aapt2DaemonBuildService.set(getAapt2DaemonBuildService(task.project))
         }

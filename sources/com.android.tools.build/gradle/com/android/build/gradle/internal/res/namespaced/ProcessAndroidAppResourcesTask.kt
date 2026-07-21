@@ -16,11 +16,11 @@
 package com.android.build.gradle.internal.res.namespaced
 
 import com.android.SdkConstants
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.res.getAapt2FromMavenAndVersion
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.services.Aapt2DaemonBuildService
 import com.android.build.gradle.internal.services.getAapt2DaemonBuildService
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
@@ -66,14 +66,10 @@ abstract class ProcessAndroidAppResourcesTask : NonIncrementalTask() {
 
     private lateinit var errorFormatMode: SyncOptions.ErrorFormatMode
 
+    @get:InputFiles @get:Optional @get:PathSensitive(PathSensitivity.RELATIVE) lateinit var aaptFriendlyManifestFileDirectory: Provider<Directory> private set
     @get:InputFiles @get:PathSensitive(PathSensitivity.RELATIVE) lateinit var manifestFileDirectory: Provider<Directory> private set
     @get:InputFiles @get:PathSensitive(PathSensitivity.RELATIVE) abstract val thisSubProjectStaticLibrary: RegularFileProperty
     @get:InputFiles @get:PathSensitive(PathSensitivity.NONE) lateinit var libraryDependencies: FileCollection private set
-
-    @get:InputFiles
-    @get:PathSensitive(PathSensitivity.NONE)
-    @get:Optional
-    abstract val convertedLibraryDependencies: DirectoryProperty
 
     @get:InputFiles @get:PathSensitive(PathSensitivity.NONE) lateinit var sharedLibraryDependencies: FileCollection private set
 
@@ -101,16 +97,15 @@ abstract class ProcessAndroidAppResourcesTask : NonIncrementalTask() {
 
     override fun doTaskAction() {
         val staticLibraries = ImmutableList.builder<File>()
-        staticLibraries.addAll(libraryDependencies.files)
-        if (convertedLibraryDependencies.isPresent) {
-            Files.list(convertedLibraryDependencies.get().asFile.toPath()).use { convertedLibraries ->
-                convertedLibraries.forEach { staticLibraries.add(it.toFile()) }
-            }
-        }
         staticLibraries.add(thisSubProjectStaticLibrary.get().asFile)
+        staticLibraries.addAll(libraryDependencies.files)
+        val manifestFile = if (aaptFriendlyManifestFileDirectory.isPresent())
+            (File(aaptFriendlyManifestFileDirectory.get().asFile, SdkConstants.ANDROID_MANIFEST_XML))
+        else (File(manifestFileDirectory.get().asFile, SdkConstants.ANDROID_MANIFEST_XML))
+
         val config = AaptPackageConfig(
                 androidJarPath = androidJar.get().absolutePath,
-                manifestFile = (File(manifestFileDirectory.get().asFile, SdkConstants.ANDROID_MANIFEST_XML)),
+                manifestFile = manifestFile,
                 options = AaptOptions(noCompress, false, null),
                 staticLibraryDependencies = staticLibraries.build(),
                 imports = ImmutableList.copyOf(sharedLibraryDependencies.asIterable()),
@@ -120,7 +115,7 @@ abstract class ProcessAndroidAppResourcesTask : NonIncrementalTask() {
                 intermediateDir = aaptIntermediateDir)
 
         val aapt2ServiceKey = aapt2DaemonBuildService.get().registerAaptService(
-            aapt2FromMaven = aapt2FromMaven.singleFile, logger = LoggerWrapper(logger)
+            aapt2FromMaven = aapt2FromMaven, logger = LoggerWrapper(logger)
         )
         getWorkerFacadeWithWorkers().use {
             it.submit(
@@ -130,75 +125,72 @@ abstract class ProcessAndroidAppResourcesTask : NonIncrementalTask() {
         }
     }
 
-    class CreationAction(variantScope: VariantScope) :
-        VariantTaskCreationAction<ProcessAndroidAppResourcesTask>(variantScope) {
+    class CreationAction(componentProperties: ComponentPropertiesImpl) :
+        VariantTaskCreationAction<ProcessAndroidAppResourcesTask, ComponentPropertiesImpl>(
+            componentProperties
+        ) {
 
         override val name: String
-            get() = variantScope.getTaskName("process", "NamespacedResources")
+            get() = computeTaskName("process", "NamespacedResources")
         override val type: Class<ProcessAndroidAppResourcesTask>
             get() = ProcessAndroidAppResourcesTask::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out ProcessAndroidAppResourcesTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out ProcessAndroidAppResourcesTask>
+        ) {
             super.handleProvider(taskProvider)
-            variantScope.artifacts.producesDir(
+            creationConfig.artifacts.producesDir(
                 InternalArtifactType.RUNTIME_R_CLASS_SOURCES,
                 taskProvider,
                 ProcessAndroidAppResourcesTask::rClassSource,
                 fileName = "out"
             )
-            variantScope.artifacts.producesDir(
+            creationConfig.artifacts.producesDir(
                 InternalArtifactType.PROCESSED_RES,
                 taskProvider,
                 ProcessAndroidAppResourcesTask::resourceApUnderscoreDirectory
             )
         }
 
-        override fun configure(task: ProcessAndroidAppResourcesTask) {
+        override fun configure(
+            task: ProcessAndroidAppResourcesTask
+        ) {
             super.configure(task)
 
-            val artifacts = variantScope.artifacts
+            val artifacts = creationConfig.artifacts
+            task.aaptFriendlyManifestFileDirectory =
+                artifacts.getFinalProduct(InternalArtifactType.AAPT_FRIENDLY_MERGED_MANIFESTS)
+
             task.manifestFileDirectory =
-                    when {
-                        artifacts.hasFinalProduct(InternalArtifactType.AAPT_FRIENDLY_MERGED_MANIFESTS)
-                            -> artifacts.getFinalProduct(InternalArtifactType.AAPT_FRIENDLY_MERGED_MANIFESTS)
-                        variantScope.globalScope.projectOptions.get(BooleanOption.IDE_DEPLOY_AS_INSTANT_APP)
-                            -> artifacts.getFinalProduct(InternalArtifactType.INSTANT_APP_MANIFEST)
-                        else -> artifacts.getFinalProduct(InternalArtifactType.MERGED_MANIFESTS)
-                    }
-            variantScope.artifacts.setTaskInputToFinalProduct(
+                artifacts.getFinalProduct(creationConfig.manifestArtifactType)
+
+            creationConfig.artifacts.setTaskInputToFinalProduct(
                 InternalArtifactType.RES_STATIC_LIBRARY,
                 task.thisSubProjectStaticLibrary
             )
             task.libraryDependencies =
-                    variantScope.getArtifactFileCollection(
+                    creationConfig.variantDependencies.getArtifactFileCollection(
                             AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
                             AndroidArtifacts.ArtifactScope.ALL,
                             AndroidArtifacts.ArtifactType.RES_STATIC_LIBRARY)
-            if (variantScope.globalScope.extension.aaptOptions.namespaced &&
-                variantScope.globalScope.projectOptions.get(BooleanOption.CONVERT_NON_NAMESPACED_DEPENDENCIES)) {
-                variantScope.artifacts.setTaskInputToFinalProduct(
-                    InternalArtifactType.RES_CONVERTED_NON_NAMESPACED_REMOTE_DEPENDENCIES,
-                    task.convertedLibraryDependencies)
-            }
             task.sharedLibraryDependencies =
-                    variantScope.getArtifactFileCollection(
+                    creationConfig.variantDependencies.getArtifactFileCollection(
                             AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH,
                             AndroidArtifacts.ArtifactScope.ALL,
                             AndroidArtifacts.ArtifactType.RES_SHARED_STATIC_LIBRARY)
 
             task.aaptIntermediateDir =
                     FileUtils.join(
-                            variantScope.globalScope.intermediatesDir, "res-process-intermediate", variantScope.variantDslInfo.dirName)
-            val (aapt2FromMaven, aapt2Version) = getAapt2FromMavenAndVersion(variantScope.globalScope)
+                            creationConfig.globalScope.intermediatesDir, "res-process-intermediate", creationConfig.dirName)
+            val (aapt2FromMaven, aapt2Version) = getAapt2FromMavenAndVersion(creationConfig.globalScope)
             task.aapt2FromMaven.from(aapt2FromMaven)
             task.aapt2Version = aapt2Version
-            task.androidJar = variantScope.globalScope.sdkComponents.androidJarProvider
+            task.androidJar = creationConfig.globalScope.sdkComponents.androidJarProvider
             task.errorFormatMode = SyncOptions.getErrorFormatMode(
-                variantScope.globalScope.projectOptions
+                creationConfig.services.projectOptions
             )
             task.noCompress =
-                variantScope.globalScope.extension.aaptOptions.noCompress?.toList()?.sorted() ?:
-                        listOf()
+                creationConfig.globalScope.extension.aaptOptions.noCompress.toList().sorted()
             task.aapt2DaemonBuildService.set(getAapt2DaemonBuildService(task.project))
         }
     }

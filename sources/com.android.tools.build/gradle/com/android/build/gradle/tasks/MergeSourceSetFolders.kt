@@ -15,6 +15,7 @@
  */
 package com.android.build.gradle.tasks
 
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.errors.MessageReceiverImpl
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.ALL
@@ -22,7 +23,6 @@ import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactTyp
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.SingleArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.IncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.options.SyncOptions
@@ -289,35 +289,41 @@ abstract class MergeSourceSetFolders : IncrementalTask() {
         return assetSetList
     }
 
-    abstract class CreationAction protected constructor(scope: VariantScope) :
-        VariantTaskCreationAction<MergeSourceSetFolders>(scope) {
+    abstract class CreationAction protected constructor(
+        componentProperties: ComponentPropertiesImpl
+    ) : VariantTaskCreationAction<MergeSourceSetFolders, ComponentPropertiesImpl>(
+        componentProperties
+    ) {
 
         override val type: Class<MergeSourceSetFolders>
             get() = MergeSourceSetFolders::class.java
 
-        override fun configure(task: MergeSourceSetFolders) {
+        override fun configure(
+            task: MergeSourceSetFolders
+        ) {
             super.configure(task)
-            val scope = variantScope
 
-            task.incrementalFolder = scope.getIncrementalDir(name)
+            task.incrementalFolder = creationConfig.paths.getIncrementalDir(name)
 
-            task.errorFormatMode = SyncOptions.getErrorFormatMode(scope.globalScope.projectOptions)
+            task.errorFormatMode = SyncOptions.getErrorFormatMode(creationConfig.services.projectOptions)
         }
     }
 
     open class MergeAssetBaseCreationAction(
-        scope: VariantScope,
+        componentProperties: ComponentPropertiesImpl,
         private val outputArtifactType: SingleArtifactType<Directory>,
         private val includeDependencies: Boolean
-    ) : CreationAction(scope) {
+    ) : CreationAction(componentProperties) {
 
         override val name: String
-            get() = variantScope.getTaskName("merge", "Assets")
+            get() = computeTaskName("merge", "Assets")
 
-        override fun handleProvider(taskProvider: TaskProvider<out MergeSourceSetFolders>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out MergeSourceSetFolders>
+        ) {
             super.handleProvider(taskProvider)
 
-            variantScope
+            creationConfig
                 .artifacts
                 .producesDir(
                     outputArtifactType,
@@ -325,66 +331,76 @@ abstract class MergeSourceSetFolders : IncrementalTask() {
                     MergeSourceSetFolders::outputDir,
                     fileName = "out"
                 )
-            variantScope.taskContainer.mergeAssetsTask = taskProvider
+            creationConfig.taskContainer.mergeAssetsTask = taskProvider
         }
 
-        override fun configure(task: MergeSourceSetFolders) {
+        override fun configure(
+            task: MergeSourceSetFolders
+        ) {
             super.configure(task)
-            val scope = variantScope
-
-            val variantData = scope.variantData
-            val variantSources = variantData.variantSources
+            val variantSources = creationConfig.variantSources
 
             val assetDirFunction =
                 Function<SourceProvider, Collection<File>> { it.assetsDirectories }
 
-            task.assetSets.set(variantScope.globalScope.project.provider {
+            task.assetSets.set(creationConfig.globalScope.project.provider {
                 variantSources.getSourceFilesAsAssetSets(assetDirFunction)
             })
             task.assetSets.disallowChanges()
 
             task.sourceFolderInputs.from(Callable { variantSources.getSourceFiles(assetDirFunction) })
 
-            scope.artifacts.setTaskInputToFinalProduct(
+            creationConfig.artifacts.setTaskInputToFinalProduct(
                 InternalArtifactType.SHADER_ASSETS,
                 task.shadersOutputDir
             )
 
-            val options = scope.globalScope.extension.aaptOptions
+            val options = creationConfig.globalScope.extension.aaptOptions
             if (options != null) {
                 task.ignoreAssets = options.ignoreAssets
             }
 
             if (includeDependencies) {
-                task.libraryCollection = scope.getArtifactCollection(RUNTIME_CLASSPATH, ALL, ASSETS)
+                task.libraryCollection = creationConfig.variantDependencies.getArtifactCollection(RUNTIME_CLASSPATH, ALL, ASSETS)
             }
 
-            task.dependsOn(scope.taskContainer.assetGenTask)
+            task.dependsOn(creationConfig.taskContainer.assetGenTask)
         }
     }
 
-    class MergeAppAssetCreationAction(scope: VariantScope) :
-        MergeAssetBaseCreationAction(scope, InternalArtifactType.MERGED_ASSETS, true) {
+    class MergeAppAssetCreationAction(componentProperties: ComponentPropertiesImpl) :
+        MergeAssetBaseCreationAction(
+            componentProperties,
+            InternalArtifactType.MERGED_ASSETS,
+            true
+        ) {
 
         override val name: String
-            get() = variantScope.getTaskName("merge", "Assets")
+            get() = computeTaskName("merge", "Assets")
     }
 
-    class LibraryAssetCreationAction(scope: VariantScope) :
-        MergeAssetBaseCreationAction(scope, InternalArtifactType.LIBRARY_ASSETS, false) {
+    class LibraryAssetCreationAction(componentProperties: ComponentPropertiesImpl) :
+        MergeAssetBaseCreationAction(
+            componentProperties,
+            InternalArtifactType.LIBRARY_ASSETS,
+            false
+        ) {
 
         override val name: String
-            get() = variantScope.getTaskName("package", "Assets")
+            get() = computeTaskName("package", "Assets")
     }
 
-    class MergeJniLibFoldersCreationAction(scope: VariantScope) : CreationAction(scope) {
+    class MergeJniLibFoldersCreationAction(componentProperties: ComponentPropertiesImpl) :
+        CreationAction(componentProperties) {
 
         override val name: String
-            get() = variantScope.getTaskName("merge", "JniLibFolders")
+            get() = computeTaskName("merge", "JniLibFolders")
 
-        override fun handleProvider(taskProvider: TaskProvider<out MergeSourceSetFolders>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out MergeSourceSetFolders>
+        ) {
             super.handleProvider(taskProvider)
-            variantScope
+            creationConfig
                 .artifacts
                 .producesDir(
                     InternalArtifactType.MERGED_JNI_LIBS,
@@ -394,14 +410,15 @@ abstract class MergeSourceSetFolders : IncrementalTask() {
                 )
         }
 
-        override fun configure(task: MergeSourceSetFolders) {
+        override fun configure(
+            task: MergeSourceSetFolders
+        ) {
             super.configure(task)
-            val variantData = variantScope.variantData
-            val variantSources = variantData.variantSources
+            val variantSources = creationConfig.variantSources
 
             val assetDirFunction =
                 Function<SourceProvider, Collection<File>> { it.jniLibsDirectories }
-            task.assetSets.set(variantScope.globalScope.project.provider {
+            task.assetSets.set(creationConfig.globalScope.project.provider {
                 variantSources.getSourceFilesAsAssetSets(assetDirFunction)
             })
             task.assetSets.disallowChanges()
@@ -409,14 +426,17 @@ abstract class MergeSourceSetFolders : IncrementalTask() {
         }
     }
 
-    class MergeShaderSourceFoldersCreationAction(scope: VariantScope) : CreationAction(scope) {
+    class MergeShaderSourceFoldersCreationAction(componentProperties: ComponentPropertiesImpl) :
+        CreationAction(componentProperties) {
 
         override val name: String
-            get() = variantScope.getTaskName("merge", "Shaders")
+            get() = computeTaskName("merge", "Shaders")
 
-        override fun handleProvider(taskProvider: TaskProvider<out MergeSourceSetFolders>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out MergeSourceSetFolders>
+        ) {
             super.handleProvider(taskProvider)
-            variantScope
+            creationConfig
                 .artifacts
                 .producesDir(
                     InternalArtifactType.MERGED_SHADERS,
@@ -426,13 +446,14 @@ abstract class MergeSourceSetFolders : IncrementalTask() {
                 )
         }
 
-        override fun configure(task: MergeSourceSetFolders) {
+        override fun configure(
+            task: MergeSourceSetFolders
+        ) {
             super.configure(task)
-            val variantData = variantScope.variantData
-            val variantSources = variantData.variantSources
+            val variantSources = creationConfig.variantSources
 
             val assetDirFunction = Function<SourceProvider, Collection<File>> { it.shadersDirectories }
-            task.assetSets.set(variantScope.globalScope.project.provider {
+            task.assetSets.set(creationConfig.globalScope.project.provider {
                 variantSources.getSourceFilesAsAssetSets(assetDirFunction)
             })
             task.assetSets.disallowChanges()

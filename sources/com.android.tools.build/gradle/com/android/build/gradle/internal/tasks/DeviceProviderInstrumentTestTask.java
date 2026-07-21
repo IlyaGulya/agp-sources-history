@@ -27,11 +27,13 @@ import static com.android.builder.model.AndroidProject.FD_OUTPUTS;
 import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.build.api.component.impl.ComponentPropertiesImpl;
+import com.android.build.api.component.impl.TestComponentPropertiesImpl;
 import com.android.build.gradle.internal.LoggerWrapper;
+import com.android.build.gradle.internal.component.VariantCreationConfig;
 import com.android.build.gradle.internal.process.GradleProcessExecutor;
-import com.android.build.gradle.internal.scope.ExistingBuildElements;
+import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
-import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
 import com.android.build.gradle.internal.test.AbstractTestDataImpl;
 import com.android.build.gradle.internal.test.InstrumentationTestAnalytics;
@@ -43,8 +45,6 @@ import com.android.build.gradle.internal.testing.ShardedTestRunner;
 import com.android.build.gradle.internal.testing.SimpleTestRunnable;
 import com.android.build.gradle.internal.testing.SimpleTestRunner;
 import com.android.build.gradle.internal.testing.TestRunner;
-import com.android.build.gradle.internal.variant.BaseVariantData;
-import com.android.build.gradle.internal.variant.TestVariantData;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.IntegerOption;
 import com.android.build.gradle.options.ProjectOptions;
@@ -171,8 +171,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
 
         // populate the TestData from the tested variant build output.
         if (!testTargetManifests.isEmpty()) {
-            testData.loadFromMetadataFile(ExistingBuildElements.getMetadataFile(
-                    testTargetManifests.getSingleFile()));
+            testData.load(testTargetManifests.getSingleFile());
         }
 
         boolean success;
@@ -404,7 +403,8 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
     }
 
     public static class CreationAction
-            extends VariantTaskCreationAction<DeviceProviderInstrumentTestTask> {
+            extends VariantTaskCreationAction<
+                    DeviceProviderInstrumentTestTask, ComponentPropertiesImpl> {
 
         @NonNull
         private final DeviceProvider deviceProvider;
@@ -418,12 +418,12 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
         }
 
         public CreationAction(
-                @NonNull VariantScope scope,
+                @NonNull ComponentPropertiesImpl componentProperties,
                 @NonNull DeviceProvider deviceProvider,
                 @NonNull Type type,
                 @NonNull AbstractTestDataImpl testData,
                 @NonNull FileCollection testTargetManifests) {
-            super(scope);
+            super(componentProperties);
             this.deviceProvider = deviceProvider;
             this.type = type;
             this.testData = testData;
@@ -433,7 +433,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
         @NonNull
         @Override
         public String getName() {
-            return getVariantScope().getTaskName(deviceProvider.getName());
+            return computeTaskName(deviceProvider.getName());
         }
 
         @NonNull
@@ -448,14 +448,14 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
             super.handleProvider(taskProvider);
 
             boolean isAdditionalAndroidTestOutputEnabled =
-                    getVariantScope()
-                            .getGlobalScope()
+                    creationConfig
+                            .getServices()
                             .getProjectOptions()
                             .get(BooleanOption.ENABLE_ADDITIONAL_ANDROID_TEST_OUTPUT);
 
             if (type == Type.INTERNAL_CONNECTED_DEVICE_PROVIDER) {
                 if (isAdditionalAndroidTestOutputEnabled) {
-                    getVariantScope()
+                    creationConfig
                             .getArtifacts()
                             .producesDir(
                                     InternalArtifactType.CONNECTED_ANDROID_TEST_ADDITIONAL_OUTPUT
@@ -464,7 +464,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
                                     DeviceProviderInstrumentTestTask::getAdditionalTestOutputDir,
                                     deviceProvider.getName());
                 }
-                getVariantScope()
+                creationConfig
                         .getArtifacts()
                         .producesDir(
                                 InternalArtifactType.CODE_COVERAGE.INSTANCE,
@@ -475,7 +475,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
                 // NOTE : This task will be created per device provider, assume several tasks instances
                 // will exist in the variant scope.
                 if (isAdditionalAndroidTestOutputEnabled) {
-                    getVariantScope()
+                    creationConfig
                             .getArtifacts()
                             .producesDir(
                                     InternalArtifactType
@@ -485,7 +485,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
                                     DeviceProviderInstrumentTestTask::getAdditionalTestOutputDir,
                                     deviceProvider.getName());
                 }
-                getVariantScope()
+                creationConfig
                         .getArtifacts()
                         .producesDir(
                                 InternalArtifactType.DEVICE_PROVIDER_CODE_COVERAGE.INSTANCE,
@@ -494,32 +494,31 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
                                 deviceProvider.getName());
             }
 
-            VariantScope scope = getVariantScope();
-            if (scope.getVariantData() instanceof TestVariantData) {
+            if (creationConfig instanceof TestComponentPropertiesImpl) {
                 if (type == Type.INTERNAL_CONNECTED_DEVICE_PROVIDER) {
-                    scope.getTaskContainer().setConnectedTestTask(taskProvider);
+                    creationConfig.getTaskContainer().setConnectedTestTask(taskProvider);
                     // possible redundant with setConnectedTestTask?
-                    scope.getTaskContainer().setConnectedTask(taskProvider);
+                    creationConfig.getTaskContainer().setConnectedTask(taskProvider);
                 } else {
-                    scope.getTaskContainer().getProviderTestTaskList().add(taskProvider);
+                    creationConfig.getTaskContainer().getProviderTestTaskList().add(taskProvider);
                 }
             }
         }
 
         @Override
-        public void configure(@NonNull DeviceProviderInstrumentTestTask task) {
+        public void configure(
+                @NonNull DeviceProviderInstrumentTestTask task) {
             super.configure(task);
 
-            VariantScope scope = getVariantScope();
-            Project project = scope.getGlobalScope().getProject();
-            ProjectOptions projectOptions = scope.getGlobalScope().getProjectOptions();
+            GlobalScope globalScope = creationConfig.getGlobalScope();
+            Project project = globalScope.getProject();
+            ProjectOptions projectOptions = creationConfig.getServices().getProjectOptions();
 
-            BaseVariantData testedVariantData = scope.getTestedVariantData();
+            // this can be null for test plugin
+            VariantCreationConfig testedConfig = creationConfig.getTestedConfig();
 
             String variantName =
-                    testedVariantData != null
-                            ? testedVariantData.getName()
-                            : scope.getVariantData().getName();
+                    testedConfig != null ? testedConfig.getName() : creationConfig.getName();
             if (type == Type.INTERNAL_CONNECTED_DEVICE_PROVIDER) {
                 task.setDescription("Installs and runs the tests for " + variantName +
                         " on connected devices.");
@@ -540,13 +539,12 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
             task.setFlavorName(testData.getFlavorName());
             task.setDeviceProvider(deviceProvider);
             task.testTargetManifests = testTargetManifests;
-            task.setInstallOptions(
-                    scope.getGlobalScope().getExtension().getAdbOptions().getInstallOptions());
+            task.setInstallOptions(globalScope.getExtension().getAdbOptions().getInstallOptions());
 
             boolean shardBetweenDevices = projectOptions.get(BooleanOption.ENABLE_TEST_SHARDING);
 
             final TestOptions.Execution executionEnum =
-                    scope.getGlobalScope().getExtension().getTestOptions().getExecutionEnum();
+                    globalScope.getExtension().getTestOptions().getExecutionEnum();
             switch (executionEnum) {
                 case ANDROID_TEST_ORCHESTRATOR:
                 case ANDROIDX_TEST_ORCHESTRATOR:
@@ -584,8 +582,8 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
                 default:
                     throw new AssertionError("Unknown value " + executionEnum);
             }
-            task.codeCoverageEnabled = scope.getVariantDslInfo().isTestCoverageEnabled();
-            task.dependencies = scope.getVariantDependencies().getRuntimeClasspath();
+            task.codeCoverageEnabled = creationConfig.getVariantDslInfo().isTestCoverageEnabled();
+            task.dependencies = creationConfig.getVariantDependencies().getRuntimeClasspath();
             task.testExecution = executionEnum;
 
             String flavorFolder = testData.getFlavorName();
@@ -599,20 +597,19 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
             final String subFolder = "/" + providerFolder + "/" + flavorFolder;
 
             task.splitSelectExecProvider =
-                    scope.getGlobalScope().getSdkComponents().getSplitSelectExecutableProvider();
+                    globalScope.getSdkComponents().getSplitSelectExecutableProvider();
 
-            String rootLocation = scope.getGlobalScope().getExtension().getTestOptions()
-                    .getResultsDir();
+            String rootLocation = globalScope.getExtension().getTestOptions().getResultsDir();
             if (rootLocation == null) {
-                rootLocation = scope.getGlobalScope().getBuildDir() + "/" +
-                        FD_OUTPUTS + "/" + FD_ANDROID_RESULTS;
+                rootLocation =
+                        globalScope.getBuildDir() + "/" + FD_OUTPUTS + "/" + FD_ANDROID_RESULTS;
             }
             task.getResultsDir().set(new File(rootLocation + subFolder));
 
-            rootLocation = scope.getGlobalScope().getExtension().getTestOptions().getReportDir();
+            rootLocation = globalScope.getExtension().getTestOptions().getReportDir();
             if (rootLocation == null) {
-                rootLocation = scope.getGlobalScope().getBuildDir() + "/" +
-                        FD_REPORTS + "/" + FD_ANDROID_TESTS;
+                rootLocation =
+                        globalScope.getBuildDir() + "/" + FD_REPORTS + "/" + FD_ANDROID_TESTS;
             }
             task.reportsDir = project.file(rootLocation + subFolder);
 

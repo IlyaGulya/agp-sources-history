@@ -24,7 +24,7 @@ import java.nio.file.Path
  * Represents a built artifact that is present in the file system.
  */
 @Incubating
-interface BuiltArtifact {
+interface BuiltArtifact: VariantOutputConfiguration {
 
     /**
      * Returns a read-only version code.
@@ -48,26 +48,11 @@ interface BuiltArtifact {
     val isEnabled: Boolean
 
     /**
-     * Returns the output type of the referenced APK.
+     * Absolute path to the built file
      *
-     * @return the [OutputType] for this APK
+     * @return the output file path.
      */
-    val outputType: OutputType
-
-    /**
-     * Returns a possibly empty list of [FilterConfiguration] for this output. If the list is empty,
-     * this means there is no filter associated to this output.
-     *
-     * @return list of [FilterConfiguration] for this output.
-     */
-    val filters: Collection<FilterConfiguration>
-
-    /**
-     * [Path] to the built file
-     *
-     * @return the output file [Path]
-     */
-    val outputFile: Path
+    val outputFile: String
 
     /**
      * [Map] of [String] for properties that are associated with the output. Such properties

@@ -18,12 +18,12 @@
 
 package com.android.build.gradle.tasks
 
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.ALL
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.CLASSES_JAR
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.PROCESSED_JAR
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.ANNOTATION_PROCESSOR
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.builder.profile.ProcessProfileWriter
 import com.android.utils.FileUtils
 import com.google.common.base.Joiner
@@ -66,11 +66,11 @@ const val DEFAULT_INCREMENTAL_COMPILATION = true
  *
  * @see [JavaCompile.configurePropertiesForAnnotationProcessing]
  */
-fun JavaCompile.configureProperties(scope: VariantScope) {
-    val compileOptions = scope.globalScope.extension.compileOptions
+fun JavaCompile.configureProperties(componentProperties: ComponentPropertiesImpl) {
+    val compileOptions = componentProperties.globalScope.extension.compileOptions
 
-    this.options.bootstrapClasspath = scope.bootClasspath
-    this.classpath = scope.getJavaClasspath(COMPILE_CLASSPATH, CLASSES_JAR)
+    this.options.bootstrapClasspath = componentProperties.variantScope.bootClasspath
+    this.classpath = componentProperties.getJavaClasspath(COMPILE_CLASSPATH, CLASSES_JAR)
 
     this.sourceCompatibility = compileOptions.sourceCompatibility.toString()
     this.targetCompatibility = compileOptions.targetCompatibility.toString()
@@ -83,12 +83,12 @@ fun JavaCompile.configureProperties(scope: VariantScope) {
  * @see [JavaCompile.configureProperties]
  */
 fun JavaCompile.configurePropertiesForAnnotationProcessing(
-    scope: VariantScope, sourcesOutputFolder: DirectoryProperty
+    componentProperties: ComponentPropertiesImpl, sourcesOutputFolder: DirectoryProperty
 ) {
-    val processorOptions = scope.variantDslInfo.javaCompileOptions.annotationProcessorOptions
+    val processorOptions = componentProperties.variantDslInfo.javaCompileOptions.annotationProcessorOptions
     val compileOptions = this.options
 
-    configureAnnotationProcessorPath(scope)
+    configureAnnotationProcessorPath(componentProperties)
 
     if (!processorOptions.classNames.isEmpty()) {
         compileOptions.compilerArgs.add("-processor")
@@ -111,9 +111,12 @@ fun JavaCompile.configurePropertiesForAnnotationProcessing(
  *
  * @see [JavaCompile.configurePropertiesForAnnotationProcessing]
  */
-fun JavaCompile.configureAnnotationProcessorPath(scope: VariantScope) {
-    var processorPath = scope.getArtifactFileCollection(ANNOTATION_PROCESSOR, ALL, PROCESSED_JAR)
-    this.options.annotationProcessorPath = processorPath
+fun JavaCompile.configureAnnotationProcessorPath(componentProperties: ComponentPropertiesImpl) {
+    options.annotationProcessorPath = componentProperties.variantDependencies.getArtifactFileCollection(
+        ANNOTATION_PROCESSOR,
+        ALL,
+        PROCESSED_JAR
+    )
 }
 
 data class SerializableArtifact(

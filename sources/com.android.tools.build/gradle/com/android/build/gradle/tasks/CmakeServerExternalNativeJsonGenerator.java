@@ -463,8 +463,12 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
                 CmakeUtils.getBuildCommand(cmakeExecutable, outputFolder, target.name);
         nativeLibraryValue.artifactName = target.name;
         nativeLibraryValue.buildType = isDebuggable ? "debug" : "release";
-        // We'll have only one output, so get the first one.
-        if (target.artifacts.length > 0) {
+        // If the target type is an OBJECT_LIBRARY, it does not build any output that we care.
+        if (!"OBJECT_LIBRARY".equals(target.type)
+                // artifacts of an object library could be null. See example in b/144938511
+                && target.artifacts != null
+                && target.artifacts.length > 0) {
+            // We'll have only one output, so get the first one.
             nativeLibraryValue.output = new File(target.artifacts[0]);
         }
 
@@ -472,8 +476,8 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
         nativeLibraryValue.headers = new ArrayList<>();
         nativeLibraryValue.runtimeFiles = new ArrayList<>();
 
-        Path sysroot = Paths.get(target.sysroot);
-        if (target.linkLibraries != null) {
+        if (target.linkLibraries != null && !"OBJECT_LIBRARY".equals(target.type)) {
+            Path sysroot = Paths.get(target.sysroot);
             for (String library : parseLinkLibraries(target.linkLibraries)) {
                 // Each element here is just an argument to the linker. It might be a full path to a
                 // library to be linked or a trivial -l flag. If it's a full path that exists within
@@ -483,20 +487,7 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
                 }
 
                 // Filter out any other arguments that aren't files.
-                // We don't actually care about the normalization here except that it makes it
-                // possible to write a test for https://issuetracker.google.com/158317988. Without
-                // it, the runtimeFile is sometimes a path that includes .. that resolves to the
-                // same place as the destination, but sometimes isn't (within bazel's sandbox it is,
-                // outside it isn't, could be related to the path lengths since CMake tries to keep
-                // those short when possible). If the paths passed to Files.copy are equal the
-                // operation will throw IllegalArgumentException, but only if they are exactly equal
-                // (without normalization). Users were encountering this but it was being hidden
-                // from tests because of the lack of normalization.
                 Path libraryPath = Paths.get(library);
-                if (!libraryPath.isAbsolute()) {
-                    libraryPath = Paths.get(target.buildDirectory).resolve(libraryPath);
-                }
-                libraryPath = libraryPath.normalize();
                 if (!Files.exists(libraryPath)) {
                     continue;
                 }
@@ -521,6 +512,8 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
         int workingDirectoryOrdinal = strings.intern(normalizeFilePath(workingDirectory));
         for (FileGroup fileGroup : target.fileGroups) {
             for (String source : fileGroup.sources) {
+                // Skip object files in sources
+                if (source.endsWith(".o")) continue;
                 // CMake returns an absolute path or a path relative to the source directory,
                 // whichever one is shorter.
                 Path sourceFilePath = Paths.get(source);
@@ -614,11 +607,9 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
      * library.
      */
     private static boolean canAddTargetToNativeLibrary(@NonNull Target target) {
-        // If the target has no artifacts or file groups, the target will be get ignored, so mark
-        // it valid.
-        return (target.artifacts != null)
-                && (target.fileGroups != null)
-                && !target.type.equals("OBJECT_LIBRARY");
+        // If the target has artifact, then we need to build it.
+        // If the target has files, then we need it for intellisense.
+        return (target.artifacts != null) || (target.fileGroups != null);
     }
 
     /**

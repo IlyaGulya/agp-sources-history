@@ -917,23 +917,7 @@ public class PositionXmlParser {
                 mCurrentOffset++;
             }
 
-            // Sanity check -- the parser will sometimes pass newlines with columns that are
-            // out of bounds for the line; check for this
-            // (https://issuetracker.google.com/123835101)
-            // so instead of
-            //     mCurrentOffset += column - mCurrentColumn;
-            // we'll abort if we encounter newlines
-            for (int skip = mCurrentColumn; skip < column; skip++) {
-                if (mCurrentOffset == xmlLength) {
-                    break;
-                }
-                char c = mXml.charAt(mCurrentOffset);
-                if (c == '\n') {
-                    break;
-                }
-                mCurrentOffset++;
-            }
-
+            mCurrentOffset += column - mCurrentColumn;
             if (mCurrentOffset >= xmlLength) {
                 // The parser sometimes passes wrong column numbers at the
                 // end of the file: Ensure that the offset remains valid.

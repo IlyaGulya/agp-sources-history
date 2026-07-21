@@ -28,39 +28,61 @@ import org.gradle.api.Incubating
  */
 @Incubating
 interface ApplicationExtension<
-        BuildTypeT : BuildType,
-        CMakeOptionsT : CmakeOptions,
+        AaptOptionsT : AaptOptions,
+        AbiSplitT : AbiSplit,
+        AdbOptionsT : AdbOptions,
+        AnnotationProcessorOptionsT : AnnotationProcessorOptions,
+        BuildTypeT : BuildType<AnnotationProcessorOptionsT>,
+        CMakeT : Cmake,
         CompileOptionsT : CompileOptions,
-        DefaultConfigT : DefaultConfig,
-        ExternalNativeBuildT : ExternalNativeBuild<CMakeOptionsT, NdkBuildOptionsT>,
+        DataBindingT : DataBinding,
+        DefaultConfigT : DefaultConfig<AnnotationProcessorOptionsT>,
+        DensitySplitT : DensitySplit,
+        ExternalNativeBuildT : ExternalNativeBuild<CMakeT, NdkBuildT>,
         JacocoOptionsT : JacocoOptions,
-        NdkBuildOptionsT : NdkBuildOptions,
-        ProductFlavorT : ProductFlavor,
+        LintOptionsT : LintOptions,
+        NdkBuildT : NdkBuild,
+        PackagingOptionsT : PackagingOptions,
+        ProductFlavorT : ProductFlavor<AnnotationProcessorOptionsT>,
         SigningConfigT : SigningConfig,
+        SplitsT : Splits<AbiSplitT, DensitySplitT>,
         TestOptionsT : TestOptions<UnitTestOptionsT>,
         UnitTestOptionsT : UnitTestOptions> :
     CommonExtension<
+            AaptOptionsT,
+            AbiSplitT,
+            AdbOptionsT,
+            AnnotationProcessorOptionsT,
             ApplicationBuildFeatures,
             BuildTypeT,
-            CMakeOptionsT,
+            CMakeT,
             CompileOptionsT,
+            DataBindingT,
             DefaultConfigT,
+            DensitySplitT,
             ExternalNativeBuildT,
             JacocoOptionsT,
-            NdkBuildOptionsT,
+            LintOptionsT,
+            NdkBuildT,
+            PackagingOptionsT,
             ProductFlavorT,
             SigningConfigT,
+            SplitsT,
             TestOptionsT,
             UnitTestOptionsT,
-            ApplicationVariant,
+            ApplicationVariant<ApplicationVariantProperties>,
             ApplicationVariantProperties>,
     ApkExtension,
     TestedExtension {
     // TODO(b/140406102)
 
-  /** Specify whether to include SDK dependency information in APKs and Bundles. */
-  val dependenciesInfo: DependenciesInfo
+    /** Specify whether to include SDK dependency information in APKs and Bundles. */
+    val dependenciesInfo: DependenciesInfo
 
-  /** Specify whether to include SDK dependency information in APKs and Bundles. */
-  fun dependenciesInfo(action: DependenciesInfo.() -> Unit)
+    /** Specify whether to include SDK dependency information in APKs and Bundles. */
+    fun dependenciesInfo(action: DependenciesInfo.() -> Unit)
+
+    val bundle: Bundle
+
+    fun bundle(action: Bundle.() -> Unit)
 }

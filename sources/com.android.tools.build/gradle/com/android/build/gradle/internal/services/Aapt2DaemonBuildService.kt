@@ -38,14 +38,12 @@ import java.io.Closeable
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
-import java.util.UUID
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
-/** Used to get unique build service name. Each class loader will initialize its own version. */
-private val AAPT2_DAEMON_BUILD_SERVICE_NAME = "aapt2-daemon-build-service" + UUID.randomUUID().toString()
+private const val AAPT2_DAEMON_BUILD_SERVICE_NAME = "aapt2-daemon-build-service"
 
 /**
  * Registers aapt2 daemon build services. This makes it available for querying, by using
@@ -105,12 +103,13 @@ abstract class Aapt2DaemonBuildService : BuildService<BuildServiceParameters.Non
     @JvmOverloads
     @Synchronized
     fun registerAaptService(
-        aapt2FromMaven: File,
+        aapt2FromMaven: FileCollection,
         logger: ILogger,
         serviceRegistry: WorkerActionServiceRegistry = aapt2DaemonServiceRegistry
     ): Aapt2DaemonServiceKey {
-        val key = Aapt2DaemonServiceKey(aapt2FromMaven)
-        val aaptExecutablePath = aapt2FromMaven.toPath().resolve(SdkConstants.FN_AAPT2)
+        val dir = aapt2FromMaven.singleFile
+        val key = Aapt2DaemonServiceKey(dir)
+        val aaptExecutablePath = dir.toPath().resolve(SdkConstants.FN_AAPT2)
 
         if (!Files.exists(aaptExecutablePath)) {
             throw InvalidUserDataException(

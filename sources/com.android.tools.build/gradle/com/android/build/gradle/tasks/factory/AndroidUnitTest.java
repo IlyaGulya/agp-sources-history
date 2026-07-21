@@ -23,20 +23,23 @@ import static com.android.build.gradle.internal.publishing.AndroidArtifacts.Cons
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.build.api.component.TestComponentProperties;
+import com.android.build.api.component.impl.ComponentPropertiesImpl;
+import com.android.build.api.component.impl.UnitTestPropertiesImpl;
+import com.android.build.api.variant.impl.VariantPropertiesImpl;
+import com.android.build.gradle.BaseExtension;
 import com.android.build.gradle.internal.scope.BootClasspathBuilder;
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
-import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.VariantAwareTask;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
-import com.android.build.gradle.internal.variant.BaseVariantData;
-import com.android.build.gradle.internal.variant.TestVariantData;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.tasks.GenerateTestConfig;
 import com.android.builder.core.VariantType;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.Callable;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.plugins.JavaBasePlugin;
@@ -74,16 +77,20 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
         return testConfigInputs;
     }
 
-    public static class CreationAction extends VariantTaskCreationAction<AndroidUnitTest> {
+    public static class CreationAction
+            extends VariantTaskCreationAction<AndroidUnitTest, ComponentPropertiesImpl> {
 
-        public CreationAction(@NonNull VariantScope scope) {
-            super(scope);
+        @NonNull private final UnitTestPropertiesImpl unitTestProperties;
+
+        public CreationAction(@NonNull UnitTestPropertiesImpl unitTestProperties) {
+            super(unitTestProperties);
+            this.unitTestProperties = unitTestProperties;
         }
 
         @NonNull
         @Override
         public String getName() {
-            return getVariantScope().getTaskName(VariantType.UNIT_TEST_PREFIX);
+            return computeTaskName(VariantType.UNIT_TEST_PREFIX);
         }
 
         @NonNull
@@ -96,18 +103,18 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
         public void configure(@NonNull AndroidUnitTest task) {
             super.configure(task);
 
-            final VariantScope scope = getVariantScope();
-            final TestVariantData variantData = (TestVariantData) scope.getVariantData();
-            final BaseVariantData testedVariantData =
-                    (BaseVariantData) variantData.getTestedVariantData();
+            GlobalScope globalScope = creationConfig.getGlobalScope();
+            BaseExtension extension = globalScope.getExtension();
+
+            VariantPropertiesImpl testedVariant =
+                    (VariantPropertiesImpl)
+                            ((TestComponentProperties) creationConfig).getTestedVariant();
+
             boolean includeAndroidResources =
-                    scope.getGlobalScope()
-                            .getExtension()
-                            .getTestOptions()
-                            .getUnitTests()
-                            .isIncludeAndroidResources();
+                    extension.getTestOptions().getUnitTests().isIncludeAndroidResources();
             boolean useRelativePathInTestConfig =
-                    scope.getGlobalScope()
+                    creationConfig
+                            .getServices()
                             .getProjectOptions()
                             .get(BooleanOption.USE_RELATIVE_PATH_IN_TEST_CONFIG);
 
@@ -115,13 +122,10 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
             task.systemProperty("java.awt.headless", "true");
 
             task.setGroup(JavaBasePlugin.VERIFICATION_GROUP);
-            task.setDescription(
-                    "Run unit tests for the "
-                            + testedVariantData.getVariantDslInfo().getComponentIdentity().getName()
-                            + " build.");
+            task.setDescription("Run unit tests for the " + testedVariant.getName() + " build.");
 
-            task.setTestClassesDirs(scope.getArtifacts().getAllClasses());
-            task.setClasspath(computeClasspath(includeAndroidResources));
+            task.setTestClassesDirs(creationConfig.getArtifacts().getAllClasses());
+            task.setClasspath(computeClasspath(creationConfig, includeAndroidResources));
 
             if (includeAndroidResources) {
                 // When computing the classpath above, we made sure this task depends on the output
@@ -131,7 +135,7 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
                 // class for details).
                 // Since this task also depends on the indirect inputs to the GenerateTestConfig
                 // task, we also need to register those inputs with Gradle.
-                task.testConfigInputs = new GenerateTestConfig.TestConfigInputs(scope);
+                task.testConfigInputs = new GenerateTestConfig.TestConfigInputs(unitTestProperties);
             }
 
             // Put the variant name in the report path, so that different testing tasks don't
@@ -140,18 +144,12 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
             // eventually be replaced with the new Java plugin.
             TestTaskReports testTaskReports = task.getReports();
             ConfigurableReport xmlReport = testTaskReports.getJunitXml();
-            xmlReport.setDestination(
-                    new File(scope.getGlobalScope().getTestResultsFolder(), task.getName()));
+            xmlReport.setDestination(new File(globalScope.getTestResultsFolder(), task.getName()));
 
             ConfigurableReport htmlReport = testTaskReports.getHtml();
-            htmlReport.setDestination(
-                    new File(scope.getGlobalScope().getTestReportFolder(), task.getName()));
+            htmlReport.setDestination(new File(globalScope.getTestReportFolder(), task.getName()));
 
-            scope.getGlobalScope()
-                    .getExtension()
-                    .getTestOptions()
-                    .getUnitTests()
-                    .applyConfiguration(task);
+            extension.getTestOptions().getUnitTests().applyConfiguration(task);
 
             // The task is not yet cacheable when includeAndroidResources=true and
             // android.testConfig.useRelativePath=false (bug 115873047). We set it explicitly here
@@ -165,12 +163,12 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
         }
 
         @NonNull
-        private ConfigurableFileCollection computeClasspath(boolean includeAndroidResources) {
-            VariantScope scope = getVariantScope();
-            GlobalScope globalScope = scope.getGlobalScope();
-            BuildArtifactsHolder artifacts = scope.getArtifacts();
+        private ConfigurableFileCollection computeClasspath(
+                ComponentPropertiesImpl component, boolean includeAndroidResources) {
+            GlobalScope globalScope = component.getGlobalScope();
+            BuildArtifactsHolder artifacts = component.getArtifacts();
 
-            ConfigurableFileCollection collection = scope.getGlobalScope().getProject().files();
+            ConfigurableFileCollection collection = component.getServices().fileCollection();
 
             // the test classpath is made up of:
             // 1. the config file
@@ -186,25 +184,31 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
             collection.from(artifacts.getFinalProduct(InternalArtifactType.JAVA_RES.INSTANCE));
 
             // 3. the runtime dependencies for both CLASSES and JAVA_RES type
-            collection.from(scope.getArtifactFileCollection(RUNTIME_CLASSPATH, ALL, CLASSES_JAR));
             collection.from(
-                    scope.getArtifactFileCollection(
-                            RUNTIME_CLASSPATH,
-                            ALL,
-                            ArtifactType.JAVA_RES));
+                    component
+                            .getVariantDependencies()
+                            .getArtifactFileCollection(RUNTIME_CLASSPATH, ALL, CLASSES_JAR));
+            collection.from(
+                    component
+                            .getVariantDependencies()
+                            .getArtifactFileCollection(
+                                    RUNTIME_CLASSPATH, ALL, ArtifactType.JAVA_RES));
 
             // 4. The separately compile R class, if applicable.
             if (!globalScope.getExtension().getAaptOptions().getNamespaced()
-                    && !globalScope.getProjectOptions().get(BooleanOption.GENERATE_R_JAVA)) {
-                collection.from(scope.getRJarForUnitTests());
+                    && !component
+                            .getServices()
+                            .getProjectOptions()
+                            .get(BooleanOption.GENERATE_R_JAVA)) {
+                collection.from(component.getVariantScope().getRJarForUnitTests());
             }
 
             // 5. Any additional or requested optional libraries
-            collection.from(getAdditionalAndRequestedOptionalLibraries(scope.getGlobalScope()));
+            collection.from(getAdditionalAndRequestedOptionalLibraries(component.getGlobalScope()));
 
             // 6. Mockable JAR is last, to make sure you can shadow the classes with
             // dependencies.
-            collection.from(scope.getGlobalScope().getMockableJarArtifact());
+            collection.from(component.getGlobalScope().getMockableJarArtifact());
 
             return collection;
         }
@@ -218,10 +222,10 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
         @NonNull
         private ConfigurableFileCollection getAdditionalAndRequestedOptionalLibraries(
                 GlobalScope globalScope) {
-            return globalScope
-                    .getProject()
-                    .files(
-                            (Callable)
+            return creationConfig
+                    .getServices()
+                    .fileCollection(
+                            (Callable<List<File>>)
                                     () ->
                                             BootClasspathBuilder.INSTANCE
                                                     .computeAdditionalAndRequestedOptionalLibraries(
@@ -238,8 +242,8 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
                                                                     globalScope
                                                                             .getExtension()
                                                                             .getLibraryRequests()),
-                                                            globalScope
-                                                                    .getDslScope()
+                                                            creationConfig
+                                                                    .getServices()
                                                                     .getIssueReporter()));
         }
     }

@@ -25,18 +25,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.build.api.variant.BuiltArtifact;
+import com.android.build.api.variant.BuiltArtifacts;
+import com.android.build.api.variant.impl.BuiltArtifactsImpl;
+import com.android.build.api.variant.impl.BuiltArtifactsLoaderImpl;
+import com.android.build.api.variant.impl.VariantOutputConfigurationImplKt;
+import com.android.build.api.variant.impl.VariantOutputImpl;
 import com.android.build.gradle.internal.LoggerWrapper;
+import com.android.build.gradle.internal.component.BaseCreationConfig;
 import com.android.build.gradle.internal.core.VariantDslInfo;
 import com.android.build.gradle.internal.core.VariantSources;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
-import com.android.build.gradle.internal.scope.ApkData;
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
-import com.android.build.gradle.internal.scope.BuildElements;
-import com.android.build.gradle.internal.scope.BuildOutput;
-import com.android.build.gradle.internal.scope.BuildOutputProperty;
-import com.android.build.gradle.internal.scope.ExistingBuildElements;
+import com.android.build.gradle.internal.scope.BuiltArtifactProperty;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
-import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
 import com.android.builder.internal.TestManifestGenerator;
 import com.android.manifmerger.ManifestMerger2;
@@ -49,6 +51,7 @@ import com.android.utils.ILogger;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import java.io.File;
@@ -69,7 +72,6 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
-import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
@@ -96,7 +98,7 @@ public abstract class ProcessTestManifest extends ManifestProcessorTask {
 
     private ArtifactCollection manifests;
 
-    private ApkData apkData;
+    private VariantOutputImpl apkData;
 
     private FileCollection navigationJsons;
 
@@ -105,35 +107,29 @@ public abstract class ProcessTestManifest extends ManifestProcessorTask {
         super(objectFactory);
     }
 
-    @Nested
-    @Optional
-    public ApkData getApkData() {
-        return apkData;
-    }
-
     @Override
-    protected void doFullTaskAction() throws IOException {
-        if (getTestedApplicationId().getOrNull() == null && testTargetMetadata == null) {
+    protected void doFullTaskAction() {
+        if (getTestedApplicationId().getOrNull() == null && testTargetMetadata.isEmpty()) {
             throw new RuntimeException("testedApplicationId and testTargetMetadata are null");
         }
         String testedApplicationId = this.getTestedApplicationId().getOrNull();
-        if (!onlyTestApk && testTargetMetadata != null) {
-            BuildElements manifestOutputs =
-                    ExistingBuildElements.from(
-                            MERGED_MANIFESTS.INSTANCE, testTargetMetadata.getSingleFile());
+        if (!onlyTestApk) {
+            BuiltArtifactsImpl manifestOutputs =
+                    BuiltArtifactsLoaderImpl.loadFromDirectory(testTargetMetadata.getSingleFile());
 
-            if (manifestOutputs.isEmpty()) {
+            if (manifestOutputs == null || manifestOutputs.getElements().isEmpty()) {
                 throw new RuntimeException("Cannot find merged manifest, please file a bug.");
             }
 
-            BuildOutput mainSplit = manifestOutputs.iterator().next();
-            testedApplicationId = mainSplit.getProperties().get(BuildOutputProperty.PACKAGE_ID);
+            BuiltArtifact mainSplit = manifestOutputs.getElements().iterator().next();
+            testedApplicationId = mainSplit.getProperties().get(BuiltArtifactProperty.PACKAGE_ID);
         }
+        String dirName =
+                VariantOutputConfigurationImplKt.dirName(apkData.getVariantOutputConfiguration());
         File manifestOutputFolder =
-                Strings.isNullOrEmpty(apkData.getDirName())
+                Strings.isNullOrEmpty(dirName)
                         ? getManifestOutputDirectory().get().getAsFile()
-                        : getManifestOutputDirectory().get().file(apkData.getDirName()).getAsFile();
-
+                        : getManifestOutputDirectory().get().file(dirName).getAsFile();
 
         FileUtils.mkdirs(manifestOutputFolder);
         File manifestOutputFile = new File(manifestOutputFolder, SdkConstants.ANDROID_MANIFEST_XML);
@@ -159,14 +155,14 @@ public abstract class ProcessTestManifest extends ManifestProcessorTask {
                 manifestOutputFile,
                 getTmpDir());
 
-        new BuildElements(
-                        BuildElements.METADATA_FILE_VERSION,
+        new BuiltArtifactsImpl(
+                        BuiltArtifacts.METADATA_FILE_VERSION,
+                        MERGED_MANIFESTS.INSTANCE,
                         getTestApplicationId().get(),
-                        getVariantType().get(),
+                        getVariantName(),
                         ImmutableList.of(
-                                new BuildOutput(
-                                        MERGED_MANIFESTS.INSTANCE, apkData, manifestOutputFile)))
-                .save(getManifestOutputDirectory().get().getAsFile());
+                                apkData.toBuiltArtifact(manifestOutputFile, ImmutableMap.of())))
+                .saveToDirectory(getManifestOutputDirectory().get().getAsFile());
     }
 
     /**
@@ -474,20 +470,22 @@ public abstract class ProcessTestManifest extends ManifestProcessorTask {
         return manifests.getArtifactFiles();
     }
 
-    public static class CreationAction extends VariantTaskCreationAction<ProcessTestManifest> {
+    public static class CreationAction
+            extends VariantTaskCreationAction<ProcessTestManifest, BaseCreationConfig> {
 
         @NonNull private final FileCollection testTargetMetadata;
 
         public CreationAction(
-                @NonNull VariantScope scope, @NonNull FileCollection testTargetMetadata) {
-            super(scope);
+                @NonNull BaseCreationConfig creationConfig,
+                @NonNull FileCollection testTargetMetadata) {
+            super(creationConfig);
             this.testTargetMetadata = testTargetMetadata;
         }
 
         @NonNull
         @Override
         public String getName() {
-            return getVariantScope().getTaskName("process", "Manifest");
+            return computeTaskName("process", "Manifest");
         }
 
         @NonNull
@@ -499,7 +497,7 @@ public abstract class ProcessTestManifest extends ManifestProcessorTask {
         @Override
         public void preConfigure(@NonNull String taskName) {
             super.preConfigure(taskName);
-            getVariantScope()
+            creationConfig
                     .getArtifacts()
                     .republish(
                             InternalArtifactType.MERGED_MANIFESTS.INSTANCE,
@@ -510,9 +508,9 @@ public abstract class ProcessTestManifest extends ManifestProcessorTask {
         public void handleProvider(
                 @NonNull TaskProvider<? extends ProcessTestManifest> taskProvider) {
             super.handleProvider(taskProvider);
-            getVariantScope().getTaskContainer().setProcessManifestTask(taskProvider);
+            creationConfig.getTaskContainer().setProcessManifestTask(taskProvider);
 
-            BuildArtifactsHolder artifacts = getVariantScope().getArtifacts();
+            BuildArtifactsHolder artifacts = creationConfig.getArtifacts();
             artifacts.producesDir(
                     InternalArtifactType.MERGED_MANIFESTS.INSTANCE,
                     taskProvider,
@@ -523,18 +521,17 @@ public abstract class ProcessTestManifest extends ManifestProcessorTask {
                     InternalArtifactType.MANIFEST_MERGE_BLAME_FILE.INSTANCE,
                     taskProvider,
                     ProcessTestManifest::getMergeBlameFile,
-                    "manifest-merger-blame-"
-                            + getVariantScope().getVariantDslInfo().getBaseName()
-                            + "-report.txt");
+                    "manifest-merger-blame-" + creationConfig.getBaseName() + "-report.txt");
         }
 
         @Override
-        public void configure(@NonNull final ProcessTestManifest task) {
+        public void configure(
+                @NonNull final ProcessTestManifest task) {
             super.configure(task);
             Project project = task.getProject();
 
-            final VariantDslInfo variantDslInfo = getVariantScope().getVariantDslInfo();
-            final VariantSources variantSources = getVariantScope().getVariantSources();
+            final VariantDslInfo variantDslInfo = creationConfig.getVariantDslInfo();
+            final VariantSources variantSources = creationConfig.getVariantSources();
 
             // Use getMainManifestIfExists() instead of getMainManifestFilePath() because this task
             // accepts either a non-null file that exists or a null file, it does not accept a
@@ -543,26 +540,20 @@ public abstract class ProcessTestManifest extends ManifestProcessorTask {
                     .set(project.provider(variantSources::getMainManifestIfExists));
             task.getTestManifestFile().disallowChanges();
 
-            task.apkData =
-                    getVariantScope()
-                            .getVariantData()
-                            .getPublicVariantPropertiesApi()
-                            .getOutputs()
-                            .getMainSplit()
-                            .getApkData();
+            task.apkData = creationConfig.getOutputs().getMainSplit();
 
-            task.getVariantType().set(getVariantScope().getVariantData().getType().toString());
+            task.getVariantType().set(creationConfig.getVariantType().toString());
             task.getVariantType().disallowChanges();
 
             task.setTmpDir(
                     FileUtils.join(
-                            getVariantScope().getGlobalScope().getIntermediatesDir(),
+                            creationConfig.getPaths().getIntermediatesDir(),
                             "tmp",
                             "manifest",
-                            getVariantScope().getDirName()));
+                            creationConfig.getDirName()));
 
             task.getMinSdkVersion()
-                    .set(project.provider(() -> variantDslInfo.getMinSdkVersion().getApiString()));
+                    .set(project.provider(() -> creationConfig.getMinSdkVersion().getApiString()));
             task.getMinSdkVersion().disallowChanges();
             task.getTargetSdkVersion()
                     .set(
@@ -594,20 +585,19 @@ public abstract class ProcessTestManifest extends ManifestProcessorTask {
             task.getTestLabel().disallowChanges();
 
             task.manifests =
-                    getVariantScope().getArtifactCollection(RUNTIME_CLASSPATH, ALL, MANIFEST);
+                    creationConfig
+                            .getVariantDependencies()
+                            .getArtifactCollection(RUNTIME_CLASSPATH, ALL, MANIFEST);
 
             task.getPlaceholdersValues()
                     .set(project.provider(variantDslInfo::getManifestPlaceholders));
             task.getPlaceholdersValues().disallowChanges();
 
-            if (!getVariantScope()
-                    .getGlobalScope()
-                    .getExtension()
-                    .getAaptOptions()
-                    .getNamespaced()) {
+            if (!creationConfig.getGlobalScope().getExtension().getAaptOptions().getNamespaced()) {
                 task.navigationJsons =
                         project.files(
-                                getVariantScope()
+                                creationConfig
+                                        .getVariantDependencies()
                                         .getArtifactFileCollection(
                                                 RUNTIME_CLASSPATH, ALL, NAVIGATION_JSON));
             }

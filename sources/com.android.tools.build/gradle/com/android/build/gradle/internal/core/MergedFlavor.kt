@@ -16,17 +16,21 @@
 
 package com.android.build.gradle.internal.core
 
+import com.android.build.gradle.internal.services.DslServices
 import com.android.builder.core.AbstractProductFlavor
+import com.android.builder.core.DefaultVectorDrawablesOptions
 import com.android.builder.errors.IssueReporter
+import com.android.builder.model.BaseConfig
 import com.android.builder.model.ProductFlavor
 import com.google.common.collect.Lists
-
 
 /**
  * The merger of the default config and all of a variant's flavors (if any)
  */
-public class MergedFlavor(
-        name: String, val issueReporter: IssueReporter) : AbstractProductFlavor(name) {
+class MergedFlavor(
+    name: String,
+    private val dslServices: DslServices
+) : AbstractProductFlavor(name) {
 
     companion object {
 
@@ -37,8 +41,8 @@ public class MergedFlavor(
          * @return a new MergedFlavor instance that is a clone of the flavor.
          */
         @JvmStatic
-        fun clone(productFlavor: ProductFlavor, issueReporter: IssueReporter): MergedFlavor {
-            val mergedFlavor = MergedFlavor(productFlavor.name, issueReporter)
+        fun clone(productFlavor: ProductFlavor, dslServices: DslServices): MergedFlavor {
+            val mergedFlavor = MergedFlavor(productFlavor.getName(), dslServices)
             mergedFlavor._initWith(productFlavor)
             return mergedFlavor
         }
@@ -58,10 +62,11 @@ public class MergedFlavor(
          */
         @JvmStatic
         fun mergeFlavors(
-                lowestPriority: ProductFlavor,
-                flavors: List<ProductFlavor>,
-                issueReporter: IssueReporter): MergedFlavor {
-            val mergedFlavor = clone(lowestPriority, issueReporter)
+            lowestPriority: ProductFlavor,
+            flavors: List<ProductFlavor>,
+            dslServices: DslServices
+        ): MergedFlavor {
+            val mergedFlavor = clone(lowestPriority, dslServices)
             for (flavor in Lists.reverse(flavors)) {
                 mergedFlavor.mergeWithHigherPriorityFlavor(flavor)
             }
@@ -79,7 +84,8 @@ public class MergedFlavor(
                 applicationIdSuffix = mergeApplicationIdSuffix(
                         mFlavor.applicationIdSuffix, applicationIdSuffix)
                 versionNameSuffix = mergeVersionNameSuffix(
-                        mFlavor.versionNameSuffix, versionNameSuffix)
+                    mFlavor.versionNameSuffix, versionNameSuffix
+                )
             }
             mergedFlavor.applicationIdSuffix = applicationIdSuffix
             mergedFlavor.versionNameSuffix = versionNameSuffix
@@ -88,22 +94,39 @@ public class MergedFlavor(
         }
     }
 
-    override fun setVersionCode(versionCode: Int?): ProductFlavor {
-        // calling setVersionCode results in a sync Error because the manifest merger doesn't pick
-        // up the change.
-        reportErrorWithWorkaround("versionCode", "versionCodeOverride", versionCode)
-        return this
+    private var _vectorDrawables: DefaultVectorDrawablesOptions = DefaultVectorDrawablesOptions()
+
+    override val vectorDrawables: DefaultVectorDrawablesOptions
+        get() = _vectorDrawables
+
+    override fun _initWith(that: BaseConfig) {
+        super._initWith(that)
+        if (that is ProductFlavor) {
+            _vectorDrawables = DefaultVectorDrawablesOptions.copyOf(that.vectorDrawables)
+        }
     }
 
-    override fun setVersionName(versionName: String?): ProductFlavor {
-        // calling setVersionName results in a sync Error because the manifest merger doesn't pick
-        // up the change.
-        reportErrorWithWorkaround("versionName", "versionNameOverride", versionName)
-        return this
-    }
+    override var versionCode: Int?
+        get() = super.versionCode
+        set(value) {
+            // calling setVersionCode results in a sync Error because the manifest merger doesn't pick
+            // up the change.
+            reportErrorWithWorkaround("versionCode", "versionCodeOverride", value)
+        }
+
+    override var versionName: String?
+        get() = super.versionName
+        set(value) {
+            // calling setVersionName results in a sync Error because the manifest merger doesn't pick
+            // up the change.
+            reportErrorWithWorkaround("versionName", "versionNameOverride", value)
+        }
 
     private fun reportErrorWithWorkaround(
-            fieldName: String, outputFieldName: String, fieldValue: Any?) {
+        fieldName: String,
+        outputFieldName: String,
+        fieldValue: Any?
+    ) {
         val formattedFieldValue = if (fieldValue is String) {
             "\"" + fieldValue + "\""
         } else {
@@ -120,6 +143,6 @@ public class MergedFlavor(
                 |    }
                 |}""".trimMargin()
 
-        issueReporter.reportError(IssueReporter.Type.GENERIC, message)
+        dslServices.issueReporter.reportError(IssueReporter.Type.GENERIC, message)
     }
 }

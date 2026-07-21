@@ -18,10 +18,10 @@ package com.android.build.gradle.internal.tasks
 
 import com.android.SdkConstants
 import com.android.SdkConstants.FD_ASSETS
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.packaging.JarCreatorFactory
 import com.android.build.gradle.internal.packaging.JarCreatorType
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.builder.packaging.JarCreator
 import com.android.utils.FileUtils
@@ -84,24 +84,30 @@ abstract class AssetPackPreBundleTask : NonIncrementalTask() {
     }
 
     class CreationAction(
-        variantScope: VariantScope,
+        componentProperties: ComponentPropertiesImpl,
         private val assetFileCollection: FileCollection
-    ) : VariantTaskCreationAction<AssetPackPreBundleTask>(variantScope) {
+    ) : VariantTaskCreationAction<AssetPackPreBundleTask, ComponentPropertiesImpl>(
+        componentProperties
+    ) {
         override val type = AssetPackPreBundleTask::class.java
-        override val name = variantScope.getTaskName("assetPack", "PreBundleTask")
+        override val name = computeTaskName("assetPack", "PreBundleTask")
 
-        override fun handleProvider(taskProvider: TaskProvider<out AssetPackPreBundleTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out AssetPackPreBundleTask>
+        ) {
             super.handleProvider(taskProvider)
-            variantScope.artifacts.producesDir(
+            creationConfig.artifacts.producesDir(
                 InternalArtifactType.ASSET_PACK_BUNDLE,
                 taskProvider,
                 AssetPackPreBundleTask::outputDir
             )
         }
 
-        override fun configure(task: AssetPackPreBundleTask) {
+        override fun configure(
+            task: AssetPackPreBundleTask
+        ) {
             super.configure(task)
-            val artifacts = variantScope.artifacts
+            val artifacts = creationConfig.artifacts
 
             artifacts.setTaskInputToFinalProduct(
                 InternalArtifactType.LINKED_RES_FOR_ASSET_PACK, task.manifestFiles)

@@ -16,6 +16,7 @@
 package com.android.build.gradle.internal
 
 import com.android.SdkConstants.FD_RES_VALUES
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.ANDROID_RES
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH
 
@@ -128,7 +129,11 @@ class DependencyResourcesComputer {
         // add the generated files to the main set.
         if (sourceFolderSets.isNotEmpty()) {
             val mainResourceSet = sourceFolderSets[0]
-            assert(mainResourceSet.configName == BuilderConstants.MAIN)
+            assert(
+                mainResourceSet.configName == BuilderConstants.MAIN ||
+                        // The main source set will not be included when building app android test
+                        mainResourceSet.configName == BuilderConstants.ANDROID_TEST
+            )
             mainResourceSet.addSources(generatedResFolders)
         }
 
@@ -148,27 +153,28 @@ class DependencyResourcesComputer {
         return builder.build()
     }
 
-    fun initFromVariantScope(variantScope: VariantScope, includeDependencies: Boolean) {
-        val globalScope = variantScope.globalScope
-        val variantData = variantScope.variantData
+    fun initFromVariantScope(componentProperties: ComponentPropertiesImpl, includeDependencies: Boolean) {
+        val globalScope = componentProperties.globalScope
+        val variantData = componentProperties.variantData
         val project = globalScope.project
+        val paths = componentProperties.paths
 
         validateEnabled = !globalScope.projectOptions.get(BooleanOption.DISABLE_RESOURCE_VALIDATION)
 
         if (includeDependencies) {
-            this.libraries = variantScope.getArtifactCollection(RUNTIME_CLASSPATH, ALL, ANDROID_RES)
+            this.libraries = componentProperties.variantDependencies.getArtifactCollection(RUNTIME_CLASSPATH, ALL, ANDROID_RES)
         }
 
         resources = variantData.androidResources
 
         extraGeneratedResFolders = variantData.extraGeneratedResFolders
-        renderscriptResOutputDir = project.files(variantScope.renderscriptResOutputDir)
+        renderscriptResOutputDir = project.files(paths.renderscriptResOutputDir)
 
-        generatedResOutputDir = project.files(variantScope.generatedResOutputDir)
+        generatedResOutputDir = project.files(paths.generatedResOutputDir)
 
-        if (variantScope.taskContainer.microApkTask != null &&
-            variantData.variantDslInfo.isEmbedMicroApp) {
-            microApkResDirectory = project.files(variantScope.microApkResDirectory)
+        if (componentProperties.taskContainer.microApkTask != null &&
+            componentProperties.variantDslInfo.isEmbedMicroApp) {
+            microApkResDirectory = project.files(paths.microApkResDirectory)
         }
     }
 }

@@ -16,18 +16,155 @@
 
 package com.android.build.api.variant.impl
 
-import com.android.build.api.artifact.Operations
 import com.android.build.api.component.ComponentIdentity
 import com.android.build.api.variant.DynamicFeatureVariantProperties
-import com.android.build.gradle.internal.api.dsl.DslScope
+import com.android.build.gradle.internal.component.DynamicFeatureCreationConfig
+import com.android.build.gradle.internal.core.VariantDslInfo
+import com.android.build.gradle.internal.core.VariantSources
+import com.android.build.gradle.internal.dependency.VariantDependencies
+import com.android.build.gradle.internal.pipeline.TransformManager
+import com.android.build.gradle.internal.publishing.AndroidArtifacts
+import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope
+import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType
+import com.android.build.gradle.internal.scope.BuildArtifactsHolder
+import com.android.build.gradle.internal.scope.BuildFeatureValues
+import com.android.build.gradle.internal.scope.GlobalScope
+import com.android.build.gradle.internal.services.VariantPropertiesApiServices
 import com.android.build.gradle.internal.scope.VariantScope
+import com.android.build.gradle.internal.services.TaskCreationServices
+import com.android.build.gradle.internal.tasks.ModuleMetadata
+import com.android.build.gradle.internal.tasks.featuresplit.FeatureSetMetadata
+import com.android.build.gradle.internal.variant.BaseVariantData
+import com.android.build.gradle.internal.variant.VariantPathHelper
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import javax.inject.Inject
 
-internal open class DynamicFeatureVariantPropertiesImpl @Inject constructor(
-    dslScope: DslScope,
+open class DynamicFeatureVariantPropertiesImpl @Inject constructor(
+    componentIdentity: ComponentIdentity,
+    buildFeatureValues: BuildFeatureValues,
+    variantDslInfo: VariantDslInfo,
+    variantDependencies: VariantDependencies,
+    variantSources: VariantSources,
+    paths: VariantPathHelper,
+    artifacts: BuildArtifactsHolder,
     variantScope: VariantScope,
-    operations: Operations,
-    configuration: ComponentIdentity
-) : VariantPropertiesImpl(dslScope, variantScope, operations, configuration),
-    DynamicFeatureVariantProperties {
+    variantData: BaseVariantData,
+    transformManager: TransformManager,
+    variantApiServices: VariantPropertiesApiServices,
+    taskCreationServices: TaskCreationServices,
+    globalScope: GlobalScope
+) : VariantPropertiesImpl(
+    componentIdentity,
+    buildFeatureValues,
+    variantDslInfo,
+    variantDependencies,
+    variantSources,
+    paths,
+    artifacts,
+    variantScope,
+    variantData,
+    transformManager,
+    variantApiServices,
+    taskCreationServices,
+    globalScope
+), DynamicFeatureVariantProperties, DynamicFeatureCreationConfig {
+
+    /*
+     * Providers of data coming from the base modules. These are loaded just once and finalized.
+     */
+    private val baseModuleMetadata: Provider<ModuleMetadata> = instantiateBaseModuleMetadata(variantDependencies)
+    private val featureSetMetadata: Provider<FeatureSetMetadata>  = instantiateFeatureSetMetadata(variantDependencies)
+
+    // ---------------------------------------------------------------------------------------------
+    // PUBLIC API
+    // ---------------------------------------------------------------------------------------------
+
+    override val debuggable: Boolean
+        get() = variantDslInfo.isDebuggable
+
+    override val applicationId: Property<String> =
+        variantApiServices.propertyOf(String::class.java, baseModuleMetadata.map { it.applicationId })
+
+    override val manifestPlaceholders: Map<String, Any>
+        get() = variantDslInfo.manifestPlaceholders
+
+    // ---------------------------------------------------------------------------------------------
+    // INTERNAL API
+    // ---------------------------------------------------------------------------------------------
+
+    // always false for this type
+    override val embedsMicroApp: Boolean
+        get() = false
+
+    override val testOnlyApk: Boolean
+        get() = variantScope.isTestOnly
+
+    override val baseModuleDebuggable: Provider<Boolean> = variantApiServices.providerOf(
+        Boolean::class.java,
+        baseModuleMetadata.map { it.debuggable })
+
+    override val baseModuleVersionCode: Provider<Int> = variantApiServices.providerOf(
+        Int::class.java,
+        baseModuleMetadata.map { Integer.parseInt(it.versionCode) })
+
+    override val baseModuleVersionName: Provider<String> = variantApiServices.providerOf(
+        String::class.java,
+        baseModuleMetadata.map { it.versionName ?: "" })
+
+    override val featureName: Provider<String> =
+        variantApiServices.providerOf(String::class.java, featureSetMetadata.map {
+            val path = globalScope.project.path
+            it.getFeatureNameFor(path)
+                ?: throw RuntimeException("Failed to find feature name for $path in ${it.sourceFile}")
+        })
+
+    /**
+     * resource offset for resource compilation of a feature.
+     * This is computed by the base module and consumed by the features. */
+    override val resOffset: Provider<Int> =
+        variantApiServices.providerOf(Int::class.java, featureSetMetadata.map {
+            val path = globalScope.project.path
+            it.getResOffsetFor(path)
+                ?: throw RuntimeException("Failed to find resource offset for $path in ${it.sourceFile}")
+        })
+
+
+    // ---------------------------------------------------------------------------------------------
+    // Private stuff
+    // ---------------------------------------------------------------------------------------------
+
+    private fun instantiateBaseModuleMetadata(
+        variantDependencies: VariantDependencies
+    ): Provider<ModuleMetadata> {
+        val artifact = variantDependencies
+            .getArtifactFileCollection(
+                ConsumedConfigType.COMPILE_CLASSPATH,
+                ArtifactScope.PROJECT,
+                AndroidArtifacts.ArtifactType.BASE_MODULE_METADATA
+            )
+
+        // Have to wrap the return of artifact.elements.map because we cannot call
+        // finalizeValueOnRead directly on Provider
+        return variantPropertiesApiServices.providerOf(
+            ModuleMetadata::class.java,
+            artifact.elements.map { ModuleMetadata.load(it.single().asFile) })
+    }
+
+
+    private fun instantiateFeatureSetMetadata(
+        variantDependencies: VariantDependencies
+    ): Provider<FeatureSetMetadata> {
+        val artifact = variantDependencies.getArtifactFileCollection(
+            ConsumedConfigType.COMPILE_CLASSPATH,
+            ArtifactScope.PROJECT,
+            AndroidArtifacts.ArtifactType.FEATURE_SET_METADATA
+        )
+
+        // Have to wrap the return of artifact.elements.map because we cannot call
+        // finalizeValueOnRead directly on Provider
+        return variantPropertiesApiServices.providerOf(
+            FeatureSetMetadata::class.java,
+            artifact.elements.map { FeatureSetMetadata.load(it.single().asFile) })
+    }
 }

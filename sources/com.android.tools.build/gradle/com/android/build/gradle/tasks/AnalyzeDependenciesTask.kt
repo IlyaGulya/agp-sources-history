@@ -17,10 +17,10 @@
 package com.android.build.gradle.tasks
 
 import com.android.SdkConstants
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.scope.AnchorOutputType
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.builder.core.VariantTypeImpl
@@ -157,41 +157,48 @@ abstract class AnalyzeDependenciesTask : NonIncrementalTask() {
         fun getPublicClasses() = classesByType[CLASS_TYPE.PUBLIC] ?: emptySet()
     }
 
-    class CreationAction(val scope: VariantScope) :
-        VariantTaskCreationAction<AnalyzeDependenciesTask>(scope) {
+    class CreationAction(
+        componentProperties: ComponentPropertiesImpl
+    ) : VariantTaskCreationAction<AnalyzeDependenciesTask, ComponentPropertiesImpl>(
+        componentProperties
+    ) {
 
         override val name: String
-            get() = scope.getTaskName("analyze", "Dependencies")
+            get() = computeTaskName("analyze", "Dependencies")
         override val type: Class<AnalyzeDependenciesTask>
             get() = AnalyzeDependenciesTask::class.java
 
-        override fun configure(task: AnalyzeDependenciesTask) {
+        override fun configure(
+            task: AnalyzeDependenciesTask
+        ) {
             super.configure(task)
 
-            task.variantArtifact = scope.artifacts
+            task.variantArtifact = creationConfig.artifacts
                 .getFinalProductAsFileCollection(AnchorOutputType.ALL_CLASSES)
 
-            task.externalArtifactCollection = scope
-                .getArtifactCollection(
+            task.externalArtifactCollection = creationConfig
+                .variantDependencies.getArtifactCollection(
                     AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH,
                     AndroidArtifacts.ArtifactScope.ALL,
                     AndroidArtifacts.ArtifactType.CLASSES_JAR)
 
-            task.apiDirectDependenciesConfiguration = scope
+            task.apiDirectDependenciesConfiguration = creationConfig
                 .variantDependencies
                 .getElements(AndroidArtifacts.PublishedConfigType.API_ELEMENTS)
 
-            task.allDirectDependencies = scope
+            task.allDirectDependencies = creationConfig
                 .variantDependencies
                 .incomingRuntimeDependencies
 
-            task.isVariantLibrary = (scope.type == VariantTypeImpl.LIBRARY)
+            task.isVariantLibrary = (creationConfig.variantType == VariantTypeImpl.LIBRARY)
         }
 
-        override fun handleProvider(taskProvider: TaskProvider<out AnalyzeDependenciesTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out AnalyzeDependenciesTask>
+        ) {
             super.handleProvider(taskProvider)
 
-            variantScope.artifacts.producesDir(
+            creationConfig.artifacts.producesDir(
                 artifactType = InternalArtifactType.ANALYZE_DEPENDENCIES_REPORT,
                 taskProvider = taskProvider,
                 productProvider = AnalyzeDependenciesTask::outputDirectory,

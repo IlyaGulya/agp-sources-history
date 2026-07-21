@@ -25,6 +25,7 @@ import android.databinding.tool.LayoutXmlProcessor;
 import android.databinding.tool.util.RelativizableFile;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.build.api.component.impl.ComponentPropertiesImpl;
 import com.android.build.gradle.internal.LoggerWrapper;
 import com.android.build.gradle.internal.TaskManager;
 import com.android.build.gradle.internal.aapt.WorkerExecutorResourceCompilationService;
@@ -41,8 +42,8 @@ import com.android.build.gradle.internal.services.Aapt2Workers;
 import com.android.build.gradle.internal.services.Aapt2WorkersBuildService;
 import com.android.build.gradle.internal.tasks.Blocks;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
-import com.android.build.gradle.internal.utils.HasConfigurableValuesKt;
 import com.android.build.gradle.internal.variant.BaseVariantData;
+import com.android.build.gradle.internal.variant.VariantPathHelper;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.SyncOptions;
 import com.android.builder.model.VectorDrawablesOptions;
@@ -143,12 +144,6 @@ public abstract class MergeResources extends ResourceAwareTask {
 
     private ImmutableSet<Flag> flags;
 
-    @Input
-    public abstract Property<Boolean> getDataBindingEnabled();
-
-    @Input
-    public abstract Property<Boolean> getViewBindingEnabled();
-
     /**
      * Set of absolute paths to resource directories that are located outside of the root project
      * directory when data binding / view binding is enabled.
@@ -196,7 +191,7 @@ public abstract class MergeResources extends ResourceAwareTask {
 
         Aapt2DaemonServiceKey aapt2ServiceKey =
                 aapt2DaemonBuildService.registerAaptService(
-                        aapt2FromMaven.getSingleFile(), new LoggerWrapper(logger));
+                        aapt2FromMaven, new LoggerWrapper(logger));
 
         return new WorkerExecutorResourceCompilationService(
                 projectName,
@@ -268,7 +263,7 @@ public abstract class MergeResources extends ResourceAwareTask {
                                 getAapt2DaemonBuildService().get())) {
 
             Blocks.recordSpan(
-                    getProject().getName(),
+                    getProjectName(),
                     getPath(),
                     GradleBuildProfileSpan.ExecutionType.TASK_EXECUTION_PHASE_1,
                     () -> {
@@ -295,13 +290,13 @@ public abstract class MergeResources extends ResourceAwareTask {
                             getCrunchPng());
 
             Blocks.recordSpan(
-                    getProject().getName(),
+                    getProjectName(),
                     getPath(),
                     GradleBuildProfileSpan.ExecutionType.TASK_EXECUTION_PHASE_2,
                     () -> merger.mergeData(writer, false /*doCleanUp*/));
 
             Blocks.recordSpan(
-                    getProject().getName(),
+                    getProjectName(),
                     getPath(),
                     GradleBuildProfileSpan.ExecutionType.TASK_EXECUTION_PHASE_3,
                     () -> {
@@ -312,7 +307,7 @@ public abstract class MergeResources extends ResourceAwareTask {
 
             // No exception? Write the known state.
             Blocks.recordSpan(
-                    getProject().getName(),
+                    getProjectName(),
                     getPath(),
                     GradleBuildProfileSpan.ExecutionType.TASK_EXECUTION_PHASE_4,
                     () -> merger.writeBlobTo(getIncrementalFolder(), writer, false));
@@ -652,7 +647,8 @@ public abstract class MergeResources extends ResourceAwareTask {
         return useJvmResourceCompiler;
     }
 
-    public static class CreationAction extends VariantTaskCreationAction<MergeResources> {
+    public static class CreationAction
+            extends VariantTaskCreationAction<MergeResources, ComponentPropertiesImpl> {
         @NonNull private final TaskManager.MergeType mergeType;
         @NonNull
         private final String taskNamePrefix;
@@ -664,7 +660,7 @@ public abstract class MergeResources extends ResourceAwareTask {
         private boolean isLibrary;
 
         public CreationAction(
-                @NonNull VariantScope variantScope,
+                @NonNull ComponentPropertiesImpl componentProperties,
                 @NonNull TaskManager.MergeType mergeType,
                 @NonNull String taskNamePrefix,
                 @Nullable File mergedNotCompiledOutputDirectory,
@@ -672,7 +668,7 @@ public abstract class MergeResources extends ResourceAwareTask {
                 boolean processResources,
                 @NonNull ImmutableSet<Flag> flags,
                 boolean isLibrary) {
-            super(variantScope);
+            super(componentProperties);
             this.mergeType = mergeType;
             this.taskNamePrefix = taskNamePrefix;
             this.mergedNotCompiledOutputDirectory = mergedNotCompiledOutputDirectory;
@@ -686,7 +682,7 @@ public abstract class MergeResources extends ResourceAwareTask {
         @NonNull
         @Override
         public String getName() {
-            return getVariantScope().getTaskName(taskNamePrefix, "Resources");
+            return computeTaskName(taskNamePrefix, "Resources");
         }
 
         @NonNull
@@ -696,7 +692,8 @@ public abstract class MergeResources extends ResourceAwareTask {
         }
 
         @Override
-        public void handleProvider(@NonNull TaskProvider<? extends MergeResources> taskProvider) {
+        public void handleProvider(
+                @NonNull TaskProvider<? extends MergeResources> taskProvider) {
             super.handleProvider(taskProvider);
             // In LibraryTaskManager#createMergeResourcesTasks, there are actually two
             // MergeResources tasks sharing the same task type (MergeResources) and CreationAction
@@ -705,9 +702,9 @@ public abstract class MergeResources extends ResourceAwareTask {
             // latter one wins: The mergeResources task with mergeType == MERGE is the one that is
             // finally registered in the current scope.
             // Filed https://issuetracker.google.com//110412851 to clean this up at some point.
-            getVariantScope().getTaskContainer().setMergeResourcesTask(taskProvider);
+            creationConfig.getTaskContainer().setMergeResourcesTask(taskProvider);
 
-            getVariantScope()
+            creationConfig
                     .getArtifacts()
                     .producesDir(
                             mergeType == MERGE
@@ -722,37 +719,34 @@ public abstract class MergeResources extends ResourceAwareTask {
         public void configure(@NonNull MergeResources task) {
             super.configure(task);
 
-            VariantScope variantScope = getVariantScope();
-            GlobalScope globalScope = variantScope.getGlobalScope();
-            BaseVariantData variantData = variantScope.getVariantData();
+            VariantScope variantScope = creationConfig.getVariantScope();
+            GlobalScope globalScope = creationConfig.getGlobalScope();
+            BaseVariantData variantData = creationConfig.getVariantData();
+            VariantPathHelper paths = creationConfig.getPaths();
 
             task.getMinSdk()
                     .set(
                             globalScope
                                     .getProject()
                                     .provider(
-                                            () ->
-                                                    variantData
-                                                            .getVariantDslInfo()
-                                                            .getMinSdkVersion()
-                                                            .getApiLevel()));
+                                            () -> creationConfig.getMinSdkVersion().getApiLevel()));
             task.getMinSdk().disallowChanges();
 
             Pair<FileCollection, String> aapt2AndVersion =
                     Aapt2MavenUtils.getAapt2FromMavenAndVersion(globalScope);
             task.getAapt2FromMaven().from(aapt2AndVersion.getFirst());
             task.aapt2Version = aapt2AndVersion.getSecond();
-            task.setIncrementalFolder(variantScope.getIncrementalDir(getName()));
+            task.setIncrementalFolder(paths.getIncrementalDir(getName()));
             // Libraries use this task twice, once for compilation (with dependencies),
             // where blame is useful, and once for packaging where it is not.
             if (includeDependencies) {
-                task.setBlameLogFolder(variantScope.getResourceBlameLogDir());
+                task.setBlameLogFolder(paths.getResourceBlameLogDir());
             }
             task.processResources = processResources;
             task.crunchPng = variantScope.isCrunchPngs();
 
             VectorDrawablesOptions vectorDrawablesOptions =
-                    variantData.getVariantDslInfo().getVectorDrawables();
+                    creationConfig.getVariantDslInfo().getVectorDrawables();
             task.generatedDensities = vectorDrawablesOptions.getGeneratedDensities();
             if (task.generatedDensities == null) {
                 task.generatedDensities = Collections.emptySet();
@@ -767,21 +761,15 @@ public abstract class MergeResources extends ResourceAwareTask {
             task.vectorSupportLibraryIsUsed =
                     Boolean.TRUE.equals(vectorDrawablesOptions.getUseSupportLibrary());
 
-            task.getResourcesComputer().initFromVariantScope(variantScope, includeDependencies);
+            task.getResourcesComputer().initFromVariantScope(creationConfig, includeDependencies);
 
             if (!task.disableVectorDrawables) {
-                task.generatedPngsOutputDir = variantScope.getGeneratedPngsOutputDir();
+                task.generatedPngsOutputDir = paths.getGeneratedPngsOutputDir();
             }
 
-            final BuildFeatureValues features = globalScope.getBuildFeatures();
+            final BuildFeatureValues features = creationConfig.getBuildFeatures();
             final boolean isDataBindingEnabled = features.getDataBinding();
             boolean isViewBindingEnabled = features.getViewBinding();
-
-            HasConfigurableValuesKt.setDisallowChanges(
-                    task.getDataBindingEnabled(), isDataBindingEnabled);
-            HasConfigurableValuesKt.setDisallowChanges(
-                    task.getViewBindingEnabled(), isViewBindingEnabled);
-
             if (isDataBindingEnabled || isViewBindingEnabled) {
                 // Keep as an output.
                 task.dataBindingLayoutProcessor =
@@ -792,7 +780,7 @@ public abstract class MergeResources extends ResourceAwareTask {
 
                             private LayoutXmlProcessor getProcessor() {
                                 if (processor == null) {
-                                    processor = variantData.getLayoutXmlProcessor();
+                                    processor = creationConfig.getLayoutXmlProcessor();
                                 }
                                 return processor;
                             }
@@ -889,14 +877,12 @@ public abstract class MergeResources extends ResourceAwareTask {
 
             task.mergedNotCompiledResourcesOutputDirectory = mergedNotCompiledOutputDirectory;
 
-            task.pseudoLocalesEnabled =
-                    variantScope
-                            .getVariantData()
-                            .getVariantDslInfo()
-                            .isPseudoLocalesEnabled();
+            task.pseudoLocalesEnabled = creationConfig.getVariantDslInfo().isPseudoLocalesEnabled();
             task.flags = flags;
 
-            task.errorFormatMode = SyncOptions.getErrorFormatMode(globalScope.getProjectOptions());
+            task.errorFormatMode =
+                    SyncOptions.getErrorFormatMode(
+                            creationConfig.getServices().getProjectOptions());
 
             task.precompileDependenciesResources =
                     mergeType.equals(MERGE)
@@ -929,7 +915,7 @@ public abstract class MergeResources extends ResourceAwareTask {
                 }));
             task.getResourceDirsOutsideRootProjectDir().disallowChanges();
 
-            task.dependsOn(variantScope.getTaskContainer().getResourceGenTask());
+            task.dependsOn(creationConfig.getTaskContainer().getResourceGenTask());
 
             // TODO(141301405): when we compile resources AAPT2 stores the absolute path of the raw
             // resource in the proto (.flat) file, so we need to mark those inputs with absolute
@@ -942,8 +928,8 @@ public abstract class MergeResources extends ResourceAwareTask {
                     .withPropertyName("rawLocalResources");
 
             task.useJvmResourceCompiler =
-                    variantScope
-                            .getGlobalScope()
+                    creationConfig
+                            .getServices()
                             .getProjectOptions()
                             .get(BooleanOption.ENABLE_JVM_RESOURCE_COMPILER);
             task.getAapt2WorkersBuildService()

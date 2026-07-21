@@ -16,8 +16,6 @@
 
 package com.android.build.gradle.tasks;
 
-import static com.android.build.VariantOutput.OutputType.FULL_SPLIT;
-import static com.android.build.VariantOutput.OutputType.MAIN;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.ALL;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.LINT;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH;
@@ -30,6 +28,12 @@ import static com.android.build.gradle.internal.scope.InternalArtifactType.MERGE
 import com.android.Version;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.build.api.component.impl.ComponentPropertiesImpl;
+import com.android.build.api.variant.BuiltArtifact;
+import com.android.build.api.variant.VariantOutputConfiguration;
+import com.android.build.api.variant.impl.BuiltArtifactsImpl;
+import com.android.build.api.variant.impl.BuiltArtifactsLoaderImpl;
+import com.android.build.api.variant.impl.VariantPropertiesImpl;
 import com.android.build.gradle.AppExtension;
 import com.android.build.gradle.BaseExtension;
 import com.android.build.gradle.LibraryExtension;
@@ -37,15 +41,8 @@ import com.android.build.gradle.api.BaseVariant;
 import com.android.build.gradle.internal.dsl.LintOptions;
 import com.android.build.gradle.internal.ide.dependencies.ArtifactCollections;
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
-import com.android.build.gradle.internal.scope.BuildElements;
-import com.android.build.gradle.internal.scope.BuildOutput;
-import com.android.build.gradle.internal.scope.ExistingBuildElements;
 import com.android.build.gradle.internal.scope.GlobalScope;
-import com.android.build.gradle.internal.scope.InternalArtifactType;
-import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.factory.TaskCreationAction;
-import com.android.build.gradle.internal.variant.TestVariantData;
-import com.android.build.gradle.internal.variant.TestedVariantData;
 import com.android.builder.core.VariantType;
 import com.android.repository.Revision;
 import com.android.tools.lint.gradle.api.ReflectiveLintRunner;
@@ -246,26 +243,28 @@ public abstract class LintBaseTask extends DefaultTask {
      * would make sure they are resolved before starting the task.
      */
     protected static void addModelArtifactsToInputs(
-            @NonNull ConfigurableFileCollection inputs, @NonNull VariantScope variantScope) {
+            @NonNull ConfigurableFileCollection inputs,
+            @NonNull ComponentPropertiesImpl componentProperties) {
 
         inputs.from(
                 (Callable<Collection<ArtifactCollection>>)
                         () ->
-                                new ArtifactCollections(variantScope, COMPILE_CLASSPATH)
+                                new ArtifactCollections(componentProperties, COMPILE_CLASSPATH)
                                         .getAllCollections());
         inputs.from(
                 (Callable<Collection<ArtifactCollection>>)
                         () ->
-                                new ArtifactCollections(variantScope, RUNTIME_CLASSPATH)
+                                new ArtifactCollections(componentProperties, RUNTIME_CLASSPATH)
                                         .getAllCollections());
 
-        if (variantScope.getVariantData() instanceof TestedVariantData) {
+        if (componentProperties instanceof VariantPropertiesImpl) {
+            VariantPropertiesImpl variantProperties = (VariantPropertiesImpl) componentProperties;
+
             for (VariantType variantType : VariantType.Companion.getTestComponents()) {
-                TestVariantData testVariantData =
-                        ((TestedVariantData) variantScope.getVariantData())
-                                .getTestVariantData(variantType);
-                if (testVariantData != null) {
-                    addModelArtifactsToInputs(inputs, testVariantData.getScope());
+                ComponentPropertiesImpl testVariant =
+                        variantProperties.getTestComponents().get(variantType);
+                if (testVariant != null) {
+                    addModelArtifactsToInputs(inputs, testVariant);
                 }
             }
         }
@@ -279,27 +278,31 @@ public abstract class LintBaseTask extends DefaultTask {
 
         private final ConfigurableFileCollection allInputs;
 
-        public VariantInputs(@NonNull VariantScope variantScope) {
-            name = variantScope.getName();
-            allInputs = variantScope.getGlobalScope().getProject().files();
+        public VariantInputs(@NonNull ComponentPropertiesImpl componentProperties) {
+            name = componentProperties.getName();
+            allInputs = componentProperties.getGlobalScope().getProject().files();
 
             Provider<RegularFile> localLintJarCollection;
             allInputs.from(
                     localLintJarCollection =
-                            variantScope
+                            componentProperties
                                     .getGlobalScope()
                                     .getArtifacts()
                                     .getFinalProduct(LINT_JAR.INSTANCE));
             FileCollection dependencyLintJarCollection;
             allInputs.from(
                     dependencyLintJarCollection =
-                            variantScope.getArtifactFileCollection(RUNTIME_CLASSPATH, ALL, LINT));
+                            componentProperties
+                                    .getVariantDependencies()
+                                    .getArtifactFileCollection(RUNTIME_CLASSPATH, ALL, LINT));
 
-            lintRuleJars = variantScope.getGlobalScope().getProject().files(
-                    localLintJarCollection,
-                    dependencyLintJarCollection);
+            lintRuleJars =
+                    componentProperties
+                            .getGlobalScope()
+                            .getProject()
+                            .files(localLintJarCollection, dependencyLintJarCollection);
 
-            BuildArtifactsHolder artifacts = variantScope.getArtifacts();
+            BuildArtifactsHolder artifacts = componentProperties.getArtifacts();
             Provider<? extends FileSystemLocation> tmpMergedManifest =
                     artifacts.getFinalProduct(MERGED_MANIFESTS.INSTANCE);
             if (!tmpMergedManifest.isPresent()) {
@@ -308,7 +311,7 @@ public abstract class LintBaseTask extends DefaultTask {
             if (!tmpMergedManifest.isPresent()) {
                 throw new RuntimeException(
                         "VariantInputs initialized with no merged manifest on: "
-                                + variantScope.getVariantDslInfo().getVariantType());
+                                + componentProperties.getVariantType());
             }
             mergedManifest = tmpMergedManifest;
             allInputs.from(mergedManifest);
@@ -319,14 +322,14 @@ public abstract class LintBaseTask extends DefaultTask {
             } else {
                 throw new RuntimeException(
                         "VariantInputs initialized with no merged manifest report on: "
-                                + variantScope.getVariantDslInfo().getVariantType());
+                                + componentProperties.getVariantType());
             }
 
             // these inputs are only there to ensure that the lint task runs after these build
             // intermediates are built.
             allInputs.from(artifacts.getAllClasses());
 
-            addModelArtifactsToInputs(allInputs, variantScope);
+            addModelArtifactsToInputs(allInputs, componentProperties);
         }
 
         @NonNull
@@ -355,39 +358,40 @@ public abstract class LintBaseTask extends DefaultTask {
             if (file.isFile()) {
                 return file;
             }
+            BuiltArtifactsImpl manifests = BuiltArtifactsLoaderImpl.loadFromDirectory(file);
 
-            BuildElements manifests =
-                    ExistingBuildElements.from(
-                            InternalArtifactType.MERGED_MANIFESTS.INSTANCE, file);
-
-            if (manifests.isEmpty()) {
+            if (manifests == null || manifests.getElements().isEmpty()) {
                 throw new RuntimeException("Can't find any manifest in folder: " + file);
             }
 
             // first search for a main manifest
-            Optional<File> mainManifest =
-                    manifests
-                            .stream()
-                            .filter(buildOutput -> buildOutput.getApkData().getType() == MAIN)
-                            .map(BuildOutput::getOutputFile)
+            Optional<String> mainManifest =
+                    manifests.getElements().stream()
+                            .filter(
+                                    buildOutput ->
+                                            buildOutput.getOutputType()
+                                                    == VariantOutputConfiguration.OutputType.SINGLE)
+                            .map(BuiltArtifact::getOutputFile)
                             .findFirst();
             if (mainManifest.isPresent()) {
-                return mainManifest.get();
+                return new File(mainManifest.get());
             }
 
             // else search for a full_split with no filters.
-            Optional<File> universalSplit =
-                    manifests
-                            .stream()
+            Optional<String> universalSplit =
+                    manifests.getElements().stream()
                             .filter(
                                     output ->
-                                            output.getApkData().getType() == FULL_SPLIT
-                                                    && output.getFilters().isEmpty())
-                            .map(BuildOutput::getOutputFile)
+                                            output.getOutputType()
+                                                    == VariantOutputConfiguration.OutputType
+                                                            .UNIVERSAL)
+                            .map(BuiltArtifact::getOutputFile)
                             .findFirst();
 
             // return the universal Manifest, or a random one if not found.
-            return universalSplit.orElseGet(() -> manifests.iterator().next().getOutputFile());
+            return new File(
+                    universalSplit.orElseGet(
+                            () -> manifests.getElements().iterator().next().getOutputFile()));
         }
 
         @Override
@@ -404,7 +408,7 @@ public abstract class LintBaseTask extends DefaultTask {
     public abstract static class BaseCreationAction<T extends LintBaseTask>
             extends TaskCreationAction<T> {
 
-        @NonNull private final GlobalScope globalScope;
+        @NonNull protected final GlobalScope globalScope;
 
         public BaseCreationAction(@NonNull GlobalScope globalScope) {
             this.globalScope = globalScope;

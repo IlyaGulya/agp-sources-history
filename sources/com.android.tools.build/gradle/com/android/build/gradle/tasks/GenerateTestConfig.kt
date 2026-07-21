@@ -16,17 +16,19 @@
 
 package com.android.build.gradle.tasks
 
+import com.android.build.api.component.impl.ComponentPropertiesImpl
+import com.android.build.api.component.impl.UnitTestPropertiesImpl
+import com.android.build.api.variant.impl.BuiltArtifactsLoaderImpl
+import com.android.build.api.variant.impl.VariantOutputImpl
 import com.android.build.gradle.internal.dsl.TestOptions
-import com.android.build.gradle.internal.scope.ApkData
-import com.android.build.gradle.internal.scope.ExistingBuildElements
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.InternalArtifactType.APK_FOR_LOCAL_TEST
 import com.android.build.gradle.internal.scope.InternalArtifactType.MERGED_ASSETS
 import com.android.build.gradle.internal.scope.InternalArtifactType.MERGED_MANIFESTS
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.options.BooleanOption
+import com.android.utils.FileUtils
 import com.google.common.annotations.VisibleForTesting
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
@@ -91,19 +93,23 @@ abstract class GenerateTestConfig @Inject constructor(objectFactory: ObjectFacto
         val outputDirectory: File
     ) : Serializable
 
-    class CreationAction(scope: VariantScope) :
-        VariantTaskCreationAction<GenerateTestConfig>(scope) {
+    class CreationAction(private val unitTestProperties: UnitTestPropertiesImpl) :
+        VariantTaskCreationAction<GenerateTestConfig, ComponentPropertiesImpl>(
+            unitTestProperties
+        ) {
 
         override val name: String
-            get() = variantScope.getTaskName("generate", "Config")
+            get() = computeTaskName("generate", "Config")
 
         override val type: Class<GenerateTestConfig>
             get() = GenerateTestConfig::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out GenerateTestConfig>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out GenerateTestConfig>
+        ) {
             super.handleProvider(taskProvider)
 
-            variantScope.artifacts
+            creationConfig.artifacts
                 .producesDir(
                     InternalArtifactType.UNIT_TEST_CONFIG_DIRECTORY,
                     taskProvider,
@@ -112,13 +118,15 @@ abstract class GenerateTestConfig @Inject constructor(objectFactory: ObjectFacto
                 )
         }
 
-        override fun configure(task: GenerateTestConfig) {
+        override fun configure(
+            task: GenerateTestConfig
+        ) {
             super.configure(task)
-            task.testConfigInputs = TestConfigInputs(variantScope)
+            task.testConfigInputs = TestConfigInputs(unitTestProperties)
         }
     }
 
-    class TestConfigInputs(scope: VariantScope) {
+    class TestConfigInputs(unitTestProperties: UnitTestPropertiesImpl) {
         @get:Input
         val isUseRelativePathEnabled: Boolean
 
@@ -136,24 +144,31 @@ abstract class GenerateTestConfig @Inject constructor(objectFactory: ObjectFacto
         val mergedManifest: Provider<Directory>
 
         @get:Input
-        val mainApkInfo: ApkData
+        val buildDirectoryPath: String
+
+        @get:Nested
+        val mainVariantOutput: VariantOutputImpl
 
         private val packageNameOfFinalRClassProvider: () -> String
 
         init {
-            val testedVariantData = scope.testedVariantData ?: error("Not a unit test variant")
-            val testedScope = testedVariantData.scope
+            val testedVariant = unitTestProperties.testedVariant
 
-            isUseRelativePathEnabled = scope.globalScope.projectOptions.get(
+            isUseRelativePathEnabled = unitTestProperties.services.projectOptions.get(
                 BooleanOption.USE_RELATIVE_PATH_IN_TEST_CONFIG
             )
-            resourceApk = scope.artifacts.getFinalProduct(APK_FOR_LOCAL_TEST)
-            mergedAssets = testedScope.artifacts.getFinalProduct(MERGED_ASSETS)
-            mergedManifest = testedScope.artifacts.getFinalProduct(MERGED_MANIFESTS)
-            mainApkInfo = testedScope.variantData.publicVariantPropertiesApi.outputs.getMainSplit().apkData
+            resourceApk = unitTestProperties.artifacts.getFinalProduct(APK_FOR_LOCAL_TEST)
+            mergedAssets = testedVariant.artifacts.getFinalProduct(MERGED_ASSETS)
+            mergedManifest = testedVariant.artifacts.getFinalProduct(MERGED_MANIFESTS)
+            mainVariantOutput = testedVariant.outputs.getMainSplit()
             packageNameOfFinalRClassProvider = {
-                testedScope.variantDslInfo.originalApplicationId
+                testedVariant.variantDslInfo.originalApplicationId
             }
+            buildDirectoryPath = FileUtils.toSystemIndependentPath(
+                FileUtils.relativePossiblyNonExistingPath(
+                    unitTestProperties.globalScope.project.buildDir,
+                    unitTestProperties.globalScope.project.projectDir)
+            )
         }
 
         @get:Input
@@ -163,13 +178,13 @@ abstract class GenerateTestConfig @Inject constructor(objectFactory: ObjectFacto
 
         fun computeProperties(projectDir: File): TestConfigProperties {
             val manifestOutput =
-                ExistingBuildElements.from(InternalArtifactType.MERGED_MANIFESTS, mergedManifest)
-                    .element(mainApkInfo) ?: error("Unable to find manifest output")
+                BuiltArtifactsLoaderImpl().load(mergedManifest)?.getBuiltArtifact(mainVariantOutput)
+                    ?: error("Unable to find manifest output")
 
             return TestConfigProperties(
                 resourceApk?.get()?.let { getRelativePathIfRequired(it.asFile, projectDir) },
                 getRelativePathIfRequired(mergedAssets.get().asFile, projectDir),
-                getRelativePathIfRequired(manifestOutput.outputFile, projectDir),
+                getRelativePathIfRequired(File(manifestOutput.outputFile), projectDir),
                 packageNameOfFinalRClass
             )
         }

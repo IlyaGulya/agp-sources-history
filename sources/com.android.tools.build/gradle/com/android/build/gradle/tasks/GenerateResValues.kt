@@ -15,7 +15,7 @@
  */
 package com.android.build.gradle.tasks
 
-import com.android.build.gradle.internal.scope.VariantScope
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.builder.compiling.ResValueGenerator
@@ -77,27 +77,32 @@ abstract class GenerateResValues : NonIncrementalTask() {
         }
     }
 
-    class CreationAction(scope: VariantScope) :
-        VariantTaskCreationAction<GenerateResValues>(scope) {
+    class CreationAction(
+        componentProperties: ComponentPropertiesImpl
+    ) : VariantTaskCreationAction<GenerateResValues, ComponentPropertiesImpl>(
+        componentProperties
+    ) {
 
-        override val name = scope.getTaskName("generate", "ResValues")
+        override val name = computeTaskName("generate", "ResValues")
         override val type = GenerateResValues::class.java
 
         override fun handleProvider(
             taskProvider: TaskProvider<out GenerateResValues>
         ) {
             super.handleProvider(taskProvider)
-            variantScope.taskContainer.generateResValuesTask = taskProvider
+            creationConfig.taskContainer.generateResValuesTask = taskProvider
         }
 
-        override fun configure(task: GenerateResValues) {
+        override fun configure(
+            task: GenerateResValues
+        ) {
             super.configure(task)
 
-            task.items.set(variantScope.globalScope.project.provider {
-                variantScope.variantDslInfo.resValues
+            task.items.set(creationConfig.globalScope.project.provider {
+                creationConfig.variantDslInfo.resValues
             })
 
-            task.resOutputDir = variantScope.generatedResOutputDir
+            task.resOutputDir = creationConfig.paths.generatedResOutputDir
         }
     }
 }

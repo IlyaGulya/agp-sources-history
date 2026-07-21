@@ -32,7 +32,8 @@ class AssetPackPlugin : Plugin<Project> {
         val manifestGenerationTaskProvider = project.tasks.register(
             "generateAssetPackManifest",
             AssetPackManifestGenerationTask::class.java
-        ) { manifestGenerationTask ->
+        )
+        manifestGenerationTaskProvider.configure { manifestGenerationTask ->
             manifestGenerationTask.variantName = ""
             manifestGenerationTask.manifestFile.setDisallowChanges(
                 project.layout.buildDirectory.get().dir(

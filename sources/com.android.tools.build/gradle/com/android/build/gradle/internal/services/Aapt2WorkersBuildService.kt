@@ -31,14 +31,11 @@ import org.gradle.api.services.BuildServiceParameters
 import org.gradle.api.services.BuildServiceRegistration
 import org.gradle.workers.WorkerExecutor
 import java.io.Closeable
-import java.util.UUID
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.ForkJoinPool
 
 private const val MAX_AAPT2_THREAD_POOL_SIZE = 8
-/** Used to get unique build service name. Each class loader will initialize its own version. */
-private val AAPT2_WORKERS_BUILD_SERVICE_NAME = "aapt2-workers-build-service" + UUID.randomUUID().toString()
-
+private const val AAPT2_WORKERS_BUILD_SERVICE_NAME = "aapt2-workers-build-service"
 
 /**
  * Registers aapt2 workers build services. This makes it available for querying, by using

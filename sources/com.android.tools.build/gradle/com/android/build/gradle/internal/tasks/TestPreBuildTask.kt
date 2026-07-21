@@ -16,13 +16,11 @@
 
 package com.android.build.gradle.internal.tasks
 
+import com.android.build.api.component.impl.TestComponentPropertiesImpl
 import com.android.build.gradle.internal.TaskManager
-import com.android.build.gradle.internal.scope.VariantScope
-import com.android.build.gradle.internal.variant.BaseVariantData
-import java.io.File
-import java.util.Objects
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.CacheableTask
+import java.io.File
 
 /**
  * Pre build task that checks that there are not differences between artifact versions between the
@@ -44,22 +42,22 @@ See https://d.android.com/r/tools/test-apk-dependency-conflicts.html for details
         )
     }
 
-    class CreationAction(variantScope: VariantScope) :
-        TaskManager.AbstractPreBuildCreationAction<TestPreBuildTask>(variantScope) {
+    class CreationAction(private val testComponentProperties: TestComponentPropertiesImpl) :
+        TaskManager.AbstractPreBuildCreationAction<TestPreBuildTask>(testComponentProperties) {
 
         override val type: Class<TestPreBuildTask>
             get() = TestPreBuildTask::class.java
 
-        override fun configure(task: TestPreBuildTask) {
+        override fun configure(
+            task: TestPreBuildTask
+        ) {
             super.configure(task)
-            task.runtimeClasspath = variantScope.variantDependencies.runtimeClasspath
-            task.compileClasspath =
-                Objects.requireNonNull<BaseVariantData>(variantScope.testedVariantData)
-                    .scope.variantDependencies.runtimeClasspath
+            task.runtimeClasspath = creationConfig.variantDependencies.runtimeClasspath
+            task.compileClasspath = testComponentProperties.testedVariant.variantDependencies.runtimeClasspath
 
             task.fakeOutputDirectory = File(
-                variantScope.globalScope.intermediatesDir,
-                "prebuild/${variantScope.variantDslInfo.dirName}"
+                creationConfig.globalScope.intermediatesDir,
+                "prebuild/${creationConfig.dirName}"
             )
         }
     }

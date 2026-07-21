@@ -17,11 +17,11 @@
 package com.android.build.gradle.tasks
 
 import com.android.SdkConstants.FD_RES_VALUES
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.aapt.SharedExecutorResourceCompilationService
 import com.android.build.gradle.internal.res.getAapt2FromMavenAndVersion
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.services.Aapt2DaemonBuildService
 import com.android.build.gradle.internal.services.Aapt2DaemonServiceKey
 import com.android.build.gradle.internal.services.Aapt2WorkersBuildService
@@ -96,7 +96,7 @@ abstract class CompileLibraryResourcesTask : NewIncrementalTask() {
 
     override fun doTaskAction(inputChanges: InputChanges) {
         val aapt2ServiceKey = aapt2DaemonBuildService.get().registerAaptService(
-            aapt2FromMaven.singleFile, LoggerWrapper(logger)
+            aapt2FromMaven, LoggerWrapper(logger)
         )
 
         getWorkerFacadeWithWorkers().use { workers ->
@@ -212,47 +212,53 @@ abstract class CompileLibraryResourcesTask : NewIncrementalTask() {
         }
     }
 
-    class CreationAction(variantScope: VariantScope) :
-        VariantTaskCreationAction<CompileLibraryResourcesTask>(variantScope) {
+    class CreationAction(
+        componentProperties: ComponentPropertiesImpl
+    ) : VariantTaskCreationAction<CompileLibraryResourcesTask, ComponentPropertiesImpl>(
+        componentProperties
+    ) {
         override val name: String
-            get() = variantScope.getTaskName("compile", "LibraryResources")
+            get() = computeTaskName("compile", "LibraryResources")
         override val type: Class<CompileLibraryResourcesTask>
             get() = CompileLibraryResourcesTask::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out CompileLibraryResourcesTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out CompileLibraryResourcesTask>
+        ) {
             super.handleProvider(taskProvider)
 
-            variantScope.artifacts.producesDir(
+            creationConfig.artifacts.producesDir(
                 InternalArtifactType.COMPILED_LOCAL_RESOURCES,
                 taskProvider,
                 CompileLibraryResourcesTask::outputDir
             )
         }
 
-        override fun configure(task: CompileLibraryResourcesTask) {
+        override fun configure(
+            task: CompileLibraryResourcesTask
+        ) {
             super.configure(task)
 
-            variantScope.artifacts.setTaskInputToFinalProduct(
+            creationConfig.artifacts.setTaskInputToFinalProduct(
                 InternalArtifactType.PACKAGED_RES,
                 task.mergedLibraryResourcesDir
             )
 
-            val (aapt2FromMaven, aapt2Version) = getAapt2FromMavenAndVersion(variantScope.globalScope)
+            val (aapt2FromMaven, aapt2Version) = getAapt2FromMavenAndVersion(creationConfig.globalScope)
             task.aapt2FromMaven.from(aapt2FromMaven)
             task.aapt2Version = aapt2Version
 
-            task.pseudoLocalesEnabled = variantScope
-                .variantData
+            task.pseudoLocalesEnabled = creationConfig
                 .variantDslInfo
                 .isPseudoLocalesEnabled
 
-            task.crunchPng = variantScope.isCrunchPngs
+            task.crunchPng = creationConfig.variantScope.isCrunchPngs
 
             task.errorFormatMode =
-                SyncOptions.getErrorFormatMode(variantScope.globalScope.projectOptions)
+                SyncOptions.getErrorFormatMode(creationConfig.services.projectOptions)
 
             task.useJvmResourceCompiler =
-              variantScope.globalScope.projectOptions[BooleanOption.ENABLE_JVM_RESOURCE_COMPILER]
+              creationConfig.services.projectOptions[BooleanOption.ENABLE_JVM_RESOURCE_COMPILER]
             task.aapt2WorkersBuildService.set(getAapt2WorkersBuildService(task.project))
             task.aapt2DaemonBuildService.set(getAapt2DaemonBuildService(task.project))
         }

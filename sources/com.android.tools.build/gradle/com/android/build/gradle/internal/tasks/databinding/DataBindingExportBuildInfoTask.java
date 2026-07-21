@@ -19,7 +19,7 @@ package com.android.build.gradle.internal.tasks.databinding;
 import android.databinding.tool.LayoutXmlProcessor;
 import android.databinding.tool.processing.Scope;
 import com.android.annotations.NonNull;
-import com.android.build.gradle.internal.scope.VariantScope;
+import com.android.build.api.component.impl.ComponentPropertiesImpl;
 import com.android.build.gradle.internal.tasks.NonIncrementalTask;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
 import com.android.build.gradle.options.BooleanOption;
@@ -76,16 +76,17 @@ public abstract class DataBindingExportBuildInfoTask extends NonIncrementalTask 
     }
 
     public static class CreationAction
-            extends VariantTaskCreationAction<DataBindingExportBuildInfoTask> {
+            extends VariantTaskCreationAction<
+                    DataBindingExportBuildInfoTask, ComponentPropertiesImpl> {
 
-        public CreationAction(@NonNull VariantScope variantScope) {
-            super(variantScope);
+        public CreationAction(@NonNull ComponentPropertiesImpl componentProperties) {
+            super(componentProperties);
         }
 
         @NonNull
         @Override
         public String getName() {
-            return getVariantScope().getTaskName("dataBindingExportBuildInfo");
+            return computeTaskName("dataBindingExportBuildInfo");
         }
 
         @NonNull
@@ -98,28 +99,28 @@ public abstract class DataBindingExportBuildInfoTask extends NonIncrementalTask 
         public void handleProvider(
                 @NonNull TaskProvider<? extends DataBindingExportBuildInfoTask> taskProvider) {
             super.handleProvider(taskProvider);
-            getVariantScope().getTaskContainer().setDataBindingExportBuildInfoTask(taskProvider);
+            creationConfig.getTaskContainer().setDataBindingExportBuildInfoTask(taskProvider);
         }
 
         @Override
-        public void configure(@NonNull DataBindingExportBuildInfoTask task) {
+        public void configure(
+                @NonNull DataBindingExportBuildInfoTask task) {
             super.configure(task);
-            VariantScope variantScope = getVariantScope();
 
             task.xmlProcessor.set(
-                    variantScope
+                    creationConfig
                             .getGlobalScope()
                             .getProject()
-                            .provider(variantScope.getVariantData()::getLayoutXmlProcessor));
+                            .provider(creationConfig::getLayoutXmlProcessor));
             task.xmlProcessor.disallowChanges();
             task.useAndroidX =
-                    variantScope
-                            .getGlobalScope()
+                    creationConfig
+                            .getServices()
                             .getProjectOptions()
                             .get(BooleanOption.USE_ANDROID_X);
-            task.emptyClassOutDir = variantScope.getClassOutputForDataBinding();
+            task.emptyClassOutDir = creationConfig.getPaths().getClassOutputForDataBinding();
 
-            task.dependsOn(variantScope.getTaskContainer().getSourceGenTask());
+            task.dependsOn(creationConfig.getTaskContainer().getSourceGenTask());
         }
     }
 }

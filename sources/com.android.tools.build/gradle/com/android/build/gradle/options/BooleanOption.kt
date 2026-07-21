@@ -17,11 +17,8 @@
 package com.android.build.gradle.options
 
 import com.android.build.gradle.internal.errors.DeprecationReporter
+import com.android.build.gradle.options.Version.*
 import com.android.builder.model.AndroidProject
-import com.android.build.gradle.options.Version.VERSION_BEFORE_4_0
-import com.android.build.gradle.options.Version.VERSION_3_5
-import com.android.build.gradle.options.Version.VERSION_3_6
-import com.android.build.gradle.options.Version.VERSION_4_0
 
 enum class BooleanOption(
     override val propertyName: String,
@@ -57,6 +54,7 @@ enum class BooleanOption(
     BUILD_FEATURE_RESVALUES("android.defaults.buildfeatures.resvalues", true, ApiStage.Stable),
     BUILD_FEATURE_SHADERS("android.defaults.buildfeatures.shaders", true, ApiStage.Stable),
     BUILD_FEATURE_VIEWBINDING("android.defaults.buildfeatures.viewbinding", false, ApiStage.Stable),
+    BUILD_FEATURE_ANDROID_RESOURCES("android.library.defaults.buildfeatures.androidresources", true, ApiStage.Stable),
 
     // AndroidX & Jetifier
     USE_ANDROID_X("android.useAndroidX", false, ApiStage.Stable),
@@ -84,7 +82,10 @@ enum class BooleanOption(
     PRECOMPILE_DEPENDENCIES_RESOURCES("android.precompileDependenciesResources", true, FeatureStage.Supported),
 
     ENABLE_PREFAB("android.enablePrefab", false, FeatureStage.Supported),
-    INCLUDE_DEPENDENCY_INFO_IN_APKS("android.includeDependencyInfoInApks", true, FeatureStage.Supported),
+    INCLUDE_DEPENDENCY_INFO_IN_APKS("android.includeDependencyInfoInApks", false, FeatureStage.Supported),
+
+    // FIXME switch to false once we know we don't use these getters internally.
+    DISABLE_MEMOIZATION("android.compatibility.disableMemoization", true, FeatureStage.Supported),
 
     /* ---------------------
      * EXPERIMENTAL FEATURES
@@ -110,16 +111,16 @@ enum class BooleanOption(
     KEEP_SERVICES_BETWEEN_BUILDS("android.keepWorkerActionServicesBetweenBuilds", false, FeatureStage.Experimental),
     USE_NON_FINAL_RES_IDS("android.nonFinalResIds", false, FeatureStage.Experimental),
     ENABLE_SIDE_BY_SIDE_NDK("android.enableSideBySideNdk", true, FeatureStage.Experimental),
-    ENABLE_R_TXT_RESOURCE_SHRINKING("android.enableRTxtResourceShrinking", false, FeatureStage.Experimental),
+    ENABLE_R_TXT_RESOURCE_SHRINKING("android.enableRTxtResourceShrinking", true, FeatureStage.Experimental),
     ENABLE_PARTIAL_R_INCREMENTAL_BUILDS("android.enablePartialRIncrementalBuilds", false, FeatureStage.Experimental),
+    ENABLE_MLKIT("android.enableMlkit", false, FeatureStage.Experimental),
+    ENABLE_RESOURCE_OPTIMIZATIONS("android.enableResourceOptimizations", false, FeatureStage.Experimental),
 
     /** When set R classes are treated as compilation classpath in libraries, rather than runtime classpath, with values set to 0. */
     ENABLE_ADDITIONAL_ANDROID_TEST_OUTPUT("android.enableAdditionalTestOutput", true, FeatureStage.Experimental),
 
     ENABLE_APP_COMPILE_TIME_R_CLASS("android.enableAppCompileTimeRClass", false, FeatureStage.Experimental),
     COMPILE_CLASSPATH_LIBRARY_R_CLASSES("android.useCompileClasspathLibraryRClasses", true, FeatureStage.Experimental),
-    ENABLE_BUILD_CACHE("android.enableBuildCache", true, FeatureStage.Experimental),
-    ENABLE_INTERMEDIATE_ARTIFACTS_CACHE("android.enableIntermediateArtifactsCache", true, FeatureStage.Experimental),
     ENABLE_EXTRACT_ANNOTATIONS("android.enableExtractAnnotations", true, FeatureStage.Experimental),
     ENABLE_AAPT2_WORKER_ACTIONS("android.enableAapt2WorkerActions", true, FeatureStage.Experimental),
     ENABLE_D8_DESUGARING("android.enableD8.desugaring", true, FeatureStage.Experimental),
@@ -141,6 +142,7 @@ enum class BooleanOption(
     USE_DEPENDENCY_CONSTRAINTS("android.dependency.useConstraints", true, FeatureStage.Experimental),
     ENABLE_DUPLICATE_CLASSES_CHECK("android.enableDuplicateClassesCheck", true, FeatureStage.Experimental),
     ENABLE_DEXING_DESUGARING_ARTIFACT_TRANSFORM("android.enableDexingArtifactTransform.desugaring", true, FeatureStage.Experimental),
+    ENABLE_DEXING_ARTIFACT_TRANSFORM_FOR_EXTERNAL_LIBS("android.enableDexingArtifactTransformForExternalLibs", true, FeatureStage.Experimental),
     GENERATE_R_JAVA("android.generateRJava", false, FeatureStage.Experimental),
     MINIMAL_KEEP_RULES("android.useMinimalKeepRules", true, FeatureStage.Experimental),
     USE_NEW_JAR_CREATOR("android.useNewJarCreator", true, FeatureStage.Experimental),
@@ -162,6 +164,19 @@ enum class BooleanOption(
 
     /** Whether Jetifier will skip libraries that already support AndroidX. */
     JETIFIER_SKIP_IF_POSSIBLE("android.jetifier.skipIfPossible", true, FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.VERSION_5_0)),
+    @Suppress("unused")
+    ENABLE_BUILD_CACHE(
+        "android.enableBuildCache",
+        true,
+        FeatureStage.Deprecated(DeprecationReporter.DeprecationTarget.AGP_BUILD_CACHE)
+    ),
+    @Suppress("unused")
+    ENABLE_INTERMEDIATE_ARTIFACTS_CACHE(
+        "android.enableIntermediateArtifactsCache",
+        true,
+        FeatureStage.Deprecated(DeprecationReporter.DeprecationTarget.AGP_BUILD_CACHE)
+    ),
+
     /* -----------------
      * ENFORCED FEATURES
      */

@@ -17,15 +17,16 @@
 package com.android.build.gradle.internal.tasks
 
 import com.android.SdkConstants
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.api.transform.QualifiedContent
 import com.android.build.api.transform.QualifiedContent.Scope
 import com.android.build.gradle.internal.packaging.JarCreatorFactory
 import com.android.build.gradle.internal.packaging.JarCreatorType
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.setDisallowChanges
+import com.android.builder.model.CodeShrinker
 import com.android.builder.packaging.JarCreator
 import com.android.builder.packaging.JarMerger
 import com.android.builder.packaging.TypedefRemover
@@ -278,23 +279,27 @@ abstract class LibraryAarJarsTask : NonIncrementalTask() {
     }
 
     class CreationAction(
-        variantScope: VariantScope,
+        componentProperties: ComponentPropertiesImpl,
         private val excludeListProvider: Supplier<List<String>> =  Supplier { listOf<String>() }
-    ) : VariantTaskCreationAction<LibraryAarJarsTask>(variantScope) {
+    ) : VariantTaskCreationAction<LibraryAarJarsTask, ComponentPropertiesImpl>(
+        componentProperties
+    ) {
         override val type = LibraryAarJarsTask::class.java
-        override val name =  variantScope.getTaskName("sync", "LibJars")
+        override val name =  computeTaskName("sync", "LibJars")
 
-        override fun handleProvider(taskProvider: TaskProvider<out LibraryAarJarsTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out LibraryAarJarsTask>
+        ) {
             super.handleProvider(taskProvider)
 
-            variantScope.artifacts.producesFile(
+            creationConfig.artifacts.producesFile(
                 artifactType = InternalArtifactType.AAR_MAIN_JAR,
                 taskProvider = taskProvider,
                 productProvider = LibraryAarJarsTask::mainClassLocation,
                 fileName = SdkConstants.FN_CLASSES_JAR
             )
 
-            variantScope.artifacts.producesDir(
+            creationConfig.artifacts.producesDir(
                 artifactType = InternalArtifactType.AAR_LIBS_DIRECTORY,
                 taskProvider = taskProvider,
                 productProvider = LibraryAarJarsTask::localJarsLocation,
@@ -302,36 +307,36 @@ abstract class LibraryAarJarsTask : NonIncrementalTask() {
             )
         }
 
-        override fun configure(task: LibraryAarJarsTask) {
+        override fun configure(
+            task: LibraryAarJarsTask
+        ) {
             super.configure(task)
 
             task.excludeList.set(
-                variantScope.globalScope.project.provider {
+                creationConfig.globalScope.project.provider {
                     excludeListProvider.get()
                 }
             )
             task.excludeList.disallowChanges()
 
-            val artifacts = variantScope.artifacts
+            val artifacts = creationConfig.artifacts
 
-            if (artifacts.hasFinalProduct(InternalArtifactType.ANNOTATIONS_TYPEDEF_FILE)) {
-                artifacts.setTaskInputToFinalProduct(
-                    InternalArtifactType.ANNOTATIONS_TYPEDEF_FILE,
-                    task.typedefRecipe
-                )
-            }
+            artifacts.setTaskInputToFinalProduct(
+                InternalArtifactType.ANNOTATIONS_TYPEDEF_FILE,
+                task.typedefRecipe
+            )
 
             task.packageName.set(
-                variantScope.globalScope.project.provider {
-                    variantScope.variantDslInfo.packageFromManifest
+                creationConfig.globalScope.project.provider {
+                    creationConfig.variantDslInfo.packageFromManifest
                 }
             )
             task.packageName.disallowChanges()
 
-            task.jarCreatorType.setDisallowChanges(variantScope.jarCreatorType)
+            task.jarCreatorType.setDisallowChanges(creationConfig.variantScope.jarCreatorType)
 
             task.debugBuild
-                .setDisallowChanges(variantScope.variantDslInfo.isDebuggable)
+                .setDisallowChanges(creationConfig.variantDslInfo.isDebuggable)
 
             /*
              * Only get files that are CLASS, and exclude files that are both CLASS and RESOURCES
@@ -343,12 +348,11 @@ abstract class LibraryAarJarsTask : NonIncrementalTask() {
              * which means gradle will have to deal with possibly non-existent files in the cache
              */
             task.mainScopeClassFiles.from(
-                if (artifacts.hasFinalProduct(InternalArtifactType.SHRUNK_CLASSES)) {
+                if (creationConfig.variantScope.codeShrinker == CodeShrinker.R8) {
                     artifacts
                         .getFinalProductAsFileCollection(InternalArtifactType.SHRUNK_CLASSES)
-                        .get()
                 } else {
-                    variantScope.transformManager
+                    creationConfig.transformManager
                         .getPipelineOutputAsFileCollection(
                             { contentTypes, scopes ->
                                 contentTypes.contains(QualifiedContent.DefaultContentType.CLASSES)
@@ -365,12 +369,11 @@ abstract class LibraryAarJarsTask : NonIncrementalTask() {
             task.mainScopeClassFiles.disallowChanges()
 
             task.mainScopeResourceFiles.from(
-                if (artifacts.hasFinalProduct(InternalArtifactType.SHRUNK_JAVA_RES)) {
+                if (creationConfig.variantScope.codeShrinker == CodeShrinker.R8) {
                     artifacts
                         .getFinalProductAsFileCollection(InternalArtifactType.SHRUNK_JAVA_RES)
-                        .get()
                 } else {
-                    variantScope.transformManager
+                    creationConfig.transformManager
                         .getPipelineOutputAsFileCollection { contentTypes, scopes ->
                             contentTypes.contains(QualifiedContent.DefaultContentType.RESOURCES)
                                     && scopes.contains(Scope.PROJECT)
@@ -380,7 +383,7 @@ abstract class LibraryAarJarsTask : NonIncrementalTask() {
             task.mainScopeResourceFiles.disallowChanges()
 
             task.localScopeInputFiles.from(
-                variantScope.transformManager
+                creationConfig.transformManager
                     .getPipelineOutputAsFileCollection { contentTypes, scopes ->
                         (contentTypes.contains(QualifiedContent.DefaultContentType.CLASSES)
                                 || contentTypes.contains(QualifiedContent.DefaultContentType.RESOURCES))

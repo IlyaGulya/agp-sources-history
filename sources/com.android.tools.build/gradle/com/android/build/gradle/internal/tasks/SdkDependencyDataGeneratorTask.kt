@@ -18,10 +18,9 @@ package com.android.build.gradle.internal.tasks
 
 import java.nio.charset.StandardCharsets.UTF_8
 
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
-import com.android.tools.build.libraries.metadata.AppDependencies
 import org.gradle.api.tasks.OutputFile
 import com.google.crypto.tink.BinaryKeysetReader
 import com.google.crypto.tink.hybrid.HybridConfig
@@ -33,10 +32,7 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskProvider
-import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
-import java.io.FileInputStream
-import java.io.PrintStream
 import java.nio.file.Files;
 import java.util.zip.DeflaterOutputStream
 
@@ -52,9 +48,9 @@ abstract class SdkDependencyDataGeneratorTask : NonIncrementalTask() {
     init {
       HybridConfig.register()
     }
+  }
 
-    @JvmStatic
-    private val publicKey: ByteArray = byteArrayOf(8, -84, -65, -63, -105, 10, 18, -37, 1, 10, -50,
+  private val publicKey: ByteArray = byteArrayOf(8, -84, -65, -63, -105, 10, 18, -37, 1, 10, -50,
     1, 10, 61, 116, 121, 112, 101, 46, 103, 111, 111, 103, 108, 101, 97, 112, 105, 115, 46, 99, 111,
     109, 47, 103, 111, 111, 103, 108, 101, 46, 99, 114, 121, 112, 116, 111, 46, 116, 105, 110, 107,
     46, 69, 99, 105, 101, 115, 65, 101, 97, 100, 72, 107, 100, 102, 80, 117, 98, 108, 105, 99, 75,
@@ -66,8 +62,6 @@ abstract class SdkDependencyDataGeneratorTask : NonIncrementalTask() {
     78, -39, 34, 32, 51, 48, 123, 99, -84, -95, 126, 10, -70, -74, 47, -15, -28, 124, -83, 23, 78,
     -3, 59, -91, 38, -103, -90, 69, 67, -28, -20, -95, -90, -83, -115, -52, 24, 3, 16, 1, 24, -84,
     -65, -63, -105, 10, 32, 4)
-  }
-
 
   // Optional context. To ensure the correct decryption of a ciphertext the same value must be
   // provided for the decryption operation.
@@ -80,21 +74,9 @@ abstract class SdkDependencyDataGeneratorTask : NonIncrementalTask() {
   @get:OutputFile
   abstract val sdkDependencyData: RegularFileProperty
 
-  @get:OutputFile
-  abstract val sdkDependencyDataPublic: RegularFileProperty
-
   public override fun doTaskAction() {
     FileOutputStream(sdkDependencyData.get().asFile).use {
       it.write(encrypt(compress(Files.readAllBytes(dependencies.get().asFile.toPath()))))
-    }
-
-    PrintStream(sdkDependencyDataPublic.get().asFile).use {
-      it.print("# List of SDK dependencies of this app, this information is also included in an"
-        + " encrypted form in the APK.\n# For more information visit:"
-        + " https://d.android.com/r/tools/dependency-metadata\n\n")
-      dependencies.get().asFile.inputStream().buffered().use { dependenciesInputStream ->
-        it.print(AppDependencies.parseFrom(dependenciesInputStream).toString())
-      }
     }
   }
 
@@ -113,14 +95,18 @@ abstract class SdkDependencyDataGeneratorTask : NonIncrementalTask() {
   }
 
   class CreationAction(
-    variantScope: VariantScope
-  ) : VariantTaskCreationAction<SdkDependencyDataGeneratorTask>(variantScope) {
-    override val name: String = variantScope.getTaskName("sdk", "DependencyData")
+    componentProperties: ComponentPropertiesImpl
+  ) : VariantTaskCreationAction<SdkDependencyDataGeneratorTask, ComponentPropertiesImpl>(
+    componentProperties
+  ) {
+    override val name: String = computeTaskName("sdk", "DependencyData")
     override val type: Class<SdkDependencyDataGeneratorTask> = SdkDependencyDataGeneratorTask::class.java
 
-    override fun handleProvider(taskProvider: TaskProvider<out SdkDependencyDataGeneratorTask>) {
+    override fun handleProvider(
+      taskProvider: TaskProvider<out SdkDependencyDataGeneratorTask>
+    ) {
       super.handleProvider(taskProvider)
-      variantScope
+      creationConfig
         .artifacts
         .producesFile(
           InternalArtifactType.SDK_DEPENDENCY_DATA,
@@ -128,21 +114,14 @@ abstract class SdkDependencyDataGeneratorTask : NonIncrementalTask() {
           SdkDependencyDataGeneratorTask::sdkDependencyData,
           fileName = "sdkDependencyData.pb"
         )
-
-      variantScope
-        .artifacts
-        .producesFile(
-          InternalArtifactType.SDK_DEPENDENCY_DATA_PUBLIC,
-            taskProvider,
-            SdkDependencyDataGeneratorTask::sdkDependencyDataPublic,
-            fileName = "sdkDependencies.txt"
-        )
     }
 
-    override fun configure(task: SdkDependencyDataGeneratorTask) {
+    override fun configure(
+      task: SdkDependencyDataGeneratorTask
+    ) {
       super.configure(task)
-      variantScope.artifacts.setTaskInputToFinalProduct(
-        InternalArtifactType.METADATA_LIBRARY_DEPENDENCIES_REPORT, task.dependencies)
+      creationConfig.artifacts.setTaskInputToFinalProduct(
+          InternalArtifactType.METADATA_LIBRARY_DEPENDENCIES_REPORT, task.dependencies)
     }
   }
 }

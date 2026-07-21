@@ -16,6 +16,7 @@
 
 package com.android.build.gradle.tasks
 
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.core.Abi
 import com.android.build.gradle.internal.cxx.attribution.generateChromeTrace
@@ -32,8 +33,7 @@ import com.android.build.gradle.internal.process.GradleProcessExecutor
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.ALL
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.JNI
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH
-import com.android.build.gradle.internal.scope.VariantScope
-import com.android.build.gradle.internal.tasks.UnsafeOutputsTask
+import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.builder.errors.DefaultIssueReporter
 import com.android.ide.common.process.BuildCommandException
@@ -69,7 +69,7 @@ import kotlin.streams.toList
  * It declares no inputs or outputs, as it's supposed to always run when invoked. Incrementality
  * is left to the underlying build system.
  */
-abstract class ExternalNativeBuildTask : UnsafeOutputsTask() {
+abstract class ExternalNativeBuildTask : NonIncrementalTask() {
 
     private lateinit var generator: Provider<ExternalNativeJsonGenerator>
 
@@ -205,7 +205,8 @@ abstract class ExternalNativeBuildTask : UnsafeOutputsTask() {
                     // Only need to check existence of output files we expect to create
                     continue
                 }
-                val output = library.output!!
+                val output = library.output
+                if (output == null) continue
                 if (!output.exists()) {
                     throw GradleException(
                         "Expected output file at $output for target ${library.artifactName} but there was none")
@@ -239,18 +240,15 @@ abstract class ExternalNativeBuildTask : UnsafeOutputsTask() {
                     if (expectedOutputFile.parentFile.mkdirs()) {
                         infoln("created folder ${expectedOutputFile.parentFile}")
                     }
-                    infoln("copy file ${library.output} to $expectedOutputFile")
+                    infoln("copy file $output to $expectedOutputFile")
                     Files.copy(output, expectedOutputFile)
                 }
 
                 for (runtimeFile in library.runtimeFiles) {
-                    val dest =
+                    Files.copy(
+                        runtimeFile,
                         FileUtils.join(generator.get().variant.objFolder, abi.tag, runtimeFile.name)
-                    // Dependencies within the same project will also show up as runtimeFiles, and
-                    // will have the same source and destination. Can skip those.
-                    if (!FileUtils.isSameFile(runtimeFile, dest)) {
-                        Files.copy(runtimeFile, dest)
-                    }
+                    )
                 }
             }
         }
@@ -339,14 +337,15 @@ abstract class ExternalNativeBuildTask : UnsafeOutputsTask() {
             }
 
             if (targets.isEmpty()) {
-                if (libraryValue.output == null) {
+                val output = libraryValue.output
+                if (output == null) {
                     infoln(
                         "not building target ${libraryValue.artifactName!!} because no targets " +
                                 "are specified and library build output file is null")
                     continue
                 }
 
-                when (Files.getFileExtension(libraryValue.output!!.name)) {
+                when (Files.getFileExtension(output.name)) {
                     "so" -> infoln("building target library ${libraryValue.artifactName!!} because no targets are specified.")
                     "" -> infoln("building target executable ${libraryValue.artifactName!!} because no targets are specified.")
                     else -> {
@@ -450,11 +449,13 @@ abstract class ExternalNativeBuildTask : UnsafeOutputsTask() {
     class CreationAction(
         private val generator: Provider<ExternalNativeJsonGenerator>,
         private val generateTask: TaskProvider<out Task>,
-        scope: VariantScope
-    ) : VariantTaskCreationAction<ExternalNativeBuildTask>(scope) {
+        componentProperties: ComponentPropertiesImpl
+    ) : VariantTaskCreationAction<ExternalNativeBuildTask, ComponentPropertiesImpl>(
+        componentProperties
+    ) {
 
         override val name: String
-            get() = variantScope.getTaskName("externalNativeBuild")
+            get() = computeTaskName("externalNativeBuild")
 
         override val type: Class<ExternalNativeBuildTask>
             get() = ExternalNativeBuildTask::class.java
@@ -463,17 +464,18 @@ abstract class ExternalNativeBuildTask : UnsafeOutputsTask() {
             taskProvider: TaskProvider<out ExternalNativeBuildTask>
         ) {
             super.handleProvider(taskProvider)
-            assert(variantScope.taskContainer.externalNativeBuildTask == null)
-            variantScope.taskContainer.externalNativeBuildTask = taskProvider
+            assert(creationConfig.taskContainer.externalNativeBuildTask == null)
+            creationConfig.taskContainer.externalNativeBuildTask = taskProvider
         }
 
-        override fun configure(task: ExternalNativeBuildTask) {
+        override fun configure(
+            task: ExternalNativeBuildTask
+        ) {
             super.configure(task)
 
-            val scope = variantScope
-
             task.dependsOn(
-                generateTask, scope.getArtifactFileCollection(RUNTIME_CLASSPATH, ALL, JNI)
+                generateTask,
+                creationConfig.variantDependencies.getArtifactFileCollection(RUNTIME_CLASSPATH, ALL, JNI)
             )
 
             task.generator = generator

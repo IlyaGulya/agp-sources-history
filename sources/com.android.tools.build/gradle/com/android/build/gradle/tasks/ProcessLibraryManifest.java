@@ -19,16 +19,16 @@ package com.android.build.gradle.tasks;
 import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
-import com.android.build.api.component.impl.ComponentPropertiesImpl;
+import com.android.build.api.variant.BuiltArtifacts;
+import com.android.build.api.variant.impl.BuiltArtifactsImpl;
+import com.android.build.api.variant.impl.VariantOutputConfigurationImplKt;
+import com.android.build.api.variant.impl.VariantOutputImpl;
 import com.android.build.gradle.internal.LoggerWrapper;
+import com.android.build.gradle.internal.component.LibraryCreationConfig;
 import com.android.build.gradle.internal.core.VariantDslInfo;
 import com.android.build.gradle.internal.core.VariantSources;
-import com.android.build.gradle.internal.scope.ApkData;
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
-import com.android.build.gradle.internal.scope.BuildElements;
-import com.android.build.gradle.internal.scope.BuildOutput;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
-import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
 import com.android.build.gradle.internal.tasks.manifest.ManifestHelperKt;
 import com.android.builder.model.ApiVersion;
@@ -49,7 +49,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
-import org.apache.tools.ant.BuildException;
 import org.gradle.api.Project;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
@@ -78,7 +77,7 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
     private final Property<String> versionName;
     private final ListProperty<File> manifestOverlays;
     private final MapProperty<String, Object> manifestPlaceholders;
-    @VisibleForTesting final Property<ApkData> mainSplit;
+    @VisibleForTesting final Property<VariantOutputImpl> mainSplit;
 
     private boolean isNamespaced;
 
@@ -91,7 +90,7 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
         versionName = objectFactory.property(String.class);
         manifestOverlays = objectFactory.listProperty(File.class);
         manifestPlaceholders = objectFactory.mapProperty(String.class, Object.class);
-        mainSplit = objectFactory.property(ApkData.class);
+        mainSplit = objectFactory.property(VariantOutputImpl.class);
     }
 
     @OutputFile
@@ -110,7 +109,7 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
             workers.submit(
                     ProcessLibRunnable.class,
                     new ProcessLibParams(
-                            getVariantType().get(),
+                            getVariantName(),
                             getAaptFriendlyManifestOutputFile(),
                             isNamespaced,
                             getMainManifest().get(),
@@ -131,12 +130,12 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
                             aaptFriendlyManifestOutputDirectory.isPresent()
                                     ? aaptFriendlyManifestOutputDirectory.get().getAsFile()
                                     : null,
-                            mainSplit.get()));
+                            mainSplit.get().toSerializedForm()));
         }
     }
 
     private static class ProcessLibParams implements Serializable {
-        @NonNull private final String variantType;
+        @NonNull private final String variantName;
         @Nullable private final File aaptFriendlyManifestOutputFile;
         private final boolean isNamespaced;
         @NonNull private final File mainManifest;
@@ -153,10 +152,10 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
         @NonNull private final File mergeBlameFile;
         @Nullable private final File manifestOutputDirectory;
         @Nullable private final File aaptFriendlyManifestOutputDirectory;
-        @NonNull private final ApkData mainSplit;
+        @NonNull private final VariantOutputImpl.SerializedForm mainSplit;
 
         private ProcessLibParams(
-                @NonNull String variantType,
+                @NonNull String variantName,
                 @Nullable File aaptFriendlyManifestOutputFile,
                 boolean isNamespaced,
                 @NonNull File mainManifest,
@@ -173,8 +172,8 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
                 @NonNull File mergeBlameFile,
                 @Nullable File manifestOutputDirectory,
                 @Nullable File aaptFriendlyManifestOutputDirectory,
-                @NonNull ApkData mainSplit) {
-            this.variantType = variantType;
+                @NonNull VariantOutputImpl.SerializedForm mainSplit) {
+            this.variantName = variantName;
             this.aaptFriendlyManifestOutputFile = aaptFriendlyManifestOutputFile;
             this.isNamespaced = isNamespaced;
             this.mainManifest = mainManifest;
@@ -253,40 +252,29 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
                                     "split", mergedXmlDocument.getSplitName())
                             : ImmutableMap.of();
 
-            try {
-                if (params.manifestOutputDirectory != null) {
-                    new BuildElements(
-                                    BuildElements.METADATA_FILE_VERSION,
-                                    params.packageOverride,
-                                    params.variantType,
-                                    ImmutableList.of(
-                                            new BuildOutput(
-                                                    InternalArtifactType.MERGED_MANIFESTS.INSTANCE,
-                                                    params.mainSplit,
-                                                    params.manifestOutputFile,
-                                                    properties)))
-                            .save(params.manifestOutputDirectory);
-                }
-
-                if (params.aaptFriendlyManifestOutputDirectory != null) {
-                    new BuildElements(
-                                    BuildElements.METADATA_FILE_VERSION,
-                                    params.packageOverride,
-                                    params.variantType,
-                                    ImmutableList.of(
-                                            new BuildOutput(
-                                                    InternalArtifactType
-                                                            .AAPT_FRIENDLY_MERGED_MANIFESTS
-                                                            .INSTANCE,
-                                                    params.mainSplit,
-                                                    params.aaptFriendlyManifestOutputFile,
-                                                    properties)))
-                            .save(params.aaptFriendlyManifestOutputDirectory);
-                }
-            } catch (IOException e) {
-                throw new BuildException("Exception while saving build metadata : ", e);
+            if (params.manifestOutputDirectory != null) {
+                new BuiltArtifactsImpl(
+                                BuiltArtifacts.METADATA_FILE_VERSION,
+                                InternalArtifactType.MERGED_MANIFESTS.INSTANCE,
+                                params.packageOverride,
+                                params.variantName,
+                                ImmutableList.of(
+                                        params.mainSplit.toBuiltArtifact(
+                                                params.manifestOutputFile, properties)))
+                        .saveToDirectory(params.manifestOutputDirectory);
             }
 
+            if (params.aaptFriendlyManifestOutputDirectory != null) {
+                new BuiltArtifactsImpl(
+                                BuiltArtifacts.METADATA_FILE_VERSION,
+                                InternalArtifactType.AAPT_FRIENDLY_MERGED_MANIFESTS.INSTANCE,
+                                params.packageOverride,
+                                params.variantName,
+                                ImmutableList.of(
+                                        params.mainSplit.toBuiltArtifact(
+                                                params.aaptFriendlyManifestOutputFile, properties)))
+                        .saveToDirectory(params.aaptFriendlyManifestOutputDirectory);
+            }
         }
     }
 
@@ -297,7 +285,7 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
         return getAaptFriendlyManifestOutputDirectory().isPresent()
                 ? FileUtils.join(
                         getAaptFriendlyManifestOutputDirectory().get().getAsFile(),
-                        mainSplit.get().getDirName(),
+                        VariantOutputConfigurationImplKt.dirName(mainSplit.get()),
                         SdkConstants.ANDROID_MANIFEST_XML)
                 : null;
     }
@@ -335,9 +323,6 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
         return versionName;
     }
 
-    @Input
-    public abstract Property<String> getVariantType();
-
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
     public ListProperty<File> getManifestOverlays() {
@@ -363,24 +348,18 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
         return mainSplit.get().getFullName();
     }
 
-    public static class CreationAction extends VariantTaskCreationAction<ProcessLibraryManifest> {
+    public static class CreationAction
+            extends VariantTaskCreationAction<ProcessLibraryManifest, LibraryCreationConfig> {
 
-        private final ComponentPropertiesImpl componentProperties;
-        /**
-         * {@code EagerTaskCreationAction} for the library process manifest task.
-         *
-         * @param scope The library variant scope.
-         */
-        public CreationAction(
-                @NonNull ComponentPropertiesImpl componentProperties, @NonNull VariantScope scope) {
-            super(scope);
-            this.componentProperties = componentProperties;
+        /** {@code EagerTaskCreationAction} for the library process manifest task. */
+        public CreationAction(@NonNull LibraryCreationConfig creationConfig) {
+            super(creationConfig);
         }
 
         @NonNull
         @Override
         public String getName() {
-            return getVariantScope().getTaskName("process", "Manifest");
+            return computeTaskName("process", "Manifest");
         }
 
         @NonNull
@@ -393,9 +372,9 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
         public void handleProvider(
                 @NonNull TaskProvider<? extends ProcessLibraryManifest> taskProvider) {
             super.handleProvider(taskProvider);
-            getVariantScope().getTaskContainer().setProcessManifestTask(taskProvider);
+            creationConfig.getTaskContainer().setProcessManifestTask(taskProvider);
 
-            BuildArtifactsHolder artifacts = getVariantScope().getArtifacts();
+            BuildArtifactsHolder artifacts = creationConfig.getArtifacts();
             artifacts.producesDir(
                     InternalArtifactType.AAPT_FRIENDLY_MERGED_MANIFESTS.INSTANCE,
                     taskProvider,
@@ -418,31 +397,28 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
                     InternalArtifactType.MANIFEST_MERGE_BLAME_FILE.INSTANCE,
                     taskProvider,
                     ProcessLibraryManifest::getMergeBlameFile,
-                    "manifest-merger-blame-"
-                            + getVariantScope().getVariantDslInfo().getBaseName()
-                            + "-report.txt");
+                    "manifest-merger-blame-" + creationConfig.getBaseName() + "-report.txt");
 
             artifacts.producesFile(
                     InternalArtifactType.MANIFEST_MERGE_REPORT.INSTANCE,
                     taskProvider,
                     ProcessLibraryManifest::getReportFile,
-                    FileUtils.join(getVariantScope().getGlobalScope().getOutputsDir(), "logs")
+                    FileUtils.join(creationConfig.getGlobalScope().getOutputsDir(), "logs")
                             .getAbsolutePath(),
-                    "manifest-merger-"
-                            + getVariantScope().getVariantDslInfo().getBaseName()
-                            + "-report.txt");
+                    "manifest-merger-" + creationConfig.getBaseName() + "-report.txt");
         }
 
         @Override
-        public void configure(@NonNull ProcessLibraryManifest task) {
+        public void configure(
+                @NonNull ProcessLibraryManifest task) {
             super.configure(task);
 
-            VariantDslInfo variantDslInfo = getVariantScope().getVariantDslInfo();
-            VariantSources variantSources = getVariantScope().getVariantSources();
+            VariantDslInfo variantDslInfo = creationConfig.getVariantDslInfo();
+            VariantSources variantSources = creationConfig.getVariantSources();
 
-            Project project = getVariantScope().getGlobalScope().getProject();
+            Project project = creationConfig.getGlobalScope().getProject();
             task.getMinSdkVersion()
-                    .set(project.provider(() -> variantDslInfo.getMinSdkVersion().getApiString()));
+                    .set(project.provider(() -> creationConfig.getMinSdkVersion().getApiString()));
             task.getMinSdkVersion().disallowChanges();
 
             task.getTargetSdkVersion()
@@ -450,7 +426,7 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
                             project.provider(
                                     () -> {
                                         ApiVersion targetSdkVersion =
-                                                variantDslInfo.getTargetSdkVersion();
+                                                creationConfig.getTargetSdkVersion();
                                         if (targetSdkVersion.getApiLevel() < 0) {
                                             return null;
                                         }
@@ -458,30 +434,19 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
                                     }));
             task.getTargetSdkVersion().disallowChanges();
 
-            task.getMaxSdkVersion().set(project.provider(variantDslInfo::getMaxSdkVersion));
+            task.getMaxSdkVersion().set(project.provider(creationConfig::getMaxSdkVersion));
             task.getMaxSdkVersion().disallowChanges();
 
-            task.mainSplit.set(
-                    project.provider(
-                            getVariantScope()
-                                            .getVariantData()
-                                            .getPublicVariantPropertiesApi()
-                                            .getOutputs()
-                                            .getMainSplit()
-                                    ::getApkData));
+            task.mainSplit.set(project.provider(() -> creationConfig.getOutputs().getMainSplit()));
             task.mainSplit.disallowChanges();
 
             task.isNamespaced =
-                    getVariantScope()
-                            .getGlobalScope()
-                            .getExtension()
-                            .getAaptOptions()
-                            .getNamespaced();
+                    creationConfig.getGlobalScope().getExtension().getAaptOptions().getNamespaced();
             task.versionName.set(task.getProject().provider(variantDslInfo::getVersionName));
             task.versionName.disallowChanges();
             task.versionCode.set(task.getProject().provider(variantDslInfo::getVersionCode));
             task.versionCode.disallowChanges();
-            task.packageOverride.set(componentProperties.getApplicationId());
+            task.packageOverride.set(creationConfig.getApplicationId());
             task.packageOverride.disallowChanges();
             task.manifestPlaceholders.set(
                     task.getProject().provider(variantDslInfo::getManifestPlaceholders));
@@ -491,8 +456,6 @@ public abstract class ProcessLibraryManifest extends ManifestProcessorTask {
             task.manifestOverlays.set(
                     task.getProject().provider(variantSources::getManifestOverlays));
             task.manifestOverlays.disallowChanges();
-            task.getVariantType().set(getVariantScope().getVariantData().getType().toString());
-            task.getVariantType().disallowChanges();
         }
     }
 }

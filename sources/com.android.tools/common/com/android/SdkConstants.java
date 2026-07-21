@@ -1080,8 +1080,6 @@ public final class SdkConstants {
     public static final String TAG_RESOURCE = "resource";
     public static final String TAG_MODULE = "module";
     public static final String TAG_NAV_GRAPH = "nav-graph";
-    public static final String TAG_QUERIES = "queries";
-    public static final String TAG_INTENT = "intent";
 
     // Tags: Resources
     public static final String TAG_RESOURCES = "resources"; //$NON-NLS-1$
@@ -2696,7 +2694,7 @@ public final class SdkConstants {
     public static final String VALUE_HORIZONTAL = "horizontal"; //$NON-NLS-1$
 
     public static final String GRADLE_PLUGIN_NAME = "com.android.tools.build:gradle:";
-    public static final String GRADLE_MINIMUM_VERSION = "6.1.1";
+    public static final String GRADLE_MINIMUM_VERSION = "6.2";
     public static final String GRADLE_LATEST_VERSION = GRADLE_MINIMUM_VERSION;
     public static final String GRADLE_PLUGIN_MINIMUM_VERSION = "1.0.0";
     public static final String GRADLE_PLUGIN_RECOMMENDED_VERSION = "3.3.2";

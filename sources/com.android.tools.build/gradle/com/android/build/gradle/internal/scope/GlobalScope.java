@@ -19,21 +19,21 @@ package com.android.build.gradle.internal.scope;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ARTIFACT_TYPE;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.MOCKABLE_JAR_RETURN_DEFAULT_VALUES;
 import static com.android.builder.core.BuilderConstants.FD_REPORTS;
-import static com.android.builder.model.AndroidProject.FD_GENERATED;
 import static com.android.builder.model.AndroidProject.FD_INTERMEDIATES;
 import static com.android.builder.model.AndroidProject.FD_OUTPUTS;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import android.databinding.tool.DataBindingBuilder;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.gradle.BaseExtension;
 import com.android.build.gradle.internal.SdkComponents;
-import com.android.build.gradle.internal.api.dsl.DslScope;
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
+import com.android.build.gradle.internal.services.DslServices;
 import com.android.build.gradle.options.ProjectOptions;
+import com.android.build.gradle.options.SyncOptions;
 import com.android.builder.model.OptionalCompilationStep;
-import com.android.builder.utils.FileCache;
 import com.android.ide.common.blame.MessageReceiver;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -49,20 +49,19 @@ import org.gradle.api.file.FileCollection;
 import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 
 /** A scope containing data for the Android plugin. */
-public class GlobalScope implements TransformGlobalScope {
+public class GlobalScope {
 
     @NonNull private final Project project;
+    @NonNull private final DataBindingBuilder dataBindingBuilder;
     @NonNull private BaseExtension extension;
     @NonNull private final SdkComponents sdkComponents;
     @NonNull private final ToolingModelBuilderRegistry toolingRegistry;
     @NonNull private final Set<OptionalCompilationStep> optionalCompilationSteps;
-    @NonNull private final ProjectOptions projectOptions;
-    @Nullable private final FileCache buildCache;
     @NonNull private final MessageReceiver messageReceiver;
     @NonNull private final SoftwareComponentFactory componentFactory;
 
     @NonNull private final String createdBy;
-    @NonNull private final DslScope dslScope;
+    @NonNull private final DslServices dslServices;
 
     @NonNull private Configuration lintChecks;
     @NonNull private Configuration lintPublish;
@@ -76,29 +75,31 @@ public class GlobalScope implements TransformGlobalScope {
     public GlobalScope(
             @NonNull Project project,
             @NonNull String createdBy,
-            @NonNull ProjectOptions projectOptions,
-            @NonNull DslScope dslScope,
+            @NonNull DslServices dslServices,
             @NonNull SdkComponents sdkComponents,
             @NonNull ToolingModelBuilderRegistry toolingRegistry,
-            @Nullable FileCache buildCache,
             @NonNull MessageReceiver messageReceiver,
             @NonNull SoftwareComponentFactory componentFactory) {
         // Attention: remember that this code runs early in the build lifecycle, project may not
         // have been fully configured yet (e.g. buildDir can still change).
         this.project = checkNotNull(project);
         this.createdBy = createdBy;
-        this.dslScope = checkNotNull(dslScope);
+        this.dslServices = checkNotNull(dslServices);
         this.sdkComponents = checkNotNull(sdkComponents);
         this.toolingRegistry = checkNotNull(toolingRegistry);
-        this.optionalCompilationSteps = checkNotNull(projectOptions.getOptionalCompilationSteps());
-        this.projectOptions = checkNotNull(projectOptions);
-        this.buildCache = buildCache;
+        this.optionalCompilationSteps =
+                checkNotNull(dslServices.getProjectOptions().getOptionalCompilationSteps());
         this.messageReceiver = messageReceiver;
         this.componentFactory = componentFactory;
         this.globalArtifacts = new GlobalBuildArtifactsHolder(project, this::getBuildDir);
 
         // Create empty configurations before these have been set.
         this.lintChecks = project.getConfigurations().detachedConfiguration();
+
+        this.dataBindingBuilder = new DataBindingBuilder();
+        dataBindingBuilder.setPrintMachineReadableOutput(
+                SyncOptions.getErrorFormatMode(dslServices.getProjectOptions())
+                        == SyncOptions.ErrorFormatMode.MACHINE_PARSABLE);
     }
 
     public void setExtension(@NonNull BaseExtension extension) {
@@ -106,12 +107,6 @@ public class GlobalScope implements TransformGlobalScope {
     }
 
     @NonNull
-    public BuildFeatureValues getBuildFeatures() {
-        return dslScope.getBuildFeatures();
-    }
-
-    @NonNull
-    @Override
     public Project getProject() {
         return project;
     }
@@ -124,6 +119,11 @@ public class GlobalScope implements TransformGlobalScope {
     @NonNull
     public BaseExtension getExtension() {
         return extension;
+    }
+
+    @NonNull
+    public DataBindingBuilder getDataBindingBuilder() {
+        return dataBindingBuilder;
     }
 
     @NonNull
@@ -142,7 +142,6 @@ public class GlobalScope implements TransformGlobalScope {
     }
 
     @NonNull
-    @Override
     public File getBuildDir() {
         return project.getBuildDir();
     }
@@ -150,11 +149,6 @@ public class GlobalScope implements TransformGlobalScope {
     @NonNull
     public File getIntermediatesDir() {
         return new File(getBuildDir(), FD_INTERMEDIATES);
-    }
-
-    @NonNull
-    public File getGeneratedDir() {
-        return new File(getBuildDir(), FD_GENERATED);
     }
 
     @NonNull
@@ -180,7 +174,6 @@ public class GlobalScope implements TransformGlobalScope {
         return new File(getBuildDir(), FD_OUTPUTS);
     }
 
-    @Override
     public boolean isActive(OptionalCompilationStep step) {
         return optionalCompilationSteps.contains(step);
     }
@@ -201,15 +194,8 @@ public class GlobalScope implements TransformGlobalScope {
     }
 
     @NonNull
-    @Override
     public ProjectOptions getProjectOptions() {
-        return projectOptions;
-    }
-
-    @Nullable
-    @Override
-    public FileCache getBuildCache() {
-        return buildCache;
+        return dslServices.getProjectOptions();
     }
 
     public void setLintChecks(@NonNull Configuration lintChecks) {
@@ -260,9 +246,17 @@ public class GlobalScope implements TransformGlobalScope {
                 .getArtifactFiles();
     }
 
+    /**
+     * Do not use unless you have to.
+     *
+     * <p>If the code has access to DslServices directly, use that. If the code has access to
+     * VariantPropertiesApiServices or VariantApiServices, use that. If the code has access to
+     * TaskCreationServices, use that
+     */
+    @Deprecated
     @NonNull
-    public DslScope getDslScope() {
-        return dslScope;
+    public DslServices getDslServices() {
+        return dslServices;
     }
 
     @NonNull
@@ -351,7 +345,7 @@ public class GlobalScope implements TransformGlobalScope {
     public FileCollection getFilteredBootClasspath() {
         return BootClasspathBuilder.INSTANCE.computeClasspath(
                 project,
-                getDslScope().getIssueReporter(),
+                getDslServices().getIssueReporter(),
                 getSdkComponents().getTargetBootClasspathProvider(),
                 getSdkComponents().getTargetAndroidVersionProvider(),
                 getSdkComponents().getAdditionalLibrariesProvider(),
@@ -371,7 +365,7 @@ public class GlobalScope implements TransformGlobalScope {
     public FileCollection getFullBootClasspath() {
         return BootClasspathBuilder.INSTANCE.computeClasspath(
                 project,
-                getDslScope().getIssueReporter(),
+                getDslServices().getIssueReporter(),
                 getSdkComponents().getTargetBootClasspathProvider(),
                 getSdkComponents().getTargetAndroidVersionProvider(),
                 getSdkComponents().getAdditionalLibrariesProvider(),

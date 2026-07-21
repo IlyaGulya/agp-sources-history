@@ -16,10 +16,10 @@
 
 package com.android.build.gradle.internal.tasks
 
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.errors.MessageReceiverImpl
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.getDesugarLibConfig
 import com.android.build.gradle.internal.utils.setDisallowChanges
@@ -83,6 +83,11 @@ abstract class DexFileDependenciesTask: NonIncrementalTask() {
 
     // TODO: make incremental
     override fun doTaskAction() {
+        FileUtils.cleanOutputDir(outputDirectory.get().asFile)
+        if (outputKeepRules.isPresent) {
+            FileUtils.deleteIfExists(outputKeepRules.get().asFile)
+        }
+
         getWorkerFacadeWithWorkers().use { workerExecutorFacade ->
             val inputs = classes.files.toList()
             val totalClasspath = inputs + classpath.files
@@ -160,60 +165,66 @@ abstract class DexFileDependenciesTask: NonIncrementalTask() {
         }
     }
 
-    class CreationAction(variantScope: VariantScope) :
-        VariantTaskCreationAction<DexFileDependenciesTask>(variantScope) {
-        override val name: String = variantScope.getTaskName("desugar", "FileDependencies")
+    class CreationAction(componentProperties: ComponentPropertiesImpl) :
+        VariantTaskCreationAction<DexFileDependenciesTask, ComponentPropertiesImpl>(
+            componentProperties
+        ) {
+        override val name: String = computeTaskName("desugar", "FileDependencies")
         override val type = DexFileDependenciesTask::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out DexFileDependenciesTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out DexFileDependenciesTask>
+        ) {
             super.handleProvider(taskProvider)
-            variantScope.artifacts.producesDir(
+            creationConfig.artifacts.producesDir(
                 artifactType = InternalArtifactType.EXTERNAL_FILE_LIB_DEX_ARCHIVES,
                 taskProvider = taskProvider,
                 productProvider = DexFileDependenciesTask::outputDirectory,
                 fileName = "out"
             )
 
-            if (variantScope.needsShrinkDesugarLibrary) {
-                variantScope.artifacts.getOperations()
+            if (creationConfig.variantScope.needsShrinkDesugarLibrary) {
+                creationConfig.artifacts.getOperations()
                     .setInitialProvider(taskProvider, DexFileDependenciesTask::outputKeepRules)
                     .on(InternalArtifactType.DESUGAR_LIB_EXTERNAL_FILE_LIB_KEEP_RULES)
             }
         }
 
-        override fun configure(task: DexFileDependenciesTask) {
+        override fun configure(
+            task: DexFileDependenciesTask
+        ) {
             super.configure(task)
             task.debuggable
-                .setDisallowChanges(variantScope.variantDslInfo.isDebuggable)
+                .setDisallowChanges(creationConfig.variantDslInfo.isDebuggable)
             task.classes.from(
-                variantScope.getArtifactFileCollection(
+                creationConfig.variantDependencies.getArtifactFileCollection(
                     AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
                     AndroidArtifacts.ArtifactScope.FILE,
                     AndroidArtifacts.ArtifactType.PROCESSED_JAR
                 )
             ).disallowChanges()
             val minSdkVersion =
-                variantScope.variantDslInfo.minSdkVersionWithTargetDeviceApi.featureLevel
+                creationConfig.variantDslInfo.minSdkVersionWithTargetDeviceApi.featureLevel
             task.minSdkVersion.setDisallowChanges(minSdkVersion)
             if (minSdkVersion < AndroidVersion.VersionCodes.N) {
                 task.classpath.from(
-                    variantScope.getArtifactFileCollection(
+                    creationConfig.variantDependencies.getArtifactFileCollection(
                         AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
                         AndroidArtifacts.ArtifactScope.REPOSITORY_MODULE,
                         AndroidArtifacts.ArtifactType.PROCESSED_JAR
                     )
                 )
-                task.bootClasspath.from(variantScope.globalScope.bootClasspath)
+                task.bootClasspath.from(creationConfig.globalScope.bootClasspath)
             }
 
             task.classpath.disallowChanges()
             task.bootClasspath.disallowChanges()
 
             task.errorFormatMode =
-                SyncOptions.getErrorFormatMode(variantScope.globalScope.projectOptions)
+                SyncOptions.getErrorFormatMode(creationConfig.services.projectOptions)
 
-            if (variantScope.isCoreLibraryDesugaringEnabled) {
-                task.libConfiguration.set(getDesugarLibConfig(variantScope.globalScope.project))
+            if (creationConfig.variantScope.isCoreLibraryDesugaringEnabled) {
+                task.libConfiguration.set(getDesugarLibConfig(creationConfig.globalScope.project))
             }
             task.libConfiguration.disallowChanges()
         }

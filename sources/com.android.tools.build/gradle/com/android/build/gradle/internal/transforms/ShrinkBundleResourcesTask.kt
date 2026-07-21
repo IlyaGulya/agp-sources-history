@@ -16,12 +16,12 @@
 
 package com.android.build.gradle.internal.transforms
 
+import com.android.build.api.component.impl.ComponentPropertiesImpl
+import com.android.build.api.variant.VariantOutput
+import com.android.build.api.variant.impl.BuiltArtifactsLoaderImpl
 import com.android.build.gradle.internal.pipeline.StreamFilter
-import com.android.build.gradle.internal.scope.ApkData
-import com.android.build.gradle.internal.scope.ExistingBuildElements
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.MultipleArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.options.BooleanOption
@@ -88,7 +88,7 @@ abstract class ShrinkBundleResourcesTask : NonIncrementalTask() {
     @get:Input
     abstract val enableRTxtResourceShrinking: Property<Boolean>
 
-    private lateinit var mainSplit: ApkData
+    private lateinit var mainSplit: VariantOutput
 
     override fun doTaskAction() {
         val uncompressedResourceFile = uncompressedResources.get().asFile
@@ -113,16 +113,15 @@ abstract class ShrinkBundleResourcesTask : NonIncrementalTask() {
             lightRClasses.get().asFile
         }
 
-        val manifestFile = ExistingBuildElements.from(InternalArtifactType.BUNDLE_MANIFEST, mergedManifests)
-            .element(mainSplit)
-            ?.outputFile
-                ?: throw RuntimeException("Cannot find merged manifest file")
+        val manifestFile = BuiltArtifactsLoaderImpl().load(mergedManifests)
+            ?.getBuiltArtifact(mainSplit)
+            ?: throw java.lang.RuntimeException("Cannot find merged manifest file for $mainSplit")
 
         // Analyze resources and usages and strip out unused
         val analyzer = ResourceUsageAnalyzer(
             rSource,
             classes,
-            manifestFile,
+            File(manifestFile.outputFile),
             mappingFile,
             resourceDir.get().asFile,
             reportFile,
@@ -174,16 +173,19 @@ abstract class ShrinkBundleResourcesTask : NonIncrementalTask() {
         }
     }
 
-    class CreationAction(variantScope: VariantScope) :
-        VariantTaskCreationAction<ShrinkBundleResourcesTask>(variantScope) {
+    class CreationAction(componentProperties: ComponentPropertiesImpl) :
+        VariantTaskCreationAction<ShrinkBundleResourcesTask, ComponentPropertiesImpl>(
+            componentProperties
+        ) {
 
-        override val name: String = variantScope.getTaskName("shrink", "Resources")
+        override val name: String = computeTaskName("shrink", "Resources")
         override val type: Class<ShrinkBundleResourcesTask>
             get() = ShrinkBundleResourcesTask::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out ShrinkBundleResourcesTask>) {
-            super.handleProvider(taskProvider)
-            variantScope.artifacts.producesFile(
+        override fun handleProvider(
+            taskProvider: TaskProvider<out ShrinkBundleResourcesTask>
+        ) {
+            creationConfig.artifacts.producesFile(
                 InternalArtifactType.SHRUNK_LINKED_RES_FOR_BUNDLE,
                 taskProvider,
                 ShrinkBundleResourcesTask::compressedResources,
@@ -191,52 +193,54 @@ abstract class ShrinkBundleResourcesTask : NonIncrementalTask() {
             )
         }
 
-        override fun configure(task: ShrinkBundleResourcesTask) {
+        override fun configure(
+            task: ShrinkBundleResourcesTask
+        ) {
             super.configure(task)
 
-            variantScope.artifacts.setTaskInputToFinalProduct(
+            val artifacts = creationConfig.artifacts
+
+            artifacts.setTaskInputToFinalProduct(
                 InternalArtifactType.LINKED_RES_FOR_BUNDLE,
                 task.uncompressedResources
             )
-            task.mainSplit = variantScope.variantData.publicVariantPropertiesApi.outputs.getMainSplit().apkData
+            task.mainSplit = creationConfig.outputs.getMainSplit()
 
-            task.dex = if (variantScope.artifacts.hasFinalProduct(InternalArtifactType.BASE_DEX)) {
-                variantScope
-                    .artifacts
-                    .getFinalProductAsFileCollection(InternalArtifactType.BASE_DEX).get()
-            } else if (variantScope.artifacts.hasFinalProducts(MultipleArtifactType.DEX)) {
-                variantScope.globalScope.project.files(
-                    variantScope.artifacts.getOperations().getAll(MultipleArtifactType.DEX))
-            } else {
-                variantScope.transformManager.getPipelineOutputAsFileCollection(StreamFilter.DEX)
-            }
+            task.dex = creationConfig.globalScope.project.files(
+                if (creationConfig.variantScope.consumesFeatureJars()) {
+                    artifacts.getFinalProductAsFileCollection(InternalArtifactType.BASE_DEX)
+                } else {
+                    artifacts.getOperations().getAll(MultipleArtifactType.DEX)
+                })
 
-            if (variantScope
-                    .globalScope.projectOptions[BooleanOption.ENABLE_R_TXT_RESOURCE_SHRINKING]) {
-                variantScope.artifacts.setTaskInputToFinalProduct(
+            if (creationConfig
+                    .services.projectOptions[BooleanOption.ENABLE_R_TXT_RESOURCE_SHRINKING]
+            ) {
+                artifacts.setTaskInputToFinalProduct(
                     InternalArtifactType.RUNTIME_SYMBOL_LIST,
                     task.rTxtFile
                 )
             } else {
-                variantScope.artifacts.setTaskInputToFinalProduct(
+                artifacts.setTaskInputToFinalProduct(
                     InternalArtifactType.COMPILE_AND_RUNTIME_NOT_NAMESPACED_R_CLASS_JAR,
                     task.lightRClasses
                 )
             }
 
-            task.enableRTxtResourceShrinking.set(variantScope.globalScope
-                .projectOptions[BooleanOption.ENABLE_R_TXT_RESOURCE_SHRINKING])
+            task.enableRTxtResourceShrinking.set(
+                creationConfig.services
+                    .projectOptions[BooleanOption.ENABLE_R_TXT_RESOURCE_SHRINKING]
+            )
 
-            variantScope.artifacts.setTaskInputToFinalProduct(
+            artifacts.setTaskInputToFinalProduct(
                 InternalArtifactType.MERGED_NOT_COMPILED_RES,
                 task.resourceDir)
 
-            if (variantScope.artifacts.hasFinalProduct(InternalArtifactType.APK_MAPPING))
-                variantScope.artifacts.setTaskInputToFinalProduct(
-                    InternalArtifactType.APK_MAPPING,
-                    task.mappingFileSrc)
+            artifacts.setTaskInputToFinalProduct(
+                InternalArtifactType.APK_MAPPING,
+                task.mappingFileSrc)
 
-            variantScope.artifacts.setTaskInputToFinalProduct(
+            artifacts.setTaskInputToFinalProduct(
                 InternalArtifactType.BUNDLE_MANIFEST,
                 task.mergedManifests)
         }

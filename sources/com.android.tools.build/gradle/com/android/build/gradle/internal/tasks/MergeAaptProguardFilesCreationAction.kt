@@ -17,25 +17,30 @@
 package com.android.build.gradle.internal.tasks
 
 import com.android.SdkConstants
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import org.gradle.api.tasks.TaskProvider
 
 /** Configuration action for a task to merge aapt proguard files  */
-class MergeAaptProguardFilesCreationAction(variantScope: VariantScope) :
-    VariantTaskCreationAction<MergeFileTask>(variantScope) {
+class MergeAaptProguardFilesCreationAction(
+    componentProperties: ComponentPropertiesImpl
+) : VariantTaskCreationAction<MergeFileTask, ComponentPropertiesImpl>(
+    componentProperties
+) {
 
     override val name: String
-        get() = variantScope.getTaskName("merge", "AaptProguardFiles")
+            get() = computeTaskName("merge", "AaptProguardFiles")
     override val type: Class<MergeFileTask>
         get() = MergeFileTask::class.java
 
-    override fun handleProvider(taskProvider: TaskProvider<out MergeFileTask>) {
+    override fun handleProvider(
+        taskProvider: TaskProvider<out MergeFileTask>
+    ) {
         super.handleProvider(taskProvider)
 
-        variantScope.artifacts.producesFile(
+        creationConfig.artifacts.producesFile(
             InternalArtifactType.MERGED_AAPT_PROGUARD_FILE,
             taskProvider,
             MergeFileTask::outputFile,
@@ -43,15 +48,17 @@ class MergeAaptProguardFilesCreationAction(variantScope: VariantScope) :
         )
     }
 
-    override fun configure(task: MergeFileTask) {
+    override fun configure(
+        task: MergeFileTask
+    ) {
         super.configure(task)
 
-        val project = variantScope.globalScope.project
+        val project = creationConfig.globalScope.project
         val inputFiles =
             project
                 .files(
-                    variantScope.artifacts.getFinalProduct(InternalArtifactType.AAPT_PROGUARD_FILE),
-                    variantScope.getArtifactFileCollection(
+                    creationConfig.artifacts.getFinalProduct(InternalArtifactType.AAPT_PROGUARD_FILE),
+                    creationConfig.variantDependencies.getArtifactFileCollection(
                         AndroidArtifacts.ConsumedConfigType.REVERSE_METADATA_VALUES,
                         AndroidArtifacts.ArtifactScope.PROJECT,
                         AndroidArtifacts.ArtifactType.AAPT_PROGUARD_RULES

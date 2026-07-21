@@ -17,8 +17,8 @@
 package com.android.build.gradle.tasks
 
 import com.android.SdkConstants.FD_RES_NAVIGATION
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.AndroidVariantTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.manifmerger.NavigationXmlDocumentData
@@ -73,17 +73,22 @@ abstract class ExtractDeepLinksTask: AndroidVariantTask() {
             GsonBuilder().setPrettyPrinting().create().toJson(navDatas))
     }
 
-    class CreationAction(val scope: VariantScope) :
-        VariantTaskCreationAction<ExtractDeepLinksTask>(scope) {
+    class CreationAction(
+        componentProperties: ComponentPropertiesImpl
+    ) : VariantTaskCreationAction<ExtractDeepLinksTask, ComponentPropertiesImpl>(
+        componentProperties
+    ) {
 
         override val name: String
-            get() = scope.getTaskName("extractDeepLinks")
+            get() = computeTaskName("extractDeepLinks")
         override val type: Class<ExtractDeepLinksTask>
             get() = ExtractDeepLinksTask::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out ExtractDeepLinksTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out ExtractDeepLinksTask>
+        ) {
             super.handleProvider(taskProvider)
-            variantScope.artifacts.producesFile(
+            creationConfig.artifacts.producesFile(
                 artifactType = InternalArtifactType.NAVIGATION_JSON,
                 taskProvider = taskProvider,
                 productProvider = ExtractDeepLinksTask::navigationJson,
@@ -91,10 +96,12 @@ abstract class ExtractDeepLinksTask: AndroidVariantTask() {
             )
         }
 
-        override fun configure(task: ExtractDeepLinksTask) {
+        override fun configure(
+            task: ExtractDeepLinksTask
+        ) {
             super.configure(task)
             task.navFilesFolders =
-                variantScope.variantSources
+                creationConfig.variantSources
                     .getResourceSets(false).stream()
                     .flatMap {
                         it.sourceFiles.stream().map { File(it, FD_RES_NAVIGATION) }

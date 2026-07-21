@@ -553,10 +553,6 @@ public class ManifestMerger2 {
             addDebuggableAttribute(document);
         }
 
-        if (mMergeType == MergeType.APPLICATION) {
-            optionalAddApplicationTagIfMissing(document);
-        }
-
         if (mOptionalFeatures.contains(
                 Invoker.Feature.ADD_ANDROIDX_MULTIDEX_APPLICATION_IF_NO_NAME)) {
             addMultiDexApplicationIfNoName(document, SdkConstants.MULTI_DEX_APPLICATION.newName());
@@ -961,20 +957,6 @@ public class ManifestMerger2 {
             setAndroidAttribute(usesSplit, ATTR_NAME, usedSplitName);
             manifest.appendChild(usesSplit);
         }
-    }
-
-    /**
-     * Adds <application> tag if missing as it required by package manager in R and above..
-     *
-     * @param document the loaded manifest file
-     */
-    private static void optionalAddApplicationTagIfMissing(@NonNull Document document) {
-        Element manifest = document.getDocumentElement();
-
-        if (manifest.getElementsByTagName(SdkConstants.TAG_APPLICATION).getLength() > 0) return;
-
-        Element application = document.createElement(SdkConstants.TAG_APPLICATION);
-        manifest.appendChild(application);
     }
 
     /**

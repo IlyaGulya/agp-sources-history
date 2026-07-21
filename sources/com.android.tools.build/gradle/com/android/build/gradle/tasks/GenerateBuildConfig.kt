@@ -16,6 +16,8 @@
 package com.android.build.gradle.tasks
 
 import com.android.build.api.component.impl.ComponentPropertiesImpl
+import com.android.build.gradle.internal.component.ApkCreationConfig
+import com.android.build.gradle.internal.component.BaseCreationConfig
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
@@ -183,37 +185,41 @@ abstract class GenerateBuildConfig : NonIncrementalTask() {
 
     // ----- Config Action -----
 
-    internal class CreationAction(private val componentProperties: ComponentPropertiesImpl) :
-        VariantTaskCreationAction<GenerateBuildConfig>(componentProperties.variantScope) {
+    internal class CreationAction(creationConfig: BaseCreationConfig) :
+        VariantTaskCreationAction<GenerateBuildConfig, BaseCreationConfig>(
+            creationConfig
+        ) {
 
-        override val name: String = variantScope.getTaskName("generate", "BuildConfig")
+        override val name: String = computeTaskName("generate", "BuildConfig")
 
         override val type: Class<GenerateBuildConfig> = GenerateBuildConfig::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out GenerateBuildConfig>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out GenerateBuildConfig>
+        ) {
             super.handleProvider(taskProvider)
-            variantScope.taskContainer.generateBuildConfigTask = taskProvider
+            creationConfig.taskContainer.generateBuildConfigTask = taskProvider
         }
 
-        override fun configure(task: GenerateBuildConfig) {
+        override fun configure(
+            task: GenerateBuildConfig
+        ) {
             super.configure(task)
 
-            val variantData = variantScope.variantData
+            val variantDslInfo = creationConfig.variantDslInfo
 
-            val variantDslInfo = variantData.variantDslInfo
-
-            val project = variantScope.globalScope.project
+            val project = creationConfig.globalScope.project
             task.buildConfigPackageName.set(project.provider {
                 variantDslInfo.originalApplicationId
             })
             task.buildConfigPackageName.disallowChanges()
 
-            if (!variantDslInfo.variantType.isAar) {
-                task.appPackageName.set(componentProperties.applicationId)
+            if (creationConfig is ApkCreationConfig) {
+                task.appPackageName.set(creationConfig.applicationId)
             }
             task.appPackageName.disallowChanges()
 
-            val mainSplit = variantData.publicVariantPropertiesApi.outputs.getMainSplit()
+            val mainSplit = creationConfig.outputs.getMainSplit()
             // check the variant API property first (if there is one) in case the variant
             // output version has been overridden, otherwise use the variant configuration
             task.versionCode.setDisallowChanges(
@@ -223,7 +229,7 @@ abstract class GenerateBuildConfig : NonIncrementalTask() {
                 mainSplit?.versionName
                     ?: task.project.provider { variantDslInfo.versionName })
 
-            task.debuggable.setDisallowChanges(variantData.variantDslInfo.isDebuggable)
+            task.debuggable.setDisallowChanges(creationConfig.variantDslInfo.isDebuggable)
 
             task.buildTypeName = variantDslInfo.componentIdentity.buildType
 
@@ -239,15 +245,15 @@ abstract class GenerateBuildConfig : NonIncrementalTask() {
             task.items.set(project.provider { variantDslInfo.buildConfigItems })
             task.items.disallowChanges()
 
-            task.sourceOutputDir = variantScope.buildConfigSourceOutputDir
+            task.sourceOutputDir = creationConfig.paths.buildConfigSourceOutputDir
 
-            if (variantScope.variantDslInfo.variantType.isTestComponent) {
-                variantScope.artifacts.setTaskInputToFinalProduct(
+            if (creationConfig.variantType.isTestComponent) {
+                creationConfig.artifacts.setTaskInputToFinalProduct(
                     InternalArtifactType.MERGED_MANIFESTS, task.mergedManifests
                 )
             }
 
-            task.isLibrary = variantDslInfo.variantType.isAar
+            task.isLibrary = creationConfig.variantType.isAar
         }
     }
 }

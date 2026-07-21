@@ -16,11 +16,12 @@
 
 package com.android.build.gradle.internal.tasks
 
+import com.android.build.gradle.internal.component.ApkCreationConfig
+import com.android.build.gradle.internal.component.DynamicFeatureCreationConfig
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
-import com.android.build.gradle.internal.tasks.featuresplit.FeatureSetMetadata
+import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.tools.build.libraries.metadata.AppDependencies
 import com.android.tools.build.libraries.metadata.Library
 import com.android.tools.build.libraries.metadata.LibraryDependencies
@@ -39,7 +40,6 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputFile
@@ -52,7 +52,6 @@ import java.security.MessageDigest
 import java.util.Dictionary
 import java.util.Hashtable
 import java.util.LinkedList
-import java.util.function.Supplier
 import javax.inject.Inject
 
 /**
@@ -162,7 +161,9 @@ abstract class PerModuleReportDependenciesTask @Inject constructor(objectFactory
                         }
                     }
 
-                    libraryDependencies.add(libraryDependency.build())
+                    if (libraryDependency.getLibraryDepIndexCount() > 0) {
+                      libraryDependencies.add(libraryDependency.build())
+                    }
                 }
 
                 if (dependency.from.selectionReason.descriptions.filter
@@ -202,22 +203,24 @@ abstract class PerModuleReportDependenciesTask @Inject constructor(objectFactory
             .addModuleDependencies(moduleDependency.build())
             .build()
 
-        FileOutputStream(dependenciesList.get().asFile).use {
-            appDependencies.writeTo(it)
-        }
+        appDependencies.writeTo(FileOutputStream(dependenciesList.get().asFile))
     }
 
 
     class CreationAction(
-        variantScope: VariantScope
-    ) : VariantTaskCreationAction<PerModuleReportDependenciesTask>(variantScope) {
-        override val name: String = variantScope.getTaskName("collect", "Dependencies")
+        creationConfig: ApkCreationConfig
+    ) : VariantTaskCreationAction<PerModuleReportDependenciesTask, ApkCreationConfig>(
+        creationConfig
+    ) {
+        override val name: String = computeTaskName("collect", "Dependencies")
         override val type: Class<PerModuleReportDependenciesTask> = PerModuleReportDependenciesTask::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out PerModuleReportDependenciesTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out PerModuleReportDependenciesTask>
+        ) {
             super.handleProvider(taskProvider)
 
-            variantScope
+            creationConfig
                 .artifacts
                 .producesFile(
                     InternalArtifactType.METADATA_LIBRARY_DEPENDENCIES_REPORT,
@@ -227,10 +230,12 @@ abstract class PerModuleReportDependenciesTask @Inject constructor(objectFactory
                 )
         }
 
-        override fun configure(task: PerModuleReportDependenciesTask) {
+        override fun configure(
+            task: PerModuleReportDependenciesTask
+        ) {
             super.configure(task)
-            task.runtimeClasspath = variantScope.variantDependencies.runtimeClasspath
-            task.runtimeClasspathArtifacts = variantScope.getArtifactCollection(
+            task.runtimeClasspath = creationConfig.variantDependencies.runtimeClasspath
+            task.runtimeClasspathArtifacts = creationConfig.variantDependencies.getArtifactCollection(
                 AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
                 AndroidArtifacts.ArtifactScope.EXTERNAL,
                 // Normally we would query for PROCESSED_JAR, but JAR is probably sufficient here
@@ -239,12 +244,11 @@ abstract class PerModuleReportDependenciesTask @Inject constructor(objectFactory
             ).artifactFiles
 
 
-            if (variantScope.type.isBaseModule) {
-                task.moduleName.set("base")
+            if (creationConfig is DynamicFeatureCreationConfig) {
+                task.moduleName.setDisallowChanges(creationConfig.featureName)
             } else {
-                task.moduleName.set(variantScope.featureName)
+                task.moduleName.setDisallowChanges("base")
             }
-            task.moduleName.disallowChanges()
         }
     }
 }

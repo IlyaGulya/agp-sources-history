@@ -17,8 +17,9 @@
 package com.android.build.gradle.tasks;
 
 import com.android.SdkConstants;
+import com.android.annotations.NonNull;
+import com.android.build.gradle.internal.component.BaseCreationConfig;
 import com.android.build.gradle.internal.scope.ApkData;
-import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.IncrementalTask;
 import com.android.utils.FileUtils;
 import com.google.common.base.Preconditions;
@@ -26,6 +27,7 @@ import java.io.File;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
+import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 
@@ -33,6 +35,11 @@ import org.gradle.api.tasks.PathSensitivity;
 public abstract class ProcessAndroidResources extends IncrementalTask {
 
     protected ApkData mainSplit;
+
+    @InputFiles
+    @Optional
+    @PathSensitive(PathSensitivity.RELATIVE)
+    public abstract DirectoryProperty getAaptFriendlyManifestFiles();
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
@@ -46,7 +53,12 @@ public abstract class ProcessAndroidResources extends IncrementalTask {
 
     @Internal // getManifestFiles() is already marked as @InputFiles
     public File getManifestFile() {
-        File manifestDirectory = getManifestFiles().get().getAsFile();
+        File manifestDirectory;
+        if (getAaptFriendlyManifestFiles().isPresent()) {
+            manifestDirectory = getAaptFriendlyManifestFiles().get().getAsFile();
+        } else {
+            manifestDirectory = getManifestFiles().get().getAsFile();
+        }
         Preconditions.checkNotNull(manifestDirectory);
 
         Preconditions.checkNotNull(mainSplit);
@@ -54,7 +66,9 @@ public abstract class ProcessAndroidResources extends IncrementalTask {
                 manifestDirectory, mainSplit.getDirName(), SdkConstants.ANDROID_MANIFEST_XML);
     }
 
-    protected static boolean generatesProguardOutputFile(VariantScope variantScope) {
-        return variantScope.getCodeShrinker() != null || variantScope.getType().isDynamicFeature();
+    protected static boolean generatesProguardOutputFile(
+            @NonNull BaseCreationConfig creationConfig) {
+        return creationConfig.getVariantScope().getCodeShrinker() != null
+                || creationConfig.getVariantType().isDynamicFeature();
     }
 }

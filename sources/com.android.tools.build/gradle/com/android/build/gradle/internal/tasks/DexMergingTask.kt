@@ -17,6 +17,7 @@
 package com.android.build.gradle.internal.tasks
 
 import com.android.SdkConstants
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.api.transform.TransformException
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.crash.PluginCrashReporter
@@ -25,7 +26,6 @@ import com.android.build.gradle.internal.errors.MessageReceiverImpl
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.MultipleArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.transforms.DexMergerTransformCallable
 import com.android.build.gradle.internal.utils.setDisallowChanges
@@ -160,57 +160,63 @@ abstract class DexMergingTask : NonIncrementalTask() {
     }
 
     class CreationAction @JvmOverloads constructor(
-        variantScope: VariantScope,
+        componentProperties: ComponentPropertiesImpl,
         private val action: DexMergingAction,
         private val dexingType: DexingType,
         private val dexingUsingArtifactTransforms: Boolean = true,
         private val separateFileDependenciesDexingTask: Boolean = false,
         private val outputType: MultipleArtifactType<Directory> = MultipleArtifactType.DEX
-    ) : VariantTaskCreationAction<DexMergingTask>(variantScope) {
+    ) : VariantTaskCreationAction<DexMergingTask, ComponentPropertiesImpl>(
+        componentProperties
+    ) {
 
         private val internalName: String = when (action) {
-            DexMergingAction.MERGE_LIBRARY_PROJECTS -> variantScope.getTaskName("mergeLibDex")
-            DexMergingAction.MERGE_EXTERNAL_LIBS -> variantScope.getTaskName("mergeExtDex")
-            DexMergingAction.MERGE_PROJECT -> variantScope.getTaskName("mergeProjectDex")
-            DexMergingAction.MERGE_ALL -> variantScope.getTaskName("mergeDex")
+            DexMergingAction.MERGE_LIBRARY_PROJECTS -> componentProperties.computeTaskName("mergeLibDex")
+            DexMergingAction.MERGE_EXTERNAL_LIBS -> componentProperties.computeTaskName("mergeExtDex")
+            DexMergingAction.MERGE_PROJECT -> componentProperties.computeTaskName("mergeProjectDex")
+            DexMergingAction.MERGE_ALL -> componentProperties.computeTaskName("mergeDex")
         }
 
         override val name = internalName
         override val type = DexMergingTask::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out DexMergingTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out DexMergingTask>
+        ) {
             super.handleProvider(taskProvider)
-            variantScope.artifacts.getOperations().append(
+            creationConfig.artifacts.getOperations().append(
                 taskProvider, DexMergingTask::outputDir).on(outputType)
         }
 
-        override fun configure(task: DexMergingTask) {
+        override fun configure(
+            task: DexMergingTask
+        ) {
             super.configure(task)
 
-            task.dexFiles = getDexFiles(action)
-            task.mergingThreshold = getMergingThreshold(action, task)
+            task.dexFiles = getDexFiles(creationConfig, action)
+            task.mergingThreshold = getMergingThreshold(action, task, creationConfig)
 
             task.dexingType = dexingType
             if (DexMergingAction.MERGE_ALL == action && dexingType === DexingType.LEGACY_MULTIDEX) {
-                variantScope.artifacts.setTaskInputToFinalProduct(
+                creationConfig.artifacts.setTaskInputToFinalProduct(
                     InternalArtifactType.LEGACY_MULTIDEX_MAIN_DEX_LIST,
                     task.mainDexListFile)
             }
 
             task.errorFormatMode =
-                SyncOptions.getErrorFormatMode(variantScope.globalScope.projectOptions)
-            task.dexMerger = variantScope.dexMerger
-            task.minSdkVersion = variantScope.variantDslInfo.minSdkVersionWithTargetDeviceApi.featureLevel
+                SyncOptions.getErrorFormatMode(creationConfig.services.projectOptions)
+            task.dexMerger = creationConfig.variantScope.dexMerger
+            task.minSdkVersion = creationConfig.variantDslInfo.minSdkVersionWithTargetDeviceApi.featureLevel
             task.debuggable
-                .setDisallowChanges(variantScope.variantDslInfo.isDebuggable)
-            if (variantScope.globalScope.projectOptions[BooleanOption.ENABLE_DUPLICATE_CLASSES_CHECK]) {
-                variantScope.artifacts.setTaskInputToFinalProduct(
+                .setDisallowChanges(creationConfig.variantDslInfo.isDebuggable)
+            if (creationConfig.services.projectOptions[BooleanOption.ENABLE_DUPLICATE_CLASSES_CHECK]) {
+                creationConfig.artifacts.setTaskInputToFinalProduct(
                     InternalArtifactType.DUPLICATE_CLASSES_CHECK,
                     task.duplicateClassesCheck
                 )
             }
             if (separateFileDependenciesDexingTask) {
-                variantScope.artifacts.setTaskInputToFinalProduct(
+                creationConfig.artifacts.setTaskInputToFinalProduct(
                     InternalArtifactType.EXTERNAL_FILE_LIB_DEX_ARCHIVES,
                     task.fileDependencyDexFiles
                 )
@@ -219,8 +225,11 @@ abstract class DexMergingTask : NonIncrementalTask() {
             }
         }
 
-        private fun getDexFiles(action: DexMergingAction): FileCollection {
-            val attributes = getDexingArtifactConfiguration(variantScope).getAttributes()
+        private fun getDexFiles(
+            component: ComponentPropertiesImpl,
+            action: DexMergingAction
+        ): FileCollection {
+            val attributes = getDexingArtifactConfiguration(component).getAttributes()
 
             fun forAction(action: DexMergingAction): FileCollection {
                 when (action) {
@@ -232,48 +241,52 @@ abstract class DexMergingTask : NonIncrementalTask() {
                             } else {
                                 AndroidArtifacts.ArtifactScope.EXTERNAL
                             }
-                             variantScope.getArtifactFileCollection(
+                            component.variantDependencies.getArtifactFileCollection(
                                 AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
                                 artifactScope,
                                 AndroidArtifacts.ArtifactType.DEX,
                                 attributes
                             )
                         } else {
-                            variantScope.artifacts.getFinalProductAsFileCollection(InternalArtifactType.EXTERNAL_LIBS_DEX_ARCHIVE).get()
+                            component.globalScope.project.files(
+                                component.artifacts.getFinalProductAsFileCollection(InternalArtifactType.EXTERNAL_LIBS_DEX_ARCHIVE),
+                                component.artifacts.getFinalProductAsFileCollection(InternalArtifactType.EXTERNAL_LIBS_DEX_ARCHIVE_WITH_ARTIFACT_TRANSFORMS)
+                            )
                         }
                     }
                     DexMergingAction.MERGE_LIBRARY_PROJECTS -> {
                         return if (dexingUsingArtifactTransforms) {
-                            variantScope.getArtifactFileCollection(
+                            component.variantDependencies.getArtifactFileCollection(
                                 AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
                                 AndroidArtifacts.ArtifactScope.PROJECT,
                                 AndroidArtifacts.ArtifactType.DEX,
                                 attributes
                             )
                         } else {
-                            variantScope.artifacts.getFinalProductAsFileCollection(InternalArtifactType.SUB_PROJECT_DEX_ARCHIVE).get()
+                            component.globalScope.project.files(
+                                component.artifacts.getFinalProductAsFileCollection(InternalArtifactType.SUB_PROJECT_DEX_ARCHIVE));
                         }
                     }
                     DexMergingAction.MERGE_PROJECT -> {
                         val files =
-                            variantScope.globalScope.project.files(
-                                variantScope.artifacts.getFinalProductAsFileCollection(InternalArtifactType.PROJECT_DEX_ARCHIVE),
-                                variantScope.artifacts.getFinalProductAsFileCollection(InternalArtifactType.MIXED_SCOPE_DEX_ARCHIVE)
+                            component.globalScope.project.files(
+                                component.artifacts.getFinalProductAsFileCollection(InternalArtifactType.PROJECT_DEX_ARCHIVE),
+                                component.artifacts.getFinalProductAsFileCollection(InternalArtifactType.MIXED_SCOPE_DEX_ARCHIVE)
                             )
 
-                        val variantType = variantScope.type
-                        if (variantType.isTestComponent && variantType.isApk) {
-                            val testedVariantData =
-                                checkNotNull(variantScope.testedVariantData) { "Test component without testedVariantData" }
-                            if (dexingUsingArtifactTransforms && testedVariantData.type.isAar) {
-                                // If dexing using artifact transforms, library production code will
-                                // be dex'ed in a task, so we need to fetch the output directly.
-                                // Otherwise, it will be in the dex'ed in the dex builder transform.
-                                files.from(
-                                    testedVariantData.scope.artifacts.getOperations().getAll(
-                                        MultipleArtifactType.DEX
+                        val variantType = component.variantType
+                        if (variantType.isApk) {
+                            component.onTestedConfig {
+                                if (dexingUsingArtifactTransforms && it.variantType.isAar) {
+                                    // If dexing using artifact transforms, library production code will
+                                    // be dex'ed in a task, so we need to fetch the output directly.
+                                    // Otherwise, it will be in the dex'ed in the dex builder transform.
+                                    files.from(
+                                        it.artifacts.getOperations().getAll(
+                                            MultipleArtifactType.DEX
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
 
@@ -283,25 +296,19 @@ abstract class DexMergingTask : NonIncrementalTask() {
                         // technically, the Provider<> may not be needed, but the code would
                         // then assume that EXTERNAL_LIBS_DEX has already been registered by a
                         // Producer. Better to execute as late as possible.
-                        val external = variantScope.globalScope.project.provider {
+                        return component.globalScope.project.files(
+                            forAction(DexMergingAction.MERGE_PROJECT),
+                            forAction(DexMergingAction.MERGE_LIBRARY_PROJECTS),
                             if (dexingType == DexingType.LEGACY_MULTIDEX) {
                                 // we have to dex it
                                 forAction(DexMergingAction.MERGE_EXTERNAL_LIBS)
                             } else {
                                 // we merge external dex in a separate task
-                                if (variantScope.artifacts.hasFinalProducts(MultipleArtifactType.EXTERNAL_LIBS_DEX)) {
-                                    variantScope.globalScope.project.files(
-                                        variantScope.artifacts.getOperations().getAll(
-                                            MultipleArtifactType.EXTERNAL_LIBS_DEX
-                                        )
-                                    )
-                                } else variantScope.globalScope.project.files()
-                            }
-                        }
-                        return variantScope.globalScope.project.files(
-                                forAction(DexMergingAction.MERGE_PROJECT),
-                                forAction(DexMergingAction.MERGE_LIBRARY_PROJECTS),
-                                external)
+                                component.artifacts.getOperations().getAll(
+                                    MultipleArtifactType.EXTERNAL_LIBS_DEX)
+                                    .map { component.globalScope.project.files(it) }
+                                    .orElse(component.globalScope.project.files())
+                            })
                     }
                 }
             }
@@ -315,11 +322,15 @@ abstract class DexMergingTask : NonIncrementalTask() {
          * so this only matters for the library projects dex files. See [LIBRARIES_MERGING_THRESHOLD]
          * for details.
          */
-        private fun getMergingThreshold(action: DexMergingAction, task: DexMergingTask): Int {
+        private fun getMergingThreshold(
+            action: DexMergingAction,
+            task: DexMergingTask,
+            component: ComponentPropertiesImpl
+        ): Int {
             return when (action) {
                 DexMergingAction.MERGE_LIBRARY_PROJECTS ->
                     when {
-                        variantScope.variantDslInfo.minSdkVersionWithTargetDeviceApi.featureLevel < 23 ->
+                        component.variantDslInfo.minSdkVersionWithTargetDeviceApi.featureLevel < 23 ->
                             LIBRARIES_MERGING_THRESHOLD
                         else -> LIBRARIES_M_PLUS_MAX_THRESHOLD
                     }

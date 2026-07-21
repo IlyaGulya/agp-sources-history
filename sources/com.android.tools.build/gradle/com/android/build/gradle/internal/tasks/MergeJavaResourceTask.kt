@@ -16,6 +16,7 @@
 package com.android.build.gradle.internal.tasks
 
 import com.android.SdkConstants
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.api.transform.QualifiedContent.DefaultContentType.RESOURCES
 import com.android.build.api.transform.QualifiedContent.Scope.EXTERNAL_LIBRARIES
 import com.android.build.api.transform.QualifiedContent.Scope.PROJECT
@@ -30,7 +31,6 @@ import com.android.build.gradle.internal.scope.InternalArtifactType.JAVAC
 import com.android.build.gradle.internal.scope.InternalArtifactType.JAVA_RES
 import com.android.build.gradle.internal.scope.InternalArtifactType.MERGED_JAVA_RES
 import com.android.build.gradle.internal.scope.InternalArtifactType.RUNTIME_R_CLASS_CLASSES
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.ide.common.resources.FileStatus
 import org.gradle.api.file.FileCollection
@@ -170,37 +170,41 @@ abstract class MergeJavaResourceTask
 
     class CreationAction(
         private val mergeScopes: Collection<ScopeType>,
-        variantScope: VariantScope
-    ) : VariantTaskCreationAction<MergeJavaResourceTask>(variantScope) {
+        componentProperties: ComponentPropertiesImpl
+    ) : VariantTaskCreationAction<MergeJavaResourceTask, ComponentPropertiesImpl>(
+        componentProperties
+    ) {
 
         private val projectJavaResFromStreams: FileCollection?
 
         override val name: String
-            get() = variantScope.getTaskName("merge", "JavaResource")
+            get() = computeTaskName("merge", "JavaResource")
 
         override val type: Class<MergeJavaResourceTask>
             get() = MergeJavaResourceTask::class.java
 
         init {
-            if (variantScope.needsJavaResStreams) {
+            if (componentProperties.variantScope.needsJavaResStreams) {
                 // Because ordering matters for Transform pipeline, we need to fetch the java res
                 // as soon as this creation action is instantiated, if needed.
                 projectJavaResFromStreams =
-                    variantScope.transformManager
+                    componentProperties.transformManager
                         .getPipelineOutputAsFileCollection(PROJECT_RESOURCES)
                 // We must also consume corresponding streams to avoid duplicates; any downstream
                 // transforms will use the merged-java-res stream instead.
-                variantScope.transformManager
+                componentProperties.transformManager
                     .consumeStreams(mutableSetOf(PROJECT), setOf(RESOURCES))
             } else {
                 projectJavaResFromStreams = null
             }
         }
 
-        override fun handleProvider(taskProvider: TaskProvider<out MergeJavaResourceTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out MergeJavaResourceTask>
+        ) {
             super.handleProvider(taskProvider)
 
-            variantScope.artifacts.producesFile(
+            creationConfig.artifacts.producesFile(
                 MERGED_JAVA_RES,
                 taskProvider,
                 MergeJavaResourceTask::outputFile,
@@ -208,21 +212,23 @@ abstract class MergeJavaResourceTask
             )
         }
 
-        override fun configure(task: MergeJavaResourceTask) {
+        override fun configure(
+            task: MergeJavaResourceTask
+        ) {
             super.configure(task)
 
             if (projectJavaResFromStreams != null) {
                 task.projectJavaResAsJars = projectJavaResFromStreams
                 task.unfilteredProjectJavaRes = projectJavaResFromStreams
             } else {
-                val projectJavaRes = getProjectJavaRes(variantScope)
+                val projectJavaRes = getProjectJavaRes(creationConfig)
                 task.unfilteredProjectJavaRes = projectJavaRes
                 task.projectJavaRes = projectJavaRes.asFileTree.filter(spec)
             }
 
             if (mergeScopes.contains(SUB_PROJECTS)) {
                 task.subProjectJavaRes =
-                    variantScope.getArtifactFileCollection(
+                    creationConfig.variantDependencies.getArtifactFileCollection(
                         AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
                         AndroidArtifacts.ArtifactScope.PROJECT,
                         AndroidArtifacts.ArtifactType.JAVA_RES
@@ -231,12 +237,12 @@ abstract class MergeJavaResourceTask
 
             if (mergeScopes.contains(EXTERNAL_LIBRARIES) || mergeScopes.contains(LOCAL_DEPS)) {
                 // Local jars are treated the same as external libraries
-                task.externalLibJavaRes = getExternalLibJavaRes(variantScope, mergeScopes)
+                task.externalLibJavaRes = getExternalLibJavaRes(creationConfig, mergeScopes)
             }
 
             if (mergeScopes.contains(FEATURES)) {
                 task.featureJavaRes =
-                    variantScope.getArtifactFileCollection(
+                    creationConfig.variantDependencies.getArtifactFileCollection(
                         AndroidArtifacts.ConsumedConfigType.REVERSE_METADATA_VALUES,
                         AndroidArtifacts.ArtifactScope.PROJECT,
                         AndroidArtifacts.ArtifactType.REVERSE_METADATA_JAVA_RES
@@ -246,15 +252,14 @@ abstract class MergeJavaResourceTask
             task.mergeScopes = mergeScopes
             task.packagingOptions =
                 SerializablePackagingOptions(
-                    variantScope.globalScope.extension.packagingOptions
+                    creationConfig.globalScope.extension.packagingOptions
                 )
             task.intermediateDir =
-                variantScope.getIncrementalDir("${variantScope.name}-mergeJavaRes")
+                creationConfig.paths.getIncrementalDir("${creationConfig.name}-mergeJavaRes")
             task.cacheDir = File(task.intermediateDir, "zip-cache")
             task.incrementalStateFile = File(task.intermediateDir, "merge-state")
             task.noCompress =
-                variantScope.globalScope.extension.aaptOptions.noCompress?.toList()?.sorted() ?:
-                        listOf()
+                creationConfig.globalScope.extension.aaptOptions.noCompress.toList().sorted()
         }
     }
 
@@ -271,32 +276,35 @@ abstract class MergeJavaResourceTask
 }
 
 fun getProjectJavaRes(
-    scope: VariantScope
+    componentProperties: ComponentPropertiesImpl
 ): FileCollection {
-    val javaRes = scope.globalScope.project.files()
-    javaRes.from(scope.artifacts.getFinalProduct(JAVA_RES))
+    val javaRes = componentProperties.globalScope.project.files()
+    javaRes.from(componentProperties.artifacts.getFinalProduct(JAVA_RES))
     // use lazy file collection here in case an annotationProcessor dependency is add via
     // Configuration.defaultDependencies(), for example.
     javaRes.from(
         Callable {
-            if (projectHasAnnotationProcessors(scope)) {
-                scope.artifacts.getFinalProduct(JAVAC)
+            if (projectHasAnnotationProcessors(componentProperties)) {
+                componentProperties.artifacts.getFinalProduct(JAVAC)
             } else {
                 listOf<File>()
             }
         }
     )
-    javaRes.from(scope.variantData.allPreJavacGeneratedBytecode)
-    javaRes.from(scope.variantData.allPostJavacGeneratedBytecode)
-    javaRes.from(scope.artifacts.getFinalProductAsFileCollection(RUNTIME_R_CLASS_CLASSES))
+    javaRes.from(componentProperties.variantData.allPreJavacGeneratedBytecode)
+    javaRes.from(componentProperties.variantData.allPostJavacGeneratedBytecode)
+    javaRes.from(componentProperties.artifacts.getFinalProductAsFileCollection(RUNTIME_R_CLASS_CLASSES))
     return javaRes
 }
 
-private fun getExternalLibJavaRes(scope: VariantScope, mergeScopes: Collection<ScopeType>): FileCollection {
-    val externalLibJavaRes = scope.globalScope.project.files()
+private fun getExternalLibJavaRes(
+    componentProperties: ComponentPropertiesImpl,
+    mergeScopes: Collection<ScopeType>
+): FileCollection {
+    val externalLibJavaRes = componentProperties.globalScope.project.files()
     if (mergeScopes.contains(EXTERNAL_LIBRARIES)) {
         externalLibJavaRes.from(
-            scope.getArtifactFileCollection(
+            componentProperties.variantDependencies.getArtifactFileCollection(
                 AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
                 AndroidArtifacts.ArtifactScope.EXTERNAL,
                 AndroidArtifacts.ArtifactType.JAVA_RES
@@ -304,13 +312,13 @@ private fun getExternalLibJavaRes(scope: VariantScope, mergeScopes: Collection<S
         )
     }
     if (mergeScopes.contains(LOCAL_DEPS)) {
-        externalLibJavaRes.from(scope.localPackagedJars)
+        externalLibJavaRes.from(componentProperties.variantScope.localPackagedJars)
     }
     return externalLibJavaRes
 }
 
 /** Returns true if anything's been added to the annotation processor configuration. */
-fun projectHasAnnotationProcessors(scope: VariantScope): Boolean {
-    val config = scope.variantDependencies.annotationProcessorConfiguration
+fun projectHasAnnotationProcessors(componentProperties: ComponentPropertiesImpl): Boolean {
+    val config = componentProperties.variantDependencies.annotationProcessorConfiguration
     return config.incoming.dependencies.isNotEmpty()
 }

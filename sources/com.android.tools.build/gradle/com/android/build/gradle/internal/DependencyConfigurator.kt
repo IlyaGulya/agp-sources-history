@@ -18,6 +18,11 @@ package com.android.build.gradle.internal
 
 import com.android.build.api.attributes.BuildTypeAttr.Companion.ATTRIBUTE
 import com.android.build.api.attributes.ProductFlavorAttr
+import com.android.build.api.component.impl.ComponentPropertiesImpl
+import com.android.build.api.component.impl.TestComponentImpl
+import com.android.build.api.component.impl.TestComponentPropertiesImpl
+import com.android.build.api.variant.impl.VariantImpl
+import com.android.build.api.variant.impl.VariantPropertiesImpl
 import com.android.build.gradle.internal.dependency.AarResourcesCompilerTransform
 import com.android.build.gradle.internal.dependency.AarToClassTransform
 import com.android.build.gradle.internal.dependency.AarTransform
@@ -27,25 +32,37 @@ import com.android.build.gradle.internal.dependency.AndroidXDependencySubstituti
 import com.android.build.gradle.internal.dependency.ClassesDirToClassesTransform
 import com.android.build.gradle.internal.dependency.ExtractAarTransform
 import com.android.build.gradle.internal.dependency.ExtractProGuardRulesTransform
+import com.android.build.gradle.internal.dependency.FilterShrinkerRulesTransform
 import com.android.build.gradle.internal.dependency.GenericTransformParameters
 import com.android.build.gradle.internal.dependency.IdentityTransform
 import com.android.build.gradle.internal.dependency.JetifyTransform
-import com.android.build.gradle.internal.dependency.LibraryDefinedSymbolTableTransform
 import com.android.build.gradle.internal.dependency.LibrarySymbolTableTransform
 import com.android.build.gradle.internal.dependency.MockableJarTransform
 import com.android.build.gradle.internal.dependency.ModelArtifactCompatibilityRule.Companion.setUp
 import com.android.build.gradle.internal.dependency.PlatformAttrTransform
+import com.android.build.gradle.internal.dependency.VersionedCodeShrinker.Companion.of
+import com.android.build.gradle.internal.dependency.getDesugarLibConfigurations
+import com.android.build.gradle.internal.dependency.getDexingArtifactConfigurations
+import com.android.build.gradle.internal.dependency.registerDexingOutputSplitTransform
 import com.android.build.gradle.internal.dsl.BaseFlavor
 import com.android.build.gradle.internal.dsl.BuildType
+import com.android.build.gradle.internal.dsl.DefaultConfig
 import com.android.build.gradle.internal.dsl.ProductFlavor
+import com.android.build.gradle.internal.dsl.SigningConfig
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.res.getAapt2FromMavenAndVersion
+import com.android.build.gradle.internal.res.namespaced.AutoNamespacePreProcessTransform
+import com.android.build.gradle.internal.res.namespaced.AutoNamespaceTransform
+import com.android.build.gradle.internal.res.namespaced.init
 import com.android.build.gradle.internal.scope.GlobalScope
 import com.android.build.gradle.internal.services.getAapt2DaemonBuildService
+import com.android.build.gradle.internal.utils.getDesugarLibConfig
+import com.android.build.gradle.internal.variant.ComponentInfo
 import com.android.build.gradle.internal.variant.VariantInputModel
 import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.options.StringOption
 import com.android.build.gradle.options.SyncOptions
+import com.android.builder.model.CodeShrinker
 import com.google.common.base.Strings
 import com.google.common.collect.Maps
 import org.gradle.api.Action
@@ -67,10 +84,10 @@ class DependencyConfigurator(
     private val project: Project,
     private val projectName: String,
     private val globalScope: GlobalScope,
-    private val variantInputModel: VariantInputModel
+    private val variantInputModel: VariantInputModel<DefaultConfig, BuildType, ProductFlavor, SigningConfig>
 ) {
 
-    fun configureDependencies() {
+    fun configureGeneralTransforms(): DependencyConfigurator {
         val dependencies: DependencyHandler = project.dependencies
 
         // USE_ANDROID_X indicates that the developers want to be in the AndroidX world, whereas
@@ -101,6 +118,14 @@ class DependencyConfigurator(
         val jetifierBlackList = Strings.nullToEmpty(
             globalScope.projectOptions[StringOption.JETIFIER_BLACKLIST]
         )
+        val autoNamespaceDependencies =
+            globalScope.extension.aaptOptions.namespaced &&
+                    globalScope.projectOptions[BooleanOption.CONVERT_NON_NAMESPACED_DEPENDENCIES]
+        val jetifiedAarOutputType = if (autoNamespaceDependencies) {
+            AndroidArtifacts.ArtifactType.MAYBE_NON_NAMESPACED_PROCESSED_AAR
+        } else {
+            AndroidArtifacts.ArtifactType.PROCESSED_AAR
+        }
         if (globalScope.projectOptions[BooleanOption.ENABLE_JETIFIER]) {
             dependencies.registerTransform(
                 JetifyTransform::class.java
@@ -114,7 +139,7 @@ class DependencyConfigurator(
                 )
                 spec.to.attribute(
                     ArtifactAttributes.ARTIFACT_FORMAT,
-                    AndroidArtifacts.ArtifactType.PROCESSED_AAR.type
+                    jetifiedAarOutputType.type
                 )
             }
             dependencies.registerTransform(
@@ -143,7 +168,7 @@ class DependencyConfigurator(
                 )
                 spec.to.attribute(
                     ArtifactAttributes.ARTIFACT_FORMAT,
-                    AndroidArtifacts.ArtifactType.PROCESSED_AAR.type
+                    jetifiedAarOutputType.type
                 )
             }
             dependencies.registerTransform(
@@ -236,10 +261,7 @@ class DependencyConfigurator(
         }
         val sharedLibSupport = globalScope
             .projectOptions[BooleanOption.CONSUME_DEPENDENCIES_AS_SHARED_LIBRARIES]
-        val autoNamespaceDependencies =
-            (globalScope.extension.aaptOptions.namespaced
-                    && globalScope
-                .projectOptions[BooleanOption.CONVERT_NON_NAMESPACED_DEPENDENCIES])
+
         for (transformTarget in AarTransform.getTransformTargets()) {
             dependencies.registerTransform(
                 AarTransform::class.java
@@ -247,9 +269,6 @@ class DependencyConfigurator(
                 spec.parameters.projectName.set(projectName)
                 spec.parameters.targetType.set(transformTarget)
                 spec.parameters.sharedLibSupport.set(sharedLibSupport)
-                spec.parameters
-                    .autoNamespaceDependencies
-                    .set(autoNamespaceDependencies)
                 spec.from.attribute(
                     ArtifactAttributes.ARTIFACT_FORMAT,
                     AndroidArtifacts.ArtifactType.EXPLODED_AAR.type
@@ -316,8 +335,6 @@ class DependencyConfigurator(
             )
             reg.parameters { params: AarToClassTransform.Params ->
                 params.forCompileUse.set(true)
-                params.autoNamespaceDependencies
-                    .set(autoNamespaceDependencies)
                 params.generateRClassJar
                     .set(
                         globalScope.projectOptions.get(
@@ -350,8 +367,7 @@ class DependencyConfigurator(
             )
             reg.parameters { params: AarToClassTransform.Params ->
                 params.forCompileUse.set(false)
-                params.autoNamespaceDependencies
-                    .set(autoNamespaceDependencies)
+
                 params.generateRClassJar.set(false)
             }
         }
@@ -386,20 +402,41 @@ class DependencyConfigurator(
                 )
         }
         if (autoNamespaceDependencies) {
-            dependencies.registerTransform(
-                LibraryDefinedSymbolTableTransform::class.java
-            ) { spec: TransformSpec<GenericTransformParameters> ->
-                spec.parameters.projectName.set(projectName)
+            dependencies.registerTransform(AutoNamespacePreProcessTransform::class.java) { spec ->
                 spec.from.attribute(
                     ArtifactAttributes.ARTIFACT_FORMAT,
-                    AndroidArtifacts.ArtifactType.EXPLODED_AAR.type
+                    AndroidArtifacts.ArtifactType.MAYBE_NON_NAMESPACED_PROCESSED_AAR.type
                 )
-                spec.to
-                    .attribute(
+                spec.to.attribute(
                         ArtifactAttributes.ARTIFACT_FORMAT,
-                        AndroidArtifacts.ArtifactType.DEFINED_ONLY_SYMBOL_LIST.type
-                    )
+                        AndroidArtifacts.ArtifactType.PREPROCESSED_AAR_FOR_AUTO_NAMESPACE.type
+                )
+                spec.parameters.init(globalScope)
             }
+            dependencies.registerTransform(AutoNamespacePreProcessTransform::class.java) { spec ->
+                spec.from.attribute(
+                    ArtifactAttributes.ARTIFACT_FORMAT,
+                    AndroidArtifacts.ArtifactType.JAR.type
+                )
+                spec.to.attribute(
+                    ArtifactAttributes.ARTIFACT_FORMAT,
+                    AndroidArtifacts.ArtifactType.PREPROCESSED_AAR_FOR_AUTO_NAMESPACE.type
+                )
+                spec.parameters.init(globalScope)
+            }
+
+            dependencies.registerTransform(AutoNamespaceTransform::class.java) { spec ->
+                spec.from.attribute(
+                    ArtifactAttributes.ARTIFACT_FORMAT,
+                    AndroidArtifacts.ArtifactType.PREPROCESSED_AAR_FOR_AUTO_NAMESPACE.type
+                )
+                spec.to.attribute(
+                    ArtifactAttributes.ARTIFACT_FORMAT,
+                    AndroidArtifacts.ArtifactType.PROCESSED_AAR.type
+                )
+                spec.parameters.init(globalScope)
+            }
+
         }
         // Transform to go from external jars to CLASSES and JAVA_RES artifacts. This returns the
         // same exact file but with different types, since a jar file can contain both.
@@ -489,13 +526,13 @@ class DependencyConfigurator(
         setBuildTypeStrategy(schema)
         setupFlavorStrategy(schema)
         setupModelStrategy(schema)
+
+        return this
     }
 
     private fun setBuildTypeStrategy(schema: AttributesSchema) {
         // this is ugly but because the getter returns a very base class we have no choices.
-        val dslBuildTypes = variantInputModel.buildTypes.values.convertTo(BuildType::class.java) {
-                it.buildType
-            }
+        val dslBuildTypes = variantInputModel.buildTypes.values.map { it.buildType }
 
         if (dslBuildTypes.isEmpty()) {
             return
@@ -536,9 +573,7 @@ class DependencyConfigurator(
 
     private fun setupFlavorStrategy(schema: AttributesSchema) {
         // this is ugly but because the getter returns a very base class we have no choices.
-        val flavors = variantInputModel.productFlavors.values.convertTo(ProductFlavor::class.java) {
-                it.productFlavor
-            }
+        val flavors = variantInputModel.productFlavors.values.map { it.productFlavor }
 
         // first loop through all the flavors and collect for each dimension, and each value, its
         // fallbacks
@@ -558,7 +593,7 @@ class DependencyConfigurator(
             handleMissingDimensions(alternateMap, flavor)
         }
         // also handle missing dimensions on the default config.
-        handleMissingDimensions(alternateMap, variantInputModel.defaultConfig.productFlavor)
+        handleMissingDimensions(alternateMap, variantInputModel.defaultConfigData.defaultConfig)
         // now that we know we have all the fallbacks for each dimensions, we can create the
         // rule instances.
         for ((key, value) in alternateMap) {
@@ -574,14 +609,80 @@ class DependencyConfigurator(
         alternateMap: MutableMap<String, MutableMap<String, List<String>>>,
         flavor: BaseFlavor
     ) {
-        val missingStrategies =
-            flavor.missingDimensionStrategies
+        val missingStrategies = flavor.missingDimensionStrategies
         if (missingStrategies.isNotEmpty()) {
             for ((dimension, value) in missingStrategies) {
                 val dimensionMap = alternateMap.computeIfAbsent(dimension) { Maps.newHashMap() }
                 dimensionMap[value.requested] = value.fallbacks
             }
         }
+    }
+
+    /** Configure artifact transforms that require variant-specific attribute information.  */
+    fun <VariantT: VariantImpl<VariantPropertiesT>, VariantPropertiesT: VariantPropertiesImpl> configureVariantTransforms(
+        variants: List<ComponentInfo<VariantT, VariantPropertiesT>>,
+        testComponents: List<ComponentInfo<TestComponentImpl<out TestComponentPropertiesImpl>, TestComponentPropertiesImpl>>
+    ): DependencyConfigurator {
+        val allComponents: List<ComponentPropertiesImpl> = (variants + testComponents).map { it.properties }
+
+        val dependencies = project.dependencies
+        if (globalScope.projectOptions[BooleanOption.ENABLE_DEXING_ARTIFACT_TRANSFORM]) {
+            for (artifactConfiguration in getDexingArtifactConfigurations(
+                allComponents
+            )) {
+                artifactConfiguration.registerTransform(
+                    globalScope.project.name,
+                    dependencies,
+                    globalScope.bootClasspath,
+                    getDesugarLibConfig(globalScope.project),
+                    SyncOptions.getErrorFormatMode(globalScope.projectOptions),
+                    globalScope.projectOptions.get(BooleanOption.ENABLE_INCREMENTAL_DEXING_V2)
+                )
+            }
+        }
+        if (globalScope.projectOptions[BooleanOption.ENABLE_PROGUARD_RULES_EXTRACTION]) {
+            val shrinkers: Set<CodeShrinker> = allComponents
+                .asSequence()
+                .map { it.variantScope.codeShrinker }
+                .filterNotNull()
+                .toSet()
+            for (shrinker in shrinkers) {
+                dependencies.registerTransform(
+                    FilterShrinkerRulesTransform::class.java
+                ) { reg: TransformSpec<FilterShrinkerRulesTransform.Parameters> ->
+                    reg.from
+                        .attribute(
+                            ArtifactAttributes.ARTIFACT_FORMAT,
+                            AndroidArtifacts.ArtifactType.UNFILTERED_PROGUARD_RULES.type
+                        )
+                    reg.to
+                        .attribute(
+                            ArtifactAttributes.ARTIFACT_FORMAT,
+                            AndroidArtifacts.ArtifactType.FILTERED_PROGUARD_RULES.type
+                        )
+                    reg.from.attribute(
+                        VariantManager.SHRINKER_ATTR,
+                        shrinker.toString()
+                    )
+                    reg.to.attribute(
+                        VariantManager.SHRINKER_ATTR,
+                        shrinker.toString()
+                    )
+                    reg.parameters { params: FilterShrinkerRulesTransform.Parameters ->
+                        params.shrinker
+                            .set(of(shrinker))
+                        params.projectName.set(project.name)
+                    }
+                }
+            }
+        }
+
+        for (configuration in getDesugarLibConfigurations(allComponents)) {
+            configuration.registerTransform(dependencies)
+        }
+        registerDexingOutputSplitTransform(dependencies)
+
+        return this
     }
 
     companion object {
@@ -605,14 +706,4 @@ class DependencyConfigurator(
                 }
         }
     }
-}
-
-private fun <F, T> Collection<F>.convertTo(
-    convertedType: Class<T>,
-    function: (F) -> T
-): List<T> {
-    return asSequence()
-        .map(function)
-        .filterIsInstance(convertedType)
-        .toList()
 }

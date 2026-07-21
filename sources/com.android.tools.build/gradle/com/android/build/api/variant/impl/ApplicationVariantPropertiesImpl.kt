@@ -15,18 +15,80 @@
  */
 package com.android.build.api.variant.impl
 
-import com.android.build.api.artifact.Operations
 import com.android.build.api.component.ComponentIdentity
 import com.android.build.api.variant.ApplicationVariantProperties
-import com.android.build.gradle.internal.api.dsl.DslScope
+import com.android.build.gradle.internal.component.ApplicationCreationConfig
+import com.android.build.gradle.internal.core.VariantDslInfo
+import com.android.build.gradle.internal.core.VariantSources
+import com.android.build.gradle.internal.dependency.VariantDependencies
+import com.android.build.gradle.internal.pipeline.TransformManager
+import com.android.build.gradle.internal.scope.BuildArtifactsHolder
+import com.android.build.gradle.internal.scope.BuildFeatureValues
+import com.android.build.gradle.internal.scope.GlobalScope
+import com.android.build.gradle.internal.services.VariantPropertiesApiServices
 import com.android.build.gradle.internal.scope.VariantScope
+import com.android.build.gradle.internal.services.TaskCreationServices
+import com.android.build.gradle.internal.variant.BaseVariantData
+import com.android.build.gradle.internal.variant.VariantPathHelper
+import org.gradle.api.provider.Property
+import java.util.concurrent.Callable
 import javax.inject.Inject
 
-internal open class ApplicationVariantPropertiesImpl @Inject constructor(
-    dslScope: DslScope,
+open class ApplicationVariantPropertiesImpl @Inject constructor(
+    componentIdentity: ComponentIdentity,
+    buildFeatureValues: BuildFeatureValues,
+    variantDslInfo: VariantDslInfo,
+    variantDependencies: VariantDependencies,
+    variantSources: VariantSources,
+    paths: VariantPathHelper,
+    artifacts: BuildArtifactsHolder,
     variantScope: VariantScope,
-    operations: Operations,
-    configuration: ComponentIdentity
-) : VariantPropertiesImpl(dslScope, variantScope, operations, configuration),
-    ApplicationVariantProperties {
+    variantData: BaseVariantData,
+    variantDependencyInfo: com.android.build.api.variant.DependenciesInfo,
+    transformManager: TransformManager,
+    variantPropertiesApiServices: VariantPropertiesApiServices,
+    taskCreationServices: TaskCreationServices,
+    globalScope: GlobalScope
+) : VariantPropertiesImpl(
+    componentIdentity,
+    buildFeatureValues,
+    variantDslInfo,
+    variantDependencies,
+    variantSources,
+    paths,
+    artifacts,
+    variantScope,
+    variantData,
+    transformManager,
+    variantPropertiesApiServices,
+    taskCreationServices,
+    globalScope
+), ApplicationVariantProperties, ApplicationCreationConfig {
+
+    // ---------------------------------------------------------------------------------------------
+    // PUBLIC API
+    // ---------------------------------------------------------------------------------------------
+
+    override val debuggable: Boolean
+        get() = variantDslInfo.isDebuggable
+
+    override val applicationId: Property<String> = variantPropertiesApiServices.propertyOf(String::class.java, Callable{variantDslInfo.applicationId})
+
+    override val embedsMicroApp: Boolean
+        get() = variantDslInfo.isEmbedMicroApp
+
+    override val manifestPlaceholders: Map<String, Any>
+        get() = variantDslInfo.manifestPlaceholders
+
+    override val dependenciesInfo: com.android.build.api.variant.DependenciesInfo = variantDependencyInfo
+
+    // ---------------------------------------------------------------------------------------------
+    // INTERNAL API
+    // ---------------------------------------------------------------------------------------------
+
+    override val testOnlyApk: Boolean
+        get() = variantScope.isTestOnly
+
+    override val needAssetPackTasks: Property<Boolean> =
+        variantPropertiesApiServices.propertyOf(Boolean::class.java, false)
 }

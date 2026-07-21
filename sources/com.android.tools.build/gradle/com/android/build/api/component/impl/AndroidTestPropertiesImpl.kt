@@ -16,17 +16,82 @@
 
 package com.android.build.api.component.impl
 
-import com.android.build.api.artifact.Operations
 import com.android.build.api.component.AndroidTestProperties
 import com.android.build.api.component.ComponentIdentity
-import com.android.build.gradle.internal.api.dsl.DslScope
+import com.android.build.api.variant.impl.VariantPropertiesImpl
+import com.android.build.gradle.internal.component.ApkCreationConfig
+import com.android.build.gradle.internal.core.VariantDslInfo
+import com.android.build.gradle.internal.core.VariantSources
+import com.android.build.gradle.internal.dependency.VariantDependencies
+import com.android.build.gradle.internal.pipeline.TransformManager
+import com.android.build.gradle.internal.scope.BuildArtifactsHolder
+import com.android.build.gradle.internal.scope.BuildFeatureValues
+import com.android.build.gradle.internal.scope.GlobalScope
+import com.android.build.gradle.internal.services.VariantPropertiesApiServices
 import com.android.build.gradle.internal.scope.VariantScope
+import com.android.build.gradle.internal.services.TaskCreationServices
+import com.android.build.gradle.internal.variant.BaseVariantData
+import com.android.build.gradle.internal.variant.VariantPathHelper
+import org.gradle.api.provider.Property
+import java.util.concurrent.Callable
 import javax.inject.Inject
 
-internal open class AndroidTestPropertiesImpl @Inject constructor(
-    dslScope: DslScope,
+open class AndroidTestPropertiesImpl @Inject constructor(
+    componentIdentity: ComponentIdentity,
+    buildFeatureValues: BuildFeatureValues,
+    variantDslInfo: VariantDslInfo,
+    variantDependencies: VariantDependencies,
+    variantSources: VariantSources,
+    paths: VariantPathHelper,
+    artifacts: BuildArtifactsHolder,
     variantScope: VariantScope,
-    operations: Operations,
-    configuration: ComponentIdentity
-) : ComponentPropertiesImpl(dslScope, variantScope, operations, configuration), AndroidTestProperties {
+    variantData: BaseVariantData,
+    testedVariant: VariantPropertiesImpl,
+    transformManager: TransformManager,
+    variantPropertiesApiServices: VariantPropertiesApiServices,
+    taskCreationServices: TaskCreationServices,
+    globalScope: GlobalScope
+) : TestComponentPropertiesImpl(
+    componentIdentity,
+    buildFeatureValues,
+    variantDslInfo,
+    variantDependencies,
+    variantSources,
+    paths,
+    artifacts,
+    variantScope,
+    variantData,
+    testedVariant,
+    transformManager,
+    variantPropertiesApiServices,
+    taskCreationServices,
+    globalScope
+), AndroidTestProperties, ApkCreationConfig {
+
+    // ---------------------------------------------------------------------------------------------
+    // PUBLIC API
+    // ---------------------------------------------------------------------------------------------
+
+    override val debuggable: Boolean
+        get() = variantDslInfo.isDebuggable
+
+    override val applicationId: Property<String> = variantPropertiesApiServices.propertyOf(
+        String::class.java,
+        Callable { variantDslInfo.testApplicationId })
+
+    override val manifestPlaceholders: Map<String, Any>
+        get() = variantDslInfo.manifestPlaceholders
+
+    // ---------------------------------------------------------------------------------------------
+    // INTERNAL API
+    // ---------------------------------------------------------------------------------------------
+
+    // always false for this type
+    override val embedsMicroApp: Boolean
+        get() = false
+
+    // always true for this kind
+    override val testOnlyApk: Boolean
+        get() = true
 }
+

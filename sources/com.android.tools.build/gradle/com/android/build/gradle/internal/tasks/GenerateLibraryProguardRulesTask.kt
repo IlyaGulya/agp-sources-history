@@ -17,9 +17,9 @@
 package com.android.build.gradle.internal.tasks
 
 import com.android.SdkConstants
-import com.android.build.gradle.internal.scope.ExistingBuildElements
+import com.android.build.api.component.impl.ComponentPropertiesImpl
+import com.android.build.api.variant.impl.BuiltArtifactsLoaderImpl
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.tasks.getChangesInSerializableForm
 import com.android.builder.files.SerializableChange
@@ -43,6 +43,7 @@ import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import java.io.File
 import java.io.Serializable
+import java.lang.RuntimeException
 import java.nio.file.Files
 import javax.inject.Inject
 import javax.xml.parsers.DocumentBuilderFactory
@@ -72,9 +73,9 @@ abstract class GenerateLibraryProguardRulesTask : NewIncrementalTask() {
 
     override fun doTaskAction(inputChanges: InputChanges) {
         val isIncremental = inputChanges.isIncremental
-        val manifest = Iterables.getOnlyElement(
-          ExistingBuildElements.from(InternalArtifactType.MERGED_MANIFESTS, manifestFiles))
-          .outputFile
+        val manifest =
+            BuiltArtifactsLoaderImpl().load(manifestFiles)?.elements?.first()?.outputFile
+                ?: throw RuntimeException("Cannot find manifest file")
         val changedResources = if (isIncremental) {
             inputChanges.getChangesInSerializableForm(inputResourcesDir).changes
         } else {
@@ -84,7 +85,7 @@ abstract class GenerateLibraryProguardRulesTask : NewIncrementalTask() {
             it.submit(
               GenerateProguardRulesRunnable::class.java,
               GenerateProguardRulesParams(
-                manifestFile = manifest,
+                manifestFile = File(manifest),
                 proguardOutputFile = proguardOutputFile.get().asFile,
                 inputResourcesDir = inputResourcesDir.get().asFile,
                 changedResources = changedResources,
@@ -118,18 +119,22 @@ abstract class GenerateLibraryProguardRulesTask : NewIncrementalTask() {
     }
 
     class CreationAction(
-        variantScope: VariantScope
-    ): VariantTaskCreationAction<GenerateLibraryProguardRulesTask>(variantScope) {
+        componentProperties: ComponentPropertiesImpl
+    ): VariantTaskCreationAction<GenerateLibraryProguardRulesTask, ComponentPropertiesImpl>(
+        componentProperties
+    ) {
 
         override val name: String
-            get() = variantScope.getTaskName("generate", "LibraryProguardRules")
+            get() = computeTaskName("generate", "LibraryProguardRules")
         override val type: Class<GenerateLibraryProguardRulesTask>
             get() = GenerateLibraryProguardRulesTask::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out GenerateLibraryProguardRulesTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out GenerateLibraryProguardRulesTask>
+        ) {
             super.handleProvider(taskProvider)
 
-            variantScope.artifacts.producesFile(
+            creationConfig.artifacts.producesFile(
                 InternalArtifactType.AAPT_PROGUARD_FILE,
                 taskProvider,
                 GenerateLibraryProguardRulesTask::proguardOutputFile,
@@ -137,15 +142,17 @@ abstract class GenerateLibraryProguardRulesTask : NewIncrementalTask() {
             )
         }
 
-        override fun configure(task:GenerateLibraryProguardRulesTask) {
+        override fun configure(
+            task: GenerateLibraryProguardRulesTask
+        ) {
             super.configure(task)
 
-            variantScope.artifacts.setTaskInputToFinalProduct(
+            creationConfig.artifacts.setTaskInputToFinalProduct(
                 InternalArtifactType.PACKAGED_RES,
                 task.inputResourcesDir
             )
 
-             variantScope.artifacts.setTaskInputToFinalProduct(
+             creationConfig.artifacts.setTaskInputToFinalProduct(
                  InternalArtifactType.MERGED_MANIFESTS, task.manifestFiles)
         }
     }

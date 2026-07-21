@@ -16,15 +16,9 @@
 
 package com.android.build.gradle.internal.ide;
 
-import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.annotations.concurrency.Immutable;
-import com.android.build.FilterData;
-import com.android.build.OutputFile;
-import com.android.build.VariantOutput;
-import com.android.build.gradle.internal.scope.ApkData;
-import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.builder.model.AndroidArtifact;
 import com.android.builder.model.AndroidArtifactOutput;
 import com.android.builder.model.ClassField;
@@ -35,7 +29,6 @@ import com.android.builder.model.NativeLibrary;
 import com.android.builder.model.SourceProvider;
 import com.android.builder.model.TestOptions;
 import com.android.builder.model.level2.DependencyGraphs;
-import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
@@ -46,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.gradle.api.file.RegularFile;
 
 /**
@@ -54,7 +46,7 @@ import org.gradle.api.file.RegularFile;
  */
 @Immutable
 final class AndroidArtifactImpl extends BaseArtifactImpl implements AndroidArtifact, Serializable {
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 2L;
 
     private final boolean isSigned;
     @NonNull private final String baseName;
@@ -65,11 +57,6 @@ final class AndroidArtifactImpl extends BaseArtifactImpl implements AndroidArtif
     @NonNull private final Map<String, ClassField> buildConfigFields;
     @NonNull private final Map<String, ClassField> resValues;
     @NonNull private final InstantRun instantRun;
-    @NonNull
-    private final BuildOutputSupplier<Collection<EarlySyncBuildOutput>> splitOutputsSupplier;
-
-    @NonNull private final BuildOutputSupplier<Collection<EarlySyncBuildOutput>> manifestSupplier;
-    @NonNull private final Collection<AndroidArtifactOutput> buildOutputs;
     @Nullable private final String signingConfigName;
     @Nullable private final Set<String> abiFilters;
     @Nullable private final TestOptions testOptions;
@@ -104,8 +91,6 @@ final class AndroidArtifactImpl extends BaseArtifactImpl implements AndroidArtif
             @NonNull Map<String, ClassField> buildConfigFields,
             @NonNull Map<String, ClassField> resValues,
             @NonNull InstantRun instantRun,
-            @NonNull BuildOutputSupplier<Collection<EarlySyncBuildOutput>> splitOutputsSupplier,
-            @NonNull BuildOutputSupplier<Collection<EarlySyncBuildOutput>> manifestSupplier,
             @Nullable TestOptions testOptions,
             @Nullable String instrumentedTestTaskName,
             @Nullable String bundleTaskName,
@@ -138,8 +123,6 @@ final class AndroidArtifactImpl extends BaseArtifactImpl implements AndroidArtif
         this.buildConfigFields = buildConfigFields;
         this.resValues = resValues;
         this.instantRun = instantRun;
-        this.splitOutputsSupplier = splitOutputsSupplier;
-        this.manifestSupplier = manifestSupplier;
         this.testOptions = testOptions;
         this.instrumentedTestTaskName = instrumentedTestTaskName;
         this.bundleTaskName = bundleTaskName;
@@ -153,102 +136,12 @@ final class AndroidArtifactImpl extends BaseArtifactImpl implements AndroidArtif
                         ? apkFromBundleTaskOutputListingFile.getAsFile().getAbsolutePath()
                         : null;
         this.codeShrinker = codeShrinker;
-        this.buildOutputs = computeBuildOutputs();
-    }
-
-    private EarlySyncBuildOutput getOutputFor(
-            Collection<EarlySyncBuildOutput> outputs,
-            VariantOutput.OutputType outputType,
-            Collection<FilterData> filtersData) {
-
-        for (EarlySyncBuildOutput output : outputs) {
-            if (output.getApkType() == outputType && output.getFiltersData().equals(filtersData)) {
-                return output;
-            }
-        }
-        return null;
     }
 
     @NonNull
     @Override
     public Collection<AndroidArtifactOutput> getOutputs() {
-        return buildOutputs;
-    }
-
-    @NonNull
-    private Collection<AndroidArtifactOutput> computeBuildOutputs() {
-        Collection<EarlySyncBuildOutput> manifests = manifestSupplier.get();
-        Collection<EarlySyncBuildOutput> outputs = splitOutputsSupplier.get();
-        if (outputs.isEmpty()) {
-            return manifests.isEmpty()
-                    ? guessOutputsBasedOnNothing()
-                    : guessOutputsBaseOnManifests();
-        }
-
-        return outputs.stream()
-                .map(
-                        splitOutput ->
-                                new AndroidArtifactOutputImpl(
-                                        splitOutput,
-                                        getOutputFor(
-                                                manifests,
-                                                splitOutput.getApkType(),
-                                                splitOutput.getFiltersData())))
-                .collect(Collectors.toList());
-
-    }
-
-    private Collection<AndroidArtifactOutput> guessOutputsBasedOnNothing() {
-        ApkData mainApkInfo = ApkData.of(OutputFile.OutputType.MAIN, ImmutableList.of(), -1);
-
-        return ImmutableList.of(
-                new AndroidArtifactOutputImpl(
-                        new EarlySyncBuildOutput(
-                                InternalArtifactType.APK.INSTANCE,
-                                mainApkInfo.getType(),
-                                mainApkInfo.getFilters(),
-                                -1,
-                                splitOutputsSupplier.guessOutputFile(
-                                        baseName + SdkConstants.DOT_ANDROID_PACKAGE)),
-                        new EarlySyncBuildOutput(
-                                InternalArtifactType.APK.INSTANCE,
-                                mainApkInfo.getType(),
-                                mainApkInfo.getFilters(),
-                                -1,
-                                manifestSupplier.guessOutputFile(
-                                        SdkConstants.ANDROID_MANIFEST_XML))));
-    }
-
-    private Collection<AndroidArtifactOutput> guessOutputsBaseOnManifests() {
-
-        return manifestSupplier
-                .get()
-                .stream()
-                .map(
-                        manifestOutput ->
-                                new AndroidArtifactOutputImpl(
-                                        new EarlySyncBuildOutput(
-                                                InternalArtifactType.APK.INSTANCE,
-                                                manifestOutput.getApkType(),
-                                                manifestOutput.getFiltersData(),
-                                                manifestOutput.getVersionCode(),
-                                                splitOutputsSupplier.guessOutputFile(
-                                                        baseName
-                                                                + Joiner.on("-")
-                                                                        .join(
-                                                                                manifestOutput
-                                                                                        .getFilters()
-                                                                                        .stream()
-                                                                                        .map(
-                                                                                                FilterData
-                                                                                                        ::getIdentifier)
-                                                                                        .collect(
-                                                                                                Collectors
-                                                                                                        .toList()))
-                                                                + SdkConstants
-                                                                        .DOT_ANDROID_PACKAGE)),
-                                        manifestOutput))
-                .collect(Collectors.toList());
+        throw new RuntimeException("This method has been deprecated in Studio/AGP 4.0");
     }
 
     @Override
@@ -342,8 +235,6 @@ final class AndroidArtifactImpl extends BaseArtifactImpl implements AndroidArtif
                 && Objects.equals(abiFilters, that.abiFilters)
                 && Objects.equals(buildConfigFields, that.buildConfigFields)
                 && Objects.equals(resValues, that.resValues)
-                && Objects.equals(manifestSupplier, that.manifestSupplier)
-                && Objects.equals(splitOutputsSupplier, that.splitOutputsSupplier)
                 && Objects.equals(instantRun, that.instantRun)
                 && Objects.equals(additionalRuntimeApks, that.additionalRuntimeApks)
                 && Objects.equals(baseName, that.baseName)
@@ -354,16 +245,13 @@ final class AndroidArtifactImpl extends BaseArtifactImpl implements AndroidArtif
                 && Objects.equals(
                         apkFromBundleTaskOutputListingFile, that.apkFromBundleTaskOutputListingFile)
                 && Objects.equals(codeShrinker, that.codeShrinker)
-                && Objects.equals(apkFromBundleTaskName, that.apkFromBundleTaskName)
-                && Objects.equals(buildOutputs, that.buildOutputs);
+                && Objects.equals(apkFromBundleTaskName, that.apkFromBundleTaskName);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(
                 super.hashCode(),
-                splitOutputsSupplier,
-                manifestSupplier,
                 isSigned,
                 signingConfigName,
                 applicationId,
@@ -381,15 +269,12 @@ final class AndroidArtifactImpl extends BaseArtifactImpl implements AndroidArtif
                 bundleTaskOutputListingFile,
                 codeShrinker,
                 apkFromBundleTaskName,
-                apkFromBundleTaskOutputListingFile,
-                buildOutputs);
+                apkFromBundleTaskOutputListingFile);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("manifestProxy", manifestSupplier)
-                .add("splitOutputsSupplier", splitOutputsSupplier)
                 .add("isSigned", isSigned)
                 .add("signingConfigName", signingConfigName)
                 .add("applicationId", applicationId)
@@ -404,9 +289,7 @@ final class AndroidArtifactImpl extends BaseArtifactImpl implements AndroidArtif
                 .add("bundleTaskName", bundleTaskName)
                 .add("bundleTasOutputListingFile", bundleTaskName)
                 .add("codeShrinker", codeShrinker)
-                .add("apkFromBundleTaskOutputListingFile", apkFromBundleTaskOutputListingFile)
-                .add("apkFromBundleTaskName", apkFromBundleTaskName)
-                .add("buildOutputs", buildOutputs)
+                .add("apkFromBundleTaskOutputListingFile", apkFromBundleTaskName)
                 .toString();
     }
 

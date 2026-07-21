@@ -20,8 +20,13 @@ import com.android.build.api.artifact.ArtifactType
 import org.gradle.api.Incubating
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
+import org.gradle.workers.WorkAction
+import org.gradle.workers.WorkParameters
+import org.gradle.workers.WorkQueue
 import java.io.File
+import java.io.Serializable
 import java.util.ServiceLoader
+import java.util.function.Supplier
 
 /**
  * Represents a [Collection] of [BuiltArtifact] produced by a [org.gradle.api.Task].
@@ -51,9 +56,7 @@ import java.util.ServiceLoader
  *          val builtArtifacts= BuiltArtifacts.Loader.loadFromFolder(
  *               objectFactory, input.get())
  *
- *          val newBuiltArtifacts = builtArtifacts.transform(PublicArtifactType.APK) {
- *              ... transform input into a new file...
- *          }
+ *          TODO : TBD what will be surfaced here
  *
  *          newBuiltArtifacts.save(output.get()))
  *     }
@@ -115,28 +118,21 @@ interface BuiltArtifacts {
     val elements: Collection<BuiltArtifact>
 
     /**
-     * Transforms this [Collection] of [BuiltArtifact] into a new instance of newly produced
-     * [BuiltArtifact] with a new [ArtifactType].
-     *
-     * This convenience method can be used by [org.gradle.api.Task] implementation to easily
-     * transforms input [BuiltArtifacts] into a new [Collection] of [BuiltArtifact]. The new
-     * [BuiltArtifacts] instance can be used to save the metadata associated with the new produced
-     * files.
-     *
-     * @param newArtifactType the new [ArtifactType] that identifies the new produced files.
-     * @param transformer the lambda that transforms each element of [BuiltArtifacts.elements] into
-     * a new file. All the metadata associated with the input like filters, versions will be
-     * automatically transferred to create a new instance of [BuiltArtifact] that will be added
-     * to the returned [BuiltArtifacts] instance.
-     * @return a new instance of [BuiltArtifacts] with updated artifact type and elements as
-     * provided by the [transformer] lambda.
-     */
-    fun transform(newArtifactType: ArtifactType<*>, transformer: (input: File) -> File): BuiltArtifacts
-
-    /**
      * Saves the metadata associated with this instance into a folder.
      * @param out the [Directory] that can be used to save the metadata using a standard file
      * name.
      */
     fun save(out: Directory)
+
+    /**
+     * Specialized version  of Gradle's [WorkParameters] so we can retrieve the output file
+     * generated when transforming an instance of [BuiltArtifacts] into a new one.
+     */
+    @Incubating
+    interface TransformParams: WorkParameters, Serializable {
+        /**
+         * Result of the work item submission must be made available through this field.
+         */
+        val output: File
+    }
 }

@@ -16,13 +16,13 @@
 
 package com.android.build.gradle.tasks
 
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.ALL
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.AIDL
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.process.GradleProcessExecutor
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.builder.compiling.DependencyFileProcessor
@@ -167,16 +167,22 @@ abstract class AidlCompile : NonIncrementalTask() {
         }
     }
 
-    class CreationAction(scope: VariantScope) : VariantTaskCreationAction<AidlCompile>(scope) {
+    class CreationAction(
+        componentProperties: ComponentPropertiesImpl
+    ) : VariantTaskCreationAction<AidlCompile, ComponentPropertiesImpl>(
+        componentProperties
+    ) {
 
-        override val name: String = variantScope.getTaskName("compile", "Aidl")
+        override val name: String = computeTaskName("compile", "Aidl")
 
         override val type: Class<AidlCompile> = AidlCompile::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out AidlCompile>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out AidlCompile>
+        ) {
             super.handleProvider(taskProvider)
-            variantScope.taskContainer.aidlCompileTask = taskProvider
-            variantScope
+            creationConfig.taskContainer.aidlCompileTask = taskProvider
+            creationConfig
                 .artifacts
                 .producesDir(
                     InternalArtifactType.AIDL_SOURCE_OUTPUT_DIR,
@@ -185,8 +191,8 @@ abstract class AidlCompile : NonIncrementalTask() {
                     "out"
                 )
 
-            if (variantScope.variantDslInfo.variantType.isAar) {
-                variantScope
+            if (creationConfig.variantType.isAar) {
+                creationConfig
                     .artifacts
                     .producesDir(
                         InternalArtifactType.AIDL_PARCELABLE,
@@ -197,14 +203,14 @@ abstract class AidlCompile : NonIncrementalTask() {
             }
         }
 
-        override fun configure(task: AidlCompile) {
+        override fun configure(
+            task: AidlCompile
+        ) {
             super.configure(task)
-            val scope = variantScope
-            val globalScope = scope.globalScope
+            val globalScope = creationConfig.globalScope
             val project = globalScope.project
 
-            val variantDslInfo = scope.variantDslInfo
-            val variantSources = scope.variantSources
+            val variantSources = creationConfig.variantSources
 
             val sdkComponents = globalScope.sdkComponents
             task.aidlExecutableProvider.set(sdkComponents.aidlExecutableProvider)
@@ -228,9 +234,9 @@ abstract class AidlCompile : NonIncrementalTask() {
                     })
             task.sourceFiles.disallowChanges()
 
-            task.importDirs = scope.getArtifactFileCollection(COMPILE_CLASSPATH, ALL, AIDL)
+            task.importDirs = creationConfig.variantDependencies.getArtifactFileCollection(COMPILE_CLASSPATH, ALL, AIDL)
 
-            if (variantDslInfo.variantType.isAar) {
+            if (creationConfig.variantType.isAar) {
                 task.packageWhitelist = globalScope.extension.aidlPackageWhiteList
             }
         }

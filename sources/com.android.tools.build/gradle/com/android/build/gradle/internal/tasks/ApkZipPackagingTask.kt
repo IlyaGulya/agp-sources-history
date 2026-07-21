@@ -16,8 +16,8 @@
 
 package com.android.build.gradle.internal.tasks
 
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.builder.packaging.JarMerger
 import com.android.utils.FileUtils
@@ -52,14 +52,16 @@ abstract class ApkZipPackagingTask : NonIncrementalTask() {
     abstract val apkZipFile: RegularFileProperty
 
     override fun doTaskAction() {
-        getWorkerFacadeWithWorkers().submit(
-            ApkZipPackagingRunnable::class.java,
-            Params(
-                apkFolder.asFile.get(),
-                mappingFile.orNull?.asFile,
-                apkZipFile.asFile.get()
+        getWorkerFacadeWithWorkers().use {
+            it.submit(
+                ApkZipPackagingRunnable::class.java,
+                Params(
+                    apkFolder.asFile.get(),
+                    mappingFile.orNull?.asFile,
+                    apkZipFile.asFile.get()
+                )
             )
-        )
+        }
     }
 
     private data class Params(
@@ -86,18 +88,22 @@ abstract class ApkZipPackagingTask : NonIncrementalTask() {
         }
     }
 
-    class CreationAction(variantScope: VariantScope) :
-        VariantTaskCreationAction<ApkZipPackagingTask>(variantScope) {
+    class CreationAction(componentProperties: ComponentPropertiesImpl) :
+        VariantTaskCreationAction<ApkZipPackagingTask, ComponentPropertiesImpl>(
+            componentProperties
+        ) {
 
         override val name: String
-            get() = variantScope.getTaskName("zipApksFor")
+            get() = computeTaskName("zipApksFor")
         override val type: Class<ApkZipPackagingTask>
             get() = ApkZipPackagingTask::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out ApkZipPackagingTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out ApkZipPackagingTask>
+        ) {
             super.handleProvider(taskProvider)
 
-            variantScope.artifacts.producesFile(
+            creationConfig.artifacts.producesFile(
                 InternalArtifactType.APK_ZIP,
                 taskProvider,
                 ApkZipPackagingTask::apkZipFile,
@@ -105,18 +111,18 @@ abstract class ApkZipPackagingTask : NonIncrementalTask() {
             )
         }
 
-        override fun configure(task: ApkZipPackagingTask) {
+        override fun configure(
+            task: ApkZipPackagingTask
+        ) {
             super.configure(task)
 
-            variantScope.artifacts.setTaskInputToFinalProduct(
+            creationConfig.artifacts.setTaskInputToFinalProduct(
                 InternalArtifactType.APK, task.apkFolder
             )
-            if (variantScope.artifacts.hasFinalProduct(InternalArtifactType.APK_MAPPING)) {
-                variantScope.artifacts.setTaskInputToFinalProduct(
-                    InternalArtifactType.APK_MAPPING,
-                    task.mappingFile
-                )
-            }
+            creationConfig.artifacts.setTaskInputToFinalProduct(
+                InternalArtifactType.APK_MAPPING,
+                task.mappingFile
+            )
         }
     }
 }

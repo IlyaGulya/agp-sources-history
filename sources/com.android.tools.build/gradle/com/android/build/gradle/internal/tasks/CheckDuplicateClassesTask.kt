@@ -16,11 +16,11 @@
 
 package com.android.build.gradle.internal.tasks
 
+import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.EXTERNAL
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.CLASSES_JAR
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import org.gradle.api.artifacts.ArtifactCollection
 import org.gradle.api.file.DirectoryProperty
@@ -54,28 +54,34 @@ abstract class CheckDuplicateClassesTask : NonIncrementalTask() {
         )
     }
 
-    class CreationAction(scope: VariantScope)
-        : VariantTaskCreationAction<CheckDuplicateClassesTask>(scope) {
+    class CreationAction(componentProperties: ComponentPropertiesImpl)
+        : VariantTaskCreationAction<CheckDuplicateClassesTask, ComponentPropertiesImpl>(
+        componentProperties
+    ) {
 
         override val type = CheckDuplicateClassesTask::class.java
 
-        override val name = variantScope.getTaskName("check", "DuplicateClasses")
+        override val name = componentProperties.computeTaskName("check", "DuplicateClasses")
 
-        override fun handleProvider(taskProvider: TaskProvider<out CheckDuplicateClassesTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out CheckDuplicateClassesTask>
+        ) {
             super.handleProvider(taskProvider)
 
-            variantScope.artifacts.producesDir(
+            creationConfig.artifacts.producesDir(
                 InternalArtifactType.DUPLICATE_CLASSES_CHECK,
                 taskProvider,
                 CheckDuplicateClassesTask::dummyOutputDirectory
             )
         }
 
-        override fun configure(task: CheckDuplicateClassesTask) {
+        override fun configure(
+            task: CheckDuplicateClassesTask
+        ) {
             super.configure(task)
 
             task.classesArtifacts =
-                    variantScope.getArtifactCollection(RUNTIME_CLASSPATH, EXTERNAL, CLASSES_JAR)
+                    creationConfig.variantDependencies.getArtifactCollection(RUNTIME_CLASSPATH, EXTERNAL, CLASSES_JAR)
         }
     }
 }

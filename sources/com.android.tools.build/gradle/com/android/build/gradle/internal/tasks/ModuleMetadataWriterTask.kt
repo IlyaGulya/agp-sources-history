@@ -16,11 +16,12 @@
 
 package com.android.build.gradle.internal.tasks
 
-import com.android.build.api.component.impl.ComponentPropertiesImpl
+import com.android.build.gradle.internal.component.ApplicationCreationConfig
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
@@ -54,6 +55,10 @@ abstract class ModuleMetadataWriterTask : NonIncrementalTask() {
     @get:Input
     abstract val debuggable: Property<Boolean>
 
+    @get:Input
+    @get:Optional
+    abstract val abiFilters: ListProperty<String>
+
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
 
@@ -63,24 +68,29 @@ abstract class ModuleMetadataWriterTask : NonIncrementalTask() {
                 applicationId = applicationId.get(),
                 versionCode = versionCode.get().toString(),
                 versionName = versionName.orNull,
-                debuggable = debuggable.get()
+                debuggable = debuggable.get(),
+                abiFilters = abiFilters.orNull
             )
 
         declaration.save(outputFile.get().asFile)
     }
 
-    internal class CreationAction(private val componentProperties: ComponentPropertiesImpl) :
-        VariantTaskCreationAction<ModuleMetadataWriterTask>(componentProperties.variantScope) {
+    internal class CreationAction(creationConfig: ApplicationCreationConfig) :
+        VariantTaskCreationAction<ModuleMetadataWriterTask, ApplicationCreationConfig>(
+            creationConfig
+        ) {
 
         override val name: String
-            get() = variantScope.getTaskName("write", "ModuleMetadata")
+            get() = computeTaskName("write", "ModuleMetadata")
         override val type: Class<ModuleMetadataWriterTask>
             get() = ModuleMetadataWriterTask::class.java
 
-        override fun handleProvider(taskProvider: TaskProvider<out ModuleMetadataWriterTask>) {
+        override fun handleProvider(
+            taskProvider: TaskProvider<out ModuleMetadataWriterTask>
+        ) {
             super.handleProvider(taskProvider)
             // publish the ID for the dynamic features (whether it's hybrid or not) to consume.
-            variantScope.artifacts.producesFile(
+            creationConfig.artifacts.producesFile(
                 InternalArtifactType.BASE_MODULE_METADATA,
                 taskProvider,
                 ModuleMetadataWriterTask::outputFile,
@@ -88,16 +98,15 @@ abstract class ModuleMetadataWriterTask : NonIncrementalTask() {
             )
         }
 
-        override fun configure(task: ModuleMetadataWriterTask) {
+        override fun configure(
+            task: ModuleMetadataWriterTask
+        ) {
             super.configure(task)
-            task.applicationId.set(componentProperties.applicationId)
-            task.debuggable
-                .setDisallowChanges(variantScope.variantDslInfo.isDebuggable)
-            task.versionCode.setDisallowChanges(variantScope.variantData.publicVariantPropertiesApi
-                .outputs.getMainSplit().versionCode)
-            task.versionName.setDisallowChanges(variantScope.variantData.publicVariantPropertiesApi
-                .outputs.getMainSplit().versionName)
-
+            task.applicationId.set(creationConfig.applicationId)
+            task.debuggable.setDisallowChanges(creationConfig.debuggable)
+            task.versionCode.setDisallowChanges(creationConfig.outputs.getMainSplit().versionCode)
+            task.versionName.setDisallowChanges(creationConfig.outputs.getMainSplit().versionName)
+            task.abiFilters.setDisallowChanges(creationConfig.variantDslInfo.supportedAbis?.sorted())
         }
     }
 }
