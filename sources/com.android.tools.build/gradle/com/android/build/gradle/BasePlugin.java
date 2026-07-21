@@ -40,6 +40,7 @@ import com.android.build.gradle.internal.TaskManager;
 import com.android.build.gradle.internal.VariantManager;
 import com.android.build.gradle.internal.api.dsl.extensions.BaseExtension2;
 import com.android.build.gradle.internal.crash.CrashReporting;
+import com.android.build.gradle.internal.dependency.ConstraintHandler;
 import com.android.build.gradle.internal.dependency.SourceSetManager;
 import com.android.build.gradle.internal.dsl.BuildType;
 import com.android.build.gradle.internal.dsl.BuildTypeFactory;
@@ -413,6 +414,7 @@ public abstract class BasePlugin<E extends BaseExtension2>
                         Workers.INSTANCE.shutdown();
                         sdkComponents.unload();
                         SdkLocator.resetCache();
+                        ConstraintHandler.clearCache();
                         threadRecorder.record(
                                 ExecutionType.BASE_PLUGIN_BUILD_FINISHED,
                                 project.getPath(),
