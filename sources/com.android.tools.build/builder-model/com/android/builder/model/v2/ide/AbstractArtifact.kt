@@ -20,10 +20,8 @@ import java.io.File
 
 /**
  * The base information for all generated artifacts
- *
- * @since 4.2
  */
-interface BaseArtifact {
+interface AbstractArtifact {
 
     /**
      * @return the name of the task used to compile the code.
@@ -43,20 +41,10 @@ interface BaseArtifact {
     val classesFolders: Set<File>
 
     /**
-     * A SourceProvider specific to the variant. This can be null if there is no flavors as
-     * the "variant" is equal to the build type.
+     * Folders or jars containing additional classes (e.g., R.jar or those registered by third-party
+     * plugins like Kotlin).
      */
-    val variantSourceProvider: SourceProvider?
-
-    /**
-     * A SourceProvider specific to the flavor combination.
-     *
-     * For instance if there are 2 dimensions, then this would be Flavor1Flavor2, and would be
-     * common to all variant using these two flavors and any of the build type.
-     *
-     * This can be null if there is less than 2 flavors.
-     */
-    val multiFlavorSourceProvider: SourceProvider?
+    val additionalClassesFolders: Set<File>
 
     /**
      * Returns names of tasks that need to be run when setting up the IDE project. After these
