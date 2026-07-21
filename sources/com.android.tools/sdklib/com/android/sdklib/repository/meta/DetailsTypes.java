@@ -28,6 +28,7 @@ import com.android.repository.impl.meta.PackageDisplayNameQualifier;
 import com.android.repository.impl.meta.TypeDetails;
 import com.android.sdklib.AndroidVersion;
 import com.android.sdklib.OptionalLibrary;
+import com.android.sdklib.SystemImageTags;
 import com.android.sdklib.devices.Abi;
 import com.android.sdklib.repository.IdDisplay;
 import java.util.AbstractList;
@@ -163,16 +164,40 @@ public final class DetailsTypes {
                 return 0;
             }
         }
+
+        @NonNull
+        List<String> getAbis();
+
+        @NonNull
+        List<String> getTranslatedAbis();
     }
 
     /**
-     * Trivial details type for source packages.
+     * A package for Android platform source code
      *
-     * TODO: delete this and make ApiDetails concrete in the schema
+     * <p>TODO: delete this and make ApiDetails concrete in the schema
      */
     @XmlTransient
     public interface SourceDetailsType extends ApiDetailsType {
+        /**
+         * @throws UnsupportedOperationException always. Source code will never run binaries and
+         *     thus have no ABIS.
+         */
+        @NonNull
+        @Override
+        default List<String> getAbis() {
+            throw new UnsupportedOperationException();
+        }
 
+        /**
+         * @throws UnsupportedOperationException always. Source code will never run binaries and
+         *     thus have no ABIS.
+         */
+        @NonNull
+        @Override
+        default List<String> getTranslatedAbis() {
+            throw new UnsupportedOperationException();
+        }
     }
 
     /**
@@ -201,6 +226,21 @@ public final class DetailsTypes {
              * Gets the layout lib api level.
              */
             public abstract int getApi();
+        }
+
+        // TODO: http://b/338068018 - We stopped shipping system images in platforms after API 13.
+        //      Delete this override when we stop supporting API 13.
+        /** @return the native ABIs supported by the system image in the platform */
+        @NonNull
+        @Override
+        default List<String> getAbis() {
+            return Collections.singletonList(Abi.ARMEABI.toString());
+        }
+
+        @NonNull
+        @Override
+        default List<String> getTranslatedAbis() {
+            return Collections.emptyList();
         }
     }
 
@@ -266,6 +306,20 @@ public final class DetailsTypes {
             public abstract List<Library> getLibrary();
         }
 
+        @NonNull
+        @Override
+        default List<String> getAbis() {
+            Object abi =
+                    getTag().equals(SystemImageTags.GOOGLE_APIS_X86_TAG) ? Abi.X86 : Abi.ARMEABI;
+
+            return Collections.singletonList(abi.toString());
+        }
+
+        @NonNull
+        @Override
+        default List<String> getTranslatedAbis() {
+            return Collections.emptyList();
+        }
     }
 
     /**
@@ -308,6 +362,7 @@ public final class DetailsTypes {
          * Must include the result {@link #getAbi()} as the first item in the returned list.
          */
         @NonNull
+        @Override
         default List<String> getAbis() {
             // Default implementation supports pre-v4. Any version should either override #getAbi
             // or #getNativeAbis, so there should be no circular calls.
@@ -327,6 +382,7 @@ public final class DetailsTypes {
          * include anything in {@link #getAbis()}.
          */
         @NonNull
+        @Override
         default List<String> getTranslatedAbis() {
             return Collections.emptyList();
         }
