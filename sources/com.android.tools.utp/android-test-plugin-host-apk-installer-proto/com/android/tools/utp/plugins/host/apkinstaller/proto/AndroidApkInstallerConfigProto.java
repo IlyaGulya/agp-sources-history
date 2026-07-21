@@ -2477,6 +2477,26 @@ public final class AndroidApkInstallerConfigProto {
      */
     com.android.tools.utp.plugins.host.apkinstaller.proto.AndroidApkInstallerConfigProto.InstallableApkOrBuilder getApksToInstallOrBuilder(
         int index);
+
+    /**
+     * <pre>
+     * Package name of target apk
+     * </pre>
+     *
+     * <code>string instrumentation_target_package_id = 2;</code>
+     * @return The instrumentationTargetPackageId.
+     */
+    java.lang.String getInstrumentationTargetPackageId();
+    /**
+     * <pre>
+     * Package name of target apk
+     * </pre>
+     *
+     * <code>string instrumentation_target_package_id = 2;</code>
+     * @return The bytes for instrumentationTargetPackageId.
+     */
+    com.google.protobuf.ByteString
+        getInstrumentationTargetPackageIdBytes();
   }
   /**
    * Protobuf type {@code com.android.tools.utp.plugins.host.apkinstaller.proto.AndroidApkInstallerConfig}
@@ -2492,6 +2512,7 @@ public final class AndroidApkInstallerConfigProto {
     }
     private AndroidApkInstallerConfig() {
       apksToInstall_ = java.util.Collections.emptyList();
+      instrumentationTargetPackageId_ = "";
     }
 
     @java.lang.Override
@@ -2555,6 +2576,53 @@ public final class AndroidApkInstallerConfigProto {
       return apksToInstall_.get(index);
     }
 
+    public static final int INSTRUMENTATION_TARGET_PACKAGE_ID_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object instrumentationTargetPackageId_ = "";
+    /**
+     * <pre>
+     * Package name of target apk
+     * </pre>
+     *
+     * <code>string instrumentation_target_package_id = 2;</code>
+     * @return The instrumentationTargetPackageId.
+     */
+    @java.lang.Override
+    public java.lang.String getInstrumentationTargetPackageId() {
+      java.lang.Object ref = instrumentationTargetPackageId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        instrumentationTargetPackageId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Package name of target apk
+     * </pre>
+     *
+     * <code>string instrumentation_target_package_id = 2;</code>
+     * @return The bytes for instrumentationTargetPackageId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getInstrumentationTargetPackageIdBytes() {
+      java.lang.Object ref = instrumentationTargetPackageId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        instrumentationTargetPackageId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -2572,6 +2640,9 @@ public final class AndroidApkInstallerConfigProto {
       for (int i = 0; i < apksToInstall_.size(); i++) {
         output.writeMessage(1, apksToInstall_.get(i));
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instrumentationTargetPackageId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, instrumentationTargetPackageId_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -2584,6 +2655,9 @@ public final class AndroidApkInstallerConfigProto {
       for (int i = 0; i < apksToInstall_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, apksToInstall_.get(i));
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instrumentationTargetPackageId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, instrumentationTargetPackageId_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -2602,6 +2676,8 @@ public final class AndroidApkInstallerConfigProto {
 
       if (!getApksToInstallList()
           .equals(other.getApksToInstallList())) return false;
+      if (!getInstrumentationTargetPackageId()
+          .equals(other.getInstrumentationTargetPackageId())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -2617,6 +2693,8 @@ public final class AndroidApkInstallerConfigProto {
         hash = (37 * hash) + APKS_TO_INSTALL_FIELD_NUMBER;
         hash = (53 * hash) + getApksToInstallList().hashCode();
       }
+      hash = (37 * hash) + INSTRUMENTATION_TARGET_PACKAGE_ID_FIELD_NUMBER;
+      hash = (53 * hash) + getInstrumentationTargetPackageId().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2755,6 +2833,7 @@ public final class AndroidApkInstallerConfigProto {
           apksToInstallBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000001);
+        instrumentationTargetPackageId_ = "";
         return this;
       }
 
@@ -2801,6 +2880,9 @@ public final class AndroidApkInstallerConfigProto {
 
       private void buildPartial0(com.android.tools.utp.plugins.host.apkinstaller.proto.AndroidApkInstallerConfigProto.AndroidApkInstallerConfig result) {
         int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.instrumentationTargetPackageId_ = instrumentationTargetPackageId_;
+        }
       }
 
       @java.lang.Override
@@ -2873,6 +2955,11 @@ public final class AndroidApkInstallerConfigProto {
             }
           }
         }
+        if (!other.getInstrumentationTargetPackageId().isEmpty()) {
+          instrumentationTargetPackageId_ = other.instrumentationTargetPackageId_;
+          bitField0_ |= 0x00000002;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -2912,6 +2999,11 @@ public final class AndroidApkInstallerConfigProto {
                 }
                 break;
               } // case 10
+              case 18: {
+                instrumentationTargetPackageId_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 18
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -3168,6 +3260,98 @@ public final class AndroidApkInstallerConfigProto {
         }
         return apksToInstallBuilder_;
       }
+
+      private java.lang.Object instrumentationTargetPackageId_ = "";
+      /**
+       * <pre>
+       * Package name of target apk
+       * </pre>
+       *
+       * <code>string instrumentation_target_package_id = 2;</code>
+       * @return The instrumentationTargetPackageId.
+       */
+      public java.lang.String getInstrumentationTargetPackageId() {
+        java.lang.Object ref = instrumentationTargetPackageId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          instrumentationTargetPackageId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Package name of target apk
+       * </pre>
+       *
+       * <code>string instrumentation_target_package_id = 2;</code>
+       * @return The bytes for instrumentationTargetPackageId.
+       */
+      public com.google.protobuf.ByteString
+          getInstrumentationTargetPackageIdBytes() {
+        java.lang.Object ref = instrumentationTargetPackageId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          instrumentationTargetPackageId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Package name of target apk
+       * </pre>
+       *
+       * <code>string instrumentation_target_package_id = 2;</code>
+       * @param value The instrumentationTargetPackageId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setInstrumentationTargetPackageId(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        instrumentationTargetPackageId_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Package name of target apk
+       * </pre>
+       *
+       * <code>string instrumentation_target_package_id = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearInstrumentationTargetPackageId() {
+        instrumentationTargetPackageId_ = getDefaultInstance().getInstrumentationTargetPackageId();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Package name of target apk
+       * </pre>
+       *
+       * <code>string instrumentation_target_package_id = 2;</code>
+       * @param value The bytes for instrumentationTargetPackageId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setInstrumentationTargetPackageIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        instrumentationTargetPackageId_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -3273,12 +3457,14 @@ public final class AndroidApkInstallerConfigProto {
       "k.InstallOption.ForceCompilation\"a\n\020Forc" +
       "eCompilation\022\030\n\024NO_FORCE_COMPILATION\020\000\022\035" +
       "\n\031PROFILE_BASED_COMPILATION\020\001\022\024\n\020FULL_CO" +
-      "MPILATION\020\002J\004\010\004\020\005\"{\n\031AndroidApkInstaller" +
-      "Config\022^\n\017apks_to_install\030\001 \003(\0132E.com.an" +
-      "droid.tools.utp.plugins.host.apkinstalle" +
-      "r.proto.InstallableApkBW\n5com.android.to" +
-      "ols.utp.plugins.host.apkinstaller.protoB" +
-      "\036AndroidApkInstallerConfigProtob\006proto3"
+      "MPILATION\020\002J\004\010\004\020\005\"\246\001\n\031AndroidApkInstalle" +
+      "rConfig\022^\n\017apks_to_install\030\001 \003(\0132E.com.a" +
+      "ndroid.tools.utp.plugins.host.apkinstall" +
+      "er.proto.InstallableApk\022)\n!instrumentati" +
+      "on_target_package_id\030\002 \001(\tBW\n5com.androi" +
+      "d.tools.utp.plugins.host.apkinstaller.pr" +
+      "otoB\036AndroidApkInstallerConfigProtob\006pro" +
+      "to3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -3301,7 +3487,7 @@ public final class AndroidApkInstallerConfigProto {
     internal_static_com_android_tools_utp_plugins_host_apkinstaller_proto_AndroidApkInstallerConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_android_tools_utp_plugins_host_apkinstaller_proto_AndroidApkInstallerConfig_descriptor,
-        new java.lang.String[] { "ApksToInstall", });
+        new java.lang.String[] { "ApksToInstall", "InstrumentationTargetPackageId", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
