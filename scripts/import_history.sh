@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-batch_size=20
+batch_size=1
 exclude_latest=0
 
 while (($#)); do
