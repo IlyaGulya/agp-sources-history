@@ -104,42 +104,43 @@ public final class KotlinMultiplatformAndroidModelsProto {
       "2\005.File\022!\n\024minification_enabled\030\007 \001(\010H\004\210" +
       "\001\001B\014\n\n_namespaceB\025\n\023_compile_sdk_targetB" +
       "\022\n\020_min_sdk_versionB\022\n\020_max_sdk_versionB" +
-      "\027\n\025_minification_enabled\"y\n\014UnitTestInfo" +
-      "\022\026\n\tnamespace\030\001 \001(\tH\000\210\001\001\022)\n\025mockable_pla" +
-      "tform_jar\030\002 \001(\0132\005.FileH\001\210\001\001B\014\n\n_namespac" +
-      "eB\030\n\026_mockable_platform_jar\"\334\003\n\024Instrume" +
-      "ntedTestInfo\022\026\n\tnamespace\030\001 \001(\tH\000\210\001\001\022(\n\033" +
-      "test_instrumentation_runner\030\002 \001(\tH\001\210\001\001\022l" +
-      "\n%test_instrumentation_runner_arguments\030" +
-      "\003 \003(\0132=.InstrumentedTestInfo.TestInstrum" +
-      "entationRunnerArgumentsEntry\022+\n\016signing_" +
-      "config\030\004 \001(\0132\016.SigningConfigH\002\210\001\001\0225\n!ass" +
-      "emble_task_output_listing_file\030\005 \001(\0132\005.F" +
-      "ileH\003\210\001\001\032I\n\'TestInstrumentationRunnerArg" +
-      "umentsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:" +
-      "\0028\001B\014\n\n_namespaceB\036\n\034_test_instrumentati" +
-      "on_runnerB\021\n\017_signing_configB$\n\"_assembl" +
-      "e_task_output_listing_file\"\244\004\n\022AndroidCo" +
-      "mpilation\0226\n\004type\030\001 \001(\0162#.AndroidCompila" +
-      "tion.CompilationTypeH\000\210\001\001\022(\n\tmain_info\030\002" +
-      " \001(\0132\020.MainVariantInfoH\001\210\001\001\022*\n\016unit_test" +
-      "_info\030\003 \001(\0132\r.UnitTestInfoH\002\210\001\001\022:\n\026instr" +
-      "umented_test_info\030\004 \001(\0132\025.InstrumentedTe" +
-      "stInfoH\003\210\001\001\022$\n\027default_source_set_name\030\005" +
-      " \001(\tH\004\210\001\001\022\037\n\022assemble_task_name\030\006 \001(\tH\005\210" +
-      "\001\001\022%\n\030kotlin_compile_task_name\030\007 \001(\tH\006\210\001" +
-      "\001\"A\n\017CompilationType\022\010\n\004MAIN\020\000\022\r\n\tUNIT_T" +
-      "EST\020\001\022\025\n\021INSTRUMENTED_TEST\020\002B\007\n\005_typeB\014\n" +
-      "\n_main_infoB\021\n\017_unit_test_infoB\031\n\027_instr" +
-      "umented_test_infoB\032\n\030_default_source_set" +
-      "_nameB\025\n\023_assemble_task_nameB\033\n\031_kotlin_" +
-      "compile_task_name\"U\n\020AndroidSourceSet\022-\n" +
-      "\017source_provider\030\001 \001(\0132\017.SourceProviderH" +
-      "\000\210\001\001B\022\n\020_source_provider\"<\n\016DependencyIn" +
-      "fo\022\036\n\007library\030\001 \001(\0132\010.LibraryH\000\210\001\001B\n\n\010_l" +
-      "ibraryBR\n\'com.android.kotlin.multiplatfo" +
-      "rm.modelsB%KotlinMultiplatformAndroidMod" +
-      "elsProtoP\001b\006proto3"
+      "\027\n\025_minification_enabled\"\263\001\n\014UnitTestInf" +
+      "o\022\026\n\tnamespace\030\001 \001(\tH\000\210\001\001\022)\n\025mockable_pl" +
+      "atform_jar\030\002 \001(\0132\005.FileH\001\210\001\001\022 \n\023unit_tes" +
+      "t_task_name\030\003 \001(\tH\002\210\001\001B\014\n\n_namespaceB\030\n\026" +
+      "_mockable_platform_jarB\026\n\024_unit_test_tas" +
+      "k_name\"\334\003\n\024InstrumentedTestInfo\022\026\n\tnames" +
+      "pace\030\001 \001(\tH\000\210\001\001\022(\n\033test_instrumentation_" +
+      "runner\030\002 \001(\tH\001\210\001\001\022l\n%test_instrumentatio" +
+      "n_runner_arguments\030\003 \003(\0132=.InstrumentedT" +
+      "estInfo.TestInstrumentationRunnerArgumen" +
+      "tsEntry\022+\n\016signing_config\030\004 \001(\0132\016.Signin" +
+      "gConfigH\002\210\001\001\0225\n!assemble_task_output_lis" +
+      "ting_file\030\005 \001(\0132\005.FileH\003\210\001\001\032I\n\'TestInstr" +
+      "umentationRunnerArgumentsEntry\022\013\n\003key\030\001 " +
+      "\001(\t\022\r\n\005value\030\002 \001(\t:\0028\001B\014\n\n_namespaceB\036\n\034" +
+      "_test_instrumentation_runnerB\021\n\017_signing" +
+      "_configB$\n\"_assemble_task_output_listing" +
+      "_file\"\244\004\n\022AndroidCompilation\0226\n\004type\030\001 \001" +
+      "(\0162#.AndroidCompilation.CompilationTypeH" +
+      "\000\210\001\001\022(\n\tmain_info\030\002 \001(\0132\020.MainVariantInf" +
+      "oH\001\210\001\001\022*\n\016unit_test_info\030\003 \001(\0132\r.UnitTes" +
+      "tInfoH\002\210\001\001\022:\n\026instrumented_test_info\030\004 \001" +
+      "(\0132\025.InstrumentedTestInfoH\003\210\001\001\022$\n\027defaul" +
+      "t_source_set_name\030\005 \001(\tH\004\210\001\001\022\037\n\022assemble" +
+      "_task_name\030\006 \001(\tH\005\210\001\001\022%\n\030kotlin_compile_" +
+      "task_name\030\007 \001(\tH\006\210\001\001\"A\n\017CompilationType\022" +
+      "\010\n\004MAIN\020\000\022\r\n\tUNIT_TEST\020\001\022\025\n\021INSTRUMENTED" +
+      "_TEST\020\002B\007\n\005_typeB\014\n\n_main_infoB\021\n\017_unit_" +
+      "test_infoB\031\n\027_instrumented_test_infoB\032\n\030" +
+      "_default_source_set_nameB\025\n\023_assemble_ta" +
+      "sk_nameB\033\n\031_kotlin_compile_task_name\"U\n\020" +
+      "AndroidSourceSet\022-\n\017source_provider\030\001 \001(" +
+      "\0132\017.SourceProviderH\000\210\001\001B\022\n\020_source_provi" +
+      "der\"<\n\016DependencyInfo\022\036\n\007library\030\001 \001(\0132\010" +
+      ".LibraryH\000\210\001\001B\n\n\010_libraryBR\n\'com.android" +
+      ".kotlin.multiplatform.modelsB%KotlinMult" +
+      "iplatformAndroidModelsProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -175,7 +176,7 @@ public final class KotlinMultiplatformAndroidModelsProto {
     internal_static_UnitTestInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_UnitTestInfo_descriptor,
-        new java.lang.String[] { "Namespace", "MockablePlatformJar", "Namespace", "MockablePlatformJar", });
+        new java.lang.String[] { "Namespace", "MockablePlatformJar", "UnitTestTaskName", "Namespace", "MockablePlatformJar", "UnitTestTaskName", });
     internal_static_InstrumentedTestInfo_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_InstrumentedTestInfo_fieldAccessorTable = new
