@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.incfs.install;
 
-package com.android.build.api.component
+import com.android.annotations.NonNull;
+import java.io.IOException;
 
-import org.gradle.api.Incubating
+/** Optional transformation of the data block before sending. */
+public interface IBlockTransformer {
 
-/**
- * Variant of the unit test artifact.
- */
-@Incubating
-@Deprecated("Will be removed in 4.2-beta6")
-interface UnitTestBuilder: TestComponentBuilder {
+    /**
+     * Callback invoked by the associated {@link IncrementalInstallSession} to transform the block.
+     */
+    @NonNull
+    PendingBlock transform(@NonNull PendingBlock block) throws IOException;
 }
