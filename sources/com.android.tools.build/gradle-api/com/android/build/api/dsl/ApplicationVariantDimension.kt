@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.dsl
+package com.android.build.api.dsl
 
-import com.android.build.api.dsl.LibraryBuildFeatures
+import org.gradle.api.Incubating
 
-abstract class LibraryBuildFeaturesImpl : BuildFeaturesImpl(), LibraryBuildFeatures {
-    override var androidResources: Boolean? = null
-    override var dataBinding: Boolean? = null
-    override var mlModelBinding: Boolean? = false
+@Incubating
+interface ApplicationVariantDimension<AnnotationProcessorOptionsT : AnnotationProcessorOptions,
+        SigningConfigT : SigningConfig> :
+    VariantDimension<AnnotationProcessorOptionsT, SigningConfigT> {
+    // TODO(b/140406102)
 }
