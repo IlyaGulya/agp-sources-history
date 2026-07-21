@@ -1,4 +1,4 @@
-// $ANTLR 3.5.2 Proguard.g 2018-01-06 02:10:31
+// $ANTLR 3.5.2 Proguard.g 2018-01-11 18:43:38
 
 package com.android.build.gradle.shrinker.parser;
 import static com.android.build.gradle.shrinker.parser.ModifierSpecification.*;
@@ -2007,7 +2007,7 @@ public class ProguardParser extends Parser {
 
 
 	// $ANTLR start "member"
-	// Proguard.g:190:9: private member[ClassSpecification classSpec] : ( annotation )? modifiers ( (typeSig= type )? name= ( NAME | '<init>' ) (signature= arguments |) | '<methods>' | '<fields>' ) ';' ;
+	// Proguard.g:190:9: private member[ClassSpecification classSpec] : ( annotation )? modifiers ( (typeSig= type )? name= ( NAME | '<init>' ) (signature= arguments |) | ( type )? '<methods>' | ( type )? '<fields>' ) ';' ;
 	public final void member(ClassSpecification classSpec) throws RecognitionException {
 		Token name=null;
 		String typeSig =null;
@@ -2016,8 +2016,8 @@ public class ProguardParser extends Parser {
 		ModifierSpecification modifiers7 =null;
 
 		try {
-			// Proguard.g:191:3: ( ( annotation )? modifiers ( (typeSig= type )? name= ( NAME | '<init>' ) (signature= arguments |) | '<methods>' | '<fields>' ) ';' )
-			// Proguard.g:192:5: ( annotation )? modifiers ( (typeSig= type )? name= ( NAME | '<init>' ) (signature= arguments |) | '<methods>' | '<fields>' ) ';'
+			// Proguard.g:191:3: ( ( annotation )? modifiers ( (typeSig= type )? name= ( NAME | '<init>' ) (signature= arguments |) | ( type )? '<methods>' | ( type )? '<fields>' ) ';' )
+			// Proguard.g:192:5: ( annotation )? modifiers ( (typeSig= type )? name= ( NAME | '<init>' ) (signature= arguments |) | ( type )? '<methods>' | ( type )? '<fields>' ) ';'
 			{
 			// Proguard.g:192:5: ( annotation )?
 			int alt26=2;
@@ -2042,32 +2042,174 @@ public class ProguardParser extends Parser {
 			modifiers7=modifiers();
 			state._fsp--;
 
-			// Proguard.g:193:5: ( (typeSig= type )? name= ( NAME | '<init>' ) (signature= arguments |) | '<methods>' | '<fields>' )
-			int alt29=3;
+			// Proguard.g:193:5: ( (typeSig= type )? name= ( NAME | '<init>' ) (signature= arguments |) | ( type )? '<methods>' | ( type )? '<fields>' )
+			int alt31=3;
 			switch ( input.LA(1) ) {
 			case NAME:
+				{
+				switch ( input.LA(2) ) {
+				case 71:
+					{
+					switch ( input.LA(3) ) {
+					case NAME:
+					case 68:
+						{
+						alt31=1;
+						}
+						break;
+					case 71:
+						{
+						alt31=1;
+						}
+						break;
+					case 69:
+						{
+						alt31=2;
+						}
+						break;
+					case 67:
+						{
+						alt31=3;
+						}
+						break;
+					default:
+						int nvaeMark = input.mark();
+						try {
+							for (int nvaeConsume = 0; nvaeConsume < 3 - 1; nvaeConsume++) {
+								input.consume();
+							}
+							NoViableAltException nvae =
+								new NoViableAltException("", 31, 6, input);
+							throw nvae;
+						} finally {
+							input.rewind(nvaeMark);
+						}
+					}
+					}
+					break;
+				case NAME:
+				case 9:
+				case 66:
+				case 68:
+					{
+					alt31=1;
+					}
+					break;
+				case 69:
+					{
+					alt31=2;
+					}
+					break;
+				case 67:
+					{
+					alt31=3;
+					}
+					break;
+				default:
+					int nvaeMark = input.mark();
+					try {
+						input.consume();
+						NoViableAltException nvae =
+							new NoViableAltException("", 31, 1, input);
+						throw nvae;
+					} finally {
+						input.rewind(nvaeMark);
+					}
+				}
+				}
+				break;
 			case 8:
+				{
+				switch ( input.LA(2) ) {
+				case 71:
+					{
+					switch ( input.LA(3) ) {
+					case NAME:
+					case 68:
+						{
+						alt31=1;
+						}
+						break;
+					case 71:
+						{
+						alt31=1;
+						}
+						break;
+					case 69:
+						{
+						alt31=2;
+						}
+						break;
+					case 67:
+						{
+						alt31=3;
+						}
+						break;
+					default:
+						int nvaeMark = input.mark();
+						try {
+							for (int nvaeConsume = 0; nvaeConsume < 3 - 1; nvaeConsume++) {
+								input.consume();
+							}
+							NoViableAltException nvae =
+								new NoViableAltException("", 31, 12, input);
+							throw nvae;
+						} finally {
+							input.rewind(nvaeMark);
+						}
+					}
+					}
+					break;
+				case NAME:
+				case 68:
+					{
+					alt31=1;
+					}
+					break;
+				case 69:
+					{
+					alt31=2;
+					}
+					break;
+				case 67:
+					{
+					alt31=3;
+					}
+					break;
+				default:
+					int nvaeMark = input.mark();
+					try {
+						input.consume();
+						NoViableAltException nvae =
+							new NoViableAltException("", 31, 2, input);
+						throw nvae;
+					} finally {
+						input.rewind(nvaeMark);
+					}
+				}
+				}
+				break;
 			case 68:
 				{
-				alt29=1;
+				alt31=1;
 				}
 				break;
 			case 69:
 				{
-				alt29=2;
+				alt31=2;
 				}
 				break;
 			case 67:
 				{
-				alt29=3;
+				alt31=3;
 				}
 				break;
 			default:
 				NoViableAltException nvae =
-					new NoViableAltException("", 29, 0, input);
+					new NoViableAltException("", 31, 0, input);
 				throw nvae;
 			}
-			switch (alt29) {
+			switch (alt31) {
 				case 1 :
 					// Proguard.g:194:7: (typeSig= type )? name= ( NAME | '<init>' ) (signature= arguments |)
 					{
@@ -2144,25 +2286,63 @@ public class ProguardParser extends Parser {
 					}
 					break;
 				case 2 :
-					// Proguard.g:196:9: '<methods>'
+					// Proguard.g:196:9: ( type )? '<methods>'
 					{
-					match(input,69,FOLLOW_69_in_member1337); 
+					// Proguard.g:196:9: ( type )?
+					int alt29=2;
+					int LA29_0 = input.LA(1);
+					if ( (LA29_0==NAME||LA29_0==8) ) {
+						alt29=1;
+					}
+					switch (alt29) {
+						case 1 :
+							// Proguard.g:196:9: type
+							{
+							pushFollow(FOLLOW_type_in_member1337);
+							type();
+							state._fsp--;
+
+							}
+							break;
+
+					}
+
+					match(input,69,FOLLOW_69_in_member1340); 
 					GrammarActions.method(classSpec, annotation6,
 					          GrammarActions.getSignature("***", 0), "*", "\\("+ GrammarActions.getSignature("...", 0) + "\\)",
 					          modifiers7);
 					}
 					break;
 				case 3 :
-					// Proguard.g:199:9: '<fields>'
+					// Proguard.g:199:9: ( type )? '<fields>'
 					{
-					match(input,67,FOLLOW_67_in_member1349); 
+					// Proguard.g:199:9: ( type )?
+					int alt30=2;
+					int LA30_0 = input.LA(1);
+					if ( (LA30_0==NAME||LA30_0==8) ) {
+						alt30=1;
+					}
+					switch (alt30) {
+						case 1 :
+							// Proguard.g:199:9: type
+							{
+							pushFollow(FOLLOW_type_in_member1352);
+							type();
+							state._fsp--;
+
+							}
+							break;
+
+					}
+
+					match(input,67,FOLLOW_67_in_member1355); 
 					GrammarActions.field(classSpec, annotation6, null, "*", modifiers7);
 					}
 					break;
 
 			}
 
-			match(input,66,FOLLOW_66_in_member1359); 
+			match(input,66,FOLLOW_66_in_member1365); 
 			}
 
 		}
@@ -2193,25 +2373,25 @@ public class ProguardParser extends Parser {
 			// Proguard.g:207:3: ( '@' ( NEGATOR )? NAME )
 			// Proguard.g:207:6: '@' ( NEGATOR )? NAME
 			{
-			match(input,70,FOLLOW_70_in_annotation1383); 
+			match(input,70,FOLLOW_70_in_annotation1389); 
 			// Proguard.g:207:10: ( NEGATOR )?
-			int alt30=2;
-			int LA30_0 = input.LA(1);
-			if ( (LA30_0==NEGATOR) ) {
-				alt30=1;
+			int alt32=2;
+			int LA32_0 = input.LA(1);
+			if ( (LA32_0==NEGATOR) ) {
+				alt32=1;
 			}
-			switch (alt30) {
+			switch (alt32) {
 				case 1 :
 					// Proguard.g:207:11: NEGATOR
 					{
-					match(input,NEGATOR,FOLLOW_NEGATOR_in_annotation1386); 
+					match(input,NEGATOR,FOLLOW_NEGATOR_in_annotation1392); 
 					hasNameNegator = true;
 					}
 					break;
 
 			}
 
-			NAME8=(Token)match(input,NAME,FOLLOW_NAME_in_annotation1392); 
+			NAME8=(Token)match(input,NAME,FOLLOW_NAME_in_annotation1398); 
 			annotSpec = GrammarActions.annotation((NAME8!=null?NAME8.getText():null), hasNameNegator);
 			}
 
@@ -2243,19 +2423,19 @@ public class ProguardParser extends Parser {
 			// Proguard.g:214:3: ( modifier[modifiers] )*
 			{
 			// Proguard.g:214:3: ( modifier[modifiers] )*
-			loop31:
+			loop33:
 			while (true) {
-				int alt31=2;
-				int LA31_0 = input.LA(1);
-				if ( (LA31_0==NEGATOR||LA31_0==73||LA31_0==77||LA31_0==81||(LA31_0 >= 85 && LA31_0 <= 95)) ) {
-					alt31=1;
+				int alt33=2;
+				int LA33_0 = input.LA(1);
+				if ( (LA33_0==NEGATOR||LA33_0==73||LA33_0==77||LA33_0==81||(LA33_0 >= 85 && LA33_0 <= 95)) ) {
+					alt33=1;
 				}
 
-				switch (alt31) {
+				switch (alt33) {
 				case 1 :
 					// Proguard.g:214:3: modifier[modifiers]
 					{
-					pushFollow(FOLLOW_modifier_in_modifiers1416);
+					pushFollow(FOLLOW_modifier_in_modifiers1422);
 					modifier(modifiers);
 					state._fsp--;
 
@@ -2263,7 +2443,7 @@ public class ProguardParser extends Parser {
 					break;
 
 				default :
-					break loop31;
+					break loop33;
 				}
 			}
 
@@ -2294,16 +2474,16 @@ public class ProguardParser extends Parser {
 			// Proguard.g:222:3: ( NEGATOR )? ( 'public' | 'private' | 'protected' | 'static' | 'synchronized' | 'volatile' | 'native' | 'abstract' | 'strictfp' | 'final' | 'transient' | 'synthetic' | 'bridge' | 'varargs' )
 			{
 			// Proguard.g:222:3: ( NEGATOR )?
-			int alt32=2;
-			int LA32_0 = input.LA(1);
-			if ( (LA32_0==NEGATOR) ) {
-				alt32=1;
+			int alt34=2;
+			int LA34_0 = input.LA(1);
+			if ( (LA34_0==NEGATOR) ) {
+				alt34=1;
 			}
-			switch (alt32) {
+			switch (alt34) {
 				case 1 :
 					// Proguard.g:222:4: NEGATOR
 					{
-					match(input,NEGATOR,FOLLOW_NEGATOR_in_modifier1442); 
+					match(input,NEGATOR,FOLLOW_NEGATOR_in_modifier1448); 
 					hasNegator = true;
 					}
 					break;
@@ -2311,179 +2491,179 @@ public class ProguardParser extends Parser {
 			}
 
 			// Proguard.g:223:3: ( 'public' | 'private' | 'protected' | 'static' | 'synchronized' | 'volatile' | 'native' | 'abstract' | 'strictfp' | 'final' | 'transient' | 'synthetic' | 'bridge' | 'varargs' )
-			int alt33=14;
+			int alt35=14;
 			switch ( input.LA(1) ) {
 			case 88:
 				{
-				alt33=1;
+				alt35=1;
 				}
 				break;
 			case 86:
 				{
-				alt33=2;
+				alt35=2;
 				}
 				break;
 			case 87:
 				{
-				alt33=3;
+				alt35=3;
 				}
 				break;
 			case 89:
 				{
-				alt33=4;
+				alt35=4;
 				}
 				break;
 			case 91:
 				{
-				alt33=5;
+				alt35=5;
 				}
 				break;
 			case 95:
 				{
-				alt33=6;
+				alt35=6;
 				}
 				break;
 			case 85:
 				{
-				alt33=7;
+				alt35=7;
 				}
 				break;
 			case 73:
 				{
-				alt33=8;
+				alt35=8;
 				}
 				break;
 			case 90:
 				{
-				alt33=9;
+				alt35=9;
 				}
 				break;
 			case 81:
 				{
-				alt33=10;
+				alt35=10;
 				}
 				break;
 			case 93:
 				{
-				alt33=11;
+				alt35=11;
 				}
 				break;
 			case 92:
 				{
-				alt33=12;
+				alt35=12;
 				}
 				break;
 			case 77:
 				{
-				alt33=13;
+				alt35=13;
 				}
 				break;
 			case 94:
 				{
-				alt33=14;
+				alt35=14;
 				}
 				break;
 			default:
 				NoViableAltException nvae =
-					new NoViableAltException("", 33, 0, input);
+					new NoViableAltException("", 35, 0, input);
 				throw nvae;
 			}
-			switch (alt33) {
+			switch (alt35) {
 				case 1 :
 					// Proguard.g:224:5: 'public'
 					{
-					match(input,88,FOLLOW_88_in_modifier1456); 
+					match(input,88,FOLLOW_88_in_modifier1462); 
 					modifiers.addAccessFlag(AccessFlag.PUBLIC, hasNegator);
 					}
 					break;
 				case 2 :
 					// Proguard.g:225:7: 'private'
 					{
-					match(input,86,FOLLOW_86_in_modifier1466); 
+					match(input,86,FOLLOW_86_in_modifier1472); 
 					modifiers.addAccessFlag(AccessFlag.PRIVATE, hasNegator);
 					}
 					break;
 				case 3 :
 					// Proguard.g:226:7: 'protected'
 					{
-					match(input,87,FOLLOW_87_in_modifier1476); 
+					match(input,87,FOLLOW_87_in_modifier1482); 
 					modifiers.addAccessFlag(AccessFlag.PROTECTED, hasNegator);
 					}
 					break;
 				case 4 :
 					// Proguard.g:227:7: 'static'
 					{
-					match(input,89,FOLLOW_89_in_modifier1486); 
+					match(input,89,FOLLOW_89_in_modifier1492); 
 					modifiers.addModifier(Modifier.STATIC, hasNegator);
 					}
 					break;
 				case 5 :
 					// Proguard.g:228:7: 'synchronized'
 					{
-					match(input,91,FOLLOW_91_in_modifier1496); 
+					match(input,91,FOLLOW_91_in_modifier1502); 
 					modifiers.addModifier(Modifier.SYNCHRONIZED, hasNegator);
 					}
 					break;
 				case 6 :
 					// Proguard.g:229:7: 'volatile'
 					{
-					match(input,95,FOLLOW_95_in_modifier1506); 
+					match(input,95,FOLLOW_95_in_modifier1512); 
 					modifiers.addModifier(Modifier.VOLATILE, hasNegator);
 					}
 					break;
 				case 7 :
 					// Proguard.g:230:7: 'native'
 					{
-					match(input,85,FOLLOW_85_in_modifier1516); 
+					match(input,85,FOLLOW_85_in_modifier1522); 
 					modifiers.addModifier(Modifier.NATIVE, hasNegator);
 					}
 					break;
 				case 8 :
 					// Proguard.g:231:7: 'abstract'
 					{
-					match(input,73,FOLLOW_73_in_modifier1526); 
+					match(input,73,FOLLOW_73_in_modifier1532); 
 					modifiers.addModifier(Modifier.ABSTRACT, hasNegator);
 					}
 					break;
 				case 9 :
 					// Proguard.g:232:7: 'strictfp'
 					{
-					match(input,90,FOLLOW_90_in_modifier1536); 
+					match(input,90,FOLLOW_90_in_modifier1542); 
 					modifiers.addModifier(Modifier.STRICTFP, hasNegator);
 					}
 					break;
 				case 10 :
 					// Proguard.g:233:7: 'final'
 					{
-					match(input,81,FOLLOW_81_in_modifier1546); 
+					match(input,81,FOLLOW_81_in_modifier1552); 
 					modifiers.addModifier(Modifier.FINAL, hasNegator);
 					}
 					break;
 				case 11 :
 					// Proguard.g:234:7: 'transient'
 					{
-					match(input,93,FOLLOW_93_in_modifier1556); 
+					match(input,93,FOLLOW_93_in_modifier1562); 
 					modifiers.addModifier(Modifier.TRANSIENT, hasNegator);
 					}
 					break;
 				case 12 :
 					// Proguard.g:235:7: 'synthetic'
 					{
-					match(input,92,FOLLOW_92_in_modifier1566); 
+					match(input,92,FOLLOW_92_in_modifier1572); 
 					modifiers.addModifier(Modifier.SYNTHETIC, hasNegator);
 					}
 					break;
 				case 13 :
 					// Proguard.g:236:7: 'bridge'
 					{
-					match(input,77,FOLLOW_77_in_modifier1576); 
+					match(input,77,FOLLOW_77_in_modifier1582); 
 					modifiers.addModifier(Modifier.BRIDGE, hasNegator);
 					}
 					break;
 				case 14 :
 					// Proguard.g:237:7: 'varargs'
 					{
-					match(input,94,FOLLOW_94_in_modifier1586); 
+					match(input,94,FOLLOW_94_in_modifier1592); 
 					modifiers.addModifier(Modifier.VARARGS, hasNegator);
 					}
 					break;
@@ -2530,16 +2710,16 @@ public class ProguardParser extends Parser {
 				throw mse;
 			}
 			// Proguard.g:247:3: ( annotation )?
-			int alt34=2;
-			int LA34_0 = input.LA(1);
-			if ( (LA34_0==70) ) {
-				alt34=1;
+			int alt36=2;
+			int LA36_0 = input.LA(1);
+			if ( (LA36_0==70) ) {
+				alt36=1;
 			}
-			switch (alt34) {
+			switch (alt36) {
 				case 1 :
 					// Proguard.g:247:3: annotation
 					{
-					pushFollow(FOLLOW_annotation_in_inheritance1627);
+					pushFollow(FOLLOW_annotation_in_inheritance1633);
 					annotation10=annotation();
 					state._fsp--;
 
@@ -2549,23 +2729,23 @@ public class ProguardParser extends Parser {
 			}
 
 			// Proguard.g:247:15: ( NEGATOR )?
-			int alt35=2;
-			int LA35_0 = input.LA(1);
-			if ( (LA35_0==NEGATOR) ) {
-				alt35=1;
+			int alt37=2;
+			int LA37_0 = input.LA(1);
+			if ( (LA37_0==NEGATOR) ) {
+				alt37=1;
 			}
-			switch (alt35) {
+			switch (alt37) {
 				case 1 :
 					// Proguard.g:247:16: NEGATOR
 					{
-					match(input,NEGATOR,FOLLOW_NEGATOR_in_inheritance1631); 
+					match(input,NEGATOR,FOLLOW_NEGATOR_in_inheritance1637); 
 					hasNameNegator = true;
 					}
 					break;
 
 			}
 
-			NAME9=(Token)match(input,NAME,FOLLOW_NAME_in_inheritance1637); 
+			NAME9=(Token)match(input,NAME,FOLLOW_NAME_in_inheritance1643); 
 			inheritanceSpec = GrammarActions.createInheritance((NAME9!=null?NAME9.getText():null), hasNameNegator, annotation10);
 			}
 
@@ -2595,41 +2775,41 @@ public class ProguardParser extends Parser {
 			// Proguard.g:250:3: ( '(' ( (parameterSig= type ( ',' parameterSig= type )* )? ) ')' )
 			// Proguard.g:251:3: '(' ( (parameterSig= type ( ',' parameterSig= type )* )? ) ')'
 			{
-			match(input,9,FOLLOW_9_in_arguments1657); 
+			match(input,9,FOLLOW_9_in_arguments1663); 
 			signature = "\\(";
 			// Proguard.g:252:5: ( (parameterSig= type ( ',' parameterSig= type )* )? )
 			// Proguard.g:253:7: (parameterSig= type ( ',' parameterSig= type )* )?
 			{
 			// Proguard.g:253:7: (parameterSig= type ( ',' parameterSig= type )* )?
-			int alt37=2;
-			int LA37_0 = input.LA(1);
-			if ( (LA37_0==NAME||LA37_0==8) ) {
-				alt37=1;
+			int alt39=2;
+			int LA39_0 = input.LA(1);
+			if ( (LA39_0==NAME||LA39_0==8) ) {
+				alt39=1;
 			}
-			switch (alt37) {
+			switch (alt39) {
 				case 1 :
 					// Proguard.g:254:9: parameterSig= type ( ',' parameterSig= type )*
 					{
-					pushFollow(FOLLOW_type_in_arguments1685);
+					pushFollow(FOLLOW_type_in_arguments1691);
 					parameterSig=type();
 					state._fsp--;
 
 					signature += parameterSig;
 					// Proguard.g:255:9: ( ',' parameterSig= type )*
-					loop36:
+					loop38:
 					while (true) {
-						int alt36=2;
-						int LA36_0 = input.LA(1);
-						if ( (LA36_0==11) ) {
-							alt36=1;
+						int alt38=2;
+						int LA38_0 = input.LA(1);
+						if ( (LA38_0==11) ) {
+							alt38=1;
 						}
 
-						switch (alt36) {
+						switch (alt38) {
 						case 1 :
 							// Proguard.g:255:10: ',' parameterSig= type
 							{
-							match(input,11,FOLLOW_11_in_arguments1698); 
-							pushFollow(FOLLOW_type_in_arguments1702);
+							match(input,11,FOLLOW_11_in_arguments1704); 
+							pushFollow(FOLLOW_type_in_arguments1708);
 							parameterSig=type();
 							state._fsp--;
 
@@ -2638,7 +2818,7 @@ public class ProguardParser extends Parser {
 							break;
 
 						default :
-							break loop36;
+							break loop38;
 						}
 					}
 
@@ -2649,7 +2829,7 @@ public class ProguardParser extends Parser {
 
 			}
 
-			match(input,10,FOLLOW_10_in_arguments1731); 
+			match(input,10,FOLLOW_10_in_arguments1737); 
 			signature += "\\)";
 			}
 
@@ -2695,25 +2875,25 @@ public class ProguardParser extends Parser {
 				throw mse;
 			}
 			// Proguard.g:267:27: ( '[]' )*
-			loop38:
+			loop40:
 			while (true) {
-				int alt38=2;
-				int LA38_0 = input.LA(1);
-				if ( (LA38_0==71) ) {
-					alt38=1;
+				int alt40=2;
+				int LA40_0 = input.LA(1);
+				if ( (LA40_0==71) ) {
+					alt40=1;
 				}
 
-				switch (alt38) {
+				switch (alt40) {
 				case 1 :
 					// Proguard.g:267:28: '[]'
 					{
-					match(input,71,FOLLOW_71_in_type1776); 
+					match(input,71,FOLLOW_71_in_type1782); 
 					dim++;
 					}
 					break;
 
 				default :
-					break loop38;
+					break loop40;
 				}
 			}
 
@@ -2750,71 +2930,71 @@ public class ProguardParser extends Parser {
 			// Proguard.g:275:5: ( ',' ( 'allowshrinking' | 'allowoptimization' | 'includedescriptorclasses' | 'allowobfuscation' ) )*
 			{
 			// Proguard.g:275:5: ( ',' ( 'allowshrinking' | 'allowoptimization' | 'includedescriptorclasses' | 'allowobfuscation' ) )*
-			loop40:
+			loop42:
 			while (true) {
-				int alt40=2;
-				int LA40_0 = input.LA(1);
-				if ( (LA40_0==11) ) {
-					alt40=1;
+				int alt42=2;
+				int LA42_0 = input.LA(1);
+				if ( (LA42_0==11) ) {
+					alt42=1;
 				}
 
-				switch (alt40) {
+				switch (alt42) {
 				case 1 :
 					// Proguard.g:275:6: ',' ( 'allowshrinking' | 'allowoptimization' | 'includedescriptorclasses' | 'allowobfuscation' )
 					{
-					match(input,11,FOLLOW_11_in_keepOptionModifier1811); 
+					match(input,11,FOLLOW_11_in_keepOptionModifier1817); 
 					// Proguard.g:276:3: ( 'allowshrinking' | 'allowoptimization' | 'includedescriptorclasses' | 'allowobfuscation' )
-					int alt39=4;
+					int alt41=4;
 					switch ( input.LA(1) ) {
 					case 76:
 						{
-						alt39=1;
+						alt41=1;
 						}
 						break;
 					case 75:
 						{
-						alt39=2;
+						alt41=2;
 						}
 						break;
 					case 83:
 						{
-						alt39=3;
+						alt41=3;
 						}
 						break;
 					case 74:
 						{
-						alt39=4;
+						alt41=4;
 						}
 						break;
 					default:
 						NoViableAltException nvae =
-							new NoViableAltException("", 39, 0, input);
+							new NoViableAltException("", 41, 0, input);
 						throw nvae;
 					}
-					switch (alt39) {
+					switch (alt41) {
 						case 1 :
 							// Proguard.g:276:4: 'allowshrinking'
 							{
-							match(input,76,FOLLOW_76_in_keepOptionModifier1816); 
+							match(input,76,FOLLOW_76_in_keepOptionModifier1822); 
 							modifier.setAllowShrinking();
 							}
 							break;
 						case 2 :
 							// Proguard.g:277:5: 'allowoptimization'
 							{
-							match(input,75,FOLLOW_75_in_keepOptionModifier1824); 
+							match(input,75,FOLLOW_75_in_keepOptionModifier1830); 
 							}
 							break;
 						case 3 :
 							// Proguard.g:278:5: 'includedescriptorclasses'
 							{
-							match(input,83,FOLLOW_83_in_keepOptionModifier1831); 
+							match(input,83,FOLLOW_83_in_keepOptionModifier1837); 
 							}
 							break;
 						case 4 :
 							// Proguard.g:279:5: 'allowobfuscation'
 							{
-							match(input,74,FOLLOW_74_in_keepOptionModifier1838); 
+							match(input,74,FOLLOW_74_in_keepOptionModifier1844); 
 							modifier.setAllowObfuscation();
 							}
 							break;
@@ -2825,7 +3005,7 @@ public class ProguardParser extends Parser {
 					break;
 
 				default :
-					break loop40;
+					break loop42;
 				}
 			}
 
@@ -2984,42 +3164,44 @@ public class ProguardParser extends Parser {
 	public static final BitSet FOLLOW_type_in_member1287 = new BitSet(new long[]{0x0000000000000020L,0x0000000000000010L});
 	public static final BitSet FOLLOW_set_in_member1293 = new BitSet(new long[]{0x0000000000000200L,0x0000000000000004L});
 	public static final BitSet FOLLOW_arguments_in_member1302 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000004L});
-	public static final BitSet FOLLOW_69_in_member1337 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000004L});
-	public static final BitSet FOLLOW_67_in_member1349 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000004L});
-	public static final BitSet FOLLOW_66_in_member1359 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_70_in_annotation1383 = new BitSet(new long[]{0x0000000000000060L});
-	public static final BitSet FOLLOW_NEGATOR_in_annotation1386 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_NAME_in_annotation1392 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_modifier_in_modifiers1416 = new BitSet(new long[]{0x0000000000000042L,0x00000000FFE22200L});
-	public static final BitSet FOLLOW_NEGATOR_in_modifier1442 = new BitSet(new long[]{0x0000000000000000L,0x00000000FFE22200L});
-	public static final BitSet FOLLOW_88_in_modifier1456 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_86_in_modifier1466 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_87_in_modifier1476 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_89_in_modifier1486 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_91_in_modifier1496 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_95_in_modifier1506 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_85_in_modifier1516 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_73_in_modifier1526 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_90_in_modifier1536 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_81_in_modifier1546 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_93_in_modifier1556 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_92_in_modifier1566 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_77_in_modifier1576 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_94_in_modifier1586 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_set_in_inheritance1617 = new BitSet(new long[]{0x0000000000000060L,0x0000000000000040L});
-	public static final BitSet FOLLOW_annotation_in_inheritance1627 = new BitSet(new long[]{0x0000000000000060L});
-	public static final BitSet FOLLOW_NEGATOR_in_inheritance1631 = new BitSet(new long[]{0x0000000000000020L});
-	public static final BitSet FOLLOW_NAME_in_inheritance1637 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_9_in_arguments1657 = new BitSet(new long[]{0x0000000000000520L});
-	public static final BitSet FOLLOW_type_in_arguments1685 = new BitSet(new long[]{0x0000000000000C00L});
-	public static final BitSet FOLLOW_11_in_arguments1698 = new BitSet(new long[]{0x0000000000000120L});
-	public static final BitSet FOLLOW_type_in_arguments1702 = new BitSet(new long[]{0x0000000000000C00L});
-	public static final BitSet FOLLOW_10_in_arguments1731 = new BitSet(new long[]{0x0000000000000002L});
-	public static final BitSet FOLLOW_set_in_type1767 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000080L});
-	public static final BitSet FOLLOW_71_in_type1776 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000080L});
-	public static final BitSet FOLLOW_11_in_keepOptionModifier1811 = new BitSet(new long[]{0x0000000000000000L,0x0000000000081C00L});
-	public static final BitSet FOLLOW_76_in_keepOptionModifier1816 = new BitSet(new long[]{0x0000000000000802L});
-	public static final BitSet FOLLOW_75_in_keepOptionModifier1824 = new BitSet(new long[]{0x0000000000000802L});
-	public static final BitSet FOLLOW_83_in_keepOptionModifier1831 = new BitSet(new long[]{0x0000000000000802L});
-	public static final BitSet FOLLOW_74_in_keepOptionModifier1838 = new BitSet(new long[]{0x0000000000000802L});
+	public static final BitSet FOLLOW_type_in_member1337 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000020L});
+	public static final BitSet FOLLOW_69_in_member1340 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000004L});
+	public static final BitSet FOLLOW_type_in_member1352 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000008L});
+	public static final BitSet FOLLOW_67_in_member1355 = new BitSet(new long[]{0x0000000000000000L,0x0000000000000004L});
+	public static final BitSet FOLLOW_66_in_member1365 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_70_in_annotation1389 = new BitSet(new long[]{0x0000000000000060L});
+	public static final BitSet FOLLOW_NEGATOR_in_annotation1392 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_NAME_in_annotation1398 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_modifier_in_modifiers1422 = new BitSet(new long[]{0x0000000000000042L,0x00000000FFE22200L});
+	public static final BitSet FOLLOW_NEGATOR_in_modifier1448 = new BitSet(new long[]{0x0000000000000000L,0x00000000FFE22200L});
+	public static final BitSet FOLLOW_88_in_modifier1462 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_86_in_modifier1472 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_87_in_modifier1482 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_89_in_modifier1492 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_91_in_modifier1502 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_95_in_modifier1512 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_85_in_modifier1522 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_73_in_modifier1532 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_90_in_modifier1542 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_81_in_modifier1552 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_93_in_modifier1562 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_92_in_modifier1572 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_77_in_modifier1582 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_94_in_modifier1592 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_set_in_inheritance1623 = new BitSet(new long[]{0x0000000000000060L,0x0000000000000040L});
+	public static final BitSet FOLLOW_annotation_in_inheritance1633 = new BitSet(new long[]{0x0000000000000060L});
+	public static final BitSet FOLLOW_NEGATOR_in_inheritance1637 = new BitSet(new long[]{0x0000000000000020L});
+	public static final BitSet FOLLOW_NAME_in_inheritance1643 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_9_in_arguments1663 = new BitSet(new long[]{0x0000000000000520L});
+	public static final BitSet FOLLOW_type_in_arguments1691 = new BitSet(new long[]{0x0000000000000C00L});
+	public static final BitSet FOLLOW_11_in_arguments1704 = new BitSet(new long[]{0x0000000000000120L});
+	public static final BitSet FOLLOW_type_in_arguments1708 = new BitSet(new long[]{0x0000000000000C00L});
+	public static final BitSet FOLLOW_10_in_arguments1737 = new BitSet(new long[]{0x0000000000000002L});
+	public static final BitSet FOLLOW_set_in_type1773 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000080L});
+	public static final BitSet FOLLOW_71_in_type1782 = new BitSet(new long[]{0x0000000000000002L,0x0000000000000080L});
+	public static final BitSet FOLLOW_11_in_keepOptionModifier1817 = new BitSet(new long[]{0x0000000000000000L,0x0000000000081C00L});
+	public static final BitSet FOLLOW_76_in_keepOptionModifier1822 = new BitSet(new long[]{0x0000000000000802L});
+	public static final BitSet FOLLOW_75_in_keepOptionModifier1830 = new BitSet(new long[]{0x0000000000000802L});
+	public static final BitSet FOLLOW_83_in_keepOptionModifier1837 = new BitSet(new long[]{0x0000000000000802L});
+	public static final BitSet FOLLOW_74_in_keepOptionModifier1844 = new BitSet(new long[]{0x0000000000000802L});
 }
