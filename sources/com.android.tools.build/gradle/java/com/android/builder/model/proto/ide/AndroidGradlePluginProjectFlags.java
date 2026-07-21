@@ -180,6 +180,16 @@ private static final long serialVersionUID = 0L;
      * <code>ENABLE_COMPILE_RUNTIME_CLASSPATH_ALIGNMENT = 13;</code>
      */
     ENABLE_COMPILE_RUNTIME_CLASSPATH_ALIGNMENT(13),
+    /**
+     * <pre>
+     * Whether built-in Kotlin is enabled by default in this Gradle build
+     * Doesn't directly affect KMP, but useful to have here for when Studio is adding a non-KMP
+     * Android application or library to a build with only KMP subprojects.
+     * </pre>
+     *
+     * <code>BUILT_IN_KOTLIN_DEFAULT_ENABLED = 14;</code>
+     */
+    BUILT_IN_KOTLIN_DEFAULT_ENABLED(14),
     UNRECOGNIZED(-1),
     ;
 
@@ -302,6 +312,16 @@ private static final long serialVersionUID = 0L;
      * <code>ENABLE_COMPILE_RUNTIME_CLASSPATH_ALIGNMENT = 13;</code>
      */
     public static final int ENABLE_COMPILE_RUNTIME_CLASSPATH_ALIGNMENT_VALUE = 13;
+    /**
+     * <pre>
+     * Whether built-in Kotlin is enabled by default in this Gradle build
+     * Doesn't directly affect KMP, but useful to have here for when Studio is adding a non-KMP
+     * Android application or library to a build with only KMP subprojects.
+     * </pre>
+     *
+     * <code>BUILT_IN_KOTLIN_DEFAULT_ENABLED = 14;</code>
+     */
+    public static final int BUILT_IN_KOTLIN_DEFAULT_ENABLED_VALUE = 14;
 
 
     public final int getNumber() {
@@ -342,6 +362,7 @@ private static final long serialVersionUID = 0L;
         case 11: return GENERATE_MANIFEST_CLASS;
         case 12: return OLD_VARIANT_API_IN_USE;
         case 13: return ENABLE_COMPILE_RUNTIME_CLASSPATH_ALIGNMENT;
+        case 14: return BUILT_IN_KOTLIN_DEFAULT_ENABLED;
         default: return null;
       }
     }
