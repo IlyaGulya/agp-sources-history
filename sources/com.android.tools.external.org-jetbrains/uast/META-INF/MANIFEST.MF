@@ -1,5 +1,2 @@
 Manifest-Version: 1.0
 
-Name: com/android/tools/external/org/jetbrains/uast/Main.java
-SHA-256-Digest: boZ8muZeipmelGdAafogJr4vctNv2neUC9cWkc9AmlI=
-

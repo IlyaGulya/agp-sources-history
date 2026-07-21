@@ -1,14 +1,2 @@
 Manifest-Version: 1.0
 
-Name: com/android/tools/analytics/UsageTracker.java
-SHA-256-Digest: hFXWM+Tj8OlD3vsVB6u7y+ODZOdZfdp+eQ/qz3TlRsk=
-
-Name: com/android/tools/analytics/JournalingUsageTracker.java
-SHA-256-Digest: 3XhoHcbM5Yx5URT+ZwHK/qIU7p4w+7w8Gfm4B1Mj3PM=
-
-Name: com/android/tools/analytics/Percentiles.java
-SHA-256-Digest: D4uW38RmkkgnGEd+vc8NQReyl2YOvn9TRy0N/jcoKrk=
-
-Name: com/android/tools/analytics/NullUsageTracker.java
-SHA-256-Digest: 43kfhKe55eiIaFSGvvh4Q8O8gDmPj1r0ONTINgCDslM=
-
