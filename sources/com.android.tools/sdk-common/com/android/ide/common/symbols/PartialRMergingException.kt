@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.builder.internal.aapt
+package com.android.ide.common.symbols
 
-import java.io.Serializable
+/** Exception thrown when an error occurs during partial R files merging.  */
+class PartialRMergingException : Exception {
 
-data class AaptOptions @JvmOverloads constructor(
-        val noCompress: Collection<String>? = null,
-        val failOnMissingConfigEntry: Boolean = true,
-        val additionalParameters: List<String>? = null,
-        val privateRDotJavaPackage: String? = null) : Serializable
+    constructor(description: String) : super(description)
+
+    constructor(description: String, cause: Throwable) : super(description, cause)
+}

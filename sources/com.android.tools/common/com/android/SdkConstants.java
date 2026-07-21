@@ -303,8 +303,6 @@ public final class SdkConstants {
     public static final String FN_PROJECT_PROGUARD_FILE = "proguard-project.txt"; //$NON-NLS-1$
     /** File holding a list of advanced features */
     public static final String FN_ADVANCED_FEATURES = "advancedFeatures.ini";
-    /** File holding a list of advanced features when user is on canary channel */
-    public static final String FN_ADVANCED_FEATURES_CANARY = "advancedFeaturesCanary.ini";
 
     /* Folder Names for Android Projects . */
 
@@ -800,8 +798,8 @@ public final class SdkConstants {
     /* Android ConstraintLayout Constants */
     public static final String CLASS_CONSTRAINT_LAYOUT =
             "android.support.constraint.ConstraintLayout"; //$NON-NLS-1$
-    public static final String CLASS_TRANSITION_LAYOUT =
-      "android.support.constraint.TransitionLayout"; //$NON-NLS-1$
+    public static final String CLASS_MOTION_LAYOUT =
+      "android.support.constraint.motion.MotionLayout"; //$NON-NLS-1$
     public static final String CLASS_CONSTRAINT_LAYOUT_HELPER =
             "android.support.constraint.ConstraintHelper"; //$NON-NLS-1$
     public static final String CLASS_CONSTRAINT_LAYOUT_BARRIER =
@@ -1162,7 +1160,7 @@ public final class SdkConstants {
 
     /* Android ConstraintLayout Tag Constants */
     public static final String CONSTRAINT_LAYOUT = CLASS_CONSTRAINT_LAYOUT;
-    public static final String TRANSITION_LAYOUT = CLASS_TRANSITION_LAYOUT;
+    public static final String MOTION_LAYOUT = CLASS_MOTION_LAYOUT;
     public static final String TABLE_CONSTRAINT_LAYOUT = CLASS_TABLE_CONSTRAINT_LAYOUT;
     public static final String CONSTRAINT_LAYOUT_GUIDELINE = CLASS_CONSTRAINT_LAYOUT_GUIDELINE;
     public static final String CONSTRAINT_LAYOUT_BARRIER = CLASS_CONSTRAINT_LAYOUT_BARRIER;
@@ -2238,7 +2236,7 @@ public final class SdkConstants {
     public static final String GRADLE_MINIMUM_VERSION = "4.4";
     public static final String GRADLE_LATEST_VERSION = GRADLE_MINIMUM_VERSION;
     public static final String GRADLE_PLUGIN_MINIMUM_VERSION = "1.0.0";
-    public static final String GRADLE_PLUGIN_RECOMMENDED_VERSION = "3.1.0";
+    public static final String GRADLE_PLUGIN_RECOMMENDED_VERSION = "3.0.0";
     // Temporary - can be removed once the recommended version supports AIA (with splits).
     public static final String GRADLE_PLUGIN_LATEST_VERSION = GRADLE_PLUGIN_RECOMMENDED_VERSION;
 
