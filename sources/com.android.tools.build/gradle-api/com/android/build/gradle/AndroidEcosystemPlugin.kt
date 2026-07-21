@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.build.api.variant
+package com.android.build.gradle
 
 import org.gradle.api.Incubating
+import org.gradle.api.Plugin
+import org.gradle.api.initialization.Settings
 
 /**
- * [Variant] that optionally have [DeviceTest] components like [AndroidTest].
+ * Android ecosystem plugin for Declarative Gradle support
+ *
+ * @suppress Do not use from production code. Only exposed for prototype.
  */
 @Incubating
-interface HasDeviceTests {
+class AndroidEcosystemPlugin : Plugin<Settings> {
 
-    /**
-     * Variant's [Map] of [DeviceTest] configurations, or empty if all devices tests (like android
-     * tests) are disabled for this variant.
-     *
-     *  @return a [Map] which keys are unique names within the tested variant like
-     * [DeviceTestBuilder.ANDROID_TEST_TYPE] and the values are [DeviceTest] for that host
-     * test suite.
-     */
-    @get:Incubating
-    val deviceTests: Map<String, DeviceTest>
+    override fun apply(target: Settings) {
+        target.apply(INTERNAL_PLUGIN_ID)
+    }
+
+    private val INTERNAL_PLUGIN_ID = mapOf("plugin" to "com.android.internal.ecosystem")
 }
