@@ -61,8 +61,7 @@ private fun compareVersions(
     firstVersion: String,
     projectToCheck: Project
 ) {
-    val currentProjectPath = projectToCheck.projectDir.canonicalPath
-    projectToCheck.plugins.withId(ANDROID_GRADLE_PLUGIN_ID) {
+    projectToCheck.plugins.withId("com.android.base") {
         val versionValue = try {
             val versionClass = try {
                 it::class.java.classLoader.loadClass(com.android.Version::class.java.name)
@@ -76,7 +75,7 @@ private fun compareVersions(
             field.get(null) as String
         } catch (ex: Throwable) {
             projectToCheck.logger.error(
-                "Unable to get AGP version for project `$currentProjectPath`. All projects in the build should use the same AGP version.",
+                "Unable to get AGP version for project `${projectToCheck.projectDir.canonicalPath}`. All projects in the build should use the same AGP version.",
                 ex
             )
             throw ex
@@ -86,11 +85,10 @@ private fun compareVersions(
             """
 Using multiple versions of the Android Gradle plugin in the same build is not allowed.
 - Project `$firstProjectPath` is using version `$firstVersion`
-- Project `$currentProjectPath` is using version `$versionValue`
+- Project `${projectToCheck.projectDir.canonicalPath}` is using version `$versionValue`
             """.trimIndent()
         )
     }
 }
 
-const val ANDROID_GRADLE_PLUGIN_ID = "com.android.base"
 private const val CHECK_PERFORMED = "android.agp.version.check.performed"

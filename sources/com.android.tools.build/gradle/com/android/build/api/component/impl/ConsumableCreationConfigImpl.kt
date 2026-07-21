@@ -27,7 +27,6 @@ import com.android.build.gradle.options.OptionalBooleanOption
 import com.android.builder.dexing.DexingType
 import com.android.builder.errors.IssueReporter
 import com.android.builder.model.CodeShrinker
-import com.google.common.collect.Lists
 
 /**
  * This class and subclasses are implementing methods defined in the CreationConfig
@@ -63,7 +62,7 @@ open class ConsumableCreationConfigImpl(
 
     open fun getCodeShrinker(): CodeShrinker? {
         val codeShrinker: CodeShrinker = variantDslInfo.getPostProcessingOptions().getCodeShrinker() ?: return null
-        var enableR8 = globalScope.projectOptions[OptionalBooleanOption.ENABLE_R8]
+        var enableR8 = globalScope.projectOptions[OptionalBooleanOption.INTERNAL_ONLY_ENABLE_R8]
         if (variantDslInfo.variantType.isAar && !globalScope.projectOptions[BooleanOption.ENABLE_R8_LIBRARIES]) {
                 // R8 is disabled for libraries
                 enableR8 = false
@@ -98,55 +97,10 @@ open class ConsumableCreationConfigImpl(
         }
         val shrinker = getCodeShrinker()
         if (shrinker == CodeShrinker.R8) {
-            if (globalScope.projectOptions[BooleanOption.ENABLE_R8_DESUGARING]) {
-                return VariantScope.Java8LangSupport.R8
-            }
+            return VariantScope.Java8LangSupport.R8
         } else {
             // D8 cannot be used if R8 is used
-            if (globalScope.projectOptions[BooleanOption.ENABLE_D8_DESUGARING]
-                    && isValidJava8Flag(BooleanOption.ENABLE_D8_DESUGARING, BooleanOption.ENABLE_D8)) {
-                return VariantScope.Java8LangSupport.D8
-            }
-        }
-        if (globalScope.projectOptions[BooleanOption.ENABLE_DESUGAR]) {
-            return VariantScope.Java8LangSupport.DESUGAR
-        }
-        val missingFlag = if (shrinker == CodeShrinker.R8) BooleanOption.ENABLE_R8_DESUGARING else BooleanOption.ENABLE_D8_DESUGARING
-        globalScope
-            .dslServices
-            .issueReporter
-            .reportError(
-                    IssueReporter.Type.GENERIC, String.format(
-                    "Please add '%s=true' to your "
-                            + "gradle.properties file to enable Java 8 "
-                            + "language support.",
-                    missingFlag.name),
-                    variantDslInfo.componentIdentity.name)
-        return VariantScope.Java8LangSupport.INVALID
-    }
-
-    private fun isValidJava8Flag(flag: BooleanOption, vararg dependsOn: BooleanOption): Boolean {
-
-        var invalid: MutableList<String?>? = null
-        for (requiredFlag in dependsOn) {
-            if (!globalScope.projectOptions[requiredFlag]) {
-                if (invalid == null) {
-                    invalid = Lists.newArrayList()
-                }
-                invalid!!.add("'" + requiredFlag.propertyName + "= false'")
-            }
-        }
-        return if (invalid == null) {
-            true
-        } else {
-            val template = ("Java 8 language support, as requested by '%s= true' in your "
-                    + "gradle.properties file, is not supported when %s.")
-            val msg = String.format(template, flag.propertyName, java.lang.String.join(",", invalid))
-            globalScope
-                .dslServices
-                .issueReporter
-                .reportError(IssueReporter.Type.GENERIC, msg, variantDslInfo.componentIdentity.name)
-            false
+            return VariantScope.Java8LangSupport.D8
         }
     }
 

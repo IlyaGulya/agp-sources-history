@@ -16,7 +16,6 @@
 
 package com.android.build.gradle.internal.test
 
-import com.android.build.api.component.impl.ComponentImpl
 import com.android.build.gradle.internal.component.AndroidTestCreationConfig
 import com.android.build.gradle.internal.tasks.getApkFiles
 import com.android.build.gradle.internal.testing.TestData
@@ -27,7 +26,6 @@ import com.google.common.collect.ImmutableList
 import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
-import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
@@ -42,8 +40,6 @@ import java.io.File
  * For the moment, that is only dynamic feature modules.
  */
 internal class BundleTestDataImpl constructor(
-    providerFactory: ProviderFactory,
-    componentImpl: ComponentImpl,
     creationConfig: AndroidTestCreationConfig,
     testApkDir: Provider<Directory>,
     @get:Input
@@ -54,8 +50,6 @@ internal class BundleTestDataImpl constructor(
     @get:Optional
     val apkBundle: FileCollection
 ) : AbstractTestDataImpl(
-    providerFactory,
-    componentImpl,
     creationConfig,
     creationConfig.variantSources,
     testApkDir,

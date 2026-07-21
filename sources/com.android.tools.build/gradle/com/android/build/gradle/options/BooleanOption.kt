@@ -22,6 +22,7 @@ import com.android.build.gradle.options.Version.VERSION_3_6
 import com.android.build.gradle.options.Version.VERSION_4_0
 import com.android.build.gradle.options.Version.VERSION_4_1
 import com.android.build.gradle.options.Version.VERSION_4_2
+import com.android.build.gradle.options.Version.VERSION_7_0
 import com.android.build.gradle.options.Version.VERSION_BEFORE_4_0
 import com.android.builder.model.AndroidProject
 
@@ -123,6 +124,7 @@ enum class BooleanOption(
     ENABLE_NEW_RESOURCE_SHRINKER("android.experimental.enableNewResourceShrinker", false, FeatureStage.Experimental),
     ENABLE_NEW_RESOURCE_SHRINKER_PRECISE("android.experimental.enableNewResourceShrinker.preciseShrinking", false, FeatureStage.Experimental),
     GENERATE_MANIFEST_CLASS("android.generateManifestClass", false, FeatureStage.Experimental),
+    ENABLE_LOCAL_TESTING("android.bundletool.enableLocalTesting", false, FeatureStage.Experimental),
 
     /** When set R classes are treated as compilation classpath in libraries, rather than runtime classpath, with values set to 0. */
     ENABLE_ADDITIONAL_ANDROID_TEST_OUTPUT("android.enableAdditionalTestOutput", true, FeatureStage.Experimental),
@@ -131,10 +133,6 @@ enum class BooleanOption(
     COMPILE_CLASSPATH_LIBRARY_R_CLASSES("android.useCompileClasspathLibraryRClasses", true, FeatureStage.Experimental),
     ENABLE_EXTRACT_ANNOTATIONS("android.enableExtractAnnotations", true, FeatureStage.Experimental),
     ENABLE_AAPT2_WORKER_ACTIONS("android.enableAapt2WorkerActions", true, FeatureStage.Experimental),
-    ENABLE_D8_DESUGARING("android.enableD8.desugaring", true, FeatureStage.Experimental),
-
-    /** Set to true by default, but has effect only if R8 is enabled. */
-    ENABLE_R8_DESUGARING("android.enableR8.desugaring", true, FeatureStage.Experimental),
 
     // Marked as stable to avoid reporting deprecation twice.
     CONVERT_NON_NAMESPACED_DEPENDENCIES("android.convertNonNamespacedDependencies", true, FeatureStage.Experimental),
@@ -142,7 +140,7 @@ enum class BooleanOption(
     /** Set to true to build native .so libraries only for the device it will be run on. */
     BUILD_ONLY_TARGET_ABI("android.buildOnlyTargetAbi", true, FeatureStage.Experimental),
 
-    ENABLE_PARALLEL_NATIVE_JSON_GEN("android.enableParallelJsonGen", true, FeatureStage.Experimental),
+    ENABLE_PARALLEL_NATIVE_JSON_GEN("android.enableParallelJsonGen", false, FeatureStage.Experimental),
     ENABLE_SIDE_BY_SIDE_CMAKE("android.enableSideBySideCmake", true, FeatureStage.Experimental),
     ENABLE_NATIVE_COMPILER_SETTINGS_CACHE("android.enableNativeCompilerSettingsCache", false, FeatureStage.Experimental),
     ENABLE_CMAKE_BUILD_COHABITATION("android.enableCmakeBuildCohabitation", false, FeatureStage.Experimental),
@@ -156,20 +154,18 @@ enum class BooleanOption(
     USE_NEW_APK_CREATOR("android.useNewApkCreator", true, FeatureStage.Experimental),
     EXCLUDE_RES_SOURCES_FOR_RELEASE_BUNDLES("android.bundle.excludeResSourcesForRelease", true, FeatureStage.Experimental),
     ENABLE_BUILD_CONFIG_AS_BYTECODE("android.enableBuildConfigAsBytecode", false, FeatureStage.Experimental),
+    ENABLE_SOURCE_SET_PATHS_MAP("android.experimental.enableSourceSetPathsMap", false, FeatureStage.Experimental),
 
     // Options related to new Variant API
     USE_SAFE_PROPERTIES("android.variant.safe.properties", false, FeatureStage.Experimental),
 
     USE_NEW_DSL_INTERFACES("android.experimental.newDslInterfaces", false, FeatureStage.Experimental),
 
-    USE_NEW_LINT_MODEL("android.experimental.useNewLintModel", false, FeatureStage.Experimental),
-
     /* ------------------------
      * SOFTLY-ENFORCED FEATURES
      */
 
-    ENABLE_DESUGAR("android.enableDesugar", true, FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.DESUGAR_TOOL)),
-    ENABLE_D8("android.enableD8", true, FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.LEGACY_DEXER)),
+    USE_NEW_LINT_MODEL("android.experimental.useNewLintModel", true,  FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.VERSION_7_0)),
 
     /** Whether Jetifier will skip libraries that already support AndroidX. */
     JETIFIER_SKIP_IF_POSSIBLE("android.jetifier.skipIfPossible", true, FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.VERSION_7_0)),
@@ -186,25 +182,13 @@ enum class BooleanOption(
 
     ENABLE_RESOURCE_OPTIMIZATIONS("android.enableResourceOptimizations", true, FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.VERSION_7_0)),
 
-    ENABLE_V2_NATIVE_MODEL("android.enableV2NativeModel", true, FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.VERSION_7_0)),
     PREFER_CMAKE_FILE_API("android.preferCmakeFileApi", true, FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.VERSION_7_0)),
+    ENABLE_NATIVE_CONFIGURATION_FOLDING("android.enableNativeConfigurationFolding", true, FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.VERSION_7_0)),
 
     /* -------------------
      * DEPRECATED FEATURES
      */
 
-    @Suppress("unused")
-    ENABLE_BUILD_CACHE(
-        "android.enableBuildCache",
-        true,
-        FeatureStage.Deprecated(DeprecationReporter.DeprecationTarget.AGP_BUILD_CACHE)
-    ),
-    @Suppress("unused")
-    ENABLE_INTERMEDIATE_ARTIFACTS_CACHE(
-        "android.enableIntermediateArtifactsCache",
-        true,
-        FeatureStage.Deprecated(DeprecationReporter.DeprecationTarget.AGP_BUILD_CACHE)
-    ),
 
     /* -----------------
      * ENFORCED FEATURES
@@ -346,6 +330,36 @@ enum class BooleanOption(
         )
     ),
 
+    @Suppress("unused")
+    ENABLE_D8(
+        "android.enableD8",
+        true,
+        FeatureStage.Enforced(
+            VERSION_7_0,
+            "For more details, see https://d.android.com/r/studio-ui/d8-overview.html."
+        )
+    ),
+
+    @Suppress("unused")
+    ENABLE_D8_DESUGARING(
+        "android.enableD8.desugaring",
+        true,
+        FeatureStage.Enforced(
+            VERSION_7_0,
+            "D8 desugaring is used by default, when applicable."
+        )
+    ),
+
+    @Suppress("unused")
+    ENABLE_R8_DESUGARING(
+        "android.enableR8.desugaring",
+        true,
+        FeatureStage.Enforced(
+            VERSION_7_0,
+            "R8 desugaring is used by default, when applicable."
+        )
+    ),
+
     /* ----------------
      * REMOVED FEATURES
      */
@@ -422,6 +436,27 @@ enum class BooleanOption(
         "android.generateRJava",
         false,
         FeatureStage.Removed(VERSION_4_1, "This feature was removed in AGP 4.1")),
+
+    @Suppress("unused")
+    ENABLE_BUILD_CACHE(
+        "android.enableBuildCache",
+        false,
+        FeatureStage.Removed(VERSION_7_0, "The Android-specific build caches are superseded by the Gradle build cache https://docs.gradle.org/current/userguide/build_cache.html")
+    ),
+
+    @Suppress("unused")
+    ENABLE_INTERMEDIATE_ARTIFACTS_CACHE(
+        "android.enableIntermediateArtifactsCache",
+        false,
+        FeatureStage.Removed(VERSION_7_0, "The Android-specific build caches are superseded by the Gradle build cache https://docs.gradle.org/current/userguide/build_cache.html")
+    ),
+
+    @Suppress("unused")
+    ENABLE_DESUGAR(
+            "android.enableDesugar",
+            true,
+            FeatureStage.Removed(VERSION_7_0, "Desugar tool has been removed from AGP.")
+    ),
 
     ; // end of enums
 

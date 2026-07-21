@@ -64,19 +64,23 @@ import com.android.build.gradle.internal.errors.IncompatibleProjectOptionsReport
 import com.android.build.gradle.internal.errors.MessageReceiverImpl;
 import com.android.build.gradle.internal.errors.SyncIssueReporterImpl;
 import com.android.build.gradle.internal.ide.ModelBuilder;
-import com.android.build.gradle.internal.ide.NativeModelBuilder;
 import com.android.build.gradle.internal.ide.dependencies.LibraryDependencyCacheBuildService;
 import com.android.build.gradle.internal.ide.dependencies.MavenCoordinatesCacheBuildService;
 import com.android.build.gradle.internal.ide.v2.GlobalLibraryBuildService;
+import com.android.build.gradle.internal.ide.v2.NativeModelBuilder;
+import com.android.build.gradle.internal.lint.LintFixBuildService;
 import com.android.build.gradle.internal.profile.AnalyticsConfiguratorService;
 import com.android.build.gradle.internal.profile.AnalyticsService;
 import com.android.build.gradle.internal.profile.AnalyticsUtil;
+import com.android.build.gradle.internal.profile.NoOpAnalyticsConfiguratorService;
+import com.android.build.gradle.internal.profile.NoOpAnalyticsService;
 import com.android.build.gradle.internal.res.Aapt2FromMaven;
 import com.android.build.gradle.internal.scope.BuildFeatureValues;
 import com.android.build.gradle.internal.scope.DelayedActionsExecutor;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.services.Aapt2DaemonBuildService;
 import com.android.build.gradle.internal.services.Aapt2ThreadPoolBuildService;
+import com.android.build.gradle.internal.services.BuildServicesKt;
 import com.android.build.gradle.internal.services.ClassesHierarchyBuildService;
 import com.android.build.gradle.internal.services.DslServices;
 import com.android.build.gradle.internal.services.DslServicesImpl;
@@ -120,6 +124,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.gradle.api.JavaVersion;
 import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -268,21 +273,34 @@ public abstract class BasePlugin<
 
         this.project = project;
 
-        new AnalyticsService.RegistrationAction(project).execute();
-
-        configuratorService
-                = new AnalyticsConfiguratorService.RegistrationAction(project).execute().get();
-
         optionService = new ProjectOptionService.RegistrationAction(project).execute().get();
 
         createProjectServices(project);
+        checkMinJvmVersion();
 
         ProjectOptions projectOptions = projectServices.getProjectOptions();
+
+        if (projectOptions.isAnalyticsEnabled()) {
+            new AnalyticsService.RegistrationAction(project).execute();
+
+            configuratorService
+                    = new AnalyticsConfiguratorService.RegistrationAction(project).execute().get();
+        } else {
+            project.getGradle().getSharedServices().registerIfAbsent(
+                    BuildServicesKt.getBuildServiceName(AnalyticsService.class),
+                    NoOpAnalyticsService.class,
+                    spec -> {}
+            );
+            configuratorService = project.getGradle().getSharedServices().registerIfAbsent(
+                    BuildServicesKt.getBuildServiceName(AnalyticsConfiguratorService.class),
+                    NoOpAnalyticsConfiguratorService.class,
+                    spec -> {}
+            ).get();
+        }
 
         DependencyResolutionChecks.registerDependencyCheck(project, projectOptions);
 
         project.getPluginManager().apply(AndroidBasePlugin.class);
-
 
         checkPathForErrors();
         checkModulesForErrors();
@@ -299,11 +317,15 @@ public abstract class BasePlugin<
 
         configuratorService.createAnalyticsService(project, listenerRegistry);
 
-        configuratorService.getProjectBuilder(project.getPath())
-                .setAndroidPluginVersion(Version.ANDROID_GRADLE_PLUGIN_VERSION)
-                .setAndroidPlugin(getAnalyticsPluginType())
-                .setPluginGeneration(GradleBuildProject.PluginGeneration.FIRST)
-                .setOptions(AnalyticsUtil.toProto(projectOptions));
+        GradleBuildProject.Builder projectBuilder =
+                configuratorService.getProjectBuilder(project.getPath());
+        if (projectBuilder != null) {
+            projectBuilder
+                    .setAndroidPluginVersion(Version.ANDROID_GRADLE_PLUGIN_VERSION)
+                    .setAndroidPlugin(getAnalyticsPluginType())
+                    .setPluginGeneration(GradleBuildProject.PluginGeneration.FIRST)
+                    .setOptions(AnalyticsUtil.toProto(projectOptions));
+        }
 
         configuratorService.recordBlock(
                 ExecutionType.BASE_PLUGIN_PROJECT_CONFIGURE,
@@ -354,36 +376,30 @@ public abstract class BasePlugin<
         new Aapt2ThreadPoolBuildService.RegistrationAction(project, projectOptions).execute();
         new Aapt2DaemonBuildService.RegistrationAction(project, projectOptions).execute();
         new SyncIssueReporterImpl.GlobalSyncIssueService.RegistrationAction(
-                        project,
-                        SyncOptions.getModelQueryMode(projectOptions),
-                        SyncOptions.getErrorFormatMode(projectOptions))
+                        project, SyncOptions.getModelQueryMode(projectOptions))
                 .execute();
         Provider<SdkComponentsBuildService> sdkComponentsBuildService =
-                new SdkComponentsBuildService.RegistrationAction(project, projectOptions).execute();
+                new SdkComponentsBuildService.RegistrationAction(
+                                project,
+                                projectOptions,
+                                project.getProviders()
+                                        .provider(() -> extension.getCompileSdkVersion()),
+                                project.getProviders()
+                                        .provider(() -> extension.getBuildToolsRevision()),
+                                project.getProviders().provider(() -> extension.getNdkVersion()),
+                                project.getProviders().provider(() -> extension.getNdkPath()))
+                        .execute();
         Provider<AvdComponentsBuildService> avdComponentsBuildService =
                 new AvdComponentsBuildService.RegistrationAction(
                                 project,
                                 getManagedDeviceAvdFolder(
                                         project.getObjects(), project.getProviders()),
-                                sdkComponentsBuildService,
-                                sdkComponentsBuildService.map(
-                                        buildService -> {
-                                            return buildService.sdkLoader(
-                                                    project.getProviders()
-                                                            .provider(
-                                                                    () ->
-                                                                            extension
-                                                                                    .getCompileSdkVersion()),
-                                                    project.getProviders()
-                                                            .provider(
-                                                                    () ->
-                                                                            extension
-                                                                                    .getBuildToolsRevision()));
-                                        }))
+                                sdkComponentsBuildService)
                         .execute();
 
         new SymbolTableBuildService.RegistrationAction(project, projectOptions).execute();
         new ClassesHierarchyBuildService.RegistrationAction(project).execute();
+        new LintFixBuildService.RegistrationAction(project).execute();
 
         projectOptions
                 .getAllOptions()
@@ -498,6 +514,7 @@ public abstract class BasePlugin<
         createAndroidTestUtilConfiguration();
     }
 
+
     protected void registerModels(
             @NonNull ToolingModelBuilderRegistry registry,
             @NonNull GlobalScope globalScope,
@@ -507,19 +524,7 @@ public abstract class BasePlugin<
             @NonNull BaseExtension extension,
             @NonNull ExtraModelInfo extraModelInfo) {
         // Register a builder for the custom tooling model
-        VariantModel variantModel =
-                new VariantModelImpl(
-                        variantInputModel,
-                        extension::getTestBuildType,
-                        () ->
-                                variantManager.getMainComponents().stream()
-                                        .map(ComponentInfo::getVariant)
-                                        .collect(Collectors.toList()),
-                        () ->
-                                variantManager.getTestComponents().stream()
-                                        .map(ComponentInfo::getVariant)
-                                        .collect(Collectors.toList()),
-                        dslServices.getIssueReporter());
+        VariantModel variantModel = createVariantModel();
 
         registerModelBuilder(registry, globalScope, variantModel, extension, extraModelInfo);
 
@@ -533,17 +538,26 @@ public abstract class BasePlugin<
 
         // Register a builder for the native tooling model
 
-        if (globalScope.getProjectOptions().get(BooleanOption.ENABLE_V2_NATIVE_MODEL)) {
-            com.android.build.gradle.internal.ide.v2.NativeModelBuilder nativeModelBuilderV2 =
-                    new com.android.build.gradle.internal.ide.v2.NativeModelBuilder(
-                            projectServices.getIssueReporter(), globalScope, variantModel);
-            registry.register(nativeModelBuilderV2);
-        } else {
-            NativeModelBuilder nativeModelBuilder =
-                    new NativeModelBuilder(
-                            projectServices.getIssueReporter(), globalScope, variantModel);
-            registry.register(nativeModelBuilder);
-        }
+        NativeModelBuilder nativeModelBuilderV2 =
+                new NativeModelBuilder(
+                        projectServices.getIssueReporter(), globalScope, variantModel);
+        registry.register(nativeModelBuilderV2);
+    }
+
+    @NonNull
+    private VariantModel createVariantModel() {
+        return new VariantModelImpl(
+                variantInputModel,
+                extension::getTestBuildType,
+                () ->
+                        variantManager.getMainComponents().stream()
+                                .map(ComponentInfo::getVariant)
+                                .collect(Collectors.toList()),
+                () ->
+                        variantManager.getTestComponents().stream()
+                                .map(ComponentInfo::getVariant)
+                                .collect(Collectors.toList()),
+                dslServices.getIssueReporter());
     }
 
     /** Registers a builder for the custom tooling model. */
@@ -659,16 +673,21 @@ public abstract class BasePlugin<
         extension.disableWrite();
         dslServices.getVariableFactory().disableWrite();
 
-        configuratorService.getProjectBuilder(project.getPath())
-                .setCompileSdk(extension.getCompileSdkVersion())
-                .setBuildToolsVersion(extension.getBuildToolsRevision().toString())
-                .setSplits(AnalyticsUtil.toProto(extension.getSplits()));
+        GradleBuildProject.Builder projectBuilder =
+                configuratorService.getProjectBuilder(project.getPath());
 
-        String kotlinPluginVersion = getKotlinPluginVersion();
-        if (kotlinPluginVersion != null) {
-            configuratorService.getProjectBuilder(project.getPath())
-                    .setKotlinPluginVersion(kotlinPluginVersion);
+        if (projectBuilder != null) {
+            projectBuilder
+                    .setCompileSdk(extension.getCompileSdkVersion())
+                    .setBuildToolsVersion(extension.getBuildToolsRevision().toString())
+                    .setSplits(AnalyticsUtil.toProto(extension.getSplits()));
+
+            String kotlinPluginVersion = getKotlinPluginVersion();
+            if (kotlinPluginVersion != null) {
+                projectBuilder.setKotlinPluginVersion(kotlinPluginVersion);
+            }
         }
+
         AnalyticsUtil.recordFirebasePerformancePluginVersion(project);
 
         // create the build feature object that will be re-used everywhere
@@ -676,7 +695,7 @@ public abstract class BasePlugin<
                 variantFactory.createBuildFeatureValues(
                         extension.getBuildFeatures(), projectServices.getProjectOptions());
 
-        variantManager.createVariants(buildFeatureValues, extension.getNamespace());
+        variantManager.createVariants(buildFeatureValues, extension.getPackageName());
 
         List<ComponentInfo<VariantBuilderT, VariantT>> variants =
                 variantManager.getMainComponents();
@@ -689,7 +708,7 @@ public abstract class BasePlugin<
                         globalScope,
                         extension);
 
-        taskManager.createTasks(variantFactory.getVariantType(), buildFeatureValues);
+        taskManager.createTasks(variantFactory.getVariantType(), createVariantModel());
 
         new DependencyConfigurator(
                         project, project.getName(), globalScope, variantInputModel, projectServices)
@@ -906,10 +925,7 @@ public abstract class BasePlugin<
         ProjectOptions projectOptions = optionService.getProjectOptions();
 
         syncIssueReporter =
-                new SyncIssueReporterImpl(
-                        SyncOptions.getModelQueryMode(projectOptions),
-                        SyncOptions.getErrorFormatMode(projectOptions),
-                        logger);
+                new SyncIssueReporterImpl(SyncOptions.getModelQueryMode(projectOptions), logger);
 
         DeprecationReporterImpl deprecationReporter =
                 new DeprecationReporterImpl(syncIssueReporter, projectOptions, projectPath);
@@ -929,5 +945,23 @@ public abstract class BasePlugin<
                         aapt2FromMaven,
                         project.getGradle().getStartParameter().getMaxWorkerCount(),
                         project::file);
+    }
+
+    private void checkMinJvmVersion() {
+        JavaVersion current = JavaVersion.current();
+        JavaVersion minRequired = JavaVersion.VERSION_11;
+        if (!current.isCompatibleWith(minRequired)) {
+            syncIssueReporter.reportError(
+                    Type.GENERIC,
+                    "Android Gradle plugin requires Java "
+                            + minRequired.toString()
+                            + " to run. You are currently using Java "
+                            + current.toString()
+                            + ".\n"
+                            + "You can try some of the following options:\n"
+                            + "  - changing the IDE settings.\n"
+                            + "  - changing the JAVA_HOME environment variable.\n"
+                            + "  - changing `org.gradle.java.home` in `gradle.properties`.");
+        }
     }
 }

@@ -20,15 +20,12 @@ import com.android.SdkConstants
 import com.android.SdkConstants.DOT_DBG
 import com.android.SdkConstants.DOT_SYM
 import com.android.build.gradle.internal.LoggerWrapper
-import com.android.build.gradle.internal.NdkHandlerInput
 import com.android.build.gradle.internal.SdkComponentsBuildService
 import com.android.build.gradle.internal.component.VariantCreationConfig
 import com.android.build.gradle.internal.core.Abi
 import com.android.build.gradle.internal.dsl.NdkOptions.DebugSymbolLevel
-import com.android.build.gradle.internal.initialize
 import com.android.build.gradle.internal.process.GradleProcessExecutor
 import com.android.build.gradle.internal.profile.ProfileAwareWorkAction
-import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.InternalArtifactType.MERGED_NATIVE_LIBS
 import com.android.build.gradle.internal.scope.InternalArtifactType.NATIVE_DEBUG_METADATA
 import com.android.build.gradle.internal.scope.InternalArtifactType.NATIVE_SYMBOL_TABLES
@@ -51,7 +48,6 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -74,21 +70,15 @@ abstract class ExtractNativeDebugMetadataTask : NonIncrementalTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val inputDir: DirectoryProperty
 
-    // The stripped native libs are an input to this task because we only want to keep the native
-    // debug metadata files which actually contain native debug metadata; we delete native debug
-    // metadata files that are the same size as the corresponding stripped native libraries.
-    @get:InputFiles
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val strippedNativeLibs: DirectoryProperty
-
     @get:OutputDirectory
     abstract val outputDir: DirectoryProperty
 
     @get:Inject
     abstract val execOperations: ExecOperations
 
-    @get:Nested
-    abstract val ndkHandlerInput: NdkHandlerInput
+    @Input
+    @Optional
+    fun getNdkRevision(): Provider<Revision> = sdkBuildService.flatMap { it.ndkRevisionProvider }
 
     @get:Input
     lateinit var debugSymbolLevel: DebugSymbolLevel
@@ -111,11 +101,8 @@ abstract class ExtractNativeDebugMetadataTask : NonIncrementalTask() {
         workerExecutor.noIsolation().submit(ExtractNativeDebugMetadataWorkAction::class.java) {
             it.initializeFromAndroidVariantTask(this)
             it.inputDir.set(inputDir)
-            it.strippedNativeLibs.set(strippedNativeLibs)
             it.outputDir.set(outputDir)
-            it.objcopyExecutableMap.set(sdkBuildService.flatMap { buildService ->
-                buildService.versionedNdkHandler(ndkHandlerInput).objcopyExecutableMapProvider
-            })
+            it.objcopyExecutableMap.set(sdkBuildService.flatMap { it.objcopyExecutableMapProvider })
             it.debugSymbolLevel.set(debugSymbolLevel)
             it.maxWorkerCount.set(maxWorkerCount)
         }
@@ -134,14 +121,9 @@ abstract class ExtractNativeDebugMetadataTask : NonIncrementalTask() {
             super.configure(task)
 
             creationConfig.artifacts.setTaskInputToFinalProduct(MERGED_NATIVE_LIBS, task.inputDir)
-            creationConfig.artifacts.setTaskInputToFinalProduct(
-                InternalArtifactType.STRIPPED_NATIVE_LIBS,
-                task.strippedNativeLibs
-            )
             task.sdkBuildService.setDisallowChanges(
                 getBuildService(creationConfig.services.buildServiceRegistry)
             )
-            task.ndkHandlerInput.initialize(creationConfig)
         }
     }
 
@@ -203,7 +185,6 @@ abstract class ExtractNativeDebugMetadataWorkAction :
 
     abstract class Parameters: ProfileAwareWorkAction.Parameters() {
         abstract val inputDir: DirectoryProperty
-        abstract val strippedNativeLibs: DirectoryProperty
         abstract val outputDir: DirectoryProperty
         abstract val objcopyExecutableMap: MapProperty<Abi, File>
         abstract val debugSymbolLevel: Property<DebugSymbolLevel>
@@ -220,11 +201,8 @@ abstract class ExtractNativeDebugMetadataWorkAction :
         val outputDir = parameters.outputDir.asFile.get()
         FileUtils.cleanOutputDir(outputDir)
 
-        val inputDir = parameters.inputDir.asFile.get()
-        val strippedNativeLibs = parameters.strippedNativeLibs.asFile.get()
-
         val allRequests = mutableListOf<ExtractNativeDebugMetadataRunnable.SingleRequest>()
-        for (inputFile in FileUtils.getAllFiles(inputDir)) {
+        for (inputFile in FileUtils.getAllFiles(parameters.inputDir.asFile.get())) {
             if (!inputFile.name.endsWith(SdkConstants.DOT_NATIVE_LIBS, ignoreCase = true)) {
                 continue
             }
@@ -255,17 +233,7 @@ abstract class ExtractNativeDebugMetadataWorkAction :
                 )
                 continue
             }
-            val strippedNativeLib =
-                File(strippedNativeLibs, "lib/${inputFile.parentFile.name}/${inputFile.name}")
-            allRequests.add(
-                ExtractNativeDebugMetadataRunnable.SingleRequest(
-                    inputFile,
-                    strippedNativeLib,
-                    outputFile,
-                    objcopyExecutable,
-                    objcopyArgs
-                )
-            )
+            allRequests.add(ExtractNativeDebugMetadataRunnable.SingleRequest(inputFile, outputFile, objcopyExecutable, objcopyArgs))
         }
 
         // split them into maxWorkersCount buckets
@@ -296,24 +264,11 @@ abstract class ExtractNativeDebugMetadataRunnable : ProfileAwareWorkAction<Extra
     override fun run() {
         val processExecutor = GradleProcessExecutor(execOperations::exec)
         parameters.requests.get().forEach {
-            processSingle(
-                it.inputFile,
-                it.strippedFile,
-                it.outputFile,
-                it.objcopyExecutable,
-                it.objcopyArgs,
-                processExecutor)
+            processSingle(it.inputFile, it.outputFile, it.objcopyExecutable, it.objcopyArgs, processExecutor)
         }
     }
 
-    private fun processSingle(
-        inputFile: File,
-        strippedFile: File,
-        outputFile: File,
-        objcopyExecutable: File,
-        objcopyArgs: List<String>,
-        processExecutor: GradleProcessExecutor
-    ) {
+    private fun processSingle(inputFile: File, outputFile: File, objcopyExecutable: File, objcopyArgs: List<String>, processExecutor: GradleProcessExecutor) {
         FileUtils.mkdirs(outputFile.parentFile)
 
         val builder = ProcessInfoBuilder()
@@ -336,16 +291,10 @@ abstract class ExtractNativeDebugMetadataRunnable : ProfileAwareWorkAction<Extra
                         "because of non-zero exit value from objcopy."
             )
         }
-        // We delete a native debug metadata file that is the same size as the corresponding
-        // stripped native library, because it doesn't contain any extra information.
-        if (outputFile.length() == strippedFile.length()) {
-            FileUtils.deleteIfExists(outputFile)
-        }
     }
 
     data class SingleRequest(
         val inputFile: File,
-        val strippedFile: File,
         val outputFile: File,
         val objcopyExecutable: File,
         val objcopyArgs: List<String>

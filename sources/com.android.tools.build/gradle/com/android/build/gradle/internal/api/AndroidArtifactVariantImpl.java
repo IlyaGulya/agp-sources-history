@@ -59,9 +59,6 @@ public abstract class AndroidArtifactVariantImpl extends BaseVariantImpl
         return component.getVariantDslInfo().isSigningReady();
     }
 
-    private Integer _versionCode = null;
-    private String _versionName = null;
-
     @Nullable
     @Override
     public String getVersionName() {
@@ -75,13 +72,8 @@ public abstract class AndroidArtifactVariantImpl extends BaseVariantImpl
             // return default value during sync
             return null;
         }
-        synchronized (this) {
-            if (_versionName == null) {
-                _versionName = component.getOutputs().getMainSplit().getVersionName().getOrNull();
-            }
-        }
 
-        return _versionName;
+        return component.getOutputs().getMainSplit().getVersionName().getOrNull();
     }
 
     @Override
@@ -97,12 +89,7 @@ public abstract class AndroidArtifactVariantImpl extends BaseVariantImpl
             return -1;
         }
 
-        synchronized (this) {
-            if (_versionCode == null) {
-                _versionCode = component.getOutputs().getMainSplit().getVersionCode().getOrElse(-1);
-            }
-        }
-        return _versionCode;
+        return component.getOutputs().getMainSplit().getVersionCode().getOrElse(-1);
     }
 
     @NonNull

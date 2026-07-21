@@ -64,9 +64,7 @@ class ReportingPlugin implements org.gradle.api.Plugin<Project> {
 
         SyncIssueReporterImpl syncIssueHandler =
                 new SyncIssueReporterImpl(
-                        SyncOptions.getModelQueryMode(projectOptions),
-                        SyncOptions.getErrorFormatMode(projectOptions),
-                        project.getLogger());
+                        SyncOptions.getModelQueryMode(projectOptions), project.getLogger());
 
         DeprecationReporterImpl deprecationReporter =
                 new DeprecationReporterImpl(syncIssueHandler, projectOptions, project.getPath());

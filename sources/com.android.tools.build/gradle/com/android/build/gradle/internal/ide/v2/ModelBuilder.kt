@@ -47,7 +47,6 @@ import com.android.build.gradle.internal.ide.dependencies.computeBuildMapping
 import com.android.build.gradle.internal.ide.dependencies.getDependencyGraphBuilder
 import com.android.build.gradle.internal.ide.dependencies.getVariantName
 import com.android.build.gradle.internal.ide.verifyIDEIsNotOld
-import com.android.build.gradle.internal.lint.getLocalCustomLintChecksForModel
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH
 import com.android.build.gradle.internal.scope.BuildFeatureValues
@@ -64,6 +63,7 @@ import com.android.build.gradle.internal.tasks.ExtractApksTask
 import com.android.build.gradle.internal.variant.VariantModel
 import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.options.ProjectOptionService
+import com.android.build.gradle.options.ProjectOptions
 import com.android.builder.core.VariantTypeImpl
 import com.android.builder.errors.IssueReporter
 import com.android.builder.model.SyncIssue
@@ -168,7 +168,8 @@ class ModelBuilder<
 
         verifyIDEIsNotOld(projectOptions)
 
-        val sdkSetupCorrectly = globalScope.versionedSdkLoader.get().sdkSetupCorrectly.get()
+        val sdkComponents = globalScope.sdkComponents.get()
+        val sdkSetupCorrectly = sdkComponents.sdkSetupCorrectly.get()
 
         // Get the boot classpath. This will ensure the target is configured.
         val bootClasspath = if (sdkSetupCorrectly) {
@@ -270,7 +271,7 @@ class ModelBuilder<
             dependenciesInfo = dependenciesInfo,
 
             flags = getFlags(),
-            lintRuleJars = getLocalCustomLintChecksForModel(project, syncIssueReporter)
+            lintRuleJars = globalScope.localCustomLintChecks.files.toList()
         )
     }
 

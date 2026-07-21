@@ -17,12 +17,10 @@
 package com.android.build.gradle.internal.tasks
 
 import com.android.build.gradle.internal.LoggerWrapper
-import com.android.build.gradle.internal.NdkHandlerInput
 import com.android.build.gradle.internal.SdkComponentsBuildService
 import com.android.build.gradle.internal.component.VariantCreationConfig
 import com.android.build.gradle.internal.core.Abi
 import com.android.build.gradle.internal.cxx.stripping.SymbolStripExecutableFinder
-import com.android.build.gradle.internal.initialize
 import com.android.build.gradle.internal.process.GradleProcessExecutor
 import com.android.build.gradle.internal.profile.ProfileAwareWorkAction
 import com.android.build.gradle.internal.scope.InternalArtifactType.MERGED_NATIVE_LIBS
@@ -48,7 +46,6 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -82,8 +79,17 @@ abstract class StripDebugSymbolsTask : IncrementalTask() {
     @get:Inject
     abstract val execOperations: ExecOperations
 
-    @get:Nested
-    abstract val ndkHandlerInput: NdkHandlerInput
+    @Input
+    @Optional
+    fun getStripExecutablesMap(): Map<Abi, File>? {
+        // if no input files, return null, because no need for executable(s), and we don't want to
+        // spend the extra time or print out NDK-related spam if not necessary.
+        return if (FileUtils.getAllFiles(inputDir.get().asFile).isEmpty) {
+            null
+        } else {
+            sdkBuildService.get().stripExecutableFinderProvider.get().stripExecutables.toSortedMap()
+        }
+    }
 
     // We need inputFiles in addition to inputDir because SkipWhenEmpty doesn't work for inputDir
     // because it's a DirectoryProperty
@@ -105,7 +111,7 @@ abstract class StripDebugSymbolsTask : IncrementalTask() {
                 inputDir.get().asFile,
                 outputDir.get().asFile,
                 keepDebugSymbols.get(),
-                sdkBuildService.get().versionedNdkHandler(ndkHandlerInput).stripExecutableFinderProvider,
+                sdkBuildService.get().stripExecutableFinderProvider,
                 null,
                 this
             ).run()
@@ -117,7 +123,7 @@ abstract class StripDebugSymbolsTask : IncrementalTask() {
             inputDir.get().asFile,
             outputDir.get().asFile,
             keepDebugSymbols.get(),
-            sdkBuildService.get().versionedNdkHandler(ndkHandlerInput).stripExecutableFinderProvider,
+            sdkBuildService.get().stripExecutableFinderProvider,
             changedInputs,
             this
         ).run()
@@ -153,12 +159,11 @@ abstract class StripDebugSymbolsTask : IncrementalTask() {
 
             creationConfig.artifacts.setTaskInputToFinalProduct(MERGED_NATIVE_LIBS, task.inputDir)
             task.keepDebugSymbols.setDisallowChanges(
-                creationConfig.packagingOptions.jniLibs.keepDebugSymbols
+                creationConfig.packaging.jniLibs.keepDebugSymbols
             )
             task.sdkBuildService.setDisallowChanges(
                 getBuildService(creationConfig.services.buildServiceRegistry)
             )
-            task.ndkHandlerInput.initialize(creationConfig)
         }
     }
 }

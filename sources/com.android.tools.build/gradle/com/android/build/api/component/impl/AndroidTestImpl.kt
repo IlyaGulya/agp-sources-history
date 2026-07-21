@@ -104,27 +104,27 @@ open class AndroidTestImpl @Inject constructor(
         )
     }
 
-    override val aaptOptions: AaptOptions by lazy {
+    override val aapt: Aapt by lazy {
         initializeAaptOptionsFromDsl(
                 globalScope.extension.aaptOptions,
                 variantPropertiesApiServices
         )
     }
 
-    override fun aaptOptions(action: AaptOptions.() -> Unit) {
-        action.invoke(aaptOptions)
+    override fun aaptOptions(action: Aapt.() -> Unit) {
+        action.invoke(aapt)
     }
 
-    override val packagingOptions: ApkPackagingOptions by lazy {
-        ApkPackagingOptionsImpl(
+    override val packaging: ApkPackaging by lazy {
+        ApkPackagingImpl(
             globalScope.extension.packagingOptions,
             variantPropertiesApiServices,
             minSdkVersion.apiLevel
         )
     }
 
-    override fun packagingOptions(action: ApkPackagingOptions.() -> Unit) {
-        action.invoke(packagingOptions)
+    override fun packaging(action: ApkPackaging.() -> Unit) {
+        action.invoke(packaging)
     }
 
     override val minifiedEnabled: Boolean
@@ -248,7 +248,10 @@ open class AndroidTestImpl @Inject constructor(
         testedVariant.minSdkVersionWithTargetDeviceApi
 
     override val maxSdkVersion: Int?
-        get() = testedVariant.maxSdkVersion
+        get() = testedVariant.variantBuilder.maxSdkVersion
+
+    override val targetSdkVersion: AndroidVersion
+        get() = testedVariant.variantBuilder.targetSdkVersion
 
     override val isMultiDexEnabled: Boolean =
         testedVariant.isMultiDexEnabled
@@ -268,13 +271,17 @@ open class AndroidTestImpl @Inject constructor(
     override fun <T : Component> createUserVisibleVariantObject(
             projectServices: ProjectServices,
             operationsRegistrar: VariantApiOperationsRegistrar<VariantBuilder, Variant>,
-            stats: GradleBuildVariant.Builder
+            stats: GradleBuildVariant.Builder?
     ): T =
+        if (stats == null) {
+            this as T
+        } else {
             projectServices.objectFactory.newInstance(
                     AnalyticsEnabledAndroidTest::class.java,
                     this,
                     stats
             ) as T
+        }
 
     override val shouldPackageProfilerDependencies: Boolean = false
 

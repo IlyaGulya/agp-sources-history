@@ -24,14 +24,9 @@ import java.io.File
  *
  * Each class is represented via its internal name.
  */
-class ClassesHierarchyResolver(
-    classesDataCache: ClassesDataCache,
-    sources: Map<File, ClassesDataSourceCache.SourceType>
-) {
+class ClassesHierarchyResolver(classesDataCache: ClassesDataCache, sources: Set<File>) {
 
     private val classesDataCaches = classesDataCache.getSourceCaches(sources)
-
-    val queriedProjectClasses = mutableSetOf<ClassData>()
 
     private fun maybeLoadClassData(className: String): ClassesDataSourceCache.ClassData? {
         // Check if it's already cached
@@ -45,24 +40,6 @@ class ClassesHierarchyResolver(
         }
 
         return null
-    }
-
-    /**
-     * Loads the class data for a class requested by a class visitor. If the requested class is a
-     * project class, the request is saved as it will be saved later as a part of the incremental
-     * state.
-     *
-     * @see [ClassContextImpl.loadClassData]
-     */
-    fun loadClassDataForVisitor(className: String): ClassData? {
-        return maybeLoadClassDataForClass(className)?.also {
-            classesDataCaches.filter { it.sourceType == ClassesDataSourceCache.SourceType.PROJECT }
-                .forEach { classesSource ->
-                if (classesSource.isClassLoaded(className)) {
-                    queriedProjectClasses.add(it)
-                }
-            }
-        }
     }
 
     fun maybeLoadClassDataForClass(className: String): ClassData? {
@@ -148,26 +125,16 @@ class ClassesHierarchyResolver(
         }
     }
 
-    class Builder(private val classesDataCache: ClassesDataCache) {
-        private val sources = mutableMapOf<File, ClassesDataSourceCache.SourceType>()
+    class Builder(val classesDataCache: ClassesDataCache) {
+        private val sources = mutableSetOf<File>()
 
-        fun addProjectSources(vararg sources: File): Builder {
-            sources.forEach { this.sources[it] = ClassesDataSourceCache.SourceType.PROJECT }
+        fun addSources(vararg sources: File): Builder {
+            this.sources.addAll(sources)
             return this
         }
 
-        fun addDependenciesSources(vararg sources: File): Builder {
-            sources.forEach { this.sources[it] = ClassesDataSourceCache.SourceType.DEPENDENCY }
-            return this
-        }
-
-        fun addProjectSources(sources: Iterable<File>): Builder {
-            sources.forEach { this.sources[it] = ClassesDataSourceCache.SourceType.PROJECT }
-            return this
-        }
-
-        fun addDependenciesSources(sources: Iterable<File>): Builder {
-            sources.forEach { this.sources[it] = ClassesDataSourceCache.SourceType.DEPENDENCY }
+        fun addSources(sources: Iterable<File>): Builder {
+            this.sources.addAll(sources)
             return this
         }
 

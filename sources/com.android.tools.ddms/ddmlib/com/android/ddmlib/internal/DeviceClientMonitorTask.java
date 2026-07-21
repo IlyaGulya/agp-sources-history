@@ -21,12 +21,14 @@ import com.android.ddmlib.AdbCommandRejectedException;
 import com.android.ddmlib.AdbHelper;
 import com.android.ddmlib.AndroidDebugBridge;
 import com.android.ddmlib.ClientData;
+import com.android.ddmlib.DdmPreferences;
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.Log;
 import com.android.ddmlib.TimeoutException;
 import com.android.ddmlib.internal.jdwp.chunkhandler.HandleHello;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
@@ -171,76 +173,66 @@ class DeviceClientMonitorTask implements Runnable {
     }
 
     /** Registers track-jdwp key with the corresponding device's socket channel's selector. */
-    void processChannelsToRegister() {
+    void processChannelsToRegister() throws ClosedChannelException {
         List<SocketChannel> channels = Collections.list(mChannelsToRegister.keys());
         for (SocketChannel channel : channels) {
-            try {
-                channel.register(mSelector, SelectionKey.OP_READ, mChannelsToRegister.get(channel));
-            } catch (ClosedChannelException e) {
-                Log.w("DeviceClientMonitorTask", "Cannot register already-closed channel.");
-            } finally {
-                mChannelsToRegister.keySet().remove(channel);
-            }
+            channel.register(mSelector, SelectionKey.OP_READ, mChannelsToRegister.get(channel));
         }
+        mChannelsToRegister.keySet().removeAll(channels);
     }
 
     @Override
     public void run() {
         final byte[] lengthBuffer = new byte[4];
         do {
-            int count = 0;
             try {
-                count = mSelector.select();
-            } catch (IOException e) {
-                Log.e("DeviceClientMonitorTask", "Connection error while monitoring clients.");
-                Log.d("DeviceClientMonitorTask", e);
-                return;
-            }
+                int count = mSelector.select();
 
-            if (mQuit) {
-                return;
-            }
+                if (mQuit) {
+                    return;
+                }
 
-            processChannelsToRegister();
-            processDropAndReopenClients();
+                processChannelsToRegister();
+                processDropAndReopenClients();
 
-            if (count == 0) {
-                continue;
-            }
+                if (count == 0) {
+                    continue;
+                }
 
-            Set<SelectionKey> keys = mSelector.selectedKeys();
-            Iterator<SelectionKey> iter = keys.iterator();
+                Set<SelectionKey> keys = mSelector.selectedKeys();
+                Iterator<SelectionKey> iter = keys.iterator();
 
-            while (iter.hasNext()) {
-                SelectionKey key = iter.next();
-                iter.remove();
+                while (iter.hasNext()) {
+                    SelectionKey key = iter.next();
+                    iter.remove();
 
-                if (key.isValid() && key.isReadable()) {
-                    Object attachment = key.attachment();
+                    if (key.isValid() && key.isReadable()) {
+                        Object attachment = key.attachment();
 
-                    if (attachment instanceof DeviceImpl) {
-                        DeviceImpl device = (DeviceImpl) attachment;
+                        if (attachment instanceof DeviceImpl) {
+                            DeviceImpl device = (DeviceImpl) attachment;
 
-                        SocketChannel socket = device.getClientMonitoringSocket();
+                            SocketChannel socket = device.getClientMonitoringSocket();
 
-                        if (socket != null) {
-                            try {
-                                int length = AdbSocketUtils.readLength(socket, lengthBuffer);
-                                processIncomingJdwpData(device, socket, length);
-                            } catch (IOException ioe) {
-                                Log.d(
-                                        "DeviceClientMonitorTask",
-                                        "Error reading jdwp list: " + ioe.getMessage());
+                            if (socket != null) {
                                 try {
+                                    int length = AdbSocketUtils.readLength(socket, lengthBuffer);
+                                    processIncomingJdwpData(device, socket, length);
+                                } catch (IOException ioe) {
+                                    Log.d(
+                                            "DeviceClientMonitorTask",
+                                            "Error reading jdwp list: " + ioe.getMessage());
                                     socket.close();
-                                } catch (IOException ignored) {
+                                    mChannelsToRegister.remove(socket);
+                                    device.getClientTracker().trackDeviceToDropAndReopen(device);
                                 }
-                                mChannelsToRegister.remove(socket);
-                                device.getClientTracker().trackDeviceToDropAndReopen(device);
                             }
                         }
                     }
                 }
+
+            } catch (IOException ex) {
+                Log.e("DeviceClientMonitorTask", "Connection error while monitoring clients.");
             }
         } while (!mQuit);
     }
@@ -345,9 +337,10 @@ class DeviceClientMonitorTask implements Runnable {
 
         SocketChannel clientSocket;
         try {
-            clientSocket =
-                    AdbHelper.createPassThroughConnection(
-                            AndroidDebugBridge.getSocketAddress(), device.getSerialNumber(), pid);
+          clientSocket =
+            AdbHelper.createPassThroughConnection(
+              new InetSocketAddress("localhost", DdmPreferences.DEFAULT_PROXY_SERVER_PORT), device.getSerialNumber(), pid);
+
             // required for Selector
             clientSocket.configureBlocking(false);
         } catch (UnknownHostException uhe) {

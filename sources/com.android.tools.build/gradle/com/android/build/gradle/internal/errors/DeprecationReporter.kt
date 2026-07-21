@@ -61,22 +61,13 @@ interface DeprecationReporter {
             "For more information, see http://d.android.com/r/tools/update-dependency-configurations.html."
         ),
 
-        // When legacy dexer will be removed and fully replaced by D8.
-        LEGACY_DEXER(
-            Version.VERSION_7_0,
-            "For more details, see https://d.android.com/r/studio-ui/d8-overview.html"
-        ),
-
-        // Obsolete Dex Options
-        DEX_OPTIONS(LEGACY_DEXER.removalTarget),
+        // Obsolete dx Dex Options
+        DEX_OPTIONS(Version.VERSION_8_0),
 
         // Deprecation of Task Access in the variant API
         TASK_ACCESS_VIA_VARIANT(Version.VERSION_7_0),
 
-        DSL_USE_PROGUARD(
-            Version.VERSION_7_0,
-            "Use 'android.enableR8' in gradle.properties to switch between R8 and Proguard."
-        ),
+        DSL_USE_PROGUARD(Version.VERSION_7_0),
 
         ENABLE_R8(Version.VERSION_7_0, "You will no longer be able to disable R8"),
 

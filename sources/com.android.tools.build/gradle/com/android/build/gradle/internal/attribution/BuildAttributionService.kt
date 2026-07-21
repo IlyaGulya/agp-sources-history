@@ -20,7 +20,6 @@ import com.android.build.gradle.internal.services.ServiceRegistrationAction
 import com.android.build.gradle.internal.services.getBuildServiceName
 import com.android.build.gradle.internal.utils.getBuildSrcPlugins
 import com.android.ide.common.attribution.AndroidGradlePluginAttributionData
-import com.android.tools.analytics.HostData
 import org.gradle.api.Project
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
@@ -76,17 +75,6 @@ abstract class BuildAttributionService : BuildService<BuildAttributionService.Pa
                 serviceRegistration.parameters.tasksSharingOutputs.set(
                         outputFileToTasksMap.filter { it.value.size > 1 }
                 )
-                serviceRegistration.parameters.javaInfo.set(
-                    AndroidGradlePluginAttributionData.JavaInfo(
-                        version = project.providers.systemProperty("java.version")
-                            .forUseAtConfigurationTime().getOrElse(""),
-                        vendor = project.providers.systemProperty("java.vendor")
-                            .forUseAtConfigurationTime().getOrElse(""),
-                        home = project.providers.systemProperty("java.home")
-                            .forUseAtConfigurationTime().getOrElse(""),
-                        vmArguments = HostData.runtimeBean?.inputArguments ?: emptyList()
-                    )
-                )
 
                 listenersRegistry.onTaskCompletion(serviceRegistration.service)
             }
@@ -116,14 +104,13 @@ abstract class BuildAttributionService : BuildService<BuildAttributionService.Pa
                 }.filter { it.second > 0L }.toMap()
 
         AndroidGradlePluginAttributionData.save(
-            File(parameters.attributionFileLocation.get()),
-            AndroidGradlePluginAttributionData(
-                taskNameToClassNameMap = parameters.taskNameToClassNameMap.get(),
-                tasksSharingOutput = parameters.tasksSharingOutputs.get(),
-                garbageCollectionData = gcData,
-                buildSrcPlugins = getBuildSrcPlugins(this.javaClass.classLoader),
-                javaInfo = parameters.javaInfo.get()
-            )
+                File(parameters.attributionFileLocation.get()),
+                AndroidGradlePluginAttributionData(
+                        taskNameToClassNameMap = parameters.taskNameToClassNameMap.get(),
+                        tasksSharingOutput = parameters.tasksSharingOutputs.get(),
+                        garbageCollectionData = gcData,
+                        buildSrcPlugins = getBuildSrcPlugins(this.javaClass.classLoader)
+                )
         )
     }
 
@@ -140,8 +127,6 @@ abstract class BuildAttributionService : BuildService<BuildAttributionService.Pa
         val tasksSharingOutputs: MapProperty<String, List<String>>
 
         val taskNameToClassNameMap: MapProperty<String, String>
-
-        val javaInfo: Property<AndroidGradlePluginAttributionData.JavaInfo>
     }
 
     class RegistrationAction(project: Project)

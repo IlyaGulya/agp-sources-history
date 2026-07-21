@@ -28,13 +28,11 @@ import com.android.build.gradle.internal.scope.GlobalScope
 import com.android.build.gradle.internal.services.getBuildService
 import com.android.build.gradle.internal.tasks.factory.GlobalTaskCreationAction
 import com.android.build.gradle.internal.utils.setDisallowChanges
-import com.android.repository.Revision
 import com.android.utils.GrabProcessOutput
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Nested
 import java.lang.Exception
 import java.util.concurrent.TimeUnit
 
@@ -64,12 +62,6 @@ abstract class ManagedDeviceSetupTask: NonIncrementalGlobalTask() {
     abstract val avdService: Property<AvdComponentsBuildService>
 
     @get: Input
-    abstract val compileSdkVersion: Property<String>
-
-    @get: Input
-    abstract val buildToolsRevision: Property<Revision>
-
-    @get: Input
     abstract val abi: Property<String>
 
     @get: Input
@@ -85,9 +77,6 @@ abstract class ManagedDeviceSetupTask: NonIncrementalGlobalTask() {
         workerExecutor.noIsolation().submit(ManagedDeviceSetupRunnable::class.java) {
             it.initializeWith(projectName,  path, analyticsService)
             it.sdkService.set(sdkService)
-            it.versionedSdkLoader.set(sdkService.map { sdkService ->
-                sdkService.sdkLoader(compileSdkVersion, buildToolsRevision)
-            })
             it.avdService.set(avdService)
             it.imageHash.set(computeImageHash())
             it.deviceName.set(
@@ -112,7 +101,7 @@ abstract class ManagedDeviceSetupTask: NonIncrementalGlobalTask() {
             }
 
             loggerWrapper.info("Creating snapshot for ${parameters.deviceName.get()}")
-            val emulatorDir = parameters.versionedSdkLoader.get().emulatorDirectoryProvider.orNull?.asFile
+            val emulatorDir = parameters.sdkService.get().emulatorDirectoryProvider.orNull?.asFile
             emulatorDir ?: error("Emulator is missing.")
             val emulatorExecutable = emulatorDir.resolve("emulator")
             val processBuilder = ProcessBuilder(
@@ -167,7 +156,6 @@ abstract class ManagedDeviceSetupTask: NonIncrementalGlobalTask() {
 
     abstract class ManagedDeviceSetupParams : ProfileAwareWorkAction.Parameters() {
         abstract val sdkService: Property<SdkComponentsBuildService>
-        abstract val versionedSdkLoader: Property<SdkComponentsBuildService.VersionedSdkLoader>
         abstract val avdService: Property<AvdComponentsBuildService>
         abstract val imageHash: Property<String>
         abstract val deviceName: Property<String>
@@ -192,7 +180,6 @@ abstract class ManagedDeviceSetupTask: NonIncrementalGlobalTask() {
 
     class CreationAction(
         override val name: String,
-        private val avdService: Provider<AvdComponentsBuildService>,
         private val systemImageSource: String,
         private val apiLevel: Int,
         private val abi: String,
@@ -202,12 +189,10 @@ abstract class ManagedDeviceSetupTask: NonIncrementalGlobalTask() {
 
         constructor(
             name: String,
-            avdService: Provider<AvdComponentsBuildService>,
             managedDevice: ManagedVirtualDevice,
             globalScope: GlobalScope
         ): this(
             name,
-            avdService,
             managedDevice.systemImageSource,
             managedDevice.apiLevel,
             managedDevice.abi,
@@ -219,9 +204,7 @@ abstract class ManagedDeviceSetupTask: NonIncrementalGlobalTask() {
 
         override fun configure(task: ManagedDeviceSetupTask) {
             task.sdkService.setDisallowChanges(globalScope.sdkComponents)
-            task.compileSdkVersion.setDisallowChanges(globalScope.extension.compileSdkVersion)
-            task.buildToolsRevision.setDisallowChanges(globalScope.extension.buildToolsRevision)
-            task.avdService.setDisallowChanges(avdService)
+            task.avdService.setDisallowChanges(globalScope.avdComponents)
 
             task.systemImageVendor.setDisallowChanges(systemImageSource)
             task.apiLevel.setDisallowChanges(apiLevel)

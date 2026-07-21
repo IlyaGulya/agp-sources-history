@@ -46,6 +46,7 @@ import com.android.build.gradle.internal.dsl.ProductFlavor
 import com.android.build.gradle.internal.dsl.SigningConfig
 import com.android.build.gradle.internal.dsl.Splits
 import com.android.build.gradle.internal.dsl.TestOptions
+import com.android.build.gradle.internal.errors.DeprecationReporter
 import com.android.build.gradle.internal.scope.GlobalScope
 import com.android.build.gradle.internal.services.DslServices
 import com.android.builder.core.LibraryRequest
@@ -107,8 +108,17 @@ abstract class BaseExtension protected constructor(
     /** Secondary dependencies for the custom transform. */
     private val _transformDependencies: MutableList<List<Any>> = mutableListOf()
 
-    override val dexOptions: DexOptions =
-        dslServices.newInstance(DexOptions::class.java, dslServices.deprecationReporter)
+    private val _dexOptions = dslServices.newInstance(DexOptions::class.java)
+
+    @Deprecated("Using dexOptions is obsolete.")
+    override val dexOptions: DexOptions
+        get() {
+            dslServices.deprecationReporter.reportObsoleteUsage(
+                "dexOptions",
+                DeprecationReporter.DeprecationTarget.DEX_OPTIONS
+            )
+            return _dexOptions
+        }
 
     private val deviceProviderList: MutableList<DeviceProvider> = Lists.newArrayList()
     private val testServerList: MutableList<TestServer> = Lists.newArrayList()
@@ -177,6 +187,7 @@ abstract class BaseExtension protected constructor(
      *
      * For more information about the properties you can configure in this block, see [DexOptions].
      */
+    @Deprecated("Setting dexOptions is obsolete.")
     fun dexOptions(action: Action<DexOptions>) {
         checkWritability()
         action.execute(dexOptions)
@@ -375,14 +386,7 @@ abstract class BaseExtension protected constructor(
     val ndkDirectory: File
         get() {
         // do not call this method from within the plugin code as it forces part of SDK initialization.
-            return dslServices.sdkComponents.map {
-                it.versionedNdkHandler(
-                    compileSdkVersion
-                        ?: throw kotlin.IllegalStateException("compileSdkVersion not set in the android configuration"),
-                    ndkVersion,
-                    ndkPath
-                ).ndkPlatform.getOrThrow().ndkDirectory
-            }.get()
+            return dslServices.sdkComponents.flatMap { it.ndkDirectoryProvider }.get().asFile
     }
 
     // do not call this method from within the plugin code as it forces SDK initialization.
@@ -400,8 +404,7 @@ abstract class BaseExtension protected constructor(
      */
     val adbExecutable: File
         get() {
-            return globalScope.versionedSdkLoader.flatMap {
-                it.adbExecutableProvider }.get().asFile
+            return dslServices.sdkComponents.flatMap { it.adbExecutableProvider }.get().asFile
         }
 
     /** This property is deprecated. Instead, use [adbExecutable]. */
@@ -512,5 +515,5 @@ abstract class BaseExtension protected constructor(
     // these are indirectly implemented by extensions when they implement the new public
     // extension interfaces via delegates.
     abstract val buildFeatures: BuildFeatures
-    abstract var namespace: String?
+    abstract var packageName: String?
 }

@@ -1157,14 +1157,6 @@ private abstract class LintModelReader(
         return adapter.fromPathString(path, root)
     }
 
-    protected fun getOptionalOutputFile(attribute: String): File? {
-        val path = getOptionalAttribute(attribute) ?: return null
-        // stdout and stderr are special reserved file names which should
-        // not be made absolute.
-        val relativeTo = if (path == "stderr" || path == "stdout") null else root
-        return adapter.fromPathString(path, relativeTo)
-    }
-
     protected fun getRequiredFile(attribute: String, relativeTo: File? = root): File {
         val path = getRequiredAttribute(attribute)
         return adapter.fromPathString(path, relativeTo)
@@ -1274,11 +1266,11 @@ private class LintModelModuleReader(
         val explainIssues = getOptionalBoolean("explainIssues", false)
         val showAll = getOptionalBoolean("showAll", false)
         val textReport = getOptionalBoolean("textReport", false)
-        val textOutput = getOptionalOutputFile("textOutput")
+        val textOutput = getOptionalFile("textOutput")
         val htmlReport = getOptionalBoolean("htmlReport", false)
-        val htmlOutput = getOptionalOutputFile("htmlOutput")
+        val htmlOutput = getOptionalFile("htmlOutput")
         val xmlReport = getOptionalBoolean("xmlReport", false)
-        val xmlOutput = getOptionalOutputFile("xmlOutput")
+        val xmlOutput = getOptionalFile("xmlOutput")
         val sarifReport = getOptionalBoolean("sarifReport", false)
         val sarifOutput = getOptionalFile("sarifOutput")
 

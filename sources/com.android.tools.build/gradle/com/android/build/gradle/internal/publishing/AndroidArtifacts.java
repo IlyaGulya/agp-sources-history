@@ -80,8 +80,7 @@ public class AndroidArtifacts {
     private static final String TYPE_AIDL = "android-aidl";
     private static final String TYPE_RENDERSCRIPT = "android-renderscript";
     private static final String TYPE_LINT_JAR = "android-lint";
-    private static final String TYPE_LINT_PROJECT_GLOBAL_MODEL = "android-lint-project-global-model";
-    private static final String TYPE_LINT_VARIANT_DEPENDENCIES_MODEL = "android-lint-variant-dependencies-model";
+    private static final String TYPE_LINT_MODEL = "android-lint-variant-dependencies-model";
     private static final String TYPE_LOCAL_AAR_FOR_LINT = "android-lint-local-aar";
     private static final String TYPE_LOCAL_EXPLODED_AAR_FOR_LINT = "android-lint-exploded-aar";
     private static final String TYPE_EXT_ANNOTATIONS = "android-ext-annot";
@@ -146,8 +145,18 @@ public class AndroidArtifacts {
 
     private static final String TYPE_PREFAB_PACKAGE = "android-prefab";
 
-    private static final String TYPE_DESUGAR_LIB_MERGED_KEEP_RULES =
-            "android-desugar-lib-merged-keep-rules";
+    private static final String TYPE_DESUGAR_LIB_PROJECT_KEEP_RULES =
+            "android-desugar-lib-project-keep-rules";
+    private static final String TYPE_DESUGAR_LIB_SUBPROJECT_KEEP_RULES =
+            "android-desugar-lib-subproject-keep-rules";
+    private static final String TYPE_DESUGAR_LIB_EXTERNAL_LIBS_KEEP_RULES =
+            "android-desugar-lib-external-libs-keep-rules";
+    private static final String TYPE_DESUGAR_LIB_MIXED_SCOPE_KEEP_RULES =
+            "android-desugar-lib-mixed-scope-keep-rules";
+    private static final String TYPE_DESUGAR_LIB_EXTERNAL_FILE_KEEP_RULES =
+            "android-desugar-lib-external-file-keep-rules";
+    private static final String TYPE_DESUGAR_LIB_EXTERNAL_LIBS_ARTIFACT_TRANSFORM_KEEP_RULES =
+            "android-desugar-lib-external-artifact-transform-file-keep-rules";
 
     public enum ConsumedConfigType {
         COMPILE_CLASSPATH("compileClasspath", API_ELEMENTS, true),
@@ -355,8 +364,7 @@ public class AndroidArtifacts {
         AAPT_PROGUARD_RULES(TYPE_AAPT_PROGUARD_RULES),
 
         LINT(TYPE_LINT_JAR),
-        LINT_PROJECT_GLOBAL_MODEL(TYPE_LINT_PROJECT_GLOBAL_MODEL),
-        LINT_VARIANT_DEPENDENCIES_MODEL(TYPE_LINT_VARIANT_DEPENDENCIES_MODEL),
+        LINT_MODEL(AndroidArtifacts.TYPE_LINT_MODEL),
         // An AAR built from a library project for lint to consume.
         LOCAL_AAR_FOR_LINT(TYPE_LOCAL_AAR_FOR_LINT),
         // Exploded AARs from library projects for lint to consume when not run with check
@@ -436,8 +444,13 @@ public class AndroidArtifacts {
 
         NAVIGATION_JSON(TYPE_NAVIGATION_JSON),
 
-        // merged desugar lib keep rules from dynamic feature modules
-        DESUGAR_LIB_MERGED_KEEP_RULES(TYPE_DESUGAR_LIB_MERGED_KEEP_RULES);
+        DESUGAR_LIB_PROJECT_KEEP_RULES(TYPE_DESUGAR_LIB_PROJECT_KEEP_RULES),
+        DESUGAR_LIB_SUBPROJECT_KEEP_RULES(TYPE_DESUGAR_LIB_SUBPROJECT_KEEP_RULES),
+        DESUGAR_LIB_EXTERNAL_LIBS_KEEP_RULES(TYPE_DESUGAR_LIB_EXTERNAL_LIBS_KEEP_RULES),
+        DESUGAR_LIB_MIXED_SCOPE_KEEP_RULES(TYPE_DESUGAR_LIB_MIXED_SCOPE_KEEP_RULES),
+        DESUGAR_LIB_EXTERNAL_FILE_KEEP_RULES(TYPE_DESUGAR_LIB_EXTERNAL_FILE_KEEP_RULES),
+        DESUGAR_LIB_EXTERNAL_LIBS_ARTIFACT_TRANSFORM_KEEP_RULES(
+                TYPE_DESUGAR_LIB_EXTERNAL_LIBS_ARTIFACT_TRANSFORM_KEEP_RULES);
 
         @NonNull private final String type;
 

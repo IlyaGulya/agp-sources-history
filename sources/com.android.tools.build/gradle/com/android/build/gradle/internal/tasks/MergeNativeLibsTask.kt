@@ -16,11 +16,9 @@
 package com.android.build.gradle.internal.tasks
 
 import com.android.SdkConstants
-import com.android.build.gradle.internal.BuildToolsExecutableInput
 import com.android.build.gradle.internal.SdkComponentsBuildService
 import com.android.build.gradle.internal.component.ApkCreationConfig
 import com.android.build.gradle.internal.component.VariantCreationConfig
-import com.android.build.gradle.internal.initialize
 import com.android.build.gradle.internal.pipeline.ExtendedContentType.NATIVE_LIBS
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.scope.InternalArtifactType
@@ -41,7 +39,6 @@ import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
@@ -52,7 +49,6 @@ import org.gradle.api.tasks.util.PatternSet
 import java.io.File
 import java.util.function.Predicate
 import javax.inject.Inject
-import javax.inject.Provider
 
 /**
  * Task to merge native libs from multiple modules
@@ -95,10 +91,6 @@ abstract class MergeNativeLibsTask
     @get:OutputDirectory
     val outputDir: DirectoryProperty = objects.directoryProperty()
 
-    @get:Nested
-    abstract val buildTools: BuildToolsExecutableInput
-
-
     override val incremental: Boolean
         get() = true
 
@@ -115,10 +107,7 @@ abstract class MergeNativeLibsTask
     }
 
     override fun doIncrementalTaskAction(changedInputs: Map<File, FileStatus>) {
-        // Run non-incrementally if changedInputs.size > 20. Temporary workaround for
-        // https://issuetracker.google.com/175337498
-        val canRunIncrementally =
-            incrementalStateFile.isFile && changedInputs.size <= 20
+        val canRunIncrementally = incrementalStateFile.isFile
         doProcessing(canRunIncrementally, changedInputs)
     }
 
@@ -167,8 +156,8 @@ abstract class MergeNativeLibsTask
         ) {
             super.configure(task)
 
-            task.excludes.setDisallowChanges(creationConfig.packagingOptions.jniLibs.excludes)
-            task.pickFirsts.setDisallowChanges(creationConfig.packagingOptions.jniLibs.pickFirsts)
+            task.excludes.setDisallowChanges(creationConfig.packaging.jniLibs.excludes)
+            task.pickFirsts.setDisallowChanges(creationConfig.packaging.jniLibs.pickFirsts)
             task.intermediateDir =
                     creationConfig.paths.getIncrementalDir(
                         "${creationConfig.name}-mergeNativeLibs")
@@ -180,13 +169,8 @@ abstract class MergeNativeLibsTask
                 .disallowChanges()
             task.incrementalStateFile = File(task.intermediateDir, "merge-state")
 
-            task.buildTools.initialize(creationConfig)
-
             task.projectNativeLibs
-                .from(getProjectNativeLibs(
-                    creationConfig,
-                    task.buildTools
-                ).asFileTree.matching(patternSet))
+                .from(getProjectNativeLibs(creationConfig).asFileTree.matching(patternSet))
                 .disallowChanges()
 
             if (creationConfig is ApkCreationConfig) {
@@ -202,10 +186,7 @@ abstract class MergeNativeLibsTask
             }
 
             task.unfilteredProjectNativeLibs
-                .from(getProjectNativeLibs(
-                    creationConfig,
-                    task.buildTools)
-                ).disallowChanges()
+                .from(getProjectNativeLibs(creationConfig)).disallowChanges()
         }
     }
 
@@ -229,10 +210,7 @@ abstract class MergeNativeLibsTask
     }
 }
 
-fun getProjectNativeLibs(
-    creationConfig: VariantCreationConfig,
-    buildTools: BuildToolsExecutableInput
-): FileCollection {
+fun getProjectNativeLibs(creationConfig: VariantCreationConfig): FileCollection {
     val artifacts = creationConfig.artifacts
     val taskContainer = creationConfig.taskContainer
     val nativeLibs = creationConfig.services.fileCollection()
@@ -246,7 +224,7 @@ fun getProjectNativeLibs(
         getBuildService<SdkComponentsBuildService>(creationConfig.services.buildServiceRegistry).get()
 
     // add content of the local external native build if there is one
-    taskContainer.cxxConfigurationModel?.variant?.objFolder?.let { objFolder ->
+    taskContainer.cxxConfigurationModel?.variant?.soFolder?.let { objFolder ->
         nativeLibs.from(
             creationConfig.services.fileCollection(objFolder)
                     .builtBy(taskContainer.externalNativeBuildTask?.name)
@@ -257,16 +235,19 @@ fun getProjectNativeLibs(
     if (creationConfig.variantDslInfo.renderscriptSupportModeEnabled) {
         val rsFileCollection: ConfigurableFileCollection =
                 creationConfig.services.fileCollection(artifacts.get(RENDERSCRIPT_LIB))
-        rsFileCollection.from(buildTools::supportNativeLibFolderProvider)
+        val rsLibs = sdkComponents.supportNativeLibFolderProvider.orNull
+        if (rsLibs?.isDirectory != null) {
+            rsFileCollection.from(rsLibs)
+        }
         if (creationConfig.variantDslInfo.renderscriptSupportModeBlasEnabled) {
-            rsFileCollection.from(buildTools.supportBlasLibFolderProvider().map { rsBlasLib ->
-                    if (!rsBlasLib.isDirectory) {
-                        throw GradleException(
-                            "Renderscript BLAS support mode is not supported in BuildTools $rsBlasLib"
-                        )
-                    }
-                    rsBlasLib
-            })
+            val rsBlasLib = sdkComponents.supportBlasLibFolderProvider.orNull
+            if (rsBlasLib == null || !rsBlasLib.isDirectory) {
+                throw GradleException(
+                    "Renderscript BLAS support mode is not supported in BuildTools $rsBlasLib"
+                )
+            } else {
+                rsFileCollection.from(rsBlasLib)
+            }
         }
         nativeLibs.from(rsFileCollection)
     }

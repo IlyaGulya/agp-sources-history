@@ -89,7 +89,8 @@ abstract class ProcessApplicationManifest : ManifestProcessorTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     @get:InputFiles
-    abstract val microApkManifest: RegularFileProperty
+    var microApkManifest: FileCollection? = null
+        private set
 
     @get:Optional
     @get:Input
@@ -192,11 +193,11 @@ abstract class ProcessApplicationManifest : ManifestProcessorTask() {
                 )
             )
         }
-        if (microApkManifest.isPresent) {
+        if (microApkManifest != null) {
             // this is now always present if embedding is enabled, but it doesn't mean
             // anything got embedded so the file may not run (the file path exists and is
             // returned by the FC but the file doesn't exist.
-            val microManifest = microApkManifest.get().asFile
+            val microManifest = microApkManifest!!.singleFile
             if (microManifest.isFile) {
                 providers.add(
                     ManifestProviderImpl(
@@ -354,32 +355,24 @@ abstract class ProcessApplicationManifest : ManifestProcessorTask() {
             if (creationConfig.taskContainer.microApkTask != null
                 && creationConfig.embedsMicroApp
             ) {
-                creationConfig.artifacts.setTaskInputToFinalProduct(
-                        InternalArtifactType.MICRO_APK_MANIFEST_FILE,
-                        task.microApkManifest
-                )
+                task.microApkManifest = project.files(creationConfig.paths.microApkManifestFile)
             }
             task.applicationId.set(creationConfig.applicationId)
             task.applicationId.disallowChanges()
             task.variantType.set(creationConfig.variantType.toString())
             task.variantType.disallowChanges()
-            task.minSdkVersion
-                .set(project.provider { creationConfig.minSdkVersion.getApiString() })
-            task.minSdkVersion.disallowChanges()
+            task.minSdkVersion.setDisallowChanges(creationConfig.minSdkVersion.getApiString())
             task.targetSdkVersion
-                .set(
-                    project.provider {
-                        val targetSdk =
-                            creationConfig.targetSdkVersion
-                        if (targetSdk.apiLevel < 1) null else targetSdk.apiString
-                    }
+                .setDisallowChanges(
+                        if (creationConfig.targetSdkVersion.apiLevel < 1)
+                            null
+                        else creationConfig.targetSdkVersion.getApiString()
                 )
-            task.targetSdkVersion.disallowChanges()
             task.maxSdkVersion.setDisallowChanges(creationConfig.maxSdkVersion)
             task.optionalFeatures.set(project.provider { getOptionalFeatures(creationConfig) })
             task.optionalFeatures.disallowChanges()
             task.jniLibsUseLegacyPackaging.setDisallowChanges(
-                creationConfig.packagingOptions.jniLibs.useLegacyPackaging
+                creationConfig.packaging.jniLibs.useLegacyPackaging
             )
             task.variantOutput.setDisallowChanges(
                 creationConfig.outputs.getMainSplit()

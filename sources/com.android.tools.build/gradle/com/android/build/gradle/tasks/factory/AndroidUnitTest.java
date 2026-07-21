@@ -40,7 +40,6 @@ import com.android.builder.core.VariantType;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.concurrent.Callable;
 import org.gradle.api.Task;
 import org.gradle.api.file.ConfigurableFileCollection;
@@ -53,8 +52,6 @@ import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.api.tasks.testing.TestTaskReports;
-import org.gradle.testing.jacoco.plugins.JacocoPlugin;
-import org.gradle.testing.jacoco.plugins.JacocoTaskExtension;
 
 /** Patched version of {@link Test} that we need to use for local unit tests support. */
 @CacheableTask
@@ -107,29 +104,6 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
         @Override
         public void configure(@NonNull AndroidUnitTest task) {
             super.configure(task);
-
-            unitTestCreationConfig.onTestedConfig(
-                    testedConfig -> {
-                        if (testedConfig.getVariantType().isAar()
-                                && testedConfig.getVariantDslInfo().isTestCoverageEnabled()) {
-                            // Library project runtime classes are instrumented offline and
-                            // published like such, so we need to exclude all classes from being
-                            // re-instrumented by the Jacoco jvm agent.
-                            task.getProject()
-                                    .getPlugins()
-                                    .withType(
-                                            JacocoPlugin.class,
-                                            plugin -> {
-                                                JacocoTaskExtension jacocoTaskExtension =
-                                                        task.getExtensions()
-                                                                .findByType(
-                                                                        JacocoTaskExtension.class);
-                                                jacocoTaskExtension.setExcludes(
-                                                        Collections.singletonList("*"));
-                                            });
-                        }
-                        return null;
-                    });
 
             GlobalScope globalScope = creationConfig.getGlobalScope();
             BaseExtension extension = globalScope.getExtension();
@@ -252,28 +226,30 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
                     .getServices()
                     .fileCollection(
                             (Callable)
-                                    () -> {
-                                        SdkComponentsBuildService.VersionedSdkLoader
-                                                versionedSdkLoader =
-                                                        globalScope.getVersionedSdkLoader().get();
-                                        return BootClasspathBuilder.INSTANCE
-                                                .computeAdditionalAndRequestedOptionalLibraries(
-                                                        globalScope.getProject(),
-                                                        versionedSdkLoader
-                                                                .getAdditionalLibrariesProvider()
-                                                                .get(),
-                                                        versionedSdkLoader
-                                                                .getOptionalLibrariesProvider()
-                                                                .get(),
-                                                        false,
-                                                        ImmutableList.copyOf(
-                                                                globalScope
-                                                                        .getExtension()
-                                                                        .getLibraryRequests()),
-                                                        creationConfig
-                                                                .getServices()
-                                                                .getIssueReporter());
-                                    });
+                                    () ->
+                                            BootClasspathBuilder.INSTANCE
+                                                    .computeAdditionalAndRequestedOptionalLibraries(
+                                                            globalScope.getProject(),
+                                                            globalScope
+                                                                    .getSdkComponents()
+                                                                    .flatMap(
+                                                                            SdkComponentsBuildService
+                                                                                    ::getAdditionalLibrariesProvider)
+                                                                    .get(),
+                                                            globalScope
+                                                                    .getSdkComponents()
+                                                                    .flatMap(
+                                                                            SdkComponentsBuildService
+                                                                                    ::getOptionalLibrariesProvider)
+                                                                    .get(),
+                                                            false,
+                                                            ImmutableList.copyOf(
+                                                                    globalScope
+                                                                            .getExtension()
+                                                                            .getLibraryRequests()),
+                                                            creationConfig
+                                                                    .getServices()
+                                                                    .getIssueReporter()));
         }
     }
 }

@@ -17,30 +17,53 @@
 package com.android.build.api.variant.impl
 
 import com.android.build.api.artifact.Artifact
-import com.android.build.api.variant.BuiltArtifact
 import com.android.build.api.variant.BuiltArtifacts
 import com.android.build.api.variant.VariantOutputConfiguration
 import com.android.ide.common.build.CommonBuiltArtifacts
 import com.google.gson.GsonBuilder
 import org.gradle.api.file.Directory
-import org.gradle.workers.WorkAction
-import org.gradle.workers.WorkerExecutor
 import java.io.File
 import java.io.Serializable
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.function.Supplier
 
-class BuiltArtifactsImpl(
+class BuiltArtifactsImpl @JvmOverloads constructor(
     override val version: Int = BuiltArtifacts.METADATA_FILE_VERSION,
     override val artifactType: Artifact<*>,
     override val applicationId: String,
     override val variantName: String,
-    override val elements: Collection<BuiltArtifactImpl>)
+    override val elements: Collection<BuiltArtifactImpl>,
+    val elementType: String? = initFileType(elements))
     : CommonBuiltArtifacts, BuiltArtifacts, Serializable {
 
     companion object {
         const val METADATA_FILE_NAME = "output-metadata.json"
+
+        private fun initFileType(elements: Collection<BuiltArtifactImpl>): String? {
+            val (files, directories)  = elements
+                    .asSequence()
+                    .map { File(it.outputFile) }
+                    .filter { it.exists() }
+                    .partition { it.isFile }
+            if (files.isNotEmpty() && directories.isNotEmpty()) {
+                throw IllegalArgumentException("""
+                You cannot store both files and directories as a single artifact.
+                ${display(files, "file", "files")}
+                ${display(directories, "directory", "directories")}
+            """.trimIndent())
+            }
+            return when {
+                files.isNotEmpty() -> "File"
+                directories.isNotEmpty() -> "Directory"
+                else -> null
+            }
+        }
+
+        private fun display(files: Collection<File>, singular: String, plural: String): String {
+            return if (files.size > 1)
+                "${files.joinToString(",") { it.name }} are $plural"
+            else "${files.first().name} is a $singular"
+        }
     }
 
     override fun save(out: Directory) {
@@ -56,43 +79,6 @@ class BuiltArtifactsImpl(
         elements.firstOrNull {
             it.outputType == variantOutputConfiguration.outputType &&
             it.filters == variantOutputConfiguration.filters }
-
-    /**
-     * Similar implementation of [BuiltArtifacts.transform] using the [WorkerExecutor]
-     *
-     * TODO : move those 2 APIs to TaskBaseOperationsImpl class.
-     */
-    internal fun <T: BuiltArtifacts.TransformParams> transform(
-        newArtifactType: Artifact<Directory>,
-        workerExecutor: WorkerExecutor,
-        transformRunnableClass: Class<out WorkAction<T>>,
-        parametersFactory: (builtArtifact: BuiltArtifact) -> T
-    ): Supplier<BuiltArtifacts> {
-
-        val parametersList = mutableMapOf<BuiltArtifact, T>()
-        elements.forEach { builtArtifact ->
-            workerExecutor.noIsolation().submit(transformRunnableClass) {
-                parametersFactory(builtArtifact).also {
-                    parametersList[builtArtifact] = it
-                }
-            }
-        }
-        return Supplier {
-            workerExecutor.await()
-            BuiltArtifactsImpl(
-                version,
-                newArtifactType,
-                applicationId,
-                variantName,
-                elements.map { builtArtifact ->
-                    builtArtifact.newOutput(
-                        parametersList[builtArtifact]?.output?.toPath()
-                            ?: throw java.lang.RuntimeException("Cannot find BuiltArtifact")
-                    )
-                }
-            )
-        }
-    }
 
     fun saveToDirectory(folder: File) =
         saveToFile(File(folder, METADATA_FILE_NAME))
@@ -125,7 +111,8 @@ class BuiltArtifactsImpl(
                         versionName = builtArtifact.versionName,
                         variantOutputConfiguration = builtArtifact.variantOutputConfiguration
                     )
-                }
-            .toList()))
+                }.toList(),
+                elementType)
+        )
     }
 }

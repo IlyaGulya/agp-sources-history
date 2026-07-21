@@ -29,28 +29,10 @@ data class CxxProjectModel(
     val rootBuildGradleFolder: File = File("."),
 
     /**
-     * Folder storing project-level C/C++ information
-     *   ex, source-root/.cxx
-     */
-    val cxxFolder : File = File("."),
-
-    /**
-     * Location of project-wide compiler settings cache
-     *   ex, $projectRoot/.cxx
-     */
-    val compilerSettingsCacheFolder: File = File("."),
-
-    /**
      * Install folder of SDK
      *   ex, sdk.dir=/path/to/sdk
      */
     val sdkFolder: File = File("."),
-
-    /**
-     * Whether compiler settings cache is enabled
-     *   default -pandroid.enableNativeCompilerSettingsCache=false
-     */
-    val isNativeCompilerSettingsCacheEnabled: Boolean = false,
 
     /**
      * Whether to build a single ABI for IDE
@@ -69,6 +51,11 @@ data class CxxProjectModel(
     val isCmakeBuildCohabitationEnabled: Boolean = false,
 
     /**
+     * When true, C/C++ configuration folding is enabled.
+     */
+    val isConfigurationFoldingEnabled: Boolean = false,
+
+    /**
      * Directory containing all build attribution file in Chrome trace format. See
      * [com.android.builder.profile.ChromeTracingProfileConverter.EXTRA_CHROME_TRACE_DIRECTORY].
      * If null, it means user has not requested generation of build attribution file.
@@ -79,6 +66,4 @@ data class CxxProjectModel(
      * Feature flag enabling prefab for the project.
      */
     val isPrefabEnabled: Boolean = false,
-
-    val isV2NativeModelEnabled: Boolean = false
 )

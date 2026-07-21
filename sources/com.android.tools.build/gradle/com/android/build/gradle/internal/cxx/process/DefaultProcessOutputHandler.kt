@@ -30,29 +30,27 @@ import java.io.OutputStream
  * process executes.
  */
 class DefaultProcessOutputHandler(
-    private val stderrFile: File,
-    private val stdoutFile: File,
+    private val stderrFile : File,
+    private val stdoutFile : File,
     private val logPrefix: String,
-    private val logStderr: Boolean,
-    private val logStdout: Boolean,
-    private val logFullStdout: Boolean
-) : ProcessOutputHandler {
+    private val logErrorToLifecycle: Boolean,
+    private val logOutputToInfo: Boolean) : ProcessOutputHandler {
 
-    var stderr: FileOutputStream? = null
-    var stdout: FileOutputStream? = null
+    var stderr : FileOutputStream? = null
+    var stdout : FileOutputStream? = null
 
-    override fun createOutput(): ProcessOutput {
+    override fun createOutput() : ProcessOutput {
         val singleStderr = FileOutputStream(stderrFile, true)
         val singleStdout = FileOutputStream(stdoutFile, true)
         val stderrReceivers = mutableListOf<OutputStream>(singleStderr)
         val stdoutReceivers = mutableListOf<OutputStream>(singleStdout)
-        if (logStderr) {
+        if (logErrorToLifecycle) {
             stderrReceivers.add(ChunkBytesToLineOutputStream(logPrefix, { lifecycleln(it) }))
         }
-        if (logStdout) {
+        if (logOutputToInfo) {
             stdoutReceivers.add(ChunkBytesToLineOutputStream(logPrefix, {
-                if (logFullStdout) lifecycleln(it)
-                else if (shouldElevateToLifeCycle(it)) lifecycleln(it)
+                if (shouldElevateToLifeCycle(it)) lifecycleln(it)
+                else infoln(it)
             }))
         }
         return DefaultProcessOutput(

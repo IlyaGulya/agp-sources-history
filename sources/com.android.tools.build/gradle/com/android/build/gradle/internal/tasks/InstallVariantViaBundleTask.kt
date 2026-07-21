@@ -15,16 +15,17 @@
  */
 package com.android.build.gradle.internal.tasks
 
-import com.android.build.gradle.internal.BuildToolsExecutableInput
+import com.android.build.gradle.internal.AdbExecutableInput
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.TaskManager
 import com.android.build.gradle.internal.component.ApkCreationConfig
-import com.android.build.gradle.internal.initialize
 import com.android.build.gradle.internal.profile.ProfileAwareWorkAction
 import com.android.build.gradle.internal.scope.InternalArtifactType
+import com.android.build.gradle.internal.services.getBuildService
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.builder.internal.InstallUtils
 import com.android.build.gradle.internal.testing.ConnectedDeviceProvider
+import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.builder.testing.api.DeviceConfigProviderImpl
 import com.android.builder.testing.api.DeviceConnector
 import com.android.builder.testing.api.DeviceProvider
@@ -59,7 +60,7 @@ abstract class InstallVariantViaBundleTask : NonIncrementalTask() {
     private var installOptions = mutableListOf<String>()
 
     @get:Nested
-    abstract val buildTools: BuildToolsExecutableInput
+    abstract val adbExecutableInput: AdbExecutableInput
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NAME_ONLY)
@@ -72,7 +73,7 @@ abstract class InstallVariantViaBundleTask : NonIncrementalTask() {
     override fun doTaskAction() {
         workerExecutor.noIsolation().submit(InstallRunnable::class.java) {
             it.initializeFromAndroidVariantTask(this)
-            it.adbExe.set(buildTools.adbExecutable())
+            it.adbExe.set(adbExecutableInput.getAdbExecutable())
             it.apkBundle.set(apkBundle.get().asFile)
             it.timeOutInMs.set(timeOutInMs)
             it.installOptions.set(installOptions)
@@ -208,7 +209,9 @@ abstract class InstallVariantViaBundleTask : NonIncrementalTask() {
             )
 
             task.timeOutInMs = creationConfig.globalScope.extension.adbOptions.timeOutInMs
-            task.buildTools.initialize(creationConfig)
+            task.adbExecutableInput.sdkBuildService.setDisallowChanges(
+                getBuildService(creationConfig.services.buildServiceRegistry)
+            )
         }
 
         override fun handleProvider(

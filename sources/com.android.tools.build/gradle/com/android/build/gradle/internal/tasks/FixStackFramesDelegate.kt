@@ -236,7 +236,7 @@ class FixStackFramesDelegate(
                 parameters.outputJar.get(),
                 parameters.classesHierarchyBuildService.get()
                     .getClassesHierarchyResolverBuilder()
-                    .addDependenciesSources(parameters.classpath.get())
+                    .addSources(parameters.classpath.get())
                     .build()
             )
         }
@@ -248,7 +248,7 @@ class FixStackFramesDelegate(
             val classesHierarchyResolver =
                 parameters.classesHierarchyBuildService.get()
                     .getClassesHierarchyResolverBuilder()
-                    .addDependenciesSources(parameters.classpath.get())
+                    .addSources(parameters.classpath.get())
                     .build()
 
             parameters.inputFiles.get().forEach { inputFile ->

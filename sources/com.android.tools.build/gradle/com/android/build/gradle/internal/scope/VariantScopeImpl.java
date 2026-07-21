@@ -50,24 +50,19 @@ import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactTyp
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.PublishedConfigType;
 import com.android.build.gradle.internal.publishing.PublishingSpecs;
 import com.android.build.gradle.internal.variant.VariantPathHelper;
-import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.IntegerOption;
 import com.android.build.gradle.options.OptionalBooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.options.StringOption;
 import com.android.builder.core.VariantType;
-import com.android.builder.dexing.DexMergerTool;
-import com.android.builder.dexing.DexerTool;
 import com.android.builder.errors.IssueReporter.Type;
 import com.android.builder.internal.packaging.ApkCreatorType;
 import com.android.builder.model.OptionalCompilationStep;
 import com.android.sdklib.AndroidTargetHash;
 import com.android.sdklib.AndroidVersion;
-import com.android.utils.FileUtils;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import java.io.File;
@@ -77,24 +72,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import org.gradle.api.Project;
 import org.gradle.api.artifacts.ArtifactCollection;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.SelfResolvingDependency;
 import org.gradle.api.attributes.LibraryElements;
-import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.provider.Provider;
 
 /** A scope containing data for a specific variant. */
 public class VariantScopeImpl implements VariantScope {
-
-    private static final String PUBLISH_ERROR_MSG =
-            "Publishing to %1$s with no %1$s configuration object. VariantType: %2$s";
 
     // Variant specific Data
     @NonNull private final ComponentIdentity componentIdentity;
@@ -112,8 +101,6 @@ public class VariantScopeImpl implements VariantScope {
     // other
 
     @NonNull private final Map<Abi, File> ndkDebuggableLibraryFolders = Maps.newHashMap();
-
-    private final Supplier<ConfigurableFileCollection> desugarTryWithResourcesRuntimeJar;
 
     @NonNull private final PostProcessingOptions postProcessingOptions;
 
@@ -138,18 +125,6 @@ public class VariantScopeImpl implements VariantScope {
         if (globalScope.isActive(OptionalCompilationStep.INSTANT_DEV)) {
             throw new RuntimeException("InstantRun mode is not supported");
         }
-        Project project = globalScope.getProject();
-
-        this.desugarTryWithResourcesRuntimeJar =
-                Suppliers.memoize(
-                        () ->
-                                project.files(
-                                        FileUtils.join(
-                                                pathHelper.getIntermediatesDir(),
-                                                "processing-tools",
-                                                "runtime-deps",
-                                                variantDslInfo.getDirName(),
-                                                "desugar_try_with_resources.jar")));
         this.postProcessingOptions = variantDslInfo.getPostProcessingOptions();
 
         configureNdk();
@@ -191,10 +166,15 @@ public class VariantScopeImpl implements VariantScope {
         for (PublishedConfigType configType : PublishedConfigType.values()) {
             if (configTypes.contains(configType)) {
                 Configuration config = variantDependencies.getElements(configType);
-                Preconditions.checkNotNull(
-                        config,
-                        String.format(
-                                PUBLISH_ERROR_MSG, configType, variantDslInfo.getVariantType()));
+                if (config == null) {
+                    throw new NullPointerException(
+                            "Publishing to "
+                                    + configType
+                                    + " with no "
+                                    + configType
+                                    + " configuration object. VariantType: "
+                                    + variantDslInfo.getVariantType());
+                }
                 if (configType.isPublicationConfig()) {
                     String classifier = null;
                     if (configType.isClassifierRequired()) {
@@ -329,7 +309,7 @@ public class VariantScopeImpl implements VariantScope {
                 || projectOptions.get(IntegerOption.IDE_TARGET_DEVICE_API) != null
                 || isPreviewTargetPlatform()
                 || variant.getVariantBuilder().getMinSdkVersion().getCodename() != null
-                || variantDslInfo.getTargetSdkVersion().getCodename() != null;
+                || variant.getVariantBuilder().getTargetSdkVersion().getCodename() != null;
     }
 
     private boolean isPreviewTargetPlatform() {
@@ -473,35 +453,9 @@ public class VariantScopeImpl implements VariantScope {
         }
     }
 
-    @NonNull
-    @Override
-    public ConfigurableFileCollection getTryWithResourceRuntimeSupportJar() {
-        return desugarTryWithResourcesRuntimeJar.get();
-    }
-
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this).addValue(componentIdentity.getName()).toString();
-    }
-
-    @NonNull
-    @Override
-    public DexerTool getDexer() {
-        if (globalScope.getProjectOptions().get(BooleanOption.ENABLE_D8)) {
-            return DexerTool.D8;
-        } else {
-            return DexerTool.DX;
-        }
-    }
-
-    @NonNull
-    @Override
-    public DexMergerTool getDexMerger() {
-        if (globalScope.getProjectOptions().get(BooleanOption.ENABLE_D8)) {
-            return DexMergerTool.D8;
-        } else {
-            return DexMergerTool.DX;
-        }
     }
 
     @NonNull

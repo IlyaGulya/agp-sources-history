@@ -18,7 +18,6 @@ package com.android.build.gradle.internal.tasks
 
 import com.android.build.gradle.internal.AndroidJarInput
 import com.android.build.gradle.internal.component.VariantCreationConfig
-import com.android.build.gradle.internal.initialize
 import com.android.build.gradle.internal.res.Aapt2ProcessResourcesRunnable
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.services.Aapt2Input
@@ -116,7 +115,9 @@ abstract class LinkManifestForAssetPackTask : NonIncrementalTask() {
                 InternalArtifactType.ASSET_PACK_MANIFESTS, task.manifestsDirectory)
 
             creationConfig.services.initializeAapt2Input(task.aapt2)
-            task.androidJarInput.initialize(creationConfig)
+            task.androidJarInput.sdkBuildService.setDisallowChanges(
+                getBuildService(creationConfig.services.buildServiceRegistry)
+            )
         }
     }
 }

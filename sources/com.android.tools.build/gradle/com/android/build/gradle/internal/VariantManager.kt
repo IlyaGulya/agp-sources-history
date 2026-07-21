@@ -59,6 +59,7 @@ import com.android.builder.dexing.isLegacyMultiDexMode
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
 import com.google.wireless.android.sdk.stats.ApiVersion
+import com.google.wireless.android.sdk.stats.GradleBuildVariant
 import org.gradle.api.Project
 import org.gradle.api.attributes.Attribute
 import java.io.File
@@ -111,12 +112,12 @@ class VariantManager<VariantBuilderT : VariantBuilderImpl, VariantT : VariantImp
      * Creates the variants.
      *
      * @param buildFeatureValues the build feature value instance
-     * @param dslNamespace the namespace from the android extension DSL
+     * @param dslPackageName the packageName from the android extension DSL
      */
-    fun createVariants(buildFeatureValues: BuildFeatureValues, dslNamespace: String?) {
+    fun createVariants(buildFeatureValues: BuildFeatureValues, dslPackageName: String?) {
         variantFactory.validateModel(variantInputModel)
         variantFactory.preVariantWork(project)
-        computeVariants(buildFeatureValues, dslNamespace)
+        computeVariants(buildFeatureValues, dslPackageName)
     }
 
     private fun getFlavorSelection(
@@ -140,9 +141,9 @@ class VariantManager<VariantBuilderT : VariantBuilderImpl, VariantT : VariantImp
      * Create all variants.
      *
      * @param buildFeatureValues the build feature value instance
-     * @param dslNamespace the namespace from the android extension DSL
+     * @param dslPackageName the packageName from the android extension DSL
      */
-    private fun computeVariants(buildFeatureValues: BuildFeatureValues, dslNamespace: String?) {
+    private fun computeVariants(buildFeatureValues: BuildFeatureValues, dslPackageName: String?) {
         val flavorDimensionList: List<String> = extension.flavorDimensionList
         val computer = DimensionCombinator(
                 variantInputModel,
@@ -159,7 +160,7 @@ class VariantManager<VariantBuilderT : VariantBuilderImpl, VariantT : VariantImp
                     variant,
                     testBuildTypeData,
                     buildFeatureValues,
-                    dslNamespace
+                    dslPackageName
             )
         }
 
@@ -190,7 +191,7 @@ class VariantManager<VariantBuilderT : VariantBuilderImpl, VariantT : VariantImp
             productFlavorDataList: List<ProductFlavorData<ProductFlavor>>,
             variantType: VariantType,
             buildFeatureValues: BuildFeatureValues,
-            dslNamespace: String?
+            dslPackageName: String?
     ): VariantComponentInfo<VariantBuilderT, VariantT>? {
         // entry point for a given buildType/Flavors/VariantType combo.
         // Need to run the new variant API to selectively ignore variants.
@@ -211,7 +212,7 @@ class VariantManager<VariantBuilderT : VariantBuilderImpl, VariantT : VariantImp
                         variantType.requiresManifest) { canParseManifest() },
                 dslServices,
                 variantPropertiesApiServices,
-                dslNamespace)
+                dslPackageName)
 
         // We must first add the flavors to the variant config, in order to get the proper
         // variant-specific and multi-flavor name as we add/create the variant providers later.
@@ -442,7 +443,7 @@ class VariantManager<VariantBuilderT : VariantBuilderImpl, VariantT : VariantImp
                     .executeOperations(unitTestVariantBuilder)
             unitTestVariantBuilder
         }
-        if (!component.enable) {
+        if (!component.enabled) {
             return null
         }
 
@@ -598,7 +599,7 @@ class VariantManager<VariantBuilderT : VariantBuilderImpl, VariantT : VariantImp
             dimensionCombination: DimensionCombination,
             testBuildTypeData: BuildTypeData<BuildType>?,
             buildFeatureValues: BuildFeatureValues,
-            dslNamespace: String?
+            dslPackageName: String?
     ) {
         val variantType = variantFactory.variantType
 
@@ -634,7 +635,7 @@ class VariantManager<VariantBuilderT : VariantBuilderImpl, VariantT : VariantImp
                     productFlavorDataList,
                     variantType,
                     buildFeatureValues,
-                    dslNamespace)?.let { variantInfo ->
+                    dslPackageName)?.let { variantInfo ->
                 addVariant(variantInfo)
                 val variant = variantInfo.variant
                 val variantDslInfo = variant.variantDslInfo
@@ -656,37 +657,37 @@ class VariantManager<VariantBuilderT : VariantBuilderImpl, VariantT : VariantImp
                                     variant.name))
                 }
                 val variantBuilder = variantInfo.stats
-                variantBuilder
+                variantBuilder?.let {
+                    it
                         .setIsDebug(buildType.isDebuggable)
                         .setMinSdkVersion(AnalyticsUtil.toProto(variantInfo.variant.minSdkVersion))
                         .setMinifyEnabled(variant.codeShrinker != null)
                         .setUseMultidex(variant.isMultiDexEnabled)
                         .setUseLegacyMultidex(variant.dexingType.isLegacyMultiDexMode())
                         .setVariantType(variant.variantType.analyticsVariantType)
-                        .setDexBuilder(AnalyticsUtil.toProto(variantScope.dexer))
-                        .setDexMerger(AnalyticsUtil.toProto(variantScope.dexMerger))
+                        .setDexBuilder(GradleBuildVariant.DexBuilderTool.D8_DEXER)
+                        .setDexMerger(GradleBuildVariant.DexMergerTool.D8_MERGER)
                         .setCoreLibraryDesugaringEnabled(variant.isCoreLibraryDesugaringEnabled)
-                        .testExecution = AnalyticsUtil.toProto(
-                                globalScope
-                                        .extension
-                                        .testOptions
-                                        .getExecutionEnum())
-                variant.codeShrinker?.let {
-                    variantBuilder.codeShrinker = AnalyticsUtil.toProto(it)
-                }
-                if (variantDslInfo.targetSdkVersion.apiLevel > 0) {
-                    variantBuilder.targetSdkVersion =
+                        .testExecution = AnalyticsUtil.toProto(globalScope.extension.testOptions.getExecutionEnum())
+
+                    variant.codeShrinker?.let {
+                        variantBuilder.codeShrinker = AnalyticsUtil.toProto(it)
+                    }
+                    if (variantDslInfo.targetSdkVersion.apiLevel > 0) {
+                        variantBuilder.targetSdkVersion =
                             AnalyticsUtil.toProto(variantDslInfo.targetSdkVersion)
-                }
-                variantDslInfo.maxSdkVersion?.let {
-                    variantBuilder.setMaxSdkVersion(
+                    }
+                    variantDslInfo.maxSdkVersion?.let {
+                        variantBuilder.setMaxSdkVersion(
                             ApiVersion.newBuilder().setApiLevel(it.toLong()))
-                }
-                val supportType = variant.getJava8LangSupportType()
-                if (supportType != VariantScope.Java8LangSupport.INVALID
+                    }
+                    val supportType = variant.getJava8LangSupportType()
+                    if (supportType != VariantScope.Java8LangSupport.INVALID
                         && supportType != VariantScope.Java8LangSupport.UNUSED) {
-                    variantBuilder.java8LangSupport = AnalyticsUtil.toProto(supportType)
+                        variantBuilder.java8LangSupport = AnalyticsUtil.toProto(supportType)
+                    }
                 }
+
                 if (variantFactory.variantType.hasTestComponents) {
                     if (buildTypeData == testBuildTypeData) {
                         val androidTest = createTestComponents(

@@ -66,7 +66,7 @@ sealed class NdkInstallStatus {
 /**
  * Handles NDK related information.
  */
-open class NdkHandler(
+class NdkHandler(
     private val ndkLocator: NdkLocator,
     private val compileSdkVersion: String
 ) {

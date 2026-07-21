@@ -15,11 +15,11 @@
  */
 package com.android.build.gradle.external.gnumake
 
+import com.android.build.gradle.internal.cxx.build.CxxRegularBuilder
 import com.android.build.gradle.internal.cxx.json.NativeBuildConfigValue
 import com.android.build.gradle.internal.cxx.json.NativeLibraryValue
 import com.android.build.gradle.internal.cxx.json.NativeSourceFileValue
 import com.android.build.gradle.internal.cxx.json.NativeToolchainValue
-import com.android.build.gradle.tasks.ExternalNativeBuildTask
 import com.android.utils.NativeSourceFileExtensions
 import com.android.utils.NdkUtils
 import com.android.utils.cxx.CompileCommandsEncoder
@@ -28,9 +28,7 @@ import com.google.common.collect.Lists
 import com.google.common.collect.Sets
 import com.google.common.io.Files
 import java.io.File
-import java.util.ArrayList
-import java.util.HashMap
-import java.util.HashSet
+import java.util.*
 
 /**
  * The purpose of this class is to take the raw output of an ndk-build -n call and to produce a
@@ -56,7 +54,7 @@ import java.util.HashSet
  */
 class NativeBuildConfigValueBuilder internal constructor(
     private val androidMk: File,
-    private var executionRootPath: File,
+    private val executionRootPath: File,
     fileConventions: OsFileConventions
 ) {
     private val toolChainToCCompiler: MutableMap<String, String> = HashMap()
@@ -109,27 +107,14 @@ class NativeBuildConfigValueBuilder internal constructor(
         if (outputs.isNotEmpty()) {
             throw RuntimeException("setCommands should be called once")
         }
-        extractWorkingDirectoryFromDryRunOutputIfAvailable(dryRunOutput)
         val buildSteps = CommandClassifier.classify(dryRunOutput, fileConventions)
         val outputs = FlowAnalyzer.analyze(buildSteps)
         for ((key, value) in outputs.entries()) {
             this.outputs.add(Output(key, value, buildCommand, cleanCommand, variantName))
         }
         buildTargetsCommand =
-            buildCommand + listOf(ExternalNativeBuildTask.BUILD_TARGETS_PLACEHOLDER)
+            buildCommand + listOf(CxxRegularBuilder.BUILD_TARGETS_PLACEHOLDER)
         return this
-    }
-
-    private fun extractWorkingDirectoryFromDryRunOutputIfAvailable(dryRunOutput: String) {
-        if (dryRunOutput.contains("make: Entering directory")) {
-            // A custom working dir can be specified with `-C` when invoking ndk-build to overwrite
-            // the working directory when invoking the compiler. In NDK 20.x and before, the path is
-            // quoted with asymmetric single quotes "`'". In NDK 21 and above, it's symmetric.
-            val workingDirPattern =
-                Regex("^make: Entering directory [`'](.*?)'$", RegexOption.MULTILINE)
-            val match = workingDirPattern.find(dryRunOutput) ?: return
-            executionRootPath = File(match.groups[1]!!.value)
-        }
     }
 
     /**

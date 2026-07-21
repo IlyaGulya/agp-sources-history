@@ -19,22 +19,16 @@ package com.android.build.gradle.internal.cxx.gradle.generator
 import com.android.build.api.variant.impl.VariantImpl
 import com.android.build.api.variant.impl.toSharedAndroidVersion
 import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.internal.core.Abi
 import com.android.build.gradle.internal.cxx.caching.CachingEnvironment
 import com.android.build.gradle.internal.cxx.configure.CXX_DEFAULT_CONFIGURATION_SUBFOLDER
 import com.android.build.gradle.internal.cxx.configure.NativeBuildSystemVariantConfig
 import com.android.build.gradle.internal.cxx.configure.createNativeBuildSystemVariantConfig
 import com.android.build.gradle.internal.cxx.configure.isCmakeForkVersion
-import com.android.build.gradle.internal.cxx.logging.IssueReporterLoggingEnvironment
 import com.android.build.gradle.internal.cxx.logging.errorln
 import com.android.build.gradle.internal.cxx.logging.infoln
 import com.android.build.gradle.internal.cxx.logging.warnln
 import com.android.build.gradle.internal.cxx.model.CxxAbiModel
 import com.android.build.gradle.internal.cxx.model.CxxVariantModel
-import com.android.build.gradle.internal.cxx.model.createCxxAbiModel
-import com.android.build.gradle.internal.cxx.model.createCxxModuleModel
-import com.android.build.gradle.internal.cxx.model.createCxxVariantModel
-import com.android.build.gradle.internal.cxx.settings.rewriteCxxAbiModelWithCMakeSettings
 import com.android.build.gradle.internal.dsl.ExternalNativeBuild
 import com.android.build.gradle.internal.ndk.NdkHandler
 import com.android.build.gradle.internal.profile.AnalyticsService
@@ -43,9 +37,8 @@ import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.options.BooleanOption.BUILD_ONLY_TARGET_ABI
 import com.android.build.gradle.options.BooleanOption.ENABLE_CMAKE_BUILD_COHABITATION
-import com.android.build.gradle.options.BooleanOption.ENABLE_NATIVE_COMPILER_SETTINGS_CACHE
+import com.android.build.gradle.options.BooleanOption.ENABLE_NATIVE_CONFIGURATION_FOLDING
 import com.android.build.gradle.options.BooleanOption.ENABLE_PROFILE_JSON
-import com.android.build.gradle.options.BooleanOption.ENABLE_V2_NATIVE_MODEL
 import com.android.build.gradle.options.BooleanOption.PREFER_CMAKE_FILE_API
 import com.android.build.gradle.options.StringOption
 import com.android.build.gradle.options.StringOption.IDE_BUILD_TARGET_ABI
@@ -53,17 +46,17 @@ import com.android.build.gradle.options.StringOption.PROFILE_OUTPUT_DIR
 import com.android.build.gradle.tasks.CmakeAndroidNinjaExternalNativeJsonGenerator
 import com.android.build.gradle.tasks.CmakeQueryMetadataGenerator
 import com.android.build.gradle.tasks.CmakeServerExternalNativeJsonGenerator
-import com.android.build.gradle.tasks.CxxNopMetadataGenerator
 import com.android.build.gradle.tasks.NativeBuildSystem
 import com.android.build.gradle.tasks.NdkBuildExternalNativeJsonGenerator
 import com.android.build.gradle.tasks.getPrefabFromMaven
 import com.android.builder.profile.ChromeTracingProfileConverter
 import com.android.sdklib.AndroidVersion
 import com.android.utils.FileUtils
-import com.google.common.annotations.VisibleForTesting
+import com.android.utils.cxx.CxxDiagnosticCode.CMAKE_IS_MISSING
+import com.android.utils.cxx.CxxDiagnosticCode.CMAKE_VERSION_IS_UNSUPPORTED
+import com.android.utils.cxx.CxxDiagnosticCode.INVALID_EXTERNAL_NATIVE_BUILD_CONFIG
 import org.gradle.api.file.FileCollection
 import java.io.File
-import java.lang.IllegalStateException
 import java.util.*
 
 /**
@@ -88,10 +81,6 @@ data class CxxConfigurationModel(
     val unusedAbis: List<CxxAbiModel>
 )
 
-enum class NativeBuildOutputLevel {
-    QUIET, VERBOSE
-}
-
 /**
  * Parameters common to configuring the creation of [CxxConfigurationModel].
  */
@@ -106,17 +95,14 @@ data class CxxConfigurationParameters(
     val buildFile: File,
     val isDebuggable: Boolean,
     val minSdkVersion: AndroidVersion,
-    val compileSdkVersion: String,
-    val ndkVersion: String?,
-    val ndkPath: String?,
     val cmakeVersion: String?,
     val splitsAbiFilterSet: Set<String>,
     val intermediatesFolder: File,
     val gradleModulePathName: String,
-    val isNativeCompilerSettingsCacheEnabled: Boolean,
     val isBuildOnlyTargetAbiEnabled: Boolean,
     val ideBuildTargetAbi: String?,
     val isCmakeBuildCohabitationEnabled: Boolean,
+    val isConfigurationFoldingEnabled: Boolean,
     val chromeTraceJsonFolder: File?,
     val isPrefabEnabled: Boolean,
     val prefabClassPath: FileCollection?,
@@ -124,9 +110,7 @@ data class CxxConfigurationParameters(
     val implicitBuildTargetSet: Set<String>,
     val variantName: String,
     val nativeVariantConfig: NativeBuildSystemVariantConfig,
-    val isV2NativeModelEnabled: Boolean,
-    val isPreferCmakeFileApiEnabled: Boolean,
-    val nativeBuildOutputLevel: NativeBuildOutputLevel
+    val isPreferCmakeFileApiEnabled: Boolean
 )
 
 /**
@@ -165,40 +149,6 @@ data class CxxConfigurationParameters(
 }
 
 /**
- * This creates the [CxxConfigurationModel]. After deserialization it is used to construct
- * [CxxMetadataGenerator] for tasks to operate on. The resulting [CxxConfigurationModel] is
- * passed to [createCxxMetadataGenerator] to construct the generator.
- * Time phases are:
- * 1) Configuration phase. [tryCreateCxxConfigurationModel] is called and the resulting
- *    [CxxConfigurationModel] is passed to the task's [CreationAction] and should be stored in
- *    the task.
- * 2) Execution phase. The [CxxConfigurationModel] is used to construct a [CxxMetadataGenerator]
- *    which does the task's work.
- * Phase (2) may be run with the freshly created [CxxConfigurationModel] or from a version that
- * was deserialized from the task graph.
- */
-fun tryCreateCxxConfigurationModel(variant: VariantImpl) : CxxConfigurationModel? {
-    IssueReporterLoggingEnvironment(variant.services.issueReporter).use {
-        return tryCreateCxxConfigurationModelImpl(variant)
-    }
-}
-
-@VisibleForTesting
-fun tryCreateCxxConfigurationModelImpl(variant: VariantImpl) : CxxConfigurationModel? {
-    val global = variant.globalScope
-    val parameters =
-        tryCreateConfigurationParameters(variant) ?: return null
-    val sdkComponents = global.sdkComponents.get()
-    val module = createCxxModuleModel(sdkComponents, parameters)
-    val variant = createCxxVariantModel(parameters, module)
-    val (active, unused) = Abi.getDefaultValues().map { abi ->
-            createCxxAbiModel(sdkComponents, parameters, variant, abi)
-                .rewriteCxxAbiModelWithCMakeSettings()
-        }.partition { variant.validAbiList.contains(it.abi) }
-    return CxxConfigurationModel(variant, active, unused)
-}
-
-/**
  * Try to create C/C++ model configuration parameters [CxxConfigurationParameters].
  * Return null when there is no C/C++ in the user's project or if there is some other kind of error.
  * In the latter case, an error will have been reported.
@@ -224,12 +174,7 @@ fun tryCreateConfigurationParameters(variant: VariantImpl) : CxxConfigurationPar
      * allow valid [errorln]s to pass or throw exception that will trigger download hyperlinks
      * in Android Studio
      */
-    val ndkHandler = global.sdkComponents.get().versionedNdkHandler(
-        compileSdkVersion = global.extension.compileSdkVersion ?:
-            throw IllegalStateException("compileSdkVersion not set in android configuration"),
-        ndkVersion = global.extension.ndkVersion,
-        ndkPath = global.extension.ndkPath
-    )
+    val ndkHandler = global.sdkComponents.get().ndkHandler
     val ndkInstall = CachingEnvironment(cxxFolder).use {
         ndkHandler.getNdkPlatform(downloadOkay = true)
     }
@@ -276,10 +221,7 @@ fun tryCreateConfigurationParameters(variant: VariantImpl) : CxxConfigurationPar
     }
 
     return CxxConfigurationParameters(
-        cxxFolder = findCxxFolder(
-            global.project.projectDir,
-            buildStagingFolder,
-            global.project.buildFile),
+        cxxFolder = cxxFolder,
         buildSystem = buildSystem,
         makeFile = makeFile,
         buildStagingFolder = buildStagingFolder,
@@ -289,15 +231,11 @@ fun tryCreateConfigurationParameters(variant: VariantImpl) : CxxConfigurationPar
         buildFile = global.project.buildFile,
         isDebuggable = variant.debuggable,
         minSdkVersion = variant.variantBuilder.minSdkVersion.toSharedAndroidVersion(),
-        compileSdkVersion = global.extension.compileSdkVersion ?:
-            throw IllegalStateException("compileSdkVersion not set in android configuration"),
-        ndkVersion = global.extension.ndkVersion,
-        ndkPath = global.extension.ndkPath,
         cmakeVersion = global.extension.externalNativeBuild.cmake.version,
         splitsAbiFilterSet = global.extension.splits.abiFilters,
         intermediatesFolder = global.intermediatesDir,
         gradleModulePathName = global.project.path,
-        isNativeCompilerSettingsCacheEnabled = option(ENABLE_NATIVE_COMPILER_SETTINGS_CACHE),
+        isConfigurationFoldingEnabled = option(ENABLE_NATIVE_CONFIGURATION_FOLDING),
         isBuildOnlyTargetAbiEnabled = option(BUILD_ONLY_TARGET_ABI),
         ideBuildTargetAbi = option(IDE_BUILD_TARGET_ABI),
         isCmakeBuildCohabitationEnabled = option(ENABLE_CMAKE_BUILD_COHABITATION),
@@ -308,17 +246,9 @@ fun tryCreateConfigurationParameters(variant: VariantImpl) : CxxConfigurationPar
         implicitBuildTargetSet = prefabTargets,
         variantName = variant.name,
         nativeVariantConfig = createNativeBuildSystemVariantConfig(
-            buildSystem, variant.variantDslInfo
+            buildSystem, variant, variant.variantDslInfo
         ),
-        isV2NativeModelEnabled = option(ENABLE_V2_NATIVE_MODEL),
-        isPreferCmakeFileApiEnabled = option(PREFER_CMAKE_FILE_API),
-        nativeBuildOutputLevel = NativeBuildOutputLevel.values()
-            .firstOrNull {
-                it.toString() == option(StringOption.NATIVE_BUILD_OUTPUT_LEVEL)?.toUpperCase(
-                    Locale.US
-                )
-            }
-            ?: NativeBuildOutputLevel.QUIET
+        isPreferCmakeFileApiEnabled = option(PREFER_CMAKE_FILE_API)
     )
 }
 
@@ -337,7 +267,10 @@ private fun getProjectPath(config: ExternalNativeBuild)
 
     return when {
         externalProjectPaths.size > 1 -> {
-            errorln("More than one externalNativeBuild path specified")
+            errorln(
+                INVALID_EXTERNAL_NATIVE_BUILD_CONFIG,
+                "More than one externalNativeBuild path specified"
+            )
             null
         }
         externalProjectPaths.isEmpty() -> {
@@ -351,9 +284,7 @@ private fun getProjectPath(config: ExternalNativeBuild)
 /**
  * This function is used at task execution time to construct a [CxxMetadataGenerator] to do the
  * task's work. It should only have parameters that can be obtained after task graph
- * deserialization. Effectively, this limits us to Gradle build services like [CxxMetadataGenerator]
- * and to the information saved in the [CxxConfigurationModel] constructed during configuration
- * phase by [tryCreateCxxConfigurationModel].
+ * deserialization.
  */
 fun createCxxMetadataGenerator(
     configurationModel: CxxConfigurationModel,
@@ -369,6 +300,7 @@ fun createCxxMetadataGenerator(
 
     val variantBuilder = analyticsService.getVariantBuilder(
         variant.module.gradleModulePathName, variant.variantName)
+
     return when (variant.module.buildSystem) {
         NativeBuildSystem.NDK_BUILD -> NdkBuildExternalNativeJsonGenerator(
             variant,
@@ -379,25 +311,28 @@ fun createCxxMetadataGenerator(
             val cmake =
                 Objects.requireNonNull(variant.module.cmake)!!
             if (!cmake.isValidCmakeAvailable) {
-                errorln("No valid CMake executable was found.")
-                return CxxNopMetadataGenerator(variant, abis, variantBuilder)
+                errorln(CMAKE_IS_MISSING, "No valid CMake executable was found.")
+                return CxxNopMetadataGenerator(variantBuilder)
             }
             val cmakeRevision = cmake.minimumCmakeVersion
-            variantBuilder.nativeCmakeVersion = cmakeRevision.toString()
+            variantBuilder?.nativeCmakeVersion = cmakeRevision.toString()
             if (cmakeRevision.isCmakeForkVersion()) {
                 return CmakeAndroidNinjaExternalNativeJsonGenerator(variant, abis, variantBuilder)
             }
             if (cmakeRevision.major < 3
                 || cmakeRevision.major == 3 && cmakeRevision.minor <= 6
             ) {
-                errorln("Unsupported CMake version $cmakeRevision. Try 3.7.0 or later.")
-                return CxxNopMetadataGenerator(variant, abis, variantBuilder)
+                errorln(
+                    CMAKE_VERSION_IS_UNSUPPORTED,
+                    "Unsupported CMake version $cmakeRevision. Try 3.7.0 or later."
+                )
+                return CxxNopMetadataGenerator(variantBuilder)
             }
 
             val isPreCmakeFileApiVersion = cmakeRevision.major == 3 && cmakeRevision.minor < 15
             if (isPreCmakeFileApiVersion ||
-                !variant.module.project.isV2NativeModelEnabled ||
-                !variant.module.cmake!!.isPreferCmakeFileApiEnabled) {
+                !variant.module.cmake!!.isPreferCmakeFileApiEnabled
+            ) {
                 return CmakeServerExternalNativeJsonGenerator(variant, abis, variantBuilder)
             }
             return CmakeQueryMetadataGenerator(variant, abis, variantBuilder)

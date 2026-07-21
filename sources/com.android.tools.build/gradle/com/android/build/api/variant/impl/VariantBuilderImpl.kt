@@ -43,11 +43,20 @@ abstract class VariantBuilderImpl(
             _minSdkVersion = AndroidVersionImpl(value.apiLevel, value.codename)
         }
 
+    private var _targetSdkVersion= AndroidVersionImpl(
+            variantDslInfo.targetSdkVersion.apiLevel,
+            variantDslInfo.targetSdkVersion.codename
+    )
+    override var targetSdkVersion: AndroidVersion
+        get() = _targetSdkVersion
+        set(value) {
+            _targetSdkVersion = AndroidVersionImpl(value.apiLevel, value.codename)
+        }
     override var maxSdkVersion: Int? = variantDslInfo.maxSdkVersion
 
     abstract fun <T: VariantBuilder> createUserVisibleVariantObject(
             projectServices: ProjectServices,
-            stats: GradleBuildVariant.Builder): T
+            stats: GradleBuildVariant.Builder?): T
 
     override var renderscriptTargetApi: Int = -1
         get() {

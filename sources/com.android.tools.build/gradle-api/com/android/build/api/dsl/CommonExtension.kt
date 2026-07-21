@@ -125,6 +125,37 @@ interface CommonExtension<
     fun buildTypes(action: Action<in NamedDomainObjectContainer<BuildTypeT>>)
 
     /**
+     * Shortcut extension method to allow easy access to the predefined `debug` [BuildType]
+     *
+     * For example:
+     * ```
+     *  android {
+     *      buildTypes {
+     *          debug {
+     *              // ...
+     *          }
+     *      }
+     * }
+     * ```
+     */
+    fun NamedDomainObjectContainer<BuildTypeT>.debug(action: BuildTypeT.() -> Unit)
+    /**
+     * Shortcut extension method to allow easy access to the predefined `release` [BuildType]
+     *
+     * For example:
+     * ```
+     *  android {
+     *      buildTypes {
+     *          release {
+     *              // ...
+     *          }
+     *      }
+     * }
+     * ```
+     */
+    fun NamedDomainObjectContainer<BuildTypeT>.release(action: BuildTypeT.() -> Unit)
+
+    /**
      * Specifies options for the
      * [Data Binding Library](https://developer.android.com/topic/libraries/data-binding/index.html).
      *
@@ -589,6 +620,7 @@ interface CommonExtension<
      * @param name the name of the library.
      */
     fun useLibrary(name: String)
+
     /**
      * Includes the specified library to the classpath.
      *
@@ -616,8 +648,6 @@ interface CommonExtension<
      */
     fun useLibrary(name: String, required: Boolean)
 
-    @Deprecated(
-        message = "This API will be removed in AGP 7.0, replaced with AndroidComponents::sdkComponents")
     val sdkComponents: SdkComponents
 
     /**
@@ -652,5 +682,5 @@ interface CommonExtension<
      * AndroidManifest.xml, but doing a 'get' on this property will not retrieve the value specified
      * in the AndroidManifest.xml.
      */
-    var namespace: String?
+    var packageName: String?
 }

@@ -89,7 +89,7 @@ open class VariantDslInfoImpl internal constructor(
     private val dslServices: DslServices,
     private val services: VariantPropertiesApiServices,
     private val buildDirectory: DirectoryProperty,
-    private val dslNamespace: String?
+    private val dslPackageName: String?
 ): VariantDslInfo, DimensionCombination {
 
     override val buildType: String?
@@ -106,6 +106,12 @@ open class VariantDslInfoImpl internal constructor(
     val mergedFlavor: MergedFlavor by lazy {
         mergeFlavors(defaultConfig, productFlavorList, applicationId, dslServices)
     }
+
+    /** Variant-specific build Config fields.  */
+    private val mBuildConfigFields: MutableMap<String, ClassField> = Maps.newTreeMap()
+
+    /** Variant-specific res values.  */
+    private val mResValues: MutableMap<String, ClassField> = Maps.newTreeMap()
 
     /**
      * Optional tested config in case this variant is used for testing another variant.
@@ -277,14 +283,14 @@ open class VariantDslInfoImpl internal constructor(
 
             // -------------
             // Special case for separate test sub-projects
-            // If there is no namespace from the DSL or package attribute in the manifest, we use
+            // If there is no packageName from the DSL or package attribute in the manifest, we use
             // testApplicationId, if present. This allows the test project to not have a manifest if
             // all is declared in the DSL.
-            // TODO(Issue 172361895) Remove this special case - users should use namespace DSL
+            // TODO(Issue 172361895) Remove this special case - users should use packageName DSL
             // instead of testApplicationId DSL for this.
             variantType.isSeparateTestProject -> {
-                if (dslNamespace != null) {
-                    services.provider { dslNamespace }
+                if (dslPackageName != null) {
+                    services.provider { dslPackageName }
                 } else {
                     val testAppIdFromFlavors =
                             productFlavorList.asSequence().map { it.testApplicationId }
@@ -303,15 +309,15 @@ open class VariantDslInfoImpl internal constructor(
 
             // -------------
             // All other types of projects, get it from the DSL or read it from the manifest.
-            else -> dslOrManifestNamespace
+            else -> dslOrManifestPackageName
         }
     }
 
     // The packageName as specified by the user, either via the DSL or the `package` attribute of
     // the source AndroidManifest.xml
-    private val dslOrManifestNamespace: Provider<String> by lazy {
-        if (dslNamespace != null) {
-            services.provider { dslNamespace }
+    private val dslOrManifestPackageName: Provider<String> by lazy {
+        if (dslPackageName != null) {
+            services.provider { dslPackageName }
         } else {
             dataProvider.manifestData.map {
                 it.packageName
@@ -369,7 +375,7 @@ open class VariantDslInfoImpl internal constructor(
                 // No appId value set from DSL, rely on package name value from DSL or manifest.
                 // using map will allow us to keep task dependency should the manifest be generated
                 // or transformed via a task.
-                dslOrManifestNamespace.map { "$it${computeApplicationIdSuffix()}" }
+                dslOrManifestPackageName.map { "$it${computeApplicationIdSuffix()}" }
             } else {
                 // use value from flavors/defaultConfig
                 // needed to make nullability work in kotlinc
@@ -656,6 +662,36 @@ open class VariantDslInfoImpl internal constructor(
     override val vectorDrawables: VectorDrawablesOptions
         get() = mergedFlavor.vectorDrawables
 
+    /**
+     * Adds a variant-specific BuildConfig field.
+     *
+     * @param type the type of the field
+     * @param name the name of the field
+     * @param value the value of the field
+     */
+    override fun addBuildConfigField(
+        type: String,
+        name: String,
+        value: String
+    ) {
+        val classField: ClassField = ClassFieldImpl(type, name, value)
+        mBuildConfigFields[name] = classField
+    }
+
+    /**
+     * Adds a variant-specific res value.
+     *
+     * @param type the type of the field
+     * @param name the name of the field
+     * @param value the value of the field
+     */
+    override fun addResValue(type: String, name: String, value: String) {
+        val classField: ClassField = ClassFieldImpl(type, name, value)
+        mResValues[name] = classField
+    } // keep track of the names already added. This is because we show where the items
+// come from so we cannot just put everything a map and let the new ones override the
+// old ones.
+
     override fun getBuildConfigFields(): Map<String, BuildConfigField<out java.io.Serializable>> {
         val buildConfigFieldsMap =
             mutableMapOf<String, BuildConfigField<out java.io.Serializable>>()
@@ -665,6 +701,10 @@ open class VariantDslInfoImpl internal constructor(
                 buildConfigFieldsMap[classField.name] =
                         BuildConfigField(classField.type , classField.value, comment)
             }
+        }
+
+        mBuildConfigFields.values.forEach { classField ->
+            addToListIfNotAlreadyPresent(classField, "Field from the variant API")
         }
 
         buildTypeObj.buildConfigFields.values.forEach { classField ->
@@ -705,6 +745,10 @@ open class VariantDslInfoImpl internal constructor(
                     comment = comment
                 )
             }
+        }
+
+        mResValues.values.forEach { classField ->
+            addToListIfNotAlreadyPresent(classField, "Value from the variant")
         }
 
         buildTypeObj.resValues.values.forEach { classField ->

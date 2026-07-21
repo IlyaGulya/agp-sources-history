@@ -42,7 +42,12 @@ import com.android.build.gradle.internal.scope.InternalArtifactType.COMPILE_SYMB
 import com.android.build.gradle.internal.scope.InternalArtifactType.CONSUMER_PROGUARD_DIR
 import com.android.build.gradle.internal.scope.InternalArtifactType.DATA_BINDING_ARTIFACT
 import com.android.build.gradle.internal.scope.InternalArtifactType.DATA_BINDING_BASE_CLASS_LOG_ARTIFACT
-import com.android.build.gradle.internal.scope.InternalArtifactType.DESUGAR_LIB_MERGED_KEEP_RULES
+import com.android.build.gradle.internal.scope.InternalArtifactType.DESUGAR_LIB_EXTERNAL_FILE_LIB_KEEP_RULES
+import com.android.build.gradle.internal.scope.InternalArtifactType.DESUGAR_LIB_EXTERNAL_LIBS_ARTIFACT_TRANSFORM_KEEP_RULES
+import com.android.build.gradle.internal.scope.InternalArtifactType.DESUGAR_LIB_EXTERNAL_LIBS_KEEP_RULES
+import com.android.build.gradle.internal.scope.InternalArtifactType.DESUGAR_LIB_MIXED_SCOPE_KEEP_RULES
+import com.android.build.gradle.internal.scope.InternalArtifactType.DESUGAR_LIB_PROJECT_KEEP_RULES
+import com.android.build.gradle.internal.scope.InternalArtifactType.DESUGAR_LIB_SUBPROJECT_KEEP_RULES
 import com.android.build.gradle.internal.scope.InternalArtifactType.FEATURE_NAME
 import com.android.build.gradle.internal.scope.InternalArtifactType.FEATURE_RESOURCE_PKG
 import com.android.build.gradle.internal.scope.InternalArtifactType.FEATURE_SET_METADATA
@@ -51,8 +56,7 @@ import com.android.build.gradle.internal.scope.InternalArtifactType.JAVA_RES
 import com.android.build.gradle.internal.scope.InternalArtifactType.LIBRARY_ASSETS
 import com.android.build.gradle.internal.scope.InternalArtifactType.LIBRARY_JAVA_RES
 import com.android.build.gradle.internal.scope.InternalArtifactType.LIBRARY_JNI
-import com.android.build.gradle.internal.scope.InternalArtifactType.LINT_VARIANT_DEPENDENCIES_MODEL
-import com.android.build.gradle.internal.scope.InternalArtifactType.LINT_PROJECT_GLOBAL_MODEL
+import com.android.build.gradle.internal.scope.InternalArtifactType.LINT_MODEL
 import com.android.build.gradle.internal.scope.InternalArtifactType.LINT_PUBLISH_JAR
 import com.android.build.gradle.internal.scope.InternalArtifactType.MANIFEST_METADATA
 import com.android.build.gradle.internal.scope.InternalArtifactType.MERGED_JAVA_RES
@@ -189,7 +193,13 @@ class PublishingSpecs {
                 reverseMetadata(PACKAGED_DEPENDENCIES, ArtifactType.PACKAGED_DEPENDENCIES)
                 reverseMetadata(NATIVE_DEBUG_METADATA, ArtifactType.REVERSE_METADATA_NATIVE_DEBUG_METADATA)
                 reverseMetadata(NATIVE_SYMBOL_TABLES, ArtifactType.REVERSE_METADATA_NATIVE_SYMBOL_TABLES)
-                reverseMetadata(DESUGAR_LIB_MERGED_KEEP_RULES, ArtifactType.DESUGAR_LIB_MERGED_KEEP_RULES)
+
+                reverseMetadata(DESUGAR_LIB_PROJECT_KEEP_RULES, ArtifactType.DESUGAR_LIB_PROJECT_KEEP_RULES)
+                reverseMetadata(DESUGAR_LIB_SUBPROJECT_KEEP_RULES, ArtifactType.DESUGAR_LIB_SUBPROJECT_KEEP_RULES)
+                reverseMetadata(DESUGAR_LIB_MIXED_SCOPE_KEEP_RULES, ArtifactType.DESUGAR_LIB_MIXED_SCOPE_KEEP_RULES)
+                reverseMetadata(DESUGAR_LIB_EXTERNAL_LIBS_KEEP_RULES, ArtifactType.DESUGAR_LIB_EXTERNAL_LIBS_KEEP_RULES)
+                reverseMetadata(DESUGAR_LIB_EXTERNAL_FILE_LIB_KEEP_RULES, ArtifactType.DESUGAR_LIB_EXTERNAL_FILE_KEEP_RULES)
+                reverseMetadata(DESUGAR_LIB_EXTERNAL_LIBS_ARTIFACT_TRANSFORM_KEEP_RULES, ArtifactType.DESUGAR_LIB_EXTERNAL_LIBS_ARTIFACT_TRANSFORM_KEEP_RULES)
 
                 runtime(NAVIGATION_JSON, ArtifactType.NAVIGATION_JSON)
                 runtime(FEATURE_NAME, ArtifactType.FEATURE_NAME)
@@ -234,9 +244,7 @@ class PublishingSpecs {
                 runtime(NAVIGATION_JSON, ArtifactType.NAVIGATION_JSON)
                 runtime(COMPILED_LOCAL_RESOURCES, ArtifactType.COMPILED_DEPENDENCIES_RESOURCES)
                 runtime(AAR_METADATA, ArtifactType.AAR_METADATA)
-
-                runtime(LINT_PROJECT_GLOBAL_MODEL, ArtifactType.LINT_PROJECT_GLOBAL_MODEL)
-                runtime(LINT_VARIANT_DEPENDENCIES_MODEL, ArtifactType.LINT_VARIANT_DEPENDENCIES_MODEL)
+                runtime(LINT_MODEL, ArtifactType.LINT_MODEL)
                 runtime(
                     com.android.build.api.artifact.ArtifactType.AAR,
                     ArtifactType.LOCAL_AAR_FOR_LINT)

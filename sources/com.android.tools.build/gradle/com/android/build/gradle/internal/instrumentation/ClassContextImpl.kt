@@ -26,5 +26,5 @@ class ClassContextImpl(
 
     @Synchronized
     override fun loadClassData(className: String) =
-            classesHierarchyResolver.loadClassDataForVisitor(className)
+            classesHierarchyResolver.maybeLoadClassDataForClass(className)
 }

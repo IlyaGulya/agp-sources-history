@@ -29,6 +29,14 @@ import org.gradle.api.tasks.PathSensitivity
 abstract class LintFixTask : LintBaseTask() {
 
     private var variantInputMap: Map<String, LintBaseTask.VariantInputs>? = null
+    private var allInputs: ConfigurableFileCollection? = null
+
+    @InputFiles
+    @PathSensitive(PathSensitivity.ABSOLUTE)
+    @Optional
+    fun getAllInputs(): FileCollection? {
+        return allInputs
+    }
 
     override fun doTaskAction() {
         runLint(LintFixTaskDescriptor())
@@ -68,14 +76,13 @@ abstract class LintFixTask : LintBaseTask() {
                     "Runs lint on all variants and applies any safe suggestions to the source code."
             task.group = "cleanup"
 
-            val allInputs = globalScope.project.files()
+            task.allInputs = globalScope.project.files()
 
             task.variantInputMap = components.asSequence().map { component ->
                 val inputs = LintBaseTask.VariantInputs(component)
-                allInputs.from(inputs.allInputs)
+                task.allInputs!!.from(inputs.allInputs)
                 inputs
             }.associateBy { it.name }
-            task.dependsOn(allInputs)
         }
     }
 }

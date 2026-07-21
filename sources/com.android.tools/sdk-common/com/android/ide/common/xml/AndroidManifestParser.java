@@ -704,7 +704,8 @@ public class AndroidManifestParser {
     private static final SAXParserFactory sParserFactory;
 
     static {
-        sParserFactory = XmlUtils.getConfiguredSaxFactory(true, false);
+        sParserFactory = SAXParserFactory.newInstance();
+        XmlUtils.configureSaxFactory(sParserFactory, true, false);
     }
 
     /**

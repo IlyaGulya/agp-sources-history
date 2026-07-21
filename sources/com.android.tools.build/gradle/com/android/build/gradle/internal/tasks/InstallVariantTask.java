@@ -17,17 +17,19 @@ package com.android.build.gradle.internal.tasks;
 
 import com.android.annotations.NonNull;
 import com.android.build.api.artifact.ArtifactType;
-import com.android.build.api.variant.BuiltArtifacts;
+import com.android.build.api.variant.impl.BuiltArtifactsImpl;
 import com.android.build.api.variant.impl.BuiltArtifactsLoaderImpl;
 import com.android.build.api.variant.impl.VariantApiExtensionsKt;
-import com.android.build.gradle.internal.BuildToolsExecutableInput;
+import com.android.build.gradle.internal.AdbExecutableInput;
 import com.android.build.gradle.internal.LoggerWrapper;
-import com.android.build.gradle.internal.SdkComponentsKt;
+import com.android.build.gradle.internal.SdkComponentsBuildService;
 import com.android.build.gradle.internal.TaskManager;
 import com.android.build.gradle.internal.component.ApkCreationConfig;
+import com.android.build.gradle.internal.services.BuildServicesKt;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
 import com.android.build.gradle.internal.test.BuiltArtifactsSplitOutputMatcher;
 import com.android.build.gradle.internal.testing.ConnectedDeviceProvider;
+import com.android.build.gradle.internal.utils.HasConfigurableValuesKt;
 import com.android.builder.internal.InstallUtils;
 import com.android.builder.testing.api.DeviceConfigProviderImpl;
 import com.android.builder.testing.api.DeviceConnector;
@@ -84,10 +86,10 @@ public abstract class InstallVariantTask extends NonIncrementalTask {
         final ILogger iLogger = new LoggerWrapper(getLogger());
         DeviceProvider deviceProvider =
                 new ConnectedDeviceProvider(
-                        getBuildTools().adbExecutable(), getTimeOutInMs(), iLogger);
+                        getAdbExecutableInput().getAdbExecutable(), getTimeOutInMs(), iLogger);
         deviceProvider.use(
                 () -> {
-                    BuiltArtifacts builtArtifacts =
+                    BuiltArtifactsImpl builtArtifacts =
                             new BuiltArtifactsLoaderImpl().load(getApkDirectory().get());
 
                     install(
@@ -110,7 +112,7 @@ public abstract class InstallVariantTask extends NonIncrementalTask {
             @NonNull String variantName,
             @NonNull DeviceProvider deviceProvider,
             @NonNull AndroidVersion minSkdVersion,
-            @NonNull BuiltArtifacts builtArtifacts,
+            @NonNull BuiltArtifactsImpl builtArtifacts,
             @NonNull Set<String> supportedAbis,
             @NonNull Collection<String> installOptions,
             int timeOutInMs,
@@ -194,7 +196,7 @@ public abstract class InstallVariantTask extends NonIncrementalTask {
     public abstract DirectoryProperty getApkDirectory();
 
     @Nested
-    public abstract BuildToolsExecutableInput getBuildTools();
+    public abstract AdbExecutableInput getAdbExecutableInput();
 
     public static class CreationAction
             extends VariantTaskCreationAction<InstallVariantTask, ApkCreationConfig> {
@@ -242,8 +244,11 @@ public abstract class InstallVariantTask extends NonIncrementalTask {
                             .getExtension()
                             .getAdbOptions()
                             .getInstallOptions());
-
-            SdkComponentsKt.initialize(task.getBuildTools(), creationConfig);
+            HasConfigurableValuesKt.setDisallowChanges(
+                    task.getAdbExecutableInput().getSdkBuildService(),
+                    BuildServicesKt.getBuildService(
+                            creationConfig.getServices().getBuildServiceRegistry(),
+                            SdkComponentsBuildService.class));
         }
 
         @Override

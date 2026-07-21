@@ -21,9 +21,7 @@ import static com.android.build.gradle.internal.utils.HasConfigurableValuesKt.se
 
 import com.android.annotations.NonNull;
 import com.android.build.gradle.internal.LoggerWrapper;
-import com.android.build.gradle.internal.NdkHandlerInput;
 import com.android.build.gradle.internal.SdkComponentsBuildService;
-import com.android.build.gradle.internal.SdkComponentsKt;
 import com.android.build.gradle.internal.component.VariantCreationConfig;
 import com.android.build.gradle.internal.core.VariantDslInfo;
 import com.android.build.gradle.internal.process.GradleProcessExecutor;
@@ -46,17 +44,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.inject.Inject;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
-import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
@@ -79,8 +78,17 @@ public abstract class ShaderCompile extends NonIncrementalTask {
             .include("**/*." + ShaderProcessor.EXT_FRAG)
             .include("**/*." + ShaderProcessor.EXT_COMP);
 
+    @Internal
+    public Provider<Revision> getBuildToolInfoRevisionProvider() {
+        return getSdkBuildService()
+                .flatMap(SdkComponentsBuildService::getBuildToolsRevisionProvider);
+    }
+
     @Input
-    public abstract Property<Revision> getBuildToolInfoRevisionProvider();
+    public Provider<String> getBuildToolsVersion() {
+        return getBuildToolInfoRevisionProvider()
+                .map(rev -> Objects.requireNonNull(rev.toString()));
+    }
 
     @Internal
     public abstract Property<SdkComponentsBuildService> getSdkBuildService();
@@ -88,9 +96,6 @@ public abstract class ShaderCompile extends NonIncrementalTask {
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
     public abstract DirectoryProperty getSourceDir();
-
-    @Nested
-    public abstract NdkHandlerInput getNdkHandlerInput();
 
     @NonNull
     private List<String> defaultArgs = ImmutableList.of();
@@ -142,12 +147,7 @@ public abstract class ShaderCompile extends NonIncrementalTask {
         if (!processingRequests.isEmpty()) {
             File glslcLocation =
                     ShaderProcessor.getGlslcLocation(
-                            getSdkBuildService()
-                                    .get()
-                                    .versionedNdkHandler(getNdkHandlerInput())
-                                    .getNdkPlatform()
-                                    .getOrThrow()
-                                    .getNdkDirectory());
+                            getSdkBuildService().get().getNdkDirectoryProvider().get().getAsFile());
 
             HashMap<Integer, List<ProcessingRequest>> buckets = new HashMap<>();
             int ord = 0;
@@ -290,17 +290,11 @@ public abstract class ShaderCompile extends NonIncrementalTask {
                     BuildServicesKt.getBuildService(
                             creationConfig.getServices().getBuildServiceRegistry(),
                             SdkComponentsBuildService.class));
-
-            setDisallowChanges(
-                    task.getBuildToolInfoRevisionProvider(),
-                    creationConfig.getGlobalScope().getExtension().getBuildToolsRevision());
-
             creationConfig
                     .getArtifacts()
                     .setTaskInputToFinalProduct(MERGED_SHADERS.INSTANCE, task.getSourceDir());
             task.setDefaultArgs(variantDslInfo.getDefaultGlslcArgs());
             task.setScopedArgs(variantDslInfo.getScopedGlslcArgs());
-            SdkComponentsKt.initialize(task.getNdkHandlerInput(), creationConfig);
         }
     }
 }

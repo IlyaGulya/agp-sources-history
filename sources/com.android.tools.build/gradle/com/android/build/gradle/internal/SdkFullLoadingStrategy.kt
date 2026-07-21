@@ -16,7 +16,6 @@
 
 package com.android.build.gradle.internal
 
-import com.android.SdkConstants
 import com.android.builder.internal.compiler.RenderScriptProcessor
 import com.android.builder.sdk.SdkInfo
 import com.android.builder.sdk.TargetInfo
@@ -99,8 +98,11 @@ class SdkFullLoadingStrategy(
     fun getEmulatorLibFolder() =
         sdkHandler.localEmulator
 
+    fun getCoreForSystemModulesJar() = getFileFromTarget(IAndroidTarget.CORE_FOR_SYSTEM_MODULES_JAR)
+
     @Synchronized
     fun reset() {
         sdkInitResult = null
+        sdkHandler.unload()
     }
 }

@@ -97,12 +97,12 @@ open class  LibraryVariantImpl @Inject constructor(
         super.transformClassesWith(classVisitorFactoryImplClass, scope, instrumentationParamsConfig)
     }
 
-    override val packagingOptions: LibraryPackagingOptions by lazy {
-        LibraryPackagingOptionsImpl(globalScope.extension.packagingOptions, internalServices)
+    override val packaging: LibraryPackaging by lazy {
+        LibraryPackagingImpl(globalScope.extension.packagingOptions, internalServices)
     }
 
-    override fun packagingOptions(action: LibraryPackagingOptions.() -> Unit) {
-        action.invoke(packagingOptions)
+    override fun packaging(action: LibraryPackaging.() -> Unit) {
+        action.invoke(packaging)
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -120,13 +120,17 @@ open class  LibraryVariantImpl @Inject constructor(
     override fun <T : Component> createUserVisibleVariantObject(
             projectServices: ProjectServices,
             operationsRegistrar: VariantApiOperationsRegistrar<VariantBuilder, Variant>,
-            stats: GradleBuildVariant.Builder
+            stats: GradleBuildVariant.Builder?
     ): T =
+        if (stats == null) {
+            this as T
+        } else {
             projectServices.objectFactory.newInstance(
-                    AnalyticsEnabledLibraryVariant::class.java,
-                    this,
-                    stats
+                AnalyticsEnabledLibraryVariant::class.java,
+                this,
+                stats
             ) as T
+        }
 
     override val codeShrinker: CodeShrinker?
         get() = delegate.getCodeShrinker()

@@ -16,13 +16,15 @@
 package com.android.build.gradle.internal.tasks;
 
 import com.android.annotations.NonNull;
-import com.android.build.gradle.internal.BuildToolsExecutableInput;
+import com.android.build.gradle.internal.AdbExecutableInput;
 import com.android.build.gradle.internal.LoggerWrapper;
-import com.android.build.gradle.internal.SdkComponentsKt;
+import com.android.build.gradle.internal.SdkComponentsBuildService;
 import com.android.build.gradle.internal.TaskManager;
 import com.android.build.gradle.internal.component.ApkCreationConfig;
+import com.android.build.gradle.internal.services.BuildServicesKt;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
 import com.android.build.gradle.internal.testing.ConnectedDeviceProvider;
+import com.android.build.gradle.internal.utils.HasConfigurableValuesKt;
 import com.android.builder.testing.api.DeviceConnector;
 import com.android.builder.testing.api.DeviceException;
 import com.android.builder.testing.api.DeviceProvider;
@@ -60,7 +62,7 @@ public abstract class UninstallTask extends NonIncrementalTask {
         final ILogger iLogger = new LoggerWrapper(getLogger());
         final DeviceProvider deviceProvider =
                 new ConnectedDeviceProvider(
-                        getBuildToolsExecutableInput().adbExecutable(), getTimeOutInMs(), iLogger);
+                        getAdbExecutableInput().getAdbExecutable(), getTimeOutInMs(), iLogger);
 
         deviceProvider.use(
                 () -> {
@@ -94,7 +96,7 @@ public abstract class UninstallTask extends NonIncrementalTask {
     }
 
     @Nested
-    public abstract BuildToolsExecutableInput getBuildToolsExecutableInput();
+    public abstract AdbExecutableInput getAdbExecutableInput();
 
     public void setTimeOutInMs(int timeoutInMs) {
         mTimeOutInMs = timeoutInMs;
@@ -135,7 +137,11 @@ public abstract class UninstallTask extends NonIncrementalTask {
                             .getAdbOptions()
                             .getTimeOutInMs());
 
-            SdkComponentsKt.initialize(task.getBuildToolsExecutableInput(), creationConfig);
+            HasConfigurableValuesKt.setDisallowChanges(
+                    task.getAdbExecutableInput().getSdkBuildService(),
+                    BuildServicesKt.getBuildService(
+                            creationConfig.getServices().getBuildServiceRegistry(),
+                            SdkComponentsBuildService.class));
         }
 
         @Override

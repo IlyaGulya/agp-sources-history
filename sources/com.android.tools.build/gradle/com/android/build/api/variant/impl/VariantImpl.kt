@@ -88,11 +88,6 @@ abstract class VariantImpl(
         buildConfigFields.put(key, BuildConfigField(descriptor, value, comment))
     }
 
-    // for compatibility with old variant API.
-    fun addBuildConfigField(type: String, key: String, value: Serializable, comment: String?) {
-        buildConfigFields.put(key, BuildConfigField(type, value, comment))
-    }
-
     /**
      * Adds a ResValue element to the generated resources.
      * @param name the resource name
@@ -124,8 +119,27 @@ abstract class VariantImpl(
         )
     }
 
-    override val packagingOptions: PackagingOptions by lazy {
-        PackagingOptionsImpl(globalScope.extension.packagingOptions, internalServices)
+    override val packaging: Packaging by lazy {
+        PackagingImpl(globalScope.extension.packagingOptions, internalServices)
+    }
+
+
+    override val externalCmake: ExternalCmake? by lazy {
+        variantDslInfo.externalNativeBuildOptions.externalNativeCmakeOptions?.let {
+            ExternalCmakeImpl(
+                    it,
+                    variantPropertiesApiServices
+            )
+        }
+    }
+
+    override val externalNdkBuild: ExternalNdkBuild? by lazy {
+        variantDslInfo.externalNativeBuildOptions.externalNativeNdkBuildOptions?.let {
+            ExternalNdkBuildImpl(
+                    it,
+                    variantPropertiesApiServices
+            )
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -148,9 +162,11 @@ abstract class VariantImpl(
     override val minSdkVersion: AndroidVersion
         get() = variantBuilder.minSdkVersion
 
-
     override val maxSdkVersion: Int?
         get() = variantBuilder.maxSdkVersion
+
+    override val targetSdkVersion: AndroidVersion
+        get() = variantBuilder.targetSdkVersion
 
     private var _isMultiDexEnabled: Boolean? = variantDslInfo.isMultiDexEnabled
     override val isMultiDexEnabled: Boolean
@@ -172,5 +188,5 @@ abstract class VariantImpl(
     abstract override fun <T : Component> createUserVisibleVariantObject(
             projectServices: ProjectServices,
             operationsRegistrar: VariantApiOperationsRegistrar<VariantBuilder, Variant>,
-            stats: GradleBuildVariant.Builder): T
+            stats: GradleBuildVariant.Builder?): T
 }

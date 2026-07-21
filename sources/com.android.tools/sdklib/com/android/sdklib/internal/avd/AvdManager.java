@@ -256,7 +256,6 @@ public class AvdManager {
     public static final String AVD_INI_FORCE_CHOSEN_SNAPSHOT_BOOT_MODE = "fastboot.forceChosenSnapshotBoot";
     public static final String AVD_INI_FORCE_FAST_BOOT_MODE = "fastboot.forceFastBoot";
     public static final String AVD_INI_CHOSEN_SNAPSHOT_FILE = "fastboot.chosenSnapshotFile";
-    public static final String AVD_INI_COLD_BOOT_ONCE = "once"; // Key value in addition to "yes" and "no"
 
     /**
      * AVD/config.ini key name representing how to emulate the front facing camera
@@ -316,6 +315,23 @@ public class AvdManager {
     public static final String AVD_INI_FOLD_AT_POSTURE = "hw.sensor.hinge.fold_to_displayRegion.0.1_at_posture";
     public static final String AVD_INI_HINGE_ANGLES_POSTURE_DEFINITIONS =
             "hw.sensor.hinge_angles_posture_definitions";
+
+    /** AVD/config.ini key name representing the rollable settings */
+    public static final String AVD_INI_ROLL = "hw.sensor.roll";
+
+    public static final String AVD_INI_ROLL_COUNT = "hw.sensor.roll.count";
+    public static final String AVD_INI_ROLL_RANGES = "hw.sensor.roll.ranges";
+    public static final String AVD_INI_ROLL_DEFAULTS = "hw.sensor.roll.defaults";
+    public static final String AVD_INI_ROLL_RADIUS = "hw.sensor.roll.radius";
+    public static final String AVD_INI_ROLL_DIRECTION = "hw.sensor.roll.direction";
+    public static final String AVD_INI_ROLL_RESIZE_1_AT_POSTURE =
+            "hw.sensor.roll.resize_to_displayRegion.0.1_at_posture";
+    public static final String AVD_INI_ROLL_RESIZE_2_AT_POSTURE =
+            "hw.sensor.roll.resize_to_displayRegion.0.2_at_posture";
+    public static final String AVD_INI_ROLL_RESIZE_3_AT_POSTURE =
+            "hw.sensor.roll.resize_to_displayRegion.0.3_at_posture";
+    public static final String AVD_INI_ROLL_PERCENTAGES_POSTURE_DEFINITIONS =
+            "hw.sensor.roll_percentages_posture_definitions";
 
     /**
      * The API level of this AVD. Derived from the target hash.
@@ -723,10 +739,10 @@ public class AvdManager {
             alternative = new File(alternative, "pid");
         }
         if (mFop.exists(f)) {
-            return mFop.toString(f, Charsets.UTF_8).trim();
+            return mFop.readText(f).trim();
         }
         if (mFop.exists(alternative)){
-            return mFop.toString(alternative, Charsets.UTF_8).trim();
+            return mFop.readText(alternative).trim();
         }
         return null;
     }

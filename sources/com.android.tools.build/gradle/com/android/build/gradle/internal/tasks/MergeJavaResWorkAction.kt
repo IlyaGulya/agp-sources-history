@@ -45,7 +45,6 @@ abstract class MergeJavaResWorkAction : ProfileAwareWorkAction<MergeJavaResWorkA
         val isIncremental = parameters.incremental.get()
         val outputFile = parameters.outputFile.asFile.orNull
         val outputDirectory = parameters.outputDirectory.asFile.orNull
-        val incrementalStateFile = parameters.incrementalStateFile.asFile.get()
         val output: File =
             outputFile
                 ?: outputDirectory
@@ -53,7 +52,6 @@ abstract class MergeJavaResWorkAction : ProfileAwareWorkAction<MergeJavaResWorkA
         if (!isIncremental) {
             outputFile?.also { FileUtils.deleteIfExists(it) }
             outputDirectory?.also { FileUtils.cleanOutputDir(it) }
-            FileUtils.deleteIfExists(incrementalStateFile)
         }
         val cacheDir = parameters.cacheDir.asFile.get().also { FileUtils.mkdirs(it) }
 
@@ -90,7 +88,7 @@ abstract class MergeJavaResWorkAction : ProfileAwareWorkAction<MergeJavaResWorkA
                     parameters.merges.get()
                 ),
                 contentType,
-                incrementalStateFile,
+                parameters.incrementalStateFile.asFile.get(),
                 isIncremental,
                 parameters.noCompress.get()
             )

@@ -20,7 +20,6 @@ import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.api.artifact.ArtifactType;
 import com.android.build.api.component.impl.ComponentImpl;
-import com.android.build.api.variant.impl.VariantImpl;
 import com.android.build.gradle.api.BaseVariant;
 import com.android.build.gradle.api.BaseVariantOutput;
 import com.android.build.gradle.api.JavaCompileOptions;
@@ -232,6 +231,12 @@ public abstract class BaseVariantImpl implements BaseVariant, InternalBaseVarian
     @Override
     @NonNull
     public TextResource getApplicationIdTextResource() {
+        services.getDeprecationReporter()
+                .reportDeprecatedApi(
+                        "VariantProperties.applicationId",
+                        "BaseVariant.getApplicationIdTextResource",
+                        "TBD",
+                        DeprecationReporter.DeprecationTarget.VERSION_7_0);
         return getVariantData().applicationIdTextResource;
     }
 
@@ -629,27 +634,12 @@ public abstract class BaseVariantImpl implements BaseVariant, InternalBaseVarian
     @Override
     public void buildConfigField(
             @NonNull String type, @NonNull String name, @NonNull String value) {
-        if (component instanceof VariantImpl) {
-            ((VariantImpl) component)
-                    .addBuildConfigField(type, name, value, "Field from the variant API");
-        } else {
-            throw new RuntimeException(
-                    "Variant "
-                            + component.getVariantType().getName()
-                            + " do not support adding BuildConfig fields");
-        }
+        component.getVariantDslInfo().addBuildConfigField(type, name, value);
     }
 
     @Override
     public void resValue(@NonNull String type, @NonNull String name, @NonNull String value) {
-        if (component instanceof VariantImpl) {
-            ((VariantImpl) component).addResValue(name, type, value, "Value from the variant");
-        } else {
-            throw new RuntimeException(
-                    "Variant "
-                            + component.getVariantType().getName()
-                            + " do not support adding resValue");
-        }
+        component.getVariantDslInfo().addResValue(type, name, value);
     }
 
     @Override
