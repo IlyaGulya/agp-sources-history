@@ -87,17 +87,17 @@ public class Svg2Vector {
 
     public static final ImmutableMap<String, String> presentationMap =
             ImmutableMap.<String, String>builder()
-                    .put(SVG_CLIP, "android:clip")
-                    .put(SVG_CLIP_RULE, "") // Treated individually.
-                    .put(SVG_FILL, "android:fillColor")
-                    .put(SVG_FILL_RULE, "android:fillType")
-                    .put(SVG_FILL_OPACITY, "android:fillAlpha")
-                    .put(SVG_OPACITY, "") // Treated individually.
                     .put(SVG_STROKE_COLOR, "android:strokeColor")
                     .put(SVG_STROKE_OPACITY, "android:strokeAlpha")
                     .put(SVG_STROKE_LINEJOIN, "android:strokeLineJoin")
                     .put(SVG_STROKE_LINECAP, "android:strokeLineCap")
                     .put(SVG_STROKE_WIDTH, "android:strokeWidth")
+                    .put(SVG_FILL, "android:fillColor")
+                    .put(SVG_FILL_OPACITY, "android:fillAlpha")
+                    .put(SVG_CLIP, "android:clip")
+                    .put(SVG_OPACITY, "android:fillAlpha")
+                    .put(SVG_FILL_RULE, "android:fillType")
+                    .put(SVG_CLIP_RULE, "android:fillType")
                     .build();
 
     public static final ImmutableMap<String, String> gradientMap =
@@ -519,7 +519,10 @@ public class Svg2Vector {
         }
         // Gradient offset values must be between 0 and 1 or 0% and 100%.
         x = Math.min(1, Math.max(x, 0));
-        return Math.max(x, greatestOffset);
+        if (x >= greatestOffset) {
+            return x;
+        }
+        return greatestOffset;
     }
 
     /**
@@ -582,9 +585,8 @@ public class Svg2Vector {
                     String styleAttrTemp = styleAttr;
                     className = splitClassName.trim();
                     // Concatenate the attributes to existing attributes.
-                    String existing = svgTree.getStyleClassAttr(className);
-                    if (existing != null) {
-                        styleAttrTemp += ';' + existing;
+                    if (svgTree.containsStyleClass(className)) {
+                        styleAttrTemp += svgTree.getStyleClassAttr(className);
                     }
                     svgTree.addStyleClassToTree(className, styleAttrTemp);
                 }
@@ -1169,6 +1171,7 @@ public class Svg2Vector {
                     svg.addAffectedNodeToStyleClass("path." + value, child);
                     svg.addAffectedNodeToStyleClass("." + value, child);
                 }
+
             }
         }
     }
@@ -1177,7 +1180,7 @@ public class Svg2Vector {
         logger.log(Level.FINE, "Style found is " + value);
         if (value != null) {
             String[] parts = value.split(";");
-            for (int k = parts.length; --k >= 0; ) {
+            for (int k = parts.length - 1; k >= 0; k--) {
                 String subStyle = parts[k];
                 String[] nameValue = subStyle.split(":");
                 if (nameValue.length == 2 && nameValue[0] != null && nameValue[1] != null) {
