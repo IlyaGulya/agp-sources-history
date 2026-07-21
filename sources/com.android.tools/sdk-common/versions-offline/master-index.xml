@@ -58,7 +58,6 @@
   <androidx.arch.core/>
   <android.arch.work/>
   <android.arch.navigation/>
-  <androidx.navigation/>
   <androidx.mediarouter/>
   <androidx.percentlayout/>
   <androidx.emoji/>
@@ -115,7 +114,4 @@
   <com.android.tools.pixelprobe/>
   <androidx.textclassifier/>
   <androidx.remotecallback/>
-  <com.android.tools.chunkio/>
-  <com.android.tools.fakeadbserver/>
-  <androidx.savedstate/>
 </metadata>

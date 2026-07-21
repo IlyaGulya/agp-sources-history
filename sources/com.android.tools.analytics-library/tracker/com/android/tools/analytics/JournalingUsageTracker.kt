@@ -29,7 +29,6 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.*
-import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -70,15 +69,7 @@ class JournalingUsageTracker
   private var currentLogCount = 0
   private var journalTimeout: ScheduledFuture<*>? = null
   private var scheduleVersion = 0
-  @Volatile
   private var state = State.Open
-  private val pendingEvents: Queue<ClientAnalytics.LogEvent.Builder> = ConcurrentLinkedQueue<ClientAnalytics.LogEvent.Builder>()
-  private val quietFlushRunnable = Runnable {
-    try {
-      flush()
-    } catch (ignored: IOException) {
-    }
-  }
 
   private enum class State {
     Open,
@@ -175,28 +166,17 @@ class JournalingUsageTracker
     if (state != State.Open) {
       return
     }
-    pendingEvents.add(logEvent)
-    scheduler.submit(quietFlushRunnable)
-  }
-
-  /**
-   * Writes any pending events to the currently open file.
-   *
-   * @throws IOException on failure, and the UsageTracker will be closed in those cases.
-   */
-  override fun flush() {
-    while (true) {
+    scheduler.execute {
       synchronized(gate) {
-        val logEvent = pendingEvents.poll() ?: return
         if (state != State.Open) {
-          return
+          return@execute
         }
         try {
           logEvent.build().writeDelimitedTo(outputStream!!)
         }
-        catch (exception: IOException) {
+        catch (ignored: IOException) {
           closeAsBroken()
-          throw IOException("Failed to write log event", exception)
+          return@execute
         }
 
         currentLogCount++
@@ -242,8 +222,9 @@ class JournalingUsageTracker
   }
 
   /**
-   * Closes the UsageTracker (closes current tracker file, disables scheduling of timeout,
-   * drops any pending logs and disables new logs from being posted).
+   * Closes the UsageTracker (closes current tracker file, disables scheduling of timeout &amp;
+   * disables new logs from
+   * being posted).
    */
   @Throws(Exception::class)
   override fun close() {

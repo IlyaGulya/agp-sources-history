@@ -17,7 +17,6 @@ package com.android.ide.common.vectordrawable;
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
-import com.google.common.collect.Iterables;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -75,9 +74,6 @@ public class SvgClipPathNode extends SvgGroupNode {
         }
 
         mStackedTransform.setTransform(transform);
-        for (SvgNode n : mAffectedNodes) {
-            n.flatten(mStackedTransform); // mLocalTransform does not apply to mAffectedNodes.
-        }
         mStackedTransform.concatenate(mLocalTransform);
 
         if (mVdAttributesMap.containsKey(Svg2Vector.SVG_STROKE_WIDTH)
@@ -92,15 +88,14 @@ public class SvgClipPathNode extends SvgGroupNode {
 
     @Override
     public void transformIfNeeded(@NonNull AffineTransform rootTransform) {
-        for (SvgNode p : Iterables.concat(mChildren, mAffectedNodes)) {
+        for (SvgNode p : mChildren) {
             p.transformIfNeeded(rootTransform);
         }
     }
 
     @Override
-    public void writeXml(
-            @NonNull OutputStreamWriter writer, boolean inClipPath, @NonNull String indent)
-            throws IOException {
+    public void writeXML(@NonNull OutputStreamWriter writer, boolean inClipPath,
+            @NonNull String indent) throws IOException {
         writer.write(indent);
         writer.write("<group>");
         writer.write(System.lineSeparator());
@@ -108,12 +103,12 @@ public class SvgClipPathNode extends SvgGroupNode {
         writer.write(INDENT_UNIT);
         writer.write("<clip-path android:pathData=\"");
         for (SvgNode node : mChildren) {
-            node.writeXml(writer, true, indent + INDENT_UNIT);
+            node.writeXML(writer, true, indent + INDENT_UNIT);
         }
         writer.write("\"/>");
         writer.write(System.lineSeparator());
         for (SvgNode node : mAffectedNodes) {
-            node.writeXml(writer, false, indent + INDENT_UNIT);
+            node.writeXML(writer, false, indent + INDENT_UNIT);
         }
         writer.write(indent);
         writer.write("</group>");
