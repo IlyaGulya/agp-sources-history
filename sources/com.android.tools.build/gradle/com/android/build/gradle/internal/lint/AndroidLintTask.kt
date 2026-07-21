@@ -19,6 +19,7 @@
 package com.android.build.gradle.internal.lint
 
 import com.android.SdkConstants.DOT_JAR
+import com.android.SdkConstants.VALUE_TRUE
 import com.android.Version
 import com.android.build.api.artifact.impl.ArtifactsImpl
 import com.android.build.gradle.internal.SdkComponentsBuildService
@@ -28,9 +29,9 @@ import com.android.build.gradle.internal.dsl.LintOptions
 import com.android.build.gradle.internal.lint.LintTaskManager.Companion.isLintStderr
 import com.android.build.gradle.internal.lint.LintTaskManager.Companion.isLintStdout
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
-import com.android.build.gradle.internal.scope.GlobalScope
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.services.AndroidLocationsBuildService
+import com.android.build.gradle.internal.services.LintClassLoaderBuildService
 import com.android.build.gradle.internal.services.getBuildService
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
@@ -41,6 +42,7 @@ import com.android.build.gradle.options.BooleanOption.USE_LINT_PARTIAL_ANALYSIS
 import com.android.build.gradle.options.ProjectOptions
 import com.android.builder.model.AndroidProject
 import com.android.tools.lint.model.LintModelSerialization
+import com.google.common.annotations.VisibleForTesting
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
@@ -81,6 +83,15 @@ abstract class AndroidLintTask : NonIncrementalTask() {
 
     @get:OutputDirectory
     abstract val lintModelDirectory: DirectoryProperty
+
+    /**
+     * This task needs the location of the lint model directory produced by [LintModelWriterTask]
+     * in order to ensure that that directory is not passed to lint via --lint-model, which would
+     * be problematic because [lintModelDirectory] is already being passed to lint via --lint-model.
+     * See b/190855628.
+     */
+    @get:Input
+    abstract val lintModelWriterTaskOutputPath: Property<String>
 
     @get:Input
     abstract val textReportEnabled: Property<Boolean>
@@ -142,6 +153,9 @@ abstract class AndroidLintTask : NonIncrementalTask() {
     @get:Internal
     abstract val lintFixBuildService: Property<LintFixBuildService>
 
+    @get:Internal
+    abstract val lintClassLoaderBuildService: Property<LintClassLoaderBuildService>
+
     @get:Input
     abstract val checkDependencies: Property<Boolean>
 
@@ -192,7 +206,20 @@ abstract class AndroidLintTask : NonIncrementalTask() {
     @get:Input
     abstract val printStackTrace: Property<Boolean>
 
+    @get:Nested
+    abstract val systemPropertyInputs: SystemPropertyInputs
+
+    @get:Nested
+    abstract val environmentVariableInputs: EnvironmentVariableInputs
+
     override fun doTaskAction() {
+        lintClassLoaderBuildService.get().shouldDispose = true
+        if (systemPropertyInputs.lintAutofix.orNull == VALUE_TRUE) {
+            logger.warn(
+                "Running lint with -Dlint.autofix=true is not supported by the Android Gradle "
+                        + "Plugin. Please try running the lintFix task instead."
+            )
+        }
         writeLintModelFile()
         workerExecutor.noIsolation().submit(AndroidLintLauncherWorkAction::class.java) { parameters ->
             parameters.arguments.set(generateCommandLineArguments())
@@ -204,7 +231,7 @@ abstract class AndroidLintTask : NonIncrementalTask() {
     }
 
     /**
-     * Non-isolated work action to launch lint in a process-isolated work action
+     * Non-isolated work action to launch lint in a possibly process-isolated work action
      *
      * This extra layer exists to use the LintFixBuildService to only run one lint fix at a time.
      */
@@ -248,7 +275,8 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         )
     }
 
-    private fun generateCommandLineArguments(): List<String> {
+    @VisibleForTesting
+    internal fun generateCommandLineArguments(): List<String> {
 
         val arguments = mutableListOf<String>()
         // Some Global flags
@@ -300,6 +328,8 @@ abstract class AndroidLintTask : NonIncrementalTask() {
             models.add(model.absolutePath)
         }
 
+        models.remove(lintModelWriterTaskOutputPath.get())
+
         check(checkDependencies.get()
                 || models.size == 1 + dynamicFeatureLintModels.files.size) {
             "Library dependency models should not be an input unless check dependencies is being used."
@@ -320,6 +350,16 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         if (printStackTrace.get()) {
             arguments += "--stacktrace"
         }
+        arguments += listOf("--cache-dir", lintCacheDirectory.get().asFile.absolutePath)
+        if (systemPropertyInputs.lintBaselinesContinue.orNull == VALUE_TRUE) {
+            arguments += "--continue-after-baseline-created"
+        }
+
+        // Pass information to lint using the --client-id, --client-name, and --client-version flags
+        // so that lint can apply gradle-specific and version-specific behaviors.
+        arguments.add("--client-id", "gradle")
+        arguments.add("--client-name", "AGP")
+        arguments.add("--client-version", Version.ANDROID_GRADLE_PLUGIN_VERSION)
 
         return Collections.unmodifiableList(arguments)
     }
@@ -446,7 +486,10 @@ abstract class AndroidLintTask : NonIncrementalTask() {
             task.group = JavaBasePlugin.VERIFICATION_GROUP
             task.description = description
 
-            task.initializeGlobalInputs(creationConfig.globalScope, creationConfig.services.projectInfo.getProject())
+            task.initializeGlobalInputs(
+                project = creationConfig.services.projectInfo.getProject(),
+                isAndroid = true
+            )
             task.lintModelDirectory.set(variant.main.paths.getIncrementalDir(task.name))
             task.lintRulesJar.from(creationConfig.globalScope.localCustomLintChecks)
             task.lintRulesJar.from(
@@ -474,6 +517,9 @@ abstract class AndroidLintTask : NonIncrementalTask() {
                 task.lintFixBuildService.set(getBuildService(creationConfig.services.buildServiceRegistry))
             }
             task.lintFixBuildService.disallowChanges()
+            task.lintClassLoaderBuildService.setDisallowChanges(
+                getBuildService(creationConfig.services.buildServiceRegistry)
+            )
             task.checkDependencies.setDisallowChanges(checkDependencies)
             task.reportOnly.setDisallowChanges(reportOnly)
             task.checkOnly.set(creationConfig.services.provider {
@@ -590,7 +636,13 @@ abstract class AndroidLintTask : NonIncrementalTask() {
             task.androidTestDependencyLintModels.disallowChanges()
             task.unitTestDependencyLintModels.disallowChanges()
             task.dependencyPartialResults.disallowChanges()
-            task.lintTool.initialize(creationConfig.services.projectInfo.getProject(), creationConfig.services.projectOptions)
+            task.lintTool.initialize(
+                creationConfig.services.projectInfo.getProject(),
+                creationConfig.services.projectOptions
+            )
+            task.lintModelWriterTaskOutputPath.setDisallowChanges(
+                creationConfig.artifacts.getOutputPath(InternalArtifactType.LINT_MODEL).absolutePath
+            )
             if (checkDependencies && !reportOnly) {
                 task.outputs.upToDateWhen {
                     it.logger.debug("Lint with checkDependencies does not model all of its inputs yet.")
@@ -635,13 +687,6 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         textReportToStderr.disallowChanges()
     }
 
-    private fun initializeGlobalInputs(globalScope: GlobalScope, project: Project) {
-        initializeGlobalInputs(
-            project = project,
-            isAndroid = true
-        )
-    }
-
     private fun initializeGlobalInputs(
         project: Project,
         isAndroid: Boolean
@@ -655,9 +700,7 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         this.offline.setDisallowChanges(project.gradle.startParameter.isOffline)
         this.android.setDisallowChanges(isAndroid)
         this.lintCacheDirectory.setDisallowChanges(
-            project.layout.projectDirectory.dir(
-                AndroidProject.FD_INTERMEDIATES
-            ).dir("lint-cache")
+            project.layout.buildDirectory.dir("${AndroidProject.FD_INTERMEDIATES}/lint-cache")
         )
 
         val locationBuildService = getBuildService<AndroidLocationsBuildService>(buildServiceRegistry)
@@ -667,8 +710,14 @@ abstract class AndroidLintTask : NonIncrementalTask() {
                 it.prefsLocation.resolve("lint")
             }).also { it.include("*$DOT_JAR") }
         this.globalRuleJars.from(globalLintJarsInPrefsDir)
-
+        // Also include Lint jars set via the environment variable ANDROID_LINT_JARS
+        val globalLintJarsFromEnvVariable: Provider<List<String>> =
+                project.providers.environmentVariable(ANDROID_LINT_JARS_ENVIRONMENT_VARIABLE)
+                        .orElse("")
+                        .map { it.split(File.pathSeparator).filter(String::isNotEmpty) }
+        this.globalRuleJars.from(globalLintJarsFromEnvVariable)
         this.globalRuleJars.disallowChanges()
+
         if (project.gradle.startParameter.showStacktrace != ShowStacktrace.INTERNAL_EXCEPTIONS) {
             printStackTrace.setDisallowChanges(true)
         } else {
@@ -677,6 +726,8 @@ abstract class AndroidLintTask : NonIncrementalTask() {
                     .map { it.equals("true", ignoreCase = true) }.orElse(false)
             )
         }
+        systemPropertyInputs.initialize(project.providers)
+        environmentVariableInputs.initialize(project.providers)
     }
 
     fun configureForStandalone(
@@ -686,6 +737,7 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         customLintChecksConfig: FileCollection,
         lintOptions: LintOptions,
         partialResults: Provider<Directory>,
+        lintModelWriterTaskOutputDir: File,
         fatalOnly: Boolean = false,
         autoFix: Boolean = false,
     ) {
@@ -701,6 +753,9 @@ abstract class AndroidLintTask : NonIncrementalTask() {
             this.lintFixBuildService.set(getBuildService(project.gradle.sharedServices))
         }
         this.lintFixBuildService.disallowChanges()
+        this.lintClassLoaderBuildService.setDisallowChanges(
+            getBuildService(project.gradle.sharedServices)
+        )
         this.checkDependencies.setDisallowChanges(false)
         this.reportOnly.setDisallowChanges(true)
         this.checkOnly.setDisallowChanges(lintOptions.checkOnly)
@@ -711,6 +766,9 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         this.lintRulesJar.fromDisallowChanges(customLintChecksConfig)
         this.lintModelDirectory.setDisallowChanges(project.layout.buildDirectory.dir("intermediates/android-lint-model"))
         this.partialResults.setDisallowChanges(partialResults)
+        this.lintModelWriterTaskOutputPath.setDisallowChanges(
+            lintModelWriterTaskOutputDir.absolutePath
+        )
         this.initializeOutputTypesConvention()
         when {
             fatalOnly -> {
@@ -748,6 +806,7 @@ abstract class AndroidLintTask : NonIncrementalTask() {
 
     companion object {
         private const val LINT_PRINT_STACKTRACE_ENVIRONMENT_VARIABLE = "LINT_PRINT_STACKTRACE"
+        private const val ANDROID_LINT_JARS_ENVIRONMENT_VARIABLE = "ANDROID_LINT_JARS"
         const val LINT_CLASS_PATH = "lintClassPath"
     }
 }

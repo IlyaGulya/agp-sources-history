@@ -16,7 +16,7 @@
 
 package com.android.build.api.component.analytics
 
-import com.android.build.api.component.AndroidTest
+import com.android.build.api.variant.AndroidTest
 import com.android.build.api.component.TestFixtures
 import com.android.build.api.variant.AndroidResources
 import com.android.build.api.variant.GeneratesApk
@@ -35,7 +35,7 @@ open class AnalyticsEnabledDynamicFeatureVariant @Inject constructor(
     objectFactory: ObjectFactory
 ) : AnalyticsEnabledVariant(delegate, stats, objectFactory), DynamicFeatureVariant {
 
-    private val userVisibleAndroidTest: AndroidTest? by lazy {
+    private val userVisibleAndroidTest: AnalyticsEnabledAndroidTest? by lazy {
         delegate.androidTest?.let {
             objectFactory.newInstance(
                 AnalyticsEnabledAndroidTest::class.java,
@@ -45,7 +45,7 @@ open class AnalyticsEnabledDynamicFeatureVariant @Inject constructor(
         }
     }
 
-    override val androidTest: AndroidTest?
+    override val androidTest: com.android.build.api.component.AndroidTest?
         get() {
             stats.variantApiAccessBuilder.addVariantPropertiesAccessBuilder().type =
                 VariantPropertiesMethodType.ANDROID_TEST_VALUE

@@ -21,6 +21,7 @@ import com.android.build.gradle.internal.SdkComponentsBuildService
 import com.android.build.gradle.internal.TaskManager
 import com.android.build.gradle.internal.dependency.AndroidAttributes
 import com.android.build.gradle.internal.dsl.LintOptions
+import com.android.build.gradle.internal.dsl.decorator.androidPluginDslDecorator
 import com.android.build.gradle.internal.errors.DeprecationReporterImpl
 import com.android.build.gradle.internal.errors.SyncIssueReporterImpl
 import com.android.build.gradle.internal.ide.dependencies.LibraryDependencyCacheBuildService
@@ -32,6 +33,7 @@ import com.android.build.gradle.internal.lint.AndroidLintTask
 import com.android.build.gradle.internal.lint.LintFixBuildService
 import com.android.build.gradle.internal.lint.LintModelWriterTask
 import com.android.build.gradle.internal.lint.LintTaskManager
+import com.android.build.gradle.internal.lint.createLintClasspathConfiguration
 import com.android.build.gradle.internal.lint.getLocalCustomLintChecks
 import com.android.build.gradle.internal.plugins.BasePlugin
 import com.android.build.gradle.internal.profile.AnalyticsConfiguratorService
@@ -43,6 +45,7 @@ import com.android.build.gradle.internal.scope.ProjectInfo
 import com.android.build.gradle.internal.scope.publishArtifactToConfiguration
 import com.android.build.gradle.internal.services.AndroidLocationsBuildService
 import com.android.build.gradle.internal.services.DslServicesImpl
+import com.android.build.gradle.internal.services.LintClassLoaderBuildService
 import com.android.build.gradle.internal.services.ProjectServices
 import com.android.build.gradle.internal.services.StringCachingBuildService
 import com.android.build.gradle.options.Option
@@ -94,7 +97,7 @@ abstract class LintPlugin : Plugin<Project> {
         val javaConvention: JavaPluginConvention = getJavaPluginConvention(project) ?: return
         val customLintChecksConfig = TaskManager.createCustomLintChecksConfig(project)
         val customLintChecks = getLocalCustomLintChecks(customLintChecksConfig)
-        BasePlugin.createLintClasspathConfiguration(project)
+        createLintClasspathConfiguration(project, projectServices)
         registerTasks(
             project,
             javaConvention,
@@ -126,7 +129,8 @@ abstract class LintPlugin : Plugin<Project> {
                     javaConvention,
                     customLintChecks,
                     lintOptions!!,
-                    artifacts.get(InternalArtifactType.LINT_PARTIAL_RESULTS)
+                    artifacts.get(InternalArtifactType.LINT_PARTIAL_RESULTS),
+                    artifacts.getOutputPath(InternalArtifactType.LINT_MODEL)
                 )
             }
 
@@ -140,6 +144,7 @@ abstract class LintPlugin : Plugin<Project> {
                     customLintChecks,
                     lintOptions!!,
                     artifacts.get(InternalArtifactType.LINT_VITAL_PARTIAL_RESULTS),
+                    artifacts.getOutputPath(InternalArtifactType.LINT_MODEL),
                     fatalOnly = true
                 )
             }
@@ -152,6 +157,7 @@ abstract class LintPlugin : Plugin<Project> {
                     customLintChecks,
                     lintOptions!!,
                     artifacts.get(InternalArtifactType.LINT_PARTIAL_RESULTS),
+                    artifacts.getOutputPath(InternalArtifactType.LINT_MODEL),
                     autoFix = true
                 )
             }
@@ -252,7 +258,10 @@ abstract class LintPlugin : Plugin<Project> {
     }
 
     private fun createExtension(project: Project) {
-        lintOptions = project.extensions.create("lintOptions", LintOptions::class.java, dslServices)
+        val decoratedLintOptionsClass =
+            androidPluginDslDecorator.decorate(LintOptions::class.java)
+        lintOptions =
+            project.extensions.create("lintOptions", decoratedLintOptionsClass, dslServices)
     }
 
     private fun withJavaPlugin(project: Project, action: Action<Plugin<*>>) {
@@ -334,5 +343,6 @@ abstract class LintPlugin : Plugin<Project> {
             projectServices.projectOptions
         ).execute()
         LintFixBuildService.RegistrationAction(project).execute()
+        LintClassLoaderBuildService.RegistrationAction(project).execute()
     }
 }

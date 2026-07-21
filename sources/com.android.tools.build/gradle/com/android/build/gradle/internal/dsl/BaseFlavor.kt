@@ -17,6 +17,7 @@ package com.android.build.gradle.internal.dsl
 
 import com.android.build.api.dsl.ApkSigningConfig
 import com.android.build.api.dsl.ApplicationBaseFlavor
+import com.android.build.api.dsl.BaseFlavor
 import com.android.build.api.dsl.DynamicFeatureBaseFlavor
 import com.android.build.api.dsl.LibraryBaseFlavor
 import com.android.build.api.dsl.Ndk
@@ -32,6 +33,7 @@ import com.android.builder.model.ApiVersion
 import com.android.builder.model.BaseConfig
 import com.android.builder.model.ProductFlavor
 import com.google.common.base.Strings
+import com.google.common.collect.Iterables
 import java.io.File
 import org.gradle.api.Action
 
@@ -194,6 +196,10 @@ abstract class BaseFlavor(name: String, private val dslServices: DslServices) :
         this.signingConfig = signingConfig
     }
 
+    fun setSigningConfig(signingConfig: InternalSigningConfig?) {
+        this.signingConfig = signingConfig
+    }
+
     // -- DSL Methods. TODO remove once the instantiator does what I expect it to do.
     override fun buildConfigField(
         type: String,
@@ -257,11 +263,10 @@ abstract class BaseFlavor(name: String, private val dslServices: DslServices) :
         }
     }
 
-    fun setProguardFiles(proguardFileIterable: Iterable<Any>) {
+    override fun setProguardFiles(proguardFileIterable: Iterable<*>) {
+        val replacementFiles = Iterables.toArray(proguardFileIterable, Any::class.java)
         proguardFiles.clear()
-        for (file in proguardFileIterable) {
-            proguardFile(file)
-        }
+        proguardFiles(*replacementFiles)
     }
 
     override var testProguardFiles: MutableList<File>
@@ -543,11 +548,17 @@ abstract class BaseFlavor(name: String, private val dslServices: DslServices) :
         } else null
     }
 
+    override fun initWith(that: BaseFlavor) {
+        if (that !is com.android.build.gradle.internal.dsl.BaseFlavor) {
+            throw RuntimeException("Unexpected implementation type")
+        }
+        _initWith(that)
+    }
+
     override fun _initWith(that: BaseConfig) {
         super._initWith(that)
         if (that is ProductFlavor) {
-            _vectorDrawables =
-                DefaultVectorDrawablesOptions.copyOf(that.vectorDrawables) as VectorDrawablesOptions
+            _vectorDrawables = VectorDrawablesOptions.copyOf(that.vectorDrawables)
         }
     }
 }

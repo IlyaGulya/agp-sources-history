@@ -314,7 +314,8 @@ abstract class PackageBundleTask : NonIncrementalTask() {
                 .setOutputPath(bundleFile.toPath())
                 .setModulesPaths(builder.build())
 
-            if (parameters.binaryArtProfiler.isPresent) {
+            if (parameters.binaryArtProfiler.isPresent
+                && parameters.binaryArtProfiler.get().asFile.exists()) {
                 command.addMetadataFile(
                         SdkConstants.FN_BINART_ART_PROFILE_FOLDER_IN_APK.replace('/', '.'),
                         SdkConstants.FN_BINARY_ART_PROFILE,
@@ -567,9 +568,14 @@ abstract class PackageBundleTask : NonIncrementalTask() {
                 task.appMetadata
             )
 
-            creationConfig.artifacts.setTaskInputToFinalProduct(
-                InternalArtifactType.BINARY_ART_PROFILE,
-                task.binaryArtProfile)
+            if (creationConfig.services.projectOptions[BooleanOption.ENABLE_ART_PROFILES]
+                && !creationConfig.debuggable) {
+                creationConfig.artifacts.setTaskInputToFinalProduct(
+                    InternalArtifactType.BINARY_ART_PROFILE,
+                    task.binaryArtProfile
+                )
+            }
+            task.binaryArtProfile.disallowChanges()
         }
     }
 }

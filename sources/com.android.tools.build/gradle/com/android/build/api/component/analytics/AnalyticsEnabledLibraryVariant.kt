@@ -16,7 +16,7 @@
 
 package com.android.build.api.component.analytics
 
-import com.android.build.api.component.AndroidTest
+import com.android.build.api.variant.AndroidTest
 import com.android.build.api.component.TestFixtures
 import com.android.build.api.variant.AarMetadata
 import com.android.build.api.variant.LibraryVariant
@@ -35,7 +35,7 @@ open class AnalyticsEnabledLibraryVariant @Inject constructor(
     delegate, stats, objectFactory
 ), LibraryVariant {
 
-    override val androidTest: AndroidTest?
+    override val androidTest: com.android.build.api.component.AndroidTest?
         get() = delegate.androidTest
 
     private val userVisibleTestFixtures: TestFixtures? by lazy {

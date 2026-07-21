@@ -26,11 +26,12 @@ import com.android.build.gradle.internal.computeAvdName
 import com.android.build.gradle.internal.dsl.EmulatorSnapshots
 import com.android.build.gradle.internal.dsl.ManagedVirtualDevice
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
+import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.services.getBuildService
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.test.AbstractTestDataImpl
-import com.android.build.gradle.internal.test.recordCrashedTestRun
-import com.android.build.gradle.internal.test.recordOkTestRun
+import com.android.build.gradle.internal.test.recordCrashedInstrumentedTestRun
+import com.android.build.gradle.internal.test.recordOkInstrumentedTestRun
 import com.android.build.gradle.internal.test.report.ReportType
 import com.android.build.gradle.internal.test.report.TestReport
 import com.android.build.gradle.internal.testing.TestData
@@ -73,6 +74,7 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.options.Option
 import org.gradle.internal.logging.ConsoleRenderer
 import java.io.File
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.workers.WorkerExecutor
 
 /**
@@ -187,6 +189,9 @@ abstract class ManagedDeviceInstrumentationTestTask(): NonIncrementalTask(), And
     @OutputDirectory
     abstract fun getReportsDir(): DirectoryProperty
 
+    @OutputDirectory
+    abstract fun getCoverageDirectory(): DirectoryProperty
+
     override fun doTaskAction() {
         val emulatorProvider = avdComponents.get().emulatorDirectory
         Preconditions.checkArgument(
@@ -210,6 +215,9 @@ abstract class ManagedDeviceInstrumentationTestTask(): NonIncrementalTask(), And
         val resultsOutDir = resultsDir.get().asFile
         FileUtils.cleanOutputDir(resultsOutDir)
 
+        val codeCoverageOutDir = getCoverageDirectory().get().asFile
+        FileUtils.cleanOutputDir(codeCoverageOutDir)
+
         val success = if (!testsFound()) {
             logger.info("No tests found, nothing to do.")
             true
@@ -219,6 +227,7 @@ abstract class ManagedDeviceInstrumentationTestTask(): NonIncrementalTask(), And
                 runner.runTests(
                         managedDevice,
                         resultsOutDir,
+                        codeCoverageOutDir,
                         projectName,
                         testData.get().flavorName.get(),
                         testData.get().getAsStaticData(),
@@ -227,7 +236,7 @@ abstract class ManagedDeviceInstrumentationTestTask(): NonIncrementalTask(), And
                         LoggerWrapper(logger)
                 )
             } catch (e: Exception) {
-                recordCrashedTestRun(
+                recordCrashedInstrumentedTestRun(
                         dependencies,
                         testRunnerFactory.executionEnum.get(),
                         false,
@@ -242,7 +251,7 @@ abstract class ManagedDeviceInstrumentationTestTask(): NonIncrementalTask(), And
         val report = TestReport(ReportType.SINGLE_FLAVOR, resultsOutDir, reportOutDir)
         val results = report.generateReport()
 
-        recordOkTestRun(
+        recordOkInstrumentedTestRun(
                 dependencies,
                 testRunnerFactory.executionEnum.get(),
                 false,
@@ -278,6 +287,17 @@ abstract class ManagedDeviceInstrumentationTestTask(): NonIncrementalTask(), And
         override val name = computeTaskName(device.name)
 
         override val type = ManagedDeviceInstrumentationTestTask::class.java
+
+        override fun handleProvider(taskProvider: TaskProvider<ManagedDeviceInstrumentationTestTask>) {
+            super.handleProvider(taskProvider)
+
+            creationConfig.artifacts
+                .setInitialProvider(
+                    taskProvider,
+                    ManagedDeviceInstrumentationTestTask::getCoverageDirectory)
+                .withName(BuilderConstants.MANAGED_DEVICE)
+                .on(InternalArtifactType.MANAGED_DEVICE_CODE_COVERAGE)
+        }
 
         override fun configure(task: ManagedDeviceInstrumentationTestTask) {
             super.configure(task)

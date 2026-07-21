@@ -29,8 +29,8 @@ import com.android.build.api.component.impl.TestComponentImpl;
 import com.android.build.api.component.impl.TestFixturesImpl;
 import com.android.build.api.dsl.CommonExtension;
 import com.android.build.api.dsl.TestedExtension;
-import com.android.build.api.extension.AndroidComponentsExtension;
 import com.android.build.api.extension.impl.VariantApiOperationsRegistrar;
+import com.android.build.api.variant.AndroidComponentsExtension;
 import com.android.build.api.variant.Variant;
 import com.android.build.api.variant.impl.GradleProperty;
 import com.android.build.api.variant.impl.VariantBuilderImpl;
@@ -76,7 +76,7 @@ import com.android.build.gradle.internal.ide.dependencies.LibraryDependencyCache
 import com.android.build.gradle.internal.ide.dependencies.MavenCoordinatesCacheBuildService;
 import com.android.build.gradle.internal.ide.v2.GlobalLibraryBuildService;
 import com.android.build.gradle.internal.ide.v2.NativeModelBuilder;
-import com.android.build.gradle.internal.lint.AndroidLintTask;
+import com.android.build.gradle.internal.lint.AndroidLintInputs;
 import com.android.build.gradle.internal.lint.LintFixBuildService;
 import com.android.build.gradle.internal.profile.AnalyticsConfiguratorService;
 import com.android.build.gradle.internal.profile.AnalyticsService;
@@ -95,6 +95,7 @@ import com.android.build.gradle.internal.services.BuildServicesKt;
 import com.android.build.gradle.internal.services.ClassesHierarchyBuildService;
 import com.android.build.gradle.internal.services.DslServices;
 import com.android.build.gradle.internal.services.DslServicesImpl;
+import com.android.build.gradle.internal.services.LintClassLoaderBuildService;
 import com.android.build.gradle.internal.services.ProjectServices;
 import com.android.build.gradle.internal.services.StringCachingBuildService;
 import com.android.build.gradle.internal.services.SymbolTableBuildService;
@@ -431,6 +432,7 @@ public abstract class BasePlugin<
         new SymbolTableBuildService.RegistrationAction(project).execute();
         new ClassesHierarchyBuildService.RegistrationAction(project).execute();
         new LintFixBuildService.RegistrationAction(project).execute();
+        new LintClassLoaderBuildService.RegistrationAction(project).execute();
         new JacocoInstrumentationService.RegistrationAction(project).execute();
 
         projectOptions
@@ -446,9 +448,7 @@ public abstract class BasePlugin<
         project.getPlugins().apply(JavaBasePlugin.class);
 
         dslServices =
-                new DslServicesImpl(
-                        projectServices,
-                        sdkComponentsBuildService);
+                new DslServicesImpl(projectServices, sdkComponentsBuildService, getProjectTypeV2());
 
         MessageReceiverImpl messageReceiver =
                 new MessageReceiverImpl(
@@ -476,21 +476,9 @@ public abstract class BasePlugin<
         // As soon as project is evaluated we can clear the shared state for deprecation reporting.
         gradle.projectsEvaluated(action -> DeprecationReporterImpl.Companion.clean());
 
-        createLintClasspathConfiguration(project);
+        AndroidLintInputs.createLintClasspathConfiguration(project, projectServices);
 
         createAndroidJdkImageConfiguration(project, globalScope);
-    }
-
-    /** Creates a lint class path Configuration for the given project */
-    public static void createLintClasspathConfiguration(@NonNull Project project) {
-        Configuration config = project.getConfigurations().create(AndroidLintTask.LINT_CLASS_PATH);
-        config.setVisible(false);
-        config.setTransitive(true);
-        config.setCanBeConsumed(false);
-        config.setDescription("The lint embedded classpath");
-
-        project.getDependencies().add(config.getName(), "com.android.tools.lint:lint-gradle:" +
-                Version.ANDROID_TOOLS_BASE_VERSION);
     }
 
     /** Creates the androidJdkImage configuration */
@@ -729,11 +717,11 @@ public abstract class BasePlugin<
         }
         hasCreatedTasks = true;
 
-        extension.disableWrite();
-
         variantApiOperations.executeDslFinalizationBlocks(
                 (AndroidT) extension
         );
+
+        extension.disableWrite();
 
         GradleBuildProject.Builder projectBuilder =
                 configuratorService.getProjectBuilder(project.getPath());
