@@ -1135,6 +1135,7 @@ public final class SdkConstants {
     public static final String TAG_GENERAL_PURPOSE = "general-purpose";
     public static final String TAG_VALID_SPECIFIC_PURPOSE = "valid-specific-purpose";
     public static final String TAG_VALID_GENERAL_PURPOSE = "valid-general-purpose";
+    public static final String TAG_VALID_PURPOSE = "valid-purpose";
     public static final String TAG_GRANT_PERMISSION = "grant-uri-permission";
     public static final String TAG_PATH_PERMISSION = "path-permission";
     public static final String TAG_ACTION = "action";
@@ -2920,7 +2921,7 @@ public final class SdkConstants {
      * Studio product. It need not actually be the latest version of Gradle, but it will most likely
      * be fairly recent.
      */
-    public static final String GRADLE_LATEST_VERSION = "9.0.0";
+    public static final String GRADLE_LATEST_VERSION = "9.1.0";
 
     /**
      * The minimum released version of the Android Gradle Plugin for which Studio will attempt a
@@ -2928,13 +2929,13 @@ public final class SdkConstants {
      * display a diagnostic informing the user that this project's version AGP is unsupported, but
      * at some point that might fail.
      */
-    public static final String GRADLE_PLUGIN_MINIMUM_FORCED_UPGRADE_VERSION = "3.2.0";
+    public static final String GRADLE_PLUGIN_MINIMUM_FORCED_UPGRADE_VERSION = "4.0.0";
 
     /**
      * The minimum released version of the Android Gradle Plugin that this version of Studio will
      * support. (Support of the development series leading up to it is unknown.)
      */
-    public static final String GRADLE_PLUGIN_MINIMUM_VERSION = "4.0.0";
+    public static final String GRADLE_PLUGIN_MINIMUM_VERSION = "4.2.0";
 
     /**
      * The minimum released version of the Android Gradle Plugin that the next version of Studio
