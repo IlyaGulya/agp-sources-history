@@ -98,6 +98,7 @@ import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
 import com.google.common.collect.ImmutableSortedSet
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 import java.util.HashMap
 
 interface ModelCache {
@@ -170,14 +171,12 @@ interface ModelCacheTesting : ModelCache {
   fun mavenCoordinatesFrom(coordinates: MavenCoordinates): IdeMavenCoordinatesImpl
 }
 
-private val MODEL_VERSION_3_2_0 = GradleVersion.parse("3.2.0")
-
 private fun modelCacheImpl(buildFolderPaths: BuildFolderPaths): ModelCacheTesting {
 
   val strings: MutableMap<String, String> = HashMap()
-  val androidLibraryCores = mutableMapOf<IdeAndroidLibraryCore, IdeAndroidLibraryCore>()
-  val javaLibraryCores = mutableMapOf<IdeJavaLibraryCore, IdeJavaLibraryCore>()
-  val moduleLibraryCores = mutableMapOf<IdeModuleLibraryCore, IdeModuleLibraryCore>()
+  val androidLibraryCores: MutableMap<IdeAndroidLibraryCore, IdeAndroidLibraryCore> = HashMap()
+  val javaLibraryCores: MutableMap<IdeJavaLibraryCore, IdeJavaLibraryCore> = HashMap()
+  val moduleLibraryCores: MutableMap<IdeModuleLibraryCore, IdeModuleLibraryCore> = HashMap()
 
   fun deduplicateString(s: String): String = strings.putIfAbsent(s, s) ?: s
   fun String.deduplicate() = deduplicateString(this)
@@ -783,7 +782,8 @@ private fun modelCacheImpl(buildFolderPaths: BuildFolderPaths): ModelCacheTestin
       name = nativeAbi.name,
       sourceFlagsFile = nativeAbi.sourceFlagsFile,
       symbolFolderIndexFile = nativeAbi.symbolFolderIndexFile,
-      buildFileIndexFile = nativeAbi.buildFileIndexFile
+      buildFileIndexFile = nativeAbi.buildFileIndexFile,
+      additionalProjectFilesIndexFile = copyNewPropertyWithDefault(nativeAbi::additionalProjectFilesIndexFile) { null }
     )
   }
 
@@ -966,11 +966,7 @@ private fun modelCacheImpl(buildFolderPaths: BuildFolderPaths): ModelCacheTestin
     val defaultConfigCopy: IdeProductFlavorContainer = copyModel(project.defaultConfig, ::productFlavorContainerFrom)
     val buildTypesCopy: Collection<IdeBuildTypeContainer> = copy(project::getBuildTypes, ::buildTypeContainerFrom)
     val productFlavorCopy: Collection<IdeProductFlavorContainer> = copy(project::getProductFlavors, ::productFlavorContainerFrom)
-    val variantNamesCopy: Collection<String> =
-            if (parsedModelVersion != null && parsedModelVersion < MODEL_VERSION_3_2_0)
-                copy(fun(): Collection<String> = project.variants.map { it.name }, ::deduplicateString)
-            else
-                copy(project::getVariantNames, ::deduplicateString)
+    val variantNamesCopy: Collection<String> = copy(project::getVariantNames, ::deduplicateString)
     val flavorDimensionCopy: Collection<String> = copy(project::getFlavorDimensions, ::deduplicateString)
     val bootClasspathCopy: Collection<String> = ImmutableList.copyOf(project.bootClasspath)
     val signingConfigsCopy: Collection<IdeSigningConfig> = copy(project::getSigningConfigs, ::signingConfigFrom)
@@ -1179,7 +1175,7 @@ private inline fun <T> copyNewPropertyWithDefault(propertyInvoker: () -> T, defa
   }
 }
 
-private fun <T> MutableMap<T, T>.internCore(core: T): T = getOrPut(core) { core }
+private fun <T> MutableMap<T, T>.internCore(core: T): T = putIfAbsent(core, core) ?: core
 
 private fun getSymbolFilePath(androidLibrary: AndroidLibrary): String {
   return try {

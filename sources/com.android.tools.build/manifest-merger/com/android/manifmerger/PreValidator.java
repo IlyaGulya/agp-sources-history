@@ -262,7 +262,6 @@ public class PreValidator {
                     .getAttribute(attributeOperationTypeEntry.getKey());
             switch(attributeOperationTypeEntry.getValue()) {
                 case STRICT:
-                case IGNORE_WARNING:
                     break;
                 case REMOVE:
                     // check we are not provided a new value.

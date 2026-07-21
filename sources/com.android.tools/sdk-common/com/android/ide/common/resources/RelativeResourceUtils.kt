@@ -12,40 +12,20 @@ import java.lang.IllegalStateException
  * The absolute path to the module source set is identified by the source set ordering of a module.
  * Format of the returned String is `<package name - source set module order>:<path to source set>`.
  */
-fun produceRelativeSourceSetPath(
-        resourceFile: File,
-        packageName: String,
-        moduleSourceSets: Collection<Collection<File>>
-) : String {
-    // Allows for relocatablity as various file system formats streamline to the same path format.
-    val invariantFilePath = resourceFile.invariantSeparatorsPath
-    for (sourceSet in moduleSourceSets) {
-        for ((index, sourceSetFile) in sourceSet.withIndex()) {
-            if (invariantFilePath.startsWith(sourceSetFile.invariantSeparatorsPath)) {
-                val resIndex = sourceSetFile.invariantSeparatorsPath.length
-                val relativePathToSourceSet = invariantFilePath.substring(resIndex)
-                return "$packageName-$index:$relativePathToSourceSet"
-            }
+fun getRelativeSourceSetPath(resourceFile: File, moduleSourceSets: Map<String, String>)
+        : String {
+    val absoluteResFilePath = resourceFile.absolutePath
+    for ((identifier, absoluteSourceSetPath) in moduleSourceSets.entries) {
+        if (absoluteResFilePath.startsWith(absoluteSourceSetPath)) {
+            val invariantFilePath = resourceFile.absoluteFile.invariantSeparatorsPath
+            val resIndex = File(absoluteSourceSetPath).absoluteFile.invariantSeparatorsPath.length
+            val relativePathToSourceSet = invariantFilePath.substring(resIndex)
+            return "$identifier:$relativePathToSourceSet"
         }
     }
 
-    // TODO(lukeedgar) Improve handling of these edge case source sets.
-    //Handle cases where resources do not originate from source-sets.
-    val dirs = invariantFilePath.split('/')
-    if ("generated" in dirs && "pngs" in dirs){
-        val variant = dirs[dirs.indexOf("pngs") + 1]
-        val relativePathToSourceSet =
-                invariantFilePath.substringAfterLast(variant)
-        return "$packageName-generated-pngs-$variant:$relativePathToSourceSet"
-    } else if ("incremental" in dirs && "merged.dir" in dirs) {
-        val variant = dirs[dirs.indexOf("incremental") + 1]
-        val relativePathToSourceSet =
-                invariantFilePath.substringAfterLast("merged.dir")
-        return "$packageName-incremental-$variant-merged.dir:$relativePathToSourceSet"
-    }
-
     throw IllegalArgumentException(
-            "Unable to locate resourceFile (${resourceFile.absolutePath}) in source-sets.")
+            "Unable to locate resourceFile ($absoluteResFilePath) in source-sets.")
 }
 
 /**
@@ -80,7 +60,7 @@ fun relativeResourcePathToAbsolutePath(
 
 /**
  * Parses identifier and file path into a map from a file
- * in the format '<Int source set id> <String file path>`.
+ * in the format 'packageName.projectName-sortedOrderPosition absolutePath'.
  */
 fun readFromSourceSetPathsFile(artifactFile: File) : Map<String, String> {
     if (!artifactFile.exists() || !artifactFile.isFile) {
@@ -89,4 +69,40 @@ fun readFromSourceSetPathsFile(artifactFile: File) : Map<String, String> {
     return artifactFile.bufferedReader().lineSequence().associate {
         it.substringBefore(" ") to it.substringAfter(" ")
     }
+}
+
+/**
+ * Writes a file containing a mapping of resource source-set absolute paths to a unique identifier
+ * in the format of 'packageName.projectName-sortedOrderPosition absolutePath'.
+ */
+fun writeIdentifiedSourceSetsFile(
+        resourceSourceSets: List<File>,
+        packageName: String,
+        projectName: String,
+        output: File
+) {
+    output.bufferedWriter().use { bw ->
+        getIdentifiedSourceSetMap(resourceSourceSets, packageName, projectName).forEach {
+            bw.write("${it.key} ${it.value}\n")
+        }
+    }
+}
+
+fun getIdentifiedSourceSetMap(
+        resourceSourceSets: List<File>,
+        packageName: String,
+        projectName: String) : Map<String, String> {
+    var i = 0
+    return resourceSourceSets
+            .asSequence()
+            .filterNotNull()
+            .distinctBy(File::invariantSeparatorsPath)
+            .sortedBy(File::invariantSeparatorsPath)
+            .associate { sourceSet ->
+                val sourceSetFolderName = sourceSet.parentFile.name
+                val appendProjectName =
+                        if (packageName.endsWith(projectName)) "" else ".$projectName"
+                val appId = "$packageName$appendProjectName-$sourceSetFolderName-${i++}"
+                appId to sourceSet.absolutePath
+            }
 }
