@@ -75,7 +75,7 @@ public final class AndroidAdditionalTestOutputConfigProto {
    *
    * Protobuf type {@code com.android.tools.utp.plugins.host.additionaltestoutput.proto.AndroidAdditionalTestOutputConfig}
    */
-  public  static final class AndroidAdditionalTestOutputConfig extends
+  public static final class AndroidAdditionalTestOutputConfig extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:com.android.tools.utp.plugins.host.additionaltestoutput.proto.AndroidAdditionalTestOutputConfig)
       AndroidAdditionalTestOutputConfigOrBuilder {
@@ -176,6 +176,7 @@ public final class AndroidAdditionalTestOutputConfigProto {
      * <code>string additional_output_directory_on_device = 1;</code>
      * @return The additionalOutputDirectoryOnDevice.
      */
+    @java.lang.Override
     public java.lang.String getAdditionalOutputDirectoryOnDevice() {
       java.lang.Object ref = additionalOutputDirectoryOnDevice_;
       if (ref instanceof java.lang.String) {
@@ -199,6 +200,7 @@ public final class AndroidAdditionalTestOutputConfigProto {
      * <code>string additional_output_directory_on_device = 1;</code>
      * @return The bytes for additionalOutputDirectoryOnDevice.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAdditionalOutputDirectoryOnDeviceBytes() {
       java.lang.Object ref = additionalOutputDirectoryOnDevice_;
@@ -225,6 +227,7 @@ public final class AndroidAdditionalTestOutputConfigProto {
      * <code>string additional_output_directory_on_host = 2;</code>
      * @return The additionalOutputDirectoryOnHost.
      */
+    @java.lang.Override
     public java.lang.String getAdditionalOutputDirectoryOnHost() {
       java.lang.Object ref = additionalOutputDirectoryOnHost_;
       if (ref instanceof java.lang.String) {
@@ -247,6 +250,7 @@ public final class AndroidAdditionalTestOutputConfigProto {
      * <code>string additional_output_directory_on_host = 2;</code>
      * @return The bytes for additionalOutputDirectoryOnHost.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAdditionalOutputDirectoryOnHostBytes() {
       java.lang.Object ref = additionalOutputDirectoryOnHost_;
