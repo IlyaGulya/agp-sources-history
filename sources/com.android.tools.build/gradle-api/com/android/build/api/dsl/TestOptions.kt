@@ -66,6 +66,11 @@ interface TestOptions {
     val deviceGroups: NamedDomainObjectContainer<DeviceGroup>
 
     /**
+     * Configures Gradle Managed Devices for use in testing with the Unified test platform.
+     */
+    val managedDevices: ManagedDevices
+
+    /**
      * Specifies whether to use on-device test orchestration.
      *
      * If you want to [use Android Test Orchestrator](https://developer.android.com/training/testing/junit-runner.html#using-android-test-orchestrator)
@@ -80,7 +85,7 @@ interface TestOptions {
      * }
      * ```
      *
-     * @since 3.0.0
+     * since 3.0.0
      */
     var execution: String
 

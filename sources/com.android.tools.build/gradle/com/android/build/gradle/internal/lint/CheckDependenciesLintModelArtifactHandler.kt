@@ -98,6 +98,7 @@ internal class CheckDependenciesLintModelArtifactHandler(
         projectPath: String,
         buildId: String,
         variantName: String?,
+        isTestFixtures: Boolean,
         aarFile: File,
         lintJar: File?,
         isProvided: Boolean,

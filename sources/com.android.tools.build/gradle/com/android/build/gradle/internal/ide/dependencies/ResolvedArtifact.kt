@@ -41,7 +41,8 @@ data class ResolvedArtifact internal constructor(
     val componentIdentifier: ComponentIdentifier,
     val variant: ResolvedVariantResult,
     val variantName: String?,
-    val artifactFile: File,
+    val artifactFile: File?,
+    val isTestFixturesArtifact: Boolean,
     /**
      * An optional sub-result that represents the bundle file, when the current result
      * represents an exploded aar
@@ -67,6 +68,8 @@ data class ResolvedArtifact internal constructor(
                 mainArtifactResult.variant,
                 mainArtifactResult.getVariantName(),
                 mainArtifactResult.file,
+                mainArtifactResult.hasProjectTestFixturesCapability() ||
+                        mainArtifactResult.hasLibraryTestFixturesCapability(),
                 extractedFolder,
                 publishedLintJar,
                 dependencyType,
@@ -76,7 +79,8 @@ data class ResolvedArtifact internal constructor(
 
     enum class DependencyType constructor(val extension: String) {
         JAVA(EXT_JAR),
-        ANDROID(EXT_AAR)
+        ANDROID(EXT_AAR),
+        RELOCATED_ARTIFACT("")
     }
 
     /**
@@ -92,12 +96,12 @@ data class ResolvedArtifact internal constructor(
                 val extension = dependencyType.extension
                 var classifier: String? = null
 
-                if (!artifactFile.isDirectory) {
+                if (!artifactFile!!.isDirectory) {
                     // attempts to compute classifier based on the filename.
                     val pattern = "^$module-$version-(.+)\\.$extension$"
 
                     val p = Pattern.compile(pattern)
-                    val m = p.matcher(artifactFile.name)
+                    val m = p.matcher(artifactFile!!.name)
                     if (m.matches()) {
                         classifier = m.group(1)
                     }
@@ -126,14 +130,14 @@ data class ResolvedArtifact internal constructor(
                 // We have a file based dependency
                 if (dependencyType == DependencyType.JAVA) {
                     MavenCoordinatesCacheBuildService.getMavenCoordForLocalFile(
-                        artifactFile,
+                        artifactFile!!,
                         stringCachingService
                     )
                 } else {
                     // local aar?
-                    assert(artifactFile.isDirectory)
+                    assert(artifactFile!!.isDirectory)
                     MavenCoordinatesCacheBuildService.getMavenCoordForLocalFile(
-                        artifactFile,
+                        artifactFile!!,
                         stringCachingService
                     )
                 }
@@ -165,11 +169,17 @@ data class ResolvedArtifact internal constructor(
                 .append(componentIdentifier.projectPath)
                 .also { sb ->
                     this.variantName?.let{ sb.append("::").append(it) }
+                    if (this.isTestFixturesArtifact) {
+                        sb.append("::").append("testFixtures")
+                    }
                 }
                 .toString().intern()
         }
         is ModuleComponentIdentifier, is OpaqueComponentArtifactIdentifier -> {
-            mavenCoordinatesCache.getMavenCoordinates(this).toString().intern()
+            (mavenCoordinatesCache.getMavenCoordinates(this).toString() +
+                    if (this.isTestFixturesArtifact) {
+                        "::testFixtures"
+                    } else "").intern()
         }
         else -> {
             throw RuntimeException(

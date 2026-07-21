@@ -64,6 +64,7 @@ class Level2ArtifactHandler(
         projectPath: String,
         buildId: String,
         variantName: String?,
+        isTestFixtures: Boolean,
         aarFile: File,
         lintJar: File?,
         isProvided: Boolean,

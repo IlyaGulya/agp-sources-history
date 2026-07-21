@@ -27,6 +27,7 @@ import com.android.build.api.component.impl.ComponentImpl
 import com.android.build.api.component.impl.TestComponentImpl
 import com.android.build.api.component.impl.TestFixturesImpl
 import com.android.build.api.component.impl.UnitTestImpl
+import com.android.build.api.dsl.DeviceGroup
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.variant.impl.VariantBuilderImpl
 import com.android.build.api.variant.impl.VariantImpl
@@ -123,6 +124,7 @@ import com.android.build.gradle.internal.tasks.LibraryAarJarsTask
 import com.android.build.gradle.internal.tasks.LintCompile
 import com.android.build.gradle.internal.tasks.ListingFileRedirectTask
 import com.android.build.gradle.internal.tasks.ManagedDeviceCleanTask
+import com.android.build.gradle.internal.tasks.ManagedDeviceInstrumentationTestResultAggregationTask
 import com.android.build.gradle.internal.tasks.ManagedDeviceInstrumentationTestTask
 import com.android.build.gradle.internal.tasks.ManagedDeviceSetupTask
 import com.android.build.gradle.internal.tasks.MergeAaptProguardFilesCreationAction
@@ -542,8 +544,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
 
         maybeCreateTransformClassesWithAsmTask(
             testFixturesComponent,
-            instrumented /* Unit Tests do not use offline instrumentation */,
-            false /* Legacy transforms do not apply to test fixtures / unit tests */)
+            instrumented /* Unit Tests do not use offline instrumentation. */)
 
         // packaging tasks
 
@@ -1548,9 +1549,9 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         // This should be done automatically by the classpath
         //        TaskFactoryUtils.dependsOn(javacTask,
         // testedVariantScope.getTaskContainer().getJavacTask());
-        maybeCreateTransformClassesWithAsmTask(unitTestCreationConfig,
-            isTestCoverageEnabled = false,
-            legacyTransformsEnabled = false /* Instrumentation isn't needed for unit tests */
+        maybeCreateTransformClassesWithAsmTask(
+            unitTestCreationConfig,
+            isTestCoverageEnabled = false
         )
 
 
@@ -1636,25 +1637,27 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         val ant = JacocoConfigurations.getJacocoAntTaskConfiguration(
             project, JacocoTask.getJacocoVersion(unitTestCreationConfig))
 
+        if (unitTestCreationConfig.variantDslInfo.isUnitTestCoverageEnabled) {
+           unitTestCreationConfig.services.projectInfo.getProject().pluginManager
+               .apply(JacocoPlugin::class.java)
+        }
         val runTestsTask =
                 taskFactory.register(AndroidUnitTest.CreationAction(unitTestCreationConfig))
         taskFactory.configure(JavaPlugin.TEST_TASK_NAME) {
                 test: Task -> test.dependsOn(runTestsTask)
         }
 
-        if (unitTestCreationConfig.isTestCoverageEnabled) {
+        if (unitTestCreationConfig.isTestCoverageEnabled
+            || unitTestCreationConfig.variantDslInfo.isUnitTestCoverageEnabled) {
             unitTestCreationConfig.services.projectInfo.getProject().plugins.withType(
                 JacocoPlugin::class.java
             ) {
                 // Jacoco plugin is applied and test coverage enabled, ∴ generate coverage report.
                 taskFactory.register(
-                    JacocoReportTask.CreateActionUnitTest(
-                        unitTestCreationConfig,
-                        ant
-                    )
+                    JacocoReportTask.CreateActionUnitTest(unitTestCreationConfig, ant)
                 )
             }
-       }
+        }
     }
 
     private fun createTopLevelTestTasks() {
@@ -1749,17 +1752,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         }
 
         logger.warn("WARNING: The Gradle Managed Device DSL and associated tests are experimental")
-        val managedDevices = mutableListOf<ManagedVirtualDevice>()
-        extension
-                .testOptions
-                .devices
-                .forEach { device ->
-                    if (device is ManagedVirtualDevice) {
-                        managedDevices.add(device)
-                    } else {
-                        error("Unsupported managed device type: ${device.javaClass}")
-                    }
-                }
+        val managedDevices = getManagedDevices()
         taskFactory.register(
                 ManagedDeviceCleanTask.CreationAction(
                     "cleanManagedDevices",
@@ -1790,8 +1783,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
             allDevices.dependsOn(deviceAllVariantsTask)
         }
 
-        val deviceGroups = extension.testOptions.deviceGroups
-        for (group in deviceGroups) {
+        for (group in getDeviceGroups()) {
             taskFactory.register(
                 managedDeviceGroupAllVariantsTaskName(group)
             ) { deviceGroupTask: Task ->
@@ -1888,15 +1880,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         if (shouldEnableUtp(projectOptions, extension.testOptions, testedVariant.variantType) &&
                 extension.testOptions.devices.isNotEmpty()) {
             // Now for each managed device defined in the dsl
-            val managedDevices = mutableListOf<ManagedVirtualDevice>()
-            extension
-                .testOptions
-                .devices
-                .forEach { device ->
-                    if (device is ManagedVirtualDevice) {
-                        managedDevices.add(device)
-                    }
-                }
+            val managedDevices = getManagedDevices()
             val variantName = androidTestProperties.testedConfig.name
             val allDevicesVariantTask = taskFactory.register(
                 androidTestProperties.computeTaskName("allDevices")
@@ -1930,6 +1914,31 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                 deviceToProvider[managedDevice.name] = managedDeviceTestTask
             }
 
+            // Register a task to aggregate test suite result protos.
+            val testResultAggregationTask = taskFactory.register(
+                ManagedDeviceInstrumentationTestResultAggregationTask.CreationAction(
+                    androidTestProperties,
+                    managedDevices,
+                    testData
+                )
+            )
+            for (managedDevice in managedDevices) {
+                taskFactory.configure(
+                    managedDeviceAllVariantsTaskName(managedDevice)
+                ) { managedDeviceCheck ->
+                    managedDeviceCheck.dependsOn(testResultAggregationTask)
+                }
+            }
+            deviceToProvider.values.forEach { managedDeviceTestTask ->
+                testResultAggregationTask.configure {
+                    it.mustRunAfter(managedDeviceTestTask)
+                }
+                // Run test result aggregation task even after test failures.
+                managedDeviceTestTask.configure {
+                    it.finalizedBy(testResultAggregationTask)
+                }
+            }
+
             // Register a test coverage report generation task to every managedDeviceCheck
             // task.
             if (testedVariant.variantDslInfo.isTestCoverageEnabled) {
@@ -1955,7 +1964,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
             }
 
             // Lastly the Device Group Tasks.
-            for (group in extension.testOptions.deviceGroups) {
+            for (group in getDeviceGroups()) {
                 val variantDeviceGroupTask = taskFactory.register(
                     managedDeviceGroupSingleVariantTaskName(androidTestProperties, group)
                 ) { deviceGroupVariant: Task ->
@@ -2013,11 +2022,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                 createJacocoTask(creationConfig)
             }
         }
-        maybeCreateTransformClassesWithAsmTask(
-            creationConfig,
-            isTestCoverageEnabled,
-            registeredLegacyTransform
-        )
+        maybeCreateTransformClassesWithAsmTask(creationConfig, isTestCoverageEnabled)
 
         // Add a task to create merged runtime classes if this is a dynamic-feature,
         // or a base module consuming feature jars. Merged runtime classes are needed if code
@@ -3182,11 +3187,30 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         }
     }
 
+    private fun getManagedDevices(): List<ManagedVirtualDevice> {
+        val managedDevices = mutableListOf<ManagedVirtualDevice>()
+        // First add devices from within the managed device block in testOptions.
+        extension
+            .testOptions
+            .managedDevices
+            .devices
+            .forEach { device ->
+                if (device is ManagedVirtualDevice) {
+                    managedDevices.add(device)
+                } else {
+                    error("Unsupported managed device type: ${device.javaClass}")
+                }
+            }
+        return managedDevices
+    }
+
+    private fun getDeviceGroups(): Collection<DeviceGroup> =
+        extension.testOptions.managedDevices.groups
+
     @Suppress("DEPRECATION") // Legacy support (b/195153220)
     protected fun maybeCreateTransformClassesWithAsmTask(
         creationConfig: ComponentCreationConfig,
-        isTestCoverageEnabled: Boolean,
-        legacyTransformsEnabled: Boolean
+        isTestCoverageEnabled: Boolean
     ) {
         if (creationConfig.projectClassesAreInstrumented) {
             creationConfig
