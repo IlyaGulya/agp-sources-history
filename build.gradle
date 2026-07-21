@@ -43,6 +43,8 @@ agpVersions.eachWithIndex { agpVersion, index ->
         ModuleComponentIdentifier id = artifact.id.componentIdentifier
         from(zipTree(artifact.file)) {
           into("${id.group}/${id.module}")
+          exclude("**/*.RSA", "**/*.SF")
+          exclude("**/*.so", "**/*.dll", "**/*.dylib")
         }
       }
   }
