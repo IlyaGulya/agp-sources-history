@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.tools.lint.gradle.api
+package com.android.utils.reflection
 
-import org.gradle.api.file.FileCollection
-import java.io.File
+import kotlin.reflect.KProperty
 
-interface VariantInputs {
-    /** The variant name */
-    val name: String
+/**
+ * Computes the qualified name of a property.
+ *
+ * Can be used for creating instances of `Key` or `Logger` that should know their own name:
+ *
+ * `val MY_KEY: Key<Boolean> = Key.create(::MY_KEY.qualifiedName)`.
+ */
+val KProperty<*>.qualifiedName: String get() = "${javaClass.name}.$name"
 
-    /** The lint rule jars, if any */
-    val ruleJars: FileCollection
-
-    /** The merged manifest of the current module  */
-    val mergedManifest: File?
-
-    /** The manifest merger report file, if any */
-    val manifestMergeReport: File?
-}
