@@ -472,6 +472,13 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
                 && globalScope.hasDynamicFeatures();
     }
 
+    @Override
+    public boolean getNeedsMainDexListForBundle() {
+        return getVariantData().getType().isBaseModule()
+                && globalScope.hasDynamicFeatures()
+                && getVariantConfiguration().getDexingType().getNeedsMainDexList();
+    }
+
     @Nullable
     @Override
     public CodeShrinker getCodeShrinker() {
@@ -692,8 +699,7 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     @Override
     public boolean getNeedsMainDexList() {
-        // The bundle relies on the main dex list even if multidex is not enabled.
-        return variantData.getVariantConfiguration().getMinSdkVersion().getFeatureLevel() < 21;
+        return getDexingType().getNeedsMainDexList();
     }
 
     @NonNull
@@ -1455,8 +1461,11 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
     @Override
     @NonNull
     public File getProcessAndroidResourcesProguardOutputFile() {
-        return new File(globalScope.getIntermediatesDir(),
-                "/proguard-rules/" + getVariantConfiguration().getDirName() + "/aapt_rules.txt");
+        return FileUtils.join(
+                globalScope.getIntermediatesDir(),
+                "proguard-rules",
+                getVariantConfiguration().getDirName(),
+                SdkConstants.FN_AAPT_RULES);
     }
 
     @Override

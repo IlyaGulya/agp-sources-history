@@ -70,7 +70,8 @@ public class AndroidArtifacts {
     private static final String TYPE_SYMBOL = "android-symbol";
     private static final String TYPE_SYMBOL_WITH_PACKAGE_NAME = "android-symbol-with-package-name";
     private static final String TYPE_DEFINED_ONLY_SYMBOL = "defined-only-android-symbol";
-    private static final String TYPE_PROGUARD_RULES = "android-proguad";
+    private static final String TYPE_CONSUMER_PROGUARD_RULES = "android-consumer-proguard-rules";
+    private static final String TYPE_AAPT_PROGUARD_RULES = "android-aapt-proguard-rules";
     private static final String TYPE_DATA_BINDING_ARTIFACT = "android-databinding";
     private static final String TYPE_DATA_BINDING_BASE_CLASS_LOG_ARTIFACT =
             "android-databinding-class-log";
@@ -92,9 +93,14 @@ public class AndroidArtifacts {
     private static final String TYPE_METADATA_FEATURE_DECLARATION = "android-metadata-feature-decl";
     private static final String TYPE_METADATA_FEATURE_MANIFEST =
             "android-metadata-feature-manifest";
-    private static final String TYPE_METADATA_APP_ID_DECLARATION = "android-metadata-app-id-decl";
+    private static final String TYPE_METADATA_BASE_DECLARATION =
+            "android-metadata-base-module-decl";
     private static final String TYPE_METADATA_CLASSES = "android-metadata-classes";
     private static final String TYPE_METADATA_JAVA_RES = "android-metadata-java-res";
+
+    public static final String TYPE_MOCKABLE_JAR = "android-mockable-jar";
+    public static final Attribute MOCKABLE_JAR_RETURN_DEFAULT_VALUES =
+            Attribute.of("returnDefaultValues", Boolean.class);
 
     public enum ConsumedConfigType {
         COMPILE_CLASSPATH("compileClasspath", API_ELEMENTS, true),
@@ -189,7 +195,8 @@ public class AndroidArtifacts {
         SHARED_JNI(TYPE_SHARED_JNI),
         ANNOTATIONS(TYPE_EXT_ANNOTATIONS),
         PUBLIC_RES(TYPE_PUBLIC_RES),
-        PROGUARD_RULES(TYPE_PROGUARD_RULES),
+        CONSUMER_PROGUARD_RULES(TYPE_CONSUMER_PROGUARD_RULES),
+        AAPT_PROGUARD_RULES(TYPE_AAPT_PROGUARD_RULES),
 
         LINT(TYPE_LINT_JAR),
 
@@ -227,7 +234,7 @@ public class AndroidArtifacts {
         // Metadata artifacts
         METADATA_FEATURE_DECLARATION(TYPE_METADATA_FEATURE_DECLARATION),
         METADATA_FEATURE_MANIFEST(TYPE_METADATA_FEATURE_MANIFEST),
-        METADATA_APP_ID_DECLARATION(TYPE_METADATA_APP_ID_DECLARATION),
+        METADATA_BASE_MODULE_DECLARATION(TYPE_METADATA_BASE_DECLARATION),
         METADATA_CLASSES(TYPE_METADATA_CLASSES),
         METADATA_JAVA_RES(TYPE_METADATA_JAVA_RES),
 
