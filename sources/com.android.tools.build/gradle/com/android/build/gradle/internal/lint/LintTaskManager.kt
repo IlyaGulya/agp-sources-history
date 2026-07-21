@@ -50,7 +50,8 @@ class LintTaskManager constructor(private val globalScope: GlobalScope, private 
         // Map of task path to the providers for tasks that that task subsumes,
         // and therefore should be disabled if both are in the task graph.
         // e.g. Running `lintRelease` should cause `lintVitalRelease` to be skipped,
-        val variantLintTaskToLintVitalTask = mutableMapOf<String, TaskProvider<AndroidLintTask>>()
+        val variantLintTaskToLintVitalTask =
+            mutableMapOf<String, TaskProvider<AndroidLintTextOutputTask>>()
 
         val needsCopyReportTask = needsCopyReportTask(globalScope.extension.lintOptions)
 
@@ -86,8 +87,11 @@ class LintTaskManager constructor(private val globalScope: GlobalScope, private 
                 continue
             }
 
+            taskFactory.register(AndroidLintTask.SingleVariantCreationAction(variantWithTests))
             val variantLintTask =
-                taskFactory.register(AndroidLintTask.SingleVariantCreationAction(variantWithTests))
+                taskFactory.register(
+                    AndroidLintTextOutputTask.SingleVariantCreationAction(variantWithTests.main)
+                )
 
             if (needsCopyReportTask) {
                 val copyLintReportTask =
@@ -102,11 +106,14 @@ class LintTaskManager constructor(private val globalScope: GlobalScope, private 
                 !mainVariant.variantDslInfo.isDebuggable &&
                 globalScope.extension.lintOptions.isCheckReleaseBuilds
             ) {
-                val lintVitalTask =
-                    taskFactory.register(AndroidLintTask.LintVitalCreationAction(mainVariant))
                 taskFactory.register(
                     AndroidLintAnalysisTask.LintVitalCreationAction(variantWithTests)
                 )
+                taskFactory.register(AndroidLintTask.LintVitalCreationAction(mainVariant))
+                val lintVitalTask =
+                    taskFactory.register(
+                        AndroidLintTextOutputTask.LintVitalCreationAction(mainVariant)
+                    )
 
                 // If lint is being run, we do not need to run lint vital.
                 variantLintTaskToLintVitalTask[getTaskPath(variantLintTask)] = lintVitalTask
@@ -177,7 +184,7 @@ class LintTaskManager constructor(private val globalScope: GlobalScope, private 
         return variantsWithTests
     }
 
-    private fun getTaskPath(task: TaskProvider<AndroidLintTask>): String {
+    private fun getTaskPath(task: TaskProvider<AndroidLintTextOutputTask>): String {
         return (getTaskPath(task.name))
     }
 
@@ -187,8 +194,8 @@ class LintTaskManager constructor(private val globalScope: GlobalScope, private 
 
     companion object {
 
-        internal fun File?.isLintStdout() = this?.path == "stdout"
-        internal fun File?.isLintStderr() = this?.path == "stdout"
+        internal fun File.isLintStdout() = this.path == File("stdout").path
+        internal fun File.isLintStderr() = this.path == File("stderr").path
 
         internal fun needsCopyReportTask(lintOptions: LintOptions) : Boolean {
             val textOutput = lintOptions.textOutput

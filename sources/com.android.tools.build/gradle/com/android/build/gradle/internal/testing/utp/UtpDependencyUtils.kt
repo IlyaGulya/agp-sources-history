@@ -26,7 +26,7 @@ import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Optional
 
 private const val UTP_MAVEN_GROUP_ID = "com.google.testing.platform"
-private const val UTP_DEFAULT_VERSION = "0.0.8-alpha04"
+private const val UTP_DEFAULT_VERSION = "0.0.8-alpha05"
 private const val ANDROID_TOOLS_UTP_PLUGIN_MAVEN_GROUP_ID = "com.android.tools.utp"
 private val ANDROID_TOOLS_UTP_PLUGIN_VERSION = ANDROID_TOOLS_BASE_VERSION
 
@@ -71,6 +71,12 @@ enum class UtpDependency(
             "android-test-plugin-host-device-info",
             "com.android.tools.utp.plugins.host.device.info.AndroidTestDeviceInfoPlugin",
             UtpDependencies::testDeviceInfoPlugin,
+            ANDROID_TOOLS_UTP_PLUGIN_MAVEN_GROUP_ID,
+            ANDROID_TOOLS_UTP_PLUGIN_VERSION),
+    ANDROID_TEST_ADDITIONAL_TEST_OUTPUT_PLUGIN(
+            "android-test-plugin-host-additional-test-output",
+            "com.android.tools.utp.plugins.host.additionaltestoutput.AndroidAdditionalTestOutputPlugin",
+            UtpDependencies::additionalTestOutputPlugin,
             ANDROID_TOOLS_UTP_PLUGIN_MAVEN_GROUP_ID,
             ANDROID_TOOLS_UTP_PLUGIN_VERSION),
     ANDROID_TEST_COVERAGE_PLUGIN(
@@ -140,6 +146,10 @@ abstract class UtpDependencies {
     @get:Optional
     @get:Classpath
     abstract val testDeviceInfoPlugin: ConfigurableFileCollection
+
+    @get:Optional
+    @get:Classpath
+    abstract val additionalTestOutputPlugin: ConfigurableFileCollection
 
     @get:Optional
     @get:Classpath
