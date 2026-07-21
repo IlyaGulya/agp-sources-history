@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.build.api.dsl
-
-import org.gradle.api.Incubating
+package com.android.build.gradle.internal.component
 
 /**
- * DSL object on library build type for configurations of the android test component.
- *
- * android {
- *     buildTypes {
- *         debug {
- *             androidTest {
- *                 enableMinification = ...
- *             }
- *         }
- *     }
- * }
- *
+ * Internal interface for Android Test component
  */
-@Incubating
-interface AndroidTest {
-
-    /** Enable minification for the android test component */
-    @get:Incubating
-    @set:Incubating
-    var enableMinification: Boolean
-}
+interface DeviceTestCreationConfig: TestComponentCreationConfig, InstrumentedTestCreationConfig
