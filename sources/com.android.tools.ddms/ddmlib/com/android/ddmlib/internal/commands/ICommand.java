@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:JvmName("VariantUtil")
-
-package com.android.projectmodel
+package com.android.ddmlib.internal.commands;
 
 /**
- * Name reserved the main artifact in a [Variant].
+ * The command interface specifies a string that is the command, as well as a handler for
+ * the action of the command.
  */
-const val ARTIFACT_NAME_MAIN = "_main_"
-
-/**
- * Name reserved the android test artifact in a [Variant].
- */
-const val ARTIFACT_NAME_ANDROID_TEST = "_android_test_"
-
-/**
- * Name reserved the unit test artifact in a [Variant].
- */
-const val ARTIFACT_NAME_UNIT_TEST = "_unit_test_"
-
-/**
- * Name reserved the test fixtures artifact in a [Variant].
- */
-const val ARTIFACT_NAME_TEST_FIXTURES = "_test_fixtures_"
+public interface ICommand {
+    // TODO (194901500): define command interface
+}
