@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal
+package com.android.build.api.variant
 
-class FusedLibraryDependencyConfigurator {
+import org.gradle.api.Incubating
+
+/**
+ * Interface is for variant builders that as able to shrinkResources
+ */
+@Incubating
+interface ResourcesShrinkableBuilder {
+    /**
+     * Variable value for BuildType isShrinkResources
+     */
+    var shrinkResources: Boolean
 }
