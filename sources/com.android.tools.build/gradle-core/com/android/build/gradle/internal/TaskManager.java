@@ -22,7 +22,6 @@ import static com.android.SdkConstants.FN_ANDROID_MANIFEST_XML;
 import static com.android.SdkConstants.FN_LINT_JAR;
 import static com.android.SdkConstants.FN_RESOURCE_TEXT;
 import static com.android.SdkConstants.FN_SPLIT_LIST;
-import static com.android.build.gradle.internal.coverage.JacocoPlugin.AGENT_CONFIGURATION_NAME;
 import static com.android.build.gradle.internal.dependency.VariantDependencies.CONFIG_NAME_LINTCHECKS;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.ALL;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.EXTERNAL;
@@ -78,7 +77,7 @@ import com.android.build.gradle.api.JavaCompileOptions;
 import com.android.build.gradle.internal.aapt.AaptGeneration;
 import com.android.build.gradle.internal.core.Abi;
 import com.android.build.gradle.internal.core.GradleVariantConfiguration;
-import com.android.build.gradle.internal.coverage.JacocoPlugin;
+import com.android.build.gradle.internal.coverage.JacocoConfigurations;
 import com.android.build.gradle.internal.coverage.JacocoReportTask;
 import com.android.build.gradle.internal.dsl.AbiSplitOptions;
 import com.android.build.gradle.internal.dsl.CoreSigningConfig;
@@ -86,7 +85,6 @@ import com.android.build.gradle.internal.dsl.PackagingOptions;
 import com.android.build.gradle.internal.incremental.BuildInfoLoaderTask;
 import com.android.build.gradle.internal.incremental.BuildInfoWriterTask;
 import com.android.build.gradle.internal.incremental.InstantRunAnchorTaskConfigAction;
-import com.android.build.gradle.internal.incremental.InstantRunPatchingPolicy;
 import com.android.build.gradle.internal.model.CoreExternalNativeBuild;
 import com.android.build.gradle.internal.ndk.NdkHandler;
 import com.android.build.gradle.internal.packaging.GradleKeystoreHelper;
@@ -103,9 +101,7 @@ import com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask
 import com.android.build.gradle.internal.res.namespaced.NamespacedResourcesTaskManager;
 import com.android.build.gradle.internal.scope.BuildOutputs;
 import com.android.build.gradle.internal.scope.CodeShrinker;
-import com.android.build.gradle.internal.scope.DefaultGradlePackagingScope;
 import com.android.build.gradle.internal.scope.GlobalScope;
-import com.android.build.gradle.internal.scope.PackagingScope;
 import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.TaskOutputHolder;
 import com.android.build.gradle.internal.scope.VariantScope;
@@ -185,6 +181,7 @@ import com.android.build.gradle.tasks.InstantRunResourcesApkBuilder;
 import com.android.build.gradle.tasks.JavaPreCompileTask;
 import com.android.build.gradle.tasks.LintGlobalTask;
 import com.android.build.gradle.tasks.LintPerVariantTask;
+import com.android.build.gradle.tasks.MainApkListPersistence;
 import com.android.build.gradle.tasks.ManifestProcessorTask;
 import com.android.build.gradle.tasks.MergeManifests;
 import com.android.build.gradle.tasks.MergeResources;
@@ -203,11 +200,11 @@ import com.android.build.gradle.tasks.factory.AndroidUnitTest;
 import com.android.build.gradle.tasks.factory.JavaCompileConfigAction;
 import com.android.build.gradle.tasks.factory.ProcessJavaResConfigAction;
 import com.android.build.gradle.tasks.factory.TestServerTaskConfigAction;
-import com.android.build.gradle.tasks.ir.InstantRunMainApkResourcesBuilder;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.DefaultDexOptions;
-import com.android.builder.core.DesugarProcessBuilder;
+import com.android.builder.core.DesugarProcessArgs;
 import com.android.builder.core.VariantType;
+import com.android.builder.dexing.DexerTool;
 import com.android.builder.dexing.DexingType;
 import com.android.builder.errors.EvalIssueReporter.Type;
 import com.android.builder.model.DataBindingOptions;
@@ -1203,21 +1200,10 @@ public abstract class TaskManager {
 
         variantData.calculateFilters(scope.getGlobalScope().getExtension().getSplits());
 
+        createSplitsDiscovery(scope);
+
         boolean useAaptToGenerateLegacyMultidexMainDexProguardRules =
                 scope.getDexingType() == DexingType.LEGACY_MULTIDEX;
-
-        if (scope.getVariantData().getType().getCanHaveSplits()) {
-            // split list calculation and save to this file.
-            File splitListOutputFile = new File(scope.getSplitSupportDirectory(), FN_SPLIT_LIST);
-            SplitsDiscovery splitsDiscoveryAndroidTask =
-                    taskFactory.create(
-                            new SplitsDiscovery.ConfigAction(scope, splitListOutputFile));
-
-            scope.addTaskOutput(
-                    TaskOutputHolder.TaskOutputType.SPLIT_LIST,
-                    splitListOutputFile,
-                    splitsDiscoveryAndroidTask.getName());
-        }
 
         if (Boolean.TRUE.equals(
                 scope.getGlobalScope().getExtension().getAaptOptions().getNamespaced())) {
@@ -1354,15 +1340,11 @@ public abstract class TaskManager {
      * the FULL_APK build output directory.
      */
     @NonNull
-    public PackageSplitRes createSplitResourcesTasks(
-            @NonNull VariantScope scope, @NonNull PackagingScope packagingScope) {
+    public PackageSplitRes createSplitResourcesTasks(@NonNull VariantScope scope) {
         BaseVariantData variantData = scope.getVariantData();
 
         checkState(
-                variantData
-                        .getOutputScope()
-                        .getMultiOutputPolicy()
-                        .equals(MultiOutputPolicy.SPLITS),
+                variantData.getMultiOutputPolicy().equals(MultiOutputPolicy.SPLITS),
                 "Can only create split resources tasks for pure splits.");
 
         File densityOrLanguagesPackages = scope.getSplitDensityOrLanguagesPackagesOutputDirectory();
@@ -1375,23 +1357,19 @@ public abstract class TaskManager {
                 densityOrLanguagesPackages,
                 packageSplitRes.getName());
 
-        if (packagingScope.getSigningConfig() != null) {
-            packageSplitRes.dependsOn(getValidateSigningTask(packagingScope));
+        if (scope.getVariantConfiguration().getSigningConfig() != null) {
+            packageSplitRes.dependsOn(getValidateSigningTask(scope));
         }
 
         return packageSplitRes;
     }
 
     @Nullable
-    public PackageSplitAbi createSplitAbiTasks(
-            @NonNull VariantScope scope, @NonNull PackagingScope packagingScope) {
+    public PackageSplitAbi createSplitAbiTasks(@NonNull VariantScope scope) {
         BaseVariantData variantData = scope.getVariantData();
 
         checkState(
-                variantData
-                        .getOutputScope()
-                        .getMultiOutputPolicy()
-                        .equals(MultiOutputPolicy.SPLITS),
+                variantData.getMultiOutputPolicy().equals(MultiOutputPolicy.SPLITS),
                 "split ABI tasks are only compatible with pure splits.");
 
         Set<String> filters = AbiSplitOptions.getAbiFilters(extension.getSplits().getAbiFilters());
@@ -1438,8 +1416,8 @@ public abstract class TaskManager {
 
         packageSplitAbiTask.dependsOn(scope.getNdkBuildable());
 
-        if (packagingScope.getSigningConfig() != null) {
-            packageSplitAbiTask.dependsOn(getValidateSigningTask(packagingScope));
+        if (variantData.getVariantConfiguration().getSigningConfig() != null) {
+            packageSplitAbiTask.dependsOn(getValidateSigningTask(variantData.getScope()));
         }
 
         if (scope.getExternalNativeBuildTask() != null) {
@@ -1450,10 +1428,8 @@ public abstract class TaskManager {
     }
 
     public void createSplitTasks(@NonNull VariantScope variantScope) {
-        PackagingScope packagingScope = new DefaultGradlePackagingScope(variantScope);
-
-        createSplitResourcesTasks(variantScope, packagingScope);
-        createSplitAbiTasks(variantScope, packagingScope);
+        createSplitResourcesTasks(variantScope);
+        createSplitAbiTasks(variantScope);
     }
 
     /**
@@ -1499,10 +1475,11 @@ public abstract class TaskManager {
         processJavaResourcesTask.dependsOn(variantScope.getPreBuildTask());
 
         // create the task outputs for others to consume
-        variantScope.addTaskOutput(
-                VariantScope.TaskOutputType.JAVA_RES,
-                destinationDir,
-                processJavaResourcesTask.getName());
+        FileCollection collection =
+                variantScope.addTaskOutput(
+                        VariantScope.TaskOutputType.JAVA_RES,
+                        destinationDir,
+                        processJavaResourcesTask.getName());
 
         // create the stream generated from this task
         variantScope
@@ -1511,8 +1488,7 @@ public abstract class TaskManager {
                         OriginalStream.builder(project, "processed-java-res")
                                 .addContentType(DefaultContentType.RESOURCES)
                                 .addScope(Scope.PROJECT)
-                                .setFolder(destinationDir)
-                                .setDependency(processJavaResourcesTask.getName())
+                                .setFileCollection(collection)
                                 .build());
     }
 
@@ -1559,8 +1535,15 @@ public abstract class TaskManager {
         // TODO do we support non compiled shaders in aars?
         //mergeShadersTask.dependsOn( scope.getVariantData().prepareDependenciesTask);
 
+        File outputDir = scope.getGeneratedAssetsDir("shaders");
+
         // compile the shaders
-        ShaderCompile shaderCompileTask = taskFactory.create(new ShaderCompile.ConfigAction(scope));
+        ShaderCompile shaderCompileTask =
+                taskFactory.create(new ShaderCompile.ConfigAction(scope, outputDir));
+        scope.addTaskOutput(
+                TaskOutputHolder.TaskOutputType.SHADER_ASSETS,
+                outputDir,
+                shaderCompileTask.getName());
         shaderCompileTask.dependsOn(mergeShadersTask);
 
         scope.getAssetGenTask().dependsOn(shaderCompileTask);
@@ -1872,6 +1855,24 @@ public abstract class TaskManager {
         assembleUnitTests.setGroup(null);
     }
 
+    protected void createSplitsDiscovery(VariantScope variantScope) {
+        if (variantScope.getVariantData().getType().getCanHaveSplits()) {
+            // split list calculation and save to this file.
+            File splitListOutputFile =
+                    new File(
+                            new File(variantScope.getSplitSupportDirectory(), "split-list"),
+                            FN_SPLIT_LIST);
+            SplitsDiscovery splitsDiscoveryAndroidTask =
+                    taskFactory.create(
+                            new SplitsDiscovery.ConfigAction(variantScope, splitListOutputFile));
+
+            variantScope.addTaskOutput(
+                    TaskOutputHolder.TaskOutputType.SPLIT_LIST,
+                    splitListOutputFile,
+                    splitsDiscoveryAndroidTask.getName());
+        }
+    }
+
     /** Creates the tasks to build android tests. */
     public void createAndroidTestVariantTasks(@NonNull TestVariantData variantData) {
         VariantScope variantScope = variantData.getScope();
@@ -1880,6 +1881,9 @@ public abstract class TaskManager {
 
         // Create all current streams (dependencies mostly at this point)
         createDependencyStreams(variantScope);
+
+        // persist variant's output
+        taskFactory.create(new MainApkListPersistence.ConfigAction(variantScope));
 
         // Add a task to process the manifest
         createProcessTestManifestTask(
@@ -1892,8 +1896,10 @@ public abstract class TaskManager {
         createRenderscriptTask(variantScope);
 
         // Add a task to merge the resource folders
-
         createMergeResourcesTask(variantScope, true);
+
+        // Add tasks to compile shader
+        createShaderTask(variantScope);
 
         // Add a task to merge the assets folders
         createMergeAssetsTask(variantScope);
@@ -1908,8 +1914,6 @@ public abstract class TaskManager {
         createProcessJavaResTask(variantScope);
 
         createAidlTask(variantScope);
-
-        createShaderTask(variantScope);
 
         // Add NDK tasks
         if (!isComponentModelPlugin()) {
@@ -2154,12 +2158,15 @@ public abstract class TaskManager {
                 connectedAndroidTest -> connectedAndroidTest.dependsOn(connectedTask.getName()));
 
         if (baseVariantData.getVariantConfiguration().getBuildType().isTestCoverageEnabled()) {
-            applyJacocoPlugin();
 
+            Configuration jacocoAntConfiguration =
+                    JacocoConfigurations.getJacocoAntTaskConfiguration(
+                            project, getJacocoVersion(variantScope));
             JacocoReportTask reportTask =
-                    taskFactory.create(new JacocoReportTask.ConfigAction(variantScope));
-            reportTask.dependsOn(
-                    project.getConfigurations().getAt(JacocoPlugin.ANT_CONFIGURATION_NAME));
+                    taskFactory.create(
+                            new JacocoReportTask.ConfigAction(
+                                    variantScope, jacocoAntConfiguration));
+
             reportTask.dependsOn(connectedTask.getName());
 
             variantScope.setCoverageReportTask(reportTask);
@@ -2424,7 +2431,7 @@ public abstract class TaskManager {
             transformManager.addTransform(taskFactory, variantScope, desugarTransform);
 
             if (minSdk.getFeatureLevel()
-                    < DesugarProcessBuilder.MIN_SUPPORTED_API_TRY_WITH_RESOURCES) {
+                    < DesugarProcessArgs.MIN_SUPPORTED_API_TRY_WITH_RESOURCES) {
                 // add runtime classes for try-with-resources support
                 String taskName =
                         variantScope.getTaskName(ExtractTryWithResourcesSupportJar.TASK_NAME);
@@ -2690,9 +2697,6 @@ public abstract class TaskManager {
         FileCollection instantRunMergedManifests =
                 variantScope.getOutput(INSTANT_RUN_MERGED_MANIFESTS);
 
-        FileCollection processedResources =
-                variantScope.getOutput(VariantScope.TaskOutputType.PROCESSED_RES);
-
         variantScope.setInstantRunTaskManager(instantRunTaskManager);
         AndroidVersion minSdkForDx = variantScope.getMinSdkVersion();
         BuildInfoLoaderTask buildInfoLoaderTask =
@@ -2703,7 +2707,6 @@ public abstract class TaskManager {
                         allActionAnchorTask,
                         getResMergingScopes(variantScope),
                         instantRunMergedManifests,
-                        processedResources,
                         true /* addResourceVerifier */,
                         minSdkForDx.getFeatureLevel());
 
@@ -2728,19 +2731,27 @@ public abstract class TaskManager {
                                         && config.getTestedConfig().getType()
                                                 == VariantType.LIBRARY));
         if (isTestCoverageEnabled) {
-            // if not applied, apply the jacoco plugin
-            JacocoPlugin jacocoPlugin = applyJacocoPlugin();
+            if (variantScope.getDexer() == DexerTool.DX) {
+                androidBuilder
+                        .getIssueReporter()
+                        .reportWarning(
+                                Type.GENERIC,
+                                String.format(
+                                        "Jacoco version is downgraded to %s because dx is used. "
+                                                + "This is due to -P%s=false flag. See "
+                                                + "https://issuetracker.google.com/37116789 for "
+                                                + "more details.",
+                                        JacocoConfigurations.VERSION_FOR_DX,
+                                        BooleanOption.ENABLE_D8.getPropertyName()));
+            }
 
-            final Configuration agentConfiguration =
-                    project.getConfigurations().getByName(AGENT_CONFIGURATION_NAME);
+            String jacocoAgentRuntimeDependency =
+                    JacocoConfigurations.getAgentRuntimeDependency(getJacocoVersion(variantScope));
+            project.getDependencies()
+                    .add(
+                            variantScope.getVariantDependencies().getRuntimeClasspath().getName(),
+                            jacocoAgentRuntimeDependency);
 
-            variantScope
-                    .getVariantDependencies()
-                    .getRuntimeClasspath()
-                    .extendsFrom(agentConfiguration);
-
-
-            String jacocoAgentRuntimeDependency = jacocoPlugin.getAgentRuntimeDependency();
             // we need to force the same version of Jacoco we use for instrumentation
             variantScope
                     .getVariantDependencies()
@@ -2750,18 +2761,20 @@ public abstract class TaskManager {
     }
 
     @NonNull
-    private JacocoPlugin applyJacocoPlugin() {
-        JacocoPlugin jacocoPlugin = project.getPlugins().findPlugin(JacocoPlugin.class);
-        if (jacocoPlugin == null) {
-            jacocoPlugin = project.getPlugins().apply(JacocoPlugin.class);
+    public String getJacocoVersion(@NonNull VariantScope scope) {
+        if (scope.getDexer() == DexerTool.DX) {
+            return JacocoConfigurations.VERSION_FOR_DX;
+        } else {
+            return extension.getJacoco().getVersion();
         }
-        return jacocoPlugin;
     }
 
     public void createJacocoTransform(
             @NonNull final VariantScope variantScope) {
-
-        JacocoTransform jacocoTransform = new JacocoTransform();
+        JacocoTransform jacocoTransform =
+                new JacocoTransform(
+                        JacocoConfigurations.getJacocoAntTaskConfiguration(
+                                project, getJacocoVersion(variantScope)));
 
         variantScope.getTransformManager().addTransform(taskFactory, variantScope, jacocoTransform);
     }
@@ -2977,8 +2990,6 @@ public abstract class TaskManager {
 
         boolean signedApk = variantData.isSigned();
 
-        GradleVariantConfiguration variantConfiguration = variantScope.getVariantConfiguration();
-
         /*
          * PrePackaging step class that will look if the packaging of the main FULL_APK split is
          * necessary when running in InstantRun mode. In InstantRun mode targeting an api 23 or
@@ -2988,15 +2999,13 @@ public abstract class TaskManager {
          * forcing a cold swap is triggered, the main FULL_APK must be rebuilt (even if the
          * resources were changed in a previous build).
          */
-        DefaultGradlePackagingScope packagingScope = new DefaultGradlePackagingScope(variantScope);
-
         VariantScope.TaskOutputType manifestType =
                 variantScope.getInstantRunBuildContext().isInInstantRunMode()
                         ? INSTANT_RUN_MERGED_MANIFESTS
                         : MERGED_MANIFESTS;
 
         final boolean splitsArePossible =
-                variantScope.getOutputScope().getMultiOutputPolicy() == MultiOutputPolicy.SPLITS;
+                variantScope.getVariantData().getMultiOutputPolicy() == MultiOutputPolicy.SPLITS;
 
         FileCollection manifests = variantScope.getOutput(manifestType);
         // this is where the final APKs will be located.
@@ -3014,34 +3023,21 @@ public abstract class TaskManager {
                         : TaskOutputHolder.TaskOutputType.APK;
 
         boolean useSeparateApkForResources =
-                variantScope.getInstantRunBuildContext().isInInstantRunMode()
-                        && (variantScope.getInstantRunBuildContext().getPatchingPolicy()
-                                == InstantRunPatchingPolicy.MULTI_APK_SEPARATE_RESOURCES);
+                variantScope.getInstantRunBuildContext().useSeparateApkForResources();
 
         VariantScope.TaskOutputType resourceFilesInputType =
                 variantScope.useResourceShrinker()
                         ? VariantScope.TaskOutputType.SHRUNK_PROCESSED_RES
                         : VariantScope.TaskOutputType.PROCESSED_RES;
 
-        TaskOutputHolder.TaskOutputType resourcesForAppOrBaseApkPackaging = resourceFilesInputType;
-        if (useSeparateApkForResources) {
-            // add a task to create an empty resource with the merged manifest file that
-            // will eventually get packaged in the main APK.
-            // We need to pass the published resource type as the generated manifest can use
-            // a String resource for its version name (so AAPT can check for resources existence).
-            taskFactory.create(
-                    new InstantRunMainApkResourcesBuilder.ConfigAction(
-                            variantScope, packagingScope, resourceFilesInputType));
-            resourcesForAppOrBaseApkPackaging = INSTANT_RUN_MAIN_APK_RESOURCES;
-        }
-
         PackageApplication packageApp =
                 taskFactory.create(
                         new PackageApplication.StandardConfigAction(
-                                packagingScope,
+                                variantScope,
                                 outputDirectory,
-                                resourcesForAppOrBaseApkPackaging,
-                                variantScope.getOutput(resourcesForAppOrBaseApkPackaging),
+                                useSeparateApkForResources
+                                        ? INSTANT_RUN_MAIN_APK_RESOURCES
+                                        : resourceFilesInputType,
                                 manifests,
                                 manifestType,
                                 variantScope.getOutputScope(),
@@ -3058,17 +3054,16 @@ public abstract class TaskManager {
                                 new InstantRunResourcesApkBuilder.ConfigAction(
                                         resourceFilesInputType,
                                         variantScope.getOutput(resourceFilesInputType),
-                                        packagingScope));
-                packageInstantRunResources.dependsOn(getValidateSigningTask(packagingScope));
+                                        variantScope));
+                packageInstantRunResources.dependsOn(getValidateSigningTask(variantScope));
             } else {
                 // in instantRunMode, there is no user configured splits, only  one apk.
                 packageInstantRunResources =
                         taskFactory.create(
                                 new PackageApplication.InstantRunResourcesConfigAction(
                                         variantScope.getInstantRunResourcesFile(),
-                                        packagingScope,
+                                        variantScope,
                                         resourceFilesInputType,
-                                        variantScope.getOutput(resourceFilesInputType),
                                         manifests,
                                         INSTANT_RUN_MERGED_MANIFESTS,
                                         globalScope.getBuildCache(),
@@ -3093,11 +3088,11 @@ public abstract class TaskManager {
             configureResourcesAndAssetsDependencies.accept(packageInstantRunResources);
         }
 
-        CoreSigningConfig signingConfig = packagingScope.getSigningConfig();
+        CoreSigningConfig signingConfig = variantScope.getVariantConfiguration().getSigningConfig();
 
         //noinspection VariableNotUsedInsideIf - we use the whole packaging scope below.
         if (signingConfig != null) {
-            packageApp.dependsOn(getValidateSigningTask(packagingScope));
+            packageApp.dependsOn(getValidateSigningTask(variantScope));
         }
 
         if (variantScope.getJavacTask() != null) {
@@ -3134,9 +3129,7 @@ public abstract class TaskManager {
 
             CopyOutputs copyOutputsTask =
                     taskFactory.create(
-                            new CopyOutputs.ConfigAction(
-                                    new DefaultGradlePackagingScope(variantScope),
-                                    finalApkLocation));
+                            new CopyOutputs.ConfigAction(variantScope, finalApkLocation));
             variantScope.addTaskOutput(
                     TaskOutputHolder.TaskOutputType.APK,
                     finalApkLocation,
@@ -3163,10 +3156,10 @@ public abstract class TaskManager {
                 UNINSTALL_ALL, uninstallAll -> uninstallAll.dependsOn(uninstallTask.getName()));
     }
 
-    protected Task getValidateSigningTask(@NonNull PackagingScope packagingScope) {
+    protected Task getValidateSigningTask(@NonNull VariantScope variantScope) {
         File defaultDebugKeystoreLocation = GradleKeystoreHelper.getDefaultDebugKeystoreLocation();
         ValidateSigningTask.ConfigAction configAction =
-                new ValidateSigningTask.ConfigAction(packagingScope, defaultDebugKeystoreLocation);
+                new ValidateSigningTask.ConfigAction(variantScope, defaultDebugKeystoreLocation);
 
         Task validateSigningTask = taskFactory.findByName(configAction.getName());
         if (validateSigningTask == null) {
