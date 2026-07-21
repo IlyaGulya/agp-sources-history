@@ -22,7 +22,6 @@ import com.android.builder.internal.compiler.RenderScriptProcessor
 import com.android.builder.sdk.SdkInfo
 import com.android.builder.sdk.TargetInfo
 import com.android.repository.Revision
-import com.android.sdklib.AndroidVersion
 import com.android.sdklib.BuildToolInfo
 import com.android.sdklib.IAndroidTarget
 import com.google.common.base.Suppliers
@@ -60,14 +59,18 @@ open class SdkComponents(
     val renderScriptSupportJarProvider: Provider<File> = project.providers.provider { getRenderScriptSupportJar() }
     val supportNativeLibFolderProvider: Provider<File> = project.providers.provider { getSupportNativeLibFolder() }
     val supportBlasLibFolderProvider: Provider<File> = project.providers.provider { getSupportBlasLibFolder() }
+    val ndkFolderProvider: Provider<File> = project.providers.provider { getNdkFolder() }
 
     private var fallbackResultsSupplier: Supplier<Pair<SdkInfo, TargetInfo>?> = Suppliers.memoize { runFallbackSdkHandler() }
+    val ndkHandlerSupplier : Supplier<NdkHandler> = Suppliers.memoize {
+        NdkHandler(
+            options.ndkVersionSupplier.get(),
+            options.platformTargetHashSupplier.get(),
+            project.rootDir)
+    }
 
     private fun runFallbackSdkHandler(): Pair<SdkInfo, TargetInfo>? {
         fallbackSdkHandler.setSdkLibData(options.sdkLibDataFactory.getSdkLibData())
-        if (options.injectSdkMavenRepos) {
-            fallbackSdkHandler.addLocalRepositories(project)
-        }
 
         val result = fallbackSdkHandler.initTarget(
             checkNotNull(options.platformTargetHashSupplier.get()) {"Extension not initialized yet, couldn't access compileSdkVersion."},
@@ -176,7 +179,7 @@ open class SdkComponents(
     }
 
     fun getNdkFolder(): File? {
-        return fallbackSdkHandler.ndkFolder
+        return ndkHandlerSupplier.get().ndkDirectory
     }
 
     fun getCMakeExecutable(): File? {
@@ -191,6 +194,6 @@ open class SdkComponents(
 class SdkComponentsOptions(
     val platformTargetHashSupplier: Supplier<String>,
     val buildToolRevisionSupplier: Supplier<Revision>,
+    val ndkVersionSupplier: Supplier<String>,
     val sdkLibDataFactory: SdkLibDataFactory,
-    val injectSdkMavenRepos: Boolean,
     val useAndroidX: Boolean)

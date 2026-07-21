@@ -16,9 +16,12 @@
 
 package com.android.build.gradle.internal.tasks
 
+import com.android.annotations.concurrency.GuardedBy
+import com.android.build.gradle.internal.profile.ProfileAgent
 import com.android.build.gradle.internal.profile.ProfilerInitializer
 import com.android.build.gradle.internal.profile.TaskProfilingRecord
 import com.android.build.gradle.options.BooleanOption
+import com.android.build.gradle.options.IntegerOption
 import com.android.build.gradle.options.ProjectOptions
 import com.android.ide.common.workers.ExecutorServiceAdapter
 import com.android.ide.common.workers.WorkerExecutorException
@@ -54,13 +57,16 @@ object Workers {
      * Factory function for creating instances of [WorkerExecutorFacade].
      * Initialized with a default version using the the [ForkJoinPool.commonPool]
      */
-    private var factory: (owner: String, worker: WorkerExecutor, executor: ExecutorService?) -> WorkerExecutorFacade =
-        { _, _, executor -> ExecutorServiceAdapter(executor ?: ForkJoinPool.commonPool()) }
+    private var factory: (projectName: String, owner: String, worker: WorkerExecutor, executor: ExecutorService?) -> WorkerExecutorFacade =
+        { projectName, owner, worker, executor -> ExecutorServiceAdapter(
+            executor ?: ForkJoinPool.commonPool(), WorkerExecutorAdapter(projectName, owner, worker)
+        ) }
 
     /**
      * Creates a [WorkerExecutorFacade] using the passed [WorkerExecutor], delegating
      * to the [factory] method for the actual instantiation of the interface.
      *
+     * @param projectName name of the project owning the task
      * @param owner the task path issuing the request and owning the [WorkerExecutor] instance.
      * @param worker [WorkerExecutor] to use if Gradle's worker executor are enabled.
      * @param executor [ExecutorService] to use if the Gradle's worker are not enabled or null
@@ -69,11 +75,27 @@ object Workers {
      * [ExecutorService] depending on the project options.
      */
     @JvmOverloads
-    fun getWorker(owner: String, worker: WorkerExecutor, executor: ExecutorService? = null)
+    fun getWorker(projectName: String, owner: String, worker: WorkerExecutor, executor: ExecutorService? = null)
             : WorkerExecutorFacade {
         return if (useDirectWorkerExecutor) {
             DirectWorkerExecutor()
-        } else factory(owner, worker, executor)
+        } else factory(projectName, owner, worker, executor)
+    }
+
+    private const val MAX_AAPT2_THREAD_POOL_SIZE = 8
+
+    @GuardedBy("this")
+    private var aapt2ThreadPool: ForkJoinPool? = null
+
+    /**
+     * See {@link getWorker}. The only difference is a default {@code executor} that uses a
+     * specific thread pool for AAPT2 daemons.
+     */
+    @JvmOverloads
+    @Synchronized
+    fun getWorkerForAapt2(projectName: String, owner: String, worker: WorkerExecutor, executor: ExecutorService? = aapt2ThreadPool)
+            : WorkerExecutorFacade {
+        return getWorker(projectName, owner, worker, executor)
     }
 
     /**
@@ -89,15 +111,44 @@ object Workers {
      * @param defaultExecutor default [ExecutorService] to use when none is explicitly provided when
      * invoking [getWorker] API.
      */
+    @Synchronized
     fun initFromProject(options: ProjectOptions, defaultExecutor: ExecutorService) {
+        // Multi-module projects calls initFromProject for each android module, so we check to
+        // avoid resetting the thread pool all the time.
+        if (aapt2ThreadPool == null) {
+            val aapt2ThreadPoolSize = options.get(IntegerOption.AAPT2_THREAD_POOL_SIZE) ?:
+            Integer.min(
+                MAX_AAPT2_THREAD_POOL_SIZE,
+                ForkJoinPool.getCommonPoolParallelism())
+            aapt2ThreadPool = ForkJoinPool(aapt2ThreadPoolSize)
+        }
+
         factory = when {
             options.get(BooleanOption.ENABLE_GRADLE_WORKERS) -> {
-                { owner, worker, _ -> WorkerExecutorAdapter(owner, worker) }
+                { projectName, owner, worker, _ ->
+                    WorkerExecutorAdapter(
+                        projectName,
+                        owner,
+                        worker
+                    )
+                }
             }
             else -> {
-                { _, _, executor -> ExecutorServiceAdapter(executor ?: defaultExecutor) }
+                { projectName, owner, worker, executor -> ExecutorServiceAdapter(
+                    executor ?: defaultExecutor,
+                    WorkerExecutorAdapter(projectName, owner, worker)
+                ) }
             }
         }
+    }
+
+    /**
+     * Clean-up any thread pool that was set up during {@code initFromProject}.
+     */
+    @Synchronized
+    fun shutdown() {
+        aapt2ThreadPool?.shutdown()
+        aapt2ThreadPool = null
     }
 
     /** An implementation of [WorkerExecutorFacade] that executes runnables directly */
@@ -130,6 +181,7 @@ object Workers {
      *
      */
     private class WorkerExecutorAdapter(
+        private val projectName: String,
         private val owner: String,
         private val workerExecutor: WorkerExecutor
     ) :
@@ -144,19 +196,38 @@ object Workers {
             actionClass: Class<out Runnable>,
             parameter: Serializable
         ) {
+            submit(
+                actionClass,
+                WorkerExecutorFacade.Configuration(
+                    parameter,
+                    WorkerExecutorFacade.IsolationMode.NONE,
+                    listOf()
+                )
+            )
+        }
 
-            val workerKey = "$owner${actionClass.name}${parameter.hashCode()}"
+        override fun submit(
+            actionClass: Class<out Runnable>,
+            configuration: WorkerExecutorFacade.Configuration
+        ) {
+            val workerKey = "$owner${actionClass.name}${configuration.parameter.hashCode()}"
             val submissionParameters = ActionParameters(
                 actionClass,
-                parameter,
+                configuration.parameter,
+                projectName,
                 owner,
                 workerKey
             )
 
             taskRecord.addWorker(workerKey)
 
+            val classpath = configuration.classPath.toList()
+
             workerExecutor.submit(ActionFacade::class.java) {
-                it.isolationMode = IsolationMode.NONE
+                it.isolationMode = configuration.isolationMode.toGradleIsolationMode()
+                if (!classpath.isEmpty()) {
+                    it.classpath = classpath
+                }
                 it.params(submissionParameters)
             }
         }
@@ -190,19 +261,24 @@ object Workers {
         }
     }
 
+    /**
+     * Translates sdk common [WorkerExecutorFacade.IsolationMode] into Gradle's [IsolationMode]
+     */
+    fun WorkerExecutorFacade.IsolationMode.toGradleIsolationMode() =
+        when(this) {
+            WorkerExecutorFacade.IsolationMode.NONE -> IsolationMode.NONE
+            WorkerExecutorFacade.IsolationMode.CLASSLOADER -> IsolationMode.CLASSLOADER
+            else -> throw IllegalArgumentException("$this is not a handled isolation mode")
+        }
+
+
     class ActionParameters(
         val delegateAction: Class<out Runnable>,
         val delegateParameters: Serializable,
+        val projectName: String,
         val taskOwner: String,
-        private val workerKey: String
-    ) : Serializable {
-
-        private fun taskRecord() =
-            (ProfilerInitializer.getListener()?.getTaskRecord(taskOwner)
-                ?: TaskProfilingRecord.dummyTaskRecord)
-
-        fun getWorker() = taskRecord().get(workerKey)
-    }
+        val workerKey: String
+    ) : Serializable
 
     class ActionFacade @Inject constructor(val params: ActionParameters) : Runnable {
 
@@ -211,9 +287,10 @@ object Workers {
                 ?: throw RuntimeException("Cannot find constructor with @Inject in ${params.delegateAction.name}")
 
             val delegate = constructor.newInstance(params.delegateParameters) as Runnable
-            params.getWorker().executionStarted()
+            val profileMBean = ProfileAgent.getProfileMBean(params.projectName )
+            profileMBean.workerStarted(params.taskOwner, params.workerKey)
             delegate.run()
-            params.getWorker().executionFinished()
+            profileMBean.workerFinished(params.taskOwner, params.workerKey)
         }
 
         private fun findAppropriateConstructor(): Constructor<*>? {

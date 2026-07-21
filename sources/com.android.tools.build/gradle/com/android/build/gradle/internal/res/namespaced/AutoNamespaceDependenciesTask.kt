@@ -21,6 +21,7 @@ import com.google.common.annotations.VisibleForTesting
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType
+import com.android.build.gradle.internal.res.Aapt2CompileRunnable
 import com.android.build.gradle.internal.res.getAapt2FromMaven
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.VariantScope
@@ -50,6 +51,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
@@ -73,28 +75,44 @@ import java.util.concurrent.ForkJoinTask
 @CacheableTask
 open class AutoNamespaceDependenciesTask : AndroidBuilderTask() {
 
-    lateinit var rFiles: ArtifactCollection private set
-    lateinit var nonNamespacedManifests: ArtifactCollection private set
-    lateinit var jarFiles: ArtifactCollection private set
-    lateinit var dependencies: ResolvableDependencies private set
-    lateinit var externalNotNamespacedResources: ArtifactCollection private set
-    lateinit var externalResStaticLibraries: ArtifactCollection private set
-    lateinit var publicFiles: ArtifactCollection private set
+    private lateinit var rFiles: ArtifactCollection
+    private lateinit var nonNamespacedManifests: ArtifactCollection
+    private lateinit var jarFiles: ArtifactCollection
+    private lateinit var publicFiles: ArtifactCollection
+    private lateinit var externalNotNamespacedResources: ArtifactCollection
+    private lateinit var externalResStaticLibraries: ArtifactCollection
+
+    // Don't need to mark this as input as it's already covered by the other inputs
+    private lateinit var dependencies: ResolvableDependencies
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
     lateinit var androidJar: Provider<File>
         private set
 
-    @InputFiles fun getRDefFiles(): FileCollection = rFiles.artifactFiles
-    @InputFiles fun getManifestsFiles(): FileCollection = nonNamespacedManifests.artifactFiles
-    @InputFiles fun getClassesJarFiles(): FileCollection = jarFiles.artifactFiles
-    @InputFiles fun getPublicFilesArtifactFiles(): FileCollection = publicFiles.artifactFiles
     @InputFiles
+    @PathSensitive(PathSensitivity.NONE)
+    fun getRDefFiles(): FileCollection = rFiles.artifactFiles
+
+    @InputFiles
+    @PathSensitive(PathSensitivity.NONE)
+    fun getManifestsFiles(): FileCollection = nonNamespacedManifests.artifactFiles
+
+    @InputFiles
+    @PathSensitive(PathSensitivity.NONE)
+    fun getClassesJarFiles(): FileCollection = jarFiles.artifactFiles
+
+    @InputFiles
+    @PathSensitive(PathSensitivity.NONE)
+    fun getPublicFilesArtifactFiles(): FileCollection = publicFiles.artifactFiles
+
+    @InputFiles
+    @PathSensitive(PathSensitivity.NONE)
     fun getNonNamespacedResourcesFiles(): FileCollection =
         externalNotNamespacedResources.artifactFiles
 
     @InputFiles
+    @PathSensitive(PathSensitivity.NONE)
     fun getStaticLibraryDependenciesFiles(): FileCollection =
         externalResStaticLibraries.artifactFiles
 
@@ -103,6 +121,7 @@ open class AutoNamespaceDependenciesTask : AndroidBuilderTask() {
     lateinit var aapt2FromMaven: FileCollection
         private set
 
+    @get:Internal
     @VisibleForTesting internal var log: Logger? = null
 
     /**
@@ -124,8 +143,7 @@ open class AutoNamespaceDependenciesTask : AndroidBuilderTask() {
     @get:OutputFile lateinit var outputClassesJar: File private set
     @get:OutputFile lateinit var outputRClassesJar: File private set
     @get:OutputDirectory lateinit var outputRewrittenManifests: File private set
-
-    lateinit var intermediateDirectory: File private set
+    @get:OutputDirectory lateinit var intermediateDirectory: File private set
 
     @TaskAction
     fun taskAction() = autoNamespaceDependencies()
@@ -354,8 +372,10 @@ open class AutoNamespaceDependenciesTask : AndroidBuilderTask() {
                         inputFile = resourceFile,
                         outputDirectory = nodeOutputDirectory
                     )
-                    val params =
-                        Aapt2CompileRunnable.Params(aapt2ServiceKey, listOf(request))
+                    val params = Aapt2CompileRunnable.Params(
+                        aapt2ServiceKey,
+                        listOf(request)
+                    )
                     tasks.add(forkJoinPool.submit(Aapt2CompileRunnable(params)))
                 }
             }

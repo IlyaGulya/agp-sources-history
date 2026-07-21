@@ -171,49 +171,79 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
         try (PrintWriter serverLogWriter =
                 getCmakeServerLogWriter(getOutputFolder(getJsonFolder(), abiConfig.getAbiName()))) {
             ILogger logger = LoggerWrapper.getLogger(CmakeServerExternalNativeJsonGenerator.class);
-            Server cmakeServer = createServerAndConnect(serverLogWriter, logger);
-
-            List<String> cacheArgumentsList = getCacheArguments(abiConfig);
-            cacheArgumentsList.addAll(getBuildArguments());
-            ConfigureCommandResult configureCommandResult;
-            File cmakeListsFolder = getMakefile().getParentFile();
-            if (config.enableCmakeCompilerSettingsCache) {
-                // Configure extensions
-                CmakeExecutionConfiguration executableConfiguration =
-                        wrapCmakeListsForCompilerSettingsCaching(
-                                config.compilerSettingsCacheFolder,
-                                abiConfig,
-                                getMakefile().getParentFile(),
-                                cacheArgumentsList);
-
-                cacheArgumentsList = executableConfiguration.getArgs();
-                cmakeListsFolder = executableConfiguration.getCmakeListsFolder();
+            // Create a new cmake server for the given Cmake and configure the given project.
+            ServerReceiver serverReceiver =
+                    new ServerReceiver()
+                            .setMessageReceiver(
+                                    message ->
+                                            receiveInteractiveMessage(
+                                                    serverLogWriter,
+                                                    logger,
+                                                    message,
+                                                    getMakefile().getParentFile()))
+                            .setDiagnosticReceiver(
+                                    message ->
+                                            receiveDiagnosticMessage(
+                                                    serverLogWriter, logger, message));
+            Server cmakeServer = ServerFactory.create(getCmakeBinFolder(), serverReceiver);
+            if (cmakeServer == null) {
+                throw new RuntimeException(
+                        "Unable to create a Cmake server located at: "
+                                + getCmakeBinFolder().getAbsolutePath());
             }
 
-            // Handshake
-            doHandshake(cmakeListsFolder, abiConfig.getExternalNativeBuildFolder(), cmakeServer);
-
-            // Configure
-            String argsArray[] = cacheArgumentsList.toArray(new String[cacheArgumentsList.size()]);
-            configureCommandResult = cmakeServer.configure(argsArray);
-
-            if (!ServerUtils.isConfigureResultValid(configureCommandResult.configureResult)) {
-                throw new ProcessException(
-                        String.format(
-                                "Error configuring CMake server (%s).\r\n%s",
-                                cmakeServer.getCmakePath(),
-                                configureCommandResult.interactiveMessages));
+            if (!cmakeServer.connect()) {
+                throw new RuntimeException(
+                        "Unable to connect to Cmake server located at: "
+                                + getCmakeBinFolder().getAbsolutePath());
             }
 
-            ComputeResult computeResult = doCompute(cmakeServer);
-            if (!ServerUtils.isComputedResultValid(computeResult)) {
-                throw new ProcessException(
-                        "Error computing CMake server result.\r\n"
-                                + configureCommandResult.interactiveMessages);
-            }
+            try {
+                List<String> cacheArgumentsList = getCacheArguments(abiConfig);
+                cacheArgumentsList.addAll(getBuildArguments());
+                ConfigureCommandResult configureCommandResult;
+                File cmakeListsFolder = getMakefile().getParentFile();
+                if (config.enableCmakeCompilerSettingsCache) {
+                    // Configure extensions
+                    CmakeExecutionConfiguration executableConfiguration =
+                            wrapCmakeListsForCompilerSettingsCaching(
+                                    config.compilerSettingsCacheFolder,
+                                    abiConfig,
+                                    getMakefile().getParentFile(),
+                                    cacheArgumentsList);
 
-            generateAndroidGradleBuild(abiConfig, cmakeServer);
-            return configureCommandResult.interactiveMessages;
+                    cacheArgumentsList = executableConfiguration.getArgs();
+                    cmakeListsFolder = executableConfiguration.getCmakeListsFolder();
+                }
+
+                // Handshake
+                doHandshake(
+                        cmakeListsFolder, abiConfig.getExternalNativeBuildFolder(), cmakeServer);
+
+                // Configure
+                String[] argsArray = cacheArgumentsList.toArray(new String[0]);
+                configureCommandResult = cmakeServer.configure(argsArray);
+
+                if (!ServerUtils.isConfigureResultValid(configureCommandResult.configureResult)) {
+                    throw new ProcessException(
+                            String.format(
+                                    "Error configuring CMake server (%s).\r\n%s",
+                                    cmakeServer.getCmakePath(),
+                                    configureCommandResult.interactiveMessages));
+                }
+
+                ComputeResult computeResult = doCompute(cmakeServer);
+                if (!ServerUtils.isComputedResultValid(computeResult)) {
+                    throw new ProcessException(
+                            "Error computing CMake server result.\r\n"
+                                    + configureCommandResult.interactiveMessages);
+                }
+
+                generateAndroidGradleBuild(abiConfig, cmakeServer);
+                return configureCommandResult.interactiveMessages;
+            } finally {
+                cmakeServer.disconnect();
+            }
         }
     }
 
@@ -228,45 +258,6 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
     @NonNull
     private static File getCmakeServerLog(@NonNull File outputFolder) {
         return new File(outputFolder, "cmake_server_log.txt");
-    }
-
-    /**
-     * Creates a Cmake server and connects to it.
-     *
-     * @return a Cmake Server object that's successfully connected to the Cmake server
-     * @throws IOException I/O failure. Note: The function throws RuntimeException if we are unable
-     *     to create or connect to Cmake server.
-     */
-    @NonNull
-    private Server createServerAndConnect(
-            @NonNull PrintWriter serverLogWriter, @NonNull ILogger logger) throws IOException {
-        // Create a new cmake server for the given Cmake and configure the given project.
-        ServerReceiver serverReceiver =
-                new ServerReceiver()
-                        .setMessageReceiver(
-                                message ->
-                                        receiveInteractiveMessage(
-                                                serverLogWriter,
-                                                logger,
-                                                message,
-                                                getMakefile().getParentFile()))
-                        .setDiagnosticReceiver(
-                                message ->
-                                        receiveDiagnosticMessage(serverLogWriter, logger, message));
-        Server cmakeServer = ServerFactory.create(getCmakeBinFolder(), serverReceiver);
-        if (cmakeServer == null) {
-            throw new RuntimeException(
-                    "Unable to create a Cmake server located at: "
-                            + getCmakeBinFolder().getAbsolutePath());
-        }
-
-        if (!cmakeServer.connect()) {
-            throw new RuntimeException(
-                    "Unable to connect to Cmake server located at: "
-                            + getCmakeBinFolder().getAbsolutePath());
-        }
-
-        return cmakeServer;
     }
 
     /** Processes an interactive message received from the CMake server. */
@@ -403,7 +394,7 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
             }
 
             int startIndex = argument.indexOf(generatorArgument) + generatorArgument.length();
-            return argument.substring(startIndex, argument.length());
+            return argument.substring(startIndex);
         }
         // Return the default generator, i.e., "Ninja"
         return "Ninja";
@@ -448,6 +439,13 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
         nativeBuildConfigValue.cleanCommands.add(
                 CmakeUtils.getCleanCommand(
                         getCmakeExecutable(), abiConfig.getExternalNativeBuildFolder()));
+
+        // Build targets command.
+        assert nativeBuildConfigValue.buildTargetsCommand != null;
+        nativeBuildConfigValue.buildTargetsCommand =
+                CmakeUtils.getBuildTargetsCommand(
+                        getCmakeExecutable(),
+                        getOutputFolder(getJsonFolder(), abiConfig.getAbiName()));
 
         CodeModel codeModel = cmakeServer.codemodel();
         if (!ServerUtils.isCodeModelValid(codeModel)) {
@@ -541,20 +539,42 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
 
         nativeLibraryValue.files = new ArrayList<>();
         nativeLibraryValue.headers = new ArrayList<>();
+
+        // Maps each source file to the index of the corresponding strings table entry, which
+        // contains the build flags for that source file.
+        // It is important to not use a File or Path as the key to the dictionary, but instead
+        // use the corresponding normalized path. Two File/Path objects with the same normalized
+        // string representation may not be equivalent due to "../" or "./" substrings in them
+        // (b/123123307).
         Map<String, Integer> compilationDatabaseFlags = Maps.newHashMap();
 
         int workingDirectoryOrdinal = strings.intern(normalizeFilePath(workingDirectory));
         for (FileGroup fileGroup : target.fileGroups) {
             for (String source : fileGroup.sources) {
-                Path sourceFilePath = Paths.get(target.sourceDirectory, source).normalize();
-                // It is important to not use sourceFile as the key to any dictionary, but instead
-                // use its normalized path, because the the File object may contain "../" or "./" in
-                // it (b/123123307).
-                if (sourceFilePath.toString().isEmpty()) {
-                    // If the normalized path is empty, use the non-normalized path to protect the
-                    // rest of the code and also make it more debuggable.
+                // CMake returns an absolute path or a path relative to the source directory,
+                // whichever one is shorter.
+                Path sourceFilePath = Paths.get(source);
+                if (!sourceFilePath.isAbsolute()) {
                     sourceFilePath = Paths.get(target.sourceDirectory, source);
                 }
+
+                // Even if CMake returns an absolute path, we still call normalize() to be symmetric
+                // with indexCompilationDatabase() which always uses normalized paths.
+                Path normalizedSourceFilePath = sourceFilePath.normalize();
+                if (!normalizedSourceFilePath.toString().isEmpty()) {
+                    sourceFilePath = normalizedSourceFilePath;
+                } else {
+                    // Normalized path should not be empty, unless CMake sends us really bogus data
+                    // such as such as sourceDirectory="a/b", source="../../". This is not supposed
+                    // to happen because (1) sourceDirectory should not be relative, and (2) source
+                    // should contain at least a file name.
+                    //
+                    // Although it is very unlikely, this branch protects against that case by using
+                    // the non-normalized path, which also makes the case more debuggable.
+                    //
+                    // Fall through intended.
+                }
+
                 File sourceFile = sourceFilePath.toFile();
 
                 if (hasCmakeHeaderFileExtensions(sourceFile)) {

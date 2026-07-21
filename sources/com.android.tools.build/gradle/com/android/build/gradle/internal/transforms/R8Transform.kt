@@ -54,7 +54,7 @@ import java.nio.file.Path
  * is dex or class files, depending on whether we are building an APK, or AAR.
  */
 class R8Transform(
-    private val bootClasspath: Lazy<List<File>>,
+    private val bootClasspath: FileCollection,
     private val minSdkVersion: Int,
     private val isDebuggable: Boolean,
     private val java8Support: VariantScope.Java8LangSupport,
@@ -86,7 +86,7 @@ class R8Transform(
         outputProguardMapping: File
     ) :
             this(
-                lazy { scope.globalScope.fullBootClasspath },
+                scope.globalScope.fullBootClasspath,
                 scope.minSdkVersion.featureLevel,
                 scope.variantConfiguration.buildType.isDebuggable,
                 scope.java8LangSupportType,
@@ -122,7 +122,8 @@ class R8Transform(
         mutableListOf(
                 SecondaryFile.nonIncremental(allConfigurationFiles),
                 SecondaryFile.nonIncremental(mainDexListFiles),
-                SecondaryFile.nonIncremental(mainDexRulesFiles)
+                SecondaryFile.nonIncremental(mainDexRulesFiles),
+                SecondaryFile.nonIncremental(inputProguardMapping)
         )
 
     override fun getParameterInputs(): MutableMap<String, Any> =
@@ -254,7 +255,7 @@ class R8Transform(
         Files.createDirectories(javaResources.toPath().parent)
 
         val bootClasspathInputs =
-            getAllFiles(transformInvocation.referencedInputs) + bootClasspath.value
+            getAllFiles(transformInvocation.referencedInputs) + bootClasspath
 
         runR8(
             inputClasses,
