@@ -44,7 +44,6 @@ import com.android.builder.internal.compiler.RenderScriptProcessor;
 import com.android.builder.internal.compiler.ShaderProcessor;
 import com.android.builder.internal.packaging.IncrementalPackager;
 import com.android.builder.model.SigningConfig;
-import com.android.builder.model.SyncIssue;
 import com.android.builder.packaging.PackagerException;
 import com.android.builder.sdk.SdkInfo;
 import com.android.builder.sdk.TargetInfo;
@@ -209,7 +208,7 @@ public class AndroidBuilder {
 
         if (mTargetInfo.getBuildTools().getRevision().compareTo(MIN_BUILD_TOOLS_REV) < 0) {
             issueReporter.reportError(
-                    SyncIssue.TYPE_BUILD_TOOLS_TOO_LOW,
+                    EvalIssueReporter.Type.BUILD_TOOLS_TOO_LOW,
                     String.format(
                             "The SDK Build Tools revision (%1$s) is too low for project '%2$s'. "
                                     + "Minimum required is %3$s",
@@ -812,7 +811,7 @@ public class AndroidBuilder {
             // For each dependency, load its symbol file.
             Set<SymbolTable> depSymbolTables =
                     SymbolUtils.loadDependenciesSymbolTables(
-                            aaptConfig.getLibrarySymbolTableFiles(), mainPackageName);
+                            aaptConfig.getLibrarySymbolTableFiles());
 
             boolean finalIds = true;
             if (aaptConfig.getVariantType() == VariantType.LIBRARY) {
@@ -991,7 +990,7 @@ public class AndroidBuilder {
             @NonNull File sourceOutputDir,
             @Nullable File packagedOutputDir,
             @Nullable Collection<String> packageWhitelist,
-            @NonNull List<File> importFolders,
+            @NonNull Iterable<File> importFolders,
             @Nullable DependencyFileProcessor dependencyFileProcessor,
             @NonNull ProcessOutputHandler processOutputHandler)
             throws IOException, InterruptedException, ProcessException {

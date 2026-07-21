@@ -66,7 +66,7 @@ class VariantPropertiesImpl(
             if (checkSeal()) {
                 if (value !is SigningConfigImpl) {
                     issueReporter.reportError(
-                            SyncIssue.TYPE_GENERIC,
+                            EvalIssueReporter.Type.GENERIC,
                             "BuildType.signingConfig set with an object not from android.signingConfigs")
                 }
                 field = value
@@ -80,9 +80,7 @@ class VariantPropertiesImpl(
         }
 
     override fun buildConfigField(type: String, name: String, value: String) {
-        if (checkSeal()) {
-            _buildConfigFields.add(TypedValueImpl(type, name, value))
-        }
+        _buildConfigFields.add(TypedValueImpl(type, name, value))
     }
 
     override var resValues: MutableList<TypedValue>
@@ -177,6 +175,6 @@ class VariantPropertiesImpl(
         _externalNativeBuildOptions.instance?.seal()
         _shaders.instance?.seal()
         // enforced in the setter.
-        (signingConfig as SigningConfigImpl).seal()
+        (signingConfig as? SigningConfigImpl)?.seal()
     }
 }

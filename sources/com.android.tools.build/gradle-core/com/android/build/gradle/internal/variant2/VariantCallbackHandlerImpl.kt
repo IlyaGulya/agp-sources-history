@@ -19,38 +19,38 @@ package com.android.build.gradle.internal.variant2
 import com.android.build.api.dsl.extension.VariantCallbackHandler
 import com.android.build.api.dsl.variant.Variant
 import com.android.builder.errors.EvalIssueReporter
-import com.android.builder.model.SyncIssue
+import com.android.builder.errors.EvalIssueReporter.Type
 import org.gradle.api.Action
 
 internal class VariantCallbackHandlerImpl<T: Variant> private constructor(
         private val predicate: VariantPredicate,
-        private val actionRegister: ActionRegister,
+        private val variantCallbackHolder: VariantCallbackHolder,
         private val issueReporter: EvalIssueReporter)
     : VariantCallbackHandler<T> {
 
     internal constructor(
-            actionRegister: ActionRegister,
+            variantCallbackHolder: VariantCallbackHolder,
             issueReporter: EvalIssueReporter)
-            : this(VariantPredicate(issueReporter), actionRegister, issueReporter)
+            : this(VariantPredicate(issueReporter), variantCallbackHolder, issueReporter)
 
     override fun withName(name: String): VariantCallbackHandler<T> {
         return VariantCallbackHandlerImpl(
-                predicate.cloneWithName(name), actionRegister, issueReporter)
+                predicate.cloneWithName(name), variantCallbackHolder, issueReporter)
     }
 
     override fun <S : Variant> withType(variantClass: Class<S>): VariantCallbackHandler<S> {
         return VariantCallbackHandlerImpl(
-                predicate.cloneWithClass(variantClass), actionRegister, issueReporter)
+                predicate.cloneWithClass(variantClass), variantCallbackHolder, issueReporter)
     }
 
     override fun withBuildType(name: String): VariantCallbackHandler<T> {
         return VariantCallbackHandlerImpl(
-                predicate.cloneWithBuildType(name), actionRegister, issueReporter)
+                predicate.cloneWithBuildType(name), variantCallbackHolder, issueReporter)
     }
 
     override fun withProductFlavor(name: String): VariantCallbackHandler<T> {
         return VariantCallbackHandlerImpl(
-                predicate.cloneWithFlavor(name), actionRegister, issueReporter)
+                predicate.cloneWithFlavor(name), variantCallbackHolder, issueReporter)
     }
 
     override fun all(action: Action<T>) {
@@ -75,7 +75,7 @@ internal class VariantCallbackHandlerImpl<T: Variant> private constructor(
 
     private fun <V: Variant> registerAction(action: Action<V>, predicate: VariantPredicate) {
         @Suppress("UNCHECKED_CAST")
-        actionRegister.register(predicate, action as Action<Variant>)
+        variantCallbackHolder.register(predicate, action as Action<Variant>)
     }
 }
 
@@ -126,7 +126,7 @@ data class VariantPredicate(
     internal fun cloneWithName(name: String): VariantPredicate {
         if (this.name != null) {
             issueReporter.reportError(
-                    SyncIssue.TYPE_GENERIC,"Already filtered on variant name")
+                    Type.GENERIC,"Already filtered on variant name")
         }
 
         return VariantPredicate(
@@ -143,7 +143,7 @@ data class VariantPredicate(
     internal fun cloneWithClass(variantClass: Class<*>): VariantPredicate {
         if (this.theClass != null) {
             issueReporter.reportError(
-                    SyncIssue.TYPE_GENERIC,"Already filtered on variant type")
+                    Type.GENERIC,"Already filtered on variant type")
         }
 
         return VariantPredicate(
@@ -161,7 +161,7 @@ data class VariantPredicate(
     internal fun cloneWithBuildType(buildTypeName: String): VariantPredicate {
         if (this.buildTypeName != null) {
             issueReporter.reportError(
-                    SyncIssue.TYPE_GENERIC,"Already filtered on build type name")
+                    Type.GENERIC,"Already filtered on build type name")
         }
 
         return VariantPredicate(

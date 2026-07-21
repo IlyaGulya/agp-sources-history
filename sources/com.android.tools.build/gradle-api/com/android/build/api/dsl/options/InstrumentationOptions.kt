@@ -17,7 +17,9 @@
 package com.android.build.api.dsl.options
 
 import com.android.build.api.dsl.Initializable
+import org.gradle.api.Incubating
 
+@Incubating
 interface InstrumentationOptions : Initializable<InstrumentationOptions> {
 
     /**
@@ -54,15 +56,15 @@ interface InstrumentationOptions : Initializable<InstrumentationOptions> {
     </pre> *
      */
     /** Sets the test instrumentation runner custom arguments.  */
-    var instrumentationRunnerArguments: Map<String, String>
+    var instrumentationRunnerArguments: MutableMap<String, String>
 
     /**
      * See [instrumentation](http://developer.android.com/guide/topics/manifest/instrumentation-element.html).
      */
-    val handleProfiling: Boolean?
+    var handleProfiling: Boolean?
 
     /**
      * See [instrumentation](http://developer.android.com/guide/topics/manifest/instrumentation-element.html).
      */
-    val functionalTest: Boolean?
+    var functionalTest: Boolean?
 }

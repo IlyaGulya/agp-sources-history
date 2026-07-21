@@ -29,7 +29,7 @@ import com.android.build.gradle.internal.api.dsl.variant.SealableVariant
 import com.android.builder.core.VariantType
 import com.android.builder.errors.EvalIssueReporter
 
-class LibAndroidTestVariantFactory(private val issueReporter: EvalIssueReporter)
+class LibAndroidTestVariantFactory
     : VariantFactory2<LibraryExtensionImpl> {
 
     override val generatedType: VariantType = VariantType.ANDROID_TEST
@@ -43,18 +43,18 @@ class LibAndroidTestVariantFactory(private val issueReporter: EvalIssueReporter)
             buildTypOrVariant: BuildTypeOrVariantImpl,
             variantExtensionProperties: VariantOrExtensionPropertiesImpl,
             commonVariantProperties: CommonVariantPropertiesImpl,
-            variantMap: Map<VariantType, Map<Variant, Variant>>)
+            variantDispatcher: VariantDispatcher,
+            issueReporter: EvalIssueReporter)
             : SealableVariant {
 
-        // FIXME
-        return AppVariantImpl(
+        return AndroidTestVariantImpl(
                 VariantType.ANDROID_TEST,
                 variantProperties,
                 productFlavorOrVariant,
                 buildTypOrVariant,
                 variantExtensionProperties,
                 commonVariantProperties,
-                variantMap,
+                variantDispatcher,
                 issueReporter)
     }
 

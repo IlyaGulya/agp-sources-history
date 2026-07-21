@@ -29,8 +29,7 @@ import com.android.build.gradle.internal.api.dsl.variant.SealableVariant
 import com.android.builder.core.VariantType
 import com.android.builder.errors.EvalIssueReporter
 
-class TestVariantFactory(private val issueReporter: EvalIssueReporter)
-        : VariantFactory2<TestExtensionImpl> {
+class TestVariantFactory : VariantFactory2<TestExtensionImpl> {
 
     override val generatedType: VariantType = VariantType.DEFAULT
     override val testedBy: List<VariantType> = listOf()
@@ -43,9 +42,11 @@ class TestVariantFactory(private val issueReporter: EvalIssueReporter)
             buildTypOrVariant: BuildTypeOrVariantImpl,
             variantExtensionProperties: VariantOrExtensionPropertiesImpl,
             commonVariantProperties: CommonVariantPropertiesImpl,
-            variantMap: Map<VariantType, Map<Variant, Variant>>)
+            variantDispatcher: VariantDispatcher,
+            issueReporter: EvalIssueReporter)
             : SealableVariant {
 
+        // FIXME
         return AppVariantImpl(
                 VariantType.DEFAULT,
                 variantProperties,
@@ -53,7 +54,7 @@ class TestVariantFactory(private val issueReporter: EvalIssueReporter)
                 buildTypOrVariant,
                 variantExtensionProperties,
                 commonVariantProperties,
-                variantMap,
+                variantDispatcher,
                 issueReporter)
     }
 

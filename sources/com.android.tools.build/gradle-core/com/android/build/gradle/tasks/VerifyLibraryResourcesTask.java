@@ -18,6 +18,7 @@ package com.android.build.gradle.tasks;
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.annotations.VisibleForTesting;
 import com.android.build.gradle.internal.TaskManager;
 import com.android.build.gradle.internal.aapt.AaptGeneration;
 import com.android.build.gradle.internal.aapt.AaptGradleFactory;
@@ -42,6 +43,7 @@ import com.android.ide.common.blame.MergingLog;
 import com.android.ide.common.blame.MergingLogRewriter;
 import com.android.ide.common.blame.ParsingProcessOutputHandler;
 import com.android.ide.common.blame.parser.ToolOutputParser;
+import com.android.ide.common.blame.parser.aapt.Aapt2OutputParser;
 import com.android.ide.common.blame.parser.aapt.AaptOutputParser;
 import com.android.ide.common.process.ProcessException;
 import com.android.ide.common.process.ProcessOutputHandler;
@@ -121,7 +123,11 @@ public class VerifyLibraryResourcesTask extends IncrementalTask {
                 new MergingLogRewriter(mergingLog::find, builder.getMessageReceiver());
         ProcessOutputHandler processOutputHandler =
                 new ParsingProcessOutputHandler(
-                        new ToolOutputParser(new AaptOutputParser(), getILogger()),
+                        new ToolOutputParser(
+                                aaptGeneration == AaptGeneration.AAPT_V1
+                                        ? new AaptOutputParser()
+                                        : new Aapt2OutputParser(),
+                                getILogger()),
                         mergingLogRewriter);
 
         Collection<BuildOutput> manifestsOutputs = BuildOutputs.load(taskInputType, manifestFiles);
@@ -143,7 +149,7 @@ public class VerifyLibraryResourcesTask extends IncrementalTask {
             } else {
                 // If we're using AAPT2 we need to compile the resources into the compiled directory
                 // first as we need the .flat files for linking.
-                compileResources(inputs, compiledDirectory, aapt);
+                compileResources(inputs, compiledDirectory, aapt, inputDirectory.getSingleFile());
                 linkResources(compiledDirectory, aapt, manifestFile);
             }
         }
@@ -157,17 +163,26 @@ public class VerifyLibraryResourcesTask extends IncrementalTask {
      * @param inputs the new, changed or modified files that need to be compiled or removed.
      * @param outDirectory the directory containing compiled resources.
      * @param aapt AAPT tool to execute the resource compiling.
+     * @param mergedResDirectory directory containing merged uncompiled resources.
      */
-    private static void compileResources(
-            @NonNull Map<File, FileStatus> inputs, @NonNull File outDirectory, @NonNull Aapt aapt)
+    @VisibleForTesting
+    public static void compileResources(
+            @NonNull Map<File, FileStatus> inputs,
+            @NonNull File outDirectory,
+            @NonNull Aapt aapt,
+            @NonNull File mergedResDirectory)
             throws AaptException, ExecutionException, InterruptedException, IOException {
         Preconditions.checkState(
                 !(aapt instanceof AaptV1),
                 "Library resources should be compiled for verification using AAPT2");
 
-        List<Future<File>> compiling = new ArrayList();
+        List<Future<File>> compiling = new ArrayList<>();
 
         for (Map.Entry<File, FileStatus> input : inputs.entrySet()) {
+            // Ignore files and directories directly under the merged resources directory.
+            if (input.getKey().getParentFile().equals(mergedResDirectory)) {
+                continue;
+            }
             switch (input.getValue()) {
                 case NEW:
                 case CHANGED:

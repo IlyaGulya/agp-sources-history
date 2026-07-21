@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.builder.errors
+package com.android.build.gradle.internal.errors
 
 /**
  * Reporter for issues during evaluation.
@@ -26,9 +26,9 @@ package com.android.builder.errors
 interface DeprecationReporter {
 
     /** Enum for deprecated element removal target.  */
-    enum class DeprecationTarget  constructor(val version: String) {
-        // Object will be removed in 4.0
-        VERSION_4_0("4.0")
+    enum class DeprecationTarget  constructor(val removalTime: String) {
+        // Object will be removed EOY2018
+        EOY2018("at the end of 2018")
     }
 
     /**
@@ -85,4 +85,17 @@ interface DeprecationReporter {
             url: String,
             deprecationTarget: DeprecationTarget)
 
+    /**
+     * Reports a deprecation usage in the DSL/API.
+     *
+     * @param newConfiguration the name of the [org.gradle.api.artifacts.Configuration] to use
+     * instead
+     * @param oldConfiguration the name of the deprecated [org.gradle.api.artifacts.Configuration]
+     * @param deprecationTarget when the deprecated element is going to be removed. A line about the
+     * timing is added to the message.
+     */
+    fun reportDeprecatedConfiguration(
+            newConfiguration: String,
+            oldConfiguration: String,
+            deprecationTarget: DeprecationTarget)
 }

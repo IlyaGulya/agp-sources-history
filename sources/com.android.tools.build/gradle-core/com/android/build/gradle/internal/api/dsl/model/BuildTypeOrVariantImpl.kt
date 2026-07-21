@@ -21,22 +21,19 @@ import com.android.build.api.dsl.options.PostprocessingOptions
 import com.android.build.gradle.internal.api.dsl.options.PostprocessingOptionsImpl
 import com.android.build.gradle.internal.api.dsl.sealing.OptionalSupplier
 import com.android.build.gradle.internal.api.dsl.sealing.SealableObject
-import com.android.builder.errors.DeprecationReporter
+import com.android.build.gradle.internal.errors.DeprecationReporter
 import com.android.builder.errors.EvalIssueReporter
 import org.gradle.api.Action
 
 class BuildTypeOrVariantImpl(
             private val typeName: String,
-            debuggable: Boolean,
-            embedMicroApp: Boolean,
-            crunchPngs: Boolean,
             private val deprecationReporter: DeprecationReporter,
             issueReporter: EvalIssueReporter)
         : SealableObject(issueReporter), BuildTypeOrVariant {
 
     private val _postprocessing = OptionalSupplier({ PostprocessingOptionsImpl(issueReporter) })
 
-    override var debuggable: Boolean = debuggable
+    override var debuggable: Boolean = false
         set(value) {
             if (checkSeal()) {
                 field = value
@@ -85,14 +82,14 @@ class BuildTypeOrVariantImpl(
             }
         }
 
-    override var embedMicroApp: Boolean = embedMicroApp
+    override var embedMicroApp: Boolean = true
         set(value) {
             if (checkSeal()) {
                 field = value
             }
         }
 
-    override var crunchPngs: Boolean = crunchPngs
+    override var crunchPngs: Boolean = true
         set(value) {
             if (checkSeal()) {
                 field = value
@@ -134,7 +131,7 @@ class BuildTypeOrVariantImpl(
         deprecationReporter.reportDeprecatedUsage(
                 "$typeName.debuggable",
                 "$typeName.isDebuggable",
-                DeprecationReporter.DeprecationTarget.VERSION_4_0)
+                DeprecationReporter.DeprecationTarget.EOY2018)
         return debuggable
     }
 
@@ -143,7 +140,7 @@ class BuildTypeOrVariantImpl(
         deprecationReporter.reportDeprecatedUsage(
                 "$typeName.testCoverageEnabled",
                 "$typeName.isTestCoverageEnabled",
-                DeprecationReporter.DeprecationTarget.VERSION_4_0)
+                DeprecationReporter.DeprecationTarget.EOY2018)
         return testCoverageEnabled
     }
 
@@ -152,7 +149,7 @@ class BuildTypeOrVariantImpl(
         deprecationReporter.reportDeprecatedUsage(
                 "$typeName.testCoverageEnabled",
                 "$typeName.isTestCoverageEnabled",
-                DeprecationReporter.DeprecationTarget.VERSION_4_0)
+                DeprecationReporter.DeprecationTarget.EOY2018)
         return embedMicroApp
     }
 
@@ -161,7 +158,7 @@ class BuildTypeOrVariantImpl(
         deprecationReporter.reportDeprecatedUsage(
                 "$typeName.pseudoLocalesEnabled",
                 "$typeName.isPseudoLocalesEnabled",
-                DeprecationReporter.DeprecationTarget.VERSION_4_0)
+                DeprecationReporter.DeprecationTarget.EOY2018)
         return pseudoLocalesEnabled
     }
 
@@ -170,7 +167,7 @@ class BuildTypeOrVariantImpl(
         deprecationReporter.reportDeprecatedUsage(
                 "$typeName.jniDebuggable",
                 "$typeName.isJniDebuggable",
-                DeprecationReporter.DeprecationTarget.VERSION_4_0)
+                DeprecationReporter.DeprecationTarget.EOY2018)
         return jniDebuggable
     }
 
@@ -179,7 +176,7 @@ class BuildTypeOrVariantImpl(
         deprecationReporter.reportDeprecatedUsage(
                 "$typeName.renderscriptDebuggable",
                 "$typeName.isRenderscriptDebuggable",
-                DeprecationReporter.DeprecationTarget.VERSION_4_0)
+                DeprecationReporter.DeprecationTarget.EOY2018)
         return renderscriptDebuggable
     }
 
@@ -188,7 +185,7 @@ class BuildTypeOrVariantImpl(
         deprecationReporter.reportDeprecatedUsage(
                 "$typeName.zipAlignEnabled",
                 "$typeName.isZipAlignEnabled",
-                DeprecationReporter.DeprecationTarget.VERSION_4_0)
+                DeprecationReporter.DeprecationTarget.EOY2018)
         return zipAlignEnabled
     }
 }

@@ -20,6 +20,8 @@ import com.android.SdkConstants
 import com.android.annotations.VisibleForTesting
 import com.android.ide.common.res2.CompileResourceRequest
 import com.android.ide.common.res2.QueueableResourceCompiler
+import com.android.ide.common.xml.XmlFormatPreferences
+import com.android.ide.common.xml.XmlFormatStyle
 import com.android.ide.common.xml.XmlPrettyPrinter
 import com.android.utils.FileUtils
 import com.android.utils.PositionXmlParser
@@ -41,6 +43,7 @@ class NamespaceRemover : QueueableResourceCompiler {
     override fun compile(request: CompileResourceRequest): Future<File> {
         val input = request.input
         val output = compileOutputFor(request)
+        FileUtils.mkdirs(output.parentFile)
 
         if (input.name.endsWith(SdkConstants.DOT_XML)) {
             // Remove namespace.
@@ -55,7 +58,6 @@ class NamespaceRemover : QueueableResourceCompiler {
 
     override fun compileOutputFor(request: CompileResourceRequest): File {
         val parentDir = File(request.output, request.folderName)
-        FileUtils.mkdirs(parentDir)
         return File(parentDir, request.input.name)
     }
 
@@ -80,10 +82,17 @@ class NamespaceRemover : QueueableResourceCompiler {
      */
     @VisibleForTesting
     @Throws(ParserConfigurationException::class, SAXException::class, IOException::class)
-    fun rewrite(input: InputStream): String {
+    fun rewrite(input: InputStream, lineSeparator: String = System.lineSeparator()): String {
         val doc = PositionXmlParser.parse(input)
+
         removeNamespaces(doc)
-        return XmlPrettyPrinter.prettyPrint(doc, false)
+
+        return XmlPrettyPrinter.prettyPrint(
+                doc,
+                XmlFormatPreferences.defaults(),
+                XmlFormatStyle.get(doc),
+                lineSeparator,
+                false)
     }
 
     /*
