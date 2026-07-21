@@ -279,4 +279,48 @@ public interface MainVariantInfoOrBuilder extends
    */
   com.android.builder.model.proto.ide.FileOrBuilder getGeneratedAssetFoldersOrBuilder(
       int index);
+
+  /**
+   * <pre>
+   * Folders containing resources generated during the build and should be included in the main AAR.
+   * </pre>
+   *
+   * <code>repeated .File generated_resource_folders = 9;</code>
+   */
+  java.util.List<com.android.builder.model.proto.ide.File> 
+      getGeneratedResourceFoldersList();
+  /**
+   * <pre>
+   * Folders containing resources generated during the build and should be included in the main AAR.
+   * </pre>
+   *
+   * <code>repeated .File generated_resource_folders = 9;</code>
+   */
+  com.android.builder.model.proto.ide.File getGeneratedResourceFolders(int index);
+  /**
+   * <pre>
+   * Folders containing resources generated during the build and should be included in the main AAR.
+   * </pre>
+   *
+   * <code>repeated .File generated_resource_folders = 9;</code>
+   */
+  int getGeneratedResourceFoldersCount();
+  /**
+   * <pre>
+   * Folders containing resources generated during the build and should be included in the main AAR.
+   * </pre>
+   *
+   * <code>repeated .File generated_resource_folders = 9;</code>
+   */
+  java.util.List<? extends com.android.builder.model.proto.ide.FileOrBuilder> 
+      getGeneratedResourceFoldersOrBuilderList();
+  /**
+   * <pre>
+   * Folders containing resources generated during the build and should be included in the main AAR.
+   * </pre>
+   *
+   * <code>repeated .File generated_resource_folders = 9;</code>
+   */
+  com.android.builder.model.proto.ide.FileOrBuilder getGeneratedResourceFoldersOrBuilder(
+      int index);
 }

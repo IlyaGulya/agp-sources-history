@@ -21,6 +21,7 @@ private static final long serialVersionUID = 0L;
     assembleTaskName_ = "";
     kotlinCompileTaskName_ = "";
     extraClassesFolders_ = java.util.Collections.emptyList();
+    generatedSourceFolders_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -550,6 +551,67 @@ private static final long serialVersionUID = 0L;
     return extraClassesFolders_.get(index);
   }
 
+  public static final int GENERATED_SOURCE_FOLDERS_FIELD_NUMBER = 9;
+  @SuppressWarnings("serial")
+  private java.util.List<com.android.builder.model.proto.ide.File> generatedSourceFolders_;
+  /**
+   * <pre>
+   * Folders containing generated source files.
+   * </pre>
+   *
+   * <code>repeated .File generated_source_folders = 9;</code>
+   */
+  @java.lang.Override
+  public java.util.List<com.android.builder.model.proto.ide.File> getGeneratedSourceFoldersList() {
+    return generatedSourceFolders_;
+  }
+  /**
+   * <pre>
+   * Folders containing generated source files.
+   * </pre>
+   *
+   * <code>repeated .File generated_source_folders = 9;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends com.android.builder.model.proto.ide.FileOrBuilder> 
+      getGeneratedSourceFoldersOrBuilderList() {
+    return generatedSourceFolders_;
+  }
+  /**
+   * <pre>
+   * Folders containing generated source files.
+   * </pre>
+   *
+   * <code>repeated .File generated_source_folders = 9;</code>
+   */
+  @java.lang.Override
+  public int getGeneratedSourceFoldersCount() {
+    return generatedSourceFolders_.size();
+  }
+  /**
+   * <pre>
+   * Folders containing generated source files.
+   * </pre>
+   *
+   * <code>repeated .File generated_source_folders = 9;</code>
+   */
+  @java.lang.Override
+  public com.android.builder.model.proto.ide.File getGeneratedSourceFolders(int index) {
+    return generatedSourceFolders_.get(index);
+  }
+  /**
+   * <pre>
+   * Folders containing generated source files.
+   * </pre>
+   *
+   * <code>repeated .File generated_source_folders = 9;</code>
+   */
+  @java.lang.Override
+  public com.android.builder.model.proto.ide.FileOrBuilder getGeneratedSourceFoldersOrBuilder(
+      int index) {
+    return generatedSourceFolders_.get(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -588,6 +650,9 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < extraClassesFolders_.size(); i++) {
       output.writeMessage(8, extraClassesFolders_.get(i));
     }
+    for (int i = 0; i < generatedSourceFolders_.size(); i++) {
+      output.writeMessage(9, generatedSourceFolders_.get(i));
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -625,6 +690,10 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < extraClassesFolders_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(8, extraClassesFolders_.get(i));
+    }
+    for (int i = 0; i < generatedSourceFolders_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(9, generatedSourceFolders_.get(i));
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -677,6 +746,8 @@ private static final long serialVersionUID = 0L;
     }
     if (!getExtraClassesFoldersList()
         .equals(other.getExtraClassesFoldersList())) return false;
+    if (!getGeneratedSourceFoldersList()
+        .equals(other.getGeneratedSourceFoldersList())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -719,6 +790,10 @@ private static final long serialVersionUID = 0L;
     if (getExtraClassesFoldersCount() > 0) {
       hash = (37 * hash) + EXTRA_CLASSES_FOLDERS_FIELD_NUMBER;
       hash = (53 * hash) + getExtraClassesFoldersList().hashCode();
+    }
+    if (getGeneratedSourceFoldersCount() > 0) {
+      hash = (37 * hash) + GENERATED_SOURCE_FOLDERS_FIELD_NUMBER;
+      hash = (53 * hash) + getGeneratedSourceFoldersList().hashCode();
     }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
@@ -852,6 +927,7 @@ private static final long serialVersionUID = 0L;
         getUnitTestInfoFieldBuilder();
         getInstrumentedTestInfoFieldBuilder();
         getExtraClassesFoldersFieldBuilder();
+        getGeneratedSourceFoldersFieldBuilder();
       }
     }
     @java.lang.Override
@@ -884,6 +960,13 @@ private static final long serialVersionUID = 0L;
         extraClassesFoldersBuilder_.clear();
       }
       bitField0_ = (bitField0_ & ~0x00000080);
+      if (generatedSourceFoldersBuilder_ == null) {
+        generatedSourceFolders_ = java.util.Collections.emptyList();
+      } else {
+        generatedSourceFolders_ = null;
+        generatedSourceFoldersBuilder_.clear();
+      }
+      bitField0_ = (bitField0_ & ~0x00000100);
       return this;
     }
 
@@ -925,6 +1008,15 @@ private static final long serialVersionUID = 0L;
         result.extraClassesFolders_ = extraClassesFolders_;
       } else {
         result.extraClassesFolders_ = extraClassesFoldersBuilder_.build();
+      }
+      if (generatedSourceFoldersBuilder_ == null) {
+        if (((bitField0_ & 0x00000100) != 0)) {
+          generatedSourceFolders_ = java.util.Collections.unmodifiableList(generatedSourceFolders_);
+          bitField0_ = (bitField0_ & ~0x00000100);
+        }
+        result.generatedSourceFolders_ = generatedSourceFolders_;
+      } else {
+        result.generatedSourceFolders_ = generatedSourceFoldersBuilder_.build();
       }
     }
 
@@ -1033,6 +1125,32 @@ private static final long serialVersionUID = 0L;
           }
         }
       }
+      if (generatedSourceFoldersBuilder_ == null) {
+        if (!other.generatedSourceFolders_.isEmpty()) {
+          if (generatedSourceFolders_.isEmpty()) {
+            generatedSourceFolders_ = other.generatedSourceFolders_;
+            bitField0_ = (bitField0_ & ~0x00000100);
+          } else {
+            ensureGeneratedSourceFoldersIsMutable();
+            generatedSourceFolders_.addAll(other.generatedSourceFolders_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.generatedSourceFolders_.isEmpty()) {
+          if (generatedSourceFoldersBuilder_.isEmpty()) {
+            generatedSourceFoldersBuilder_.dispose();
+            generatedSourceFoldersBuilder_ = null;
+            generatedSourceFolders_ = other.generatedSourceFolders_;
+            bitField0_ = (bitField0_ & ~0x00000100);
+            generatedSourceFoldersBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getGeneratedSourceFoldersFieldBuilder() : null;
+          } else {
+            generatedSourceFoldersBuilder_.addAllMessages(other.generatedSourceFolders_);
+          }
+        }
+      }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
@@ -1113,6 +1231,19 @@ private static final long serialVersionUID = 0L;
               }
               break;
             } // case 66
+            case 74: {
+              com.android.builder.model.proto.ide.File m =
+                  input.readMessage(
+                      com.android.builder.model.proto.ide.File.parser(),
+                      extensionRegistry);
+              if (generatedSourceFoldersBuilder_ == null) {
+                ensureGeneratedSourceFoldersIsMutable();
+                generatedSourceFolders_.add(m);
+              } else {
+                generatedSourceFoldersBuilder_.addMessage(m);
+              }
+              break;
+            } // case 74
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -2298,6 +2429,318 @@ private static final long serialVersionUID = 0L;
         extraClassesFolders_ = null;
       }
       return extraClassesFoldersBuilder_;
+    }
+
+    private java.util.List<com.android.builder.model.proto.ide.File> generatedSourceFolders_ =
+      java.util.Collections.emptyList();
+    private void ensureGeneratedSourceFoldersIsMutable() {
+      if (!((bitField0_ & 0x00000100) != 0)) {
+        generatedSourceFolders_ = new java.util.ArrayList<com.android.builder.model.proto.ide.File>(generatedSourceFolders_);
+        bitField0_ |= 0x00000100;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        com.android.builder.model.proto.ide.File, com.android.builder.model.proto.ide.File.Builder, com.android.builder.model.proto.ide.FileOrBuilder> generatedSourceFoldersBuilder_;
+
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public java.util.List<com.android.builder.model.proto.ide.File> getGeneratedSourceFoldersList() {
+      if (generatedSourceFoldersBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(generatedSourceFolders_);
+      } else {
+        return generatedSourceFoldersBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public int getGeneratedSourceFoldersCount() {
+      if (generatedSourceFoldersBuilder_ == null) {
+        return generatedSourceFolders_.size();
+      } else {
+        return generatedSourceFoldersBuilder_.getCount();
+      }
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public com.android.builder.model.proto.ide.File getGeneratedSourceFolders(int index) {
+      if (generatedSourceFoldersBuilder_ == null) {
+        return generatedSourceFolders_.get(index);
+      } else {
+        return generatedSourceFoldersBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public Builder setGeneratedSourceFolders(
+        int index, com.android.builder.model.proto.ide.File value) {
+      if (generatedSourceFoldersBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureGeneratedSourceFoldersIsMutable();
+        generatedSourceFolders_.set(index, value);
+        onChanged();
+      } else {
+        generatedSourceFoldersBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public Builder setGeneratedSourceFolders(
+        int index, com.android.builder.model.proto.ide.File.Builder builderForValue) {
+      if (generatedSourceFoldersBuilder_ == null) {
+        ensureGeneratedSourceFoldersIsMutable();
+        generatedSourceFolders_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        generatedSourceFoldersBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public Builder addGeneratedSourceFolders(com.android.builder.model.proto.ide.File value) {
+      if (generatedSourceFoldersBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureGeneratedSourceFoldersIsMutable();
+        generatedSourceFolders_.add(value);
+        onChanged();
+      } else {
+        generatedSourceFoldersBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public Builder addGeneratedSourceFolders(
+        int index, com.android.builder.model.proto.ide.File value) {
+      if (generatedSourceFoldersBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureGeneratedSourceFoldersIsMutable();
+        generatedSourceFolders_.add(index, value);
+        onChanged();
+      } else {
+        generatedSourceFoldersBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public Builder addGeneratedSourceFolders(
+        com.android.builder.model.proto.ide.File.Builder builderForValue) {
+      if (generatedSourceFoldersBuilder_ == null) {
+        ensureGeneratedSourceFoldersIsMutable();
+        generatedSourceFolders_.add(builderForValue.build());
+        onChanged();
+      } else {
+        generatedSourceFoldersBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public Builder addGeneratedSourceFolders(
+        int index, com.android.builder.model.proto.ide.File.Builder builderForValue) {
+      if (generatedSourceFoldersBuilder_ == null) {
+        ensureGeneratedSourceFoldersIsMutable();
+        generatedSourceFolders_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        generatedSourceFoldersBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public Builder addAllGeneratedSourceFolders(
+        java.lang.Iterable<? extends com.android.builder.model.proto.ide.File> values) {
+      if (generatedSourceFoldersBuilder_ == null) {
+        ensureGeneratedSourceFoldersIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, generatedSourceFolders_);
+        onChanged();
+      } else {
+        generatedSourceFoldersBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public Builder clearGeneratedSourceFolders() {
+      if (generatedSourceFoldersBuilder_ == null) {
+        generatedSourceFolders_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000100);
+        onChanged();
+      } else {
+        generatedSourceFoldersBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public Builder removeGeneratedSourceFolders(int index) {
+      if (generatedSourceFoldersBuilder_ == null) {
+        ensureGeneratedSourceFoldersIsMutable();
+        generatedSourceFolders_.remove(index);
+        onChanged();
+      } else {
+        generatedSourceFoldersBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public com.android.builder.model.proto.ide.File.Builder getGeneratedSourceFoldersBuilder(
+        int index) {
+      return getGeneratedSourceFoldersFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public com.android.builder.model.proto.ide.FileOrBuilder getGeneratedSourceFoldersOrBuilder(
+        int index) {
+      if (generatedSourceFoldersBuilder_ == null) {
+        return generatedSourceFolders_.get(index);  } else {
+        return generatedSourceFoldersBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public java.util.List<? extends com.android.builder.model.proto.ide.FileOrBuilder> 
+         getGeneratedSourceFoldersOrBuilderList() {
+      if (generatedSourceFoldersBuilder_ != null) {
+        return generatedSourceFoldersBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(generatedSourceFolders_);
+      }
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public com.android.builder.model.proto.ide.File.Builder addGeneratedSourceFoldersBuilder() {
+      return getGeneratedSourceFoldersFieldBuilder().addBuilder(
+          com.android.builder.model.proto.ide.File.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public com.android.builder.model.proto.ide.File.Builder addGeneratedSourceFoldersBuilder(
+        int index) {
+      return getGeneratedSourceFoldersFieldBuilder().addBuilder(
+          index, com.android.builder.model.proto.ide.File.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * Folders containing generated source files.
+     * </pre>
+     *
+     * <code>repeated .File generated_source_folders = 9;</code>
+     */
+    public java.util.List<com.android.builder.model.proto.ide.File.Builder> 
+         getGeneratedSourceFoldersBuilderList() {
+      return getGeneratedSourceFoldersFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        com.android.builder.model.proto.ide.File, com.android.builder.model.proto.ide.File.Builder, com.android.builder.model.proto.ide.FileOrBuilder> 
+        getGeneratedSourceFoldersFieldBuilder() {
+      if (generatedSourceFoldersBuilder_ == null) {
+        generatedSourceFoldersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            com.android.builder.model.proto.ide.File, com.android.builder.model.proto.ide.File.Builder, com.android.builder.model.proto.ide.FileOrBuilder>(
+                generatedSourceFolders_,
+                ((bitField0_ & 0x00000100) != 0),
+                getParentForChildren(),
+                isClean());
+        generatedSourceFolders_ = null;
+      }
+      return generatedSourceFoldersBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(
