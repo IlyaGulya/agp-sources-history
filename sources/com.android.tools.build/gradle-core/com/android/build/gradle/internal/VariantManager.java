@@ -44,6 +44,7 @@ import com.android.build.gradle.internal.dependency.VariantDependencies;
 import com.android.build.gradle.internal.dsl.CoreBuildType;
 import com.android.build.gradle.internal.dsl.CoreProductFlavor;
 import com.android.build.gradle.internal.dsl.CoreSigningConfig;
+import com.android.build.gradle.internal.profile.AnalyticsUtil;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType;
 import com.android.build.gradle.internal.scope.AndroidTask;
@@ -55,6 +56,7 @@ import com.android.build.gradle.internal.variant.TestVariantData;
 import com.android.build.gradle.internal.variant.TestVariantFactory;
 import com.android.build.gradle.internal.variant.TestedVariantData;
 import com.android.build.gradle.internal.variant.VariantFactory;
+import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.options.SigningOptions;
 import com.android.builder.core.AndroidBuilder;
@@ -74,6 +76,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.wireless.android.sdk.stats.ApiVersion;
 import com.google.wireless.android.sdk.stats.GradleBuildProfileSpan.ExecutionType;
 import com.google.wireless.android.sdk.stats.GradleBuildVariant;
 import java.io.File;
@@ -491,16 +494,6 @@ public class VariantManager implements VariantModel {
                         variantDep.getRuntimeClasspath().getName(), COM_ANDROID_SUPPORT_MULTIDEX_INSTRUMENTATION);
             }
 
-            if (!AndroidGradleOptions.isImprovedDependencyResolutionEnabled(project)) {
-                recorder.record(
-                        ExecutionType.RESOLVE_DEPENDENCIES,
-                        project.getPath(),
-                        testVariantConfig.getFullName(),
-                        () ->
-                                taskManager.resolveDependencies(
-                                        variantDep, null /*testedProjectPath*/));
-            }
-
             switch (variantType) {
                 case ANDROID_TEST:
                     taskManager.createAndroidTestVariantTasks(tasks, (TestVariantData) variantData);
@@ -589,9 +582,9 @@ public class VariantManager implements VariantModel {
         }
 
         // default is created by the java base plugin, so mark it as not consumable here.
-        // TODO we need to disable this because the apt plugin fails otherwise (for now at least).
-        //project.getConfigurations().getByName("compile").setCanBeResolved(false);
-        //project.getConfigurations().getByName("default").setCanBeConsumed(false);
+        if (!Boolean.TRUE.equals(projectOptions.get(BooleanOption.IDE_BUILD_MODEL_ONLY))) {
+            project.getConfigurations().getByName("default").setCanBeConsumed(false);
+        }
 
         AttributesSchema schema = dependencies.getAttributesSchema();
         // default configure attribute resolution for the build type attribute
@@ -686,11 +679,14 @@ public class VariantManager implements VariantModel {
         } else {
             // ensure that there is always a dimension
             if (flavorDimensionList == null || flavorDimensionList.isEmpty()) {
-                androidBuilder.getErrorReporter().handleSyncError(
-                        "",
-                        SyncIssue.TYPE_GENERIC,
-                        "Flavor dimension name is now required even with only one dimension."
-                );
+                androidBuilder
+                        .getErrorReporter()
+                        .handleSyncError(
+                                "",
+                                SyncIssue.TYPE_UNNAMED_FLAVOR_DIMENSION,
+                                "All flavors must now belong to a named flavor dimension. "
+                                        + "Learn more at "
+                                        + "https://d.android.com/r/tools/flavorDimensions-missing-error-message.html");
             } else if (flavorDimensionList.size() == 1) {
                 // if there's only one dimension, auto-assign the dimension to all the flavors.
                 String dimensionName = flavorDimensionList.get(0);
@@ -852,14 +848,6 @@ public class VariantManager implements VariantModel {
         final String testedProjectPath = extension instanceof TestAndroidConfig ?
                 ((TestAndroidConfig) extension).getTargetProjectPath() :
                 null;
-
-        if (!AndroidGradleOptions.isImprovedDependencyResolutionEnabled(project)) {
-            recorder.record(
-                    ExecutionType.RESOLVE_DEPENDENCIES,
-                    project.getPath(),
-                    variantConfig.getFullName(),
-                    () -> taskManager.resolveDependencies(variantDep, testedProjectPath));
-        }
 
         return variantData;
     }
@@ -1059,10 +1047,24 @@ public class VariantManager implements VariantModel {
                         ProcessProfileWriter.getOrCreateVariant(
                                         project.getPath(), variantData.getName())
                                 .setIsDebug(variantConfig.getBuildType().isDebuggable())
+                                .setMinSdkVersion(
+                                        AnalyticsUtil.convert(variantConfig.getMinSdkVersion()))
                                 .setMinifyEnabled(variantScope.getCodeShrinker() != null)
                                 .setUseMultidex(variantConfig.isMultiDexEnabled())
                                 .setUseLegacyMultidex(variantConfig.isLegacyMultiDexMode())
                                 .setVariantType(variantData.getType().getAnalyticsVariantType());
+
+                if (variantConfig.getTargetSdkVersion().getApiLevel() > 0) {
+                    profileBuilder.setTargetSdkVersion(
+                            AnalyticsUtil.convert(variantConfig.getTargetSdkVersion()));
+                }
+                if (variantConfig.getMergedFlavor().getMaxSdkVersion() != null) {
+                    profileBuilder.setMaxSdkVersion(
+                            ApiVersion.newBuilder()
+                                    .setApiLevel(
+                                            variantConfig.getMergedFlavor().getMaxSdkVersion()));
+                }
+
                 VariantScope.Java8LangSupport supportType =
                         variantData.getScope().getJava8LangSupportType();
                 if (supportType != VariantScope.Java8LangSupport.INVALID

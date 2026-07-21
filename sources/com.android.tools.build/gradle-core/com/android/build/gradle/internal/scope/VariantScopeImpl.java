@@ -88,12 +88,9 @@ import com.android.build.gradle.tasks.RenderscriptCompile;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.BootClasspathBuilder;
 import com.android.builder.core.BuilderConstants;
-import com.android.builder.core.DefaultApiVersion;
 import com.android.builder.core.ErrorReporter;
 import com.android.builder.core.VariantType;
-import com.android.builder.dexing.DexingMode;
 import com.android.builder.dexing.DexingType;
-import com.android.builder.model.ApiVersion;
 import com.android.builder.model.SyncIssue;
 import com.android.repository.api.ProgressIndicator;
 import com.android.sdklib.AndroidTargetHash;
@@ -546,26 +543,24 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     @NonNull
     @Override
-    public DexingMode getDexingMode() {
-        DexingMode dexingMode = variantData.getVariantConfiguration().getDexingMode();
+    public DexingType getDexingType() {
+        DexingType dexingType = variantData.getVariantConfiguration().getDexingType();
 
         if (variantData.getType().isForTesting()
                 && getTestedVariantData() != null
                 && getTestedVariantData().getType() != VariantType.LIBRARY
-                && dexingMode.getDexingType() == DexingType.LEGACY_MULTIDEX) {
+                && dexingType == DexingType.LEGACY_MULTIDEX) {
             // for non-library legacy multidex test variants, we want to have exactly one DEX file
             // until the test runner supports multiple dex files in the test apk
-            return new DexingMode(
-                    DexingType.MONO_DEX, getVariantConfiguration().getMinSdkVersion());
-        } else if (isInstantRunDexingModeOverride()) {
-            return new DexingMode(
-                    DexingType.NATIVE_MULTIDEX, getVariantConfiguration().getMinSdkVersion());
+            return DexingType.MONO_DEX;
+        } else if (isInstantRunDexingTypeOverride()) {
+            return DexingType.NATIVE_MULTIDEX;
         }
 
-        return dexingMode;
+        return dexingType;
     }
 
-    private boolean isInstantRunDexingModeOverride() {
+    private boolean isInstantRunDexingTypeOverride() {
         return getInstantRunBuildContext().isInInstantRunMode()
                 && getInstantRunBuildContext().getPatchingPolicy()
                         == InstantRunPatchingPolicy.MULTI_APK;
@@ -573,7 +568,7 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     @NonNull
     @Override
-    public ApiVersion getMinSdkVersion() {
+    public AndroidVersion getMinSdkVersion() {
         return getVariantConfiguration().getMinSdkVersion();
     }
 
@@ -1942,21 +1937,6 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
                         + "gradle.properties file to enable Java 8 "
                         + "language support.");
         return Java8LangSupport.INVALID;
-    }
-
-    @Nullable
-    @Override
-    public ApiVersion getMinSdkForDx() {
-        if (getJava8LangSupportType() != Java8LangSupport.DESUGAR) {
-            return null;
-        }
-
-        ApiVersion minSdkVersion = getVariantConfiguration().getMinSdkVersionWithTargetDeviceApi();
-        if (DefaultApiVersion.getFeatureLevel(minSdkVersion) >= 24) {
-            return minSdkVersion;
-        } else {
-            return null;
-        }
     }
 
     @NonNull

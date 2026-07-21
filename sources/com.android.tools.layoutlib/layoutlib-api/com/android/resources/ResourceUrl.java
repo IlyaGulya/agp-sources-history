@@ -233,7 +233,11 @@ public class ResourceUrl {
         for (int i = 1, n = name.length(); i < n; i++) {
             char c = name.charAt(i);
             if (!Character.isJavaIdentifierPart(c) && c != '.') {
-                return false;
+                // Sample data allows for extra characters
+                if (type != ResourceType.SAMPLE_DATA
+                        || (c != '/' && c != '[' && c != ']' && c != ':')) {
+                    return false;
+                }
             }
         }
 

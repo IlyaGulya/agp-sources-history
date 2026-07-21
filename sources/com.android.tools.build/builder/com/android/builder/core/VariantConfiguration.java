@@ -23,7 +23,6 @@ import static com.google.common.base.Preconditions.checkState;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.builder.dependency.level2.AndroidDependency;
-import com.android.builder.dexing.DexingMode;
 import com.android.builder.dexing.DexingType;
 import com.android.builder.internal.ClassFieldImpl;
 import com.android.builder.model.AndroidLibrary;
@@ -35,6 +34,7 @@ import com.android.builder.model.SigningConfig;
 import com.android.builder.model.SourceProvider;
 import com.android.ide.common.res2.AssetSet;
 import com.android.ide.common.res2.ResourceSet;
+import com.android.sdklib.AndroidVersion;
 import com.android.utils.StringHelper;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -1018,7 +1018,7 @@ public class VariantConfiguration<T extends BuildType, D extends ProductFlavor, 
      * @return the minSdkVersion
      */
     @NonNull
-    public ApiVersion getMinSdkVersion() {
+    public AndroidVersion getMinSdkVersion() {
         if (mTestedConfig != null) {
             return mTestedConfig.getMinSdkVersion();
         }
@@ -1030,12 +1030,12 @@ public class VariantConfiguration<T extends BuildType, D extends ProductFlavor, 
                     DefaultApiVersion.create(getManifestAttributeSupplier().getMinSdkVersion());
         }
 
-        return minSdkVersion;
+        return new AndroidVersion(minSdkVersion.getApiLevel(), minSdkVersion.getCodename());
     }
 
     /** Returns the minSdkVersion as integer. */
     public int getMinSdkVersionValue() {
-        return DefaultApiVersion.getFeatureLevel(getMinSdkVersion());
+        return getMinSdkVersion().getFeatureLevel();
     }
 
     /**
@@ -1776,24 +1776,18 @@ public class VariantConfiguration<T extends BuildType, D extends ProductFlavor, 
     }
 
     public boolean isLegacyMultiDexMode() {
-        if (isMultiDexEnabled()) {
-            return getMinSdkVersionValue() < 21;
-        } else {
-            return false;
-        }
+       return getDexingType() == DexingType.LEGACY_MULTIDEX;
     }
 
     @NonNull
-    public DexingMode getDexingMode() {
-        ApiVersion minSdkVersion = getMinSdkVersion();
+    public DexingType getDexingType() {
+        AndroidVersion minSdkVersion = getMinSdkVersion();
         if (isMultiDexEnabled()) {
-            return new DexingMode(
-                    DefaultApiVersion.getFeatureLevel(minSdkVersion) < 21
-                            ? DexingType.LEGACY_MULTIDEX
-                            : DexingType.NATIVE_MULTIDEX,
-                    minSdkVersion);
+            return minSdkVersion.getFeatureLevel() < 21
+                    ? DexingType.LEGACY_MULTIDEX
+                    : DexingType.NATIVE_MULTIDEX;
         } else {
-            return new DexingMode(DexingType.MONO_DEX, minSdkVersion);
+            return DexingType.MONO_DEX;
         }
     }
 
