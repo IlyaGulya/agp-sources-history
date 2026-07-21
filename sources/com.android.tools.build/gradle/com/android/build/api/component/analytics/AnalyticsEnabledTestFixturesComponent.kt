@@ -14,26 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.builder.internal
+package com.android.build.api.component.analytics
 
-import java.io.File
+import com.android.build.api.component.TestFixturesComponent
+import com.google.wireless.android.sdk.stats.GradleBuildVariant
+import org.gradle.api.model.ObjectFactory
+import javax.inject.Inject
 
-class UnitTestManifestGenerator(
-    outputFile: File,
-    packageName: String,
-    minSdkVersion: String?,
-    targetSdkVersion: String?,
-    testedPackageName: String,
-    testRunnerName: String?,
-): TestManifestGenerator(
-    outputFile,
-    packageName,
-    minSdkVersion,
-    targetSdkVersion,
-    testedPackageName,
-    testRunnerName
-) {
-
-    override val templateResourceName: String =
-        "AndroidManifest.UnitTestTemplate"
-}
+abstract class AnalyticsEnabledTestFixturesComponent @Inject constructor(
+    override val delegate: TestFixturesComponent,
+    stats: GradleBuildVariant.Builder,
+    objectFactory: ObjectFactory
+) : AnalyticsEnabledComponent(
+    delegate, stats, objectFactory
+), TestFixturesComponent

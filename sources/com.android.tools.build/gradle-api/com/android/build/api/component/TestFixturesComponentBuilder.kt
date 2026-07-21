@@ -14,26 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.builder.internal
+package com.android.build.api.component
 
-import java.io.File
+import org.gradle.api.Incubating
 
-class UnitTestManifestGenerator(
-    outputFile: File,
-    packageName: String,
-    minSdkVersion: String?,
-    targetSdkVersion: String?,
-    testedPackageName: String,
-    testRunnerName: String?,
-): TestManifestGenerator(
-    outputFile,
-    packageName,
-    minSdkVersion,
-    targetSdkVersion,
-    testedPackageName,
-    testRunnerName
-) {
-
-    override val templateResourceName: String =
-        "AndroidManifest.UnitTestTemplate"
-}
+@Incubating
+interface TestFixturesComponentBuilder: ComponentBuilder

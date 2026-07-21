@@ -295,6 +295,33 @@ public final class GradleAndroidTestResultListenerProto {
     public interface TestSuiteStartedOrBuilder extends
         // @@protoc_insertion_point(interface_extends:com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteStarted)
         com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <pre>
+       * Message must be google.testing.platform.proto.api.core.TestSuiteMetaData.
+       * </pre>
+       *
+       * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
+       * @return Whether the testSuiteMetadata field is set.
+       */
+      boolean hasTestSuiteMetadata();
+      /**
+       * <pre>
+       * Message must be google.testing.platform.proto.api.core.TestSuiteMetaData.
+       * </pre>
+       *
+       * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
+       * @return The testSuiteMetadata.
+       */
+      com.google.protobuf.Any getTestSuiteMetadata();
+      /**
+       * <pre>
+       * Message must be google.testing.platform.proto.api.core.TestSuiteMetaData.
+       * </pre>
+       *
+       * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
+       */
+      com.google.protobuf.AnyOrBuilder getTestSuiteMetadataOrBuilder();
     }
     /**
      * <pre>
@@ -345,6 +372,19 @@ public final class GradleAndroidTestResultListenerProto {
               case 0:
                 done = true;
                 break;
+              case 10: {
+                com.google.protobuf.Any.Builder subBuilder = null;
+                if (testSuiteMetadata_ != null) {
+                  subBuilder = testSuiteMetadata_.toBuilder();
+                }
+                testSuiteMetadata_ = input.readMessage(com.google.protobuf.Any.parser(), extensionRegistry);
+                if (subBuilder != null) {
+                  subBuilder.mergeFrom(testSuiteMetadata_);
+                  testSuiteMetadata_ = subBuilder.buildPartial();
+                }
+
+                break;
+              }
               default: {
                 if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
@@ -377,6 +417,41 @@ public final class GradleAndroidTestResultListenerProto {
                 com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteStarted.class, com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteStarted.Builder.class);
       }
 
+      public static final int TEST_SUITE_METADATA_FIELD_NUMBER = 1;
+      private com.google.protobuf.Any testSuiteMetadata_;
+      /**
+       * <pre>
+       * Message must be google.testing.platform.proto.api.core.TestSuiteMetaData.
+       * </pre>
+       *
+       * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
+       * @return Whether the testSuiteMetadata field is set.
+       */
+      public boolean hasTestSuiteMetadata() {
+        return testSuiteMetadata_ != null;
+      }
+      /**
+       * <pre>
+       * Message must be google.testing.platform.proto.api.core.TestSuiteMetaData.
+       * </pre>
+       *
+       * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
+       * @return The testSuiteMetadata.
+       */
+      public com.google.protobuf.Any getTestSuiteMetadata() {
+        return testSuiteMetadata_ == null ? com.google.protobuf.Any.getDefaultInstance() : testSuiteMetadata_;
+      }
+      /**
+       * <pre>
+       * Message must be google.testing.platform.proto.api.core.TestSuiteMetaData.
+       * </pre>
+       *
+       * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
+       */
+      public com.google.protobuf.AnyOrBuilder getTestSuiteMetadataOrBuilder() {
+        return getTestSuiteMetadata();
+      }
+
       private byte memoizedIsInitialized = -1;
       @java.lang.Override
       public final boolean isInitialized() {
@@ -391,6 +466,9 @@ public final class GradleAndroidTestResultListenerProto {
       @java.lang.Override
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
+        if (testSuiteMetadata_ != null) {
+          output.writeMessage(1, getTestSuiteMetadata());
+        }
         unknownFields.writeTo(output);
       }
 
@@ -400,6 +478,10 @@ public final class GradleAndroidTestResultListenerProto {
         if (size != -1) return size;
 
         size = 0;
+        if (testSuiteMetadata_ != null) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(1, getTestSuiteMetadata());
+        }
         size += unknownFields.getSerializedSize();
         memoizedSize = size;
         return size;
@@ -415,6 +497,11 @@ public final class GradleAndroidTestResultListenerProto {
         }
         com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteStarted other = (com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteStarted) obj;
 
+        if (hasTestSuiteMetadata() != other.hasTestSuiteMetadata()) return false;
+        if (hasTestSuiteMetadata()) {
+          if (!getTestSuiteMetadata()
+              .equals(other.getTestSuiteMetadata())) return false;
+        }
         if (!unknownFields.equals(other.unknownFields)) return false;
         return true;
       }
@@ -426,6 +513,10 @@ public final class GradleAndroidTestResultListenerProto {
         }
         int hash = 41;
         hash = (19 * hash) + getDescriptor().hashCode();
+        if (hasTestSuiteMetadata()) {
+          hash = (37 * hash) + TEST_SUITE_METADATA_FIELD_NUMBER;
+          hash = (53 * hash) + getTestSuiteMetadata().hashCode();
+        }
         hash = (29 * hash) + unknownFields.hashCode();
         memoizedHashCode = hash;
         return hash;
@@ -563,6 +654,12 @@ public final class GradleAndroidTestResultListenerProto {
         @java.lang.Override
         public Builder clear() {
           super.clear();
+          if (testSuiteMetadataBuilder_ == null) {
+            testSuiteMetadata_ = null;
+          } else {
+            testSuiteMetadata_ = null;
+            testSuiteMetadataBuilder_ = null;
+          }
           return this;
         }
 
@@ -589,6 +686,11 @@ public final class GradleAndroidTestResultListenerProto {
         @java.lang.Override
         public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteStarted buildPartial() {
           com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteStarted result = new com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteStarted(this);
+          if (testSuiteMetadataBuilder_ == null) {
+            result.testSuiteMetadata_ = testSuiteMetadata_;
+          } else {
+            result.testSuiteMetadata_ = testSuiteMetadataBuilder_.build();
+          }
           onBuilt();
           return result;
         }
@@ -637,6 +739,9 @@ public final class GradleAndroidTestResultListenerProto {
 
         public Builder mergeFrom(com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteStarted other) {
           if (other == com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteStarted.getDefaultInstance()) return this;
+          if (other.hasTestSuiteMetadata()) {
+            mergeTestSuiteMetadata(other.getTestSuiteMetadata());
+          }
           this.mergeUnknownFields(other.unknownFields);
           onChanged();
           return this;
@@ -664,6 +769,161 @@ public final class GradleAndroidTestResultListenerProto {
             }
           }
           return this;
+        }
+
+        private com.google.protobuf.Any testSuiteMetadata_;
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.Any, com.google.protobuf.Any.Builder, com.google.protobuf.AnyOrBuilder> testSuiteMetadataBuilder_;
+        /**
+         * <pre>
+         * Message must be google.testing.platform.proto.api.core.TestSuiteMetaData.
+         * </pre>
+         *
+         * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
+         * @return Whether the testSuiteMetadata field is set.
+         */
+        public boolean hasTestSuiteMetadata() {
+          return testSuiteMetadataBuilder_ != null || testSuiteMetadata_ != null;
+        }
+        /**
+         * <pre>
+         * Message must be google.testing.platform.proto.api.core.TestSuiteMetaData.
+         * </pre>
+         *
+         * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
+         * @return The testSuiteMetadata.
+         */
+        public com.google.protobuf.Any getTestSuiteMetadata() {
+          if (testSuiteMetadataBuilder_ == null) {
+            return testSuiteMetadata_ == null ? com.google.protobuf.Any.getDefaultInstance() : testSuiteMetadata_;
+          } else {
+            return testSuiteMetadataBuilder_.getMessage();
+          }
+        }
+        /**
+         * <pre>
+         * Message must be google.testing.platform.proto.api.core.TestSuiteMetaData.
+         * </pre>
+         *
+         * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
+         */
+        public Builder setTestSuiteMetadata(com.google.protobuf.Any value) {
+          if (testSuiteMetadataBuilder_ == null) {
+            if (value == null) {
+              throw new NullPointerException();
+            }
+            testSuiteMetadata_ = value;
+            onChanged();
+          } else {
+            testSuiteMetadataBuilder_.setMessage(value);
+          }
+
+          return this;
+        }
+        /**
+         * <pre>
+         * Message must be google.testing.platform.proto.api.core.TestSuiteMetaData.
+         * </pre>
+         *
+         * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
+         */
+        public Builder setTestSuiteMetadata(
+            com.google.protobuf.Any.Builder builderForValue) {
+          if (testSuiteMetadataBuilder_ == null) {
+            testSuiteMetadata_ = builderForValue.build();
+            onChanged();
+          } else {
+            testSuiteMetadataBuilder_.setMessage(builderForValue.build());
+          }
+
+          return this;
+        }
+        /**
+         * <pre>
+         * Message must be google.testing.platform.proto.api.core.TestSuiteMetaData.
+         * </pre>
+         *
+         * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
+         */
+        public Builder mergeTestSuiteMetadata(com.google.protobuf.Any value) {
+          if (testSuiteMetadataBuilder_ == null) {
+            if (testSuiteMetadata_ != null) {
+              testSuiteMetadata_ =
+                com.google.protobuf.Any.newBuilder(testSuiteMetadata_).mergeFrom(value).buildPartial();
+            } else {
+              testSuiteMetadata_ = value;
+            }
+            onChanged();
+          } else {
+            testSuiteMetadataBuilder_.mergeFrom(value);
+          }
+
+          return this;
+        }
+        /**
+         * <pre>
+         * Message must be google.testing.platform.proto.api.core.TestSuiteMetaData.
+         * </pre>
+         *
+         * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
+         */
+        public Builder clearTestSuiteMetadata() {
+          if (testSuiteMetadataBuilder_ == null) {
+            testSuiteMetadata_ = null;
+            onChanged();
+          } else {
+            testSuiteMetadata_ = null;
+            testSuiteMetadataBuilder_ = null;
+          }
+
+          return this;
+        }
+        /**
+         * <pre>
+         * Message must be google.testing.platform.proto.api.core.TestSuiteMetaData.
+         * </pre>
+         *
+         * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
+         */
+        public com.google.protobuf.Any.Builder getTestSuiteMetadataBuilder() {
+          
+          onChanged();
+          return getTestSuiteMetadataFieldBuilder().getBuilder();
+        }
+        /**
+         * <pre>
+         * Message must be google.testing.platform.proto.api.core.TestSuiteMetaData.
+         * </pre>
+         *
+         * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
+         */
+        public com.google.protobuf.AnyOrBuilder getTestSuiteMetadataOrBuilder() {
+          if (testSuiteMetadataBuilder_ != null) {
+            return testSuiteMetadataBuilder_.getMessageOrBuilder();
+          } else {
+            return testSuiteMetadata_ == null ?
+                com.google.protobuf.Any.getDefaultInstance() : testSuiteMetadata_;
+          }
+        }
+        /**
+         * <pre>
+         * Message must be google.testing.platform.proto.api.core.TestSuiteMetaData.
+         * </pre>
+         *
+         * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
+         */
+        private com.google.protobuf.SingleFieldBuilderV3<
+            com.google.protobuf.Any, com.google.protobuf.Any.Builder, com.google.protobuf.AnyOrBuilder> 
+            getTestSuiteMetadataFieldBuilder() {
+          if (testSuiteMetadataBuilder_ == null) {
+            testSuiteMetadataBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+                com.google.protobuf.Any, com.google.protobuf.Any.Builder, com.google.protobuf.AnyOrBuilder>(
+                    getTestSuiteMetadata(),
+                    getParentForChildren(),
+                    isClean());
+            testSuiteMetadata_ = null;
+          }
+          return testSuiteMetadataBuilder_;
         }
         @java.lang.Override
         public final Builder setUnknownFields(
@@ -4779,7 +5039,7 @@ public final class GradleAndroidTestResultListenerProto {
       "\n)gradle_android_test_result_listener.pr" +
       "oto\022:com.android.tools.utp.plugins.resul" +
       "t.listener.gradle.proto\032\031google/protobuf" +
-      "/any.proto\"\366\005\n\017TestResultEvent\022z\n\022test_s" +
+      "/any.proto\"\251\006\n\017TestResultEvent\022z\n\022test_s" +
       "uite_started\030\001 \001(\0132\\.com.android.tools.u" +
       "tp.plugins.result.listener.gradle.proto." +
       "TestResultEvent.TestSuiteStartedH\000\022x\n\021te" +
@@ -4792,22 +5052,24 @@ public final class GradleAndroidTestResultListenerProto {
       "\022|\n\023test_suite_finished\030\004 \001(\0132].com.andr" +
       "oid.tools.utp.plugins.result.listener.gr" +
       "adle.proto.TestResultEvent.TestSuiteFini" +
-      "shedH\000\022\020\n\010deviceId\030\005 \001(\t\032\022\n\020TestSuiteSta" +
-      "rted\032:\n\017TestCaseStarted\022\'\n\ttest_case\030\001 \001" +
-      "(\0132\024.google.protobuf.Any\032B\n\020TestCaseFini" +
-      "shed\022.\n\020test_case_result\030\001 \001(\0132\024.google." +
-      "protobuf.Any\032D\n\021TestSuiteFinished\022/\n\021tes" +
-      "t_suite_result\030\001 \001(\0132\024.google.protobuf.A" +
-      "nyB\007\n\005State\"\037\n\035RecordTestResultEventResp" +
-      "onse2\354\001\n&GradleAndroidTestResultListener" +
-      "Service\022\301\001\n\025RecordTestResultEvent\022K.com." +
-      "android.tools.utp.plugins.result.listene" +
-      "r.gradle.proto.TestResultEvent\032Y.com.and" +
-      "roid.tools.utp.plugins.result.listener.g" +
-      "radle.proto.RecordTestResultEventRespons" +
-      "e(\001Bb\n:com.android.tools.utp.plugins.res" +
-      "ult.listener.gradle.protoB$GradleAndroid" +
-      "TestResultListenerProtob\006proto3"
+      "shedH\000\022\020\n\010deviceId\030\005 \001(\t\032E\n\020TestSuiteSta" +
+      "rted\0221\n\023test_suite_metadata\030\001 \001(\0132\024.goog" +
+      "le.protobuf.Any\032:\n\017TestCaseStarted\022\'\n\tte" +
+      "st_case\030\001 \001(\0132\024.google.protobuf.Any\032B\n\020T" +
+      "estCaseFinished\022.\n\020test_case_result\030\001 \001(" +
+      "\0132\024.google.protobuf.Any\032D\n\021TestSuiteFini" +
+      "shed\022/\n\021test_suite_result\030\001 \001(\0132\024.google" +
+      ".protobuf.AnyB\007\n\005State\"\037\n\035RecordTestResu" +
+      "ltEventResponse2\354\001\n&GradleAndroidTestRes" +
+      "ultListenerService\022\301\001\n\025RecordTestResultE" +
+      "vent\022K.com.android.tools.utp.plugins.res" +
+      "ult.listener.gradle.proto.TestResultEven" +
+      "t\032Y.com.android.tools.utp.plugins.result" +
+      ".listener.gradle.proto.RecordTestResultE" +
+      "ventResponse(\001Bb\n:com.android.tools.utp." +
+      "plugins.result.listener.gradle.protoB$Gr" +
+      "adleAndroidTestResultListenerProtob\006prot" +
+      "o3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4825,7 +5087,7 @@ public final class GradleAndroidTestResultListenerProto {
     internal_static_com_android_tools_utp_plugins_result_listener_gradle_proto_TestResultEvent_TestSuiteStarted_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_android_tools_utp_plugins_result_listener_gradle_proto_TestResultEvent_TestSuiteStarted_descriptor,
-        new java.lang.String[] { });
+        new java.lang.String[] { "TestSuiteMetadata", });
     internal_static_com_android_tools_utp_plugins_result_listener_gradle_proto_TestResultEvent_TestCaseStarted_descriptor =
       internal_static_com_android_tools_utp_plugins_result_listener_gradle_proto_TestResultEvent_descriptor.getNestedTypes().get(1);
     internal_static_com_android_tools_utp_plugins_result_listener_gradle_proto_TestResultEvent_TestCaseStarted_fieldAccessorTable = new
