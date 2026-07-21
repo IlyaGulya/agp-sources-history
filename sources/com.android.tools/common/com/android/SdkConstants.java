@@ -98,6 +98,9 @@ public final class SdkConstants {
             "minAndroidGradlePluginVersion";
     public static final String FORCE_COMPILE_SDK_PREVIEW_PROPERTY = "forceCompileSdkPreview";
     public static final String MIN_COMPILE_SDK_EXTENSION_PROPERTY = "minCompileSdkExtension";
+    public static final String CORE_LIBRARY_DESUGARING_ENABLED_PROPERTY =
+            "coreLibraryDesugaringEnabled";
+    public static final String DESUGAR_JDK_LIB_PROPERTY = "desugarJdkLib";
 
     /** Properties in app-metadata.properties file */
     public static final String APP_METADATA_VERSION_PROPERTY = "appMetadataVersion";
@@ -1313,6 +1316,9 @@ public final class SdkConstants {
     public static final String ATTR_MIMETYPE = "mimeType";
     public static final String ATTR_LOCALE_CONFIG = "localeConfig";
     public static final String ATTR_FOREGROUND_SERVICE_TYPE = "foregroundServiceType";
+    public static final String ATTR_TASK_AFFINITY = "taskAffinity";
+    public static final String ATTR_EXCLUDE_FROM_RECENTS = "excludeFromRecents";
+    public static final String ATTR_NO_HISTORY = "noHistory";
 
     // Attributes: Resources
     public static final String ATTR_ATTR = "attr";
@@ -2483,6 +2489,7 @@ public final class SdkConstants {
         public static final String RINGTONE_PREFERENCE = "RingtonePreference";
         public static final String SEEK_BAR_PREFERENCE = "SeekBarPreference";
         public static final String SWITCH_PREFERENCE = "SwitchPreference";
+        public static final String SWITCH_PREFERENCE_COMPAT = "SwitchPreferenceCompat";
         public static final String INTENT = "intent";
     }
 
@@ -2607,6 +2614,11 @@ public final class SdkConstants {
                 "TYPE_TEXT_VARIATION_VISIBLE_PASSWORD";
         public static final String REF_TYPE_TEXT_VARIATION_WEB_PASSWORD =
                 "TYPE_TEXT_VARIATION_WEB_PASSWORD";
+    }
+
+    public static final class Intent {
+        public static final String REF_FLAG_ACTIVITY_NEW_TASK = "FLAG_ACTIVITY_NEW_TASK";
+        public static final String REF_FLAG_ACTIVITY_CLEAR_TOP = "FLAG_ACTIVITY_CLEAR_TOP";
     }
 
     public static final class ViewAttributes {
@@ -2864,7 +2876,7 @@ public final class SdkConstants {
     public static final String GRADLE_ANDROID_TEST_API_CONFIGURATION = "androidTestApi";
 
     public static final String GRADLE_ANDROID_TEST_UTIL_CONFIGURATION = "androidTestUtil";
-    public static final String CURRENT_BUILD_TOOLS_VERSION = "34.0.0-rc3";
+    public static final String CURRENT_BUILD_TOOLS_VERSION = "34.0.0";
     public static final String SUPPORT_LIB_GROUP_ID = "com.android.support";
     public static final String SUPPORT_LIB_ARTIFACT = "com.android.support:support-v4";
     public static final String DESIGN_LIB_ARTIFACT = "com.android.support:design";

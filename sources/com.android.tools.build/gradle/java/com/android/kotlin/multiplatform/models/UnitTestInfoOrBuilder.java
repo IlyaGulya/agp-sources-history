@@ -50,4 +50,33 @@ public interface UnitTestInfoOrBuilder extends
    * <code>optional .File mockable_platform_jar = 2;</code>
    */
   com.android.builder.model.proto.ide.FileOrBuilder getMockablePlatformJarOrBuilder();
+
+  /**
+   * <pre>
+   * name of the gradle task that runs the unit tests.
+   * </pre>
+   *
+   * <code>optional string unit_test_task_name = 3;</code>
+   * @return Whether the unitTestTaskName field is set.
+   */
+  boolean hasUnitTestTaskName();
+  /**
+   * <pre>
+   * name of the gradle task that runs the unit tests.
+   * </pre>
+   *
+   * <code>optional string unit_test_task_name = 3;</code>
+   * @return The unitTestTaskName.
+   */
+  java.lang.String getUnitTestTaskName();
+  /**
+   * <pre>
+   * name of the gradle task that runs the unit tests.
+   * </pre>
+   *
+   * <code>optional string unit_test_task_name = 3;</code>
+   * @return The bytes for unitTestTaskName.
+   */
+  com.google.protobuf.ByteString
+      getUnitTestTaskNameBytes();
 }
