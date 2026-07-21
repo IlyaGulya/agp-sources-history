@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.scope;
+package com.android.build.api.variant.impl
 
-public enum CodeShrinker {
-    PROGUARD,
-    R8,
+import org.gradle.api.Action
+
+open class DelayedActionExecutor<T> {
+
+    private val actions = mutableListOf<Action<T>>()
+
+    fun registerAction(action: Action<T>) {
+        actions.add(action)
+    }
+
+    fun executeActions(target: T) {
+        actions.forEach { it.execute(target) }
+    }
 }
