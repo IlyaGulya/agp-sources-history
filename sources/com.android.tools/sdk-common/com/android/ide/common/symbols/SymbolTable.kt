@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.builder.symbols
+package com.android.ide.common.symbols
 
 import com.android.annotations.concurrency.Immutable
 import com.android.resources.ResourceType
 import com.google.common.base.Splitter
 import com.google.common.collect.ImmutableTable
+import com.google.common.collect.Lists
 import com.google.common.collect.Maps
 import com.google.common.collect.Table
 import com.google.common.collect.Tables
 import java.util.Arrays
+import java.util.Collections
 import java.util.HashMap
 import java.util.HashSet
 import javax.lang.model.SourceVersion
@@ -70,7 +72,8 @@ abstract class SymbolTable protected constructor() {
             }
         }
 
-        return SymbolTableImpl(tablePackage, builder.build())
+        return SymbolTableImpl(tablePackage,
+                builder.build())
     }
 
     /**
@@ -92,6 +95,17 @@ abstract class SymbolTable protected constructor() {
      */
     fun rename(tablePackage: String): SymbolTable {
         return SymbolTableImpl(tablePackage, symbols)
+    }
+
+    /**
+     * Collect all the symbols for a particular symbol type to a sorted list of symbols.
+     *
+     * The symbols are sorted by name to make output predicable and, therefore, testing easier.
+     */
+    fun getSymbolByResourceType(type: ResourceType): List<Symbol> {
+        val symbols = Lists.newArrayList(symbols.row(type).values)
+        symbols.sortWith(compareBy { it.name })
+        return Collections.unmodifiableList(symbols)
     }
 
     /** Builder that creates a symbol table.  */
@@ -200,7 +214,8 @@ abstract class SymbolTable protected constructor() {
          * @return the symbol table
          */
         fun build(): SymbolTable {
-            return SymbolTableImpl(tablePackage, ImmutableTable.copyOf(symbols))
+            return SymbolTableImpl(tablePackage,
+                    ImmutableTable.copyOf(symbols))
         }
     }
 
@@ -238,7 +253,8 @@ abstract class SymbolTable protected constructor() {
 
             val packageName = if (tables.isEmpty()) "" else tables[0].tablePackage
 
-            return SymbolTableImpl(packageName, builder.build())
+            return SymbolTableImpl(packageName,
+                    builder.build())
         }
 
         /**
