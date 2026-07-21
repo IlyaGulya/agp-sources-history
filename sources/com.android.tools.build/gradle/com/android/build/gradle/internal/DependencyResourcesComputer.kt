@@ -211,15 +211,14 @@ abstract class DependencyResourcesComputer {
 
         creationConfig.sources.res { resSources ->
             addResourceSets(
-                resSources.getLocalSourcesAsFileCollection().get(),
-                relativeLocalResources
+                resSources.getLocalSources()
             ) {
                 services.newInstance(ResourceSourceSetInput::class.java)
             }
 
             // Add the user added generated directories to the extraGeneratedResFolders.
             // this should be cleaned up once the old variant API is removed.
-            resSources.getVariantSources().get().forEach { directoryEntries ->
+            resSources.getVariantSources().forEach { directoryEntries ->
                 directoryEntries.directoryEntries
                     .filter {
                         it.isUserAdded && it.isGenerated
@@ -254,10 +253,13 @@ abstract class DependencyResourcesComputer {
     }
 
     @VisibleForTesting
-    fun addResourceSets(resourcesMap: Map<String, FileCollection>, relative: Boolean, blockFactory: () -> ResourceSourceSetInput) {
-        resourcesMap.forEach{(name, fileCollection) ->
+    fun addResourceSets(
+        resourcesMap: Map<String, Provider<out Collection<Directory>>>,
+        blockFactory: () -> ResourceSourceSetInput
+    ) {
+        resourcesMap.forEach{(name, providerOfDirectories) ->
             resources.put(name, blockFactory().also {
-                it.sourceDirectories.fromDisallowChanges(fileCollection)
+                it.sourceDirectories.fromDisallowChanges(providerOfDirectories)
             })
         }
     }

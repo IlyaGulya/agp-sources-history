@@ -52,7 +52,6 @@ import com.android.utils.FileUtils
 import com.android.zipflinger.ZipArchive
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
@@ -75,7 +74,6 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
-import org.jetbrains.kotlin.gradle.utils.`is`
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
@@ -223,7 +221,7 @@ abstract class R8Task @Inject constructor(
     abstract val artProfileRewriting: Property<Boolean>
 
     @get:Optional
-    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:PathSensitive(PathSensitivity.NAME_ONLY)
     @get:InputFiles
     abstract val inputArtProfile: RegularFileProperty
 
@@ -514,6 +512,13 @@ abstract class R8Task @Inject constructor(
                 generatedProguardFile.asFileTree,
         )
 
+        // If inputArtProfile exists but artProfileRewriting is false, we need to copy it over
+        // to outputArtProfile.
+        val inputArtProfileFile = inputArtProfile.orNull?.asFile
+        if (inputArtProfileFile?.exists() == true && artProfileRewriting.get() == false) {
+            outputArtProfile.orNull?.asFile?.let { FileUtils.copyFile(inputArtProfileFile, it) }
+        }
+
         val workerAction = { it: R8Runnable.Params ->
             it.bootClasspath.from(bootClasspath.toList())
             it.minSdkVersion.set(minSdkVersion.get())
@@ -584,7 +589,7 @@ abstract class R8Task @Inject constructor(
         if (executionOptions.get().runInSeparateProcess) {
             workerExecutor.processIsolation { spec ->
                 spec.forkOptions { forkOptions ->
-                    forkOptions.jvmArgs?.addAll(executionOptions.get().jvmArgs)
+                    forkOptions.jvmArgs(executionOptions.get().jvmArgs)
                 }
             }.submit(R8Runnable::class.java, workerAction)
         } else {
