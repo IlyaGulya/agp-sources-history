@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,5 +15,16 @@
  */
 package com.android.ide.common.rendering.api;
 
-/** A {@link ResourceValue} intended for text nodes where we need access to the raw XML text. */
-public interface TextResourceValue extends ResourceValue {}
+import com.android.annotations.NonNull;
+import java.util.List;
+
+/**
+ * A resource value representing a declare-styleable resource.
+ *
+ * <p>{@link #getValue()} will return null, instead use {@link #getAllAttributes()} to get the list
+ * of attributes defined in the declare-styleable.
+ */
+public interface StyleableResourceValue extends ResourceValue {
+    @NonNull
+    List<AttrResourceValue> getAllAttributes();
+}
