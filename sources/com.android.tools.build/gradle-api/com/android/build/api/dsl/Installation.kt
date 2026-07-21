@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.build.api.variant
 
-import com.android.build.api.component.AndroidTest
+package com.android.build.api.dsl
+
 import org.gradle.api.Incubating
 
 /**
- * Denote a variant that can have associated android tests.
+ * Options for the adb tool.
  */
 @Incubating
-interface HasAndroidTest {
+interface Installation {
+    /** The time out used for all adb operations. */
+    var timeOutInMs: Int
 
-    /**
-     * Variant's [AndroidTest] configuration, or null if android tests are disabled for this
-     * variant.
-     */
-    val androidTest: AndroidTest?
+    /** The list of FULL_APK installation options. */
+    var installOptions: Collection<String>?
+
+    /** Sets the list of FULL_APK installation options */
+    fun installOptions(option: String)
+
+    /** Sets the list of FULL_APK installation options */
+    fun installOptions(vararg options: String)
 }

@@ -17,25 +17,18 @@
 package com.android.build.api.variant
 
 import org.gradle.api.Incubating
+import org.gradle.api.provider.Property
 
-/**
- * Interface denoting a sub type of [Variant] that produces dex files.
- *
- * @param T the sub type of [Dexing] that contains all dexing related settings for that particular
- * [Variant] type.
- */
 @Incubating
-interface ProducesDex<T: Dexing> {
+interface Renderscript {
+    /** Returns the renderscript support mode.  */
+    val renderscriptSupportModeEnabled: Property<Boolean>
 
-    /**
-     * Variant settings related to transforming bytecodes into dex files initialized from
-     * the corresponding fields in the DSL.
-     */
-    val dexing: T
+    /** Returns the renderscript BLAS support mode.  */
+    val renderscriptSupportModeBlasEnabled: Property<Boolean>
 
-    /**
-     * Variant settings related to transforming bytecodes into dex files initialized from
-     * the corresponding fields in the DSL.
-     */
-    fun dexing(action: T.() -> Unit)
+    /** Returns the renderscript NDK mode.  */
+    val renderscriptNdkModeEnabled: Property<Boolean>
+
+    val renderscriptOptimLevel: Property<Int>
 }
