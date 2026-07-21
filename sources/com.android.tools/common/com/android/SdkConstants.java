@@ -291,6 +291,8 @@ public final class SdkConstants {
             "proguard-android-optimize.txt"; //$NON-NLS-1$
     /** default proguard config file with new file extension (for project specific stuff) */
     public static final String FN_PROJECT_PROGUARD_FILE = "proguard-project.txt"; //$NON-NLS-1$
+    /** File holding a list of advanced features */
+    public static final String FN_ADVANCED_FEATURES = "advancedFeatures.ini";
 
     /* Folder Names for Android Projects . */
 
@@ -2163,7 +2165,7 @@ public final class SdkConstants {
     public static final String GRADLE_PLUGIN_NAME = "com.android.tools.build:gradle:";
     public static final String GRADLE_EXPERIMENTAL_PLUGIN_NAME =
             "com.android.tools.build:gradle-experimental:";
-    public static final String GRADLE_MINIMUM_VERSION = "4.1-milestone-1";
+    public static final String GRADLE_MINIMUM_VERSION = "4.1-rc-1";
     public static final String GRADLE_LATEST_VERSION = GRADLE_MINIMUM_VERSION;
     public static final String GRADLE_PLUGIN_MINIMUM_VERSION = "1.0.0";
     // Always update GRADLE_PLUGIN_RECOMMENDED_VERSION and GRADLE_EXPERIMENTAL_PLUGIN_RECOMMENDED_VERSION together.
