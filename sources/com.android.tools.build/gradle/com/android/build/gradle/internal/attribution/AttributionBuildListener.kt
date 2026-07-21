@@ -18,6 +18,7 @@ package com.android.build.gradle.internal.attribution
 
 import com.android.ide.common.attribution.AndroidGradlePluginAttributionData
 import com.google.common.collect.Sets
+import org.gradle.BuildAdapter
 import org.gradle.BuildListener
 import org.gradle.BuildResult
 import org.gradle.api.Task
@@ -34,16 +35,20 @@ import java.util.concurrent.ConcurrentHashMap
  * in showing the build attribution on the IDE side.
  */
 class AttributionBuildListener internal constructor(private val outputDirPath: String) :
-    TaskExecutionListener, BuildListener {
+    TaskExecutionListener, BuildAdapter() {
     private val taskNameToClassNameMap: MutableMap<String, String> = ConcurrentHashMap()
     private val noncacheableTasks: MutableSet<String> = Sets.newConcurrentHashSet()
+    private val outputFileToTasksMap: MutableMap<String, MutableList<String>> = ConcurrentHashMap()
 
     override fun buildFinished(buildResult: BuildResult) {
         AndroidGradlePluginAttributionData.save(
             File(outputDirPath),
-            AndroidGradlePluginAttributionData(taskNameToClassNameMap, noncacheableTasks)
+            AndroidGradlePluginAttributionData(
+                taskNameToClassNameMap,
+                noncacheableTasks,
+                outputFileToTasksMap.filter { it.value.size > 1 }
+            )
         )
-
         AttributionListenerInitializer.unregister(buildResult.gradle)
     }
 
@@ -52,6 +57,12 @@ class AttributionBuildListener internal constructor(private val outputDirPath: S
 
         if (task.javaClass.getAnnotation(CacheableTask::class.java) == null) {
             noncacheableTasks.add(task.path)
+        }
+
+        task.outputs.files.forEach { outputFile ->
+            outputFileToTasksMap.computeIfAbsent(outputFile.absolutePath) {
+                ArrayList()
+            }.add(task.path)
         }
     }
 
@@ -63,22 +74,6 @@ class AttributionBuildListener internal constructor(private val outputDirPath: S
     }
 
     override fun afterExecute(task: Task, taskState: TaskState) {
-        // nothing to do
-    }
-
-    override fun projectsLoaded(gradle: Gradle) {
-        // nothing to do
-    }
-
-    override fun buildStarted(gradle: Gradle) {
-        // nothing to do
-    }
-
-    override fun projectsEvaluated(gradle: Gradle) {
-        // nothing to do
-    }
-
-    override fun settingsEvaluated(settings: Settings) {
         // nothing to do
     }
 }

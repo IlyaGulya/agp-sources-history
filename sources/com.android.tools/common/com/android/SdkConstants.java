@@ -1043,6 +1043,7 @@ public final class SdkConstants {
     public static final String TAG_USES_PERMISSION_SDK_23 = "uses-permission-sdk-23"; //$NON-NLS-1$
     public static final String TAG_USES_PERMISSION_SDK_M = "uses-permission-sdk-m"; //$NON-NLS-1$
     public static final String TAG_USES_LIBRARY = "uses-library"; //$NON-NLS-1$
+    public static final String TAG_USES_SPLIT = "uses-split"; //$NON-NLS-1$
     public static final String TAG_APPLICATION = "application"; //$NON-NLS-1$
     public static final String TAG_INTENT_FILTER = "intent-filter"; //$NON-NLS-1$
     public static final String TAG_CATEGORY = "category"; //$NON-NLS-1$
@@ -1059,6 +1060,7 @@ public final class SdkConstants {
     public static final String TAG_META_DATA = "meta-data";
     public static final String TAG_RESOURCE = "resource";
     public static final String TAG_MODULE = "module";
+    public static final String TAG_NAV_GRAPH = "nav-graph";
 
     // Tags: Resources
     public static final String TAG_RESOURCES = "resources"; //$NON-NLS-1$
