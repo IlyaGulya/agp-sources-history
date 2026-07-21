@@ -1,1 +1,4 @@
 sources/** -text
+
+sources/com.android.tools.analytics-library/protos/**/*.java linguist-generated
+sources/com.android.tools.build/aapt2-proto/**/*.java linguist-generated
