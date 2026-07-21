@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.cxx.settings
+package com.android.build.gradle.internal.dsl;
 
-/**
- * Merge a list of [CMakeSettings].
- */
-fun mergeCMakeSettings(vararg settings: CMakeSettings) : CMakeSettings {
-    val environments = mutableListOf<CMakeSettingsEnvironment>()
-    val configurations = mutableListOf<CMakeSettingsConfiguration>()
-    for (setting in settings) {
-        environments += setting.environments
-        configurations += setting.configurations
+import javax.inject.Inject;
+
+/** DSL object for configuring view binding options. */
+public class ViewBindingOptions implements com.android.builder.model.ViewBindingOptions {
+    private boolean enabled = false;
+
+    @Inject
+    public ViewBindingOptions() {}
+
+    /** Whether to enable data binding. */
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
-    return CMakeSettings(
-        environments = environments,
-        configurations = configurations
-    )
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }

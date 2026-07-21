@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.cxx.settings
+package com.android.builder.model;
 
-/**
- * Merge a list of [CMakeSettings].
- */
-fun mergeCMakeSettings(vararg settings: CMakeSettings) : CMakeSettings {
-    val environments = mutableListOf<CMakeSettingsEnvironment>()
-    val configurations = mutableListOf<CMakeSettingsConfiguration>()
-    for (setting in settings) {
-        environments += setting.environments
-        configurations += setting.configurations
-    }
-    return CMakeSettings(
-        environments = environments,
-        configurations = configurations
-    )
+/** Options for view binding */
+public interface ViewBindingOptions {
+
+    /** Whether to enable view binding. */
+    boolean isEnabled();
 }
