@@ -41,12 +41,12 @@ import com.android.build.gradle.internal.scope.ExistingBuildElements;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.scope.OutputScope;
-import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.ModuleMetadata;
 import com.android.build.gradle.internal.tasks.TaskInputHelper;
 import com.android.build.gradle.internal.tasks.featuresplit.FeatureSetMetadata;
 import com.android.build.gradle.internal.variant.BaseVariantData;
+import com.android.build.gradle.options.BooleanOption;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.VariantType;
 import com.android.builder.dexing.DexingType;
@@ -78,7 +78,9 @@ import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier;
 import org.gradle.api.artifacts.result.ResolvedArtifactResult;
+import org.gradle.api.file.Directory;
 import org.gradle.api.file.FileCollection;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
@@ -91,7 +93,7 @@ import org.gradle.internal.component.local.model.OpaqueComponentArtifactIdentifi
 
 /** A task that processes the manifest */
 @CacheableTask
-public class MergeManifests extends ManifestProcessorTask {
+public class ProcessApplicationManifest extends ManifestProcessorTask {
 
     private Supplier<String> minSdkVersion;
     private Supplier<String> targetSdkVersion;
@@ -158,10 +160,11 @@ public class MergeManifests extends ManifestProcessorTask {
 
             compatibleScreenManifestForSplit = compatibleScreenManifests.element(apkData);
             File manifestOutputFile =
-                    FileUtils.join(
-                            getManifestOutputDirectory(),
-                            apkData.getDirName(),
-                            SdkConstants.ANDROID_MANIFEST_XML);
+                    new File(
+                            getManifestOutputDirectory().get().getAsFile(),
+                            FileUtils.join(
+                                    apkData.getDirName(), SdkConstants.ANDROID_MANIFEST_XML));
+
             File instantRunManifestOutputFile =
                     FileUtils.join(
                             getInstantRunManifestOutputDirectory(),
@@ -223,7 +226,8 @@ public class MergeManifests extends ManifestProcessorTask {
                             instantRunManifestOutputFile,
                             properties));
         }
-        new BuildElements(mergedManifestOutputs.build()).save(getManifestOutputDirectory());
+        new BuildElements(mergedManifestOutputs.build())
+                .save(getManifestOutputDirectory().get().getAsFile());
         new BuildElements(irMergedManifestOutputs.build())
                 .save(getInstantRunManifestOutputDirectory());
     }
@@ -487,33 +491,28 @@ public class MergeManifests extends ManifestProcessorTask {
         return apkList;
     }
 
-    public static class ConfigAction extends TaskConfigAction<MergeManifests> {
+    public static class ConfigAction
+            extends AnnotationProcessingTaskConfigAction<ProcessApplicationManifest> {
 
         protected final VariantScope variantScope;
         protected final boolean isAdvancedProfilingOn;
+        @Nullable private Provider<Directory> manifestOutputFolder;
 
         public ConfigAction(
                 @NonNull VariantScope scope,
                 // TODO : remove this variable and find ways to access it from scope.
                 boolean isAdvancedProfilingOn) {
+            super(
+                    scope,
+                    scope.getTaskName("process", "Manifest"),
+                    ProcessApplicationManifest.class);
             this.variantScope = scope;
             this.isAdvancedProfilingOn = isAdvancedProfilingOn;
         }
 
-        @NonNull
         @Override
-        public String getName() {
-            return variantScope.getTaskName("process", "Manifest");
-        }
-
-        @NonNull
-        @Override
-        public Class<MergeManifests> getType() {
-            return MergeManifests.class;
-        }
-
-        @Override
-        public void execute(@NonNull MergeManifests processManifestTask) {
+        public void execute(@NonNull ProcessApplicationManifest processManifestTask) {
+            super.execute(processManifestTask);
             final BaseVariantData variantData = variantScope.getVariantData();
             final GradleVariantConfiguration config = variantData.getVariantConfiguration();
             GlobalScope globalScope = variantScope.getGlobalScope();
@@ -574,12 +573,6 @@ public class MergeManifests extends ManifestProcessorTask {
 
             processManifestTask.maxSdkVersion =
                     TaskInputHelper.memoize(config.getMergedFlavor()::getMaxSdkVersion);
-
-            processManifestTask.setManifestOutputDirectory(
-                    artifacts.appendArtifact(
-                            InternalArtifactType.MERGED_MANIFESTS,
-                            processManifestTask,
-                            "merged"));
 
             processManifestTask.setInstantRunManifestOutputDirectory(
                     artifacts.appendArtifact(
@@ -707,7 +700,14 @@ public class MergeManifests extends ManifestProcessorTask {
             features.add(Feature.INSTANT_RUN_REPLACEMENT);
         }
         if (variantScope.getVariantConfiguration().getDexingType() == DexingType.LEGACY_MULTIDEX) {
-            features.add(Feature.ADD_MULTIDEX_APPLICATION_IF_NO_NAME);
+            if (variantScope
+                    .getGlobalScope()
+                    .getProjectOptions()
+                    .get(BooleanOption.USE_ANDROID_X)) {
+                features.add(Feature.ADD_ANDROIDX_MULTIDEX_APPLICATION_IF_NO_NAME);
+            } else {
+                features.add(Feature.ADD_SUPPORT_MULTIDEX_APPLICATION_IF_NO_NAME);
+            }
         }
         return features.isEmpty() ? EnumSet.noneOf(Feature.class) : EnumSet.copyOf(features);
     }

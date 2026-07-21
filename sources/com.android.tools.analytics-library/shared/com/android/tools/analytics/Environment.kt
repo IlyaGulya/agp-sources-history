@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
- * Licensed under the Eclipse Public License, Version 1.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.eclipse.org/org/documents/epl-v10.php
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.tools.analytics;
+package com.android.tools.analytics
 
 /**
  * Helper class to create indirection reading environment variables
@@ -22,23 +22,18 @@ package com.android.tools.analytics;
  * This is needed to allow overriding the environment variables in tests.
  */
 abstract class Environment {
-    abstract String getVariable(String name);
 
-    static final Environment SYSTEM =
-            new Environment() {
-                @Override
-                public String getVariable(String name) {
-                    return System.getenv(name);
-                }
-            };
+  abstract fun getVariable(name: String): String?
 
-    static Environment sInstance = SYSTEM;
-
-    static Environment getInstance() {
-        return sInstance;
+  companion object {
+    @JvmStatic
+    val SYSTEM: Environment = object : Environment() {
+      override fun getVariable(name: String): String? {
+        return System.getenv(name)
+      }
     }
 
-    static void setInstance(Environment environment) {
-        sInstance = environment;
-    }
+    @JvmStatic
+    var instance: Environment = SYSTEM
+  }
 }

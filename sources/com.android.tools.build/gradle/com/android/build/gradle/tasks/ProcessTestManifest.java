@@ -35,13 +35,13 @@ import com.android.build.gradle.internal.scope.BuildOutputProperty;
 import com.android.build.gradle.internal.scope.ExistingBuildElements;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.scope.OutputScope;
-import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.TaskInputHelper;
 import com.android.ide.common.build.ApkData;
 import com.android.manifmerger.ManifestProvider;
 import com.android.utils.FileUtils;
 import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.io.File;
@@ -136,9 +136,15 @@ public class ProcessTestManifest extends ManifestProcessorTask {
                             + Joiner.on(",").join(apkDatas));
         }
         ApkData mainApkData = apkDatas.get(0);
-
         File manifestOutputFolder =
-                new File(getManifestOutputDirectory(), mainApkData.getDirName());
+                Strings.isNullOrEmpty(mainApkData.getDirName())
+                        ? getManifestOutputDirectory().get().getAsFile()
+                        : getManifestOutputDirectory()
+                                .get()
+                                .file(mainApkData.getDirName())
+                                .getAsFile();
+
+
         FileUtils.mkdirs(manifestOutputFolder);
         File manifestOutputFile = new File(manifestOutputFolder, SdkConstants.ANDROID_MANIFEST_XML);
 
@@ -161,7 +167,7 @@ public class ProcessTestManifest extends ManifestProcessorTask {
         new BuildElements(
                         ImmutableList.of(
                                 new BuildOutput(MERGED_MANIFESTS, mainApkData, manifestOutputFile)))
-                .save(getManifestOutputDirectory());
+                .save(getManifestOutputDirectory().get().getAsFile());
     }
 
     @Nullable
@@ -250,9 +256,10 @@ public class ProcessTestManifest extends ManifestProcessorTask {
         List<ManifestProvider> providers = Lists.newArrayListWithCapacity(artifacts.size());
 
         for (ResolvedArtifactResult artifact : artifacts) {
-            providers.add(new MergeManifests.ConfigAction.ManifestProviderImpl(
-                    artifact.getFile(),
-                    MergeManifests.getArtifactName(artifact)));
+            providers.add(
+                    new ProcessApplicationManifest.ConfigAction.ManifestProviderImpl(
+                            artifact.getFile(),
+                            ProcessApplicationManifest.getArtifactName(artifact)));
         }
 
         return providers;
@@ -263,7 +270,8 @@ public class ProcessTestManifest extends ManifestProcessorTask {
         return manifests.getArtifactFiles();
     }
 
-    public static class ConfigAction extends TaskConfigAction<ProcessTestManifest> {
+    public static class ConfigAction
+            extends AnnotationProcessingTaskConfigAction<ProcessTestManifest> {
 
         @NonNull
         private final VariantScope scope;
@@ -272,24 +280,14 @@ public class ProcessTestManifest extends ManifestProcessorTask {
 
         public ConfigAction(
                 @NonNull VariantScope scope, @Nullable BuildableArtifact testTargetMetadata) {
+            super(scope, scope.getTaskName("process", "Manifest"), ProcessTestManifest.class);
             this.scope = scope;
             this.testTargetMetadata = testTargetMetadata;
         }
 
-        @NonNull
-        @Override
-        public String getName() {
-            return scope.getTaskName("process", "Manifest");
-        }
-
-        @NonNull
-        @Override
-        public Class<ProcessTestManifest> getType() {
-            return ProcessTestManifest.class;
-        }
-
         @Override
         public void execute(@NonNull final ProcessTestManifest processTestManifestTask) {
+            super.execute(processTestManifestTask);
 
             final VariantConfiguration<CoreBuildType, CoreProductFlavor, CoreProductFlavor> config =
                     scope.getVariantConfiguration();
@@ -335,13 +333,6 @@ public class ProcessTestManifest extends ManifestProcessorTask {
 
             processTestManifestTask.manifests = scope.getArtifactCollection(
                     RUNTIME_CLASSPATH, ALL, MANIFEST);
-
-            processTestManifestTask.setManifestOutputDirectory(
-                    scope.getArtifacts()
-                            .appendArtifact(
-                                    InternalArtifactType.MERGED_MANIFESTS,
-                                    processTestManifestTask,
-                                    "merged"));
 
             processTestManifestTask.placeholdersValues =
                     TaskInputHelper.memoize(config::getManifestPlaceholders);

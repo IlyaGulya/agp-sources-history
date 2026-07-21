@@ -47,7 +47,9 @@ open class GatherModuleInfoTask : DefaultTask() {
         KotlinUsageCollector().collectInto(moduleDataHolder, this)
         SourceFilesCollector().collectInto(moduleDataHolder, this)
 
-        moduleDataHolder.path = sourceProjectName
+        // Transform the ":" from the path into "_" so Poet can generate directories for each module
+        // correctly. Example: :module1:submoduleA will become module1_submoduleA
+        moduleDataHolder.name = sourceProjectName.replace(':', '_')
         moduleDataHolder.saveAsJsonTo(outputProvider.get().asFile)
     }
 
@@ -120,18 +122,20 @@ private class SourceFilesCollector : DataCollector {
                 }
         }
 
-        dataHolder.javaPackageCount = javaPackageMap.size
+        dataHolder.javaSourceInfo.packages = javaPackageMap.size
         if (javaPackageMap.isNotEmpty()) {
             // Since ASPoet doesn't support count per package, we pick the biggest.
-            dataHolder.javaClassCount = javaPackageMap.values.max() ?: 0
-            dataHolder.javaMethodsPerClass = 10 // TODO actually count the methods
+            dataHolder.javaSourceInfo.classesPerPackage = javaPackageMap.values.max() ?: 0
+            dataHolder.javaSourceInfo.methodsPerClass = 10 // TODO actually count the methods
+            dataHolder.javaSourceInfo.fieldsPerClass = 10 // TODO actually count the fields
         }
 
-        dataHolder.kotlinPackageCount = kotlinPackageMap.size
+        dataHolder.kotlinSourceInfo.packages = kotlinPackageMap.size
         if (kotlinPackageMap.isNotEmpty()) {
             // Since ASPoet doesn't support count per package, we pick the biggest.
-            dataHolder.kotlinClassCount = kotlinPackageMap.values.max() ?: 0
-            dataHolder.kotlinMethodsPerClass = 10 // TODO actually count the methods
+            dataHolder.kotlinSourceInfo.classesPerPackage = kotlinPackageMap.values.max() ?: 0
+            dataHolder.kotlinSourceInfo.methodsPerClass = 10 // TODO actually count the methods
+            dataHolder.kotlinSourceInfo.fieldsPerClass = 10 // TODO actually count the methods
         }
     }
 
@@ -191,7 +195,9 @@ private class DependencyCollector : DataCollector {
                 is ProjectDependency -> PoetDependenciesInfo(
                     DependencyType.MODULE,
                     config.name,
-                    dependency.dependencyProject.path
+                    // For sub modules, drop the first ":" from the path and transform the others
+                    // into "_" so Poet can generate directories for each module correctly.
+                    dependency.dependencyProject.path.drop(1).replace(':', '_')
                 )
                 is ModuleDependency -> PoetDependenciesInfo(
                     DependencyType.EXTERNAL_LIBRARY,

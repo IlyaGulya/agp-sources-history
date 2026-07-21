@@ -14,26 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.tools.analytics;
+package com.android.tools.analytics
 
-import com.android.annotations.NonNull;
-import com.google.wireless.android.play.playlog.proto.ClientAnalytics;
-
-import java.util.concurrent.ScheduledExecutorService;
+import com.google.wireless.android.play.playlog.proto.ClientAnalytics
 
 /**
- * A {@link UsageTracker} that does not report any logs. Used when the user opts-out of reporting
+ * A [UsageTracker] that does not report any logs. Used when the user opts-out of reporting
  * usage analytics to Google.
  */
-public class NullUsageTracker extends UsageTracker {
-    public NullUsageTracker(
-            AnalyticsSettings analyticsSettings, ScheduledExecutorService scheduler) {
-        super(analyticsSettings, scheduler);
-    }
+object NullUsageTracker : UsageTrackerWriter() {
 
-    @Override
-    public void logDetails(@NonNull ClientAnalytics.LogEvent.Builder studioEvent) {}
+  override fun logDetails(logEvent: ClientAnalytics.LogEvent.Builder) {}
 
-    @Override
-    public void close() {}
+  override fun close() {}
 }

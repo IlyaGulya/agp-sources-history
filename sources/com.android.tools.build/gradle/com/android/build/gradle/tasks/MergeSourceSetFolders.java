@@ -30,6 +30,7 @@ import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.IncrementalTask;
+import com.android.build.gradle.internal.tasks.Workers;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.builder.core.BuilderConstants;
 import com.android.builder.model.SourceProvider;
@@ -101,7 +102,7 @@ public class MergeSourceSetFolders extends IncrementalTask {
 
     @Inject
     public MergeSourceSetFolders(WorkerExecutor workerExecutor) {
-        this.workerExecutor = new WorkerExecutorAdapter(workerExecutor);
+        this.workerExecutor = Workers.INSTANCE.getWorker(workerExecutor);
     }
 
     @Override
@@ -121,7 +122,7 @@ public class MergeSourceSetFolders extends IncrementalTask {
         // create a new merger and populate it with the sets.
         AssetMerger merger = new AssetMerger();
 
-        try {
+        try (WorkerExecutorFacade workerExecutor = this.workerExecutor) {
             for (AssetSet assetSet : assetSets) {
                 // set needs to be loaded.
                 assetSet.loadFromFiles(getILogger());
@@ -146,7 +147,7 @@ public class MergeSourceSetFolders extends IncrementalTask {
     protected void doIncrementalTaskAction(Map<File, FileStatus> changedInputs) throws IOException {
         // create a merger and load the known state.
         AssetMerger merger = new AssetMerger();
-        try {
+        try (WorkerExecutorFacade workerExecutor = this.workerExecutor) {
             if (!merger.loadFromBlob(getIncrementalFolder(), true /*incrementalState*/)) {
                 doFullTaskAction();
                 return;
@@ -296,7 +297,8 @@ public class MergeSourceSetFolders extends IncrementalTask {
                 // the order of the artifact is descending order, so we need to reverse it.
                 Set<ResolvedArtifactResult> libArtifacts = libraries.getArtifacts();
                 for (ResolvedArtifactResult artifact : libArtifacts) {
-                    AssetSet assetSet = new AssetSet(MergeManifests.getArtifactName(artifact));
+                    AssetSet assetSet =
+                            new AssetSet(ProcessApplicationManifest.getArtifactName(artifact));
                     assetSet.addSource(artifact.getFile());
 
                     // add to 0 always, since we need to reverse the order.

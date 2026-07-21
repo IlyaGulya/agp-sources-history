@@ -16,12 +16,15 @@
 package com.android.build.gradle.tasks;
 
 import com.android.annotations.Nullable;
+import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.tasks.IncrementalTask;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
 import java.io.File;
 import java.util.Map;
+import org.gradle.api.file.Directory;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
@@ -32,7 +35,7 @@ import org.gradle.api.tasks.OutputFile;
  */
 public abstract class ManifestProcessorTask extends IncrementalTask {
 
-    private File manifestOutputDirectory;
+    private Provider<Directory> manifestOutputDirectory;
 
     private File aaptFriendlyManifestOutputDirectory;
 
@@ -52,12 +55,10 @@ public abstract class ManifestProcessorTask extends IncrementalTask {
 
     /** The processed Manifests files folder. */
     @OutputDirectory
-    public File getManifestOutputDirectory() {
+    @InternalID(InternalArtifactType.MERGED_MANIFESTS)
+    @Replace(out = "")
+    public Provider<Directory> getManifestOutputDirectory() {
         return manifestOutputDirectory;
-    }
-
-    public void setManifestOutputDirectory(File manifestOutputFolder) {
-        this.manifestOutputDirectory = manifestOutputFolder;
     }
 
     @OutputDirectory
@@ -110,21 +111,5 @@ public abstract class ManifestProcessorTask extends IncrementalTask {
                 Ordering.natural().sortedCopy(Iterables.transform(
                         mapToSerialize.entrySet(),
                         (input) -> keyValueJoiner.join(input.getKey(), input.getValue()))));
-    }
-
-    /**
-     * Backward compatibility support. This method used to be available on AGP prior to 3.0 but has
-     * now been replaced with {@link #getManifestOutputDirectory()}.
-     *
-     * @return
-     * @deprecated As or release 3.0, replaced with {@link #getManifestOutputDirectory()}
-     */
-    @Deprecated
-    @Internal
-    public File getManifestOutputFile() {
-        throw new RuntimeException(
-                "Manifest Tasks does not support the manifestOutputFile property any more, please"
-                        + " use the manifestOutputDirectory instead.\nFor more information, please check "
-                        + "https://developer.android.com/studio/build/gradle-plugin-3-0-0-migration.html");
     }
 }

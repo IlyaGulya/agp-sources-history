@@ -748,7 +748,7 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
         mainCollection =
                 mainCollection.plus(getVariantData().getGeneratedBytecode(generatedBytecodeKey));
 
-        if (Boolean.TRUE.equals(globalScope.getExtension().getAaptOptions().getNamespaced())) {
+        if (globalScope.getExtension().getAaptOptions().getNamespaced()) {
             mainCollection =
                     mainCollection.plus(
                             buildArtifactsHolder
@@ -763,7 +763,9 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
             mainCollection =
                     mainCollection.plus(getArtifactFileCollection(configType, ALL, SHARED_CLASSES));
 
-            if (buildArtifactsHolder.hasArtifact(InternalArtifactType.NAMESPACED_CLASSES)) {
+            if (globalScope
+                    .getProjectOptions()
+                    .get(BooleanOption.CONVERT_NON_NAMESPACED_DEPENDENCIES)) {
                 FileCollection namespacedClasses =
                         buildArtifactsHolder
                                 .getFinalArtifactFiles(InternalArtifactType.NAMESPACED_CLASSES_JAR)
@@ -1607,11 +1609,10 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
                 VariantSpec testedSpec =
                         testedScope.getPublishingSpec().getTestingSpec(variantType);
 
-                // get the OutputPublishingSpec from the ArtifactType for this particular variant
-                // spec
-                Collection<OutputSpec> taskOutputSpecs = testedSpec.getSpec(artifactType);
+                // get the OutputPublishingSpec from the ArtifactType for this particular variant spec
+                OutputSpec taskOutputSpec = testedSpec.getSpec(artifactType);
 
-                for (OutputSpec taskOutputSpec : taskOutputSpecs) {
+                if (taskOutputSpec != null) {
                     Collection<PublishedConfigType> publishedConfigs =
                             taskOutputSpec.getPublishedConfigTypes();
 
