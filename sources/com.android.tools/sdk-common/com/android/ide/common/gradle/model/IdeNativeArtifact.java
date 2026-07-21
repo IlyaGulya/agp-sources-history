@@ -21,10 +21,12 @@ import com.android.builder.model.NativeArtifact;
 import com.android.builder.model.NativeFile;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
+import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
-public final class IdeNativeArtifact extends IdeModel implements NativeArtifact {
+public final class IdeNativeArtifact implements NativeArtifact, Serializable {
     @NonNull private final String myName;
     @NonNull private final String myToolChain;
     @NonNull private final String myGroupName;
@@ -35,19 +37,32 @@ public final class IdeNativeArtifact extends IdeModel implements NativeArtifact 
     @Nullable private final String myTargetName;
     private final int myHashCode;
 
+    // Used for serialization by the IDE.
+    @SuppressWarnings("unused")
+    public IdeNativeArtifact() {
+        myName = "";
+        myToolChain = "";
+        myGroupName = "";
+        mySourceFiles = Collections.emptyList();
+        myExportedHeaders = Collections.emptyList();
+        //noinspection ConstantConditions
+        myOutputFile = null;
+        myAbi = "";
+        myTargetName = "";
+
+        myHashCode = 0;
+    }
+
     public IdeNativeArtifact(@NonNull NativeArtifact artifact, @NonNull ModelCache modelCache) {
-        super(artifact, modelCache);
         myName = artifact.getName();
         myToolChain = artifact.getToolChain();
         myGroupName = artifact.getGroupName();
         mySourceFiles =
-                copy(
-                        artifact.getSourceFiles(),
-                        modelCache,
-                        file -> new IdeNativeFile(file, modelCache));
+                IdeModel.copy(
+                        artifact.getSourceFiles(), modelCache, file -> new IdeNativeFile(file));
         myExportedHeaders = ImmutableList.copyOf(artifact.getExportedHeaders());
-        myAbi = copyNewProperty(artifact::getAbi, null);
-        myTargetName = copyNewProperty(artifact::getTargetName, null);
+        myAbi = IdeModel.copyNewProperty(artifact::getAbi, null);
+        myTargetName = IdeModel.copyNewProperty(artifact::getTargetName, null);
         myOutputFile = artifact.getOutputFile();
         myHashCode = calculateHashCode();
     }

@@ -18,16 +18,26 @@ package com.android.ide.common.gradle.model;
 import com.android.annotations.NonNull;
 import com.android.builder.model.NativeFile;
 import java.io.File;
+import java.io.Serializable;
 import java.util.Objects;
 
-public final class IdeNativeFile extends IdeModel implements NativeFile {
+public final class IdeNativeFile implements NativeFile, Serializable {
     private final File myFilePath;
     private final String mySettingsName;
     private final File myWorkingDirectory;
     private final int myHashCode;
 
-    public IdeNativeFile(@NonNull NativeFile file, @NonNull ModelCache modelCache) {
-        super(file, modelCache);
+    // Used for serialization by the IDE.
+    @SuppressWarnings("unused")
+    public IdeNativeFile() {
+        myFilePath = null;
+        mySettingsName = "";
+        myWorkingDirectory = null;
+
+        myHashCode = 0;
+    }
+
+    public IdeNativeFile(@NonNull NativeFile file) {
         myFilePath = file.getFilePath();
         mySettingsName = file.getSettingsName();
         myWorkingDirectory = file.getWorkingDirectory();
