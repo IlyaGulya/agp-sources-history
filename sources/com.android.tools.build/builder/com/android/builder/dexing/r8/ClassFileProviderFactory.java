@@ -90,9 +90,7 @@ public class ClassFileProviderFactory implements Closeable {
 
         providers = Lists.newArrayListWithExpectedSize(paths.size());
         for (Path path : paths) {
-            if (path.toFile().exists()) {
-                providers.add(createProvider(path));
-            }
+            providers.add(createProvider(path));
         }
 
         orderedClassFileResourceProvider = new OrderedClassFileResourceProvider(providers);

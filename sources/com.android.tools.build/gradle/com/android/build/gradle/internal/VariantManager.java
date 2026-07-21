@@ -16,6 +16,7 @@
 
 package com.android.build.gradle.internal;
 
+import static com.android.build.gradle.internal.dependency.DexingOutputSplitTransformKt.registerDexingOutputSplitTransform;
 import static com.android.build.gradle.internal.dependency.DexingTransformKt.getDexingArtifactConfigurations;
 import static com.android.build.gradle.internal.dependency.L8DexDesugarLibTransformKt.getDesugarLibConfigurations;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.AAR;
@@ -50,9 +51,6 @@ import com.android.build.gradle.internal.dependency.AarToClassTransform;
 import com.android.build.gradle.internal.dependency.AarTransform;
 import com.android.build.gradle.internal.dependency.AlternateCompatibilityRule;
 import com.android.build.gradle.internal.dependency.AlternateDisambiguationRule;
-import com.android.build.gradle.internal.dependency.AndroidTypeAttr;
-import com.android.build.gradle.internal.dependency.AndroidTypeAttrCompatRule;
-import com.android.build.gradle.internal.dependency.AndroidTypeAttrDisambRule;
 import com.android.build.gradle.internal.dependency.AndroidXDependencySubstitution;
 import com.android.build.gradle.internal.dependency.DesugarLibConfiguration;
 import com.android.build.gradle.internal.dependency.DexingArtifactConfiguration;
@@ -79,10 +77,11 @@ import com.android.build.gradle.internal.publishing.AndroidArtifacts;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType;
 import com.android.build.gradle.internal.publishing.PublishingSpecs;
 import com.android.build.gradle.internal.res.Aapt2MavenUtils;
-import com.android.build.gradle.internal.scope.AnchorOutputType;
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
 import com.android.build.gradle.internal.scope.CodeShrinker;
 import com.android.build.gradle.internal.scope.GlobalScope;
+import com.android.build.gradle.internal.scope.InternalArtifactType;
+import com.android.build.gradle.internal.scope.SingleArtifactType;
 import com.android.build.gradle.internal.scope.TransformVariantScope;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.variant.BaseVariantData;
@@ -456,19 +455,15 @@ public class VariantManager implements VariantModel {
             // now add the default config
             testVariantSourceSets.add(defaultConfigData.getTestSourceSet(variantType));
 
-            final AndroidTypeAttr consumeAndroidTypeAttr =
-                    instantiateAndroidTypeAttr(
-                            testedVariantData.getVariantConfiguration().getType().getConsumeType());
-
             // If the variant being tested is a library variant, VariantDependencies must be
             // computed after the tasks for the tested variant is created.  Therefore, the
             // VariantDependencies is computed here instead of when the VariantData was created.
             VariantDependencies.Builder builder =
                     VariantDependencies.builder(
                                     project,
+                                    variantType,
                                     variantScope.getGlobalScope().getErrorHandler(),
                                     variantConfig)
-                            .setConsumeType(consumeAndroidTypeAttr)
                             .addSourceSets(testVariantSourceSets)
                             .setFlavorSelection(getFlavorSelection(variantConfig))
                             .setTestedVariantScope(testedVariantData.getScope());
@@ -527,8 +522,8 @@ public class VariantManager implements VariantModel {
         BuildArtifactsHolder buildArtifactsHolder = variantScope.getArtifacts();
         for (PublishingSpecs.OutputSpec outputSpec :
                 variantScope.getPublishingSpec().getOutputs()) {
-            com.android.build.api.artifact.ArtifactType<? extends FileSystemLocation>
-                    buildArtifactType = outputSpec.getOutputType();
+            SingleArtifactType<? extends FileSystemLocation> buildArtifactType =
+                    outputSpec.getOutputType();
 
             // Gradle only support publishing single file.  Therefore, unless Gradle starts
             // supporting publishing multiple files, PublishingSpecs should not contain any
@@ -542,19 +537,22 @@ public class VariantManager implements VariantModel {
             }
 
             if (buildArtifactsHolder.hasFinalProduct(buildArtifactType)) {
-                Pair<Provider<String>, Provider<FileSystemLocation>> finalProduct =
-                        buildArtifactsHolder.getFinalProductWithTaskName(
-                                (com.android.build.api.artifact.ArtifactType<FileSystemLocation>)
-                                        buildArtifactType);
+                Provider<? extends FileSystemLocation> artifact =
+                        buildArtifactsHolder.getFinalProduct(buildArtifactType);
+
                 variantScope.publishIntermediateArtifact(
-                        finalProduct.getSecond(),
-                        finalProduct.getFirst(),
+                        artifact,
                         outputSpec.getArtifactType(),
                         outputSpec.getPublishedConfigTypes());
             } else {
-                if (buildArtifactType == AnchorOutputType.ALL_CLASSES.INSTANCE) {
+                if (buildArtifactType == InternalArtifactType.ALL_CLASSES.INSTANCE) {
+                    Provider<FileCollection> allClasses =
+                            buildArtifactsHolder.getFinalProductAsFileCollection(
+                                    InternalArtifactType.ALL_CLASSES.INSTANCE);
+                    Provider<File> file = allClasses.map(FileCollection::getSingleFile);
+
                     variantScope.publishIntermediateArtifact(
-                            buildArtifactsHolder.getFinalProductAsFileCollection(buildArtifactType),
+                            file,
                             outputSpec.getArtifactType(),
                             outputSpec.getPublishedConfigTypes());
                 }
@@ -583,11 +581,6 @@ public class VariantManager implements VariantModel {
         }
 
         return ImmutableMap.of();
-    }
-
-    @NonNull
-    AndroidTypeAttr instantiateAndroidTypeAttr(@NonNull String androidTypeAttrString) {
-        return project.getObjects().named(AndroidTypeAttr.class, androidTypeAttrString);
     }
 
     public void configureDependencies() {
@@ -850,12 +843,6 @@ public class VariantManager implements VariantModel {
 
         AttributesSchema schema = dependencies.getAttributesSchema();
 
-        // custom strategy for AndroidTypeAttr
-        AttributeMatchingStrategy<AndroidTypeAttr> androidTypeAttrStrategy =
-                schema.attribute(AndroidTypeAttr.ATTRIBUTE);
-        androidTypeAttrStrategy.getCompatibilityRules().add(AndroidTypeAttrCompatRule.class);
-        androidTypeAttrStrategy.getDisambiguationRules().add(AndroidTypeAttrDisambRule.class);
-
         // custom strategy for build-type and product-flavor.
         setBuildTypeStrategy(schema);
 
@@ -912,6 +899,8 @@ public class VariantManager implements VariantModel {
         for (DesugarLibConfiguration configuration : getDesugarLibConfigurations(variantScopes)) {
             configuration.registerTransform(dependencies);
         }
+
+        registerDexingOutputSplitTransform(dependencies, variantScopes);
     }
 
     private static <F, T> List<T> convert(
@@ -945,7 +934,7 @@ public class VariantManager implements VariantModel {
 
         if (!alternateMap.isEmpty()) {
             AttributeMatchingStrategy<BuildTypeAttr> buildTypeStrategy =
-                    schema.attribute(BuildTypeAttr.ATTRIBUTE);
+                    schema.attribute(BuildTypeAttr.getATTRIBUTE());
 
             buildTypeStrategy
                     .getCompatibilityRules()
@@ -1195,16 +1184,11 @@ public class VariantManager implements VariantModel {
         VariantDependencies.Builder builder =
                 VariantDependencies.builder(
                                 project,
+                                variantType,
                                 variantScope.getGlobalScope().getErrorHandler(),
                                 variantConfig)
-                        .setConsumeType(instantiateAndroidTypeAttr(variantType.getConsumeType()))
                         .setFlavorSelection(getFlavorSelection(variantConfig))
                         .addSourceSets(variantSourceSets);
-
-        final String publishType = variantType.getPublishType();
-        if (publishType != null) {
-            builder.setPublishType(instantiateAndroidTypeAttr(publishType));
-        }
 
         if (extension instanceof BaseAppModuleExtension) {
             builder.setFeatureList(((BaseAppModuleExtension) extension).getDynamicFeatures());
@@ -1501,25 +1485,17 @@ public class VariantManager implements VariantModel {
                         variantForAndroidTest = variantData;
                     }
 
-                    if (!variantType.isHybrid()) { // BASE_FEATURE/FEATURE
-                        // There's nothing special about unit testing the feature variant, so
-                        // there's no point creating the duplicate unit testing variant. This only
-                        // causes tests to run twice when running "testDebug".
-                        TestVariantData unitTestVariantData =
-                                createTestVariantData(variantData, UNIT_TEST);
-                        addVariant(unitTestVariantData);
-                    }
+                    TestVariantData unitTestVariantData =
+                            createTestVariantData(variantData, UNIT_TEST);
+                    addVariant(unitTestVariantData);
                 }
             }
         }
 
         if (variantForAndroidTest != null) {
-            // TODO: b/34624400
-            if (!variantType.isHybrid()) { // BASE_FEATURE/FEATURE
-                TestVariantData androidTestVariantData =
-                        createTestVariantData(variantForAndroidTest, ANDROID_TEST);
-                addVariant(androidTestVariantData);
-            }
+            TestVariantData androidTestVariantData =
+                    createTestVariantData(variantForAndroidTest, ANDROID_TEST);
+            addVariant(androidTestVariantData);
         }
     }
 
@@ -1642,7 +1618,6 @@ public class VariantManager implements VariantModel {
                 variantScopes
                         .stream()
                         .filter(it -> !it.getType().isTestComponent())
-                        .filter(it -> !it.getType().isHybrid())
                         .min(preferredDefaultVariantScopeComparator);
         return defaultVariantScope.map(TransformVariantScope::getFullVariantName).orElse(null);
     }

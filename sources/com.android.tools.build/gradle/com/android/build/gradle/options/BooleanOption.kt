@@ -54,7 +54,6 @@ enum class BooleanOption(
     DISALLOW_DEPENDENCY_RESOLUTION_AT_CONFIGURATION("android.dependencyResolutionAtConfigurationTime.disallow"),
     DEBUG_OBSOLETE_API("android.debug.obsoleteApi", false, Option.Status.STABLE),
     ENABLE_STUDIO_VERSION_CHECK("android.injected.studio.version.check", true, Option.Status.STABLE),
-    DISABLE_LLD_LINKER("android.disableLldLinker", false),
 
     // ---------------
     // Lifecycle flags: Experimental stage, not yet enabled by default
@@ -83,7 +82,7 @@ enum class BooleanOption(
     // Flag added to work around b/130596259.
     FORCE_JACOCO_OUT_OF_PROCESS("android.forceJacocoOutOfProcess", false, status = Option.Status.STABLE),
     /** When set R classes are treated as compilation classpath in libraries, rather than runtime classpath, with values set to 0. */
-    ENABLE_ADDITIONAL_ANDROID_TEST_OUTPUT("android.enableAdditionalTestOutput", false),
+    ENABLE_ADDITIONAL_ANDROID_TEST_OUTPUT("android.enableAdditionalTestOutput", true),
     ENABLE_APP_COMPILE_TIME_R_CLASS("android.enableAppCompileTimeRClass", false),
     // ---------------
     // Lifecycle flags: Stable stage, Enabled by default, can be disabled
@@ -116,13 +115,16 @@ enum class BooleanOption(
     USE_NEW_JAR_CREATOR("android.useNewJarCreator", true),
     PRECOMPILE_DEPENDENCIES_RESOURCES("android.precompileDependenciesResources", true, Option.Status.STABLE),
     USE_NEW_APK_CREATOR("android.useNewApkCreator", true),
-    EXCLUDE_RES_SOURCES_FOR_RELEASE_BUNDLES("android.bundle.excludeResSourcesForRelease", false),
+    EXCLUDE_RES_SOURCES_FOR_RELEASE_BUNDLES("android.bundle.excludeResSourcesForRelease", true),
 
     // ---------------
     // Lifecycle flags: Deprecated stage, feature is stable and we want to get rid of the ability to revert to older code path
     ENABLE_DESUGAR(
         "android.enableDesugar", true, DeprecationReporter.DeprecationTarget.DESUGAR_TOOL),
     ENABLE_D8("android.enableD8", true, DeprecationReporter.DeprecationTarget.LEGACY_DEXER),
+
+    // Options related to new Variant API
+    USE_SAFE_PROPERTIES("android.variant.safe.properties", false),
 
     ;
     constructor(

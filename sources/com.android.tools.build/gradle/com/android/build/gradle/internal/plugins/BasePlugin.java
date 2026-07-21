@@ -22,8 +22,8 @@ import android.databinding.tool.DataBindingBuilder;
 import com.android.Version;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.build.api.variant.impl.GradleProperty;
 import com.android.build.gradle.BaseExtension;
-import com.android.build.gradle.FeaturePlugin;
 import com.android.build.gradle.api.AndroidBasePlugin;
 import com.android.build.gradle.api.BaseVariantOutput;
 import com.android.build.gradle.internal.ApiObjectFactory;
@@ -59,6 +59,7 @@ import com.android.build.gradle.internal.profile.AnalyticsUtil;
 import com.android.build.gradle.internal.profile.ProfileAgent;
 import com.android.build.gradle.internal.profile.ProfilerInitializer;
 import com.android.build.gradle.internal.profile.RecordingBuildListener;
+import com.android.build.gradle.internal.scope.BuildFeatureValuesImpl;
 import com.android.build.gradle.internal.scope.DelayedActionsExecutor;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.VariantScope;
@@ -73,7 +74,6 @@ import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.options.StringOption;
 import com.android.build.gradle.options.SyncOptions;
 import com.android.build.gradle.options.SyncOptions.ErrorFormatMode;
-import com.android.build.gradle.tasks.CachedAnnotationProcessorDetector;
 import com.android.build.gradle.tasks.LintBaseTask;
 import com.android.build.gradle.tasks.factory.AbstractCompilesUtil;
 import com.android.builder.core.BuilderConstants;
@@ -317,7 +317,11 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
 
         DslScopeImpl dslScope =
                 new DslScopeImpl(
-                        syncIssueHandler, extraModelInfo.getDeprecationReporter(), objectFactory);
+                        syncIssueHandler,
+                        extraModelInfo.getDeprecationReporter(),
+                        objectFactory,
+                        project.getLogger(),
+                        new BuildFeatureValuesImpl(projectOptions));
 
         @Nullable
         FileCache buildCache = BuildCacheUtils.createBuildCacheIfEnabled(project, projectOptions);
@@ -358,7 +362,6 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
                         sdkComponents.unload();
                         SdkLocator.resetCache();
                         ConstraintHandler.clearCache();
-                        CachedAnnotationProcessorDetector.clearCache();
                         threadRecorder.record(
                                 ExecutionType.BASE_PLUGIN_BUILD_FINISHED,
                                 project.getPath(),
@@ -439,6 +442,10 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
                         buildOutputs,
                         sourceSetManager,
                         extraModelInfo);
+
+        // link the extension buildFeature to the BuildFeatureValues in DslScope
+        ((BuildFeatureValuesImpl) globalScope.getDslScope().getBuildFeatures())
+                .setDslBuildFeatures(extension.getBuildFeatures());
 
         globalScope.setExtension(extension);
 
@@ -669,6 +676,10 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
                 variantManager.getVariantScopes());
 
 
+        // configure compose related tasks.
+        taskManager.configureKotlinPluginTasksForComposeIfNecessary(
+                globalScope, variantManager.getVariantScopes());
+
         // create the global lint task that depends on all the variants
         taskManager.configureGlobalLintTask(variantManager.getVariantScopes());
 
@@ -690,11 +701,13 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
 
         checkSplitConfiguration();
         variantManager.setHasCreatedTasks(true);
+        // notify our properties that configuration is over for us.
+        GradleProperty.Companion.endOfEvaluation();
     }
 
     private String findHighestSdkInstalled() {
         String highestSdk = null;
-        File folder = new File(globalScope.getSdkComponents().getSdkFolder(), "platforms");
+        File folder = new File(globalScope.getSdkComponents().getSdkDirectory(), "platforms");
         File[] listOfFiles = folder.listFiles();
 
         if (listOfFiles != null) {
@@ -713,7 +726,6 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
     private void checkSplitConfiguration() {
         String configApkUrl = "https://d.android.com/topic/instant-apps/guides/config-splits.html";
 
-        boolean isFeatureModule = project.getPlugins().hasPlugin(FeaturePlugin.class);
         boolean generatePureSplits = extension.getGeneratePureSplits();
         Splits splits = extension.getSplits();
         boolean splitsEnabled =
@@ -722,7 +734,7 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
                         || splits.getLanguage().isEnable();
 
         // The Play Store doesn't allow Pure splits
-        if (!isFeatureModule && generatePureSplits) {
+        if (generatePureSplits) {
             extraModelInfo
                     .getSyncIssueHandler()
                     .reportWarning(
@@ -731,25 +743,12 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
                                     + configApkUrl);
         }
 
-        if (!isFeatureModule && !generatePureSplits && splits.getLanguage().isEnable()) {
+        if (!generatePureSplits && splits.getLanguage().isEnable()) {
             extraModelInfo
                     .getSyncIssueHandler()
                     .reportWarning(
                             Type.GENERIC,
                             "Per-language APKs are supported only when building Android Instant Apps. For more information, go to "
-                                    + configApkUrl);
-        }
-
-        if (isFeatureModule && !generatePureSplits && splitsEnabled) {
-            extraModelInfo
-                    .getSyncIssueHandler()
-                    .reportWarning(
-                            Type.GENERIC,
-                            "Configuration APKs targeting different device configurations are "
-                                    + "automatically built when splits are enabled for a feature module.\n"
-                                    + "To suppress this warning, remove \"generatePureSplits false\" "
-                                    + "from your build.gradle file.\n"
-                                    + "To learn more, see "
                                     + configApkUrl);
         }
     }

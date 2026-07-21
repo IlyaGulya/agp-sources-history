@@ -78,6 +78,10 @@ public abstract class BaseVariantImpl implements BaseVariant {
     public static final String TASK_ACCESS_DEPRECATION_URL =
             "https://d.android.com/r/tools/task-configuration-avoidance";
 
+    // TODO : b/142687686
+    public static final String USE_PROPERTIES_DEPRECATION_URL =
+            "https://d.android.com/r/tools/use-properties";
+
     @NonNull private final ObjectFactory objectFactory;
 
     @NonNull protected final ReadOnlyObjectProvider readOnlyObjectProvider;
@@ -211,10 +215,9 @@ public abstract class BaseVariantImpl implements BaseVariant {
     public String getApplicationId() {
         BaseVariantData variantData = getVariantData();
 
-        // this getter cannot work for dynamic features or for feature plugins (both base
-        // and non base) as the applicationId comes from somewhere else and cannot be known
-        // at config time.
-        if (variantData.getType().isDynamicFeature() || variantData.getType().isHybrid()) {
+        // this getter cannot work for dynamic features as the applicationId comes from somewhere
+        // else and cannot be known at config time.
+        if (variantData.getType().isDynamicFeature()) {
             variantData
                     .getScope()
                     .getGlobalScope()
@@ -222,7 +225,7 @@ public abstract class BaseVariantImpl implements BaseVariant {
                     .getIssueReporter()
                     .reportError(
                             EvalIssueReporter.Type.GENERIC,
-                            "variant.getApplicationId() is not supported by feature plugins as it cannot handle delayed setting of the application ID. Please use getApplicationIdTextResource() instead.");
+                            "variant.getApplicationId() is not supported by dynamic-feature plugins as it cannot handle delayed setting of the application ID. Please use getApplicationIdTextResource() instead.");
         }
 
         return variantData.getApplicationId();

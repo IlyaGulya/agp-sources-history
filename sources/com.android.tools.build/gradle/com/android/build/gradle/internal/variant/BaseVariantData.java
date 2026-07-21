@@ -24,6 +24,7 @@ import android.databinding.tool.LayoutXmlProcessor;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.OutputFile;
+import com.android.build.api.variant.impl.VariantImpl;
 import com.android.build.gradle.BaseExtension;
 import com.android.build.gradle.api.AndroidSourceSet;
 import com.android.build.gradle.internal.TaskManager;
@@ -122,6 +123,7 @@ public abstract class BaseVariantData {
 
     private final MutableTaskContainer taskContainer;
     public TextResource applicationIdTextResource;
+    private final VariantImpl publicVariantAPI;
 
     public BaseVariantData(
             @NonNull GlobalScope globalScope,
@@ -137,23 +139,16 @@ public abstract class BaseVariantData {
                         || splits.getAbi().isEnable()
                         || splits.getLanguage().isEnable();
 
-        // eventually, this will require a more open ended comparison.
-        multiOutputPolicy =
-                (globalScope.getExtension().getGeneratePureSplits()
-                                        || variantConfiguration.getType().isHybrid()) // == FEATURE
-                                && variantConfiguration.getMinSdkVersionValue() >= 21
-                        ? MultiOutputPolicy.SPLITS
-                        : MultiOutputPolicy.MULTI_APK;
+        // Since pure SPLITS are not supported, remove this before submitting.
+        multiOutputPolicy = MultiOutputPolicy.MULTI_APK;
 
         // warn the user if we are forced to ignore the generatePureSplits flag.
-        if (splitsEnabled
-                && globalScope.getExtension().getGeneratePureSplits()
-                && multiOutputPolicy != MultiOutputPolicy.SPLITS) {
-            Logging.getLogger(BaseVariantData.class).warn(
-                    String.format("Variant %s, MinSdkVersion %s is too low (<21) "
-                                    + "to support pure splits, reverting to full APKs",
-                            variantConfiguration.getFullName(),
-                            variantConfiguration.getMinSdkVersion().getApiLevel()));
+        if (splitsEnabled && globalScope.getExtension().getGeneratePureSplits()) {
+            Logging.getLogger(BaseVariantData.class)
+                    .warn(
+                            String.format(
+                                    "Variant %s requested removed pure splits support, reverted to full splits",
+                                    variantConfiguration.getFullName()));
         }
 
         final Project project = globalScope.getProject();
@@ -165,6 +160,15 @@ public abstract class BaseVariantData {
                                 globalScope.getErrorHandler(),
                                 recorder),
                         this);
+
+        publicVariantAPI =
+                new VariantImpl(
+                        scope.getFullVariantName(),
+                        globalScope.getProject().getObjects(),
+                        scope,
+                        variantConfiguration,
+                        scope.getArtifacts().getOperations());
+
         outputFactory = new OutputFactory(globalScope.getProjectBaseName(), variantConfiguration);
 
         TaskManager.configureScopeForNdk(scope);
@@ -203,6 +207,11 @@ public abstract class BaseVariantData {
                                     .get(BooleanOption.USE_ANDROID_X));
         }
         return layoutXmlProcessor;
+    }
+
+    @NonNull
+    public VariantImpl getPublicVariantApi() {
+        return publicVariantAPI;
     }
 
     @NonNull

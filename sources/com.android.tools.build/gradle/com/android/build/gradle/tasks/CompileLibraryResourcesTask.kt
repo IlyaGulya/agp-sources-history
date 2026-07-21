@@ -22,25 +22,31 @@ import com.android.build.gradle.internal.aapt.SharedExecutorResourceCompilationS
 import com.android.build.gradle.internal.res.getAapt2FromMavenAndVersion
 import com.android.build.gradle.internal.res.namespaced.Aapt2ServiceKey
 import com.android.build.gradle.internal.res.namespaced.registerAaptService
-import com.android.build.gradle.internal.scope.BuildArtifactsHolder
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.NewIncrementalTask
-import com.android.build.gradle.internal.tasks.TaskInputHelper
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.options.SyncOptions
 import com.android.builder.internal.aapt.v2.Aapt2RenamingConventions
+import com.android.builder.png.VectorDrawableRenderer
 import com.android.ide.common.resources.CompileResourceRequest
+import com.android.ide.common.resources.NoOpResourcePreprocessor
+import com.android.ide.common.resources.ResourcePreprocessor
+import com.android.ide.common.workers.WorkerExecutorFacade
+import com.android.resources.Density
 import com.android.utils.FileUtils
 import com.google.common.collect.ImmutableList
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileType
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskProvider
@@ -49,8 +55,11 @@ import org.gradle.work.FileChange
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 import java.io.Serializable
-import java.util.function.Supplier
 import javax.inject.Inject
 
 @CacheableTask
@@ -81,21 +90,72 @@ abstract class CompileLibraryResourcesTask : NewIncrementalTask() {
     @get:OutputDirectory
     abstract val outputDir: DirectoryProperty
 
+    @get:Input
+    lateinit var generatedDensities: Set<String>
+        private set
+
+    private lateinit var generatedPngsOutputDir: File
+
+    /**
+     * Used to load [generatedFilesMap] when running incrementally.
+     */
+    @get:OutputFile
+    @get:Optional
+    lateinit var generatedFilesMapBlobFile: File
+        private set
+
+    /**
+     * Contains for each vector drawable file a list of generated pngs to help deleting previously
+     * generated files in incremental builds.
+     *
+     * We can identify the files uniquely using a combination of parent name and file name.
+     */
+    private var generatedFilesMap: MutableMap<FileIdentifier, Collection<FileIdentifier>> =
+        HashMap()
+
+    @get:Input
+    var vectorSupportLibraryIsUsed: Boolean = false
+        private set
+
+    private lateinit var resourcePreprocessor: ResourcePreprocessor
+
+    @get:Input
+    abstract val minSdk: Property<Int>
+
     override fun doTaskAction(inputChanges: InputChanges) {
+        if (generatedDensities.isEmpty()) {
+            resourcePreprocessor = NoOpResourcePreprocessor.INSTANCE
+        } else {
+            resourcePreprocessor = VectorDrawableRenderer(
+                minSdk.get(),
+                vectorSupportLibraryIsUsed,
+                generatedPngsOutputDir,
+                generatedDensities.map { Density.getEnum(it) },
+                LoggerWrapper.supplierFor(CompileLibraryResourcesTask::class.java)
+            )
+        }
+
         val aapt2ServiceKey = registerAaptService(
             aapt2FromMaven, LoggerWrapper(logger)
         )
 
         getWorkerFacadeWithWorkers().use { workers ->
             val requests = ImmutableList.builder<CompileResourceRequest>()
+            val generatedFilesRequests = ImmutableList.builder<CompileResourceRequest>()
 
-            if (inputChanges.isIncremental) {
+            if (inputChanges.isIncremental && loadGeneratedFilesMap()) {
                 doIncrementalTaskAction(
                     inputChanges.getFileChanges(mergedLibraryResourcesDir),
-                    requests
+                    requests,
+                    generatedFilesRequests,
+                    workers
                 )
             } else {
                 // do full task action
+                if (generatedPngsOutputDir.exists()) {
+                    FileUtils.deleteDirectoryContents(generatedPngsOutputDir)
+                }
+
                 FileUtils.deleteDirectoryContents(outputDir.asFile.get())
 
                 // filter out the values files as they have to go through the resources merging
@@ -104,10 +164,22 @@ abstract class CompileLibraryResourcesTask : NewIncrementalTask() {
                     .filter { it.isDirectory && !it.name.startsWith(FD_RES_VALUES) }
                     .forEach { dir ->
                         dir.listFiles()!!.forEach { file ->
-                            submitFileToBeCompiled(file, requests)
+                            submitFileToBeCompiled(file, requests, generatedFilesRequests, workers)
                         }
                     }
             }
+
+            // Wait for the file generation to be completed
+            workers.await()
+
+            // Save the generated files map
+            generatedFilesMapBlobFile.parentFile.mkdirs()
+            ObjectOutputStream(FileOutputStream(generatedFilesMapBlobFile)).use {
+                it.writeObject(generatedFilesMap)
+            }
+
+            // Generated resources override normal resources so we need to add them at the end
+            requests.addAll(generatedFilesRequests.build())
 
             workers.submit(
                 CompileLibraryResourcesRunnable::class.java,
@@ -124,24 +196,53 @@ abstract class CompileLibraryResourcesTask : NewIncrementalTask() {
 
     private fun submitFileToBeCompiled(
         file: File,
-        requests: ImmutableList.Builder<CompileResourceRequest>
+        requests: ImmutableList.Builder<CompileResourceRequest>,
+        generatedFilesRequests: ImmutableList.Builder<CompileResourceRequest>,
+        workers: WorkerExecutorFacade
     ) {
-        requests.add(
-            CompileResourceRequest(
-                file,
-                outputDir.asFile.get(),
-                isPseudoLocalize = pseudoLocalesEnabled,
-                isPngCrunching = crunchPng
+        val generatedFiles = resourcePreprocessor.getFilesToBeGenerated(file)
+        if (generatedFiles.isEmpty()) {
+            requests.add(
+                CompileResourceRequest(
+                    file,
+                    outputDir.asFile.get(),
+                    isPseudoLocalize = pseudoLocalesEnabled,
+                    isPngCrunching = crunchPng
+                )
             )
-        )
+        } else {
+            generatedFilesMap[FileIdentifier(file)] = generatedFiles.map { FileIdentifier(it) }
+            generatedFiles.forEach {
+                workers.submit(
+                    FileGenerationWorkAction::class.java,
+                    FileGenerationParameters(it, file, resourcePreprocessor)
+                )
+
+                generatedFilesRequests.add(
+                    CompileResourceRequest(
+                        it,
+                        outputDir.asFile.get(),
+                        isPseudoLocalize = pseudoLocalesEnabled,
+                        isPngCrunching = crunchPng
+                    )
+                )
+            }
+        }
     }
 
-    private fun handleModifiedFile(
-        file: File,
-        changeType: ChangeType,
-        requests: ImmutableList.Builder<CompileResourceRequest>
-    ) {
-        if (changeType == ChangeType.MODIFIED || changeType == ChangeType.REMOVED) {
+    private fun deleteFile(file: File) {
+        val generatedFiles = generatedFilesMap[FileIdentifier(file)]
+        if (generatedFiles?.isEmpty() == false) {
+            generatedFiles.forEach {
+                FileUtils.deleteIfExists(
+                    File(
+                        outputDir.asFile.get(),
+                        Aapt2RenamingConventions.compilationRename(File(it.parentName, it.fileName))
+                    )
+                )
+            }
+            generatedFilesMap.remove(FileIdentifier(file))
+        } else {
             FileUtils.deleteIfExists(
                 File(
                     outputDir.asFile.get(),
@@ -149,14 +250,41 @@ abstract class CompileLibraryResourcesTask : NewIncrementalTask() {
                 )
             )
         }
+    }
+
+    private fun loadGeneratedFilesMap(): Boolean {
+        return try {
+            ObjectInputStream(FileInputStream(generatedFilesMapBlobFile)).use {
+                @Suppress("UNCHECKED_CAST")
+                generatedFilesMap =
+                    it.readObject() as MutableMap<FileIdentifier, Collection<FileIdentifier>>
+            }
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun handleModifiedFile(
+        file: File,
+        changeType: ChangeType,
+        requests: ImmutableList.Builder<CompileResourceRequest>,
+        generatedFilesRequests: ImmutableList.Builder<CompileResourceRequest>,
+        workers: WorkerExecutorFacade
+    ) {
+        if (changeType == ChangeType.MODIFIED || changeType == ChangeType.REMOVED) {
+            deleteFile(file)
+        }
         if (changeType == ChangeType.ADDED || changeType == ChangeType.MODIFIED) {
-            submitFileToBeCompiled(file, requests)
+            submitFileToBeCompiled(file, requests, generatedFilesRequests, workers)
         }
     }
 
     private fun doIncrementalTaskAction(
         fileChanges: Iterable<FileChange>,
-        requests: ImmutableList.Builder<CompileResourceRequest>
+        requests: ImmutableList.Builder<CompileResourceRequest>,
+        generatedFilesRequests: ImmutableList.Builder<CompileResourceRequest>,
+        workers: WorkerExecutorFacade
     ) {
         fileChanges.filter {
             it.fileType == FileType.FILE &&
@@ -166,9 +294,15 @@ abstract class CompileLibraryResourcesTask : NewIncrementalTask() {
                 handleModifiedFile(
                     fileChange.file,
                     fileChange.changeType,
-                    requests
+                    requests,
+                    generatedFilesRequests,
+                    workers
                 )
             }
+    }
+
+    private data class FileIdentifier(val fileName: String, val parentName: String) {
+        constructor(file: File) : this(file.name, file.parentFile.name)
     }
 
     private data class CompileLibraryResourcesParams(
@@ -205,7 +339,6 @@ abstract class CompileLibraryResourcesTask : NewIncrementalTask() {
 
             variantScope.artifacts.producesDir(
                 InternalArtifactType.COMPILED_LOCAL_RESOURCES,
-                BuildArtifactsHolder.OperationType.INITIAL,
                 taskProvider,
                 CompileLibraryResourcesTask::outputDir
             )
@@ -233,6 +366,52 @@ abstract class CompileLibraryResourcesTask : NewIncrementalTask() {
 
             task.errorFormatMode =
                 SyncOptions.getErrorFormatMode(variantScope.globalScope.projectOptions)
+
+            val vectorDrawablesOptions =
+                variantScope.variantData.variantConfiguration.mergedFlavor.vectorDrawables
+            task.generatedDensities = vectorDrawablesOptions.generatedDensities ?: emptySet()
+            task.vectorSupportLibraryIsUsed = vectorDrawablesOptions.useSupportLibrary ?: false
+
+            task.minSdk.set(variantScope.globalScope.project.provider {
+                variantScope.variantData.variantConfiguration.minSdkVersion.apiLevel
+            })
+            task.minSdk.disallowChanges()
+
+            task.generatedPngsOutputDir =
+                FileUtils.join(
+                    variantScope.globalScope.generatedDir,
+                    "compile-library-resources",
+                    "pngs",
+                    variantScope.variantConfiguration.dirName
+                )
+            task.generatedFilesMapBlobFile =
+                FileUtils.join(variantScope.getIncrementalDir(name), "generatedFilesMap")
+        }
+    }
+
+    data class FileGenerationParameters constructor(
+        val file: File, val sourceFile: File, val resourcePreprocessor: ResourcePreprocessor
+    ) : Serializable
+
+    class FileGenerationWorkAction @Inject
+    constructor(private val params: FileGenerationParameters) : Runnable {
+
+        override fun run() {
+            try {
+                params.resourcePreprocessor.generateFile(
+                    params.file,
+                    params.sourceFile
+                )
+            } catch (e: Exception) {
+                throw RuntimeException(
+                    "Error while processing "
+                            + params.sourceFile
+                            + " : "
+                            + e.message,
+                    e
+                )
+            }
+
         }
     }
 }

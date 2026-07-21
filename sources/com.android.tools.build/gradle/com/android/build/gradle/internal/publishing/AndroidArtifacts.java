@@ -51,6 +51,8 @@ public class AndroidArtifacts {
     private static final String TYPE_NON_NAMESPACED_CLASSES = "non-namespaced-android-classes";
     private static final String TYPE_SHARED_CLASSES = "android-shared-classes";
     private static final String TYPE_DEX = "android-dex";
+    private static final String TYPE_DEX_AND_KEEP_RULES = "android-dex-and-keep-rules";
+    private static final String TYPE_KEEP_RULES = "android-keep-rules";
     private static final String TYPE_JAVA_RES = "android-java-res";
     private static final String TYPE_SHARED_JAVA_RES = "android-shared-java-res";
     private static final String TYPE_MANIFEST = "android-manifest";
@@ -96,7 +98,7 @@ public class AndroidArtifacts {
 
     // types for feature-split content.
     private static final String TYPE_FEATURE_SET_METADATA = "android-feature-all-metadata";
-    private static final String TYPE_FEATURE_APPLICATION_ID = "android-feature-application-id";
+    private static final String TYPE_BASE_MODULE_METADATA = "android-base-module-metadata";
     private static final String TYPE_FEATURE_RESOURCE_PKG = "android-feature-res-ap_";
     private static final String TYPE_FEATURE_DEX = "android-feature-dex";
     private static final String TYPE_FEATURE_SIGNING_CONFIG = "android-feature-signing-config";
@@ -108,8 +110,6 @@ public class AndroidArtifacts {
             "android-reverse-metadata-feature-decl";
     private static final String TYPE_REVERSE_METADATA_FEATURE_MANIFEST =
             "android-reverse-metadata-feature-manifest";
-    private static final String TYPE_REVERSE_METADATA_BASE_DECLARATION =
-            "android-reverse-metadata-base-module-decl";
     private static final String TYPE_REVERSE_METADATA_CLASSES = "android-reverse-metadata-classes";
     private static final String TYPE_REVERSE_METADATA_JAVA_RES =
             "android-reverse-metadata-java-res";
@@ -160,49 +160,10 @@ public class AndroidArtifacts {
         API_ELEMENTS, // inter-project publishing (API)
         RUNTIME_ELEMENTS, // inter-project publishing (RUNTIME)
         REVERSE_METADATA_ELEMENTS, // inter-project publishing (REVERSE META-DATA)
-
-        // Maven/SoftwareComponent AAR publishing (API, w/o variant-specific attributes)
-        API_PUBLICATION(true, false),
-        // Maven/SoftwareComponent AAR publishing (RUNTIME, w/o variant-specific attributes)
-        RUNTIME_PUBLICATION(true, false),
-        // Maven/SoftwareComponent AAR publishing (API, with variant-specific attributes)
-        ALL_API_PUBLICATION(true, true),
-        // Maven/SoftwareComponent AAR publishing (RUNTIME, with variant-specific attributes)
-        ALL_RUNTIME_PUBLICATION(true, true),
-
-        APK_PUBLICATION(true, false), // Maven/SoftwareComponent APK publishing
-        AAB_PUBLICATION(true, false); // Maven/SoftwareComponent AAB publishing
-
-        private boolean isPublicationConfig;
-        private boolean isClassifierRequired;
-
-        PublishedConfigType(boolean isPublicationConfig, boolean isClassifierRequired) {
-            this.isPublicationConfig = isPublicationConfig;
-            this.isClassifierRequired = isClassifierRequired;
-        }
-
-        PublishedConfigType() {
-            this(false, false);
-        }
-
-        public boolean isPublicationConfig() {
-            return isPublicationConfig;
-        }
-
-        /**
-         * Some publishing configurations require setting the classifier. This is because artifacts
-         * from those configurations are added to a single software component, and unless there is a
-         * classifier, POM cannot choose the main artifact.
-         *
-         * <p>E.g. when publishing an AAR that has debug and release variants, there will be two AAR
-         * to publish. POM publishing ignores configuration attributes, and it has to use
-         * classifiers in order to de-duplicate artifacts. In this case, to disambiguate between
-         * these two artifacts, they need to have different classifiers specified when publishing
-         * them.
-         */
-        public boolean isClassifierRequired() {
-            return isClassifierRequired;
-        }
+        API_PUBLICATION, // Maven/SoftwareComponent AAR publishing (API)
+        RUNTIME_PUBLICATION, // Maven/SoftwareComponent AAR publishing (RUNTIME)
+        APK_PUBLICATION, // Maven/SoftwareComponent APK publishing
+        AAB_PUBLICATION, // Maven/SoftwareComponent AAB publishing
     }
 
     /** The provenance of artifacts to include. */
@@ -235,6 +196,11 @@ public class AndroidArtifacts {
         PROCESSED_JAR(TYPE_PROCESSED_JAR),
         // published dex folder for bundle
         DEX(TYPE_DEX),
+        // dex and keep rules(shrinking desugar_jdk_libs), a folder with a subfolder named dex
+        // which contains dex files, and with a file named keep_rules
+        DEX_AND_KEEP_RULES(TYPE_DEX_AND_KEEP_RULES),
+        // a file named keep_rules for shrinking desugar_jdk_libs
+        KEEP_RULES(TYPE_KEEP_RULES),
 
         // manifest is published to both to compare and detect provided-only library dependencies.
         MANIFEST(TYPE_MANIFEST),
@@ -296,7 +262,7 @@ public class AndroidArtifacts {
         // bundle.
         LIB_DEPENDENCIES(TYPE_LIB_DEPENDENCIES),
 
-        // Feature split related artifacts.
+        // Dynamic Feature related artifacts.
 
         // file containing the metadata for the full feature set. This contains the feature names,
         // the res ID offset, both tied to the feature module path. Published by the base for the
@@ -304,9 +270,9 @@ public class AndroidArtifacts {
         FEATURE_SET_METADATA(TYPE_FEATURE_SET_METADATA),
         FEATURE_SIGNING_CONFIG(TYPE_FEATURE_SIGNING_CONFIG),
 
-        // file containing the application ID to synchronize all base + dynamic feature. This is
-        // published by the base feature and installed application module.
-        FEATURE_APPLICATION_ID_DECLARATION(TYPE_FEATURE_APPLICATION_ID),
+        // file containing the base module info (appId, versionCode, debuggable, ...).
+        // This is published by the base module and read by the dynamic feature modules
+        BASE_MODULE_METADATA(TYPE_BASE_MODULE_METADATA),
 
         // ?
         FEATURE_RESOURCE_PKG(TYPE_FEATURE_RESOURCE_PKG),
@@ -327,7 +293,6 @@ public class AndroidArtifacts {
         // Reverse Metadata artifacts
         REVERSE_METADATA_FEATURE_DECLARATION(TYPE_REVERSE_METADATA_FEATURE_DECLARATION),
         REVERSE_METADATA_FEATURE_MANIFEST(TYPE_REVERSE_METADATA_FEATURE_MANIFEST),
-        REVERSE_METADATA_BASE_MODULE_DECLARATION(TYPE_REVERSE_METADATA_BASE_DECLARATION),
         REVERSE_METADATA_CLASSES(TYPE_REVERSE_METADATA_CLASSES),
         REVERSE_METADATA_JAVA_RES(TYPE_REVERSE_METADATA_JAVA_RES),
 

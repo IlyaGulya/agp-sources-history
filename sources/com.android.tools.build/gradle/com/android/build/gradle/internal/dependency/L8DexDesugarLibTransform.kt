@@ -59,13 +59,14 @@ abstract class L8DexDesugarLibTransform : TransformAction<L8DexDesugarLibTransfo
             outputDir.toPath(),
             parameters.libConfiguration.get(),
             parameters.bootClasspath.map { it.toPath() },
-            parameters.minSdkVersion.get()
+            parameters.minSdkVersion.get(),
+            null
             )
     }
 }
 
 data class DesugarLibConfiguration(
-    private val libConfiguration: String,
+    private val libConfiguration: Provider<String>,
     private val bootClasspath: FileCollection,
     private val minSdkVersion: Int) {
 
@@ -88,7 +89,10 @@ data class DesugarLibConfiguration(
 }
 
 fun getDesugarLibConfigurations(scopes: Collection<VariantScope>): Set<DesugarLibConfiguration> {
-    return scopes.map { getDesugarLibConfiguration(it) }.toSet()
+    return scopes
+        .filter { it.isCoreLibraryDesugaringEnabled }
+        .map { getDesugarLibConfiguration(it) }
+        .toSet()
 }
 
 private fun getDesugarLibConfiguration(scope: VariantScope): DesugarLibConfiguration {

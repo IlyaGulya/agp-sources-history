@@ -20,7 +20,6 @@ import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.core.Abi
 import com.android.build.gradle.internal.cxx.stripping.SymbolStripExecutableFinder
 import com.android.build.gradle.internal.process.GradleProcessExecutor
-import com.android.build.gradle.internal.scope.BuildArtifactsHolder
 import com.android.build.gradle.internal.scope.InternalArtifactType.MERGED_NATIVE_LIBS
 import com.android.build.gradle.internal.scope.InternalArtifactType.STRIPPED_NATIVE_LIBS
 import com.android.build.gradle.internal.scope.VariantScope
@@ -127,7 +126,6 @@ abstract class StripDebugSymbolsTask : IncrementalTask() {
 
             variantScope.artifacts.producesDir(
                 STRIPPED_NATIVE_LIBS,
-                BuildArtifactsHolder.OperationType.APPEND,
                 taskProvider,
                 StripDebugSymbolsTask::outputDir,
                 fileName = "out"
@@ -170,8 +168,6 @@ class StripDebugSymbolsDelegate(
         // by lazy, because we don't want to spend the extra time or print out NDK-related spam if
         // there are no .so files to strip
         val stripToolFinder by lazy { stripToolFinderProvider.get() }
-
-        UnstrippedLibs.reset()
 
         if (changedInputs != null) {
             for (input in changedInputs.keys) {
@@ -227,15 +223,6 @@ class StripDebugSymbolsDelegate(
                 }
             }
         }
-
-        workers.await()
-        if (UnstrippedLibs.isNotEmpty()) {
-            val logger = LoggerWrapper(Logging.getLogger(StripDebugSymbolsTask::class.java))
-            logger.warning(
-                "Unable to strip the following libraries, packaging them as they are: "
-                        + "${UnstrippedLibs.getJoinedString()}."
-            )
-        }
     }
 }
 
@@ -251,8 +238,7 @@ private class StripDebugSymbolsRunnable @Inject constructor(val params: Params):
 
         val exe =
             params.stripToolFinder.stripToolExecutableFile(params.input, params.abi) {
-                UnstrippedLibs.add(params.input.name)
-                logger.verbose("$it Packaging it as is.")
+                logger.warning("$it Packaging it as is.")
                 return@stripToolExecutableFile null
             }
 
@@ -275,8 +261,7 @@ private class StripDebugSymbolsRunnable @Inject constructor(val params: Params):
                 builder.createProcess(), LoggedProcessOutputHandler(logger)
             )
         if (result.exitValue != 0) {
-            UnstrippedLibs.add(params.input.name)
-            logger.verbose(
+            logger.warning(
                 "Unable to strip library ${params.input.absolutePath} due to error "
                         + "${result.exitValue} returned from $exe, packaging it as is."
             )
@@ -292,26 +277,6 @@ private class StripDebugSymbolsRunnable @Inject constructor(val params: Params):
         val stripToolFinder: SymbolStripExecutableFinder,
         val processExecutor: ProcessExecutor
     ): Serializable
-}
-
-object UnstrippedLibs {
-    private val unstrippedLibs = mutableListOf<String>()
-
-    fun reset() {
-        synchronized(unstrippedLibs) {
-            unstrippedLibs.removeAll { true }
-        }
-    }
-
-    fun add(name: String) {
-        synchronized(unstrippedLibs) {
-            unstrippedLibs.add(name)
-        }
-    }
-
-    fun isNotEmpty() = synchronized(unstrippedLibs) { unstrippedLibs.isNotEmpty() }
-
-    fun getJoinedString() = synchronized(unstrippedLibs) { unstrippedLibs.sorted().joinToString() }
 }
 
 private fun compileGlob(pattern: String): PathMatcher {

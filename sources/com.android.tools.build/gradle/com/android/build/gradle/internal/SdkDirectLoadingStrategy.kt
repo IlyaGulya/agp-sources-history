@@ -87,7 +87,7 @@ class SdkDirectLoadingStrategy(
     }
 
     private fun loadSdkComponents(targetHash: String, buildToolRevision: Revision): DirectLoadComponents? {
-        val sdkLocation = SdkLocator.getSdkLocation(sdkLocationSourceSet)
+        val sdkLocation = SdkLocator.getSdkLocation(sdkLocationSourceSet, evalIssueReporter)
         if (sdkLocation.type == SdkType.MISSING) {
             return null
         }
@@ -236,13 +236,6 @@ private class PlatformComponents(
 
     companion object {
         internal fun build(sdkDirectory: File, targetHash: String): PlatformComponents? {
-            if (!AndroidTargetHash.isPlatform(targetHash)) {
-                // We don't support add-on SDKs as we cannot predict where they
-                // are installed given only the targetHash, so we return null in order to fallback
-                // to the full loading mechanism.
-                return null;
-            }
-
             val platformVersion = AndroidTargetHash.getVersionFromHash(targetHash)
                 ?: return null // We are not sure which version this hash maps to.
 

@@ -251,12 +251,6 @@ public final class SdkConstants {
     public static final String FN_LD_MIPS =
             "mipsel-linux-android-ld" + ext(".exe", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
-    /**
-     * 64 bit (host) renderscript support linker for all ABIs (with extension for the current OS)
-     */
-    public static final String FN_LLD =
-            "lld" + ext(".exe", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
     /** adb executable (with extension for the current OS) */
     public static final String FN_ADB =
             "adb" + ext(".exe", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -698,7 +692,6 @@ public final class SdkConstants {
     public static final String CLS_TYPED_ARRAY = "android.content.res.TypedArray"; //$NON-NLS-1$
     public static final String CLASS_VIEW = "android.view.View"; //$NON-NLS-1$
     public static final String CLASS_VIEWGROUP = "android.view.ViewGroup"; //$NON-NLS-1$
-    public static final String CLASS_VIEWSTUB = "android.view.ViewStub"; //$NON-NLS-1$
     public static final String CLASS_NAME_LAYOUTPARAMS = "LayoutParams"; //$NON-NLS-1$
     public static final String CLASS_VIEWGROUP_LAYOUTPARAMS =
             CLASS_VIEWGROUP + "$" + CLASS_NAME_LAYOUTPARAMS; //$NON-NLS-1$
@@ -746,6 +739,7 @@ public final class SdkConstants {
             AndroidxName.of("android.support.v4.widget.", "NestedScrollView");
     public static final AndroidxName CLASS_VIEW_PAGER =
             AndroidxName.of("android.support.v4.view.", "ViewPager");
+    public static final String CLASS_VIEW_PAGER2 = "androidx.viewpager2.widget.ViewPager2";
     public static final AndroidxName CLASS_DRAWER_LAYOUT =
             AndroidxName.of("android.support.v4.widget.", "DrawerLayout");
 
@@ -925,15 +919,6 @@ public final class SdkConstants {
         return "Other";
     }
 
-    /**
-     * Returns current platform's UI name
-     *
-     * @return the platform version string.
-     */
-    public static String currentPlatformVersion() {
-        return System.getProperty("os.version"); //$NON-NLS-1$
-    }
-
     private static String ext(String windowsExtension, String nonWindowsExtension) {
         if (CURRENT_PLATFORM == PLATFORM_WINDOWS) {
             return windowsExtension;
@@ -1079,8 +1064,6 @@ public final class SdkConstants {
     public static final String TAG_RESOURCE = "resource";
     public static final String TAG_MODULE = "module";
     public static final String TAG_NAV_GRAPH = "nav-graph";
-    public static final String TAG_QUERIES = "queries";
-    public static final String TAG_INTENT = "intent";
 
     // Tags: Resources
     public static final String TAG_RESOURCES = "resources"; //$NON-NLS-1$
@@ -1208,6 +1191,7 @@ public final class SdkConstants {
     public static final AndroidxName NESTED_SCROLL_VIEW = CLASS_NESTED_SCROLL_VIEW;
     public static final AndroidxName DRAWER_LAYOUT = CLASS_DRAWER_LAYOUT;
     public static final AndroidxName VIEW_PAGER = CLASS_VIEW_PAGER;
+    public static final String VIEW_PAGER2 = CLASS_VIEW_PAGER2;
     public static final AndroidxName GRID_LAYOUT_V7 = CLASS_GRID_LAYOUT_V7;
     public static final AndroidxName TOOLBAR_V7 = CLASS_TOOLBAR_V7;
     public static final AndroidxName RECYCLER_VIEW = CLASS_RECYCLER_VIEW_V7;
@@ -1298,6 +1282,7 @@ public final class SdkConstants {
     public static final String ATTR_REQUIRED = "required";
     public static final String ATTR_ON_DEMAND = "onDemand";
     public static final String MANIFEST_ATTR_TITLE = "title";
+    public static final String ATTR_TARGET_ACTIVITY = "targetActivity";
 
     // Attributes: Resources
     public static final String ATTR_ATTR = "attr";
@@ -1694,6 +1679,10 @@ public final class SdkConstants {
 
     // MotionLayout
     public static final String ATTR_MOTION_TARGET = "motionTarget";
+    public static final String ATTR_MOTION_WAVE_OFFSET = "waveOffset";
+    public static final String ATTR_MOTION_TARGET_ID = "targetId";
+    public static final String ATTR_MOTION_TOUCH_ANCHOR_ID = "touchAnchorId";
+    public static final String ATTR_MOTION_TOUCH_REGION_ID = "touchRegionId";
 
     // AbsListView
     public static final String ATTR_LIST_SELECTOR = "listSelector";
@@ -2207,7 +2196,6 @@ public final class SdkConstants {
     public static final String ANDROID_LAYOUT_RESOURCE_PREFIX = "@android:layout/"; //$NON-NLS-1$
     public static final String ANDROID_STYLE_RESOURCE_PREFIX = "@android:style/"; //$NON-NLS-1$
     public static final String ANDROID_COLOR_RESOURCE_PREFIX = "@android:color/"; //$NON-NLS-1$
-    public static final String ANDROID_NEW_ID_PREFIX = "@android:+id/"; //$NON-NLS-1$
     public static final String ANDROID_ID_PREFIX = "@android:id/"; //$NON-NLS-1$
     public static final String ANDROID_DRAWABLE_PREFIX = "@android:drawable/"; //$NON-NLS-1$
     public static final String ANDROID_STRING_PREFIX = "@android:string/"; //$NON-NLS-1$
@@ -2630,7 +2618,7 @@ public final class SdkConstants {
     public static final String VALUE_HORIZONTAL = "horizontal"; //$NON-NLS-1$
 
     public static final String GRADLE_PLUGIN_NAME = "com.android.tools.build:gradle:";
-    public static final String GRADLE_MINIMUM_VERSION = "5.6.4";
+    public static final String GRADLE_MINIMUM_VERSION = "5.6.1";
     public static final String GRADLE_LATEST_VERSION = GRADLE_MINIMUM_VERSION;
     public static final String GRADLE_PLUGIN_MINIMUM_VERSION = "1.0.0";
     public static final String GRADLE_PLUGIN_RECOMMENDED_VERSION = "3.3.2";
@@ -2679,6 +2667,7 @@ public final class SdkConstants {
     public static final String ANDROIDX_ANNOTATIONS_ARTIFACT = "androidx.annotation:annotation";
     public static final String ANDROIDX_SUPPORT_LIB_ARTIFACT = "androidx.legacy:legacy-support-v4";
     public static final String ANDROIDX_VIEW_PAGER_LIB_ARTIFACT = "androidx.viewpager:viewpager";
+    public static final String ANDROIDX_VIEW_PAGER2_LIB_ARTIFACT = "androidx.viewpager2:viewpager2";
     public static final String ANDROIDX_APPCOMPAT_LIB_ARTIFACT = "androidx.appcompat:appcompat";
     public static final String ANDROIDX_CONSTRAINT_LAYOUT_LIB_ARTIFACT =
             "androidx.constraintlayout:constraintlayout";

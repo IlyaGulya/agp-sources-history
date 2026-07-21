@@ -18,6 +18,7 @@ package com.android.build.gradle;
 import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.build.api.dsl.BuildFeatures;
 import com.android.build.api.transform.Transform;
 import com.android.build.api.variant.VariantFilter;
 import com.android.build.gradle.api.AndroidSourceSet;
@@ -31,7 +32,10 @@ import com.android.build.gradle.internal.coverage.JacocoOptions;
 import com.android.build.gradle.internal.dependency.SourceSetManager;
 import com.android.build.gradle.internal.dsl.AaptOptions;
 import com.android.build.gradle.internal.dsl.AdbOptions;
+import com.android.build.gradle.internal.dsl.BuildFeaturesImpl;
 import com.android.build.gradle.internal.dsl.BuildType;
+import com.android.build.gradle.internal.dsl.ComposeOptions;
+import com.android.build.gradle.internal.dsl.ComposeOptionsImpl;
 import com.android.build.gradle.internal.dsl.DataBindingOptions;
 import com.android.build.gradle.internal.dsl.DefaultConfig;
 import com.android.build.gradle.internal.dsl.DexOptions;
@@ -44,6 +48,7 @@ import com.android.build.gradle.internal.dsl.Splits;
 import com.android.build.gradle.internal.dsl.TestOptions;
 import com.android.build.gradle.internal.dsl.ViewBindingOptionsImpl;
 import com.android.build.gradle.internal.scope.GlobalScope;
+import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.builder.core.BuilderConstants;
@@ -186,6 +191,10 @@ public abstract class BaseExtension implements AndroidConfig {
 
     @Nullable private String ndkVersion;
 
+    @NonNull private final BuildFeatures buildFeatures;
+
+    @NonNull private final ComposeOptions composeOptions;
+
     BaseExtension(
             @NonNull final Project project,
             @NonNull final ProjectOptions projectOptions,
@@ -240,6 +249,8 @@ public abstract class BaseExtension implements AndroidConfig {
         splits = objectFactory.newInstance(Splits.class, objectFactory);
         dataBinding = objectFactory.newInstance(DataBindingOptions.class);
         viewBinding = objectFactory.newInstance(ViewBindingOptionsImpl.class);
+        buildFeatures = objectFactory.newInstance(BuildFeaturesImpl.class);
+        composeOptions = objectFactory.newInstance(ComposeOptionsImpl.class);
 
         // Create the "special" configuration for test buddy APKs. It will be resolved by the test
         // running task, so that we can install all the found APKs before running tests.
@@ -816,14 +827,14 @@ public abstract class BaseExtension implements AndroidConfig {
     @Incubating
     @Override
     public boolean getGeneratePureSplits() {
-        return generatePureSplits;
+        return false;
     }
 
     public void resourcePrefix(String prefix) {
         resourcePrefix = prefix;
     }
 
-    public abstract void addVariant(BaseVariant variant);
+    public abstract void addVariant(BaseVariant variant, VariantScope variantScope);
 
     public void registerArtifactType(@NonNull String name,
             boolean isTest,
@@ -899,8 +910,9 @@ public abstract class BaseExtension implements AndroidConfig {
      * href="https://developer.android.com/studio/intro/update.html#sdk-manager">Update Your Tools
      * with the SDK Manager</a>.
      */
+    @NonNull
     public File getSdkDirectory() {
-        return globalScope.getSdkComponents().getSdkFolder();
+        return globalScope.getSdkComponents().getSdkDirectory();
     }
 
     /**
@@ -956,15 +968,9 @@ public abstract class BaseExtension implements AndroidConfig {
     // ---------------
     // TEMP for compatibility
 
-    // by default, we do not generate pure splits
-    boolean generatePureSplits = false;
-
-    public void generatePureSplits(boolean flag) {
-        setGeneratePureSplits(flag);
-    }
-
     public void setGeneratePureSplits(boolean flag) {
-        this.generatePureSplits = flag;
+        logger.warn(
+                "generatePureSplits is deprecated and has no effect anymore. Use bundletool to generate configuration splits.");
     }
 
     /** {@inheritDoc} */
@@ -1042,5 +1048,27 @@ public abstract class BaseExtension implements AndroidConfig {
     @Override
     public Boolean getBaseFeature() {
         return isBaseModule;
+    }
+
+    @Incubating
+    @NonNull
+    public BuildFeatures getBuildFeatures() {
+        return buildFeatures;
+    }
+
+    @Incubating
+    public void buildFeatures(@NonNull Action<BuildFeatures> action) {
+        action.execute(buildFeatures);
+    }
+
+    @Incubating
+    @NonNull
+    public ComposeOptions getComposeOptions() {
+        return composeOptions;
+    }
+
+    @Incubating
+    public void composeOptions(@NonNull Action<ComposeOptions> action) {
+        action.execute(composeOptions);
     }
 }

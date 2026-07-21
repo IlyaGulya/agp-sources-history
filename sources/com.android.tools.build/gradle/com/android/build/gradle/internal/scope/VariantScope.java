@@ -39,13 +39,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import javax.annotation.Nonnull;
 import org.gradle.api.artifacts.ArtifactCollection;
 import org.gradle.api.attributes.Attribute;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.FileCollection;
-import org.gradle.api.file.FileSystemLocation;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.provider.Provider;
 
@@ -62,13 +60,7 @@ public interface VariantScope extends TransformVariantScope {
     PublishingSpecs.VariantSpec getPublishingSpec();
 
     void publishIntermediateArtifact(
-            @NonNull Provider<FileCollection> artifact,
-            @NonNull ArtifactType artifactType,
-            @NonNull Collection<AndroidArtifacts.PublishedConfigType> configTypes);
-
-    void publishIntermediateArtifact(
-            @NonNull Provider<? extends FileSystemLocation> artifact,
-            @Nonnull Provider<String> lastProducerTaskName,
+            @NonNull Provider<?> artifact,
             @NonNull ArtifactType artifactType,
             @NonNull Collection<AndroidArtifacts.PublishedConfigType> configTypes);
 
@@ -118,6 +110,11 @@ public interface VariantScope extends TransformVariantScope {
     boolean getNeedsMainDexListForBundle();
 
     boolean isTestOnly();
+
+    boolean isCoreLibraryDesugaringEnabled();
+
+    /** Returns if we need to shrink desugar_jdk_libs when desugaring Core Library. */
+    boolean getNeedsShrinkDesugarLibrary();
 
     @NonNull
     VariantType getType();
@@ -317,4 +314,15 @@ public interface VariantScope extends TransformVariantScope {
 
     @NonNull
     ApkCreatorType getApkCreatorType();
+
+    /**
+     * Returns a {@link Provider} for the name of the feature.
+     *
+     * @return the provider
+     */
+    @NonNull
+    Provider<String> getFeatureName();
+
+    @NonNull
+    Provider<Integer> getResOffset();
 }
