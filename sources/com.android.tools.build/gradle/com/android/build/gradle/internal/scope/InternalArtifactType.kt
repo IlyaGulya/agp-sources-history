@@ -248,6 +248,9 @@ InternalArtifactType<T : FileSystemLocation>(
 
     // Information neeeded to resolve included navigation graphs into intent filters
     object NAVIGATION_JSON: InternalArtifactType<RegularFile>(FILE), Replaceable
+    // Similar to [NAVIGATION_JSON], but it lacks the source file information, which shouldn't be in
+    // the AAR.
+    object NAVIGATION_JSON_FOR_AAR: InternalArtifactType<RegularFile>(FILE), Replaceable
 
     // --- Namespaced android res ---
     // An AAPT2 static library: InternalArtifactType<RegularFile>(FILE), Replaceable containing only the current sub-project's resources.
@@ -291,9 +294,6 @@ InternalArtifactType<T : FileSystemLocation>(
     object SHADER_ASSETS: InternalArtifactType<Directory>(DIRECTORY), Replaceable
 
     object LIBRARY_ASSETS: InternalArtifactType<Directory>(DIRECTORY), Replaceable
-    // assets built by AGP and possible additions from the variant API are merged into this
-    // private type for 'test_config.properties' creation.
-    object MERGED_ASSETS_FOR_UNIT_TEST: InternalArtifactType<Directory>(DIRECTORY), Replaceable
     // compressed assets, ready to be packaged in the APK.
     object COMPRESSED_ASSETS: InternalArtifactType<Directory>(DIRECTORY), Replaceable
 

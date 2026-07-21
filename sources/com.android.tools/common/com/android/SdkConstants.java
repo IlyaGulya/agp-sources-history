@@ -382,6 +382,9 @@ public final class SdkConstants {
     /** File holding relative class entries */
     public static final String FN_CLASS_LIST = "classes.txt";
 
+    /** File holding data extracted from the navigation xml files */
+    public static final String FN_NAVIGATION_JSON = "navigation.json";
+
     /* Folder Names for Android Projects . */
 
     /** Resources folder name, i.e. "res". */
@@ -2922,7 +2925,7 @@ public final class SdkConstants {
      * Studio product. It need not actually be the latest version of Gradle, but it will most likely
      * be fairly recent.
      */
-    public static final String GRADLE_LATEST_VERSION = "7.4";
+    public static final String GRADLE_LATEST_VERSION = "7.4.2";
 
     /**
      * The minimum released version of the Android Gradle Plugin that this version of Studio will
