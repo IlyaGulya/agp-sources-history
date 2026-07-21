@@ -451,18 +451,6 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     @Nullable
     @Override
-    public File getResourceShrinkerInputFolder() {
-        if (!useResourceShrinker()) {
-            return null;
-        }
-        return new File(
-                globalScope.getIntermediatesDir()
-                        + "/resource-shrinker-in/"
-                        + getVariantConfiguration().getDirName());
-    }
-
-    @Nullable
-    @Override
     public CodeShrinker getCodeShrinker() {
         boolean isForTesting = getVariantConfiguration().getType().isForTesting();
 
@@ -1248,14 +1236,6 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
                 "javaResources/" + getVariantConfiguration().getDirName());
     }
 
-    @NonNull
-    @Override
-    public File getGeneratedJavaResourcesDir() {
-        return new File(
-                globalScope.getGeneratedDir(),
-                "javaResources/" + getVariantConfiguration().getDirName());
-    }
-
     @Override
     @NonNull
     public File getRClassSourceOutputDir() {
@@ -1433,15 +1413,6 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
                 globalScope.getIntermediatesDir(),
                 "resources",
                 "instant-run",
-                getVariantConfiguration().getDirName());
-    }
-
-    @NonNull
-    @Override
-    public File getShrunkProcessedResourcesOutputDirectory() {
-        return FileUtils.join(
-                globalScope.getIntermediatesDir(),
-                "res_stripped",
                 getVariantConfiguration().getDirName());
     }
 
@@ -2112,12 +2083,20 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
     @NonNull
     @Override
     public DexerTool getDexer() {
-        return DexerTool.DX;
+        if (globalScope.getProjectOptions().get(BooleanOption.ENABLE_D8_DEXER)) {
+            return DexerTool.D8;
+        } else {
+            return DexerTool.DX;
+        }
     }
 
     @NonNull
     @Override
     public DexMergerTool getDexMerger() {
-        return DexMergerTool.DX;
+        if (globalScope.getProjectOptions().get(BooleanOption.ENABLE_D8_MERGER)) {
+            return DexMergerTool.D8;
+        } else {
+            return DexMergerTool.DX;
+        }
     }
 }
