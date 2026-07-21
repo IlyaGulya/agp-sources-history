@@ -19,14 +19,14 @@ package com.android.build.gradle.tasks;
 import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.build.OutputFile;
+import com.android.build.gradle.internal.core.VariantConfiguration;
 import com.android.build.gradle.internal.packaging.IncrementalPackagerBuilder;
 import com.android.build.gradle.internal.pipeline.StreamFilter;
 import com.android.build.gradle.internal.scope.BuildOutputs;
 import com.android.build.gradle.internal.scope.OutputScope;
 import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.VariantScope;
-import com.android.build.gradle.internal.tasks.BaseTask;
-import com.android.builder.core.VariantConfiguration;
+import com.android.build.gradle.internal.tasks.AndroidBuilderTask;
 import com.android.builder.files.IncrementalRelativeFileSets;
 import com.android.builder.files.RelativeFile;
 import com.android.builder.internal.packaging.IncrementalPackager;
@@ -54,7 +54,7 @@ import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 
 /** Package a abi dimension specific split APK */
-public class PackageSplitAbi extends BaseTask {
+public class PackageSplitAbi extends AndroidBuilderTask {
 
     private FileCollection processedAbiResources;
 

@@ -26,6 +26,7 @@ import com.android.build.gradle.internal.CombinedInput;
 import com.android.build.gradle.internal.LoggerWrapper;
 import com.android.build.gradle.internal.aapt.AaptGeneration;
 import com.android.build.gradle.internal.aapt.AaptGradleFactory;
+import com.android.build.gradle.internal.res.namespaced.NamespaceRemover;
 import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.IncrementalTask;
@@ -34,7 +35,6 @@ import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.BuilderConstants;
-import com.android.builder.internal.aapt.Aapt;
 import com.android.builder.model.SourceProvider;
 import com.android.builder.model.VectorDrawablesOptions;
 import com.android.builder.png.VectorDrawableRenderer;
@@ -64,6 +64,7 @@ import com.android.utils.FileUtils;
 import com.android.utils.ILogger;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.IOException;
@@ -155,16 +156,34 @@ public class MergeResources extends IncrementalTask {
 
     private boolean pseudoLocalesEnabled;
 
+    private ImmutableSet<Flag> flags;
+
     @NonNull
-    private static Aapt makeAapt(
+    private static QueueableResourceCompiler getResourceProcessor(
             @NonNull AaptGeneration aaptGeneration,
             @NonNull AndroidBuilder builder,
             @Nullable FileCache fileCache,
             boolean crunchPng,
             @NonNull VariantScope scope,
             @NonNull File intermediateDir,
-            @Nullable MergingLog blameLog)
+            @Nullable MergingLog blameLog,
+            ImmutableSet<Flag> flags,
+            boolean processResources)
             throws IOException {
+
+        // If we received the flag for removing namespaces we need to use the namespace remover to
+        // process the resources.
+        if (flags.contains(Flag.REMOVE_RESOURCE_NAMESPACES)) {
+            return new NamespaceRemover();
+        }
+
+        // If we're not removing namespaces and there's no need to compile the resources, return a
+        // no-op resource processor.
+        if (!processResources) {
+            return QueueableResourceCompiler.NONE;
+        }
+
+        // Finally, use AAPT or one of AAPT2 versions based on the project flags.
         return AaptGradleFactory.make(
                 aaptGeneration,
                 builder,
@@ -175,7 +194,8 @@ public class MergeResources extends IncrementalTask {
                                                 ? new AaptOutputParser()
                                                 : new Aapt2OutputParser(),
                                         builder.getLogger()),
-                                new MergingLogRewriter(blameLog::find, builder.getErrorReporter()))
+                                new MergingLogRewriter(
+                                        blameLog::find, builder.getMessageReceiver()))
                         : new LoggedProcessOutputHandler(
                                 new AaptGradleFactory.FilteringLogger(builder.getLogger())),
                 fileCache,
@@ -194,6 +214,7 @@ public class MergeResources extends IncrementalTask {
         return true;
     }
 
+    @Nullable
     @OutputDirectory
     @Optional
     public File getDataBindingLayoutInfoOutFolder() {
@@ -213,28 +234,34 @@ public class MergeResources extends IncrementalTask {
     protected void doFullTaskAction() throws IOException, ExecutionException, JAXBException {
         ResourcePreprocessor preprocessor = getPreprocessor();
 
-        // this is full run, clean the previous output
+        // this is full run, clean the previous outputs
         File destinationDir = getOutputDir();
         FileUtils.cleanOutputDir(destinationDir);
+        if (dataBindingLayoutInfoOutFolder != null) {
+            FileUtils.deleteDirectoryContents(dataBindingLayoutInfoOutFolder);
+        }
 
         List<ResourceSet> resourceSets = getConfiguredResourceSets(preprocessor);
 
         // create a new merger and populate it with the sets.
         ResourceMerger merger = new ResourceMerger(minSdk);
-        MergingLog mergingLog =
-                getBlameLogFolder() != null ? new MergingLog(getBlameLogFolder()) : null;
+        MergingLog mergingLog = null;
+        if (blameLogFolder != null) {
+            FileUtils.cleanOutputDir(blameLogFolder);
+            mergingLog = new MergingLog(blameLogFolder);
+        }
 
         try (QueueableResourceCompiler resourceCompiler =
-                processResources
-                        ? makeAapt(
-                                aaptGeneration,
-                                getBuilder(),
-                                fileCache,
-                                crunchPng,
-                                variantScope,
-                                getAaptTempDir(),
-                                mergingLog)
-                        : QueueableResourceCompiler.NONE) {
+                getResourceProcessor(
+                        aaptGeneration,
+                        getBuilder(),
+                        fileCache,
+                        crunchPng,
+                        variantScope,
+                        getAaptTempDir(),
+                        mergingLog,
+                        flags,
+                        processResources)) {
 
             for (ResourceSet resourceSet : resourceSets) {
                 resourceSet.loadFromFiles(getILogger());
@@ -327,16 +354,16 @@ public class MergeResources extends IncrementalTask {
                     getBlameLogFolder() != null ? new MergingLog(getBlameLogFolder()) : null;
 
             try (QueueableResourceCompiler resourceCompiler =
-                    processResources
-                            ? makeAapt(
-                                    aaptGeneration,
-                                    getBuilder(),
-                                    fileCache,
-                                    crunchPng,
-                                    variantScope,
-                                    getAaptTempDir(),
-                                    mergingLog)
-                            : QueueableResourceCompiler.NONE) {
+                    getResourceProcessor(
+                            aaptGeneration,
+                            getBuilder(),
+                            fileCache,
+                            crunchPng,
+                            variantScope,
+                            getAaptTempDir(),
+                            mergingLog,
+                            flags,
+                            processResources)) {
 
                 MergedResourceWriter writer =
                         new MergedResourceWriter(
@@ -395,7 +422,8 @@ public class MergeResources extends IncrementalTask {
         }
 
         @Override
-        public void generateFile(File toBeGenerated, File original) throws IOException {
+        public void generateFile(@NonNull File toBeGenerated, @NonNull File original)
+                throws IOException {
             try {
                 super.generateFile(toBeGenerated, original);
             } catch (ResourcesNotSupportedException e) {
@@ -647,6 +675,11 @@ public class MergeResources extends IncrementalTask {
         return pseudoLocalesEnabled;
     }
 
+    @Input
+    public String getFlags() {
+        return flags.stream().map(Enum::name).sorted().collect(Collectors.joining(","));
+    }
+
     @VisibleForTesting
     void setResSetSupplier(@NonNull Supplier<List<ResourceSet>> resSetSupplier) {
         this.resSetSupplier = resSetSupplier;
@@ -733,6 +766,8 @@ public class MergeResources extends IncrementalTask {
         @Nullable private final File mergedNotCompiledOutputDirectory;
         private final boolean includeDependencies;
         private final boolean processResources;
+        private final boolean processVectorDrawables;
+        @NonNull private final ImmutableSet<Flag> flags;
 
         public ConfigAction(
                 @NonNull VariantScope scope,
@@ -740,13 +775,17 @@ public class MergeResources extends IncrementalTask {
                 @Nullable File outputLocation,
                 @Nullable File mergedNotCompiledOutputDirectory,
                 boolean includeDependencies,
-                boolean processResources) {
+                boolean processResources,
+                boolean processVectorDrawables,
+                @NonNull ImmutableSet<Flag> flags) {
             this.scope = scope;
             this.taskNamePrefix = taskNamePrefix;
             this.outputLocation = outputLocation;
             this.mergedNotCompiledOutputDirectory = mergedNotCompiledOutputDirectory;
             this.includeDependencies = includeDependencies;
             this.processResources = processResources;
+            this.processVectorDrawables = processVectorDrawables;
+            this.flags = flags;
         }
 
         @NonNull
@@ -794,10 +833,11 @@ public class MergeResources extends IncrementalTask {
             // Collections.<String>emptySet() is used intentionally instead of Collections.emptySet()
             // to keep compatibility with javac 1.8.0_45 used by ab/
             mergeResourcesTask.setGeneratedDensities(
-                    MoreObjects.firstNonNull(generatedDensities, Collections.<String>emptySet()));
+                    MoreObjects.firstNonNull(generatedDensities, Collections.emptySet()));
 
             mergeResourcesTask.setDisableVectorDrawables(
-                    (vectorDrawablesOptions.getUseSupportLibrary() != null
+                    !processVectorDrawables
+                            || (vectorDrawablesOptions.getUseSupportLibrary() != null
                                     && vectorDrawablesOptions.getUseSupportLibrary())
                             || mergeResourcesTask.getGeneratedDensities().isEmpty());
 
@@ -870,6 +910,7 @@ public class MergeResources extends IncrementalTask {
                             .getVariantConfiguration()
                             .getBuildType()
                             .isPseudoLocalesEnabled();
+            mergeResourcesTask.flags = flags;
         }
     }
 
@@ -886,5 +927,9 @@ public class MergeResources extends IncrementalTask {
                         "mergedNotCompiledResourcesOutputDirectory",
                         getMergedNotCompiledResourcesOutputDirectory())
                 .toString();
+    }
+
+    public enum Flag {
+        REMOVE_RESOURCE_NAMESPACES,
     }
 }

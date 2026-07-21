@@ -25,6 +25,7 @@ import static com.android.build.gradle.internal.publishing.AndroidArtifacts.Cons
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH;
 import static com.android.build.gradle.options.BooleanOption.BUILD_ONLY_TARGET_ABI;
 import static com.android.build.gradle.options.BooleanOption.ENABLE_NEW_RESOURCE_PROCESSING;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.android.SdkConstants;
 import com.android.annotations.NonNull;
@@ -50,7 +51,6 @@ import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.TaskOutputHolder;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.IncrementalTask;
-import com.android.build.gradle.internal.tasks.TaskInputHelper;
 import com.android.build.gradle.internal.tasks.featuresplit.FeatureSplitPackageIds;
 import com.android.build.gradle.internal.transforms.InstantRunSliceSplitApkBuilder;
 import com.android.build.gradle.internal.variant.BaseVariantData;
@@ -93,6 +93,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -138,11 +139,9 @@ public class ProcessAndroidResources extends IncrementalTask {
 
     private File mainDexListProguardOutputFile;
 
-    @Nullable private FileCollection symbolListsWithPackageNames;
-
+    @Nullable private FileCollection dependenciesFileCollection;
+    @Nullable private FileCollection sharedLibraryDependencies;
     @Nullable private ArtifactCollection packageIdsFiles;
-
-    private Supplier<String> packageForR;
 
     private MultiOutputPolicy multiOutputPolicy;
 
@@ -171,6 +170,8 @@ public class ProcessAndroidResources extends IncrementalTask {
     private String projectBaseName;
 
     private TaskOutputHolder.TaskOutputType taskInputType;
+
+    private boolean isNamespaced = false;
 
     @Nullable private FileCache fileCache;
 
@@ -268,7 +269,14 @@ public class ProcessAndroidResources extends IncrementalTask {
 
         SplitList splitList = isLibrary ? SplitList.EMPTY : SplitList.load(splitListInput);
 
-        Set<File> libraryInfoList = symbolListsWithPackageNames.getFiles();
+        Set<File> dependencies =
+                dependenciesFileCollection != null
+                        ? dependenciesFileCollection.getFiles()
+                        : Collections.emptySet();
+        Set<File> imports =
+                sharedLibraryDependencies != null
+                        ? sharedLibraryDependencies.getFiles()
+                        : Collections.emptySet();
 
         try (Aapt aapt = bypassAapt ? null : makeAapt()) {
 
@@ -284,7 +292,8 @@ public class ProcessAndroidResources extends IncrementalTask {
                         apkDataList.remove(apkData);
                         invokeAaptForSplit(
                                 manifestsOutputs,
-                                libraryInfoList,
+                                dependencies,
+                                imports,
                                 packageIdFileSet,
                                 splitList,
                                 featureResourcePackages,
@@ -303,7 +312,8 @@ public class ProcessAndroidResources extends IncrementalTask {
                             () -> {
                                 invokeAaptForSplit(
                                         manifestsOutputs,
-                                        libraryInfoList,
+                                        dependencies,
+                                        imports,
                                         packageIdFileSet,
                                         splitList,
                                         featureResourcePackages,
@@ -397,7 +407,8 @@ public class ProcessAndroidResources extends IncrementalTask {
 
     void invokeAaptForSplit(
             Collection<BuildOutput> manifestsOutputs,
-            @NonNull Set<File> dependencySymbolTableFiles,
+            @NonNull Set<File> dependencies,
+            Set<File> imports,
             @Nullable Set<File> packageIdFileSet,
             @NonNull SplitList splitList,
             @NonNull Set<File> featureResourcePackages,
@@ -502,13 +513,13 @@ public class ProcessAndroidResources extends IncrementalTask {
                 // FIXME: move to the package res task.
                 SymbolTable symbolTable =
                         ResourceDirectoryParser.parseDirectory(
-                                getInputResourcesDir().getSingleFile(),
+                                checkNotNull(getInputResourcesDir()).getSingleFile(),
                                 IdProvider.sequential(),
                                 androidAttrSymbol);
 
                 SymbolUtils.processLibraryMainSymbolTable(
                         symbolTable,
-                        generateCode ? dependencySymbolTableFiles : ImmutableSet.of(),
+                        generateCode ? dependencies : ImmutableSet.of(),
                         packageForR,
                         manifestFile,
                         Preconditions.checkNotNull(srcOut),
@@ -526,11 +537,6 @@ public class ProcessAndroidResources extends IncrementalTask {
                         new AaptPackageConfig.Builder()
                                 .setManifestFile(manifestFile)
                                 .setOptions(DslAdaptersKt.convert(aaptOptions))
-                                .setResourceDir(getInputResourcesDir().getSingleFile())
-                                .setLibrarySymbolTableFiles(
-                                        generateCode
-                                                ? dependencySymbolTableFiles
-                                                : ImmutableSet.of())
                                 .setCustomPackageForR(packageForR)
                                 .setSymbolOutputDir(symbolOutputDir)
                                 .setSourceOutputDir(srcOut)
@@ -546,8 +552,17 @@ public class ProcessAndroidResources extends IncrementalTask {
                                 .setPreferredDensity(preferredDensity)
                                 .setPackageId(packageId)
                                 .setDependentFeatures(featurePackagesBuilder.build())
+                                .setImports(imports)
                                 .setListResourceFiles(aaptGeneration == AaptGeneration.AAPT_V2);
 
+                if (isNamespaced) {
+                    config.setStaticLibraryDependencies(ImmutableList.copyOf(dependencies));
+                } else {
+                    if (generateCode) {
+                        config.setLibrarySymbolTableFiles(dependencies);
+                    }
+                    config.setResourceDir(checkNotNull(getInputResourcesDir()).getSingleFile());
+                }
                 getBuilder().processResources(aapt, config);
 
                 if (LOG.isInfoEnabled()) {
@@ -555,7 +570,7 @@ public class ProcessAndroidResources extends IncrementalTask {
                 }
             }
             if (generateCode
-                    && (isLibrary || !dependencySymbolTableFiles.isEmpty())
+                    && (isLibrary || !dependencies.isEmpty())
                     && symbolsWithPackageNameOutputFile != null) {
                 SymbolIo.writeSymbolTableWithPackage(
                         Preconditions.checkNotNull(getTextSymbolOutputFile()).toPath(),
@@ -613,7 +628,7 @@ public class ProcessAndroidResources extends IncrementalTask {
                                         ? new AaptOutputParser()
                                         : new Aapt2OutputParser(),
                                 getILogger()),
-                        new MergingLogRewriter(mergingLog::find, builder.getErrorReporter()));
+                        new MergingLogRewriter(mergingLog::find, builder.getMessageReceiver()));
 
         return AaptGradleFactory.make(
                 aaptGeneration,
@@ -809,22 +824,11 @@ public class ProcessAndroidResources extends IncrementalTask {
             processResources.multiOutputPolicy =
                     variantData.getOutputScope().getMultiOutputPolicy();
 
-            processResources.symbolListsWithPackageNames =
+            processResources.dependenciesFileCollection =
                     variantScope.getArtifactFileCollection(
                             RUNTIME_CLASSPATH,
                             ALL,
                             AndroidArtifacts.ArtifactType.SYMBOL_LIST_WITH_PACKAGE_NAME);
-
-                processResources.packageForR =
-                        TaskInputHelper.memoize(
-                                () -> {
-                                    String splitName = config.getSplitFromManifest();
-                                    if (splitName == null) {
-                                        return config.getOriginalApplicationId();
-                                    } else {
-                                        return config.getOriginalApplicationId() + "." + splitName;
-                                    }
-                                });
 
                 // TODO: unify with generateBuilderConfig, compileAidl, and library packaging somehow?
                 processResources
@@ -931,6 +935,157 @@ public class ProcessAndroidResources extends IncrementalTask {
         }
     }
 
+    /**
+     * TODO: extract in to a separate task implementation once splits are calculated in the split
+     * discovery task.
+     */
+    public static final class NamespacedConfigAction
+            implements TaskConfigAction<ProcessAndroidResources> {
+        protected final VariantScope variantScope;
+        @NonNull private final File resPackageOutputDir;
+        @NonNull private final File sourceOutputDir;
+        private final boolean isLibrary;
+        private final boolean generateLegacyMultidexMainDexProguardRules;
+        @Nullable private final String baseName;
+
+        public NamespacedConfigAction(
+                @NonNull VariantScope scope,
+                @NonNull File sourceOutputDir,
+                @NonNull File resPackageOutputDir,
+                boolean isLibrary,
+                boolean generateLegacyMultidexMainDexProguardRules,
+                @Nullable String baseName) {
+            this.variantScope = scope;
+            this.resPackageOutputDir = resPackageOutputDir;
+            this.sourceOutputDir = sourceOutputDir;
+            this.isLibrary = isLibrary;
+            this.generateLegacyMultidexMainDexProguardRules =
+                    generateLegacyMultidexMainDexProguardRules;
+            this.baseName = baseName;
+        }
+
+        @NonNull
+        @Override
+        public final String getName() {
+            return variantScope.getTaskName("process", "Resources");
+        }
+
+        @NonNull
+        @Override
+        public final Class<ProcessAndroidResources> getType() {
+            return ProcessAndroidResources.class;
+        }
+
+        @Override
+        public final void execute(@NonNull ProcessAndroidResources task) {
+            final BaseVariantData variantData = variantScope.getVariantData();
+            final ProjectOptions projectOptions = variantScope.getGlobalScope().getProjectOptions();
+            final GradleVariantConfiguration config = variantData.getVariantConfiguration();
+
+            task.setAndroidBuilder(variantScope.getGlobalScope().getAndroidBuilder());
+            task.fileCache = variantScope.getGlobalScope().getBuildCache();
+            task.setVariantName(config.getFullName());
+            task.resPackageOutputFolder = resPackageOutputDir;
+            task.aaptGeneration = AaptGeneration.fromProjectOptions(projectOptions);
+            task.setEnableAapt2(true);
+
+            task.versionCode = config.getVersionCode();
+            task.applicationId = config.getApplicationId();
+            task.versionName = config.getVersionName();
+
+            // per exec
+            task.setIncrementalFolder(variantScope.getIncrementalDir(getName()));
+            if (!isLibrary) {
+                task.splitListInput =
+                        variantScope.getOutput(TaskOutputHolder.TaskOutputType.SPLIT_LIST);
+            }
+            task.multiOutputPolicy = variantData.getOutputScope().getMultiOutputPolicy();
+
+            task.sourceOutputDir = sourceOutputDir;
+
+            if (variantScope.getCodeShrinker() != null) {
+                task.setProguardOutputFile(
+                        variantScope.getProcessAndroidResourcesProguardOutputFile());
+            }
+
+            if (generateLegacyMultidexMainDexProguardRules) {
+                task.setAaptMainDexListProguardOutputFile(
+                        variantScope.getManifestKeepListProguardFile());
+            }
+
+            task.variantScope = variantScope;
+            task.outputScope = variantData.getOutputScope();
+            task.outputFactory = variantData.getOutputFactory();
+            task.originalApplicationId =
+                    variantScope.getVariantConfiguration().getOriginalApplicationId();
+
+            boolean aaptFriendlyManifestsFilePresent =
+                    variantScope.hasOutput(
+                            TaskOutputHolder.TaskOutputType.AAPT_FRIENDLY_MERGED_MANIFESTS);
+            task.taskInputType =
+                    aaptFriendlyManifestsFilePresent
+                            ? VariantScope.TaskOutputType.AAPT_FRIENDLY_MERGED_MANIFESTS
+                            : variantScope.getInstantRunBuildContext().isInInstantRunMode()
+                                    ? VariantScope.TaskOutputType.INSTANT_RUN_MERGED_MANIFESTS
+                                    : VariantScope.TaskOutputType.MERGED_MANIFESTS;
+            task.setManifestFiles(variantScope.getOutput(task.taskInputType));
+
+            List<FileCollection> dependencies = new ArrayList<>(2);
+            dependencies.add(
+                    variantScope.getOutput(TaskOutputHolder.TaskOutputType.RES_STATIC_LIBRARY));
+            dependencies.add(
+                    variantScope.getArtifactFileCollection(
+                            RUNTIME_CLASSPATH,
+                            ALL,
+                            AndroidArtifacts.ArtifactType.RES_STATIC_LIBRARY));
+
+            task.dependenciesFileCollection =
+                    variantScope.getGlobalScope().getProject().files(dependencies);
+            task.sharedLibraryDependencies =
+                    variantScope.getArtifactFileCollection(
+                            AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH,
+                            AndroidArtifacts.ArtifactScope.ALL,
+                            AndroidArtifacts.ArtifactType.RES_SHARED_STATIC_LIBRARY);
+            task.setType(config.getType());
+            task.setDebuggable(config.getBuildType().isDebuggable());
+            task.setAaptOptions(variantScope.getGlobalScope().getExtension().getAaptOptions());
+            task.setPseudoLocalesEnabled(config.getBuildType().isPseudoLocalesEnabled());
+
+            task.buildTargetDensity = projectOptions.get(StringOption.IDE_BUILD_TARGET_DENSITY);
+
+            task.setMergeBlameLogFolder(variantScope.getResourceBlameLogDir());
+
+            task.buildContext = variantScope.getInstantRunBuildContext();
+
+            task.featureResourcePackages =
+                    variantScope.getArtifactFileCollection(
+                            COMPILE_CLASSPATH, MODULE, FEATURE_RESOURCE_PKG);
+            if (variantScope.getVariantData().getType() == VariantType.FEATURE
+                    && !variantScope.isBaseFeature()) {
+                task.packageIdsFiles =
+                        variantScope.getArtifactCollection(
+                                COMPILE_CLASSPATH, MODULE, FEATURE_IDS_DECLARATION);
+            }
+
+            task.projectBaseName = baseName;
+            task.buildTargetAbi =
+                    projectOptions.get(BUILD_ONLY_TARGET_ABI)
+                                    || variantScope
+                                            .getGlobalScope()
+                                            .getExtension()
+                                            .getSplits()
+                                            .getAbi()
+                                            .isEnable()
+                            ? projectOptions.get(StringOption.IDE_BUILD_TARGET_ABI)
+                            : null;
+            task.supportedAbis = config.getSupportedAbis();
+            task.isLibrary = isLibrary;
+            task.supportDirectory =
+                    new File(variantScope.getInstantRunSplitApkOutputFolder(), "resources");
+            task.isNamespaced = true;
+        }
+    }
+
     FileCollection manifestFiles;
 
     public File getManifestFile() {
@@ -970,10 +1125,11 @@ public class ProcessAndroidResources extends IncrementalTask {
         return this.buildContext.isInInstantRunMode();
     }
 
-    private FileCollection inputResourcesDir;
+    @Nullable private FileCollection inputResourcesDir;
 
-    @NonNull
+    @Nullable
     @InputFiles
+    @Optional
     @PathSensitive(PathSensitivity.RELATIVE)
     public FileCollection getInputResourcesDir() {
         return inputResourcesDir;
@@ -1037,15 +1193,16 @@ public class ProcessAndroidResources extends IncrementalTask {
     @InputFiles
     @Optional
     @PathSensitive(PathSensitivity.NONE)
-    public FileCollection getSymbolListsWithPackageNames() {
-        return symbolListsWithPackageNames;
+    public FileCollection getDependenciesFileCollection() {
+        return dependenciesFileCollection;
     }
 
-    @Input
+    @InputFiles
     @Optional
+    @PathSensitive(PathSensitivity.NONE)
     @Nullable
-    public String getPackageForR() {
-        return packageForR != null ? packageForR.get() : null;
+    public FileCollection getSharedLibraryDependencies() {
+        return sharedLibraryDependencies;
     }
 
     @Input
@@ -1094,10 +1251,7 @@ public class ProcessAndroidResources extends IncrementalTask {
         this.aaptOptions = aaptOptions;
     }
 
-    /**
-     * Only used for rewriting error messages. Should not affect task result.
-     */
-    @Internal
+    @Input
     public File getMergeBlameLogFolder() {
         return mergeBlameLogFolder;
     }
@@ -1173,6 +1327,11 @@ public class ProcessAndroidResources extends IncrementalTask {
     @Input
     boolean isLibrary() {
         return isLibrary;
+    }
+
+    @Input
+    public boolean isNamespaced() {
+        return isNamespaced;
     }
 
     // Workaround for https://issuetracker.google.com/67418335

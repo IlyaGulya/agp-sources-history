@@ -20,6 +20,7 @@ import com.android.annotations.NonNull;
 import com.android.apkzlib.zip.StoredEntry;
 import com.android.apkzlib.zip.StoredEntryType;
 import com.android.apkzlib.zip.ZFile;
+import com.android.utils.FileUtils;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableSet;
@@ -73,7 +74,8 @@ public final class RelativeFiles {
      */
     @NonNull
     private static ImmutableSet<RelativeFile> fromDirectory(
-            @NonNull File base, @NonNull File directory) {
+            @NonNull File base,
+            @NonNull File directory) {
         Preconditions.checkArgument(base.isDirectory(), "!base.isDirectory()");
         Preconditions.checkArgument(directory.isDirectory(), "!directory.isDirectory()");
 
@@ -100,7 +102,7 @@ public final class RelativeFiles {
      */
     @NonNull
     public static Predicate<RelativeFile> fromPathPredicate(@NonNull Predicate<String> predicate) {
-        return rf -> predicate.test(rf.getRelativePath());
+        return rf -> predicate.test(rf.getOsIndependentRelativePath());
     }
 
     /**
@@ -119,7 +121,9 @@ public final class RelativeFiles {
         try (ZFile zipReader = new ZFile(zip)) {
             for (StoredEntry entry : zipReader.entries()) {
                 if (entry.getType() == StoredEntryType.FILE) {
-                    files.add(new RelativeFile(zip, entry.getCentralDirectoryHeader().getName()));
+                    File file = new File(zip, FileUtils.toSystemDependentPath(
+                            entry.getCentralDirectoryHeader().getName()));
+                    files.add(new RelativeFile(zip, file));
                 }
             }
         }

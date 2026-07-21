@@ -60,6 +60,7 @@ import com.android.build.gradle.internal.variant.TestVariantData;
 import com.android.build.gradle.internal.variant.TestVariantFactory;
 import com.android.build.gradle.internal.variant.TestedVariantData;
 import com.android.build.gradle.internal.variant.VariantFactory;
+import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.options.SigningOptions;
 import com.android.build.gradle.options.StringOption;
@@ -504,7 +505,9 @@ public class VariantManager implements VariantModel {
             // VariantDependencies is computed here instead of when the VariantData was created.
             VariantDependencies.Builder builder =
                     VariantDependencies.builder(
-                                    project, androidBuilder.getErrorReporter(), variantConfig)
+                                    project,
+                                    variantScope.getGlobalScope().getErrorHandler(),
+                                    variantConfig)
                             .setConsumeType(
                                     getConsumeType(
                                             testedVariantData.getVariantConfiguration().getType()))
@@ -622,13 +625,18 @@ public class VariantManager implements VariantModel {
                     reg.artifactTransform(ExtractAarTransform.class);
                 });
 
+        boolean sharedLibSupport =
+                globalScope
+                        .getProjectOptions()
+                        .get(BooleanOption.CONSUME_DEPENDENCIES_AS_SHARED_LIBRARIES);
         for (ArtifactType transformTarget : AarTransform.getTransformTargets()) {
             dependencies.registerTransform(
                     reg -> {
                         reg.getFrom().attribute(ARTIFACT_FORMAT, explodedAarType);
                         reg.getTo().attribute(ARTIFACT_FORMAT, transformTarget.getType());
                         reg.artifactTransform(
-                                AarTransform.class, config -> config.params(transformTarget));
+                                AarTransform.class,
+                                config -> config.params(transformTarget, sharedLibSupport));
                     });
         }
 
@@ -814,9 +822,8 @@ public class VariantManager implements VariantModel {
             // ensure that there is always a dimension
             if (flavorDimensionList == null || flavorDimensionList.isEmpty()) {
                 androidBuilder
-                        .getErrorReporter()
-                        .handleSyncError(
-                                "",
+                        .getIssueReporter()
+                        .reportError(
                                 SyncIssue.TYPE_UNNAMED_FLAVOR_DIMENSION,
                                 "All flavors must now belong to a named flavor dimension. "
                                         + "Learn more at "
@@ -951,7 +958,9 @@ public class VariantManager implements VariantModel {
 
         VariantDependencies.Builder builder =
                 VariantDependencies.builder(
-                                project, androidBuilder.getErrorReporter(), variantConfig)
+                                project,
+                                variantData.getScope().getGlobalScope().getErrorHandler(),
+                                variantConfig)
                         .setConsumeType(
                                 getConsumeType(variantData.getVariantConfiguration().getType()))
                         .setPublishType(
@@ -1106,7 +1115,6 @@ public class VariantManager implements VariantModel {
                         taskManager,
                         testVariantConfig,
                         (TestedVariantData) testedVariantData,
-                        androidBuilder.getErrorReporter(),
                         recorder);
         // link the testVariant to the tested variant in the other direction
         ((TestedVariantData) testedVariantData).setTestVariantData(testVariantData, type);
@@ -1211,7 +1219,18 @@ public class VariantManager implements VariantModel {
                                 .setUseLegacyMultidex(variantConfig.isLegacyMultiDexMode())
                                 .setVariantType(variantData.getType().getAnalyticsVariantType())
                                 .setDexBuilder(AnalyticsUtil.toProto(variantScope.getDexer()))
-                                .setDexMerger(AnalyticsUtil.toProto(variantScope.getDexMerger()));
+                                .setDexMerger(AnalyticsUtil.toProto(variantScope.getDexMerger()))
+                                .setTestExecution(
+                                        AnalyticsUtil.toProto(
+                                                globalScope
+                                                        .getExtension()
+                                                        .getTestOptions()
+                                                        .getExecutionEnum()));
+
+                if (variantScope.getCodeShrinker() != null) {
+                    profileBuilder.setCodeShrinker(
+                            AnalyticsUtil.toProto(variantScope.getCodeShrinker()));
+                }
 
                 if (variantConfig.getTargetSdkVersion().getApiLevel() > 0) {
                     profileBuilder.setTargetSdkVersion(

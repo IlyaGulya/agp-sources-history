@@ -24,6 +24,7 @@ import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutpu
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.APK;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.APK_MAPPING;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.APP_CLASSES;
+import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.COMPILE_ONLY_R_CLASS_JAR;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.CONSUMER_PROGUARD_FILE;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.FEATURE_APPLICATION_ID_DECLARATION;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.FEATURE_CLASSES;
@@ -32,19 +33,20 @@ import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutpu
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.FEATURE_TRANSITIVE_DEPS;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.FULL_JAR;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.JAVA_RES;
+import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.LIBRARY_ASSETS;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.LIBRARY_CLASSES;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.LIBRARY_JAVA_RES;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.LIBRARY_JNI;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.LIBRARY_MANIFEST;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.LINT_JAR;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.MANIFEST_METADATA;
-import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.MERGED_ASSETS;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.METADADA_FEATURE_MANIFEST;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.METADATA_APP_ID_DECLARATION;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.METADATA_FEATURE_DECLARATION;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.PACKAGED_RES;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.PUBLIC_RES;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.RENDERSCRIPT_HEADERS;
+import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.RES_STATIC_LIBRARY;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.SYMBOL_LIST;
 import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType.SYMBOL_LIST_WITH_PACKAGE_NAME;
 
@@ -149,8 +151,16 @@ public class VariantPublishingSpec {
                         // dependencies.
                         outputSpec(
                                 LIBRARY_MANIFEST, ArtifactType.MANIFEST, API_AND_RUNTIME_ELEMENTS),
-                        outputSpec(MERGED_ASSETS, ArtifactType.ASSETS, RUNTIME_ELEMENTS_ONLY),
+                        outputSpec(LIBRARY_ASSETS, ArtifactType.ASSETS, RUNTIME_ELEMENTS_ONLY),
                         outputSpec(PACKAGED_RES, ArtifactType.ANDROID_RES, RUNTIME_ELEMENTS_ONLY),
+                        outputSpec(
+                                RES_STATIC_LIBRARY,
+                                ArtifactType.RES_STATIC_LIBRARY,
+                                API_AND_RUNTIME_ELEMENTS),
+                        outputSpec(
+                                COMPILE_ONLY_R_CLASS_JAR,
+                                ArtifactType.COMPILE_ONLY_R_CLASS_JAR,
+                                API_ELEMENTS_ONLY),
                         outputSpec(PUBLIC_RES, ArtifactType.PUBLIC_RES, RUNTIME_ELEMENTS_ONLY),
                         outputSpec(SYMBOL_LIST, ArtifactType.SYMBOL_LIST, RUNTIME_ELEMENTS_ONLY),
                         outputSpec(

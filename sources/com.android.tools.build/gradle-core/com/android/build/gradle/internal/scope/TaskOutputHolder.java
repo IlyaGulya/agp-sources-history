@@ -89,10 +89,29 @@ public interface TaskOutputHolder {
         DENSITY_OR_LANGUAGE_PACKAGED_SPLIT,
         INSTANT_RUN_PACKAGED_RESOURCES,
 
-        // --- JNI libs ---
-        // packaged JNI for AAR Intermediate publishing
-        LIBRARY_JNI,
+        // --- Namespaced android res ---
+        // Compiled resources (directory of .flat files) for the local library
+        RES_COMPILED_FLAT_FILES,
+        // An AAPT2 static library, containing only the current sub-project's resources.
+        RES_STATIC_LIBRARY,
+        // R Class sources (for compilation only)
+        COMPILE_ONLY_R_CLASS_SOURCES,
+        // Compiled R class sources (for compilation only)
+        COMPILE_ONLY_R_CLASS_CLASSES,
+        // Compiled R class jar (for compilation only, packaged in AAR)
+        COMPILE_ONLY_R_CLASS_JAR,
+        // Final R class sources (to package)
+        RUNTIME_R_CLASS_SOURCES,
+        // Final R class classes (for packaging)
+        RUNTIME_R_CLASS_CLASSES,
 
+        // --- JNI libs ---
+        // packaged JNI for inter-project intermediate publishing
+        LIBRARY_JNI,
+        // packaged JNI for AAR publishing
+        LIBRARY_AND_LOCAL_JARS_JNI,
+
+        LIBRARY_ASSETS,
         MERGED_ASSETS,
         MOCKABLE_JAR,
 

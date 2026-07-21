@@ -29,7 +29,6 @@ import com.android.build.gradle.AndroidConfig;
 import com.android.build.gradle.internal.aapt.AaptGeneration;
 import com.android.build.gradle.internal.core.GradleVariantConfiguration;
 import com.android.build.gradle.internal.incremental.BuildInfoWriterTask;
-import com.android.build.gradle.internal.incremental.InstantRunPatchingPolicy;
 import com.android.build.gradle.internal.pipeline.TransformManager;
 import com.android.build.gradle.internal.pipeline.TransformTask;
 import com.android.build.gradle.internal.scope.AndroidTask;
@@ -146,7 +145,7 @@ public class ApplicationTaskManager extends TaskManager {
                 ExecutionType.APP_TASK_MANAGER_CREATE_MERGE_ASSETS_TASK,
                 project.getPath(),
                 variantScope.getFullVariantName(),
-                () -> createMergeAssetsTask(tasks, variantScope, null));
+                () -> createMergeAssetsTask(tasks, variantScope));
 
         // Add a task to create the BuildConfig class
         recorder.record(
@@ -214,7 +213,7 @@ public class ApplicationTaskManager extends TaskManager {
                 () -> createMergeJniLibFoldersTasks(tasks, variantScope));
 
         // Add data binding tasks if enabled
-        createDataBindingTasksIfNecessary(tasks, variantScope);
+        createDataBindingTasksIfNecessary(tasks, variantScope, MergeType.MERGE);
 
         // Add a compile task
         recorder.record(
@@ -285,9 +284,7 @@ public class ApplicationTaskManager extends TaskManager {
                                     + "tools/java-8-support-message.html\n",
                             pluginName);
 
-            androidBuilder
-                    .getErrorReporter()
-                    .handleSyncWarning(null, SyncIssue.TYPE_GENERIC, warningMsg);
+            androidBuilder.getIssueReporter().reportWarning(SyncIssue.TYPE_GENERIC, warningMsg);
         }
 
         addJavacClassesStream(variantScope);
@@ -314,77 +311,69 @@ public class ApplicationTaskManager extends TaskManager {
         variantScope.getInstantRunTaskManager()
                         .configureBuildInfoWriterTask(buildInfoGeneratorTask);
 
-        InstantRunPatchingPolicy patchingPolicy =
-                variantScope.getInstantRunBuildContext().getPatchingPolicy();
+        PackagingScope packagingScope = new DefaultGradlePackagingScope(variantScope);
 
-        if (InstantRunPatchingPolicy.useMultiApk(patchingPolicy)) {
+        // create the transforms that will create the dependencies apk.
+        InstantRunDependenciesApkBuilder dependenciesApkBuilder =
+                new InstantRunDependenciesApkBuilder(
+                        getLogger(),
+                        project,
+                        variantScope.getInstantRunBuildContext(),
+                        variantScope.getGlobalScope().getAndroidBuilder(),
+                        variantScope.getGlobalScope().getBuildCache(),
+                        packagingScope,
+                        packagingScope.getSigningConfig(),
+                        AaptGeneration.fromProjectOptions(projectOptions),
+                        packagingScope.getAaptOptions(),
+                        new File(packagingScope.getInstantRunSplitApkOutputFolder(), "dep"),
+                        packagingScope.getInstantRunSupportDir(),
+                        new File(
+                                packagingScope.getIncrementalDir(
+                                        "InstantRunDependenciesApkBuilder"),
+                                "aapt-temp"));
 
-            PackagingScope packagingScope = new DefaultGradlePackagingScope(variantScope);
+        Optional<AndroidTask<TransformTask>> dependenciesApkBuilderTask =
+                variantScope
+                        .getTransformManager()
+                        .addTransform(tasks, variantScope, dependenciesApkBuilder);
 
-            // create the transforms that will create the dependencies apk.
-            InstantRunDependenciesApkBuilder dependenciesApkBuilder =
-                    new InstantRunDependenciesApkBuilder(
-                            getLogger(),
-                            project,
-                            variantScope.getInstantRunBuildContext(),
-                            variantScope.getGlobalScope().getAndroidBuilder(),
-                            variantScope.getGlobalScope().getBuildCache(),
-                            packagingScope,
-                            packagingScope.getSigningConfig(),
-                            AaptGeneration.fromProjectOptions(projectOptions),
-                            packagingScope.getAaptOptions(),
-                            new File(packagingScope.getInstantRunSplitApkOutputFolder(), "dep"),
-                            packagingScope.getInstantRunSupportDir(),
-                            new File(
-                                    packagingScope.getIncrementalDir(
-                                            "InstantRunDependenciesApkBuilder"),
-                                    "aapt-temp"));
+        dependenciesApkBuilderTask.ifPresent(
+                task -> task.dependsOn(tasks, getValidateSigningTask(tasks, packagingScope)));
 
-            Optional<AndroidTask<TransformTask>> dependenciesApkBuilderTask =
-                    variantScope
-                            .getTransformManager()
-                            .addTransform(tasks, variantScope, dependenciesApkBuilder);
+        // and now the transform that will create a split FULL_APK for each slice.
+        InstantRunSliceSplitApkBuilder slicesApkBuilder =
+                new InstantRunSliceSplitApkBuilder(
+                        getLogger(),
+                        project,
+                        variantScope.getInstantRunBuildContext(),
+                        variantScope.getGlobalScope().getAndroidBuilder(),
+                        variantScope.getGlobalScope().getBuildCache(),
+                        packagingScope,
+                        packagingScope.getSigningConfig(),
+                        AaptGeneration.fromProjectOptions(projectOptions),
+                        packagingScope.getAaptOptions(),
+                        new File(packagingScope.getInstantRunSplitApkOutputFolder(), "slices"),
+                        packagingScope.getInstantRunSupportDir(),
+                        new File(
+                                packagingScope.getIncrementalDir("InstantRunSliceSplitApkBuilder"),
+                                "aapt-temp"),
+                        globalScope.getProjectOptions().get(OptionalBooleanOption.SERIAL_AAPT2));
 
-            dependenciesApkBuilderTask.ifPresent(
-                    task -> task.dependsOn(tasks, getValidateSigningTask(tasks, packagingScope)));
+        Optional<AndroidTask<TransformTask>> transformTaskAndroidTask =
+                variantScope
+                        .getTransformManager()
+                        .addTransform(tasks, variantScope, slicesApkBuilder);
 
-            // and now the transform that will create a split FULL_APK for each slice.
-            InstantRunSliceSplitApkBuilder slicesApkBuilder =
-                    new InstantRunSliceSplitApkBuilder(
-                            getLogger(),
-                            project,
-                            variantScope.getInstantRunBuildContext(),
-                            variantScope.getGlobalScope().getAndroidBuilder(),
-                            variantScope.getGlobalScope().getBuildCache(),
-                            packagingScope,
-                            packagingScope.getSigningConfig(),
-                            AaptGeneration.fromProjectOptions(projectOptions),
-                            packagingScope.getAaptOptions(),
-                            new File(packagingScope.getInstantRunSplitApkOutputFolder(), "slices"),
-                            packagingScope.getInstantRunSupportDir(),
-                            new File(
-                                    packagingScope.getIncrementalDir(
-                                            "InstantRunSliceSplitApkBuilder"),
-                                    "aapt-temp"),
-                            globalScope
-                                    .getProjectOptions()
-                                    .get(OptionalBooleanOption.SERIAL_AAPT2));
-
-            Optional<AndroidTask<TransformTask>> transformTaskAndroidTask = variantScope
-                    .getTransformManager().addTransform(tasks, variantScope, slicesApkBuilder);
-
-            if (transformTaskAndroidTask.isPresent()) {
-                AndroidTask<TransformTask> splitApk = transformTaskAndroidTask.get();
-                splitApk.dependsOn(tasks, getValidateSigningTask(tasks, packagingScope));
-                variantScope.getAssembleTask().dependsOn(tasks, splitApk);
-                buildInfoGeneratorTask
-                        .configure(tasks, task -> task.mustRunAfter(splitApk.getName()));
-            }
-
-            // if the assembleVariant task run, make sure it also runs the task to generate
-            // the build-info.xml.
-            variantScope.getAssembleTask().dependsOn(tasks, buildInfoGeneratorTask);
+        if (transformTaskAndroidTask.isPresent()) {
+            AndroidTask<TransformTask> splitApk = transformTaskAndroidTask.get();
+            splitApk.dependsOn(tasks, getValidateSigningTask(tasks, packagingScope));
+            variantScope.getAssembleTask().dependsOn(tasks, splitApk);
+            buildInfoGeneratorTask.configure(tasks, task -> task.mustRunAfter(splitApk.getName()));
         }
+
+        // if the assembleVariant task run, make sure it also runs the task to generate
+        // the build-info.xml.
+        variantScope.getAssembleTask().dependsOn(tasks, buildInfoGeneratorTask);
         return buildInfoGeneratorTask;
     }
 

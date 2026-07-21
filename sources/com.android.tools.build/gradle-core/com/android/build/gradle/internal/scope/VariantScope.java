@@ -18,7 +18,6 @@ package com.android.build.gradle.internal.scope;
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
-import com.android.build.gradle.external.gson.NativeBuildConfigValue;
 import com.android.build.gradle.internal.InstantRunTaskManager;
 import com.android.build.gradle.internal.PostprocessingFeatures;
 import com.android.build.gradle.internal.core.Abi;
@@ -39,7 +38,6 @@ import com.android.build.gradle.tasks.ExternalNativeBuildTask;
 import com.android.build.gradle.tasks.ExternalNativeJsonGenerator;
 import com.android.build.gradle.tasks.GenerateBuildConfig;
 import com.android.build.gradle.tasks.ManifestProcessorTask;
-import com.android.build.gradle.tasks.MergeResources;
 import com.android.build.gradle.tasks.MergeSourceSetFolders;
 import com.android.build.gradle.tasks.ProcessAndroidResources;
 import com.android.build.gradle.tasks.RenderscriptCompile;
@@ -54,7 +52,6 @@ import java.util.function.Supplier;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.ArtifactCollection;
-import org.gradle.api.artifacts.ArtifactView;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.Sync;
@@ -140,6 +137,9 @@ public interface VariantScope extends TransformVariantScope, InstantRunVariantSc
 
     @NonNull
     File getInstantRunSplitApkOutputFolder();
+
+    @NonNull
+    File getDefaultInstantRunApkLocation();
 
     @NonNull
     FileCollection getJavaClasspath(
@@ -388,11 +388,6 @@ public interface VariantScope extends TransformVariantScope, InstantRunVariantSc
     void setAidlCompileTask(AndroidTask<AidlCompile> aidlCompileTask);
 
     @Nullable
-    AndroidTask<MergeResources> getMergeResourcesTask();
-
-    void setMergeResourcesTask(@Nullable AndroidTask<MergeResources> mergeResourcesTask);
-
-    @Nullable
     AndroidTask<MergeSourceSetFolders> getMergeAssetsTask();
 
     void setMergeAssetsTask(@Nullable AndroidTask<MergeSourceSetFolders> mergeAssetsTask);
@@ -417,6 +412,11 @@ public interface VariantScope extends TransformVariantScope, InstantRunVariantSc
     AndroidTask<Task> getCompileTask();
     void setCompileTask(AndroidTask<Task> compileTask);
 
+    @Nullable
+    AndroidTask<? extends DefaultTask> getConnectedTask();
+
+    void setConnectedTask(AndroidTask<? extends DefaultTask> compileTask);
+
     AndroidTask<GenerateApkDataTask> getMicroApkTask();
     void setMicroApkTask(AndroidTask<GenerateApkDataTask> microApkTask);
 
@@ -431,10 +431,6 @@ public interface VariantScope extends TransformVariantScope, InstantRunVariantSc
     @Nullable
     ExternalNativeJsonGenerator getExternalNativeJsonGenerator();
     void setExternalNativeJsonGenerator(@NonNull ExternalNativeJsonGenerator generator);
-
-    @NonNull
-    Collection<NativeBuildConfigValue> getExternalNativeBuildConfigValues();
-    void addExternalNativeBuildConfigValues(@NonNull Collection<NativeBuildConfigValue> values);
 
     @Nullable
     InstantRunTaskManager getInstantRunTaskManager();
@@ -457,6 +453,9 @@ public interface VariantScope extends TransformVariantScope, InstantRunVariantSc
 
     @NonNull
     File getInstantRunResourceApkFolder();
+
+    @NonNull
+    File getIntermediateDir(@NonNull TaskOutputType taskOutputType);
 
     enum Java8LangSupport {
         INVALID,

@@ -17,7 +17,7 @@
 package com.android.build.gradle.internal.dsl;
 
 import com.android.annotations.NonNull;
-import com.android.builder.core.ErrorReporter;
+import com.android.builder.errors.ConfigurableErrorHandler;
 import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
 import org.gradle.internal.reflect.Instantiator;
@@ -30,7 +30,7 @@ public class DefaultConfig extends BaseFlavor {
             @NonNull Project project,
             @NonNull Instantiator instantiator,
             @NonNull Logger logger,
-            @NonNull ErrorReporter errorReporter) {
+            @NonNull ConfigurableErrorHandler errorReporter) {
         super(name, project, instantiator, logger, errorReporter);
     }
 }

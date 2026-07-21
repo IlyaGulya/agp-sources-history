@@ -25,6 +25,8 @@ import static com.android.build.gradle.internal.dsl.BuildType.PostprocessingConf
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ARTIFACT_TYPE;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.ALL;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.CLASSES;
+import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.COMPILE_ONLY_R_CLASS_JAR;
+import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.SHARED_CLASSES;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.PublishedConfigType.API_ELEMENTS;
@@ -39,7 +41,6 @@ import android.databinding.tool.DataBindingBuilder;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.gradle.ProguardFiles;
-import com.android.build.gradle.external.gson.NativeBuildConfigValue;
 import com.android.build.gradle.internal.InstantRunTaskManager;
 import com.android.build.gradle.internal.LoggerWrapper;
 import com.android.build.gradle.internal.PostprocessingFeatures;
@@ -57,7 +58,6 @@ import com.android.build.gradle.internal.dsl.CoreBuildType;
 import com.android.build.gradle.internal.dsl.CoreProductFlavor;
 import com.android.build.gradle.internal.dsl.PostprocessingOptions;
 import com.android.build.gradle.internal.incremental.InstantRunBuildContext;
-import com.android.build.gradle.internal.incremental.InstantRunPatchingPolicy;
 import com.android.build.gradle.internal.pipeline.TransformManager;
 import com.android.build.gradle.internal.pipeline.TransformTask;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
@@ -93,7 +93,6 @@ import com.android.build.gradle.tasks.RenderscriptCompile;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.BootClasspathBuilder;
 import com.android.builder.core.BuilderConstants;
-import com.android.builder.core.ErrorReporter;
 import com.android.builder.core.VariantType;
 import com.android.builder.dexing.DexMergerTool;
 import com.android.builder.dexing.DexerTool;
@@ -113,12 +112,12 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -155,7 +154,6 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     @NonNull private final GlobalScope globalScope;
     @NonNull private final BaseVariantData variantData;
-    @NonNull private final ErrorReporter errorReporter;
     @NonNull private final TransformManager transformManager;
     @Nullable private Collection<Object> ndkBuildable;
     @Nullable private Collection<File> ndkSoFolder;
@@ -187,15 +185,13 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
     // empty anchor compile task to set all compilations tasks as dependents.
     private AndroidTask<Task> compileTask;
 
+    @Nullable private AndroidTask<? extends DefaultTask> connectedTask;
+
     private AndroidTask<GenerateApkDataTask> microApkTask;
 
     @Nullable private AndroidTask<ExternalNativeBuildTask> externalNativeBuild;
 
     @Nullable private ExternalNativeJsonGenerator externalNativeJsonGenerator;
-
-    @NonNull
-    private final List<NativeBuildConfigValue> externalNativeBuildConfigValues =
-            Lists.newArrayList();
 
     @Nullable private CodeShrinker defaultCodeShrinker;
 
@@ -214,11 +210,9 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     public VariantScopeImpl(
             @NonNull GlobalScope globalScope,
-            @NonNull ErrorReporter errorReporter,
             @NonNull TransformManager transformManager,
             @NonNull BaseVariantData variantData) {
         this.globalScope = globalScope;
-        this.errorReporter = errorReporter;
         this.transformManager = transformManager;
         this.variantData = variantData;
         this.variantPublishingSpec = VariantPublishingSpec.getVariantSpec(variantData.getType());
@@ -243,17 +237,19 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
         if (postprocessingOptions.getCodeShrinkerEnum() == ANDROID_GRADLE) {
             if (postprocessingOptions.isObfuscate()) {
-                errorReporter.handleSyncError(
-                        null,
-                        SyncIssue.TYPE_GENERIC,
-                        "The 'android-gradle' code shrinker does not support obfuscating.");
+                globalScope
+                        .getErrorHandler()
+                        .reportError(
+                                SyncIssue.TYPE_GENERIC,
+                                "The 'android-gradle' code shrinker does not support obfuscating.");
             }
 
             if (postprocessingOptions.isOptimizeCode()) {
-                errorReporter.handleSyncError(
-                        null,
-                        SyncIssue.TYPE_GENERIC,
-                        "The 'android-gradle' code shrinker does not support optimizing code.");
+                globalScope
+                        .getErrorHandler()
+                        .reportError(
+                                SyncIssue.TYPE_GENERIC,
+                                "The 'android-gradle' code shrinker does not support optimizing code.");
             }
         }
     }
@@ -305,8 +301,10 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
         } catch (MissingTaskOutputException e) {
             throw new RuntimeException(
                     String.format(
-                            "Variant '%s' has no output with type '%s'",
-                            this.getFullVariantName(), e.getOutputType()),
+                            "Variant '%1$s' in project '%2$s' has no output with type '%3$s'",
+                            this.getFullVariantName(),
+                            this.getProject().getPath(),
+                            e.getOutputType()),
                     e);
         }
     }
@@ -425,20 +423,22 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
         }
 
         if (variantData.getType() == VariantType.LIBRARY) {
-            errorReporter.handleSyncError(
-                    null,
-                    SyncIssue.TYPE_GENERIC,
-                    "Resource shrinker cannot be used for libraries.");
+            globalScope
+                    .getErrorHandler()
+                    .reportError(
+                            SyncIssue.TYPE_GENERIC,
+                            "Resource shrinker cannot be used for libraries.");
             return false;
         }
 
         if (getCodeShrinker() == null) {
-            errorReporter.handleSyncError(
-                    null,
-                    SyncIssue.TYPE_GENERIC,
-                    "Removing unused resources requires unused code shrinking to be turned on. See "
-                            + "http://d.android.com/r/tools/shrink-resources.html "
-                            + "for more information.");
+            globalScope
+                    .getErrorHandler()
+                    .reportError(
+                            SyncIssue.TYPE_GENERIC,
+                            "Removing unused resources requires unused code shrinking to be turned on. See "
+                                    + "http://d.android.com/r/tools/shrink-resources.html "
+                                    + "for more information.");
 
             return false;
         }
@@ -681,17 +681,11 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
             // for non-library legacy multidex test variants, we want to have exactly one DEX file
             // until the test runner supports multiple dex files in the test apk
             return DexingType.MONO_DEX;
-        } else if (isInstantRunDexingTypeOverride()) {
+        } else if (getInstantRunBuildContext().isInInstantRunMode()) {
             return DexingType.NATIVE_MULTIDEX;
         }
 
         return dexingType;
-    }
-
-    private boolean isInstantRunDexingTypeOverride() {
-        return getInstantRunBuildContext().isInInstantRunMode()
-                && InstantRunPatchingPolicy.useMultiApk(
-                        getInstantRunBuildContext().getPatchingPolicy());
     }
 
     @NonNull
@@ -811,6 +805,12 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     @NonNull
     @Override
+    public File getDefaultInstantRunApkLocation() {
+        return FileUtils.join(globalScope.getIntermediatesDir(), "instant-run-apk");
+    }
+
+    @NonNull
+    @Override
     public File getInstantRunPastIterationsFolder() {
         return new File(globalScope.getIntermediatesDir(), "/builds/" + getVariantConfiguration().getDirName());
     }
@@ -832,7 +832,30 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
             @Nullable Object generatedBytecodeKey) {
         FileCollection mainCollection = getArtifactFileCollection(configType, ALL, classesType);
 
-        return mainCollection.plus(getVariantData().getGeneratedBytecode(generatedBytecodeKey));
+        mainCollection =
+                mainCollection.plus(getVariantData().getGeneratedBytecode(generatedBytecodeKey));
+
+        if (Boolean.TRUE.equals(globalScope.getExtension().getAaptOptions().getNamespaced())) {
+            mainCollection =
+                    mainCollection.plus(
+                            getOutput(VariantScope.TaskOutputType.COMPILE_ONLY_R_CLASS_JAR));
+            mainCollection =
+                    mainCollection.plus(
+                            getArtifactFileCollection(configType, ALL, COMPILE_ONLY_R_CLASS_JAR));
+            mainCollection =
+                    mainCollection.plus(getArtifactFileCollection(configType, ALL, SHARED_CLASSES));
+            BaseVariantData tested = getTestedVariantData();
+            if (tested != null) {
+                mainCollection =
+                        mainCollection.plus(
+                                tested.getScope()
+                                        .getOutput(
+                                                VariantScope.TaskOutputType
+                                                        .COMPILE_ONLY_R_CLASS_JAR));
+            }
+        }
+
+        return mainCollection;
     }
 
     @NonNull
@@ -1353,7 +1376,11 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
     @Override
     @NonNull
     public File getGeneratedClassListOutputFileForDataBinding() {
-        return new File(getLayoutInfoOutputForDataBinding(), "_generated.txt");
+        return new File(
+                globalScope.getIntermediatesDir()
+                        + "/data-binding-class-list/"
+                        + getVariantConfiguration().getDirName()
+                        + "/_generated.txt");
     }
 
     @NonNull
@@ -1454,6 +1481,15 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     @NonNull
     @Override
+    public File getIntermediateDir(@NonNull TaskOutputType taskOutputType) {
+        return FileUtils.join(
+                globalScope.getIntermediatesDir(),
+                taskOutputType.name().toLowerCase(Locale.US),
+                getVariantConfiguration().getDirName());
+    }
+
+    @NonNull
+    @Override
     public File getMicroApkManifestFile() {
         return FileUtils.join(
                 globalScope.getGeneratedDir(),
@@ -1515,11 +1551,15 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
     @Override
     public File getApkLocation() {
         String override = globalScope.getProjectOptions().get(StringOption.IDE_APK_LOCATION);
+        File defaultLocation =
+                getInstantRunBuildContext().isInInstantRunMode()
+                        ? getDefaultInstantRunApkLocation()
+                        : getDefaultApkLocation();
 
         File baseDirectory =
                 override != null && variantData.getType() != VariantType.FEATURE
                         ? globalScope.getProject().file(override)
-                        : getDefaultApkLocation();
+                        : defaultLocation;
 
         return new File(baseDirectory, getVariantConfiguration().getDirName());
     }
@@ -1677,18 +1717,6 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     @Override
     @Nullable
-    public AndroidTask<MergeResources> getMergeResourcesTask() {
-        return mergeResourcesTask;
-    }
-
-    @Override
-    public void setMergeResourcesTask(
-            @Nullable AndroidTask<MergeResources> mergeResourcesTask) {
-        this.mergeResourcesTask = mergeResourcesTask;
-    }
-
-    @Override
-    @Nullable
     public AndroidTask<MergeSourceSetFolders> getMergeAssetsTask() {
         return mergeAssetsTask;
     }
@@ -1758,6 +1786,17 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
     public void setCompileTask(
             AndroidTask<Task> compileTask) {
         this.compileTask = compileTask;
+    }
+
+    @Override
+    @Nullable
+    public AndroidTask<? extends DefaultTask> getConnectedTask() {
+        return this.connectedTask;
+    }
+
+    @Override
+    public void setConnectedTask(AndroidTask<? extends DefaultTask> connectedTask) {
+        this.connectedTask = connectedTask;
     }
 
     @Override
@@ -1880,18 +1919,6 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
     @Override
     public AndroidTask<ExternalNativeBuildTask> getExternalNativeBuildTask() {
         return externalNativeBuild;
-    }
-
-    @Override
-    @NonNull
-    public List<NativeBuildConfigValue> getExternalNativeBuildConfigValues() {
-        return externalNativeBuildConfigValues;
-    }
-
-    @Override
-    public void addExternalNativeBuildConfigValues(
-            @NonNull Collection<NativeBuildConfigValue> values) {
-        externalNativeBuildConfigValues.addAll(values);
     }
 
     @Nullable
@@ -2078,12 +2105,14 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
             return Java8LangSupport.DESUGAR;
         }
 
-        errorReporter.handleSyncError(
-                getVariantConfiguration().getFullName(),
-                SyncIssue.TYPE_GENERIC,
-                "Please add 'android.enableDesugar=true' to your "
-                        + "gradle.properties file to enable Java 8 "
-                        + "language support.");
+        globalScope
+                .getErrorHandler()
+                .reportError(
+                        SyncIssue.TYPE_GENERIC,
+                        "Please add 'android.enableDesugar=true' to your "
+                                + "gradle.properties file to enable Java 8 "
+                                + "language support.",
+                        getVariantConfiguration().getFullName());
         return Java8LangSupport.INVALID;
     }
 

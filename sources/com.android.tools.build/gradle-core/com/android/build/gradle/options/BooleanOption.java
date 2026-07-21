@@ -39,14 +39,17 @@ public enum BooleanOption implements Option<Boolean> {
     ENABLE_DESUGAR("android.enableDesugar", true),
     ENABLE_GRADLE_WORKERS("android.enableGradleWorkers", false),
     DISABLE_RES_MERGE_IN_LIBRARY("android.disable.res.merge", true),
-    ENABLE_D8("android.enableD8", false),
+    ENABLE_D8("android.enableD8", true),
 
     ENABLE_DEPRECATED_NDK("android.useDeprecatedNdk"),
     DISABLE_RESOURCE_VALIDATION("android.disableResourceValidation"),
+    CONSUME_DEPENDENCIES_AS_SHARED_LIBRARIES("android.consumeDependenciesAsSharedLibraries"),
 
     /** Set to true to build native .so libraries only for the device it will be run on. */
     BUILD_ONLY_TARGET_ABI("android.buildOnlyTargetAbi", true),
     KEEP_TIMESTAMPS_IN_APK("android.keepTimestampsInApk"),
+
+    ENABLE_NEW_DSL_AND_API("android.enable.new.dsl"),
 
     IDE_INVOKED_FROM_IDE(AndroidProject.PROPERTY_INVOKED_FROM_IDE),
     IDE_BUILD_MODEL_ONLY(AndroidProject.PROPERTY_BUILD_MODEL_ONLY),
@@ -55,7 +58,7 @@ public enum BooleanOption implements Option<Boolean> {
             AndroidProject.PROPERTY_BUILD_MODEL_FEATURE_FULL_DEPENDENCIES),
     IDE_REFRESH_EXTERNAL_NATIVE_MODEL(AndroidProject.PROPERTY_REFRESH_EXTERNAL_NATIVE_MODEL),
     IDE_GENERATE_SOURCES_ONLY(AndroidProject.PROPERTY_GENERATE_SOURCES_ONLY),
-    ENABLE_SEPARATE_APK_RESOURCES("android.enableSeparateApkRes", false),
+    ENABLE_SEPARATE_APK_RESOURCES("android.enableSeparateApkRes", true),
     ENABLE_BUILDSCRIPT_CLASSPATH_CHECK("android.enableBuildScriptClasspathCheck", true),
     ENABLE_EXPERIMENTAL_FEATURE_DATABINDING("android.enableExperimentalFeatureDatabinding", false),
     ;

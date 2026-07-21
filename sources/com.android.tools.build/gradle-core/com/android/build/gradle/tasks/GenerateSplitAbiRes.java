@@ -28,6 +28,7 @@ import com.android.annotations.VisibleForTesting;
 import com.android.build.OutputFile;
 import com.android.build.gradle.internal.aapt.AaptGeneration;
 import com.android.build.gradle.internal.aapt.AaptGradleFactory;
+import com.android.build.gradle.internal.core.VariantConfiguration;
 import com.android.build.gradle.internal.dsl.AaptOptions;
 import com.android.build.gradle.internal.dsl.AbiSplitOptions;
 import com.android.build.gradle.internal.dsl.DslAdaptersKt;
@@ -35,11 +36,10 @@ import com.android.build.gradle.internal.scope.OutputFactory;
 import com.android.build.gradle.internal.scope.OutputScope;
 import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.VariantScope;
+import com.android.build.gradle.internal.tasks.AndroidBuilderTask;
 import com.android.build.gradle.internal.tasks.ApplicationId;
-import com.android.build.gradle.internal.tasks.BaseTask;
 import com.android.build.gradle.internal.variant.FeatureVariantData;
 import com.android.builder.core.AndroidBuilder;
-import com.android.builder.core.VariantConfiguration;
 import com.android.builder.core.VariantType;
 import com.android.builder.internal.aapt.Aapt;
 import com.android.builder.internal.aapt.AaptPackageConfig;
@@ -63,10 +63,8 @@ import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 
-/**
- * Generates all metadata (like AndroidManifest.xml) necessary for a ABI dimension split APK.
- */
-public class GenerateSplitAbiRes extends BaseTask {
+/** Generates all metadata (like AndroidManifest.xml) necessary for a ABI dimension split APK. */
+public class GenerateSplitAbiRes extends AndroidBuilderTask {
 
     private String applicationId;
     private String outputBaseName;

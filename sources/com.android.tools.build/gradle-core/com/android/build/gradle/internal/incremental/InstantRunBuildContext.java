@@ -19,7 +19,7 @@ package com.android.build.gradle.internal.incremental;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.gradle.internal.aapt.AaptGeneration;
-import com.android.builder.Version;
+import com.android.builder.model.Version;
 import com.android.ide.common.xml.XmlPrettyPrinter;
 import com.android.sdklib.AndroidVersion;
 import com.android.utils.XmlUtils;
@@ -317,10 +317,13 @@ public class InstantRunBuildContext {
         this.isInstantRunMode = isInstantRunMode;
         this.androidVersion = androidVersion;
         this.patchingPolicy =
-                InstantRunPatchingPolicy.getPatchingPolicy(
-                        androidVersion,
-                        aaptGeneration != AaptGeneration.AAPT_V1,
-                        createSeparateApkForResources);
+                isInstantRunMode
+                        ? InstantRunPatchingPolicy.getPatchingPolicy(
+                                androidVersion,
+                                aaptGeneration != AaptGeneration.AAPT_V1,
+                                createSeparateApkForResources)
+                        : InstantRunPatchingPolicy.UNKNOWN_PATCHING_POLICY;
+
         this.abi = targetAbi;
         this.density = density;
         this.createSeparateApkForResources = createSeparateApkForResources;
@@ -451,28 +454,10 @@ public class InstantRunBuildContext {
             }
         }
 
-        // validate the patching policy and the received file type to record the file or not.
-        // RELOAD and MAIN are always record.
-        if (isInInstantRunMode()
-                && fileType != FileType.RELOAD_DEX
-                && fileType != FileType.MAIN
-                && fileType != FileType.RESOURCES) {
-            switch (patchingPolicy) {
-                case PRE_LOLLIPOP:
-                    return;
-                case MULTI_APK:
-                case MULTI_APK_SEPARATE_RESOURCES:
-                    if (fileType != FileType.SPLIT) {
-                        return;
-                    }
-            }
-        }
         if (fileType == FileType.MAIN) {
             // in case of MAIN, we need to disambiguate whether this is a SPLIT_MAIN or just a
             // MAIN. this is useful for the IDE so it knows which deployment method to use.
-            if (InstantRunPatchingPolicy.useMultiApk(patchingPolicy)) {
-                fileType = FileType.SPLIT_MAIN;
-            }
+            fileType = FileType.SPLIT_MAIN;
 
             // because of signing/aligning, we can be notified several times of the main FULL_APK
             // construction, last one wins.
@@ -567,7 +552,7 @@ public class InstantRunBuildContext {
 
             // when a coldswap build was found, remove all RESOURCES entries for previous builds
             // as the resource is redelivered as part of the main split.
-            if (foundColdRestart && patchingPolicy.useMultiApk()) {
+            if (foundColdRestart) {
                 Artifact resourceApArtifact = previousBuild.getArtifactForType(FileType.RESOURCES);
                 if (resourceApArtifact != null) {
                     previousBuild.artifacts.remove(resourceApArtifact);
@@ -676,70 +661,50 @@ public class InstantRunBuildContext {
                         + "=======================================\n"
                         + "collapseMainArtifactsIntoCurrentBuild\n"
                         + "=======================================");
-        if (patchingPolicy.useMultiApk()) {
-            // Add all of the older splits to the current build,
-            // as the older builds will be thrown away.
-            Set<String> splitLocations = Sets.newHashSet();
-            Artifact main = null;
+        // Add all of the older splits to the current build,
+        // as the older builds will be thrown away.
+        Set<String> splitLocations = Sets.newHashSet();
+        Artifact main = null;
 
-            for (Build build : previousBuilds.values()) {
-                for (Artifact artifact : build.artifacts) {
-                    if (artifact.fileType == FileType.SPLIT) {
-                        splitLocations.add(artifact.location.getAbsolutePath());
-                    } else if (artifact.fileType == FileType.SPLIT_MAIN) {
-                        main = artifact;
-                    }
-                }
-            }
-
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(
-                        "Split locations  Count:{}.\n" + "{}",
-                        splitLocations.size(),
-                        splitLocations.stream().collect(Collectors.joining("\n")));
-            }
-
-            // Don't re-add existing splits.
-            for (Artifact artifact : currentBuild.artifacts) {
+        for (Build build : previousBuilds.values()) {
+            for (Artifact artifact : build.artifacts) {
                 if (artifact.fileType == FileType.SPLIT) {
-                    splitLocations.remove(artifact.location.getAbsolutePath());
+                    splitLocations.add(artifact.location.getAbsolutePath());
                 } else if (artifact.fileType == FileType.SPLIT_MAIN) {
-                    main = null;
+                    main = artifact;
                 }
             }
+        }
 
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(
-                        "Split locations, current build removed  Count: {}.\n" + "{}",
-                        splitLocations.size(),
-                        splitLocations.stream().collect(Collectors.joining("\n")));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(
+                    "Split locations  Count:{}.\n" + "{}",
+                    splitLocations.size(),
+                    splitLocations.stream().collect(Collectors.joining("\n")));
+        }
+
+        // Don't re-add existing splits.
+        for (Artifact artifact : currentBuild.artifacts) {
+            if (artifact.fileType == FileType.SPLIT) {
+                splitLocations.remove(artifact.location.getAbsolutePath());
+            } else if (artifact.fileType == FileType.SPLIT_MAIN) {
+                main = null;
             }
+        }
 
-            for (String splitLocation : splitLocations) {
-                currentBuild.artifacts.add(new Artifact(FileType.SPLIT, new File(splitLocation)));
-            }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(
+                    "Split locations, current build removed  Count: {}.\n" + "{}",
+                    splitLocations.size(),
+                    splitLocations.stream().collect(Collectors.joining("\n")));
+        }
 
-            if (main != null) {
-                currentBuild.artifacts.add(main);
-            }
-        } else {
-            if (currentBuild.artifacts.isEmpty()) {
+        for (String splitLocation : splitLocations) {
+            currentBuild.artifacts.add(new Artifact(FileType.SPLIT, new File(splitLocation)));
+        }
 
-                Artifact main = null;
-
-                for (Build build : previousBuilds.values()) {
-                    for (Artifact artifact : build.artifacts) {
-                        if (artifact.fileType == FileType.MAIN) {
-                            main = artifact;
-                        }
-                    }
-                }
-                if (main == null) {
-                    throw new IllegalStateException(
-                            "No current or previous main artifacts. " + "This should not happen.");
-                }
-                currentBuild.artifacts.add(main);
-            }
+        if (main != null) {
+            currentBuild.artifacts.add(main);
         }
         if (currentBuild.artifacts.isEmpty()) {
             throw new IllegalStateException(

@@ -55,7 +55,6 @@ import com.android.build.gradle.internal.variant.TestedVariantData;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.options.SyncOptions;
-import com.android.builder.Version;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.VariantType;
 import com.android.builder.model.AaptOptions;
@@ -79,6 +78,7 @@ import com.android.builder.model.TestVariantBuildOutput;
 import com.android.builder.model.TestedTargetVariant;
 import com.android.builder.model.Variant;
 import com.android.builder.model.VariantBuildOutput;
+import com.android.builder.model.Version;
 import com.android.builder.model.level2.DependencyGraphs;
 import com.android.builder.model.level2.GlobalLibraryMap;
 import com.android.ide.common.build.ApkInfo;
@@ -254,8 +254,7 @@ public class ModelBuilder implements ToolingModelBuilder {
         }
 
         if (modelLevel < AndroidProject.MODEL_LEVEL_3_VARIANT_OUTPUT_POST_BUILD) {
-            throw new RuntimeException(
-                    "This Gradle plugin requires a newer IDE able to request IDE model level 3. For Android Studio this means version 3.0+");
+            throw new RuntimeException("This Gradle plugin requires Studio 3.0 minimum");
         }
 
         modelWithFullDependency =
@@ -692,7 +691,8 @@ public class ModelBuilder implements ToolingModelBuilder {
                 instantRun,
                 splitOutputsProxy,
                 manifestsProxy,
-                testOptions);
+                testOptions,
+                scope.getConnectedTask() == null ? null : scope.getConnectedTask().getName());
     }
 
     private static BuildOutputSupplier<Collection<BuildOutput>> getBuildOutputSupplier(

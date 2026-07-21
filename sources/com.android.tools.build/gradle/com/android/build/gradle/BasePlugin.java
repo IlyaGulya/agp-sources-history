@@ -25,6 +25,7 @@ import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.annotations.VisibleForTesting;
+import com.android.build.api.dsl.variant.Variant;
 import com.android.build.api.transform.Transform;
 import com.android.build.gradle.api.AndroidBasePlugin;
 import com.android.build.gradle.api.BaseVariantOutput;
@@ -41,8 +42,18 @@ import com.android.build.gradle.internal.PluginInitializer;
 import com.android.build.gradle.internal.SdkHandler;
 import com.android.build.gradle.internal.TaskContainerAdaptor;
 import com.android.build.gradle.internal.TaskManager;
-import com.android.build.gradle.internal.ToolingRegistryProvider;
 import com.android.build.gradle.internal.VariantManager;
+import com.android.build.gradle.internal.api.dsl.extensions.BaseExtension2;
+import com.android.build.gradle.internal.api.dsl.extensions.BuildPropertiesImpl;
+import com.android.build.gradle.internal.api.dsl.extensions.VariantAwarePropertiesImpl;
+import com.android.build.gradle.internal.api.dsl.extensions.VariantOrExtensionPropertiesImpl;
+import com.android.build.gradle.internal.api.dsl.model.BaseFlavorImpl;
+import com.android.build.gradle.internal.api.dsl.model.BuildTypeOrProductFlavorImpl;
+import com.android.build.gradle.internal.api.dsl.model.DefaultConfigImpl;
+import com.android.build.gradle.internal.api.dsl.model.FallbackStrategyImpl;
+import com.android.build.gradle.internal.api.dsl.model.ProductFlavorOrVariantImpl;
+import com.android.build.gradle.internal.api.dsl.model.VariantPropertiesImpl;
+import com.android.build.gradle.internal.api.dsl.variant.SealableVariant;
 import com.android.build.gradle.internal.coverage.JacocoPlugin;
 import com.android.build.gradle.internal.dsl.BuildType;
 import com.android.build.gradle.internal.dsl.BuildTypeFactory;
@@ -64,16 +75,22 @@ import com.android.build.gradle.internal.tasks.TaskInputHelper;
 import com.android.build.gradle.internal.transforms.DexTransform;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.internal.variant.VariantFactory;
+import com.android.build.gradle.internal.variant2.DslModelData;
+import com.android.build.gradle.internal.variant2.VariantBuilder;
+import com.android.build.gradle.internal.variant2.VariantFactory2;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.IntegerOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.tasks.ExternalNativeBuildTaskUtils;
 import com.android.build.gradle.tasks.ExternalNativeJsonGenerator;
-import com.android.builder.Version;
+import com.android.build.gradle.tasks.LintBaseTask;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.BuilderConstants;
+import com.android.builder.errors.DeprecationReporter;
+import com.android.builder.errors.EvalIssueReporter;
 import com.android.builder.internal.compiler.PreDexCache;
 import com.android.builder.model.AndroidProject;
+import com.android.builder.model.Version;
 import com.android.builder.profile.ProcessProfileWriter;
 import com.android.builder.profile.Recorder;
 import com.android.builder.profile.ThreadRecorder;
@@ -90,6 +107,7 @@ import com.android.repository.api.SettingsController;
 import com.android.repository.impl.downloader.LocalFileAwareDownloader;
 import com.android.repository.io.FileOpUtils;
 import com.android.sdklib.repository.legacy.LegacyDownloader;
+import com.android.tools.lint.gradle.api.ToolingRegistryProvider;
 import com.android.utils.FileUtils;
 import com.android.utils.ILogger;
 import com.google.common.base.CharMatcher;
@@ -102,6 +120,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -113,6 +132,7 @@ import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.invocation.Gradle;
 import org.gradle.api.logging.LogLevel;
@@ -120,13 +140,10 @@ import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.tasks.StopExecutionException;
 import org.gradle.internal.reflect.Instantiator;
-import org.gradle.tooling.UnsupportedVersionException;
 import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 
-/**
- * Base class for all Android plugins
- */
-public abstract class BasePlugin implements ToolingRegistryProvider {
+/** Base class for all Android plugins */
+public abstract class BasePlugin<E extends BaseExtension2> implements ToolingRegistryProvider {
 
     @VisibleForTesting
     public static final GradleVersion GRADLE_MIN_VERSION =
@@ -138,7 +155,7 @@ public abstract class BasePlugin implements ToolingRegistryProvider {
 
     private TaskManager taskManager;
 
-    private Project project;
+    protected Project project;
 
     private ProjectOptions projectOptions;
 
@@ -158,7 +175,7 @@ public abstract class BasePlugin implements ToolingRegistryProvider {
 
     private LoggerWrapper loggerWrapper;
 
-    private ExtraModelInfo extraModelInfo;
+    protected ExtraModelInfo extraModelInfo;
 
     private String creator;
 
@@ -175,7 +192,6 @@ public abstract class BasePlugin implements ToolingRegistryProvider {
 
         ModelBuilder.clearCaches();
     }
-
 
     @NonNull
     protected abstract BaseExtension createExtension(
@@ -242,13 +258,11 @@ public abstract class BasePlugin implements ToolingRegistryProvider {
         // We run by default in headless mode, so the JVM doesn't steal focus.
         System.setProperty("java.awt.headless", "true");
 
-        project.getPluginManager().apply(AndroidBasePlugin.class);
-        checkPluginVersion();
-
-        TaskInputHelper.enableBypass();
-
         this.project = project;
         this.projectOptions = new ProjectOptions(project);
+
+        project.getPluginManager().apply(AndroidBasePlugin.class);
+
         ExecutionConfigurationUtil.setThreadPoolSize(projectOptions);
         checkPathForErrors();
         checkModulesForErrors();
@@ -262,46 +276,74 @@ public abstract class BasePlugin implements ToolingRegistryProvider {
                 .setAndroidPlugin(getAnalyticsPluginType())
                 .setPluginGeneration(GradleBuildProject.PluginGeneration.FIRST);
 
-        threadRecorder.record(
-                ExecutionType.BASE_PLUGIN_PROJECT_CONFIGURE,
-                project.getPath(),
-                null,
-                this::configureProject);
+        if (!projectOptions.get(BooleanOption.ENABLE_NEW_DSL_AND_API)) {
+            TaskInputHelper.enableBypass();
 
-        threadRecorder.record(
-                ExecutionType.BASE_PLUGIN_PROJECT_BASE_EXTENSION_CREATION,
-                project.getPath(),
-                null,
-                this::configureExtension);
+            threadRecorder.record(
+                    ExecutionType.BASE_PLUGIN_PROJECT_CONFIGURE,
+                    project.getPath(),
+                    null,
+                    this::configureProject);
 
-        threadRecorder.record(
-                ExecutionType.BASE_PLUGIN_PROJECT_TASKS_CREATION,
-                project.getPath(),
-                null,
-                this::createTasks);
+            threadRecorder.record(
+                    ExecutionType.BASE_PLUGIN_PROJECT_BASE_EXTENSION_CREATION,
+                    project.getPath(),
+                    null,
+                    this::configureExtension);
+
+            threadRecorder.record(
+                    ExecutionType.BASE_PLUGIN_PROJECT_TASKS_CREATION,
+                    project.getPath(),
+                    null,
+                    this::createTasks);
+        } else {
+            // configure project
+
+            // Apply the Java and Jacoco plugins.
+            project.getPlugins().apply(JavaBasePlugin.class);
+            project.getPlugins().apply(JacocoPlugin.class);
+
+            // configure extension
+            configureNewExtension();
+
+            // create basic tasks?
+            // FIXME dependency should be setup using BuildableArtifacts
+
+            // after evaluate callbacks
+            project.afterEvaluate(
+                    p ->
+                            threadRecorder.record(
+                                    ExecutionType.BASE_PLUGIN_CREATE_ANDROID_TASKS,
+                                    p.getPath(),
+                                    null,
+                                    this::afterEvaluateCallback));
+        }
     }
 
     private void configureProject() {
+        final Gradle gradle = project.getGradle();
+
         extraModelInfo = new ExtraModelInfo(projectOptions, project.getLogger());
         checkGradleVersion();
 
         sdkHandler = new SdkHandler(project, getLogger());
-
-        if (!project.getGradle().getStartParameter().isOffline()
+        if (!gradle.getStartParameter().isOffline()
                 && projectOptions.get(BooleanOption.ENABLE_SDK_DOWNLOAD)
                 && !projectOptions.get(BooleanOption.IDE_INVOKED_FROM_IDE)) {
             SdkLibData sdkLibData = SdkLibData.download(getDownloader(), getSettingsController());
             sdkHandler.setSdkLibData(sdkLibData);
         }
 
-        androidBuilder = new AndroidBuilder(
-                project == project.getRootProject() ? project.getName() : project.getPath(),
-                creator,
-                new GradleProcessExecutor(project),
-                new GradleJavaProcessExecutor(project),
-                extraModelInfo,
-                getLogger(),
-                isVerbose());
+        androidBuilder =
+                new AndroidBuilder(
+                        project == project.getRootProject() ? project.getName() : project.getPath(),
+                        creator,
+                        new GradleProcessExecutor(project),
+                        new GradleJavaProcessExecutor(project),
+                        extraModelInfo,
+                        extraModelInfo,
+                        getLogger(),
+                        isVerbose());
         dataBindingBuilder = new DataBindingBuilder();
         dataBindingBuilder.setPrintMachineReadableOutput(
                 extraModelInfo.getErrorFormatMode() ==
@@ -320,52 +362,49 @@ public abstract class BasePlugin implements ToolingRegistryProvider {
         // after the current project is done).
         // This is will be called for each (android) projects though, so this should support
         // being called 2+ times.
-        project.getGradle()
-                .addBuildListener(
-                        new BuildListener() {
-                            @Override
-                            public void buildStarted(Gradle gradle) {
-                                TaskInputHelper.enableBypass();
-                            }
+        gradle.addBuildListener(
+                new BuildListener() {
+                    @Override
+                    public void buildStarted(Gradle gradle) {
+                        TaskInputHelper.enableBypass();
+                    }
 
-                            @Override
-                            public void settingsEvaluated(Settings settings) {}
+                    @Override
+                    public void settingsEvaluated(Settings settings) {}
 
-                            @Override
-                            public void projectsLoaded(Gradle gradle) {}
+                    @Override
+                    public void projectsLoaded(Gradle gradle) {}
 
-                            @Override
-                            public void projectsEvaluated(Gradle gradle) {}
+                    @Override
+                    public void projectsEvaluated(Gradle gradle) {}
 
-                            @Override
-                            public void buildFinished(BuildResult buildResult) {
-                                // Do not run buildFinished for included project in composite build.
-                                if (buildResult.getGradle().getParent() != null) {
-                                    return;
-                                }
-                                ExecutorSingleton.shutdown();
-                                sdkHandler.unload();
-                                threadRecorder.record(
-                                        ExecutionType.BASE_PLUGIN_BUILD_FINISHED,
-                                        project.getPath(),
-                                        null,
-                                        () -> {
-                                            PreDexCache.getCache()
-                                                    .clear(
-                                                            FileUtils.join(
-                                                                    project.getRootProject()
-                                                                            .getBuildDir(),
-                                                                    FD_INTERMEDIATES,
-                                                                    "dex-cache",
-                                                                    "cache.xml"),
-                                                            getLogger());
-                                            Main.clearInternTables();
-                                        });
-                            }
-                        });
+                    @Override
+                    public void buildFinished(BuildResult buildResult) {
+                        // Do not run buildFinished for included project in composite build.
+                        if (buildResult.getGradle().getParent() != null) {
+                            return;
+                        }
+                        ExecutorSingleton.shutdown();
+                        sdkHandler.unload();
+                        threadRecorder.record(
+                                ExecutionType.BASE_PLUGIN_BUILD_FINISHED,
+                                project.getPath(),
+                                null,
+                                () -> {
+                                    PreDexCache.getCache()
+                                            .clear(
+                                                    FileUtils.join(
+                                                            project.getRootProject().getBuildDir(),
+                                                            FD_INTERMEDIATES,
+                                                            "dex-cache",
+                                                            "cache.xml"),
+                                                    getLogger());
+                                    Main.clearInternTables();
+                                });
+                    }
+                });
 
-        project.getGradle()
-                .getTaskGraph()
+        gradle.getTaskGraph()
                 .addTaskExecutionGraphListener(
                         taskGraph -> {
                             TaskInputHelper.disableBypass();
@@ -387,13 +426,27 @@ public abstract class BasePlugin implements ToolingRegistryProvider {
                                 }
                             }
                         });
+
+        createLintClasspathConfiguration();
+    }
+
+    private void createLintClasspathConfiguration() {
+        Configuration config = project.getConfigurations().create(LintBaseTask.LINT_CLASS_PATH);
+        config.setVisible(false);
+        config.setTransitive(true);
+        config.setCanBeConsumed(false);
+        config.setDescription("The lint embedded classpath");
+
+        project.getDependencies().add(config.getName(), "com.android.tools.lint:lint-gradle:" +
+                Version.ANDROID_TOOLS_BASE_VERSION);
     }
 
     private void configureExtension() {
         final NamedDomainObjectContainer<BuildType> buildTypeContainer =
                 project.container(
                         BuildType.class,
-                        new BuildTypeFactory(instantiator, project, extraModelInfo));
+                        new BuildTypeFactory(
+                                instantiator, project, extraModelInfo, extraModelInfo));
         final NamedDomainObjectContainer<ProductFlavor> productFlavorContainer =
                 project.container(
                         ProductFlavor.class,
@@ -555,6 +608,92 @@ public abstract class BasePlugin implements ToolingRegistryProvider {
                                 () -> createAndroidTasks(false)));
     }
 
+    private DslModelData dslModelData = null;
+    private E newExtension = null;
+
+    @NonNull
+    protected abstract E createNewExtension(
+            @NonNull BuildPropertiesImpl buildProperties,
+            @NonNull VariantOrExtensionPropertiesImpl variantExtensionProperties,
+            @NonNull VariantAwarePropertiesImpl variantAwareProperties);
+
+    @NonNull
+    protected abstract List<VariantFactory2<E>> getVariantFactories();
+
+    private void configureNewExtension() {
+        // FIXME we don't want to keep this around in this form.
+        extraModelInfo = new ExtraModelInfo(projectOptions, project.getLogger());
+        // FIXME, split in different implementations
+        EvalIssueReporter issueReporter = extraModelInfo;
+        DeprecationReporter deprecationReporter = extraModelInfo;
+
+        // create the default config implementation
+        BaseFlavorImpl baseFlavor = new BaseFlavorImpl(deprecationReporter, issueReporter);
+        DefaultConfigImpl defaultConfig =
+                new DefaultConfigImpl(
+                        new VariantPropertiesImpl(issueReporter),
+                        new BuildTypeOrProductFlavorImpl(
+                                deprecationReporter, issueReporter, baseFlavor::getPostprocessing),
+                        new ProductFlavorOrVariantImpl(issueReporter),
+                        new FallbackStrategyImpl(deprecationReporter, issueReporter),
+                        baseFlavor,
+                        issueReporter);
+
+        dslModelData =
+                new DslModelData(
+                        project, defaultConfig, instantiator, extraModelInfo, extraModelInfo);
+
+        newExtension =
+                createNewExtension(
+                        new BuildPropertiesImpl(dslModelData, issueReporter),
+                        new VariantOrExtensionPropertiesImpl(issueReporter),
+                        new VariantAwarePropertiesImpl(
+                                dslModelData, deprecationReporter, issueReporter));
+    }
+
+    private void afterEvaluateCallback() {
+        // callback for the afterEvaluate
+        List<Action<Void>> preVariantActions = newExtension.getPreVariantCallbacks();
+        for (Action<Void> action : preVariantActions) {
+            action.execute(null);
+        }
+
+        // seal the DSL.
+        newExtension.seal();
+
+        dslModelData.afterEvaluateCompute(true /*FIXME*/, null);
+
+        // compute the variants
+        VariantBuilder<E> builder =
+                new VariantBuilder<>(
+                        dslModelData,
+                        newExtension,
+                        getVariantFactories(),
+                        extraModelInfo,
+                        extraModelInfo);
+        builder.generateVariants();
+        List<SealableVariant> variants = builder.getVariants();
+        List<Variant> variantShims = builder.getShims();
+
+        // run the variant API
+        dslModelData.runVariantCallbacks(variantShims);
+
+        // post-variant API
+        for (Action<List<Variant>> action : newExtension.getPostVariants()) {
+            action.execute(variantShims);
+        }
+
+        // seal the variants
+        for (SealableVariant variant : variants) {
+            variant.seal();
+        }
+        // and additional data
+        dslModelData.seal();
+
+        // create the tasks
+        // FIXME implement
+    }
+
     private void checkGradleVersion() {
         String currentVersion = project.getGradle().getGradleVersion();
         if (GRADLE_MIN_VERSION.compareTo(currentVersion) > 0) {
@@ -694,9 +833,6 @@ public abstract class BasePlugin implements ToolingRegistryProvider {
                                 // When refreshExternalNativeModel() is true it will also
                                 // force update all JSONs.
                                 generator.build(forceRegeneration);
-
-                                variantScope.addExternalNativeBuildConfigValues(
-                                        generator.readExistingNativeBuildConfigurations());
                             }
                         }
                     });
@@ -749,28 +885,6 @@ public abstract class BasePlugin implements ToolingRegistryProvider {
             } else {
                 subProjectsById.put(id, subProject);
             }
-        }
-    }
-
-    /**
-     * Verify the plugin version.  If a newer version of gradle-experimental plugin is applied, then
-     * builder.jar module will be resolved to a different version than the one this gradle plugin is
-     * compiled with.  Throw an error and suggest to update this plugin.
-     */
-    private static void checkPluginVersion() {
-        String actualGradlePluginVersion = Version.ANDROID_GRADLE_PLUGIN_VERSION;
-        if(!actualGradlePluginVersion.equals(
-                com.android.build.gradle.internal.Version.ANDROID_GRADLE_PLUGIN_VERSION)) {
-            throw new UnsupportedVersionException(
-                    String.format(
-                            "Plugin version mismatch.  "
-                                    + "'com.android.tools.build:gradle-experimental:%s' was applied, and it "
-                                    + "requires 'com.android.tools.build:gradle:%s'.  Current version is '%s'.  "
-                                    + "Please update to version '%s'.",
-                            Version.ANDROID_GRADLE_COMPONENT_PLUGIN_VERSION,
-                            Version.ANDROID_GRADLE_PLUGIN_VERSION,
-                            com.android.build.gradle.internal.Version.ANDROID_GRADLE_PLUGIN_VERSION,
-                            Version.ANDROID_GRADLE_PLUGIN_VERSION));
         }
     }
 

@@ -23,7 +23,9 @@ import com.android.build.gradle.api.JavaCompileOptions;
 import com.android.build.gradle.internal.scope.CodeShrinker;
 import com.android.builder.core.BuilderConstants;
 import com.android.builder.core.DefaultBuildType;
-import com.android.builder.core.ErrorReporter;
+import com.android.builder.errors.DeprecationReporter;
+import com.android.builder.errors.DeprecationReporter.DeprecationTarget;
+import com.android.builder.errors.EvalIssueReporter;
 import com.android.builder.internal.ClassFieldImpl;
 import com.android.builder.model.BaseConfig;
 import com.android.builder.model.ClassField;
@@ -73,7 +75,8 @@ public class BuildType extends DefaultBuildType implements CoreBuildType, Serial
     @NonNull
     private final com.android.build.gradle.internal.dsl.JavaCompileOptions javaCompileOptions;
     @NonNull private final ShaderOptions shaderOptions;
-    @NonNull private final ErrorReporter errorReporter;
+    @NonNull private final EvalIssueReporter issueReporter;
+    @NonNull private final DeprecationReporter deprecationReporter;
     @NonNull private final PostprocessingOptions postprocessingOptions;
 
     @Nullable private PostprocessingConfiguration postprocessingConfiguration;
@@ -88,11 +91,13 @@ public class BuildType extends DefaultBuildType implements CoreBuildType, Serial
             @NonNull String name,
             @NonNull Project project,
             @NonNull Instantiator instantiator,
-            @NonNull ErrorReporter errorReporter) {
+            @NonNull EvalIssueReporter issueReporter,
+            @NonNull DeprecationReporter deprecationReporter) {
         super(name);
         this.project = project;
-        this.errorReporter = errorReporter;
-        jackOptions = instantiator.newInstance(JackOptions.class, errorReporter);
+        this.issueReporter = issueReporter;
+        this.deprecationReporter = deprecationReporter;
+        jackOptions = instantiator.newInstance(JackOptions.class, deprecationReporter);
         javaCompileOptions =
                 instantiator.newInstance(
                         com.android.build.gradle.internal.dsl.JavaCompileOptions.class,
@@ -106,11 +111,16 @@ public class BuildType extends DefaultBuildType implements CoreBuildType, Serial
 
     @VisibleForTesting
     BuildType(
-            @NonNull String name, @NonNull Project project, @NonNull ErrorReporter errorReporter) {
+            @NonNull String name,
+            @NonNull Project project,
+            @NonNull EvalIssueReporter issueReporter,
+            @NonNull DeprecationReporter deprecationReporter) {
+
         super(name);
         this.project = project;
-        this.errorReporter = errorReporter;
-        jackOptions = new JackOptions(errorReporter);
+        this.issueReporter = issueReporter;
+        this.deprecationReporter = deprecationReporter;
+        jackOptions = new JackOptions(deprecationReporter);
         javaCompileOptions = new com.android.build.gradle.internal.dsl.JavaCompileOptions();
         shaderOptions = new ShaderOptions();
         ndkConfig = new NdkOptions();
@@ -297,7 +307,7 @@ public class BuildType extends DefaultBuildType implements CoreBuildType, Serial
                     String.format(
                             "BuildType(%s): buildConfigField '%s' value is being replaced: %s -> %s",
                             getName(), name, alreadyPresent.getValue(), value);
-            errorReporter.handleSyncWarning(null, SyncIssue.TYPE_GENERIC, message);
+            issueReporter.reportWarning(SyncIssue.TYPE_GENERIC, message);
         }
         addBuildConfigField(new ClassFieldImpl(type, name, value));
     }
@@ -323,7 +333,7 @@ public class BuildType extends DefaultBuildType implements CoreBuildType, Serial
                     String.format(
                             "BuildType(%s): resValue '%s' value is being replaced: %s -> %s",
                             getName(), name, alreadyPresent.getValue(), value);
-            errorReporter.handleSyncWarning(null, SyncIssue.TYPE_GENERIC, message);
+            issueReporter.reportWarning(SyncIssue.TYPE_GENERIC, message);
         }
         addResValue(new ClassFieldImpl(type, name, value));
     }
@@ -530,8 +540,8 @@ public class BuildType extends DefaultBuildType implements CoreBuildType, Serial
     @Deprecated
     @Nullable
     public Boolean getUseJack() {
-        errorReporter.handleSyncWarning(
-                null, SyncIssue.TYPE_GENERIC, JackOptions.DEPRECATION_WARNING);
+        deprecationReporter.reportObsoleteUsage(
+                "BuildType.useJack", JackOptions.DEPRECATION_URL, DeprecationTarget.VERSION_4_0);
         return null;
     }
 
@@ -542,8 +552,8 @@ public class BuildType extends DefaultBuildType implements CoreBuildType, Serial
      */
     @Deprecated
     public void setUseJack(@Nullable Boolean useJack) {
-        errorReporter.handleSyncWarning(
-                null, SyncIssue.TYPE_GENERIC, JackOptions.DEPRECATION_WARNING);
+        deprecationReporter.reportObsoleteUsage(
+                "BuildType.useJack", JackOptions.DEPRECATION_URL, DeprecationTarget.VERSION_4_0);
     }
 
     /**
@@ -597,24 +607,6 @@ public class BuildType extends DefaultBuildType implements CoreBuildType, Serial
         this.shrinkResources = shrinkResources;
     }
 
-    /**
-     * Specifies whether to always use ProGuard for code and resource shrinking.
-     *
-     * <p>By default, when you enable code shrinking by setting <a
-     * href="com.android.build.gradle.internal.dsl.BuildType.html#com.android.build.gradle.internal.dsl.BuildType:minifyEnabled">
-     * <code>minifyEnabled</code></a> to <code>true</code>, the Android plugin uses ProGuard.
-     * However while deploying your app using Android Studio's <a
-     * href="https://developer.android.com/studio/run/index.html#instant-run">Instant Run</a>
-     * feature, which doesn't support ProGuard, the plugin switches to using a custom experimental
-     * code shrinker.
-     *
-     * <p>If you experience issues using the experimental code shrinker, you can disable code
-     * shrinking while using Instant Run by setting this property to <code>true</code>.
-     *
-     * <p>To learn more, read <a
-     * href="https://developer.android.com/studio/build/shrink-code.html">Shrink Your Code and
-     * Resources</a>.
-     */
     @Override
     public Boolean isUseProguard() {
         // Try to return a sensible value for the model and third party plugins inspecting the DSL.
@@ -718,7 +710,7 @@ public class BuildType extends DefaultBuildType implements CoreBuildType, Serial
                 default:
                     throw new AssertionError("Unknown value " + used);
             }
-            errorReporter.handleSyncError(methodName, SyncIssue.TYPE_GENERIC, message);
+            issueReporter.reportError(SyncIssue.TYPE_GENERIC, message, methodName);
         }
     }
 

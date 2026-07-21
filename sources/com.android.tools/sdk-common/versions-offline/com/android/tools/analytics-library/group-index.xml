@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <com.android.tools.analytics-library>
-  <tracker versions="26.0.0-alpha4"/>
-  <protos versions="26.0.0-alpha4"/>
-  <inspector versions="26.0.0-alpha4"/>
-  <shared versions="26.0.0-alpha4"/>
-  <publisher versions="26.0.0-alpha4"/>
+  <tracker versions="26.0.0-beta3"/>
+  <protos versions="26.0.0-beta3"/>
+  <inspector versions="26.0.0-beta3"/>
+  <shared versions="26.0.0-beta3"/>
+  <publisher versions="26.0.0-beta3"/>
 </com.android.tools.analytics-library>
 

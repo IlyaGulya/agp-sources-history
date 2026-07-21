@@ -25,10 +25,11 @@ import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.gradle.AndroidConfig;
 import com.android.build.gradle.external.cmake.CmakeUtils;
-import com.android.build.gradle.external.gson.NativeBuildConfigValue;
 import com.android.build.gradle.internal.SdkHandler;
 import com.android.build.gradle.internal.core.Abi;
 import com.android.build.gradle.internal.core.GradleVariantConfiguration;
+import com.android.build.gradle.internal.cxx.json.AndroidBuildGradleJsons;
+import com.android.build.gradle.internal.cxx.json.NativeBuildConfigValueMini;
 import com.android.build.gradle.internal.dsl.CoreExternalNativeCmakeOptions;
 import com.android.build.gradle.internal.dsl.CoreExternalNativeNdkBuildOptions;
 import com.android.build.gradle.internal.model.CoreExternalNativeBuild;
@@ -36,7 +37,7 @@ import com.android.build.gradle.internal.ndk.NdkHandler;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.builder.core.AndroidBuilder;
-import com.android.builder.core.ErrorReporter;
+import com.android.builder.errors.EvalIssueReporter;
 import com.android.builder.model.ApiVersion;
 import com.android.builder.model.SyncIssue;
 import com.android.ide.common.process.ProcessException;
@@ -52,8 +53,13 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.Files;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -153,8 +159,7 @@ public abstract class ExternalNativeJsonGenerator {
         }
 
         // Now check whether the JSON is out-of-date with respect to the build files it declares.
-        NativeBuildConfigValue config = ExternalNativeBuildTaskUtils
-                .getNativeBuildConfigValue(json, groupName);
+        NativeBuildConfigValueMini config = AndroidBuildGradleJsons.getNativeBuildMiniConfig(json);
         if (config.buildFiles != null) {
             long jsonLastModified = java.nio.file.Files.getLastModifiedTime(
                     json.toPath()).toMillis();
@@ -186,17 +191,21 @@ public abstract class ExternalNativeJsonGenerator {
             diagnostic("building json with force flag %s", forceJsonGeneration);
             buildAndPropagateException(forceJsonGeneration);
         } catch (@NonNull IOException | GradleException e) {
-            androidBuilder.getErrorReporter().handleSyncError(
-                    variantName,
-                    SyncIssue.TYPE_EXTERNAL_NATIVE_BUILD_CONFIGURATION,
-                    e.getMessage());
+            androidBuilder
+                    .getIssueReporter()
+                    .reportError(
+                            SyncIssue.TYPE_EXTERNAL_NATIVE_BUILD_CONFIGURATION,
+                            e.getMessage(),
+                            variantName);
         } catch (ProcessException e) {
-            androidBuilder.getErrorReporter().handleSyncError(
-                    e.getMessage(),
-                    SyncIssue.TYPE_EXTERNAL_NATIVE_BUILD_PROCESS_EXCEPTION,
-                    String.format("executing external native build for %s %s",
-                            getNativeBuildSystem().getName(),
-                            makefile));
+            androidBuilder
+                    .getIssueReporter()
+                    .reportError(
+                            SyncIssue.TYPE_EXTERNAL_NATIVE_BUILD_PROCESS_EXCEPTION,
+                            String.format(
+                                    "executing external native build for %s %s",
+                                    getNativeBuildSystem().getName(), makefile),
+                            e.getMessage());
         }
     }
 
@@ -296,6 +305,7 @@ public abstract class ExternalNativeJsonGenerator {
                     // JSON. If any of these change later the JSON will be regenerated.
                     diagnostic("write command file %s", commandFile.getAbsolutePath());
                     Files.write(currentBuildCommand, commandFile, Charsets.UTF_8);
+
                 } else {
                     diagnostic("JSON '%s' was up-to-date", expectedJson);
                 }
@@ -326,6 +336,7 @@ public abstract class ExternalNativeJsonGenerator {
 
         throw (ProcessException) firstException;
     }
+
 
     /**
      * Derived class implements this method to post-process build output. Ndk-build uses this to
@@ -369,7 +380,7 @@ public abstract class ExternalNativeJsonGenerator {
      * Log low level diagnostic information.
      */
     void diagnostic(String format, Object... args) {
-        androidBuilder.getLogger().verbose(
+        androidBuilder.getLogger().info(
                 "External native generate JSON " + variantName + ": " + format, args);
     }
 
@@ -398,11 +409,11 @@ public abstract class ExternalNativeJsonGenerator {
     }
 
     @NonNull
-    public Collection<NativeBuildConfigValue> readExistingNativeBuildConfigurations()
-            throws IOException {
+    public Collection<JsonReader> streamExistingNativeBuildConfigurations()
+            throws FileNotFoundException {
         List<File> files = getNativeBuildConfigurationsJsons();
         diagnostic("reading %s JSON files", files.size());
-        List<NativeBuildConfigValue> result = Lists.newArrayList();
+        List<JsonReader> result = Lists.newArrayList();
         List<File> existing = Lists.newArrayList();
         for (File file : files) {
             if (file.exists()) {
@@ -412,16 +423,25 @@ public abstract class ExternalNativeJsonGenerator {
                 // If the tool didn't create the JSON file then create fallback with the
                 // information we have so the user can see partial information in the UI.
                 diagnostic("using fallback JSON for %s", file.getAbsolutePath());
-                NativeBuildConfigValue fallback = new NativeBuildConfigValue();
+                NativeBuildConfigValueMini fallback = new NativeBuildConfigValueMini();
                 fallback.buildFiles = Lists.newArrayList(makefile);
-                result.add(fallback);
+
+                String jsonText = new Gson().toJson(fallback);
+                result.add(new JsonReader(new StringReader(new Gson().toJson(fallback))));
             }
         }
 
-        result.addAll(ExternalNativeBuildTaskUtils.getNativeBuildConfigValues(
-                existing,
-                variantName));
+        for (File json : existing) {
+            JsonReader reader = new JsonReader(new FileReader(json));
+            result.add(reader);
+        }
         return result;
+    }
+
+    /** @return the variant name for this generator */
+    @NonNull
+    public String getVariantName() {
+        return variantName;
     }
 
     /** Return ABIs that are available on the platform. */
@@ -429,7 +449,7 @@ public abstract class ExternalNativeJsonGenerator {
     private static List<Abi> filterToAvailableAbis(
             @NonNull Collection<Abi> supportedAbis,
             @NonNull Collection<String> userRequestedAbis,
-            @NonNull ErrorReporter errorReporter,
+            @NonNull EvalIssueReporter issueReporter,
             @NonNull String variantName) {
         List<String> requestedButNotAvailable = Lists.newArrayList();
         List<Abi> result = Lists.newArrayList();
@@ -447,14 +467,14 @@ public abstract class ExternalNativeJsonGenerator {
             // them a SyncIssue that describes which ones are the problem.
             Iterable<String> supportedAbisNames =
                     supportedAbis.stream().map(Abi::getName)::iterator;
-            errorReporter.handleSyncError(
-                    variantName,
+            issueReporter.reportError(
                     SyncIssue.TYPE_EXTERNAL_NATIVE_BUILD_CONFIGURATION,
                     String.format(
                             "ABIs [%s] are not supported for platform. Supported ABIs are "
                                     + "[%s].",
                             Joiner.on(", ").join(requestedButNotAvailable),
-                            Joiner.on(", ").join(supportedAbisNames)));
+                            Joiner.on(", ").join(supportedAbisNames)),
+                    variantName);
         }
         return result;
     }
@@ -619,7 +639,7 @@ public abstract class ExternalNativeJsonGenerator {
                         : filterToAvailableAbis(
                                 ndkHandler.getSupportedAbis(),
                                 userRequestedAbis,
-                                androidBuilder.getErrorReporter(),
+                                androidBuilder.getIssueReporter(),
                                 variantData.getName());
 
         // Produce the list of expected JSON files. This list includes possibly invalid ABIs
@@ -764,9 +784,8 @@ public abstract class ExternalNativeJsonGenerator {
                             buildSystem.getName(),
                             variantData.getName());
             androidBuilder
-                    .getErrorReporter()
-                    .handleSyncError(
-                            "",
+                    .getIssueReporter()
+                    .reportError(
                             SyncIssue.TYPE_EXTERNAL_NATIVE_BUILD_CONFIGURATION,
                             String.format(
                                     Locale.getDefault(),

@@ -18,11 +18,13 @@ package com.android.ide.common.vectordrawable;
 import com.google.common.collect.ImmutableMap;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.w3c.dom.Node;
@@ -41,13 +43,35 @@ public class SvgGradientNode extends SvgNode {
 
     private GradientUsage mGradientUsage;
 
+    private static class GradientCoordResult {
+        private final double mValue;
+        // When the gradientUnits is set to "userSpaceOnUse", we usually use the coordinate values
+        // as it is. But if the coordinate value is a percentage, we still need to multiply this
+        // percentage with the viewport's bounding box, in a similar way as gradientUnits is set
+        // to "objectBoundingBox".
+        private final boolean mIsPercentage;
+
+        public GradientCoordResult(double value, boolean isPercentage) {
+            mValue = value;
+            mIsPercentage = isPercentage;
+        }
+
+        public double getValue() {
+            return mValue;
+        }
+
+        public boolean isPercentage() {
+            return mIsPercentage;
+        }
+    }
+
     protected enum GradientUsage {
         FILL,
         STROKE
     }
 
     // Maps the gradient vector's coordinate names to an int for easier array lookup.
-    public static final ImmutableMap<String, Integer> vectorCoordinateMap =
+    private static final ImmutableMap<String, Integer> vectorCoordinateMap =
             ImmutableMap.<String, Integer>builder()
                     .put("x1", 0)
                     .put("y1", 1)
@@ -104,13 +128,18 @@ public class SvgGradientNode extends SvgNode {
     }
 
     /** Parses the gradient coordinate value given as a percentage or a length. Returns a double. */
-    private double getGradientCoordinate(String x, double defaultValue) {
+    private GradientCoordResult getGradientCoordinate(String x, double defaultValue) {
+        boolean isPercentage = false;
         if (!mVdAttributesMap.containsKey(x)) {
-            return defaultValue;
+            return new GradientCoordResult(defaultValue, isPercentage);
         }
         double val = defaultValue;
         String vdValue = mVdAttributesMap.get(x).trim();
+        if (x.equals("r") && vdValue.startsWith("-")) {
+            return new GradientCoordResult(defaultValue, isPercentage);
+        }
         if (vdValue.endsWith("%")) {
+            isPercentage = true;
             try {
                 val = Double.parseDouble(vdValue.substring(0, vdValue.length() - 1));
             } catch (NumberFormatException e) {
@@ -132,12 +161,20 @@ public class SvgGradientNode extends SvgNode {
                                 SvgTree.SvgLogLevel.ERROR);
             }
         }
-        return val;
+        return new GradientCoordResult(val, isPercentage);
     }
 
     /** Writes the XML defining the gradient within a path. */
     @Override
     public void writeXML(OutputStreamWriter writer, boolean inClipPath) throws IOException {
+        if (myGradientStops.isEmpty()) {
+            getTree()
+                    .logErrorLine(
+                            "Gradient has no stop info.",
+                            getDocumentNode(),
+                            SvgTree.SvgLogLevel.ERROR);
+            return;
+        }
         if (mGradientUsage == GradientUsage.FILL) {
             writer.write("        <aapt:attr name=\"android:fillColor\">\n");
         } else {
@@ -152,9 +189,10 @@ public class SvgGradientNode extends SvgNode {
         double startX = boundingBox.getX();
         double startY = boundingBox.getY();
 
+        String gradientUnit = mVdAttributesMap.get("gradientUnits");
+        boolean isUserSpaceOnUse = "userSpaceOnUse".equals(gradientUnit);
         // If gradientUnits is specified to be "userSpaceOnUse", we use the image's dimensions.
-        if (mVdAttributesMap.containsKey("gradientUnits")
-                && mVdAttributesMap.get("gradientUnits").equals("userSpaceOnUse")) {
+        if (isUserSpaceOnUse) {
             startX = 0;
             startY = 0;
             height = getTree().getHeight();
@@ -164,54 +202,109 @@ public class SvgGradientNode extends SvgNode {
         // TODO: Fix matrix transformations that include skew element and SVGs that define scale before rotate.
         // Additionally skew transformations have not been tested.
         // If there is a gradientTransform parse and store in mLocalTransform.
+        AffineTransform identity = new AffineTransform();
         if (mVdAttributesMap.containsKey("gradientTransform")) {
             String transformValue = mVdAttributesMap.get("gradientTransform");
             parseLocalTransform(transformValue);
-        }
-
-        // Source and target arrays to which we apply the local transform.
-        double[] gradientBounds = new double[4];
-        double[] transformedBounds = new double[4];
-
-        // Retrieves x1, y1, x2, y2 and calculates their coordinate in the viewport.
-        // Stores the coordinates in the gradientBounds and transformedBounds arrays to apply
-        // the proper transformation.
-        for (String s : vectorCoordinateMap.keySet()) {
-            // Gets the index corresponding to x1, y1, x2 and y2.
-            // x1 and x2 are indexed as 0 and 2
-            // y1 and y2 are indexed as 1 and 3
-            int index = vectorCoordinateMap.get(s);
-
-            // According to SVG spec, the default coordinate value for x1, and y1 and y2 is 0.
-            // The default for x2 is 1.
-            double defaultValue = 0;
-            if (index == 2) {
-                defaultValue = 1;
-            }
-            double value = getGradientCoordinate(s, defaultValue);
-
-            if (index % 2 == 0) {
-                value = value * width + startX;
-            } else {
-                value = value * height + startY;
-            }
-            // In case no transforms are applied, original coordinates are also stored in
-            // transformedBounds.
-            gradientBounds[index] = value;
-            transformedBounds[index] = value;
-
-            // We need mVdAttributesMap to contain all coordinates regardless if they are
-            // specified in the SVG in order to write the default value to the VD XML.
-            if (!mVdAttributesMap.containsKey(s)) {
-                mVdAttributesMap.put(s, "");
+            if (!isUserSpaceOnUse) {
+                identity.scale(1.0 / width, 1.0 / height);
+                mLocalTransform.concatenate(identity);
+                identity.setToIdentity();
+                identity.scale(width, height);
+                mLocalTransform.preConcatenate(identity);
             }
         }
 
         // Apply the path's transformations to the gradient.
-        mLocalTransform.concatenate(mSvgLeafNode.mStackedTransform);
+        mLocalTransform.preConcatenate(mSvgLeafNode.mStackedTransform);
 
-        // transformedBounds will hold the new coordinates of the gradient.
-        mLocalTransform.transform(gradientBounds, 0, transformedBounds, 0, 2);
+        // Source and target arrays to which we apply the local transform.
+        double[] gradientBounds;
+        double[] transformedBounds;
+
+        String gradientType = "linear";
+
+        if (mVdAttributesMap.containsKey("gradientType")) {
+            gradientType = mVdAttributesMap.get("gradientType");
+        }
+
+        if (gradientType.equals("linear")) {
+            gradientBounds = new double[4];
+            transformedBounds = new double[4];
+            // Retrieves x1, y1, x2, y2 and calculates their coordinate in the viewport.
+            // Stores the coordinates in the gradientBounds and transformedBounds arrays to apply
+            // the proper transformation.
+            for (Map.Entry<String, Integer> entry : vectorCoordinateMap.entrySet()) {
+                // Gets the index corresponding to x1, y1, x2 and y2.
+                // x1 and x2 are indexed as 0 and 2
+                // y1 and y2 are indexed as 1 and 3
+                String s = entry.getKey();
+                int index = entry.getValue();
+
+                // According to SVG spec, the default coordinate value for x1, and y1 and y2 is 0.
+                // The default for x2 is 1.
+                double defaultValue = 0;
+                if (index == 2) {
+                    defaultValue = 1;
+                }
+                GradientCoordResult result = getGradientCoordinate(s, defaultValue);
+
+                double coordValue = result.getValue();
+                if (!isUserSpaceOnUse || result.isPercentage()) {
+                    if (index % 2 == 0) {
+                        coordValue = coordValue * width + startX;
+                    } else {
+                        coordValue = coordValue * height + startY;
+                    }
+                }
+                // In case no transforms are applied, original coordinates are also stored in
+                // transformedBounds.
+                gradientBounds[index] = coordValue;
+                transformedBounds[index] = coordValue;
+
+                // We need mVdAttributesMap to contain all coordinates regardless if they are
+                // specified in the SVG in order to write the default value to the VD XML.
+                if (!mVdAttributesMap.containsKey(s)) {
+                    mVdAttributesMap.put(s, "");
+                }
+            }
+            // transformedBounds will hold the new coordinates of the gradient.
+            // This applies it to the linearGradient
+            mLocalTransform.transform(gradientBounds, 0, transformedBounds, 0, 2);
+        } else {
+            gradientBounds = new double[2];
+            transformedBounds = new double[2];
+            GradientCoordResult cxResult = getGradientCoordinate("cx", .5);
+            double cx = cxResult.getValue();
+            if (!isUserSpaceOnUse || cxResult.isPercentage()) {
+                cx = width * cx + startX;
+            }
+            GradientCoordResult cyResult = getGradientCoordinate("cy", .5);
+            double cy = cyResult.getValue();
+            if (!isUserSpaceOnUse || cyResult.isPercentage()) {
+                cy = height * cy + startY;
+            }
+            GradientCoordResult rResult = getGradientCoordinate("r", .5);
+            double r = rResult.getValue();
+            if (!isUserSpaceOnUse || rResult.isPercentage()) {
+                r *= Math.max(height, width);
+            }
+
+            gradientBounds[0] = cx;
+            transformedBounds[0] = cx;
+            gradientBounds[1] = cy;
+            transformedBounds[1] = cy;
+
+            // Transform radius, center point here.
+            mLocalTransform.transform(gradientBounds, 0, transformedBounds, 0, 1);
+            Point2D radius = new Point2D.Double(r, 0);
+            Point2D transformedRadius = new Point2D.Double(r, 0);
+            mLocalTransform.deltaTransform(radius, transformedRadius);
+
+            mVdAttributesMap.put("cx", String.valueOf(transformedBounds[0]));
+            mVdAttributesMap.put("cy", String.valueOf(transformedBounds[1]));
+            mVdAttributesMap.put("r", String.valueOf(transformedRadius.distance(0, 0)));
+        }
 
         for (String key : mVdAttributesMap.keySet()) {
             String gradientAttr = Svg2Vector.gradientMap.get(key);
@@ -239,6 +332,8 @@ public class SvgGradientNode extends SvgNode {
                 } else if (vdValue.equals("reflect")) {
                     vdValue = "mirror";
                 }
+            } else if (vdValue.endsWith("%")) {
+                vdValue = String.valueOf(getGradientCoordinate(key, 0));
             }
             if (!gradientAttr.isEmpty()) {
                 writer.write("\n        " + gradientAttr + "=\"" + vdValue + "\"");
@@ -246,6 +341,12 @@ public class SvgGradientNode extends SvgNode {
         }
         writer.write(">\n");
 
+        writeGradientStops(writer);
+        writer.write("            </gradient>");
+        writer.write("</aapt:attr>");
+    }
+
+    private void writeGradientStops(OutputStreamWriter writer) throws IOException {
         for (GradientStop g : myGradientStops) {
             g.formatStopAttributes();
             String color = g.getColor();
@@ -269,9 +370,17 @@ public class SvgGradientNode extends SvgNode {
 
             writer.write("<item android:offset=\"" + g.getOffset() + "\"");
             writer.write(" android:color=\"" + color + "\" />\n");
+
+            if (myGradientStops.size() == 1) {
+                getTree()
+                        .logErrorLine(
+                                "Gradient only have one color stops",
+                                getDocumentNode(),
+                                SvgTree.SvgLogLevel.WARNING);
+                writer.write("<item android:offset=\"1.0\"");
+                writer.write(" android:color=\"" + color + "\" />\n");
+            }
         }
-        writer.write("            </gradient>");
-        writer.write("</aapt:attr>");
     }
 
     public void addGradientStop(String color, String offset, String opacity) {

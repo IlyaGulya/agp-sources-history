@@ -21,8 +21,8 @@ import com.android.annotations.Nullable;
 import com.android.annotations.VisibleForTesting;
 import com.android.annotations.concurrency.GuardedBy;
 import com.android.annotations.concurrency.Immutable;
-import com.android.builder.Version;
-import com.android.ide.common.util.JvmWideVariable;
+import com.android.builder.model.Version;
+import com.android.utils.JvmWideVariable;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
@@ -188,6 +188,7 @@ public final class BuildSessionImpl implements BuildSession {
     }
 
     @Override
+    @SuppressWarnings("GuardedBy")
     public String toString() {
         //noinspection FieldAccessNotGuarded
         return MoreObjects.toStringHelper(this).add("buildState", buildState.name()).toString();

@@ -1081,8 +1081,7 @@ public abstract class BaseExtension implements AndroidConfig {
 
     public File getDefaultProguardFile(String name) {
         if (!ProguardFiles.KNOWN_FILE_NAMES.contains(name)) {
-            extraModelInfo.handleSyncError(
-                    null, TYPE_GENERIC, ProguardFiles.UNKNOWN_FILENAME_MESSAGE);
+            extraModelInfo.reportError(TYPE_GENERIC, ProguardFiles.UNKNOWN_FILENAME_MESSAGE);
         }
         return ProguardFiles.getDefaultProguardFile(name, project);
     }
@@ -1101,8 +1100,8 @@ public abstract class BaseExtension implements AndroidConfig {
         if (flag) {
             logger.warn(
                     "Pure splits is currently supported only when publishing"
-                            + "Android Instant Apps. For more information, go to"
-                            + "https://d.android.com/instant-apps.");
+                            + " Android Instant Apps. For more information, go to"
+                            + " https://d.android.com/instant-apps.");
         }
         this.generatePureSplits = flag;
     }

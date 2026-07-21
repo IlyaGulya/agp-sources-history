@@ -41,7 +41,6 @@ import com.android.build.gradle.internal.variant.TaskContainer;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.options.SyncOptions;
-import com.android.builder.Version;
 import com.android.builder.model.AndroidArtifact;
 import com.android.builder.model.AndroidProject;
 import com.android.builder.model.BuildTypeContainer;
@@ -52,6 +51,7 @@ import com.android.builder.model.ProductFlavor;
 import com.android.builder.model.ProductFlavorContainer;
 import com.android.builder.model.SyncIssue;
 import com.android.builder.model.Variant;
+import com.android.builder.model.Version;
 import com.android.builder.model.level2.DependencyGraphs;
 import com.android.ide.common.build.ApkInfo;
 import com.android.utils.Pair;
@@ -118,8 +118,7 @@ public class InstantAppModelBuilder implements ToolingModelBuilder {
         }
 
         if (modelLevel < AndroidProject.MODEL_LEVEL_3_VARIANT_OUTPUT_POST_BUILD) {
-            throw new RuntimeException(
-                    "This Gradle plugin requires a newer IDE able to request IDE model level 3. For Android Studio this means version 3.0+");
+            throw new RuntimeException("This Gradle plugin requires Studio 3.0 minimum");
         }
 
         modelWithFullDependency =
@@ -284,6 +283,7 @@ public class InstantAppModelBuilder implements ToolingModelBuilder {
                                                                 outputLocation,
                                                                 baseName + SdkConstants.DOT_ZIP))),
                         new BuildOutputsSupplier(ImmutableList.of(), ImmutableList.of()),
+                        null,
                         null);
 
         return new VariantImpl(
