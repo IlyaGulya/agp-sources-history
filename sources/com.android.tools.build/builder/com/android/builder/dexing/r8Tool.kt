@@ -438,9 +438,7 @@ private fun setupResourceShrinking(r8CommandBuilder: R8Command.Builder, config: 
   config.linkedResourcesInputFiles.forEachIndexed { index, linkedResourcesInputFile ->
     r8CommandBuilder.addFeatureSplit {
       it.setAndroidResourceProvider(ArchiveProtoAndroidResourceProvider(linkedResourcesInputFile.toPath()))
-      if (config.shrinkOutput != null) {
-        it.setAndroidResourceConsumer(ArchiveProtoAndroidResourceConsumer(config.shrinkOutput.shrunkResourcesOutputFiles[index].toPath()))
-      }
+      it.setAndroidResourceConsumer(ArchiveProtoAndroidResourceConsumer(config.shrunkResourcesOutputFiles[index].toPath()))
 
       // R8 requires a program consumer to be set
       it.setProgramConsumer(DexIndexedConsumer.emptyConsumer())
@@ -516,14 +514,12 @@ private fun setupFeatureSplits(
   check(
     featureDexOutputDir != null &&
       featureJavaResourceOutputDir != null &&
-      (resourceShrinkingConfig == null ||
-        resourceShrinkingConfig.shrinkOutput?.featureShrunkResourcesOutputDir != null ||
-        resourceShrinkingConfig.shrinkOutput == null)
+      (resourceShrinkingConfig == null || resourceShrinkingConfig.featureShrunkResourcesOutputDir != null)
   ) {
     "Expected not null but received:\n" +
       "  featureDexDir=$featureDexOutputDir\n" +
       "  featureJavaResourceOutputDir=$featureJavaResourceOutputDir\n" +
-      "  featureShrunkResourcesOutputDir=${resourceShrinkingConfig?.shrinkOutput?.featureShrunkResourcesOutputDir}"
+      "  featureShrunkResourcesOutputDir=${resourceShrinkingConfig?.featureShrunkResourcesOutputDir}"
   }
 
   featureFileNamesWithoutExtension.forEach { featureFileNameWithoutExtension ->
@@ -551,11 +547,9 @@ private fun setupFeatureSplits(
           resourceShrinkingConfig.featureLinkedResourcesInputFiles.single { file ->
             file.nameWithoutExtension == featureFileNameWithoutExtension
           }
+        val outputFile = resourceShrinkingConfig.featureShrunkResourcesOutputDir!!.resolve(inputFile.name)
         it.setAndroidResourceProvider(ArchiveProtoAndroidResourceProvider(inputFile.toPath()))
-        if (resourceShrinkingConfig.shrinkOutput != null) {
-          val outputFile = resourceShrinkingConfig.shrinkOutput.featureShrunkResourcesOutputDir!!.resolve(inputFile.name)
-          it.setAndroidResourceConsumer(ArchiveProtoAndroidResourceConsumer(outputFile.toPath()))
-        }
+        it.setAndroidResourceConsumer(ArchiveProtoAndroidResourceConsumer(outputFile.toPath()))
       }
 
       it.build()
@@ -714,14 +708,9 @@ data class ResourceShrinkingConfig(
   val optimizedShrinking: Boolean,
   val nonFinalResIds: Boolean,
   val logFile: File?,
-  val shrinkOutput: ShrinkOutput?,
+  val shrunkResourcesOutputFiles: List<File>,
+  val featureShrunkResourcesOutputDir: File?,
 ) : Serializable { // Serializable so it can be used in Gradle workers
-
-  data class ShrinkOutput(val shrunkResourcesOutputFiles: List<File>, val featureShrunkResourcesOutputDir: File?) : Serializable {
-    companion object {
-      @Suppress("ConstPropertyName") private const val serialVersionUID = 0L
-    }
-  }
 
   companion object {
     @Suppress("ConstPropertyName") private const val serialVersionUID = 0L
