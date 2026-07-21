@@ -47,7 +47,6 @@ import java.util.Map;
  * will return a directory that does not exist. In this case, the transform should prcess this
  * as a removed input.
  */
-@Deprecated
 public interface DirectoryInput extends QualifiedContent {
 
     /**

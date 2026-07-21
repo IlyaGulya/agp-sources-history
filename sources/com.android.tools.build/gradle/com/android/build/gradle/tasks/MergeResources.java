@@ -214,10 +214,6 @@ public abstract class MergeResources extends NewIncrementalTask {
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
-    public abstract ConfigurableFileCollection getGeneratedResDir();
-
-    @InputFiles
-    @PathSensitive(PathSensitivity.RELATIVE)
     public abstract ConfigurableFileCollection getExtraGeneratedResDir();
 
     @NonNull
@@ -999,7 +995,6 @@ public abstract class MergeResources extends NewIncrementalTask {
                 task.getLibrarySourceSets()
                         .setFrom(task.getSourceSetInputs().getLibrarySourceSets());
             }
-            task.getGeneratedResDir().setFrom(task.getSourceSetInputs().getGeneratedResDir());
             task.getExtraGeneratedResDir()
                     .setFrom(task.getSourceSetInputs().getExtraGeneratedResDir());
             task.resourcesComputer.initFromVariantScope(

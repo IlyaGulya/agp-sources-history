@@ -18,7 +18,6 @@ package com.android.build.gradle.internal;
 
 import static com.android.SdkConstants.FN_PUBLIC_TXT;
 import static com.android.build.api.transform.QualifiedContent.DefaultContentType.RESOURCES;
-import static com.android.build.gradle.internal.cxx.configure.CxxCreateGradleTasksKt.createCxxVariantBuildTask;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.PublishedConfigType.ALL_API_PUBLICATION;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.PublishedConfigType.ALL_RUNTIME_PUBLICATION;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.PublishedConfigType.API_PUBLICATION;
@@ -134,7 +133,7 @@ public class LibraryTaskManager extends TaskManager<LibraryVariantBuilderImpl, L
             createGenerateResValuesTask(libraryVariant);
         } else { // Resource processing is disabled.
             // TODO(b/147579629): add a warning for manifests containing resource references.
-            if (globalScope.getExtension().getAaptOptions().getNamespaced()) {
+            if (extension.getAaptOptions().getNamespaced()) {
                 getLogger()
                         .error(
                                 "Disabling resource processing in resource namespace aware "
@@ -184,8 +183,7 @@ public class LibraryTaskManager extends TaskManager<LibraryVariantBuilderImpl, L
                     libraryVariant.getServices().getProjectInfo().getProjectBaseName());
 
             // Only verify resources if in Release and not namespaced.
-            if (!libraryVariant.getDebuggable()
-                    && !globalScope.getExtension().getAaptOptions().getNamespaced()) {
+            if (!libraryVariant.getDebuggable() && !extension.getAaptOptions().getNamespaced()) {
                 createVerifyLibraryResTask(libraryVariant);
             }
 
@@ -210,8 +208,6 @@ public class LibraryTaskManager extends TaskManager<LibraryVariantBuilderImpl, L
         TaskManager.setJavaCompilerTask(javacTask, libraryVariant);
 
         taskFactory.register(new MergeGeneratedProguardFilesCreationAction(libraryVariant));
-
-        createCxxVariantBuildTask(taskFactory, variantInfo.getVariant());
 
         createMergeJniLibFoldersTasks(libraryVariant);
 
@@ -360,17 +356,9 @@ public class LibraryTaskManager extends TaskManager<LibraryVariantBuilderImpl, L
 
         final VariantDependencies variantDependencies = variant.getVariantDependencies();
 
-        AdhocComponentWithVariants component =
-                globalScope.getComponentFactory().adhoc(variant.getName());
-
-        final Configuration apiPub = variantDependencies.getElements(API_PUBLICATION);
-        final Configuration runtimePub = variantDependencies.getElements(RUNTIME_PUBLICATION);
-
-        component.addVariantsFromConfiguration(
-                apiPub, new ConfigurationVariantMapping("compile", false));
-        component.addVariantsFromConfiguration(
-                runtimePub, new ConfigurationVariantMapping("runtime", false));
-        project.getComponents().add(component);
+        if (variant.getVariantDslInfo().getPublishInfo().isAarPublished()) {
+            createComponentForSingleVariantPublishing(variant);
+        }
 
         AdhocComponentWithVariants allVariants =
                 (AdhocComponentWithVariants) project.getComponents().findByName("all");
@@ -385,6 +373,22 @@ public class LibraryTaskManager extends TaskManager<LibraryVariantBuilderImpl, L
                 variantDependencies.getElements(ALL_RUNTIME_PUBLICATION);
         allVariants.addVariantsFromConfiguration(
                 allRuntimePub, new ConfigurationVariantMapping("runtime", true));
+    }
+
+    private void createComponentForSingleVariantPublishing(@NonNull VariantImpl variant) {
+        final VariantDependencies variantDependencies = variant.getVariantDependencies();
+
+        AdhocComponentWithVariants component =
+                globalScope.getComponentFactory().adhoc(variant.getName());
+
+        final Configuration apiPub = variantDependencies.getElements(API_PUBLICATION);
+        final Configuration runtimePub = variantDependencies.getElements(RUNTIME_PUBLICATION);
+
+        component.addVariantsFromConfiguration(
+                apiPub, new ConfigurationVariantMapping("compile", false));
+        component.addVariantsFromConfiguration(
+                runtimePub, new ConfigurationVariantMapping("runtime", false));
+        project.getComponents().add(component);
     }
 
     @Override
@@ -422,7 +426,11 @@ public class LibraryTaskManager extends TaskManager<LibraryVariantBuilderImpl, L
 
     private void createMergeResourcesTasks(@NonNull VariantImpl variant) {
         ImmutableSet<MergeResources.Flag> flags;
-        if (variant.getGlobalScope().getExtension().getAaptOptions().getNamespaced()) {
+        if (variant.getServices()
+                .getProjectInfo()
+                .getExtension()
+                .getAaptOptions()
+                .getNamespaced()) {
             flags =
                     Sets.immutableEnumSet(
                             MergeResources.Flag.REMOVE_RESOURCE_NAMESPACES,

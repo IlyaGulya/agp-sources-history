@@ -314,8 +314,7 @@ abstract class PackageBundleTask : NonIncrementalTask() {
                 .setOutputPath(bundleFile.toPath())
                 .setModulesPaths(builder.build())
 
-            if (parameters.binaryArtProfiler.isPresent
-                && parameters.binaryArtProfiler.get().asFile.exists()) {
+            if (parameters.binaryArtProfiler.isPresent) {
                 command.addMetadataFile(
                         SdkConstants.FN_BINART_ART_PROFILE_FOLDER_IN_APK.replace('/', '.'),
                         SdkConstants.FN_BINARY_ART_PROFILE,
@@ -526,7 +525,7 @@ abstract class PackageBundleTask : NonIncrementalTask() {
 
             task.abiFilters.setDisallowChanges(creationConfig.variantDslInfo.supportedAbis)
 
-            task.aaptOptionsNoCompress.setDisallowChanges(creationConfig.globalScope.extension.aaptOptions.noCompress)
+            task.aaptOptionsNoCompress.setDisallowChanges(creationConfig.services.projectInfo.getExtension().aaptOptions.noCompress)
 
             task.bundleOptions =
                 ((creationConfig.globalScope.extension as BaseAppModuleExtension).bundle).convert()

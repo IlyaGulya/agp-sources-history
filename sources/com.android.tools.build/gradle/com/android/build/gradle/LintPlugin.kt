@@ -20,7 +20,6 @@ import com.android.build.api.artifact.impl.ArtifactsImpl
 import com.android.build.gradle.internal.SdkComponentsBuildService
 import com.android.build.gradle.internal.TaskManager
 import com.android.build.gradle.internal.dependency.AndroidAttributes
-import com.android.build.gradle.internal.dependency.ModelArtifactCompatibilityRule
 import com.android.build.gradle.internal.dsl.LintOptions
 import com.android.build.gradle.internal.errors.DeprecationReporterImpl
 import com.android.build.gradle.internal.errors.SyncIssueReporterImpl
@@ -44,7 +43,6 @@ import com.android.build.gradle.internal.scope.ProjectInfo
 import com.android.build.gradle.internal.scope.publishArtifactToConfiguration
 import com.android.build.gradle.internal.services.AndroidLocationsBuildService
 import com.android.build.gradle.internal.services.DslServicesImpl
-import com.android.build.gradle.internal.services.LintClassLoaderBuildService
 import com.android.build.gradle.internal.services.ProjectServices
 import com.android.build.gradle.internal.services.StringCachingBuildService
 import com.android.build.gradle.options.Option
@@ -96,13 +94,12 @@ abstract class LintPlugin : Plugin<Project> {
         val javaConvention: JavaPluginConvention = getJavaPluginConvention(project) ?: return
         val customLintChecksConfig = TaskManager.createCustomLintChecksConfig(project)
         val customLintChecks = getLocalCustomLintChecks(customLintChecksConfig)
-        BasePlugin.createLintClasspathConfiguration(project, projectServices.projectOptions)
+        BasePlugin.createLintClasspathConfiguration(project)
         registerTasks(
             project,
             javaConvention,
             customLintChecks
         )
-        ModelArtifactCompatibilityRule.setUp(project.dependencies.attributesSchema)
     }
 
     private fun registerTasks(
@@ -129,8 +126,7 @@ abstract class LintPlugin : Plugin<Project> {
                     javaConvention,
                     customLintChecks,
                     lintOptions!!,
-                    artifacts.get(InternalArtifactType.LINT_PARTIAL_RESULTS),
-                    artifacts.getOutputPath(InternalArtifactType.LINT_MODEL)
+                    artifacts.get(InternalArtifactType.LINT_PARTIAL_RESULTS)
                 )
             }
 
@@ -144,7 +140,6 @@ abstract class LintPlugin : Plugin<Project> {
                     customLintChecks,
                     lintOptions!!,
                     artifacts.get(InternalArtifactType.LINT_VITAL_PARTIAL_RESULTS),
-                    artifacts.getOutputPath(InternalArtifactType.LINT_MODEL),
                     fatalOnly = true
                 )
             }
@@ -157,7 +152,6 @@ abstract class LintPlugin : Plugin<Project> {
                     customLintChecks,
                     lintOptions!!,
                     artifacts.get(InternalArtifactType.LINT_PARTIAL_RESULTS),
-                    artifacts.getOutputPath(InternalArtifactType.LINT_MODEL),
                     autoFix = true
                 )
             }
@@ -340,6 +334,5 @@ abstract class LintPlugin : Plugin<Project> {
             projectServices.projectOptions
         ).execute()
         LintFixBuildService.RegistrationAction(project).execute()
-        LintClassLoaderBuildService.RegistrationAction(project).execute()
     }
 }

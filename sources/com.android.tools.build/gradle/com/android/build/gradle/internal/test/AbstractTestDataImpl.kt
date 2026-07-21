@@ -16,9 +16,11 @@
 package com.android.build.gradle.internal.test
 
 import com.android.SdkConstants
+import com.android.build.api.component.impl.ComponentImpl
 import com.android.build.gradle.internal.component.InstrumentedTestCreationConfig
 import com.android.build.gradle.internal.component.TestCreationConfig
 import com.android.build.gradle.internal.core.VariantSources
+import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.tasks.databinding.DATA_BINDING_TRIGGER_CLASS
 import com.android.build.gradle.internal.testing.StaticTestData
 import com.android.build.gradle.internal.testing.TestData
@@ -29,8 +31,9 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.Input
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -43,8 +46,8 @@ import java.util.zip.ZipFile
  * and separate module test projects.
  */
 abstract class AbstractTestDataImpl(
-        @get:Input
-        val namespace: Provider<String>,
+        providerFactory: ProviderFactory,
+        componentImpl: ComponentImpl,
         creationConfig: TestCreationConfig,
         instrumentedTestCreationConfig: InstrumentedTestCreationConfig,
         variantSources: VariantSources,
@@ -113,14 +116,11 @@ abstract class AbstractTestDataImpl(
         )
     }
 
-    override fun hasTests(
-        allClasses: FileCollection,
-        rClasses: FileCollection,
-        buildConfig: FileCollection
-    ): Provider<Boolean> =
-        allClasses
-            .minus(rClasses)
-            .minus(buildConfig).elements.map { testClasses ->
+    private val namespace = componentImpl.namespace
+
+    override val hasTests: Provider<Boolean> = componentImpl.artifacts.getAllClasses()
+            .minus(componentImpl.getCompiledRClasses(AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH))
+            .minus(componentImpl.getCompiledBuildConfig()).elements.map { testClasses ->
                 val namespaceDir = namespace.get().replace('.', '/')
                 val DATA_BINDER_MAPPER_IMPL = "DataBinderMapperImpl"
                 val ignoredPaths = setOf(

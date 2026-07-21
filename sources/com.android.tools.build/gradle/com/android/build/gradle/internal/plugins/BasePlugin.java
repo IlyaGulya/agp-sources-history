@@ -28,8 +28,9 @@ import com.android.build.api.component.ComponentBuilder;
 import com.android.build.api.component.impl.TestComponentImpl;
 import com.android.build.api.component.impl.TestFixturesImpl;
 import com.android.build.api.dsl.CommonExtension;
+import com.android.build.api.dsl.TestedExtension;
+import com.android.build.api.extension.AndroidComponentsExtension;
 import com.android.build.api.extension.impl.VariantApiOperationsRegistrar;
-import com.android.build.api.variant.AndroidComponentsExtension;
 import com.android.build.api.variant.Variant;
 import com.android.build.api.variant.impl.GradleProperty;
 import com.android.build.api.variant.impl.VariantBuilderImpl;
@@ -54,9 +55,15 @@ import com.android.build.gradle.internal.TaskManager;
 import com.android.build.gradle.internal.VariantManager;
 import com.android.build.gradle.internal.attribution.BuildAttributionService;
 import com.android.build.gradle.internal.crash.CrashReporting;
+import com.android.build.gradle.internal.dependency.JacocoInstrumentationService;
 import com.android.build.gradle.internal.dependency.SourceSetManager;
+import com.android.build.gradle.internal.dsl.AbstractPublishing;
+import com.android.build.gradle.internal.dsl.ApplicationPublishingImpl;
 import com.android.build.gradle.internal.dsl.BuildType;
 import com.android.build.gradle.internal.dsl.DefaultConfig;
+import com.android.build.gradle.internal.dsl.InternalApplicationExtension;
+import com.android.build.gradle.internal.dsl.InternalLibraryExtension;
+import com.android.build.gradle.internal.dsl.LibraryPublishingImpl;
 import com.android.build.gradle.internal.dsl.ProductFlavor;
 import com.android.build.gradle.internal.dsl.SigningConfig;
 import com.android.build.gradle.internal.dsl.Splits;
@@ -88,13 +95,13 @@ import com.android.build.gradle.internal.services.BuildServicesKt;
 import com.android.build.gradle.internal.services.ClassesHierarchyBuildService;
 import com.android.build.gradle.internal.services.DslServices;
 import com.android.build.gradle.internal.services.DslServicesImpl;
-import com.android.build.gradle.internal.services.LintClassLoaderBuildService;
 import com.android.build.gradle.internal.services.ProjectServices;
 import com.android.build.gradle.internal.services.StringCachingBuildService;
 import com.android.build.gradle.internal.services.SymbolTableBuildService;
 import com.android.build.gradle.internal.utils.AgpVersionChecker;
 import com.android.build.gradle.internal.utils.GradlePluginUtils;
 import com.android.build.gradle.internal.utils.KgpUtils;
+import com.android.build.gradle.internal.utils.PublishingUtils;
 import com.android.build.gradle.internal.variant.ComponentInfo;
 import com.android.build.gradle.internal.variant.LegacyVariantInputManager;
 import com.android.build.gradle.internal.variant.VariantFactory;
@@ -147,6 +154,7 @@ import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 
 /** Base class for all Android plugins */
 public abstract class BasePlugin<
+                AndroidT extends CommonExtension<?, ?, ?, ?>,
                 AndroidComponentsT extends
                         AndroidComponentsExtension<
                                 ? extends CommonExtension<?, ?, ?, ?>,
@@ -156,11 +164,11 @@ public abstract class BasePlugin<
                 VariantT extends VariantImpl>
         implements Plugin<Project> {
 
+    // TODO: BaseExtension should be changed into AndroidT
     private BaseExtension extension;
-    private AndroidComponentsExtension<? extends CommonExtension<?, ?, ?, ?>, ? extends ComponentBuilder, ? extends Variant>
-            androidComponentsExtension;
+    private AndroidComponentsT androidComponentsExtension;
 
-    private VariantManager<VariantBuilderT, VariantT> variantManager;
+    private VariantManager<AndroidT, VariantBuilderT, VariantT> variantManager;
     private LegacyVariantInputManager variantInputModel;
 
     protected Project project;
@@ -190,7 +198,7 @@ public abstract class BasePlugin<
     @NonNull private final BuildEventsListenerRegistry listenerRegistry;
 
     private final VariantApiOperationsRegistrar<
-            CommonExtension<?, ?, ?, ?>,
+            AndroidT,
             VariantBuilderT,
             VariantT> variantApiOperations = new VariantApiOperationsRegistrar<>();
 
@@ -220,7 +228,7 @@ public abstract class BasePlugin<
     protected abstract AndroidComponentsT createComponentExtension(
             @NonNull DslServices dslServices,
             @NonNull
-                    VariantApiOperationsRegistrar<CommonExtension<?, ?, ?, ?>, VariantBuilderT, VariantT>
+                    VariantApiOperationsRegistrar<AndroidT, VariantBuilderT, VariantT>
                             variantApiOperationsRegistrar);
 
     @NonNull
@@ -247,7 +255,7 @@ public abstract class BasePlugin<
     protected abstract ProjectType getProjectTypeV2();
 
     @VisibleForTesting
-    public VariantManager<VariantBuilderT, VariantT> getVariantManager() {
+    public VariantManager<AndroidT, VariantBuilderT, VariantT> getVariantManager() {
         return variantManager;
     }
 
@@ -423,7 +431,7 @@ public abstract class BasePlugin<
         new SymbolTableBuildService.RegistrationAction(project).execute();
         new ClassesHierarchyBuildService.RegistrationAction(project).execute();
         new LintFixBuildService.RegistrationAction(project).execute();
-        new LintClassLoaderBuildService.RegistrationAction(project).execute();
+        new JacocoInstrumentationService.RegistrationAction(project).execute();
 
         projectOptions
                 .getAllOptions()
@@ -468,26 +476,21 @@ public abstract class BasePlugin<
         // As soon as project is evaluated we can clear the shared state for deprecation reporting.
         gradle.projectsEvaluated(action -> DeprecationReporterImpl.Companion.clean());
 
-        createLintClasspathConfiguration(project, projectServices.getProjectOptions());
+        createLintClasspathConfiguration(project);
 
         createAndroidJdkImageConfiguration(project, globalScope);
     }
 
     /** Creates a lint class path Configuration for the given project */
-    public static void createLintClasspathConfiguration(
-            @NonNull Project project, ProjectOptions projectOptions) {
+    public static void createLintClasspathConfiguration(@NonNull Project project) {
         Configuration config = project.getConfigurations().create(AndroidLintTask.LINT_CLASS_PATH);
         config.setVisible(false);
         config.setTransitive(true);
         config.setCanBeConsumed(false);
         config.setDescription("The lint embedded classpath");
 
-        String lintVersion = projectOptions.get(StringOption.LINT_VERSION_OVERRIDE);
-        if (lintVersion == null) {
-            lintVersion = Version.ANDROID_TOOLS_BASE_VERSION;
-        }
-        project.getDependencies()
-                .add(config.getName(), "com.android.tools.lint:lint-gradle:" + lintVersion);
+        project.getDependencies().add(config.getName(), "com.android.tools.lint:lint-gradle:" +
+                Version.ANDROID_TOOLS_BASE_VERSION);
     }
 
     /** Creates the androidJdkImage configuration */
@@ -542,7 +545,7 @@ public abstract class BasePlugin<
                         globalScope,
                         project,
                         projectServices.getProjectOptions(),
-                        extension,
+                        (CommonExtension<?, ?, ?, ?>) extension,
                         variantApiOperations,
                         variantFactory,
                         variantInputModel,
@@ -710,6 +713,8 @@ public abstract class BasePlugin<
                             }
                         });
 
+        checkMavenPublishing();
+
         // don't do anything if the project was not initialized.
         // Unless TEST_SDK_DIR is set in which case this is unit tests and we don't return.
         // This is because project don't get evaluated in the unit test setup.
@@ -724,11 +729,11 @@ public abstract class BasePlugin<
         }
         hasCreatedTasks = true;
 
-        variantApiOperations.executeDslFinalizationBlocks(
-                (CommonExtension<?, ?, ?, ?>) extension
-        );
-
         extension.disableWrite();
+
+        variantApiOperations.executeDslFinalizationBlocks(
+                (AndroidT) extension
+        );
 
         GradleBuildProject.Builder projectBuilder =
                 configuratorService.getProjectBuilder(project.getPath());
@@ -752,7 +757,12 @@ public abstract class BasePlugin<
                 variantFactory.createBuildFeatureValues(
                         extension.getBuildFeatures(), projectServices.getProjectOptions());
 
-        variantManager.createVariants(buildFeatureValues);
+        @Nullable String testNamespace = null;
+        if (extension instanceof TestedExtension) {
+            testNamespace = ((TestedExtension) extension).getTestNamespace();
+        }
+
+        variantManager.createVariants(buildFeatureValues, extension.getNamespace(), testNamespace);
 
         List<ComponentInfo<VariantBuilderT, VariantT>> variants =
                 variantManager.getMainComponents();
@@ -1032,6 +1042,35 @@ public abstract class BasePlugin<
                             + "  - changing the IDE settings.\n"
                             + "  - changing the JAVA_HOME environment variable.\n"
                             + "  - changing `org.gradle.java.home` in `gradle.properties`.");
+        }
+    }
+
+    private void checkMavenPublishing() {
+        if (project.getPlugins().hasPlugin("maven-publish")) {
+            if (extension instanceof InternalApplicationExtension) {
+                checkSoftwareComponents(
+                        (ApplicationPublishingImpl)
+                                ((InternalApplicationExtension) extension).getPublishing());
+            }
+            if (extension instanceof InternalLibraryExtension) {
+                checkSoftwareComponents(
+                        (LibraryPublishingImpl)
+                                ((InternalLibraryExtension) extension).getPublishing());
+            }
+        }
+    }
+
+    private void checkSoftwareComponents(AbstractPublishing publishing) {
+        boolean optIn =
+                PublishingUtils.publishingFeatureOptIn(publishing, dslServices.getProjectOptions());
+        if (!optIn) {
+            String warning =
+                    "Software Components will not be created automatically for "
+                            + "Maven publishing from Android Gradle Plugin 8.0. To opt-in to the "
+                            + "future behavior, set the Gradle property "
+                            + "android.disableAutomaticComponentCreation=true in the "
+                            + "`gradle.properties` file or use the new publishing DSL.";
+            dslServices.getIssueReporter().reportWarning(Type.GENERIC, warning);
         }
     }
 }

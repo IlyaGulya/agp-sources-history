@@ -18,10 +18,12 @@ package com.android.build.api.variant.impl
 
 import com.android.build.api.artifact.MultipleArtifact
 import com.android.build.api.artifact.impl.ArtifactsImpl
+import com.android.build.api.component.AndroidTest
 import com.android.build.api.component.Component
 import com.android.build.api.component.analytics.AnalyticsEnabledDynamicFeatureVariant
 import com.android.build.api.component.impl.ApkCreationConfigImpl
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.DynamicFeatureExtension
 import com.android.build.api.extension.impl.VariantApiOperationsRegistrar
 import com.android.build.api.variant.AndroidResources
 import com.android.build.api.variant.AndroidVersion
@@ -58,7 +60,7 @@ import javax.inject.Inject
 open class DynamicFeatureVariantImpl @Inject constructor(
         override val variantBuilder: DynamicFeatureVariantBuilderImpl,
         buildFeatureValues: BuildFeatureValues,
-        variantDslInfo: VariantDslInfo,
+        variantDslInfo: VariantDslInfo<DynamicFeatureExtension>,
         variantDependencies: VariantDependencies,
         variantSources: VariantSources,
         paths: VariantPathHelper,
@@ -115,7 +117,7 @@ open class DynamicFeatureVariantImpl @Inject constructor(
 
     override val androidResources: AndroidResources by lazy {
         initializeAaptOptionsFromDsl(
-            globalScope.extension.aaptOptions,
+            taskCreationServices.projectInfo.getExtension().aaptOptions,
             internalServices
         )
     }
@@ -131,7 +133,7 @@ open class DynamicFeatureVariantImpl @Inject constructor(
         )
     }
 
-    override var androidTest: com.android.build.api.component.AndroidTest? = null
+    override var androidTest: AndroidTest? = null
 
     override val renderscript: Renderscript? by lazy {
         delegate.renderscript(internalServices)

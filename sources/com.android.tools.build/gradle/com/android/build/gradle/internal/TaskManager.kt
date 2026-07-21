@@ -120,6 +120,7 @@ import com.android.build.gradle.internal.tasks.JacocoTask
 import com.android.build.gradle.internal.tasks.L8DexDesugarLibTask
 import com.android.build.gradle.internal.tasks.LibraryAarJarsTask
 import com.android.build.gradle.internal.tasks.LintCompile
+import com.android.build.gradle.internal.tasks.LintModelMetadataTask
 import com.android.build.gradle.internal.tasks.ManagedDeviceCleanTask
 import com.android.build.gradle.internal.tasks.ManagedDeviceInstrumentationTestTask
 import com.android.build.gradle.internal.tasks.ManagedDeviceSetupTask
@@ -427,7 +428,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
             createGenerateResValuesTask(testFixturesComponent)
 
             val flags: ImmutableSet<MergeResources.Flag?> =
-                if (globalScope.extension.aaptOptions.namespaced) {
+                if (extension.aaptOptions.namespaced) {
                     Sets.immutableEnumSet(
                         MergeResources.Flag.REMOVE_RESOURCE_NAMESPACES,
                         MergeResources.Flag.PROCESS_VECTOR_DRAWABLES
@@ -483,7 +484,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
 
             // Only verify resources if in Release and not namespaced.
             if (!testFixturesComponent.debuggable &&
-                !globalScope.extension.aaptOptions.namespaced) {
+                !extension.aaptOptions.namespaced) {
                 createVerifyLibraryResTask(testFixturesComponent)
             }
 
@@ -553,6 +554,10 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
 
         // Add a task to create the AAR metadata file
         taskFactory.register(AarMetadataTask.CreationAction(testFixturesComponent))
+
+        // Add tasks to write the lint model metadata file and the local lint AAR file
+        taskFactory.register(LintModelMetadataTask.CreationAction(testFixturesComponent))
+        taskFactory.register(BundleAar.TestFixturesLocalLintCreationAction(testFixturesComponent))
 
         // Create a jar with both classes and java resources.  This artifact is not
         // used by the Android application plugin and the task usually don't need to
@@ -1109,7 +1114,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                 projectInfo.getProjectBaseName())
         val projectOptions = creationConfig.services.projectOptions
         val nonTransitiveR = projectOptions[BooleanOption.NON_TRANSITIVE_R_CLASS]
-        val namespaced: Boolean = creationConfig.globalScope.extension.aaptOptions.namespaced
+        val namespaced: Boolean = projectInfo.getExtension().aaptOptions.namespaced
 
         // TODO(b/138780301): Also use compile time R class in android tests.
         if ((projectOptions[BooleanOption.ENABLE_APP_COMPILE_TIME_R_CLASS] || nonTransitiveR)
@@ -1145,7 +1150,8 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                         && creationConfig
                         .dexingType
                         .needsMainDexList)
-        if (creationConfig.globalScope.extension.aaptOptions.namespaced) {
+        if (creationConfig.services.projectInfo.getExtension()
+                        .aaptOptions.namespaced) {
             // TODO: make sure we generate the proguard rules in the namespaced case.
             NamespacedResourcesTaskManager(taskFactory, creationConfig)
                     .createNamespacedResourceTasks(
@@ -1201,15 +1207,12 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                             GenerateLibraryProguardRulesTask.CreationAction(creationConfig))
                 }
                 val nonTransitiveRClassInApp = projectOptions[BooleanOption.NON_TRANSITIVE_R_CLASS]
-                val compileTimeRClassInApp = projectOptions[BooleanOption.ENABLE_APP_COMPILE_TIME_R_CLASS]
                 // Generate the R class for a library using both local symbols and symbols
                 // from dependencies.
                 // TODO: double check this (what about dynamic features?)
-                if (!nonTransitiveRClassInApp || compileTimeRClassInApp || isLibrary) {
-                    taskFactory.register(GenerateLibraryRFileTask.CreationAction(
-                        creationConfig,
-                        isLibrary
-                    ))
+                if (!nonTransitiveRClassInApp || isLibrary) {
+                    taskFactory.register(
+                            GenerateLibraryRFileTask.CreationAction(creationConfig, isLibrary))
                 }
             }
             MergeType.MERGE -> {
@@ -1357,10 +1360,11 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
     fun createJavacTask(
             creationConfig: ComponentCreationConfig
     ): TaskProvider<out JavaCompile> {
-        val usingKapt = isKotlinKaptPluginApplied(project)
-        taskFactory.register(JavaPreCompileTask.CreationAction(creationConfig, usingKapt))
-        val javacTask: TaskProvider<out JavaCompile> =
-            taskFactory.register(JavaCompileCreationAction(creationConfig, usingKapt))
+        taskFactory.register(JavaPreCompileTask.CreationAction(creationConfig))
+        val javacTask: TaskProvider<out JavaCompile> = taskFactory.register(
+                JavaCompileCreationAction(
+                        creationConfig,
+                        isKotlinKaptPluginApplied(project)))
         postJavacCreation(creationConfig)
         return javacTask
     }
@@ -1527,7 +1531,7 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
     }
 
     protected fun registerRClassTransformStream(variant: ComponentImpl) {
-        if (globalScope.extension.aaptOptions.namespaced) {
+        if (extension.aaptOptions.namespaced) {
             return
         }
         val rClassJar = variant.artifacts
@@ -1787,7 +1791,8 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         val isLibrary = testedVariant.variantType.isAar
         val testData: AbstractTestDataImpl = if (testedVariant.variantType.isDynamicFeature) {
             BundleTestDataImpl(
-                    androidTestProperties.namespace,
+                    project.providers,
+                    androidTestProperties,
                     androidTestProperties,
                     androidTestProperties.artifacts.get(SingleArtifact.APK),
                     getFeatureName(project.path),
@@ -1800,7 +1805,8 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
             val testedApkFileCollection =
                     project.files(testedVariant.artifacts.get(SingleArtifact.APK))
             TestDataImpl(
-                    androidTestProperties.namespace,
+                    project.providers,
+                    androidTestProperties,
                     androidTestProperties,
                     androidTestProperties.artifacts.get(SingleArtifact.APK),
                     if (isLibrary) null else testedApkFileCollection)

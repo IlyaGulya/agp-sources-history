@@ -32,6 +32,12 @@ open class ViewBindingOptionsImpl @Inject constructor(
     /** Whether to enable data binding.  */
     override var isEnabled: Boolean
         get() {
+            dslServices.deprecationReporter
+                .reportDeprecatedUsage(
+                    "android.buildFeatures.viewBinding",
+                    "android.viewBinding.enabled",
+                    DeprecationReporter.DeprecationTarget.VERSION_7_0
+                )
             val bool = features.viewBinding
             if (bool != null) {
                 return bool
@@ -39,6 +45,12 @@ open class ViewBindingOptionsImpl @Inject constructor(
             return dslServices.projectOptions[BooleanOption.BUILD_FEATURE_VIEWBINDING]
         }
         set(value) {
+            dslServices.deprecationReporter
+                .reportDeprecatedUsage(
+                    "android.buildFeatures.viewBinding",
+                    "android.viewBinding.enabled",
+                    DeprecationReporter.DeprecationTarget.VERSION_7_0
+                )
             features.viewBinding = value
         }
 }

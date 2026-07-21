@@ -20,12 +20,9 @@ import com.android.annotations.NonNull;
 import com.android.build.api.component.impl.TestComponentImpl;
 import com.android.build.api.component.impl.TestFixturesImpl;
 import com.android.build.api.dsl.SdkComponents;
-import com.android.build.api.extension.AndroidComponentsExtension;
+import com.android.build.api.extension.LibraryAndroidComponentsExtension;
 import com.android.build.api.extension.impl.LibraryAndroidComponentsExtensionImpl;
 import com.android.build.api.extension.impl.VariantApiOperationsRegistrar;
-import com.android.build.api.variant.LibraryAndroidComponentsExtension;
-import com.android.build.api.variant.LibraryVariant;
-import com.android.build.api.variant.LibraryVariantBuilder;
 import com.android.build.api.variant.impl.LibraryVariantBuilderImpl;
 import com.android.build.api.variant.impl.LibraryVariantImpl;
 import com.android.build.gradle.BaseExtension;
@@ -57,12 +54,14 @@ import org.gradle.api.component.SoftwareComponentFactory;
 import org.gradle.api.reflect.TypeOf;
 import org.gradle.build.event.BuildEventsListenerRegistry;
 import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
-import org.jetbrains.annotations.NotNull;
 
 /** Gradle plugin class for 'library' projects. */
 public class LibraryPlugin
         extends BasePlugin<
-                LibraryAndroidComponentsExtension, LibraryVariantBuilderImpl, LibraryVariantImpl> {
+                LibraryExtension,
+                LibraryAndroidComponentsExtension,
+                LibraryVariantBuilderImpl,
+                LibraryVariantImpl> {
 
     @Inject
     public LibraryPlugin(
@@ -122,41 +121,13 @@ public class LibraryPlugin
                         libraryExtension);
     }
 
-    /**
-     * Create typed sub implementation for the extension objects. This has several benefits : 1. do
-     * not pollute the user visible definitions with deprecated types. 2. because it's written in
-     * Java, it will still compile once the deprecated extension are moved to Level.HIDDEN.
-     */
-    @SuppressWarnings("deprecation")
-    public abstract static class LibraryAndroidComponentsExtensionImplCompat
-            extends LibraryAndroidComponentsExtensionImpl
-            implements AndroidComponentsExtension<
-                            com.android.build.api.dsl.LibraryExtension,
-                            LibraryVariantBuilder,
-                            LibraryVariant>,
-                    com.android.build.api.extension.LibraryAndroidComponentsExtension {
-
-        public LibraryAndroidComponentsExtensionImplCompat(
-                @NotNull DslServices dslServices,
-                @NotNull SdkComponents sdkComponents,
-                @NotNull
-                        VariantApiOperationsRegistrar<
-                                        com.android.build.api.dsl.LibraryExtension,
-                                        LibraryVariantBuilder,
-                                        LibraryVariant>
-                                variantApiOperations,
-                @NotNull LibraryExtension libraryExtension) {
-            super(dslServices, sdkComponents, variantApiOperations, libraryExtension);
-        }
-    }
-
     @NonNull
     @Override
     protected LibraryAndroidComponentsExtension createComponentExtension(
             @NonNull DslServices dslServices,
             @NonNull
                     VariantApiOperationsRegistrar<
-                            com.android.build.api.dsl.CommonExtension<?, ?, ?, ?>,
+                            LibraryExtension,
                             LibraryVariantBuilderImpl,
                             LibraryVariantImpl>
                             variantApiOperationsRegistrar) {
@@ -169,30 +140,15 @@ public class LibraryPlugin
                         project.provider(getExtension()::getNdkVersion),
                         project.provider(getExtension()::getNdkPath));
 
-        // register under the new interface for kotlin, groovy will find both the old and new
-        // interfaces through the implementation class.
-        LibraryAndroidComponentsExtension extension =
-                project.getExtensions()
-                        .create(
-                                LibraryAndroidComponentsExtension.class,
-                                "androidComponents",
-                                LibraryAndroidComponentsExtensionImplCompat.class,
-                                dslServices,
-                                sdkComponents,
-                                variantApiOperationsRegistrar,
-                                getExtension());
-
-        // register the same extension under a different name with the deprecated extension type.
-        // this will allow plugins that use getByType() API to retrieve the old interface and keep
-        // binary compatibility. This will become obsolete once old extension packages are removed.
-        project.getExtensions()
-                .add(
-                        com.android.build.api.extension.LibraryAndroidComponentsExtension.class,
-                        "androidComponents_compat_by_type",
-                        (com.android.build.api.extension.LibraryAndroidComponentsExtension)
-                                extension);
-
-        return extension;
+        return project.getExtensions()
+                .create(
+                        LibraryAndroidComponentsExtension.class,
+                        "androidComponents",
+                        LibraryAndroidComponentsExtensionImpl.class,
+                        dslServices,
+                        sdkComponents,
+                        variantApiOperationsRegistrar,
+                        getExtension());
     }
 
     @NonNull

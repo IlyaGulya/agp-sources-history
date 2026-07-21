@@ -16,7 +16,7 @@
 
 package com.android.build.api.component.analytics
 
-import com.android.build.api.variant.AndroidTest
+import com.android.build.api.component.AndroidTest
 import com.android.build.api.variant.AndroidResources
 import com.android.build.api.variant.GeneratesApk
 import com.android.build.api.variant.ApkPackaging
@@ -66,7 +66,7 @@ open class AnalyticsEnabledApplicationVariant @Inject constructor(
             return delegate.signingConfig
         }
 
-    private val userVisibleAndroidTest: AnalyticsEnabledAndroidTest? by lazy {
+    private val userVisibleAndroidTest: AndroidTest? by lazy {
         delegate.androidTest?.let {
             objectFactory.newInstance(
                 AnalyticsEnabledAndroidTest::class.java,
@@ -76,7 +76,7 @@ open class AnalyticsEnabledApplicationVariant @Inject constructor(
         }
     }
 
-    override val androidTest: com.android.build.api.component.AndroidTest?
+    override val androidTest: AndroidTest?
         get() {
             stats.variantApiAccessBuilder.addVariantPropertiesAccessBuilder().type =
                 VariantPropertiesMethodType.ANDROID_TEST_VALUE

@@ -22,7 +22,6 @@ import com.android.utils.ILogger
 import com.google.common.base.Joiner
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
-import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
@@ -122,11 +121,8 @@ interface TestData {
      * classes such as R, BuildConfig and AndroidManifest classes are excluded.
      * This input is used to check the presence of tests before deploying anything.
      */
-    fun hasTests(
-        allClasses: FileCollection,
-        rClasses: FileCollection,
-        buildConfig: FileCollection
-    ): Provider<Boolean>
+    @get:Internal
+    val hasTests: Provider<Boolean>
 
     /**
      * Resolves all providers and returns a static version of this class

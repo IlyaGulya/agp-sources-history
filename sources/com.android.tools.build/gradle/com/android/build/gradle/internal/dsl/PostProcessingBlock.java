@@ -22,7 +22,6 @@ import static com.android.build.gradle.internal.ProguardFileType.TEST;
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
-import com.android.build.api.dsl.PostProcessing;
 import com.android.build.gradle.ProguardFiles;
 import com.android.build.gradle.internal.ProguardFileType;
 import com.android.build.gradle.internal.ProguardFilesProvider;
@@ -38,7 +37,6 @@ import java.util.Collection;
 import java.util.List;
 import javax.inject.Inject;
 import org.gradle.api.Incubating;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * DSL object for configuring postProcessing: removing dead code, obfuscating etc.
@@ -52,7 +50,7 @@ import org.jetbrains.annotations.NotNull;
  * Resources</a>.
  */
 @Incubating
-public class PostProcessingBlock implements ProguardFilesProvider, PostProcessing {
+public class PostProcessingBlock implements ProguardFilesProvider {
     @NonNull private final DslServices dslServices;
 
     private boolean removeUnusedCode = true;
@@ -92,17 +90,10 @@ public class PostProcessingBlock implements ProguardFilesProvider, PostProcessin
         this.consumerProguardFiles = Lists.newArrayList(that.getProguardFiles(CONSUMER));
     }
 
-    @Override
-    public void initWith(@NotNull PostProcessing that) {
-        initWith((PostProcessingBlock) that);
-    }
-
-    @Override
     public boolean isRemoveUnusedCode() {
         return removeUnusedCode;
     }
 
-    @Override
     public void setRemoveUnusedCode(boolean removeUnusedCode) {
         this.removeUnusedCode = removeUnusedCode;
     }
@@ -131,7 +122,7 @@ public class PostProcessingBlock implements ProguardFilesProvider, PostProcessin
         this.optimizeCode = optimizeCode;
     }
 
-    public void setProguardFiles(List<?> proguardFiles) {
+    public void setProguardFiles(List<Object> proguardFiles) {
         this.proguardFiles = new ArrayList<>();
         for (Object file : proguardFiles) {
             this.proguardFiles.add(dslServices.file(file));
@@ -148,7 +139,7 @@ public class PostProcessingBlock implements ProguardFilesProvider, PostProcessin
         }
     }
 
-    public void setTestProguardFiles(List<?> testProguardFiles) {
+    public void setTestProguardFiles(List<Object> testProguardFiles) {
         this.testProguardFiles = new ArrayList<>();
         for (Object file : testProguardFiles) {
             this.testProguardFiles.add(dslServices.file(file));
@@ -165,7 +156,7 @@ public class PostProcessingBlock implements ProguardFilesProvider, PostProcessin
         }
     }
 
-    public void setConsumerProguardFiles(List<?> consumerProguardFiles) {
+    public void setConsumerProguardFiles(List<Object> consumerProguardFiles) {
         this.consumerProguardFiles = new ArrayList<>();
         for (Object file : consumerProguardFiles) {
             this.consumerProguardFiles.add(dslServices.file(file));

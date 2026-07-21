@@ -104,7 +104,8 @@ public class TestApplicationTaskManager
 
         TestApplicationTestData testData =
                 new TestApplicationTestData(
-                        testVariantProperties.getNamespace(),
+                        project.getProviders(),
+                        testVariantProperties,
                         testVariantProperties,
                         testingApk,
                         testedApks);

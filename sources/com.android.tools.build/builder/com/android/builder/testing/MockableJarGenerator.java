@@ -130,7 +130,7 @@ public class MockableJarGenerator {
             InputStream inputStream,
             JarOutputStream outputStream) throws IOException {
         ClassReader classReader = new ClassReader(inputStream);
-        ClassNode classNode = new ClassNode(Opcodes.ASM7);
+        ClassNode classNode = new ClassNode(Opcodes.ASM5);
 
         classReader.accept(classNode, EMPTY_FLAGS);
 

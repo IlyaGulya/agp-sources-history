@@ -528,7 +528,7 @@ abstract class LinkApplicationAndroidResourcesTask @Inject constructor(objects: 
 
             task.setType(creationConfig.variantType)
             if (creationConfig is ApkCreationConfig) {
-                task.noCompress.setDisallowChanges(creationConfig.globalScope.extension.aaptOptions.noCompress)
+                task.noCompress.setDisallowChanges(creationConfig.services.projectInfo.getExtension().aaptOptions.noCompress)
                 task.aaptAdditionalParameters.set(creationConfig.androidResources.aaptAdditionalParameters)
             }
             task.noCompress.disallowChanges()
@@ -766,13 +766,16 @@ abstract class LinkApplicationAndroidResourcesTask @Inject constructor(objects: 
             output: BuiltArtifactImpl,
             resPackageOutputFolder: File
         ) {
-            (BuiltArtifactsLoaderImpl.loadFromDirectory(resPackageOutputFolder)?.addElement(output)
-                    ?: BuiltArtifactsImpl(
-                        artifactType = InternalArtifactType.PROCESSED_RES,
-                        applicationId = applicationId,
-                        variantName = variantName,
-                        elements = listOf(output)
-                    )
+            val currentBuiltArtifacts = ArrayList(
+                BuiltArtifactsLoaderImpl.loadFromDirectory(resPackageOutputFolder)?.elements
+                    ?: ArrayList()
+            )
+            currentBuiltArtifacts.add(output)
+            BuiltArtifactsImpl(
+                artifactType = InternalArtifactType.PROCESSED_RES,
+                applicationId = applicationId,
+                variantName = variantName,
+                elements = currentBuiltArtifacts
             ).saveToDirectory(resPackageOutputFolder)
         }
 

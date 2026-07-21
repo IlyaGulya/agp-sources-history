@@ -17,7 +17,6 @@
 package com.android.build.gradle.internal;
 
 import static com.android.build.api.transform.QualifiedContent.DefaultContentType.RESOURCES;
-import static com.android.build.gradle.internal.cxx.configure.CxxCreateGradleTasksKt.createCxxVariantBuildTask;
 import static com.android.build.gradle.internal.scope.InternalArtifactType.JAVAC;
 
 import com.android.annotations.NonNull;
@@ -152,9 +151,6 @@ public abstract class AbstractAppTaskManager<
         createAidlTask(appVariantProperties);
 
         maybeExtractProfilerDependencies(apkCreationConfig);
-
-        // Set up the C/C++ external native build task
-        createCxxVariantBuildTask(taskFactory, variant.getVariant());
 
         // Add a task to merge the jni libs folders
         createMergeJniLibFoldersTasks(appVariantProperties);
@@ -307,7 +303,11 @@ public abstract class AbstractAppTaskManager<
         ProjectOptions projectOptions = variant.getServices().getProjectOptions();
         boolean nonTransitiveR = projectOptions.get(BooleanOption.NON_TRANSITIVE_R_CLASS);
         boolean namespaced =
-                variant.getGlobalScope().getExtension().getAaptOptions().getNamespaced();
+                variant.getServices()
+                        .getProjectInfo()
+                        .getExtension()
+                        .getAaptOptions()
+                        .getNamespaced();
 
         // TODO(b/138780301): Also use compile time R class in android tests.
         if ((projectOptions.get(BooleanOption.ENABLE_APP_COMPILE_TIME_R_CLASS) || nonTransitiveR)

@@ -22,29 +22,17 @@ import android.databinding.tool.processing.ScopedException
 import android.databinding.tool.store.LayoutInfoInput
 import android.databinding.tool.util.L
 import com.android.build.gradle.internal.component.ComponentCreationConfig
-import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.services.SymbolTableBuildService
-import com.android.build.gradle.internal.services.getBuildService
 import com.android.build.gradle.internal.tasks.AndroidVariantTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
-import com.android.build.gradle.internal.utils.fromDisallowChanges
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.build.gradle.options.BooleanOption
-import com.android.ide.common.symbols.EMPTY
-import com.android.ide.common.symbols.SymbolIo
-import com.android.ide.common.symbols.SymbolTable
-import com.android.resources.ResourceType
 import com.android.utils.FileUtils
 import org.apache.log4j.Logger
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
@@ -86,25 +74,6 @@ abstract class DataBindingGenBaseClassesTask : AndroidVariantTask() {
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val mergedArtifactsFromDependencies: DirectoryProperty
-
-    @get:InputFiles
-    @get:Optional
-    @get:Classpath
-    abstract val dependenciesFileCollection: ConfigurableFileCollection
-
-    // Package-aware R.txt file for the given module. Instead of actual package it will contain the
-    // keyword "local". Additionally, first line is a comment. For generating references to this
-    // local R the default package of this module
-    // should be used.
-    // See [com.android.ide.common.symbols.SymbolIo] for read/write instructions.
-    @get:InputFile
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val localResourcesFile: RegularFileProperty
-
-    @get:Internal
-    abstract val symbolTableBuildService: Property<SymbolTableBuildService>
-
     // list of v1 artifacts from dependencies
     @get:Optional
     @get:InputFiles
@@ -131,10 +100,6 @@ abstract class DataBindingGenBaseClassesTask : AndroidVariantTask() {
     var enableDataBinding: Boolean = false
         private set
 
-    @get:Input
-    var isNonTransitiveR: Boolean = false
-        private set
-
     @TaskAction
     fun writeBaseClasses(inputs: IncrementalTaskInputs) {
         // TODO extend NewIncrementalTask when moved to new API so that we can remove the manual call to recordTaskAction
@@ -149,23 +114,8 @@ abstract class DataBindingGenBaseClassesTask : AndroidVariantTask() {
                 args,
                 sourceOutFolder.get().asFile,
                 Logger.getLogger(DataBindingGenBaseClassesTask::class.java),
-                encodeErrors,
-                collectResources()).run()
+                encodeErrors).run()
         }
-    }
-
-    private fun collectResources(): List<SymbolTable>? {
-        // Don't read anything if R class is transitive
-        if (!isNonTransitiveR) return null
-
-        // TODO: maybe filter by ResourceType.ID
-        val depSymbolTables: List<SymbolTable> =
-                symbolTableBuildService.get().loadClasspath(dependenciesFileCollection.files)
-        val localTable = when (val localR = localResourcesFile.orNull) {
-            null -> EMPTY
-            else -> SymbolIo.readRDef(localR.asFile.toPath()).rename("")
-        }
-        return listOf(localTable).plus(depSymbolTables)
     }
 
     private fun buildInputArgs(inputs: IncrementalTaskInputs): LayoutInfoInput.Args {
@@ -262,28 +212,6 @@ abstract class DataBindingGenBaseClassesTask : AndroidVariantTask() {
                 .projectOptions[BooleanOption.IDE_INVOKED_FROM_IDE]
             task.enableViewBinding = creationConfig.buildFeatures.viewBinding
             task.enableDataBinding = creationConfig.buildFeatures.dataBinding
-
-            task.isNonTransitiveR =
-                    creationConfig.services.projectOptions[BooleanOption.NON_TRANSITIVE_R_CLASS]
-
-            if (task.isNonTransitiveR) {
-                artifacts.setTaskInputToFinalProduct(
-                        InternalArtifactType.LOCAL_ONLY_SYMBOL_LIST,
-                        task.localResourcesFile
-                )
-
-                task.dependenciesFileCollection.fromDisallowChanges(
-                        creationConfig
-                                .variantDependencies.getArtifactFileCollection(
-                                        AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
-                                        AndroidArtifacts.ArtifactScope.ALL,
-                                        AndroidArtifacts.ArtifactType.SYMBOL_LIST_WITH_PACKAGE_NAME
-                                )
-                )
-
-                task.symbolTableBuildService.set(
-                        getBuildService(creationConfig.services.buildServiceRegistry))
-            }
         }
     }
 
@@ -291,28 +219,16 @@ abstract class DataBindingGenBaseClassesTask : AndroidVariantTask() {
         val args: LayoutInfoInput.Args,
         private val sourceOutFolder: File,
         private val logger: Logger,
-        private val encodeErrors: Boolean,
-        private val symbolTables: List<SymbolTable>? = null
+        private val encodeErrors: Boolean
     ) : Runnable, Serializable {
         override fun run() {
             try {
                 initLogger()
-                BaseDataBinder(
-                        LayoutInfoInput(args),
-                        if (symbolTables != null) this::getRPackage else null)
+                BaseDataBinder(LayoutInfoInput(args))
                     .generateAll(DataBindingBuilder.GradleFileWriter(sourceOutFolder.absolutePath))
             } finally {
                 clearLogger()
             }
-        }
-
-        private fun getRPackage(type: String, name: String): String {
-            symbolTables!!.forEach {
-                if (it.containsSymbol(ResourceType.fromXmlTagName(type)!!, name)) {
-                    return it.tablePackage
-                }
-            }
-            error("Cannot find resource: $type $name")
         }
 
         private fun initLogger() {

@@ -30,7 +30,7 @@ import com.android.repository.Revision
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 
-abstract class DynamicFeatureExtension(
+internal open class DynamicFeatureExtension(
     dslServices: DslServices,
     globalScope: GlobalScope,
     buildOutputs: NamedDomainObjectContainer<BaseVariantOutput>,

@@ -22,6 +22,7 @@ import com.android.build.api.component.Component
 import com.android.build.api.component.analytics.AnalyticsEnabledTestVariant
 import com.android.build.api.component.impl.TestVariantCreationConfigImpl
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.TestExtension
 import com.android.build.api.extension.impl.VariantApiOperationsRegistrar
 import com.android.build.api.variant.AndroidResources
 import com.android.build.api.variant.AndroidVersion
@@ -58,7 +59,7 @@ import javax.inject.Inject
 open class TestVariantImpl @Inject constructor(
         override val variantBuilder: TestVariantBuilderImpl,
         buildFeatureValues: BuildFeatureValues,
-        variantDslInfo: VariantDslInfo,
+        variantDslInfo: VariantDslInfo<TestExtension>,
         variantDependencies: VariantDependencies,
         variantSources: VariantSources,
         paths: VariantPathHelper,
@@ -108,7 +109,7 @@ open class TestVariantImpl @Inject constructor(
 
     override val androidResources: AndroidResources by lazy {
         initializeAaptOptionsFromDsl(
-            globalScope.extension.aaptOptions,
+            taskCreationServices.projectInfo.getExtension().aaptOptions,
             internalServices
         )
     }
@@ -116,12 +117,10 @@ open class TestVariantImpl @Inject constructor(
     // TODO: We should keep this (for the manifest) but just fix the test runner to get the
     //         tested application id from the APK metadata file for uninstalling.
     override val testedApplicationId: Provider<String> by lazy {
-        experimentalProperties.flatMap {
-            if (ModulePropertyKeys.SELF_INSTRUMENTING.getValueAsBoolean(it)) {
-                applicationId
-            } else {
-                calculateTestedApplicationId(variantDependencies)
-            }
+        if (ModulePropertyKeys.SELF_INSTRUMENTING.getValueAsBoolean(properties.get())) {
+            applicationId
+        } else {
+            calculateTestedApplicationId(variantDependencies)
         }
     }
 

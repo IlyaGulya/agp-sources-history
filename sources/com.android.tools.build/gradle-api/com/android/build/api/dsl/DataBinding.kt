@@ -50,5 +50,6 @@ interface DataBinding {
     /** Whether to enable data binding. */
     @get:Incubating
     @set:Incubating
+    @Deprecated("use android.features.databinding")
     var isEnabled: Boolean
 }

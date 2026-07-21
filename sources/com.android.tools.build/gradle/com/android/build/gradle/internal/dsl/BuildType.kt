@@ -20,7 +20,6 @@ import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.DynamicFeatureBuildType
 import com.android.build.api.dsl.LibraryBuildType
 import com.android.build.api.dsl.Ndk
-import com.android.build.api.dsl.PostProcessing
 import com.android.build.api.dsl.Shaders
 import com.android.build.api.dsl.TestBuildType
 import com.android.build.gradle.internal.errors.DeprecationReporter
@@ -49,8 +48,7 @@ abstract class BuildType @Inject constructor(
     ApplicationBuildType,
     LibraryBuildType,
     DynamicFeatureBuildType,
-    TestBuildType,
-    InternalBuildType {
+    TestBuildType {
 
     /**
      * Name of this build type.
@@ -192,10 +190,6 @@ abstract class BuildType @Inject constructor(
         this.signingConfig = signingConfig
     }
 
-    fun setSigningConfig(signingConfig: InternalSigningConfig?) {
-        this.signingConfig = signingConfig
-    }
-
     fun setSigningConfig(signingConfig: Any?) {
         this.signingConfig = signingConfig as SigningConfig?
     }
@@ -323,12 +317,14 @@ abstract class BuildType @Inject constructor(
      * They are located in the SDK. Using `getDefaultProguardFile(String filename)` will return the
      * full path to the files. They are identical except for enabling optimizations.
      */
-    override fun setProguardFiles(proguardFileIterable: Iterable<*>): BuildType {
+    fun setProguardFiles(proguardFileIterable: Iterable<*>): BuildType {
         checkPostProcessingConfiguration(PostProcessingConfiguration.OLD_DSL, "setProguardFiles")
-        val replacementFiles = Iterables.toArray(proguardFileIterable, Any::class.java)
         proguardFiles.clear()
         proguardFiles(
-            *replacementFiles
+            *Iterables.toArray(
+                proguardFileIterable,
+                Any::class.java
+            )
         )
         return this
     }
@@ -515,7 +511,7 @@ abstract class BuildType @Inject constructor(
     /** This DSL is incubating and subject to change.  */
     @get:Internal
     @get:Incubating
-    override val postprocessing: PostProcessingBlock
+    val postprocessing: PostProcessingBlock
         get() {
             checkPostProcessingConfiguration(
                 PostProcessingConfiguration.POSTPROCESSING_BLOCK, "getPostProcessing"
@@ -531,10 +527,6 @@ abstract class BuildType @Inject constructor(
             PostProcessingConfiguration.POSTPROCESSING_BLOCK, "postProcessing"
         )
         action.execute(_postProcessing)
-    }
-
-    override fun postprocessing(action: PostProcessing.() -> Unit) {
-        postprocessing(Action { action.invoke(it) })
     }
 
     /** Describes how postProcessing was configured. Not to be used from the DSL.  */
@@ -581,13 +573,6 @@ abstract class BuildType @Inject constructor(
         }
     }
 
-    override fun initWith(that: com.android.build.api.dsl.BuildType) {
-        if (that !is BuildType) {
-            throw RuntimeException("Unexpected implementation type")
-        }
-        initWith(that as com.android.builder.model.BuildType)
-    }
-
     override fun initWith(that: com.android.builder.model.BuildType): BuildType {
         // we need to avoid doing this because of Property objects that cannot
         // be set from themselves
@@ -606,11 +591,6 @@ abstract class BuildType @Inject constructor(
                 that.dslChecksEnabled = true
             }
         }
-    }
-
-    /** Internal implementation detail, See comment on [InternalBuildType] */
-    fun initWith(that: InternalBuildType) {
-         initWith(that as com.android.builder.model.BuildType)
     }
 
     companion object {

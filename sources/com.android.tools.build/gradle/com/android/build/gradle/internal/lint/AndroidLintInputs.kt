@@ -86,7 +86,6 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
@@ -121,8 +120,7 @@ abstract class LintTool {
         workerHeapSize.setDisallowChanges(projectOptions.getProvider(StringOption.LINT_HEAP_SIZE))
     }
 
-    fun submit(workerExecutor: WorkerExecutor, mainClass: String, arguments: List<String>
-    ) {
+    fun submit(workerExecutor: WorkerExecutor, mainClass: String, arguments: List<String>) {
         submit(
             workerExecutor,
             mainClass,
@@ -140,6 +138,7 @@ abstract class LintTool {
         android: Boolean,
         fatalOnly: Boolean,
         await: Boolean) {
+        // Respect the android.experimental.runLintInProcess flag (useful for debugging)
         val workQueue = if (runInProcess.get()) {
             workerExecutor.noIsolation()
         } else {
@@ -151,13 +150,13 @@ abstract class LintTool {
                     workerHeapSize.orNull ?: "${Runtime.getRuntime().maxMemory() / 1024 / 1024}m"
             }
         }
-        workQueue.submit(AndroidLintWorkAction::class.java) { parameters ->
-            parameters.mainClass.set(mainClass)
-            parameters.arguments.set(arguments)
-            parameters.classpath.from(classpath)
-            parameters.android.set(android)
-            parameters.fatalOnly.set(fatalOnly)
-            parameters.runInProcess.set(runInProcess.get())
+        workQueue.submit(AndroidLintWorkAction::class.java) { isolatedParameters ->
+            isolatedParameters.mainClass.set(mainClass)
+            isolatedParameters.arguments.set(arguments)
+            isolatedParameters.classpath.from(classpath)
+            isolatedParameters.android.set(android)
+            isolatedParameters.fatalOnly.set(fatalOnly)
+            isolatedParameters.cacheClassLoader.set(!runInProcess.get())
         }
         if (await) {
             workQueue.await()
@@ -408,184 +407,6 @@ abstract class LintOptionsInput {
     }
 }
 
-/**
- * System properties which can affect lint's behavior.
- */
-abstract class SystemPropertyInputs {
-
-    @get:Input
-    @get:Optional
-    abstract val androidLintLogJarProblems: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val gradleUserHome: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val javaHome: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val lintApiDatabase: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val lintAutofix: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val lintBaselinesContinue: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val lintBinDir: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val lintConfigurationOverride: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val lintHtmlPrefs: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val lintNullnessIgnoreDeprecated: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val lintUnusedResourcesExcludeTests: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val lintUnusedResourcesIncludeTests: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val lintWorkDir: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val userHome: Property<String>
-
-    fun initialize(providerFactory: ProviderFactory, isForAnalysis: Boolean) {
-        if (isForAnalysis) {
-            lintAutofix.disallowChanges()
-            lintBaselinesContinue.disallowChanges()
-            lintHtmlPrefs.disallowChanges()
-        } else {
-            lintAutofix.setDisallowChanges(providerFactory.systemProperty("lint.autofix"))
-            lintBaselinesContinue.setDisallowChanges(
-                providerFactory.systemProperty("lint.baselines.continue")
-            )
-            lintHtmlPrefs.setDisallowChanges(providerFactory.systemProperty("lint.html.prefs"))
-        }
-        androidLintLogJarProblems.setDisallowChanges(
-            providerFactory.systemProperty("android.lint.log-jar-problems")
-        )
-        gradleUserHome.setDisallowChanges(providerFactory.systemProperty("gradle.user.home"))
-        javaHome.setDisallowChanges(providerFactory.systemProperty("java.home"))
-        lintApiDatabase.setDisallowChanges(providerFactory.systemProperty("LINT_API_DATABASE"))
-        lintBinDir.setDisallowChanges(
-            providerFactory.systemProperty("com.android.tools.lint.bindir")
-        )
-        lintConfigurationOverride.setDisallowChanges(
-            providerFactory.systemProperty("lint.configuration.override")
-        )
-        lintNullnessIgnoreDeprecated.setDisallowChanges(
-            providerFactory.systemProperty("lint.nullness.ignore-deprecated")
-        )
-        lintUnusedResourcesExcludeTests.setDisallowChanges(
-            providerFactory.systemProperty("lint.unused-resources.exclude-tests")
-        )
-        lintUnusedResourcesIncludeTests.setDisallowChanges(
-            providerFactory.systemProperty("lint.unused-resources.include-tests")
-        )
-        lintWorkDir.setDisallowChanges(
-            providerFactory.systemProperty("com.android.tools.lint.workdir")
-        )
-        userHome.setDisallowChanges(providerFactory.systemProperty("user.home"))
-    }
-}
-
-/**
- * Environment variables which can affect lint's behavior.
- */
-abstract class EnvironmentVariableInputs {
-
-    @get:Input
-    @get:Optional
-    abstract val androidHome: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val androidLintIncludeLdpi: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val androidLintMaxDepth: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val androidLintMaxViewCount: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val androidLintNullnessIgnoreDeprecated: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val androidSdkRoot: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val javaHome: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val lintApiDatabase: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val lintHtmlPrefs: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val lintXmlRoot: Property<String>
-
-    @get:Input
-    @get:Optional
-    abstract val lintOverrideConfiguration: Property<String>
-
-    fun initialize(providerFactory: ProviderFactory, isForAnalysis: Boolean) {
-        if (isForAnalysis) {
-            lintHtmlPrefs.disallowChanges()
-        } else {
-            lintHtmlPrefs.setDisallowChanges(providerFactory.environmentVariable("LINT_HTML_PREFS"))
-        }
-        androidHome.setDisallowChanges(providerFactory.environmentVariable("ANDROID_HOME"))
-        androidLintIncludeLdpi.setDisallowChanges(
-            providerFactory.environmentVariable("ANDROID_LINT_INCLUDE_LDPI")
-        )
-        androidLintMaxDepth.setDisallowChanges(
-            providerFactory.environmentVariable("ANDROID_LINT_MAX_DEPTH")
-        )
-        androidLintMaxViewCount.setDisallowChanges(
-            providerFactory.environmentVariable("ANDROID_LINT_MAX_VIEW_COUNT")
-        )
-        androidLintNullnessIgnoreDeprecated.setDisallowChanges(
-            providerFactory.environmentVariable("ANDROID_LINT_NULLNESS_IGNORE_DEPRECATED")
-        )
-        androidSdkRoot.setDisallowChanges(providerFactory.environmentVariable("ANDROID_SDK_ROOT"))
-        javaHome.setDisallowChanges(providerFactory.environmentVariable("JAVA_HOME"))
-        lintApiDatabase.setDisallowChanges(providerFactory.environmentVariable("LINT_API_DATABASE"))
-        lintXmlRoot.setDisallowChanges(providerFactory.environmentVariable("LINT_XML_ROOT"))
-        lintOverrideConfiguration.setDisallowChanges(
-            providerFactory.environmentVariable("LINT_OVERRIDE_CONFIGURATION")
-        )
-    }
-}
 
 /**
  * Inputs for the variant.
@@ -678,7 +499,7 @@ abstract class VariantInputs {
     abstract val mavenCoordinatesCache: Property<MavenCoordinatesCacheBuildService>
 
     @get:InputFiles
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val dynamicFeatureLintModels: ConfigurableFileCollection
 
     /**
@@ -918,7 +739,7 @@ abstract class BuildFeaturesInput {
         viewBinding.setDisallowChanges(creationConfig.buildFeatures.viewBinding)
         coreLibraryDesugaringEnabled.setDisallowChanges(creationConfig.isCoreLibraryDesugaringEnabled)
         namespacingMode.setDisallowChanges(
-            if (creationConfig.globalScope.extension.aaptOptions.namespaced) {
+            if (creationConfig.services.projectInfo.getExtension().aaptOptions.namespaced) {
                 LintModelNamespacingMode.DISABLED
             } else {
                 LintModelNamespacingMode.REQUIRED
@@ -1303,7 +1124,7 @@ abstract class ArtifactInput {
     abstract val artifactCollectionsInputs: Property<ArtifactCollectionsInputs>
 
     @get:InputFiles
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     val projectRuntimeExplodedAarsFileCollection: FileCollection?
         get() = projectRuntimeExplodedAars?.artifactFiles
@@ -1312,7 +1133,7 @@ abstract class ArtifactInput {
     var projectRuntimeExplodedAars: ArtifactCollection? = null
 
     @get:InputFiles
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     val projectCompileExplodedAarsFileCollection: FileCollection?
         get() = projectCompileExplodedAars?.artifactFiles
@@ -1321,7 +1142,7 @@ abstract class ArtifactInput {
     var projectCompileExplodedAars: ArtifactCollection? = null
 
     @get:InputFiles
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     abstract val projectRuntimeLintModelsFileCollection: ConfigurableFileCollection
 
@@ -1329,7 +1150,7 @@ abstract class ArtifactInput {
     abstract val projectRuntimeLintModels: Property<ArtifactCollection>
 
     @get:InputFiles
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     abstract val projectCompileLintModelsFileCollection: ConfigurableFileCollection
 
@@ -1337,7 +1158,7 @@ abstract class ArtifactInput {
     abstract val projectCompileLintModels: Property<ArtifactCollection>
 
     @get:InputFiles
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     abstract val baseModuleLintModelFileCollection: ConfigurableFileCollection
 

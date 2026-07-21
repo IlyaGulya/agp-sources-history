@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,24 +20,24 @@ import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.component.ComponentBuilder
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.SdkComponents
-import com.android.build.api.variant.DslExtension
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
 import com.android.build.api.variant.VariantExtension
-import com.android.build.api.variant.VariantExtensionConfig
 import org.gradle.api.Action
 
-@Deprecated(
-    message= "Use the com.android.build.api.variant package",
-    replaceWith = ReplaceWith(
-        "AndroidComponentsExtension",
-        "com.android.build.api.variant.AndroidComponentsExtension"),
-    level = DeprecationLevel.WARNING
-)
+/**
+ * Generic extension for Android Gradle Plugin related components.
+ *
+ * Each component has a type, like application or library and will have a dedicated extension with
+ * methods that are related to the particular component type.
+ *
+ * @param VariantBuilderT the [ComponentBuilder] type produced by this variant.
+ */
 interface AndroidComponentsExtension<
         DslExtensionT: CommonExtension<*, *, *, *>,
         VariantBuilderT: VariantBuilder,
         VariantT: Variant> {
+
     /**
      * API to customize the DSL Objects programmatically before the [beforeVariants] is called.
      *
@@ -112,16 +112,15 @@ interface AndroidComponentsExtension<
      * @param callback lambda to be called with each instance of [VariantBuilderT] of interest.
      */
     fun beforeVariants(
-        selector: VariantSelector = selector().all(),
-        callback: (VariantBuilderT) -> Unit)
+            selector: VariantSelector = selector().all(),
+            callback: (VariantBuilderT) -> Unit)
 
     /**
      * [Action] based version of [beforeVariants] above.
      */
     fun beforeVariants(
-        selector: VariantSelector,
-        callback: Action<VariantBuilderT>
-    )
+            selector: VariantSelector = selector().all(),
+            callback: Action<VariantBuilderT>)
 
     /**
      * Allow for registration of a [callback] to be called with variant instances of type [VariantT]
@@ -141,16 +140,16 @@ interface AndroidComponentsExtension<
      * that all [org.gradle.api.Task]s created by the Android Gradle Plugin use the updated value.
      */
     fun onVariants(
-        selector: VariantSelector = selector().all(),
-        callback: (VariantT) -> Unit
-    ) { }
+            selector: VariantSelector = selector().all(),
+            callback: (VariantT) -> Unit
+    )
 
     /**
      * [Action] based version of [onVariants] above.
      */
     fun onVariants(
-        selector: VariantSelector = selector().all(),
-        callback: Action<VariantT>
+            selector: VariantSelector = selector().all(),
+            callback: Action<VariantT>
     )
 
     /**

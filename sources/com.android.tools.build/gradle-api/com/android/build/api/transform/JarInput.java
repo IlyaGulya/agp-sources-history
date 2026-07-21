@@ -38,7 +38,6 @@ import java.util.Collection;
  * If the transform is not in incremental mode, {@link #getStatus()} always returns
  * {@link Status#NOTCHANGED}.
  */
-@Deprecated
 public interface JarInput extends QualifiedContent {
 
     @NonNull

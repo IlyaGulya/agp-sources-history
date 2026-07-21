@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,11 @@ import com.android.build.api.dsl.DynamicFeatureExtension
 import com.android.build.api.variant.DynamicFeatureVariant
 import com.android.build.api.variant.DynamicFeatureVariantBuilder
 
-@Deprecated(
-    message= "Use the com.android.build.api.variant package",
-    replaceWith = ReplaceWith(
-        "DynamicFeatureAndroidComponentsExtension",
-        "com.android.build.api.variant.DynamicFeatureAndroidComponentsExtension"),
-    level = DeprecationLevel.WARNING
-)
+/**
+ * Extension for Dynamic Feature module variant.
+ *
+ * A dynamic feature module is created when a build script is applying the
+ * 'com.android.dynamic-feature' plugin.
+ */
 interface DynamicFeatureAndroidComponentsExtension:
-    AndroidComponentsExtension<DynamicFeatureExtension, DynamicFeatureVariantBuilder, DynamicFeatureVariant>
+        AndroidComponentsExtension<DynamicFeatureExtension, DynamicFeatureVariantBuilder, DynamicFeatureVariant>

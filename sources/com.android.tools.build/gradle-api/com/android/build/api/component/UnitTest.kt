@@ -19,13 +19,5 @@ package com.android.build.api.component
 /**
  * Properties for the unit test variant of a module.
  */
-@Deprecated(
-    message= "Use the com.android.build.api.variant package",
-    replaceWith = ReplaceWith(
-        "UnitTest",
-        "com.android.build.api.variant.UnitTest"
-    ),
-    level = DeprecationLevel.WARNING
-)
-interface UnitTest : TestComponent,
-    com.android.build.api.variant.UnitTest
+interface UnitTest : TestComponent {
+}

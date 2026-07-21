@@ -18,8 +18,9 @@ package com.android.build.gradle.api;
 
 import com.android.annotations.Nullable;
 
-/** A Build variant that supports versioning. */
-@Deprecated
+/**
+ * A Build variant that supports versioning.
+ */
 public interface VersionedVariant {
 
     /**

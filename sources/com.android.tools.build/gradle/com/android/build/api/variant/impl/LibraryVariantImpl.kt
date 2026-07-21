@@ -16,11 +16,12 @@
 package com.android.build.api.variant.impl
 
 import com.android.build.api.artifact.impl.ArtifactsImpl
-import com.android.build.api.variant.AndroidTest
+import com.android.build.api.component.AndroidTest
 import com.android.build.api.component.Component
 import com.android.build.api.component.analytics.AnalyticsEnabledLibraryVariant
 import com.android.build.api.component.impl.ConsumableCreationConfigImpl
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.extension.impl.VariantApiOperationsRegistrar
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.InstrumentationParameters
@@ -44,7 +45,6 @@ import com.android.build.gradle.internal.services.ProjectServices
 import com.android.build.gradle.internal.services.TaskCreationServices
 import com.android.build.gradle.internal.variant.BaseVariantData
 import com.android.build.gradle.internal.variant.VariantPathHelper
-import com.android.build.gradle.options.BooleanOption
 import com.android.builder.dexing.DexingType
 import com.google.wireless.android.sdk.stats.GradleBuildVariant
 import org.gradle.api.provider.Provider
@@ -53,7 +53,7 @@ import javax.inject.Inject
 open class  LibraryVariantImpl @Inject constructor(
         override val variantBuilder: LibraryVariantBuilderImpl,
         buildFeatureValues: BuildFeatureValues,
-        variantDslInfo: VariantDslInfo,
+        variantDslInfo: VariantDslInfo<LibraryExtension>,
         variantDependencies: VariantDependencies,
         variantSources: VariantSources,
         paths: VariantPathHelper,
@@ -85,11 +85,7 @@ open class  LibraryVariantImpl @Inject constructor(
     // ---------------------------------------------------------------------------------------------
 
     override val applicationId: Provider<String> =
-        internalServices.providerOf(
-            type = String::class.java,
-            value = variantDslInfo.namespace,
-            disallowUnsafeRead = !services.projectOptions.get(BooleanOption.ENABLE_LEGACY_API)
-        )
+        internalServices.providerOf(String::class.java, variantDslInfo.namespace)
 
     override fun <ParamT : InstrumentationParameters> transformClassesWith(
         classVisitorFactoryImplClass: Class<out AsmClassVisitorFactory<ParamT>>,
@@ -108,7 +104,7 @@ open class  LibraryVariantImpl @Inject constructor(
         super.transformClassesWith(classVisitorFactoryImplClass, scope, instrumentationParamsConfig)
     }
 
-    override var androidTest: com.android.build.api.component.AndroidTest? = null
+    override var androidTest: AndroidTest? = null
 
     override val renderscript: Renderscript? by lazy {
         delegate.renderscript(internalServices)

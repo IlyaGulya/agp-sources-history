@@ -104,6 +104,10 @@ fun ObfuscationMap(file: File): ObfuscationMap {
  */
 internal class TypeMap(private val mapping: Map<String, String>) {
     operator fun get(value: String): String {
+        if (value[0] == '[') {
+            val index = value.indexOfFirst { it != '[' }
+            return "[".repeat(index) + get(value.substring(index))
+        }
         if (value[0] != 'L') return value
         return mapping[value] ?: value
     }
@@ -326,14 +330,14 @@ private fun TypeParser.parseType(line: String, start: Int): Int {
     }
     val result = flush()
     if (isArray) append('[')
-    val primitive = PRIMITIVE_MAP[result]
-    if (primitive != null) {
-        append(primitive)
-    } else {
-        isObject = true
+    if (isObject) {
         append('L')
         append(result)
         append(';')
+    } else {
+        val primitive = PRIMITIVE_MAP[result]
+        require(primitive != null) { "Expected primitive. Found '$result'"}
+        append(primitive)
     }
     descriptor = flush()
     return i

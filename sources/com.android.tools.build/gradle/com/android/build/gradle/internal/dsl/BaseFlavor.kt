@@ -32,7 +32,6 @@ import com.android.builder.model.ApiVersion
 import com.android.builder.model.BaseConfig
 import com.android.builder.model.ProductFlavor
 import com.google.common.base.Strings
-import com.google.common.collect.Iterables
 import java.io.File
 import org.gradle.api.Action
 
@@ -195,10 +194,6 @@ abstract class BaseFlavor(name: String, private val dslServices: DslServices) :
         this.signingConfig = signingConfig
     }
 
-    fun setSigningConfig(signingConfig: InternalSigningConfig?) {
-        this.signingConfig = signingConfig
-    }
-
     // -- DSL Methods. TODO remove once the instantiator does what I expect it to do.
     override fun buildConfigField(
         type: String,
@@ -262,10 +257,11 @@ abstract class BaseFlavor(name: String, private val dslServices: DslServices) :
         }
     }
 
-    override fun setProguardFiles(proguardFileIterable: Iterable<*>) {
-        val replacementFiles = Iterables.toArray(proguardFileIterable, Any::class.java)
+    fun setProguardFiles(proguardFileIterable: Iterable<Any>) {
         proguardFiles.clear()
-        proguardFiles(*replacementFiles)
+        for (file in proguardFileIterable) {
+            proguardFile(file)
+        }
     }
 
     override var testProguardFiles: MutableList<File>

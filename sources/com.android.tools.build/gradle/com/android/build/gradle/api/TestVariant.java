@@ -23,8 +23,9 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.Task;
 import org.gradle.api.tasks.TaskProvider;
 
-/** A Build variant and all its public data. */
-@Deprecated
+/**
+ * A Build variant and all its public data.
+ */
 public interface TestVariant extends ApkVariant {
 
     /**

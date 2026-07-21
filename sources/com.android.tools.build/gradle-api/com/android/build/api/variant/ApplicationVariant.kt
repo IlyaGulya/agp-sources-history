@@ -16,6 +16,7 @@
 
 package com.android.build.api.variant
 
+import com.android.build.api.component.AndroidTest
 import org.gradle.api.provider.Property
 
 /**
@@ -32,7 +33,7 @@ interface ApplicationVariant : GeneratesApk, Variant {
      * Variant's [AndroidTest] configuration, or null if android tests are disabled for this
      * variant.
      */
-    val androidTest: com.android.build.api.component.AndroidTest?
+    val androidTest: AndroidTest?
 
     /**
      * Returns the final list of variant outputs.

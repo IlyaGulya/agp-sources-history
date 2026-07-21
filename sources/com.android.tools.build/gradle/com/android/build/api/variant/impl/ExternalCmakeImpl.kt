@@ -29,36 +29,31 @@ class ExternalCmakeImpl(
 
     override val abiFilters: SetProperty<String> =
             variantPropertiesApiServices.setPropertyOf(
-                type = String::class.java,
-                value = mergedExternalNativeCmakeOptions.abiFilters,
-                disallowUnsafeRead = false, // see b/193722661
+                    String::class.java,
+                    mergedExternalNativeCmakeOptions.abiFilters
             )
 
     override val arguments: ListProperty<String> =
             variantPropertiesApiServices.listPropertyOf(
-                type = String::class.java,
-                value = mergedExternalNativeCmakeOptions.arguments,
-                disallowUnsafeRead = false, // see b/193722661
+                    String::class.java,
+                    mergedExternalNativeCmakeOptions.arguments
             )
 
     override val cFlags: ListProperty<String> =
             variantPropertiesApiServices.listPropertyOf(
-                type = String::class.java,
-                value = mergedExternalNativeCmakeOptions.getcFlags(),
-                disallowUnsafeRead = false, // see b/193722661
+                    String::class.java,
+                    mergedExternalNativeCmakeOptions.getcFlags()
             )
 
     override val cppFlags: ListProperty<String> =
             variantPropertiesApiServices.listPropertyOf(
-                type = String::class.java,
-                value = mergedExternalNativeCmakeOptions.cppFlags,
-                disallowUnsafeRead = false, // see b/193722661
+                    String::class.java,
+                    mergedExternalNativeCmakeOptions.cppFlags
             )
 
     override val targets: SetProperty<String> =
             variantPropertiesApiServices.setPropertyOf(
-                String::class.java,
-                mergedExternalNativeCmakeOptions.targets,
-                disallowUnsafeRead = false, // see b/193722661
+                    String::class.java,
+                    mergedExternalNativeCmakeOptions.targets
             )
 }

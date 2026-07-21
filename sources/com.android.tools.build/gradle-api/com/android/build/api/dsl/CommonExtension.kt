@@ -823,8 +823,8 @@ interface CommonExtension<
     fun getDefaultProguardFile(name: String): File
 
     /**
-     * Additional per module experimental properties.
+     * Additional per module properties.
      */
     @get:Incubating
-    val experimentalProperties: MutableMap<String, Any>
+    val properties: MutableMap<String, Any>
 }

@@ -44,9 +44,6 @@ interface VariantPropertiesApiServices:
      * This should be used for properties used in the new API. If the property is backing an
      * old API that returns T, use [VariantPropertiesApiServices.newPropertyBackingDeprecatedApi]
      *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
-     *
      * The property will be marked as [Property.finalizeValueOnRead], and will be locked
      * with [Property.disallowChanges] after the variant API(s) have run.
      */
@@ -57,9 +54,6 @@ interface VariantPropertiesApiServices:
      *
      * This should be used for properties used in the new API. If the property is backing an
      * old API that returns T, use [VariantPropertiesApiServices.newPropertyBackingDeprecatedApi]
-     *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
      *
      * The property will be marked as [Property.finalizeValueOnRead], and will be locked
      * with [Property.disallowChanges] after the variant API(s) have run.
@@ -72,9 +66,6 @@ interface VariantPropertiesApiServices:
      * This should be used for properties used in the new API. If the property is backing an
      * old API that returns T, use [VariantPropertiesApiServices.newPropertyBackingDeprecatedApi]
      *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
-     *
      * The property will be marked as [Property.finalizeValueOnRead], and will be locked
      * with [Property.disallowChanges] after the variant API(s) have run.
      */
@@ -85,9 +76,6 @@ interface VariantPropertiesApiServices:
      *
      * This should be used for properties used in the new API. If the property is backing an
      * old API that returns T, use [VariantPropertiesApiServices.newPropertyBackingDeprecatedApi]
-     *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
      *
      * The property will be marked as [Property.finalizeValueOnRead], and will be locked
      * with [Property.disallowChanges] after the variant API(s) have run.
@@ -100,9 +88,6 @@ interface VariantPropertiesApiServices:
      * This should be used for properties used in the new API. If the property is backing an
      * old API that returns T, use [VariantPropertiesApiServices.newPropertyBackingDeprecatedApi]
      *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
-     *
      * The property will be marked as [Property.finalizeValueOnRead], and will be locked
      * with [Property.disallowChanges] after the variant API(s) have run.
      */
@@ -113,9 +98,6 @@ interface VariantPropertiesApiServices:
      *
      * This should be used for properties used in the new API. If the property is backing an
      * old API that returns T, use [VariantPropertiesApiServices.newPropertyBackingDeprecatedApi]
-     *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
      *
      * The property will be marked as [Property.finalizeValueOnRead], and will be locked
      * with [Property.disallowChanges] after the variant API(s) have run.
@@ -128,9 +110,6 @@ interface VariantPropertiesApiServices:
      * This should be used for properties used in the new API. If the property is backing an
      * old API that returns T, use [VariantPropertiesApiServices.newPropertyBackingDeprecatedApi]
      *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
-     *
      * The property will be marked as [Property.finalizeValueOnRead], and will be locked
      * with [Property.disallowChanges] after the variant API(s) have run.
      */
@@ -141,44 +120,27 @@ interface VariantPropertiesApiServices:
      *
      * This should be used for properties used in the new API.
      *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] if
-     * [disallowUnsafeRead] is set to true. If false, the property value access will be allowed.
-     *
      * The [ListProperty] will be marked as [Property.finalizeValueOnRead], and will be locked
      * with [Property.disallowChanges] after the variant API(s) have run.
      */
-    fun <T> listPropertyOf(
-        type: Class<T>,
-        value: Collection<T>,
-        disallowUnsafeRead: Boolean = true
-    ): ListProperty<T>
+    fun <T> listPropertyOf(type: Class<T>, value: Collection<T>): ListProperty<T>
 
     /**
      * Creates a new [SetProperty].
      *
      * This should be used for properties used in the new API.
      *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
-     *
      * The [SetProperty] will be marked as [Property.finalizeValueOnRead], and will be locked
      * with [Property.disallowChanges] after the variant API(s) have run.
      */
     fun <T> setPropertyOf(type: Class<T>, value: Callable<Collection<T>>): SetProperty<T>
 
-    fun <T> setPropertyOf(
-        type: Class<T>,
-        value: Collection<T>,
-        disallowUnsafeRead: Boolean = true,
-    ): SetProperty<T>
+    fun <T> setPropertyOf(type: Class<T>, value: Collection<T>): SetProperty<T>
 
     /**
      * Creates a new [MapProperty].
      *
      * This should be used for properties used in the new API.
-     *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
      *
      * The [MapProperty] will be marked as [Property.finalizeValueOnRead], and will be locked
      * with [Property.disallowChanges] after the variant API(s) have run.
@@ -191,9 +153,6 @@ interface VariantPropertiesApiServices:
      * By default this property is memoized with [Property.finalizeValueOnRead] but access
      * to the old API getter will require disabling memoization
      *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
-     *
      * The property will be locked with [Property.disallowChanges] after the variant API(s) have
      * run.
      */
@@ -204,9 +163,6 @@ interface VariantPropertiesApiServices:
      *
      * By default this property is memoized with [Property.finalizeValueOnRead] but access
      * to the old API getter will require disabling memoization
-     *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
      *
      * The property will be locked with [Property.disallowChanges] after the variant API(s) have
      * run.
@@ -219,9 +175,6 @@ interface VariantPropertiesApiServices:
      * By default this property is memoized with [Property.finalizeValueOnRead] but access
      * to the old API getter will require disabling memoization
      *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
-     *
      * The property will be locked with [Property.disallowChanges] after the variant API(s) have
      * run.
      */
@@ -233,9 +186,6 @@ interface VariantPropertiesApiServices:
      * By default this property is memoized with [Property.finalizeValueOnRead] but access
      * to the old API getter will require disabling memoization
      *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
-     *
      * The property will be locked with [Property.disallowChanges] after the variant API(s) have
      * run.
      */
@@ -243,38 +193,15 @@ interface VariantPropertiesApiServices:
 
     /**
      * Creates a memoized Provider around the given provider
-     *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
      */
-    fun <T> providerOf(
-        type: Class<T>,
-        value: Provider<T>,
-        id: String = "",
-        disallowUnsafeRead: Boolean = true,
-    ): Provider<T>
+    fun <T> providerOf(type: Class<T>, value: Provider<T>, id: String = ""): Provider<T>
 
     /**
      * Creates a memoized Provider around the given provider
-     *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
      */
     fun <T> nullableProviderOf(type: Class<T>, value: Provider<T?>, id: String = ""): Provider<T?>
 
-    /**
-     * Creates a memoized [Provider] of [Set] around the given provider of [Iterable]
-     *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
-     */
     fun <T> setProviderOf(type: Class<T>, value: Provider<out Iterable<T>?>): Provider<Set<T>?>
-    /**
-     * Creates a memoized [Provider] of [Set] around the provided [Iterable] of values.
-     *
-     * During configuration the property will be marked as [Property.disallowUnsafeRead] to disallow
-     * unsafe reads (which will also finalize the value on read).
-     */
     fun <T> setProviderOf(type: Class<T>, value: Iterable<T>?): Provider<Set<T>?>
 
     fun <T> provider(callable: Callable<T>): Provider<T>

@@ -157,9 +157,11 @@ enum class BooleanOption(
     ENABLE_BUILD_CONFIG_AS_BYTECODE("android.enableBuildConfigAsBytecode", false, FeatureStage.Experimental),
     ENABLE_SOURCE_SET_PATHS_MAP("android.experimental.enableSourceSetPathsMap", false, FeatureStage.Experimental),
     RELATIVE_COMPILE_LIB_RESOURCES("android.experimental.cacheCompileLibResources", false, FeatureStage.Experimental),
+    ENABLE_JACOCO_TRANSFORM_INSTRUMENTATION("android.experimental.enableJacocoTransformInstrumentation", false, FeatureStage.Experimental),
+    DISABLE_AUTOMATIC_COMPONENT_CREATION("android.disableAutomaticComponentCreation", false, FeatureStage.Experimental),
 
-    /** Whether lint should be run in process; the default is true. */
-    RUN_LINT_IN_PROCESS("android.experimental.runLintInProcess", true, FeatureStage.Experimental),
+    /** Whether lint should be run in process; the default is a separate process. Primarily useful for debugging lint issues related to AGP. */
+    RUN_LINT_IN_PROCESS("android.experimental.runLintInProcess", false, FeatureStage.Experimental),
 
     // Options related to new Variant API
     USE_SAFE_PROPERTIES("android.variant.safe.properties", false, FeatureStage.Experimental),
@@ -167,7 +169,7 @@ enum class BooleanOption(
 
     ENABLE_TEST_FIXTURES("android.experimental.enableTestFixtures", false, FeatureStage.Experimental),
 
-    USE_NEW_DSL_INTERFACES("android.experimental.newDslInterfaces", false, FeatureStage.Experimental),
+    ENABLE_ART_PROFILES("android.experimental.enableArtProfiles", false, FeatureStage.Experimental),
 
     /* ------------------------
      * SOFTLY-ENFORCED FEATURES
@@ -184,13 +186,13 @@ enum class BooleanOption(
     /** Whether to use lint's partial analysis functionality. */
     USE_LINT_PARTIAL_ANALYSIS("android.enableParallelLint", true, FeatureStage.SoftlyEnforced(VERSION_8_0)),
 
+    USE_NEW_DSL_INTERFACES("android.experimental.newDslInterfaces", true, FeatureStage.SoftlyEnforced(VERSION_8_0)),
+
     ENABLE_RESOURCE_OPTIMIZATIONS("android.enableResourceOptimizations", true, FeatureStage.SoftlyEnforced(VERSION_8_0)),
 
     ENABLE_R_TXT_RESOURCE_SHRINKING("android.enableRTxtResourceShrinking", true, FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.VERSION_8_0)),
 
     INCLUDE_REPOSITORIES_IN_DEPENDENCY_REPORT("android.bundletool.includeRepositoriesInDependencyReport", true, FeatureStage.SoftlyEnforced(VERSION_8_0)),
-
-    ENABLE_ART_PROFILES("android.enableArtProfiles", true, FeatureStage.SoftlyEnforced(VERSION_8_0)),
 
     /* -------------------
      * DEPRECATED FEATURES

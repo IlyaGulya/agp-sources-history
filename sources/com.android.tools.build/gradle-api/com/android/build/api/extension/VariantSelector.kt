@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +19,18 @@ package com.android.build.api.extension
 import com.android.build.api.component.ComponentIdentity
 import java.util.regex.Pattern
 
-@Deprecated(
-    message= "Use the com.android.build.api.variant package",
-    replaceWith = ReplaceWith(
-        "VariantSelector",
-        "com.android.build.api.variant.VariantSelector"),
-    level = DeprecationLevel.WARNING
-)
-interface VariantSelector: com.android.build.api.variant.VariantSelector {
+/**
+ * Selector to reduce the number of variants that are of interests when calling any of the
+ * variant API like [AndroidComponentsExtension.beforeVariants].
+ */
+interface VariantSelector {
     /**
      * Creates a [VariantSelector] of [ComponentIdentity]that includes all the variants for the
      * current module.
      *
      * @return a [VariantSelector] for all variants.
      */
-    override fun all(): VariantSelector
+    fun all(): VariantSelector
 
     /**
      * Returns a new selector for [ComponentIdentity] objects with a given build type.
@@ -41,7 +38,7 @@ interface VariantSelector: com.android.build.api.variant.VariantSelector {
      * @param buildType Build type to filter [ComponentIdentity] on.
      * @return An instance of [VariantSelector] to further filter variants.
      */
-    override fun withBuildType(buildType: String): VariantSelector
+    fun withBuildType(buildType: String): VariantSelector
 
     /**
      * Returns a new selector for [ComponentIdentity] objects with a given (dimension, flavorName).
@@ -49,7 +46,7 @@ interface VariantSelector: com.android.build.api.variant.VariantSelector {
      * @param flavorToDimension Dimension and flavor to filter [ComponentIdentity] on.
      * @return [VariantSelector] instance to further filter instances of [ComponentIdentity]
      */
-    override fun withFlavor(flavorToDimension: Pair<String, String>): VariantSelector
+    fun withFlavor(flavorToDimension: Pair<String, String>): VariantSelector
 
     /**
      * Returns a new selector for [ComponentIdentity]  objects with a given name pattern.
@@ -57,12 +54,14 @@ interface VariantSelector: com.android.build.api.variant.VariantSelector {
      * @param pattern [Pattern] to apply on the [org.gradle.api.Named.getName] to filter [ComponentIdentity]
      * instances on
      */
-    override fun withName(pattern: Pattern): VariantSelector
+    fun withName(pattern: Pattern): VariantSelector
 
     /**
      * Returns a new selector for [ComponentIdentity]  objects with a given name.
      *
      * @param name [String] to test against the [org.gradle.api.Named.getName] for equality.
      */
-    override fun withName(name: String): VariantSelector
+    fun withName(name: String): VariantSelector
 }
+
+

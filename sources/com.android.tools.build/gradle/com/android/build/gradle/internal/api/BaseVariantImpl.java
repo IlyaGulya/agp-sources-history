@@ -35,7 +35,6 @@ import com.android.build.gradle.internal.scope.MutableTaskContainer;
 import com.android.build.gradle.internal.services.BaseServices;
 import com.android.build.gradle.internal.tasks.factory.TaskFactoryUtils;
 import com.android.build.gradle.internal.variant.BaseVariantData;
-import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.tasks.AidlCompile;
 import com.android.build.gradle.tasks.ExternalNativeBuildTask;
 import com.android.build.gradle.tasks.GenerateBuildConfig;
@@ -151,17 +150,14 @@ public abstract class BaseVariantImpl implements BaseVariant, InternalBaseVarian
         // this is to be removed when we can get rid of the old API.
         final VariantDslInfoImpl variantDslInfo =
                 (VariantDslInfoImpl) component.getVariantDslInfo();
-        return readOnlyObjectProvider.getBuildType((BuildType) variantDslInfo.getBuildTypeObj());
+        return readOnlyObjectProvider.getBuildType(variantDslInfo.getBuildTypeObj());
     }
 
     @Override
     @NonNull
     public List<ProductFlavor> getProductFlavors() {
-        List<ProductFlavor> flavors =
-                component.getVariantDslInfo().getProductFlavorList().stream()
-                        .map(it -> (ProductFlavor) it)
-                        .collect(Collectors.toList());
-        return new ImmutableFlavorList(flavors, readOnlyObjectProvider);
+        return new ImmutableFlavorList(
+                component.getVariantDslInfo().getProductFlavorList(), readOnlyObjectProvider);
     }
 
     @Override
@@ -231,17 +227,8 @@ public abstract class BaseVariantImpl implements BaseVariant, InternalBaseVarian
                             IssueReporter.Type.GENERIC,
                             "variant.getApplicationId() is not supported by dynamic-feature plugins as it cannot handle delayed setting of the application ID. Please use getApplicationIdTextResource() instead.");
         }
-        if (!services.getProjectOptions().get(BooleanOption.ENABLE_LEGACY_API)) {
-            services.getIssueReporter()
-                    .reportError(
-                            IssueReporter.Type.GENERIC,
-                            new RuntimeException(
-                                    "Access to applicationId via deprecated Variant API requires compatibility mode.\n"
-                                            + ComponentImpl.Companion.getENABLE_LEGACY_API()));
-            // return default value during sync
-            return "";
-        }
 
+        // FIXME: Break if this is done during configuration
         return component.getApplicationId().get();
     }
 

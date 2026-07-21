@@ -16,21 +16,20 @@
 
 package com.android.build.api.extension.impl
 
-import com.android.build.api.variant.ComponentIdentity
-import com.android.build.api.variant.VariantSelector
+import com.android.build.api.component.ComponentIdentity
+import com.android.build.api.extension.VariantSelector
 import java.util.regex.Pattern
 
-open class VariantSelectorImpl :
-    VariantSelector, com.android.build.api.extension.VariantSelector {
+open class VariantSelectorImpl : VariantSelector {
 
-    override fun all(): VariantSelectorImpl = this
+    override fun all(): VariantSelector= this
 
     // By default the selector applies to all variants.
     internal open fun appliesTo(variant: ComponentIdentity): Boolean {
         return true;
     }
 
-    override fun withBuildType(buildType: String): VariantSelectorImpl {
+    override fun withBuildType(buildType: String): VariantSelector {
         return object: VariantSelectorImpl() {
             override fun appliesTo(variant: ComponentIdentity): Boolean {
                 return buildType == variant.buildType && this@VariantSelectorImpl.appliesTo(variant)
@@ -38,7 +37,7 @@ open class VariantSelectorImpl :
         }
     }
 
-    override fun withFlavor(flavorToDimension: Pair<String, String>): VariantSelectorImpl {
+    override fun withFlavor(flavorToDimension: Pair<String, String>): VariantSelector {
         return object: VariantSelectorImpl() {
             override fun appliesTo(variant: ComponentIdentity): Boolean {
                 return variant.productFlavors.contains(flavorToDimension) && this@VariantSelectorImpl.appliesTo(variant)
@@ -46,7 +45,7 @@ open class VariantSelectorImpl :
         }
     }
 
-    override fun withName(pattern: Pattern): VariantSelectorImpl {
+    override fun withName(pattern: Pattern): VariantSelector {
         return object : VariantSelectorImpl() {
             override fun appliesTo(variant: ComponentIdentity): Boolean {
                 return pattern.matcher(variant.name).matches() && this@VariantSelectorImpl.appliesTo(variant)
@@ -54,7 +53,7 @@ open class VariantSelectorImpl :
         }
     }
 
-    override fun withName(name: String): VariantSelectorImpl {
+    override fun withName(name: String): VariantSelector {
         return object : VariantSelectorImpl() {
             override fun appliesTo(variant: ComponentIdentity): Boolean {
                 return variant.name == name && this@VariantSelectorImpl.appliesTo(variant)

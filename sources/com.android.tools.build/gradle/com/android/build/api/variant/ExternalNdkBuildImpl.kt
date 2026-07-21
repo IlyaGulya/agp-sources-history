@@ -28,36 +28,31 @@ class ExternalNdkBuildImpl(
 
     override val abiFilters: SetProperty<String> =
             variantPropertiesApiServices.setPropertyOf(
-                type = String::class.java,
-                value = mergedExternalNativeNdkBuildOptions.abiFilters,
-                disallowUnsafeRead = false, // see b/193722661
+                    String::class.java,
+                    mergedExternalNativeNdkBuildOptions.abiFilters
             )
 
     override val arguments: ListProperty<String> =
             variantPropertiesApiServices.listPropertyOf(
-                type = String::class.java,
-                value = mergedExternalNativeNdkBuildOptions.arguments,
-                disallowUnsafeRead = false, // see b/193722661
+                    String::class.java,
+                    mergedExternalNativeNdkBuildOptions.arguments
             )
 
     override val cFlags: ListProperty<String> =
             variantPropertiesApiServices.listPropertyOf(
-                type = String::class.java,
-                value = mergedExternalNativeNdkBuildOptions.getcFlags(),
-                disallowUnsafeRead = false, // see b/193722661
+                    String::class.java,
+                    mergedExternalNativeNdkBuildOptions.getcFlags()
             )
 
     override val cppFlags: ListProperty<String> =
             variantPropertiesApiServices.listPropertyOf(
-                type = String::class.java,
-                value = mergedExternalNativeNdkBuildOptions.cppFlags,
-                disallowUnsafeRead = false, // see b/193722661
+                    String::class.java,
+                    mergedExternalNativeNdkBuildOptions.cppFlags
             )
 
     override val targets: SetProperty<String> =
             variantPropertiesApiServices.setPropertyOf(
-                type = String::class.java,
-                value = mergedExternalNativeNdkBuildOptions.targets,
-                disallowUnsafeRead = false, // see b/193722661
+                    String::class.java,
+                    mergedExternalNativeNdkBuildOptions.targets
             )
 }

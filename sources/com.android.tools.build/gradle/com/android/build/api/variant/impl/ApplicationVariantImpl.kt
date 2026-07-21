@@ -17,11 +17,11 @@ package com.android.build.api.variant.impl
 
 import com.android.build.api.artifact.MultipleArtifact
 import com.android.build.api.artifact.impl.ArtifactsImpl
-import com.android.build.api.variant.AndroidTest
+import com.android.build.api.component.AndroidTest
 import com.android.build.api.component.Component
 import com.android.build.api.component.analytics.AnalyticsEnabledApplicationVariant
-import com.android.build.api.component.impl.AndroidTestImpl
 import com.android.build.api.component.impl.ApkCreationConfigImpl
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.extension.impl.VariantApiOperationsRegistrar
 import com.android.build.api.variant.*
@@ -51,7 +51,7 @@ import org.gradle.api.provider.Property
 open class ApplicationVariantImpl @Inject constructor(
         override val variantBuilder: ApplicationVariantBuilderImpl,
         buildFeatureValues: BuildFeatureValues,
-        variantDslInfo: VariantDslInfo,
+        variantDslInfo: VariantDslInfo<ApplicationExtension>,
         variantDependencies: VariantDependencies,
         variantSources: VariantSources,
         paths: VariantPathHelper,
@@ -112,7 +112,7 @@ open class ApplicationVariantImpl @Inject constructor(
 
     override val androidResources: AndroidResources by lazy {
         initializeAaptOptionsFromDsl(
-            globalScope.extension.aaptOptions,
+            taskCreationServices.projectInfo.getExtension().aaptOptions,
             internalServices
         )
     }
@@ -139,7 +139,7 @@ open class ApplicationVariantImpl @Inject constructor(
     override val minifiedEnabled: Boolean
         get() = variantDslInfo.getPostProcessingOptions().codeShrinkerEnabled()
 
-    override var androidTest: com.android.build.api.component.AndroidTest? = null
+    override var androidTest: AndroidTest? = null
 
     override val renderscript: Renderscript? by lazy {
         delegate.renderscript(internalServices)

@@ -90,7 +90,7 @@ import java.util.concurrent.Callable
 abstract class ComponentImpl(
     open val componentIdentity: ComponentIdentity,
     override val buildFeatures: BuildFeatureValues,
-    override val variantDslInfo: VariantDslInfo,
+    override val variantDslInfo: VariantDslInfo<*>,
     override val variantDependencies: VariantDependencies,
     override val variantSources: VariantSources,
     override val paths: VariantPathHelper,
@@ -108,11 +108,7 @@ abstract class ComponentImpl(
     // PUBLIC API
     // ---------------------------------------------------------------------------------------------
     override val namespace: Provider<String> =
-        internalServices.providerOf(
-            type = String::class.java,
-            value = variantDslInfo.namespace,
-            disallowUnsafeRead = false, // allow unsafe read for KAGP : b/193706116
-        )
+        internalServices.providerOf(String::class.java, variantDslInfo.namespace)
 
     override fun <ParamT : InstrumentationParameters> transformClassesWith(
         classVisitorFactoryImplClass: Class<out AsmClassVisitorFactory<ParamT>>,
@@ -574,7 +570,7 @@ abstract class ComponentImpl(
 
     /** Returns the path(s) to compiled R classes (R.jar). */
     fun getCompiledRClasses(configType: ConsumedConfigType): FileCollection {
-        return if (globalScope.extension.aaptOptions.namespaced) {
+        return if (services.projectInfo.getExtension().aaptOptions.namespaced) {
             internalServices.fileCollection().also { fileCollection ->
                 val namespacedRClassJar = artifacts.get(COMPILE_R_CLASS_JAR)
                 val fileTree = internalServices.fileTree(namespacedRClassJar).builtBy(namespacedRClassJar)
@@ -742,7 +738,6 @@ abstract class ComponentImpl(
     companion object {
         // String to
         final val ENABLE_LEGACY_API: String =
-            "Turn on with by putting '${BooleanOption.ENABLE_LEGACY_API.propertyName}=true in gradle.properties'\n" +
-                    "Using this deprecated API may still fail, depending on usage of the new Variant API, like computing applicationId via a task output."
+            "Turn on with by putting '${BooleanOption.ENABLE_LEGACY_API.propertyName}=true in gradle.properties'"
     }
 }

@@ -21,8 +21,9 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.Task;
 import org.gradle.api.tasks.TaskProvider;
 
-/** A Build variant that supports installation. */
-@Deprecated
+/**
+ * A Build variant that supports installation.
+ */
 public interface InstallableVariant {
 
     /**

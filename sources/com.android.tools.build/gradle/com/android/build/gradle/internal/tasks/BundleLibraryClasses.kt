@@ -36,7 +36,6 @@ import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.tasks.toSerializable
 import com.android.builder.dexing.isJarFile
-import com.android.builder.files.SerializableChange
 import com.android.builder.files.SerializableFileChanges
 import com.android.utils.FileUtils
 import org.gradle.api.file.ConfigurableFileCollection
@@ -57,7 +56,6 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import java.io.File
-import java.lang.IllegalStateException
 import java.util.function.Predicate
 import java.util.regex.Pattern
 import java.util.zip.Deflater
@@ -368,12 +366,9 @@ abstract class BundleLibraryClassesWorkAction : ProfileAwareWorkAction<BundleLib
             check(classRoot.isDirectory) { "Expected directory but found ${classRoot.path}." }
             classRoot.walk().forEach {
                 val relativePath = it.relativeTo(classRoot).path
-                if (it.isFile && relativePath.isNotEmpty() && filter.test(relativePath)) {
+                if (relativePath.isNotEmpty() && filter.test(relativePath)) {
                     val outputFile = outputDir.resolve(relativePath)
                     FileUtils.mkdirs(outputFile.parentFile)
-                    if (outputFile.isFile) {
-                        throw IllegalStateException("File $outputFile already exists, it cannot be overwritten by $it.")
-                    }
                     FileUtils.copyFile(it, outputFile)
                 }
             }
@@ -385,7 +380,7 @@ abstract class BundleLibraryClassesWorkAction : ProfileAwareWorkAction<BundleLib
         outputDir: File,
         filter: Predicate<String>
     ) {
-        (inputChanges.removedFiles + inputChanges.modifiedFiles).forEach {
+        inputChanges.removedFiles.forEach {
             val staleOutputFile = outputDir.resolve(it.normalizedPath)
             FileUtils.deleteRecursivelyIfExists(staleOutputFile)
         }
@@ -393,12 +388,9 @@ abstract class BundleLibraryClassesWorkAction : ProfileAwareWorkAction<BundleLib
             // If an added file is one of the roots of the FileCollection, normalizedPath will be
             // the file name, not an empty string, but we can probably ignore this edge case.
             val relativePath = it.normalizedPath
-            if (it.file.isFile && relativePath.isNotEmpty() && filter.test(relativePath)) {
+            if (relativePath.isNotEmpty() && filter.test(relativePath)) {
                 val outputFile = outputDir.resolve(relativePath)
                 FileUtils.mkdirs(outputFile.parentFile)
-                if (outputFile.isFile) {
-                    throw IllegalStateException("File $outputFile already exists, it cannot be overwritten by $it.")
-                }
                 FileUtils.copyFile(it.file, outputFile)
             }
         }

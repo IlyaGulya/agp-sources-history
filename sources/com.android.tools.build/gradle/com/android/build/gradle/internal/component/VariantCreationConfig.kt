@@ -47,5 +47,5 @@ interface VariantCreationConfig: ComponentCreationConfig {
 
     val proguardFiles: ListProperty<RegularFile>
 
-    val experimentalProperties: MapProperty<String, Any>
+    val properties: MapProperty<String, Any>
 }

@@ -79,7 +79,6 @@ import org.gradle.api.provider.Property;
  * {@link #getReferencedScopes()} to indicate what to read instead.
  */
 @SuppressWarnings("MethodMayBeStatic")
-@Deprecated
 public abstract class Transform {
 
     /**

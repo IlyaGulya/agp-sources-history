@@ -20,10 +20,13 @@ package com.android.builder.packaging;
 import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.builder.core.ManifestAttributeSupplier;
+import com.android.sdklib.AndroidVersion;
 import com.android.tools.build.apkzlib.zfile.NativeLibrariesPackagingMode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import java.io.File;
 import java.util.Collection;
@@ -46,9 +49,6 @@ public class PackagingUtils {
                     ".aac", ".mpg", ".mpeg", ".mid", ".midi", ".smf", ".jet", ".rtttl", ".imy",
                     ".xmf", ".mp4", ".m4a", ".m4v", ".3gp", ".3gpp", ".3g2", ".3gpp2", ".amr",
                     ".awb", ".wma", ".wmv", ".webm", ".mkv", ".webp");
-
-    public static final ImmutableList<String> DEFAULT_NO_COMPRESS_FILE_NAMES =
-            ImmutableList.of(SdkConstants.FN_BINARY_ART_PROFILE);
 
     /** Set of characters that need to be escaped when creating an ECMAScript regular expression. */
     public static final ImmutableSet<Character> ECMA_SCRIPT_ESCAPABLE_CHARACTERS =
@@ -130,38 +130,30 @@ public class PackagingUtils {
             @Nullable Collection<String> aaptOptionsNoCompress,
             @NonNull NativeLibrariesPackagingMode nativeLibsPackagingMode,
             @NonNull DexPackagingMode dexPackagingMode) {
-        ImmutableList.Builder<String> finalList = ImmutableList.builder();
-        finalList.addAll(getAllNoCompressFileNames());
-        getAllNoCompressExtensions(
-                finalList, aaptOptionsNoCompress, nativeLibsPackagingMode, dexPackagingMode);
-        return getNoCompressPredicateForExtensions(finalList.build());
+        return getNoCompressPredicateForExtensions(
+                getAllNoCompressExtensions(
+                        aaptOptionsNoCompress, nativeLibsPackagingMode, dexPackagingMode));
     }
 
     @NonNull
     public static Predicate<String> getNoCompressPredicateForJavaRes(
             @NonNull Collection<String> aaptOptionsNoCompress) {
-        ImmutableList.Builder<String> finalList = ImmutableList.builder();
-        getAllNoCompressExtensions(
-                finalList,
-                aaptOptionsNoCompress,
-                NativeLibrariesPackagingMode.COMPRESSED,
-                DexPackagingMode.COMPRESSED);
-
-        return getNoCompressPredicateForExtensions(finalList.build());
+        return getNoCompressPredicateForExtensions(
+                getAllNoCompressExtensions(
+                        aaptOptionsNoCompress,
+                        NativeLibrariesPackagingMode.COMPRESSED,
+                        DexPackagingMode.COMPRESSED));
     }
 
     @NonNull
     public static List<String> getNoCompressGlobsForBundle(
             @NonNull Collection<String> aaptOptionsNoCompress) {
-        ImmutableList.Builder<String> extensions = ImmutableList.builder();
-        getAllNoCompressExtensions(
-                extensions,
-                aaptOptionsNoCompress,
-                NativeLibrariesPackagingMode.COMPRESSED,
-                // TODO(b/161461387) Does bundletool automatically uncompress dex for P+?
-                DexPackagingMode.COMPRESSED);
-
-        return extensions.build().stream()
+        return getAllNoCompressExtensions(
+                        aaptOptionsNoCompress,
+                        NativeLibrariesPackagingMode.COMPRESSED,
+                        // TODO(b/161461387) Does bundletool automatically uncompress dex for P+?
+                        DexPackagingMode.COMPRESSED)
+                .stream()
                 .map(PackagingUtils::toCaseInsensitiveGlobForBundle)
                 .sorted()
                 .collect(ImmutableList.toImmutableList());
@@ -274,30 +266,26 @@ public class PackagingUtils {
         };
     }
 
-    private static List<String> getAllNoCompressFileNames() {
-        return DEFAULT_NO_COMPRESS_FILE_NAMES;
-    }
-
     @NonNull
-    private static void getAllNoCompressExtensions(
-            @NonNull ImmutableList.Builder<String> into,
+    private static List<String> getAllNoCompressExtensions(
             @Nullable Collection<String> aaptOptionsNoCompress,
             @NonNull NativeLibrariesPackagingMode nativeLibrariesPackagingMode,
             @NonNull DexPackagingMode dexPackagingMode) {
-        into.addAll(DEFAULT_AAPT_NO_COMPRESS_EXTENSIONS);
+        List<String> result = Lists.newArrayList(DEFAULT_AAPT_NO_COMPRESS_EXTENSIONS);
 
         // .tflite files should always be uncompressed (Issue 152875817)
-        into.add(SdkConstants.DOT_TFLITE);
+        result.add(SdkConstants.DOT_TFLITE);
 
         if (nativeLibrariesPackagingMode == NativeLibrariesPackagingMode.UNCOMPRESSED_AND_ALIGNED) {
-            into.add(SdkConstants.DOT_NATIVE_LIBS);
+            result.add(SdkConstants.DOT_NATIVE_LIBS);
         }
         if (dexPackagingMode == DexPackagingMode.UNCOMPRESSED) {
-            into.add(SdkConstants.DOT_DEX);
+            result.add(SdkConstants.DOT_DEX);
         }
 
         if (aaptOptionsNoCompress != null) {
-            into.addAll(aaptOptionsNoCompress);
+            result.addAll(aaptOptionsNoCompress);
         }
+        return result;
     }
 }

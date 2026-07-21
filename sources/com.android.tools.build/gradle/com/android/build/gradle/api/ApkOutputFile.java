@@ -32,10 +32,9 @@ import java.util.function.Function;
 /**
  * Represents a resource output from a variant configuration.
  *
- * <p>Depending on split requirements, there can be more than one output from aapt tool and each
+ * Depending on split requirements, there can be more than one output from aapt tool and each
  * output file is represented by an instance of this class.
  */
-@Deprecated
 public class ApkOutputFile implements OutputFile, Serializable {
 
     @NonNull private final Collection<FilterData> filters;

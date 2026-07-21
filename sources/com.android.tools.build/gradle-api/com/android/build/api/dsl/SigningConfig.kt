@@ -63,9 +63,4 @@ interface SigningConfig: Named {
      * See [Signing Your Applications](http://developer.android.com/tools/publishing/app-signing.html)
      */
     var storeType: String?
-
-    /**
-     * Copies all properties from the given signing config.
-     */
-    fun initWith(that: SigningConfig)
 }

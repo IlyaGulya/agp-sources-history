@@ -70,7 +70,7 @@ abstract class PlatformAttrTransform : TransformAction<GenericTransformParameter
 
 data class AttributeValue(val name: String, val value: Int)
 
-class CustomClassVisitor : ClassVisitor(Opcodes.ASM7) {
+class CustomClassVisitor : ClassVisitor(Opcodes.ASM5) {
 
     val attributes: MutableList<AttributeValue> = Lists.newArrayList()
 
@@ -83,10 +83,6 @@ class CustomClassVisitor : ClassVisitor(Opcodes.ASM7) {
     ): FieldVisitor? {
         if (value is Int) {
             attributes.add(AttributeValue(name!!, value))
-        } else if (desc.equals("I") && value == null) {
-            // Workaround for b/188629419 - where attributes with 0 value are kept with null value
-            // instead.
-            attributes.add(AttributeValue(name!!, 0))
         }
         return null
     }

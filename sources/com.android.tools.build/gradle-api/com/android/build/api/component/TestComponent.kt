@@ -16,14 +16,4 @@
 
 package com.android.build.api.component
 
-@Deprecated(
-    message= "Use the com.android.build.api.variant package",
-    replaceWith = ReplaceWith(
-        "TestComponent",
-        "com.android.build.api.variant.TestComponent"
-    ),
-    level = DeprecationLevel.WARNING
-)
-interface TestComponent :
-    Component,
-    com.android.build.api.variant.TestComponent
+interface TestComponent : Component

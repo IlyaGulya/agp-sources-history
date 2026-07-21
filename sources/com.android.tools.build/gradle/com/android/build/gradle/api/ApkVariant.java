@@ -22,7 +22,6 @@ import com.android.build.gradle.tasks.PackageAndroidArtifact;
 import org.gradle.api.tasks.TaskProvider;
 
 /** A Build variant and all its public data. */
-@Deprecated
 public interface ApkVariant
         extends BaseVariant, InstallableVariant, AndroidArtifactVariant, InternalBaseVariant {
 

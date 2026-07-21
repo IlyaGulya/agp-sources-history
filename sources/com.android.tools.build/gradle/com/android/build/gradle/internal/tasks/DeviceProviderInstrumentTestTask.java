@@ -31,7 +31,6 @@ import static com.android.builder.model.TestOptions.Execution.ANDROID_TEST_ORCHE
 import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
-import com.android.build.api.component.impl.ComponentImpl;
 import com.android.build.api.component.impl.TestComponentImpl;
 import com.android.build.gradle.BaseExtension;
 import com.android.build.gradle.internal.BuildToolsExecutableInput;
@@ -40,14 +39,13 @@ import com.android.build.gradle.internal.SdkComponentsBuildService;
 import com.android.build.gradle.internal.SdkComponentsKt;
 import com.android.build.gradle.internal.component.VariantCreationConfig;
 import com.android.build.gradle.internal.dsl.EmulatorSnapshots;
-import com.android.build.gradle.internal.process.GradleJavaProcessExecutor;
 import com.android.build.gradle.internal.process.GradleProcessExecutor;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.services.BuildServicesKt;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
 import com.android.build.gradle.internal.test.AbstractTestDataImpl;
-import com.android.build.gradle.internal.test.TestsAnalytics;
+import com.android.build.gradle.internal.test.InstrumentationTestAnalytics;
 import com.android.build.gradle.internal.test.report.CompositeTestResults;
 import com.android.build.gradle.internal.test.report.ReportType;
 import com.android.build.gradle.internal.test.report.TestReport;
@@ -70,7 +68,6 @@ import com.android.builder.model.TestOptions;
 import com.android.builder.testing.api.DeviceConnector;
 import com.android.builder.testing.api.DeviceException;
 import com.android.builder.testing.api.DeviceProvider;
-import com.android.ide.common.process.JavaProcessExecutor;
 import com.android.ide.common.workers.ExecutorServiceAdapter;
 import com.android.utils.FileUtils;
 import com.android.utils.StringHelper;
@@ -101,7 +98,6 @@ import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
-import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
@@ -114,6 +110,7 @@ import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.options.Option;
 import org.gradle.internal.logging.ConsoleRenderer;
 import org.gradle.process.ExecOperations;
+import org.gradle.workers.WorkerExecutor;
 
 /** Run instrumentation tests for a given variant */
 public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTask
@@ -178,12 +175,11 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
         public abstract BuildToolsExecutableInput getBuildTools();
 
         TestRunner createTestRunner(
+                WorkerExecutor workerExecutor,
                 ExecutorServiceAdapter executorServiceAdapter,
                 @Nullable UtpTestResultListener utpTestResultListener) {
             GradleProcessExecutor gradleProcessExecutor =
                     new GradleProcessExecutor(getExecOperations()::exec);
-            JavaProcessExecutor javaProcessExecutor =
-                    new GradleJavaProcessExecutor(getExecOperations()::javaexec);
 
             if (getUnifiedTestPlatform().get()) {
                 boolean useOrchestrator =
@@ -192,7 +188,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
                 return new UtpTestRunner(
                         getBuildTools().splitSelectExecutable().getOrNull(),
                         gradleProcessExecutor,
-                        javaProcessExecutor,
+                        workerExecutor,
                         executorServiceAdapter,
                         getUtpDependencies(),
                         getSdkBuildService()
@@ -331,6 +327,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
                                 TestRunner testRunner =
                                         getTestRunnerFactory()
                                                 .createTestRunner(
+                                                        getWorkerExecutor(),
                                                         getExecutorServiceAdapter(),
                                                         utpTestResultListener);
                                 Collection<String> extraArgs =
@@ -351,7 +348,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
                                             coverageOutDir,
                                             new LoggerWrapper(getLogger()));
                                 } catch (Exception e) {
-                                    TestsAnalytics.recordCrashedInstrumentedTestRun(
+                                    InstrumentationTestAnalytics.recordCrashedTestRun(
                                             dependencies,
                                             getTestRunnerFactory().getExecutionEnum().get(),
                                             getCodeCoverageEnabled().get(),
@@ -368,7 +365,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
         TestReport report = new TestReport(ReportType.SINGLE_FLAVOR, resultsOutDir, reportOutDir);
         CompositeTestResults results = report.generateReport();
 
-        TestsAnalytics.recordOkInstrumentedTestRun(
+        InstrumentationTestAnalytics.recordOkTestRun(
                 dependencies,
                 getTestRunnerFactory().getExecutionEnum().get(),
                 getCodeCoverageEnabled().get(),
@@ -464,10 +461,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
      * @return true if there are some tests to run, false otherwise
      */
     private boolean testsFound() {
-        return getTestData()
-                .get()
-                .hasTests(getClasses(), getRClasses(), getBuildConfigClasses())
-                .get();
+        return getTestData().get().getHasTests().get();
     }
 
     @OutputDirectory
@@ -502,18 +496,6 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
 
     @Nested
     public abstract DeviceProviderFactory getDeviceProviderFactory();
-
-    @Classpath
-    @Optional
-    public abstract ConfigurableFileCollection getClasses();
-
-    @Classpath
-    @Optional
-    public abstract ConfigurableFileCollection getBuildConfigClasses();
-
-    @Classpath
-    @Optional
-    public abstract ConfigurableFileCollection getRClasses();
 
     @Option(
             option = "serial",
@@ -827,20 +809,8 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
                 task.getBuddyApks().from(androidTestUtil);
             }
 
-            // This task should never be UP-TO-DATE as we don't model the device state as input yet.
+            // This task should not be UP-TO-DATE as we don't model the device state as input yet.
             task.getOutputs().upToDateWhen(it -> false);
-
-            task.getClasses().from(creationConfig.getArtifacts().getAllClasses());
-            task.getClasses().disallowChanges();
-            task.getBuildConfigClasses()
-                    .from(((ComponentImpl) creationConfig).getCompiledBuildConfig());
-            task.getBuildConfigClasses().disallowChanges();
-            task.getRClasses()
-                    .from(
-                            ((ComponentImpl) creationConfig)
-                                    .getCompiledRClasses(
-                                            AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH));
-            task.getRClasses().disallowChanges();
         }
     }
 }

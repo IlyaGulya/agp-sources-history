@@ -44,7 +44,6 @@ import javax.lang.model.SourceVersion
  * generate the `R.java` file.
  */
 private const val ANDROID_ATTR_PREFIX = "android_"
-val EMPTY: SymbolTable = SymbolTable.builder().build()
 
 @Immutable
 abstract class SymbolTable protected constructor() {

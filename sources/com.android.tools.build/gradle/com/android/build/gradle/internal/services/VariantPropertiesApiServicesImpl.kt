@@ -31,8 +31,7 @@ import java.io.File
 import java.util.concurrent.Callable
 
 class VariantPropertiesApiServicesImpl(
-    projectServices: ProjectServices,
-    private val forUnitTesting: Boolean = false,
+    projectServices: ProjectServices
 ): BaseServicesImpl(projectServices),
     VariantPropertiesApiServices {
     // list of properties to lock when [.lockProperties] is called.
@@ -48,9 +47,10 @@ class VariantPropertiesApiServicesImpl(
         return initializeProperty(type, id).also {
             it.set(value)
             it.finalizeValueOnRead()
-            if (!forUnitTesting) {
-                it.disallowUnsafeRead()
-            }
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
+
             delayedLock(it)
         }
     }
@@ -59,9 +59,10 @@ class VariantPropertiesApiServicesImpl(
         return initializeProperty(type, id).also {
             it.set(value)
             it.finalizeValueOnRead()
-            if (!forUnitTesting) {
-                it.disallowUnsafeRead()
-            }
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
+
             delayedLock(it)
         }
     }
@@ -70,9 +71,10 @@ class VariantPropertiesApiServicesImpl(
         return initializeNullableProperty(type, "").also {
             it.set(value)
             it.finalizeValueOnRead()
-            if (!forUnitTesting) {
-                it.disallowUnsafeRead()
-            }
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
+
             delayedLock(it)
         }
     }
@@ -81,9 +83,10 @@ class VariantPropertiesApiServicesImpl(
         return initializeProperty(type, id).also {
             it.set(projectServices.providerFactory.provider(value))
             it.finalizeValueOnRead()
-            if (!forUnitTesting) {
-                it.disallowUnsafeRead()
-            }
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
+
             delayedLock(it)
         }
     }
@@ -92,9 +95,10 @@ class VariantPropertiesApiServicesImpl(
         return initializeProperty(type, id).also {
             it.set(projectServices.providerFactory.provider(value))
             it.finalizeValueOnRead()
-            if (!forUnitTesting) {
-                it.disallowUnsafeRead()
-            }
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
+
             delayedLock(it)
         }
     }
@@ -103,9 +107,10 @@ class VariantPropertiesApiServicesImpl(
         return initializeNullableProperty(type, id).also {
             it.set(value)
             it.finalizeValueOnRead()
-            if (!forUnitTesting) {
-                it.disallowUnsafeRead()
-            }
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
+
             delayedLock(it)
         }
     }
@@ -114,24 +119,22 @@ class VariantPropertiesApiServicesImpl(
         return initializeNullableProperty(type, id).also {
             it.set(value)
             it.finalizeValueOnRead()
-            if (!forUnitTesting) {
-                it.disallowUnsafeRead()
-            }
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
+
             delayedLock(it)
         }
     }
 
-    override fun <T> listPropertyOf(
-        type: Class<T>,
-        value: Collection<T>,
-        disallowUnsafeRead: Boolean
-    ): ListProperty<T> {
+    override fun <T> listPropertyOf(type: Class<T>, value: Collection<T>): ListProperty<T> {
         return projectServices.objectFactory.listProperty(type).also {
             it.set(value)
             it.finalizeValueOnRead()
-            if (disallowUnsafeRead && !forUnitTesting) {
-                it.disallowUnsafeRead()
-            }
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
+
             delayedLock(it)
         }
     }
@@ -140,24 +143,22 @@ class VariantPropertiesApiServicesImpl(
         return projectServices.objectFactory.setProperty(type).also {
             it.set(projectServices.providerFactory.provider(value))
             it.finalizeValueOnRead()
-            if (!forUnitTesting) {
-                it.disallowUnsafeRead()
-            }
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
+
             delayedLock(it)
         }
     }
 
-    override fun <T> setPropertyOf(
-        type: Class<T>,
-        value: Collection<T>,
-        disallowUnsafeRead: Boolean
-    ): SetProperty<T> {
+    override fun <T> setPropertyOf(type: Class<T>, value: Collection<T>): SetProperty<T> {
         return projectServices.objectFactory.setProperty(type).also {
             it.set(value)
             it.finalizeValueOnRead()
-            if (disallowUnsafeRead && !forUnitTesting) {
-                it.disallowUnsafeRead()
-            }
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
+
             delayedLock(it)
         }
     }
@@ -170,9 +171,10 @@ class VariantPropertiesApiServicesImpl(
         return projectServices.objectFactory.mapProperty(keyType, valueType).also {
             it.set(value)
             it.finalizeValueOnRead()
-            if (!forUnitTesting) {
-                it.disallowUnsafeRead()
-            }
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
+
             delayedLock(it)
         }
     }
@@ -182,10 +184,11 @@ class VariantPropertiesApiServicesImpl(
             it.set(value)
             if (!compatibilityMode) {
                 it.finalizeValueOnRead()
-                if (!forUnitTesting) {
-                    it.disallowUnsafeRead()
-                }
+
+                // FIXME when Gradle supports this
+                // it.preventGet()
             }
+
             delayedLock(it)
         }
     }
@@ -195,10 +198,11 @@ class VariantPropertiesApiServicesImpl(
             it.set(projectServices.providerFactory.provider(value))
             if (!compatibilityMode) {
                 it.finalizeValueOnRead()
-                if (!forUnitTesting) {
-                    it.disallowUnsafeRead()
-                }
+
+                // FIXME when Gradle supports this
+                // it.preventGet()
             }
+
             delayedLock(it)
         }
     }
@@ -208,10 +212,12 @@ class VariantPropertiesApiServicesImpl(
             it.set(value)
             if (!compatibilityMode) {
                 it.finalizeValueOnRead()
-                if (!forUnitTesting) {
-                    it.disallowUnsafeRead()
-                }
+
+                // FIXME when Gradle supports this
+                // it.preventGet()
             }
+
+
             delayedLock(it)
         }
     }
@@ -222,26 +228,22 @@ class VariantPropertiesApiServicesImpl(
             it.set(value)
             if (!compatibilityMode) {
                 it.finalizeValueOnRead()
-                if (!forUnitTesting) {
-                    it.disallowUnsafeRead()
-                }
+
+                // FIXME when Gradle supports this
+                // it.preventGet()
             }
+
             delayedLock(it)
         }
     }
 
-    override fun <T> providerOf(
-        type: Class<T>,
-        value: Provider<T>,
-        id: String,
-        disallowUnsafeRead: Boolean,
-    ): Provider<T> {
+    override fun <T> providerOf(type: Class<T>, value: Provider<T>, id: String): Provider<T> {
         return initializeProperty(type, id).also {
             it.set(value)
             it.disallowChanges()
-            if (disallowUnsafeRead && !forUnitTesting) {
-                it.disallowUnsafeRead()
-            }
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
         }
     }
 
@@ -250,9 +252,9 @@ class VariantPropertiesApiServicesImpl(
             it.set(value)
             it.disallowChanges()
             it.finalizeValueOnRead()
-            if (!forUnitTesting) {
-                it.disallowUnsafeRead()
-            }
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
         }
     }
 
@@ -261,9 +263,9 @@ class VariantPropertiesApiServicesImpl(
             it.set(value)
             it.disallowChanges()
             it.finalizeValueOnRead()
-            if (!forUnitTesting) {
-                it.disallowUnsafeRead()
-            }
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
         }
     }
 
@@ -272,9 +274,9 @@ class VariantPropertiesApiServicesImpl(
             it.set(value)
             it.disallowChanges()
             it.finalizeValueOnRead()
-            if (!forUnitTesting) {
-                it.disallowUnsafeRead()
-            }
+
+            // FIXME when Gradle supports this
+            // it.preventGet()
         }
     }
 

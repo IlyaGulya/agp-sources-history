@@ -52,7 +52,7 @@ import javax.inject.Inject
 open class UnitTestImpl @Inject constructor(
     componentIdentity: ComponentIdentity,
     buildFeatureValues: BuildFeatureValues,
-    variantDslInfo: VariantDslInfo,
+    variantDslInfo: VariantDslInfo<*>,
     variantDependencies: VariantDependencies,
     variantSources: VariantSources,
     paths: VariantPathHelper,
@@ -134,13 +134,8 @@ open class UnitTestImpl @Inject constructor(
         }
 
     /**
-     * for unit tests, the placeholders are from the tested variant.
+     * for unit tests, the placeholders are always empty.
      */
-    override val manifestPlaceholders: MapProperty<String, String> by lazy {
-        internalServices.mapPropertyOf(
-                String::class.java,
-                String::class.java,
-                variantDslInfo.manifestPlaceholders
-        )
-    }
+    override val manifestPlaceholders: MapProperty<String, String> =
+            internalServices.mapPropertyOf(String::class.java, String::class.java, mapOf())
 }

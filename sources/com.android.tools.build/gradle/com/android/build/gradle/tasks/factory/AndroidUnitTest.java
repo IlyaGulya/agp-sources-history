@@ -29,14 +29,12 @@ import com.android.build.gradle.internal.SdkComponentsBuildService;
 import com.android.build.gradle.internal.component.ComponentCreationConfig;
 import com.android.build.gradle.internal.component.UnitTestCreationConfig;
 import com.android.build.gradle.internal.component.VariantCreationConfig;
-import com.android.build.gradle.internal.publishing.AndroidArtifacts;
 import com.android.build.gradle.internal.scope.BootClasspathBuilder;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.tasks.VariantAwareTask;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
 import com.android.build.gradle.options.BooleanOption;
-import com.android.build.gradle.tasks.AndroidAnalyticsTestListener;
 import com.android.build.gradle.tasks.GenerateTestConfig;
 import com.android.builder.core.VariantType;
 import com.google.common.collect.ImmutableList;
@@ -45,7 +43,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 import org.gradle.api.Task;
-import org.gradle.api.artifacts.ArtifactCollection;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.plugins.JavaBasePlugin;
@@ -55,7 +52,6 @@ import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.Optional;
-import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.api.tasks.testing.TestTaskReports;
@@ -68,8 +64,6 @@ import org.jetbrains.annotations.NotNull;
 public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
 
     private String variantName;
-
-    private ArtifactCollection dependencies;
 
     @Nullable private GenerateTestConfig.TestConfigInputs testConfigInputs;
 
@@ -93,23 +87,6 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
 
     @Internal
     abstract RegularFileProperty getJacocoCoverageOutputFile();
-
-    @Override
-    @TaskAction
-    public void executeTests() {
-        // Get the Jacoco extension to determine later if we have cove coverage enabled.
-        JacocoTaskExtension jcoExtension = getExtensions().findByType(JacocoTaskExtension.class);
-
-        AndroidAnalyticsTestListener testListener =
-                new AndroidAnalyticsTestListener(
-                        dependencies,
-                        jcoExtension != null && jcoExtension.isEnabled(),
-                        getAnalyticsService().get(),
-                        this.getFilter());
-        this.addTestListener(testListener);
-
-        super.executeTests();
-    }
 
     public static class CreationAction
             extends VariantTaskCreationAction<AndroidUnitTest, ComponentCreationConfig> {
@@ -242,14 +219,6 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
                                     ((thisTask) ->
                                             includeAndroidResources
                                                     && !useRelativePathInTestConfig));
-
-            task.dependencies =
-                    creationConfig
-                            .getVariantDependencies()
-                            .getArtifactCollection(
-                                    AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
-                                    AndroidArtifacts.ArtifactScope.EXTERNAL,
-                                    AndroidArtifacts.ArtifactType.CLASSES_JAR);
         }
 
         @NonNull
@@ -283,7 +252,12 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
 
             // 4. The separately compile R class, if applicable.
             if (creationConfig.getBuildFeatures().getAndroidResources()
-                    && !globalScope.getExtension().getAaptOptions().getNamespaced()) {
+                    && !creationConfig
+                            .getServices()
+                            .getProjectInfo()
+                            .getExtension()
+                            .getAaptOptions()
+                            .getNamespaced()) {
                 collection.from(creationConfig.getVariantScope().getRJarForUnitTests());
             }
 
