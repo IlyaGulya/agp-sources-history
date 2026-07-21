@@ -44,6 +44,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          imported=0
 
           for version in $VERSIONS; do
             ./gradlew dumpSources -PagpVersion="$version"
@@ -54,6 +55,13 @@ jobs:
             git add --all sources .agp-version
             git commit -m "AGP $version"
             git tag -f -a "agp-$version" -m "Android Gradle Plugin $version sources"
+
+            imported=$((imported + 1))
+            if (( imported % 20 == 0 )); then
+              git push origin "HEAD:${GITHUB_REF_NAME}"
+              git push origin --force --tags
+              git gc
+            fi
           done
 
           git push origin "HEAD:${GITHUB_REF_NAME}"
