@@ -24,7 +24,6 @@ private static final long serialVersionUID = 0L;
     groupId_ = "";
     buildToolsVersion_ = "";
     desugaredMethodsFiles_ = java.util.Collections.emptyList();
-    buildName_ = "";
   }
 
   @java.lang.Override
@@ -162,15 +161,9 @@ private static final long serialVersionUID = 0L;
                 input.readMessage(com.android.builder.model.proto.ide.File.parser(), extensionRegistry));
             break;
           }
-          case 106: {
-            java.lang.String s = input.readStringRequireUtf8();
-            bitField0_ |= 0x00000100;
-            buildName_ = s;
-            break;
-          }
           case 114: {
             com.android.builder.model.proto.ide.File.Builder subBuilder = null;
-            if (((bitField0_ & 0x00000200) != 0)) {
+            if (((bitField0_ & 0x00000100) != 0)) {
               subBuilder = rootBuildId_.toBuilder();
             }
             rootBuildId_ = input.readMessage(com.android.builder.model.proto.ide.File.parser(), extensionRegistry);
@@ -178,12 +171,12 @@ private static final long serialVersionUID = 0L;
               subBuilder.mergeFrom(rootBuildId_);
               rootBuildId_ = subBuilder.buildPartial();
             }
-            bitField0_ |= 0x00000200;
+            bitField0_ |= 0x00000100;
             break;
           }
           case 122: {
             com.android.builder.model.proto.ide.File.Builder subBuilder = null;
-            if (((bitField0_ & 0x00000400) != 0)) {
+            if (((bitField0_ & 0x00000200) != 0)) {
               subBuilder = buildId_.toBuilder();
             }
             buildId_ = input.readMessage(com.android.builder.model.proto.ide.File.parser(), extensionRegistry);
@@ -191,7 +184,7 @@ private static final long serialVersionUID = 0L;
               subBuilder.mergeFrom(buildId_);
               buildId_ = subBuilder.buildPartial();
             }
-            bitField0_ |= 0x00000400;
+            bitField0_ |= 0x00000200;
             break;
           }
           default: {
@@ -877,64 +870,6 @@ private static final long serialVersionUID = 0L;
     return desugaredMethodsFiles_.get(index);
   }
 
-  public static final int BUILD_NAME_FIELD_NUMBER = 13;
-  private volatile java.lang.Object buildName_;
-  /**
-   * <pre>
-   * The name of the build this project belongs to.
-   * </pre>
-   *
-   * <code>optional string build_name = 13;</code>
-   * @return Whether the buildName field is set.
-   */
-  @java.lang.Override
-  public boolean hasBuildName() {
-    return ((bitField0_ & 0x00000100) != 0);
-  }
-  /**
-   * <pre>
-   * The name of the build this project belongs to.
-   * </pre>
-   *
-   * <code>optional string build_name = 13;</code>
-   * @return The buildName.
-   */
-  @java.lang.Override
-  public java.lang.String getBuildName() {
-    java.lang.Object ref = buildName_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      buildName_ = s;
-      return s;
-    }
-  }
-  /**
-   * <pre>
-   * The name of the build this project belongs to.
-   * </pre>
-   *
-   * <code>optional string build_name = 13;</code>
-   * @return The bytes for buildName.
-   */
-  @java.lang.Override
-  public com.google.protobuf.ByteString
-      getBuildNameBytes() {
-    java.lang.Object ref = buildName_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      buildName_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
   public static final int ROOT_BUILD_ID_FIELD_NUMBER = 14;
   private com.android.builder.model.proto.ide.File rootBuildId_;
   /**
@@ -947,7 +882,7 @@ private static final long serialVersionUID = 0L;
    */
   @java.lang.Override
   public boolean hasRootBuildId() {
-    return ((bitField0_ & 0x00000200) != 0);
+    return ((bitField0_ & 0x00000100) != 0);
   }
   /**
    * <pre>
@@ -986,7 +921,7 @@ private static final long serialVersionUID = 0L;
    */
   @java.lang.Override
   public boolean hasBuildId() {
-    return ((bitField0_ & 0x00000400) != 0);
+    return ((bitField0_ & 0x00000200) != 0);
   }
   /**
    * <pre>
@@ -1065,12 +1000,9 @@ private static final long serialVersionUID = 0L;
       output.writeMessage(12, desugaredMethodsFiles_.get(i));
     }
     if (((bitField0_ & 0x00000100) != 0)) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 13, buildName_);
-    }
-    if (((bitField0_ & 0x00000200) != 0)) {
       output.writeMessage(14, getRootBuildId());
     }
-    if (((bitField0_ & 0x00000400) != 0)) {
+    if (((bitField0_ & 0x00000200) != 0)) {
       output.writeMessage(15, getBuildId());
     }
     unknownFields.writeTo(output);
@@ -1127,13 +1059,10 @@ private static final long serialVersionUID = 0L;
         .computeMessageSize(12, desugaredMethodsFiles_.get(i));
     }
     if (((bitField0_ & 0x00000100) != 0)) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, buildName_);
-    }
-    if (((bitField0_ & 0x00000200) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(14, getRootBuildId());
     }
-    if (((bitField0_ & 0x00000400) != 0)) {
+    if (((bitField0_ & 0x00000200) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(15, getBuildId());
     }
@@ -1200,11 +1129,6 @@ private static final long serialVersionUID = 0L;
     }
     if (!getDesugaredMethodsFilesList()
         .equals(other.getDesugaredMethodsFilesList())) return false;
-    if (hasBuildName() != other.hasBuildName()) return false;
-    if (hasBuildName()) {
-      if (!getBuildName()
-          .equals(other.getBuildName())) return false;
-    }
     if (hasRootBuildId() != other.hasRootBuildId()) return false;
     if (hasRootBuildId()) {
       if (!getRootBuildId()
@@ -1274,10 +1198,6 @@ private static final long serialVersionUID = 0L;
     if (getDesugaredMethodsFilesCount() > 0) {
       hash = (37 * hash) + DESUGARED_METHODS_FILES_FIELD_NUMBER;
       hash = (53 * hash) + getDesugaredMethodsFilesList().hashCode();
-    }
-    if (hasBuildName()) {
-      hash = (37 * hash) + BUILD_NAME_FIELD_NUMBER;
-      hash = (53 * hash) + getBuildName().hashCode();
     }
     if (hasRootBuildId()) {
       hash = (37 * hash) + ROOT_BUILD_ID_FIELD_NUMBER;
@@ -1481,20 +1401,18 @@ private static final long serialVersionUID = 0L;
       } else {
         desugaredMethodsFilesBuilder_.clear();
       }
-      buildName_ = "";
-      bitField0_ = (bitField0_ & ~0x00001000);
       if (rootBuildIdBuilder_ == null) {
         rootBuildId_ = null;
       } else {
         rootBuildIdBuilder_.clear();
       }
-      bitField0_ = (bitField0_ & ~0x00002000);
+      bitField0_ = (bitField0_ & ~0x00001000);
       if (buildIdBuilder_ == null) {
         buildId_ = null;
       } else {
         buildIdBuilder_.clear();
       }
-      bitField0_ = (bitField0_ & ~0x00004000);
+      bitField0_ = (bitField0_ & ~0x00002000);
       return this;
     }
 
@@ -1604,24 +1522,20 @@ private static final long serialVersionUID = 0L;
         result.desugaredMethodsFiles_ = desugaredMethodsFilesBuilder_.build();
       }
       if (((from_bitField0_ & 0x00001000) != 0)) {
-        to_bitField0_ |= 0x00000100;
-      }
-      result.buildName_ = buildName_;
-      if (((from_bitField0_ & 0x00002000) != 0)) {
         if (rootBuildIdBuilder_ == null) {
           result.rootBuildId_ = rootBuildId_;
         } else {
           result.rootBuildId_ = rootBuildIdBuilder_.build();
         }
-        to_bitField0_ |= 0x00000200;
+        to_bitField0_ |= 0x00000100;
       }
-      if (((from_bitField0_ & 0x00004000) != 0)) {
+      if (((from_bitField0_ & 0x00002000) != 0)) {
         if (buildIdBuilder_ == null) {
           result.buildId_ = buildId_;
         } else {
           result.buildId_ = buildIdBuilder_.build();
         }
-        to_bitField0_ |= 0x00000400;
+        to_bitField0_ |= 0x00000200;
       }
       result.bitField0_ = to_bitField0_;
       onBuilt();
@@ -1807,11 +1721,6 @@ private static final long serialVersionUID = 0L;
             desugaredMethodsFilesBuilder_.addAllMessages(other.desugaredMethodsFiles_);
           }
         }
-      }
-      if (other.hasBuildName()) {
-        bitField0_ |= 0x00001000;
-        buildName_ = other.buildName_;
-        onChanged();
       }
       if (other.hasRootBuildId()) {
         mergeRootBuildId(other.getRootBuildId());
@@ -4138,113 +4047,6 @@ private static final long serialVersionUID = 0L;
       return desugaredMethodsFilesBuilder_;
     }
 
-    private java.lang.Object buildName_ = "";
-    /**
-     * <pre>
-     * The name of the build this project belongs to.
-     * </pre>
-     *
-     * <code>optional string build_name = 13;</code>
-     * @return Whether the buildName field is set.
-     */
-    public boolean hasBuildName() {
-      return ((bitField0_ & 0x00001000) != 0);
-    }
-    /**
-     * <pre>
-     * The name of the build this project belongs to.
-     * </pre>
-     *
-     * <code>optional string build_name = 13;</code>
-     * @return The buildName.
-     */
-    public java.lang.String getBuildName() {
-      java.lang.Object ref = buildName_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        buildName_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <pre>
-     * The name of the build this project belongs to.
-     * </pre>
-     *
-     * <code>optional string build_name = 13;</code>
-     * @return The bytes for buildName.
-     */
-    public com.google.protobuf.ByteString
-        getBuildNameBytes() {
-      java.lang.Object ref = buildName_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        buildName_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <pre>
-     * The name of the build this project belongs to.
-     * </pre>
-     *
-     * <code>optional string build_name = 13;</code>
-     * @param value The buildName to set.
-     * @return This builder for chaining.
-     */
-    public Builder setBuildName(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00001000;
-      buildName_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * The name of the build this project belongs to.
-     * </pre>
-     *
-     * <code>optional string build_name = 13;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearBuildName() {
-      bitField0_ = (bitField0_ & ~0x00001000);
-      buildName_ = getDefaultInstance().getBuildName();
-      onChanged();
-      return this;
-    }
-    /**
-     * <pre>
-     * The name of the build this project belongs to.
-     * </pre>
-     *
-     * <code>optional string build_name = 13;</code>
-     * @param value The bytes for buildName to set.
-     * @return This builder for chaining.
-     */
-    public Builder setBuildNameBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00001000;
-      buildName_ = value;
-      onChanged();
-      return this;
-    }
-
     private com.android.builder.model.proto.ide.File rootBuildId_;
     private com.google.protobuf.SingleFieldBuilderV3<
         com.android.builder.model.proto.ide.File, com.android.builder.model.proto.ide.File.Builder, com.android.builder.model.proto.ide.FileOrBuilder> rootBuildIdBuilder_;
@@ -4257,7 +4059,7 @@ private static final long serialVersionUID = 0L;
      * @return Whether the rootBuildId field is set.
      */
     public boolean hasRootBuildId() {
-      return ((bitField0_ & 0x00002000) != 0);
+      return ((bitField0_ & 0x00001000) != 0);
     }
     /**
      * <pre>
@@ -4291,7 +4093,7 @@ private static final long serialVersionUID = 0L;
       } else {
         rootBuildIdBuilder_.setMessage(value);
       }
-      bitField0_ |= 0x00002000;
+      bitField0_ |= 0x00001000;
       return this;
     }
     /**
@@ -4309,7 +4111,7 @@ private static final long serialVersionUID = 0L;
       } else {
         rootBuildIdBuilder_.setMessage(builderForValue.build());
       }
-      bitField0_ |= 0x00002000;
+      bitField0_ |= 0x00001000;
       return this;
     }
     /**
@@ -4321,7 +4123,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder mergeRootBuildId(com.android.builder.model.proto.ide.File value) {
       if (rootBuildIdBuilder_ == null) {
-        if (((bitField0_ & 0x00002000) != 0) &&
+        if (((bitField0_ & 0x00001000) != 0) &&
             rootBuildId_ != null &&
             rootBuildId_ != com.android.builder.model.proto.ide.File.getDefaultInstance()) {
           rootBuildId_ =
@@ -4333,7 +4135,7 @@ private static final long serialVersionUID = 0L;
       } else {
         rootBuildIdBuilder_.mergeFrom(value);
       }
-      bitField0_ |= 0x00002000;
+      bitField0_ |= 0x00001000;
       return this;
     }
     /**
@@ -4350,7 +4152,7 @@ private static final long serialVersionUID = 0L;
       } else {
         rootBuildIdBuilder_.clear();
       }
-      bitField0_ = (bitField0_ & ~0x00002000);
+      bitField0_ = (bitField0_ & ~0x00001000);
       return this;
     }
     /**
@@ -4361,7 +4163,7 @@ private static final long serialVersionUID = 0L;
      * <code>optional .File root_build_id = 14;</code>
      */
     public com.android.builder.model.proto.ide.File.Builder getRootBuildIdBuilder() {
-      bitField0_ |= 0x00002000;
+      bitField0_ |= 0x00001000;
       onChanged();
       return getRootBuildIdFieldBuilder().getBuilder();
     }
@@ -4414,7 +4216,7 @@ private static final long serialVersionUID = 0L;
      * @return Whether the buildId field is set.
      */
     public boolean hasBuildId() {
-      return ((bitField0_ & 0x00004000) != 0);
+      return ((bitField0_ & 0x00002000) != 0);
     }
     /**
      * <pre>
@@ -4450,7 +4252,7 @@ private static final long serialVersionUID = 0L;
       } else {
         buildIdBuilder_.setMessage(value);
       }
-      bitField0_ |= 0x00004000;
+      bitField0_ |= 0x00002000;
       return this;
     }
     /**
@@ -4469,7 +4271,7 @@ private static final long serialVersionUID = 0L;
       } else {
         buildIdBuilder_.setMessage(builderForValue.build());
       }
-      bitField0_ |= 0x00004000;
+      bitField0_ |= 0x00002000;
       return this;
     }
     /**
@@ -4482,7 +4284,7 @@ private static final long serialVersionUID = 0L;
      */
     public Builder mergeBuildId(com.android.builder.model.proto.ide.File value) {
       if (buildIdBuilder_ == null) {
-        if (((bitField0_ & 0x00004000) != 0) &&
+        if (((bitField0_ & 0x00002000) != 0) &&
             buildId_ != null &&
             buildId_ != com.android.builder.model.proto.ide.File.getDefaultInstance()) {
           buildId_ =
@@ -4494,7 +4296,7 @@ private static final long serialVersionUID = 0L;
       } else {
         buildIdBuilder_.mergeFrom(value);
       }
-      bitField0_ |= 0x00004000;
+      bitField0_ |= 0x00002000;
       return this;
     }
     /**
@@ -4512,7 +4314,7 @@ private static final long serialVersionUID = 0L;
       } else {
         buildIdBuilder_.clear();
       }
-      bitField0_ = (bitField0_ & ~0x00004000);
+      bitField0_ = (bitField0_ & ~0x00002000);
       return this;
     }
     /**
@@ -4524,7 +4326,7 @@ private static final long serialVersionUID = 0L;
      * <code>optional .File build_id = 15;</code>
      */
     public com.android.builder.model.proto.ide.File.Builder getBuildIdBuilder() {
-      bitField0_ |= 0x00004000;
+      bitField0_ |= 0x00002000;
       onChanged();
       return getBuildIdFieldBuilder().getBuilder();
     }

@@ -426,35 +426,6 @@ public interface AndroidTargetOrBuilder extends
 
   /**
    * <pre>
-   * The name of the build this project belongs to.
-   * </pre>
-   *
-   * <code>optional string build_name = 13;</code>
-   * @return Whether the buildName field is set.
-   */
-  boolean hasBuildName();
-  /**
-   * <pre>
-   * The name of the build this project belongs to.
-   * </pre>
-   *
-   * <code>optional string build_name = 13;</code>
-   * @return The buildName.
-   */
-  java.lang.String getBuildName();
-  /**
-   * <pre>
-   * The name of the build this project belongs to.
-   * </pre>
-   *
-   * <code>optional string build_name = 13;</code>
-   * @return The bytes for buildName.
-   */
-  com.google.protobuf.ByteString
-      getBuildNameBytes();
-
-  /**
-   * <pre>
    * The build ID (directory containing the settings file) of the root build of this project.
    * </pre>
    *
