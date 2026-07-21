@@ -10,7 +10,7 @@ package com.android.ide.common.build.filebasedproperties.variant;
  *
  * Protobuf type {@code LibraryVariantProperties}
  */
-public  final class LibraryVariantProperties extends
+public final class LibraryVariantProperties extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:LibraryVariantProperties)
     LibraryVariantPropertiesOrBuilder {
@@ -103,6 +103,7 @@ private static final long serialVersionUID = 0L;
    * <code>.ArtifactOutputProperties artifactOutputProperties = 1;</code>
    * @return Whether the artifactOutputProperties field is set.
    */
+  @java.lang.Override
   public boolean hasArtifactOutputProperties() {
     return artifactOutputProperties_ != null;
   }
@@ -110,12 +111,14 @@ private static final long serialVersionUID = 0L;
    * <code>.ArtifactOutputProperties artifactOutputProperties = 1;</code>
    * @return The artifactOutputProperties.
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.ArtifactOutputProperties getArtifactOutputProperties() {
     return artifactOutputProperties_ == null ? com.android.ide.common.build.filebasedproperties.variant.ArtifactOutputProperties.getDefaultInstance() : artifactOutputProperties_;
   }
   /**
    * <code>.ArtifactOutputProperties artifactOutputProperties = 1;</code>
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.ArtifactOutputPropertiesOrBuilder getArtifactOutputPropertiesOrBuilder() {
     return getArtifactOutputProperties();
   }

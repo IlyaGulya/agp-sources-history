@@ -45,7 +45,7 @@ public final class IceboxOutputProto {
    *
    * Protobuf type {@code com.android.tools.utp.plugins.host.icebox.proto.IceboxOutput}
    */
-  public  static final class IceboxOutput extends
+  public static final class IceboxOutput extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:com.android.tools.utp.plugins.host.icebox.proto.IceboxOutput)
       IceboxOutputOrBuilder {
@@ -136,6 +136,7 @@ public final class IceboxOutputProto {
      * <code>string app_package = 1;</code>
      * @return The appPackage.
      */
+    @java.lang.Override
     public java.lang.String getAppPackage() {
       java.lang.Object ref = appPackage_;
       if (ref instanceof java.lang.String) {
@@ -156,6 +157,7 @@ public final class IceboxOutputProto {
      * <code>string app_package = 1;</code>
      * @return The bytes for appPackage.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAppPackageBytes() {
       java.lang.Object ref = appPackage_;

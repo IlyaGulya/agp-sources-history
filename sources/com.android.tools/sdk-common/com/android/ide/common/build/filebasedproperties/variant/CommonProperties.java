@@ -10,7 +10,7 @@ package com.android.ide.common.build.filebasedproperties.variant;
  *
  * Protobuf type {@code CommonProperties}
  */
-public  final class CommonProperties extends
+public final class CommonProperties extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:CommonProperties)
     CommonPropertiesOrBuilder {

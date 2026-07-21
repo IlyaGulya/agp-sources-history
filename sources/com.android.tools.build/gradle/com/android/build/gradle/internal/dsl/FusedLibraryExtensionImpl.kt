@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ddmlib.logcat
 
-data class LogCatMessage(val header: LogCatHeader, val message: String) {
+package com.android.build.gradle.internal.dsl
 
-    override fun toString(): String {
-        return "$header: $message"
-    }
+import com.android.build.api.dsl.FusedLibraryExtension
+import com.android.build.gradle.internal.services.DslServices
+import javax.inject.Inject
+
+abstract class FusedLibraryExtensionImpl @Inject constructor(
+    val dslServices: DslServices,
+): FusedLibraryExtension{
+
+    abstract override var namespace: String?
 }

@@ -982,6 +982,8 @@ public final class SdkConstants {
 
     public static final String ATTR_COMPOSABLE_NAME = "composableName";
 
+    public static final String PACKAGE_COMPOSE_ANIMATION = "androidx.compose.animation.core";
+
     /**
      * Returns the appropriate name for the 'mksdcard' command, which is 'mksdcard.exe' for Windows
      * and 'mksdcard' for all other platforms.
@@ -2939,7 +2941,7 @@ public final class SdkConstants {
      * The version of NDK to use as default. If no specific version of NDK is specified in
      * build.gradle then this is the version that will be used.
      */
-    public static final String NDK_DEFAULT_VERSION = "21.4.7075529";
+    public static final String NDK_DEFAULT_VERSION = "23.1.7779620";
 
     /** use api or implementation */
     @Deprecated public static final String GRADLE_COMPILE_CONFIGURATION = "compile";

@@ -10,7 +10,7 @@ package com.android.ide.common.build.filebasedproperties.variant;
  *
  * Protobuf type {@code ArtifactOutputProperties}
  */
-public  final class ArtifactOutputProperties extends
+public final class ArtifactOutputProperties extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:ArtifactOutputProperties)
     ArtifactOutputPropertiesOrBuilder {
@@ -140,6 +140,7 @@ private static final long serialVersionUID = 0L;
    * <code>map&lt;string, string&gt; manifestPlaceholders = 1;</code>
    */
 
+  @java.lang.Override
   public boolean containsManifestPlaceholders(
       java.lang.String key) {
     if (key == null) { throw new java.lang.NullPointerException(); }
@@ -148,6 +149,7 @@ private static final long serialVersionUID = 0L;
   /**
    * Use {@link #getManifestPlaceholdersMap()} instead.
    */
+  @java.lang.Override
   @java.lang.Deprecated
   public java.util.Map<java.lang.String, java.lang.String> getManifestPlaceholders() {
     return getManifestPlaceholdersMap();
@@ -155,6 +157,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>map&lt;string, string&gt; manifestPlaceholders = 1;</code>
    */
+  @java.lang.Override
 
   public java.util.Map<java.lang.String, java.lang.String> getManifestPlaceholdersMap() {
     return internalGetManifestPlaceholders().getMap();
@@ -162,6 +165,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>map&lt;string, string&gt; manifestPlaceholders = 1;</code>
    */
+  @java.lang.Override
 
   public java.lang.String getManifestPlaceholdersOrDefault(
       java.lang.String key,
@@ -174,6 +178,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>map&lt;string, string&gt; manifestPlaceholders = 1;</code>
    */
+  @java.lang.Override
 
   public java.lang.String getManifestPlaceholdersOrThrow(
       java.lang.String key) {
@@ -556,6 +561,7 @@ private static final long serialVersionUID = 0L;
      * <code>map&lt;string, string&gt; manifestPlaceholders = 1;</code>
      */
 
+    @java.lang.Override
     public boolean containsManifestPlaceholders(
         java.lang.String key) {
       if (key == null) { throw new java.lang.NullPointerException(); }
@@ -564,6 +570,7 @@ private static final long serialVersionUID = 0L;
     /**
      * Use {@link #getManifestPlaceholdersMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String> getManifestPlaceholders() {
       return getManifestPlaceholdersMap();
@@ -571,6 +578,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>map&lt;string, string&gt; manifestPlaceholders = 1;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, java.lang.String> getManifestPlaceholdersMap() {
       return internalGetManifestPlaceholders().getMap();
@@ -578,6 +586,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>map&lt;string, string&gt; manifestPlaceholders = 1;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getManifestPlaceholdersOrDefault(
         java.lang.String key,
@@ -590,6 +599,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>map&lt;string, string&gt; manifestPlaceholders = 1;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getManifestPlaceholdersOrThrow(
         java.lang.String key) {

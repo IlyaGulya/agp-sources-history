@@ -194,7 +194,7 @@ public final class GradleManagedDeviceProto {
    *
    * Protobuf type {@code com.android.tools.utp.plugins.deviceprovider.gradle.proto.GradleManagedDeviceConfig}
    */
-  public  static final class GradleManagedDeviceConfig extends
+  public static final class GradleManagedDeviceConfig extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:com.android.tools.utp.plugins.deviceprovider.gradle.proto.GradleManagedDeviceConfig)
       GradleManagedDeviceConfigOrBuilder {
@@ -344,6 +344,7 @@ public final class GradleManagedDeviceProto {
      * <code>.google.protobuf.Any avd_folder = 1;</code>
      * @return Whether the avdFolder field is set.
      */
+    @java.lang.Override
     public boolean hasAvdFolder() {
       return avdFolder_ != null;
     }
@@ -357,6 +358,7 @@ public final class GradleManagedDeviceProto {
      * <code>.google.protobuf.Any avd_folder = 1;</code>
      * @return The avdFolder.
      */
+    @java.lang.Override
     public com.google.protobuf.Any getAvdFolder() {
       return avdFolder_ == null ? com.google.protobuf.Any.getDefaultInstance() : avdFolder_;
     }
@@ -369,6 +371,7 @@ public final class GradleManagedDeviceProto {
      *
      * <code>.google.protobuf.Any avd_folder = 1;</code>
      */
+    @java.lang.Override
     public com.google.protobuf.AnyOrBuilder getAvdFolderOrBuilder() {
       return getAvdFolder();
     }
@@ -383,6 +386,7 @@ public final class GradleManagedDeviceProto {
      * <code>string avd_name = 2;</code>
      * @return The avdName.
      */
+    @java.lang.Override
     public java.lang.String getAvdName() {
       java.lang.Object ref = avdName_;
       if (ref instanceof java.lang.String) {
@@ -403,6 +407,7 @@ public final class GradleManagedDeviceProto {
      * <code>string avd_name = 2;</code>
      * @return The bytes for avdName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAvdNameBytes() {
       java.lang.Object ref = avdName_;
@@ -429,6 +434,7 @@ public final class GradleManagedDeviceProto {
      * <code>string avd_id = 3;</code>
      * @return The avdId.
      */
+    @java.lang.Override
     public java.lang.String getAvdId() {
       java.lang.Object ref = avdId_;
       if (ref instanceof java.lang.String) {
@@ -451,6 +457,7 @@ public final class GradleManagedDeviceProto {
      * <code>string avd_id = 3;</code>
      * @return The bytes for avdId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAvdIdBytes() {
       java.lang.Object ref = avdId_;
@@ -475,6 +482,7 @@ public final class GradleManagedDeviceProto {
      * <code>bool enable_display = 4;</code>
      * @return The enableDisplay.
      */
+    @java.lang.Override
     public boolean getEnableDisplay() {
       return enableDisplay_;
     }
@@ -490,6 +498,7 @@ public final class GradleManagedDeviceProto {
      * <code>.google.protobuf.Any emulator_path = 5;</code>
      * @return Whether the emulatorPath field is set.
      */
+    @java.lang.Override
     public boolean hasEmulatorPath() {
       return emulatorPath_ != null;
     }
@@ -502,6 +511,7 @@ public final class GradleManagedDeviceProto {
      * <code>.google.protobuf.Any emulator_path = 5;</code>
      * @return The emulatorPath.
      */
+    @java.lang.Override
     public com.google.protobuf.Any getEmulatorPath() {
       return emulatorPath_ == null ? com.google.protobuf.Any.getDefaultInstance() : emulatorPath_;
     }
@@ -513,6 +523,7 @@ public final class GradleManagedDeviceProto {
      *
      * <code>.google.protobuf.Any emulator_path = 5;</code>
      */
+    @java.lang.Override
     public com.google.protobuf.AnyOrBuilder getEmulatorPathOrBuilder() {
       return getEmulatorPath();
     }
@@ -527,6 +538,7 @@ public final class GradleManagedDeviceProto {
      * <code>string gradle_dsl_device_name = 6;</code>
      * @return The gradleDslDeviceName.
      */
+    @java.lang.Override
     public java.lang.String getGradleDslDeviceName() {
       java.lang.Object ref = gradleDslDeviceName_;
       if (ref instanceof java.lang.String) {
@@ -547,6 +559,7 @@ public final class GradleManagedDeviceProto {
      * <code>string gradle_dsl_device_name = 6;</code>
      * @return The bytes for gradleDslDeviceName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getGradleDslDeviceNameBytes() {
       java.lang.Object ref = gradleDslDeviceName_;
@@ -572,6 +585,7 @@ public final class GradleManagedDeviceProto {
      * <code>string emulator_gpu = 7;</code>
      * @return The emulatorGpu.
      */
+    @java.lang.Override
     public java.lang.String getEmulatorGpu() {
       java.lang.Object ref = emulatorGpu_;
       if (ref instanceof java.lang.String) {
@@ -593,6 +607,7 @@ public final class GradleManagedDeviceProto {
      * <code>string emulator_gpu = 7;</code>
      * @return The bytes for emulatorGpu.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEmulatorGpuBytes() {
       java.lang.Object ref = emulatorGpu_;
@@ -617,6 +632,7 @@ public final class GradleManagedDeviceProto {
      * <code>bool show_emulator_kernel_logging = 8;</code>
      * @return The showEmulatorKernelLogging.
      */
+    @java.lang.Override
     public boolean getShowEmulatorKernelLogging() {
       return showEmulatorKernelLogging_;
     }
@@ -1458,6 +1474,7 @@ public final class GradleManagedDeviceProto {
        * <code>bool enable_display = 4;</code>
        * @return The enableDisplay.
        */
+      @java.lang.Override
       public boolean getEnableDisplay() {
         return enableDisplay_;
       }
@@ -1861,6 +1878,7 @@ public final class GradleManagedDeviceProto {
        * <code>bool show_emulator_kernel_logging = 8;</code>
        * @return The showEmulatorKernelLogging.
        */
+      @java.lang.Override
       public boolean getShowEmulatorKernelLogging() {
         return showEmulatorKernelLogging_;
       }

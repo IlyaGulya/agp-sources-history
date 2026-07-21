@@ -10,7 +10,7 @@ package com.android.ide.common.build.filebasedproperties.variant;
  *
  * Protobuf type {@code VariantProperties}
  */
-public  final class VariantProperties extends
+public final class VariantProperties extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:VariantProperties)
     VariantPropertiesOrBuilder {
@@ -256,6 +256,7 @@ private static final long serialVersionUID = 0L;
    * <code>.CommonProperties common = 1;</code>
    * @return Whether the common field is set.
    */
+  @java.lang.Override
   public boolean hasCommon() {
     return common_ != null;
   }
@@ -267,6 +268,7 @@ private static final long serialVersionUID = 0L;
    * <code>.CommonProperties common = 1;</code>
    * @return The common.
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.CommonProperties getCommon() {
     return common_ == null ? com.android.ide.common.build.filebasedproperties.variant.CommonProperties.getDefaultInstance() : common_;
   }
@@ -277,6 +279,7 @@ private static final long serialVersionUID = 0L;
    *
    * <code>.CommonProperties common = 1;</code>
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.CommonPropertiesOrBuilder getCommonOrBuilder() {
     return getCommon();
   }
@@ -286,6 +289,7 @@ private static final long serialVersionUID = 0L;
    * <code>.ApplicationVariantProperties applicationVariantProperties = 2;</code>
    * @return Whether the applicationVariantProperties field is set.
    */
+  @java.lang.Override
   public boolean hasApplicationVariantProperties() {
     return variantCase_ == 2;
   }
@@ -293,6 +297,7 @@ private static final long serialVersionUID = 0L;
    * <code>.ApplicationVariantProperties applicationVariantProperties = 2;</code>
    * @return The applicationVariantProperties.
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.ApplicationVariantProperties getApplicationVariantProperties() {
     if (variantCase_ == 2) {
        return (com.android.ide.common.build.filebasedproperties.variant.ApplicationVariantProperties) variant_;
@@ -302,6 +307,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>.ApplicationVariantProperties applicationVariantProperties = 2;</code>
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.ApplicationVariantPropertiesOrBuilder getApplicationVariantPropertiesOrBuilder() {
     if (variantCase_ == 2) {
        return (com.android.ide.common.build.filebasedproperties.variant.ApplicationVariantProperties) variant_;
@@ -314,6 +320,7 @@ private static final long serialVersionUID = 0L;
    * <code>.LibraryVariantProperties libraryVariantProperties = 3;</code>
    * @return Whether the libraryVariantProperties field is set.
    */
+  @java.lang.Override
   public boolean hasLibraryVariantProperties() {
     return variantCase_ == 3;
   }
@@ -321,6 +328,7 @@ private static final long serialVersionUID = 0L;
    * <code>.LibraryVariantProperties libraryVariantProperties = 3;</code>
    * @return The libraryVariantProperties.
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.LibraryVariantProperties getLibraryVariantProperties() {
     if (variantCase_ == 3) {
        return (com.android.ide.common.build.filebasedproperties.variant.LibraryVariantProperties) variant_;
@@ -330,6 +338,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>.LibraryVariantProperties libraryVariantProperties = 3;</code>
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.LibraryVariantPropertiesOrBuilder getLibraryVariantPropertiesOrBuilder() {
     if (variantCase_ == 3) {
        return (com.android.ide.common.build.filebasedproperties.variant.LibraryVariantProperties) variant_;
@@ -342,6 +351,7 @@ private static final long serialVersionUID = 0L;
    * <code>.DynamicFeatureVariantProperties dynamicFeatureVariantProperties = 4;</code>
    * @return Whether the dynamicFeatureVariantProperties field is set.
    */
+  @java.lang.Override
   public boolean hasDynamicFeatureVariantProperties() {
     return variantCase_ == 4;
   }
@@ -349,6 +359,7 @@ private static final long serialVersionUID = 0L;
    * <code>.DynamicFeatureVariantProperties dynamicFeatureVariantProperties = 4;</code>
    * @return The dynamicFeatureVariantProperties.
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.DynamicFeatureVariantProperties getDynamicFeatureVariantProperties() {
     if (variantCase_ == 4) {
        return (com.android.ide.common.build.filebasedproperties.variant.DynamicFeatureVariantProperties) variant_;
@@ -358,6 +369,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>.DynamicFeatureVariantProperties dynamicFeatureVariantProperties = 4;</code>
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.DynamicFeatureVariantPropertiesOrBuilder getDynamicFeatureVariantPropertiesOrBuilder() {
     if (variantCase_ == 4) {
        return (com.android.ide.common.build.filebasedproperties.variant.DynamicFeatureVariantProperties) variant_;
@@ -370,6 +382,7 @@ private static final long serialVersionUID = 0L;
    * <code>.AndroidTestVariantProperties androidTestVariantProperties = 5;</code>
    * @return Whether the androidTestVariantProperties field is set.
    */
+  @java.lang.Override
   public boolean hasAndroidTestVariantProperties() {
     return variantCase_ == 5;
   }
@@ -377,6 +390,7 @@ private static final long serialVersionUID = 0L;
    * <code>.AndroidTestVariantProperties androidTestVariantProperties = 5;</code>
    * @return The androidTestVariantProperties.
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.AndroidTestVariantProperties getAndroidTestVariantProperties() {
     if (variantCase_ == 5) {
        return (com.android.ide.common.build.filebasedproperties.variant.AndroidTestVariantProperties) variant_;
@@ -386,6 +400,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>.AndroidTestVariantProperties androidTestVariantProperties = 5;</code>
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.AndroidTestVariantPropertiesOrBuilder getAndroidTestVariantPropertiesOrBuilder() {
     if (variantCase_ == 5) {
        return (com.android.ide.common.build.filebasedproperties.variant.AndroidTestVariantProperties) variant_;
@@ -398,6 +413,7 @@ private static final long serialVersionUID = 0L;
    * <code>.UnitTestVariantProperties unitTestVariantProperties = 6;</code>
    * @return Whether the unitTestVariantProperties field is set.
    */
+  @java.lang.Override
   public boolean hasUnitTestVariantProperties() {
     return variantCase_ == 6;
   }
@@ -405,6 +421,7 @@ private static final long serialVersionUID = 0L;
    * <code>.UnitTestVariantProperties unitTestVariantProperties = 6;</code>
    * @return The unitTestVariantProperties.
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.UnitTestVariantProperties getUnitTestVariantProperties() {
     if (variantCase_ == 6) {
        return (com.android.ide.common.build.filebasedproperties.variant.UnitTestVariantProperties) variant_;
@@ -414,6 +431,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>.UnitTestVariantProperties unitTestVariantProperties = 6;</code>
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.UnitTestVariantPropertiesOrBuilder getUnitTestVariantPropertiesOrBuilder() {
     if (variantCase_ == 6) {
        return (com.android.ide.common.build.filebasedproperties.variant.UnitTestVariantProperties) variant_;
@@ -426,6 +444,7 @@ private static final long serialVersionUID = 0L;
    * <code>.TestVariantProperties testVariantProperties = 7;</code>
    * @return Whether the testVariantProperties field is set.
    */
+  @java.lang.Override
   public boolean hasTestVariantProperties() {
     return variantCase_ == 7;
   }
@@ -433,6 +452,7 @@ private static final long serialVersionUID = 0L;
    * <code>.TestVariantProperties testVariantProperties = 7;</code>
    * @return The testVariantProperties.
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.TestVariantProperties getTestVariantProperties() {
     if (variantCase_ == 7) {
        return (com.android.ide.common.build.filebasedproperties.variant.TestVariantProperties) variant_;
@@ -442,6 +462,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>.TestVariantProperties testVariantProperties = 7;</code>
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.TestVariantPropertiesOrBuilder getTestVariantPropertiesOrBuilder() {
     if (variantCase_ == 7) {
        return (com.android.ide.common.build.filebasedproperties.variant.TestVariantProperties) variant_;
@@ -454,6 +475,7 @@ private static final long serialVersionUID = 0L;
    * <code>.TestFixturesVariantProperties testFixtureVariantProperties = 8;</code>
    * @return Whether the testFixtureVariantProperties field is set.
    */
+  @java.lang.Override
   public boolean hasTestFixtureVariantProperties() {
     return variantCase_ == 8;
   }
@@ -461,6 +483,7 @@ private static final long serialVersionUID = 0L;
    * <code>.TestFixturesVariantProperties testFixtureVariantProperties = 8;</code>
    * @return The testFixtureVariantProperties.
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.TestFixturesVariantProperties getTestFixtureVariantProperties() {
     if (variantCase_ == 8) {
        return (com.android.ide.common.build.filebasedproperties.variant.TestFixturesVariantProperties) variant_;
@@ -470,6 +493,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>.TestFixturesVariantProperties testFixtureVariantProperties = 8;</code>
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.variant.TestFixturesVariantPropertiesOrBuilder getTestFixtureVariantPropertiesOrBuilder() {
     if (variantCase_ == 8) {
        return (com.android.ide.common.build.filebasedproperties.variant.TestFixturesVariantProperties) variant_;
@@ -1171,6 +1195,7 @@ private static final long serialVersionUID = 0L;
      * <code>.ApplicationVariantProperties applicationVariantProperties = 2;</code>
      * @return Whether the applicationVariantProperties field is set.
      */
+    @java.lang.Override
     public boolean hasApplicationVariantProperties() {
       return variantCase_ == 2;
     }
@@ -1178,6 +1203,7 @@ private static final long serialVersionUID = 0L;
      * <code>.ApplicationVariantProperties applicationVariantProperties = 2;</code>
      * @return The applicationVariantProperties.
      */
+    @java.lang.Override
     public com.android.ide.common.build.filebasedproperties.variant.ApplicationVariantProperties getApplicationVariantProperties() {
       if (applicationVariantPropertiesBuilder_ == null) {
         if (variantCase_ == 2) {
@@ -1271,6 +1297,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.ApplicationVariantProperties applicationVariantProperties = 2;</code>
      */
+    @java.lang.Override
     public com.android.ide.common.build.filebasedproperties.variant.ApplicationVariantPropertiesOrBuilder getApplicationVariantPropertiesOrBuilder() {
       if ((variantCase_ == 2) && (applicationVariantPropertiesBuilder_ != null)) {
         return applicationVariantPropertiesBuilder_.getMessageOrBuilder();
@@ -1309,6 +1336,7 @@ private static final long serialVersionUID = 0L;
      * <code>.LibraryVariantProperties libraryVariantProperties = 3;</code>
      * @return Whether the libraryVariantProperties field is set.
      */
+    @java.lang.Override
     public boolean hasLibraryVariantProperties() {
       return variantCase_ == 3;
     }
@@ -1316,6 +1344,7 @@ private static final long serialVersionUID = 0L;
      * <code>.LibraryVariantProperties libraryVariantProperties = 3;</code>
      * @return The libraryVariantProperties.
      */
+    @java.lang.Override
     public com.android.ide.common.build.filebasedproperties.variant.LibraryVariantProperties getLibraryVariantProperties() {
       if (libraryVariantPropertiesBuilder_ == null) {
         if (variantCase_ == 3) {
@@ -1409,6 +1438,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.LibraryVariantProperties libraryVariantProperties = 3;</code>
      */
+    @java.lang.Override
     public com.android.ide.common.build.filebasedproperties.variant.LibraryVariantPropertiesOrBuilder getLibraryVariantPropertiesOrBuilder() {
       if ((variantCase_ == 3) && (libraryVariantPropertiesBuilder_ != null)) {
         return libraryVariantPropertiesBuilder_.getMessageOrBuilder();
@@ -1447,6 +1477,7 @@ private static final long serialVersionUID = 0L;
      * <code>.DynamicFeatureVariantProperties dynamicFeatureVariantProperties = 4;</code>
      * @return Whether the dynamicFeatureVariantProperties field is set.
      */
+    @java.lang.Override
     public boolean hasDynamicFeatureVariantProperties() {
       return variantCase_ == 4;
     }
@@ -1454,6 +1485,7 @@ private static final long serialVersionUID = 0L;
      * <code>.DynamicFeatureVariantProperties dynamicFeatureVariantProperties = 4;</code>
      * @return The dynamicFeatureVariantProperties.
      */
+    @java.lang.Override
     public com.android.ide.common.build.filebasedproperties.variant.DynamicFeatureVariantProperties getDynamicFeatureVariantProperties() {
       if (dynamicFeatureVariantPropertiesBuilder_ == null) {
         if (variantCase_ == 4) {
@@ -1547,6 +1579,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.DynamicFeatureVariantProperties dynamicFeatureVariantProperties = 4;</code>
      */
+    @java.lang.Override
     public com.android.ide.common.build.filebasedproperties.variant.DynamicFeatureVariantPropertiesOrBuilder getDynamicFeatureVariantPropertiesOrBuilder() {
       if ((variantCase_ == 4) && (dynamicFeatureVariantPropertiesBuilder_ != null)) {
         return dynamicFeatureVariantPropertiesBuilder_.getMessageOrBuilder();
@@ -1585,6 +1618,7 @@ private static final long serialVersionUID = 0L;
      * <code>.AndroidTestVariantProperties androidTestVariantProperties = 5;</code>
      * @return Whether the androidTestVariantProperties field is set.
      */
+    @java.lang.Override
     public boolean hasAndroidTestVariantProperties() {
       return variantCase_ == 5;
     }
@@ -1592,6 +1626,7 @@ private static final long serialVersionUID = 0L;
      * <code>.AndroidTestVariantProperties androidTestVariantProperties = 5;</code>
      * @return The androidTestVariantProperties.
      */
+    @java.lang.Override
     public com.android.ide.common.build.filebasedproperties.variant.AndroidTestVariantProperties getAndroidTestVariantProperties() {
       if (androidTestVariantPropertiesBuilder_ == null) {
         if (variantCase_ == 5) {
@@ -1685,6 +1720,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.AndroidTestVariantProperties androidTestVariantProperties = 5;</code>
      */
+    @java.lang.Override
     public com.android.ide.common.build.filebasedproperties.variant.AndroidTestVariantPropertiesOrBuilder getAndroidTestVariantPropertiesOrBuilder() {
       if ((variantCase_ == 5) && (androidTestVariantPropertiesBuilder_ != null)) {
         return androidTestVariantPropertiesBuilder_.getMessageOrBuilder();
@@ -1723,6 +1759,7 @@ private static final long serialVersionUID = 0L;
      * <code>.UnitTestVariantProperties unitTestVariantProperties = 6;</code>
      * @return Whether the unitTestVariantProperties field is set.
      */
+    @java.lang.Override
     public boolean hasUnitTestVariantProperties() {
       return variantCase_ == 6;
     }
@@ -1730,6 +1767,7 @@ private static final long serialVersionUID = 0L;
      * <code>.UnitTestVariantProperties unitTestVariantProperties = 6;</code>
      * @return The unitTestVariantProperties.
      */
+    @java.lang.Override
     public com.android.ide.common.build.filebasedproperties.variant.UnitTestVariantProperties getUnitTestVariantProperties() {
       if (unitTestVariantPropertiesBuilder_ == null) {
         if (variantCase_ == 6) {
@@ -1823,6 +1861,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.UnitTestVariantProperties unitTestVariantProperties = 6;</code>
      */
+    @java.lang.Override
     public com.android.ide.common.build.filebasedproperties.variant.UnitTestVariantPropertiesOrBuilder getUnitTestVariantPropertiesOrBuilder() {
       if ((variantCase_ == 6) && (unitTestVariantPropertiesBuilder_ != null)) {
         return unitTestVariantPropertiesBuilder_.getMessageOrBuilder();
@@ -1861,6 +1900,7 @@ private static final long serialVersionUID = 0L;
      * <code>.TestVariantProperties testVariantProperties = 7;</code>
      * @return Whether the testVariantProperties field is set.
      */
+    @java.lang.Override
     public boolean hasTestVariantProperties() {
       return variantCase_ == 7;
     }
@@ -1868,6 +1908,7 @@ private static final long serialVersionUID = 0L;
      * <code>.TestVariantProperties testVariantProperties = 7;</code>
      * @return The testVariantProperties.
      */
+    @java.lang.Override
     public com.android.ide.common.build.filebasedproperties.variant.TestVariantProperties getTestVariantProperties() {
       if (testVariantPropertiesBuilder_ == null) {
         if (variantCase_ == 7) {
@@ -1961,6 +2002,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.TestVariantProperties testVariantProperties = 7;</code>
      */
+    @java.lang.Override
     public com.android.ide.common.build.filebasedproperties.variant.TestVariantPropertiesOrBuilder getTestVariantPropertiesOrBuilder() {
       if ((variantCase_ == 7) && (testVariantPropertiesBuilder_ != null)) {
         return testVariantPropertiesBuilder_.getMessageOrBuilder();
@@ -1999,6 +2041,7 @@ private static final long serialVersionUID = 0L;
      * <code>.TestFixturesVariantProperties testFixtureVariantProperties = 8;</code>
      * @return Whether the testFixtureVariantProperties field is set.
      */
+    @java.lang.Override
     public boolean hasTestFixtureVariantProperties() {
       return variantCase_ == 8;
     }
@@ -2006,6 +2049,7 @@ private static final long serialVersionUID = 0L;
      * <code>.TestFixturesVariantProperties testFixtureVariantProperties = 8;</code>
      * @return The testFixtureVariantProperties.
      */
+    @java.lang.Override
     public com.android.ide.common.build.filebasedproperties.variant.TestFixturesVariantProperties getTestFixtureVariantProperties() {
       if (testFixtureVariantPropertiesBuilder_ == null) {
         if (variantCase_ == 8) {
@@ -2099,6 +2143,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>.TestFixturesVariantProperties testFixtureVariantProperties = 8;</code>
      */
+    @java.lang.Override
     public com.android.ide.common.build.filebasedproperties.variant.TestFixturesVariantPropertiesOrBuilder getTestFixtureVariantPropertiesOrBuilder() {
       if ((variantCase_ == 8) && (testFixtureVariantPropertiesBuilder_ != null)) {
         return testFixtureVariantPropertiesBuilder_.getMessageOrBuilder();

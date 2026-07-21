@@ -88,6 +88,10 @@ public final class IceboxPluginProto {
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
       return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -205,6 +209,10 @@ public final class IceboxPluginProto {
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
       return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -392,7 +400,7 @@ public final class IceboxPluginProto {
    *
    * Protobuf type {@code com.android.tools.utp.plugins.host.icebox.proto.IceboxPlugin}
    */
-  public  static final class IceboxPlugin extends
+  public static final class IceboxPlugin extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:com.android.tools.utp.plugins.host.icebox.proto.IceboxPlugin)
       IceboxPluginOrBuilder {
@@ -531,6 +539,7 @@ public final class IceboxPluginProto {
      * <code>string app_package = 1;</code>
      * @return The appPackage.
      */
+    @java.lang.Override
     public java.lang.String getAppPackage() {
       java.lang.Object ref = appPackage_;
       if (ref instanceof java.lang.String) {
@@ -551,6 +560,7 @@ public final class IceboxPluginProto {
      * <code>string app_package = 1;</code>
      * @return The bytes for appPackage.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAppPackageBytes() {
       java.lang.Object ref = appPackage_;
@@ -575,6 +585,7 @@ public final class IceboxPluginProto {
      * <code>string emulator_grpc_address = 2;</code>
      * @return The emulatorGrpcAddress.
      */
+    @java.lang.Override
     public java.lang.String getEmulatorGrpcAddress() {
       java.lang.Object ref = emulatorGrpcAddress_;
       if (ref instanceof java.lang.String) {
@@ -595,6 +606,7 @@ public final class IceboxPluginProto {
      * <code>string emulator_grpc_address = 2;</code>
      * @return The bytes for emulatorGrpcAddress.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEmulatorGrpcAddressBytes() {
       java.lang.Object ref = emulatorGrpcAddress_;
@@ -619,6 +631,7 @@ public final class IceboxPluginProto {
      * <code>int32 emulator_grpc_port = 3;</code>
      * @return The emulatorGrpcPort.
      */
+    @java.lang.Override
     public int getEmulatorGrpcPort() {
       return emulatorGrpcPort_;
     }
@@ -633,6 +646,7 @@ public final class IceboxPluginProto {
      * <code>bool skip_snapshot = 4;</code>
      * @return The skipSnapshot.
      */
+    @java.lang.Override
     public boolean getSkipSnapshot() {
       return skipSnapshot_;
     }
@@ -649,6 +663,7 @@ public final class IceboxPluginProto {
      * <code>int32 max_snapshot_number = 5;</code>
      * @return The maxSnapshotNumber.
      */
+    @java.lang.Override
     public int getMaxSnapshotNumber() {
       return maxSnapshotNumber_;
     }
@@ -663,6 +678,7 @@ public final class IceboxPluginProto {
      * <code>int32 android_studio_ddmlib_port = 6;</code>
      * @return The androidStudioDdmlibPort.
      */
+    @java.lang.Override
     public int getAndroidStudioDdmlibPort() {
       return androidStudioDdmlibPort_;
     }
@@ -677,7 +693,7 @@ public final class IceboxPluginProto {
      * <code>.com.android.tools.utp.plugins.host.icebox.proto.Compression snapshot_compression = 7;</code>
      * @return The enum numeric value on the wire for snapshotCompression.
      */
-    public int getSnapshotCompressionValue() {
+    @java.lang.Override public int getSnapshotCompressionValue() {
       return snapshotCompression_;
     }
     /**
@@ -688,7 +704,7 @@ public final class IceboxPluginProto {
      * <code>.com.android.tools.utp.plugins.host.icebox.proto.Compression snapshot_compression = 7;</code>
      * @return The snapshotCompression.
      */
-    public com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.Compression getSnapshotCompression() {
+    @java.lang.Override public com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.Compression getSnapshotCompression() {
       @SuppressWarnings("deprecation")
       com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.Compression result = com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.Compression.valueOf(snapshotCompression_);
       return result == null ? com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.Compression.UNRECOGNIZED : result;
@@ -704,6 +720,7 @@ public final class IceboxPluginProto {
      * <code>string emulator_grpc_token = 8;</code>
      * @return The emulatorGrpcToken.
      */
+    @java.lang.Override
     public java.lang.String getEmulatorGrpcToken() {
       java.lang.Object ref = emulatorGrpcToken_;
       if (ref instanceof java.lang.String) {
@@ -724,6 +741,7 @@ public final class IceboxPluginProto {
      * <code>string emulator_grpc_token = 8;</code>
      * @return The bytes for emulatorGrpcToken.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEmulatorGrpcTokenBytes() {
       java.lang.Object ref = emulatorGrpcToken_;
@@ -748,7 +766,7 @@ public final class IceboxPluginProto {
      * <code>.com.android.tools.utp.plugins.host.icebox.proto.IceboxSetupStrategy setup_strategy = 9;</code>
      * @return The enum numeric value on the wire for setupStrategy.
      */
-    public int getSetupStrategyValue() {
+    @java.lang.Override public int getSetupStrategyValue() {
       return setupStrategy_;
     }
     /**
@@ -759,7 +777,7 @@ public final class IceboxPluginProto {
      * <code>.com.android.tools.utp.plugins.host.icebox.proto.IceboxSetupStrategy setup_strategy = 9;</code>
      * @return The setupStrategy.
      */
-    public com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy getSetupStrategy() {
+    @java.lang.Override public com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy getSetupStrategy() {
       @SuppressWarnings("deprecation")
       com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy result = com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy.valueOf(setupStrategy_);
       return result == null ? com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy.UNRECOGNIZED : result;
@@ -1409,6 +1427,7 @@ public final class IceboxPluginProto {
        * <code>int32 emulator_grpc_port = 3;</code>
        * @return The emulatorGrpcPort.
        */
+      @java.lang.Override
       public int getEmulatorGrpcPort() {
         return emulatorGrpcPort_;
       }
@@ -1451,6 +1470,7 @@ public final class IceboxPluginProto {
        * <code>bool skip_snapshot = 4;</code>
        * @return The skipSnapshot.
        */
+      @java.lang.Override
       public boolean getSkipSnapshot() {
         return skipSnapshot_;
       }
@@ -1495,6 +1515,7 @@ public final class IceboxPluginProto {
        * <code>int32 max_snapshot_number = 5;</code>
        * @return The maxSnapshotNumber.
        */
+      @java.lang.Override
       public int getMaxSnapshotNumber() {
         return maxSnapshotNumber_;
       }
@@ -1541,6 +1562,7 @@ public final class IceboxPluginProto {
        * <code>int32 android_studio_ddmlib_port = 6;</code>
        * @return The androidStudioDdmlibPort.
        */
+      @java.lang.Override
       public int getAndroidStudioDdmlibPort() {
         return androidStudioDdmlibPort_;
       }
@@ -1583,7 +1605,7 @@ public final class IceboxPluginProto {
        * <code>.com.android.tools.utp.plugins.host.icebox.proto.Compression snapshot_compression = 7;</code>
        * @return The enum numeric value on the wire for snapshotCompression.
        */
-      public int getSnapshotCompressionValue() {
+      @java.lang.Override public int getSnapshotCompressionValue() {
         return snapshotCompression_;
       }
       /**
@@ -1596,6 +1618,7 @@ public final class IceboxPluginProto {
        * @return This builder for chaining.
        */
       public Builder setSnapshotCompressionValue(int value) {
+        
         snapshotCompression_ = value;
         onChanged();
         return this;
@@ -1608,6 +1631,7 @@ public final class IceboxPluginProto {
        * <code>.com.android.tools.utp.plugins.host.icebox.proto.Compression snapshot_compression = 7;</code>
        * @return The snapshotCompression.
        */
+      @java.lang.Override
       public com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.Compression getSnapshotCompression() {
         @SuppressWarnings("deprecation")
         com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.Compression result = com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.Compression.valueOf(snapshotCompression_);
@@ -1751,7 +1775,7 @@ public final class IceboxPluginProto {
        * <code>.com.android.tools.utp.plugins.host.icebox.proto.IceboxSetupStrategy setup_strategy = 9;</code>
        * @return The enum numeric value on the wire for setupStrategy.
        */
-      public int getSetupStrategyValue() {
+      @java.lang.Override public int getSetupStrategyValue() {
         return setupStrategy_;
       }
       /**
@@ -1764,6 +1788,7 @@ public final class IceboxPluginProto {
        * @return This builder for chaining.
        */
       public Builder setSetupStrategyValue(int value) {
+        
         setupStrategy_ = value;
         onChanged();
         return this;
@@ -1776,6 +1801,7 @@ public final class IceboxPluginProto {
        * <code>.com.android.tools.utp.plugins.host.icebox.proto.IceboxSetupStrategy setup_strategy = 9;</code>
        * @return The setupStrategy.
        */
+      @java.lang.Override
       public com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy getSetupStrategy() {
         @SuppressWarnings("deprecation")
         com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy result = com.android.tools.utp.plugins.host.icebox.proto.IceboxPluginProto.IceboxSetupStrategy.valueOf(setupStrategy_);

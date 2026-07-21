@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.build.api.dsl
+package com.android.build.gradle.internal.core
 
-import org.gradle.api.Incubating
+import com.android.build.api.dsl.ProductFlavor
 
-@Incubating
-interface FusedLibrariesExtension {
-
-    @get: Incubating
-    @set: Incubating
-    var namespace: String?
+data class ProductFlavor(val dimension: String, val name: String) {
+    constructor(flavor: ProductFlavor): this(flavor.dimension!!, flavor.name)
 }

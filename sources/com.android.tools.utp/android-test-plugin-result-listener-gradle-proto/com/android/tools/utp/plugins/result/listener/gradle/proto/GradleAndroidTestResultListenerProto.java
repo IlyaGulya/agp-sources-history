@@ -155,7 +155,7 @@ public final class GradleAndroidTestResultListenerProto {
    *
    * Protobuf type {@code com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent}
    */
-  public  static final class TestResultEvent extends
+  public static final class TestResultEvent extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent)
       TestResultEventOrBuilder {
@@ -330,7 +330,7 @@ public final class GradleAndroidTestResultListenerProto {
      *
      * Protobuf type {@code com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteStarted}
      */
-    public  static final class TestSuiteStarted extends
+    public static final class TestSuiteStarted extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteStarted)
         TestSuiteStartedOrBuilder {
@@ -427,6 +427,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
        * @return Whether the testSuiteMetadata field is set.
        */
+      @java.lang.Override
       public boolean hasTestSuiteMetadata() {
         return testSuiteMetadata_ != null;
       }
@@ -438,6 +439,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
        * @return The testSuiteMetadata.
        */
+      @java.lang.Override
       public com.google.protobuf.Any getTestSuiteMetadata() {
         return testSuiteMetadata_ == null ? com.google.protobuf.Any.getDefaultInstance() : testSuiteMetadata_;
       }
@@ -448,6 +450,7 @@ public final class GradleAndroidTestResultListenerProto {
        *
        * <code>.google.protobuf.Any test_suite_metadata = 1;</code>
        */
+      @java.lang.Override
       public com.google.protobuf.AnyOrBuilder getTestSuiteMetadataOrBuilder() {
         return getTestSuiteMetadata();
       }
@@ -1016,7 +1019,7 @@ public final class GradleAndroidTestResultListenerProto {
      *
      * Protobuf type {@code com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseStarted}
      */
-    public  static final class TestCaseStarted extends
+    public static final class TestCaseStarted extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseStarted)
         TestCaseStartedOrBuilder {
@@ -1113,6 +1116,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.google.protobuf.Any test_case = 1;</code>
        * @return Whether the testCase field is set.
        */
+      @java.lang.Override
       public boolean hasTestCase() {
         return testCase_ != null;
       }
@@ -1124,6 +1128,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.google.protobuf.Any test_case = 1;</code>
        * @return The testCase.
        */
+      @java.lang.Override
       public com.google.protobuf.Any getTestCase() {
         return testCase_ == null ? com.google.protobuf.Any.getDefaultInstance() : testCase_;
       }
@@ -1134,6 +1139,7 @@ public final class GradleAndroidTestResultListenerProto {
        *
        * <code>.google.protobuf.Any test_case = 1;</code>
        */
+      @java.lang.Override
       public com.google.protobuf.AnyOrBuilder getTestCaseOrBuilder() {
         return getTestCase();
       }
@@ -1702,7 +1708,7 @@ public final class GradleAndroidTestResultListenerProto {
      *
      * Protobuf type {@code com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseFinished}
      */
-    public  static final class TestCaseFinished extends
+    public static final class TestCaseFinished extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseFinished)
         TestCaseFinishedOrBuilder {
@@ -1799,6 +1805,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.google.protobuf.Any test_case_result = 1;</code>
        * @return Whether the testCaseResult field is set.
        */
+      @java.lang.Override
       public boolean hasTestCaseResult() {
         return testCaseResult_ != null;
       }
@@ -1810,6 +1817,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.google.protobuf.Any test_case_result = 1;</code>
        * @return The testCaseResult.
        */
+      @java.lang.Override
       public com.google.protobuf.Any getTestCaseResult() {
         return testCaseResult_ == null ? com.google.protobuf.Any.getDefaultInstance() : testCaseResult_;
       }
@@ -1820,6 +1828,7 @@ public final class GradleAndroidTestResultListenerProto {
        *
        * <code>.google.protobuf.Any test_case_result = 1;</code>
        */
+      @java.lang.Override
       public com.google.protobuf.AnyOrBuilder getTestCaseResultOrBuilder() {
         return getTestCaseResult();
       }
@@ -2388,7 +2397,7 @@ public final class GradleAndroidTestResultListenerProto {
      *
      * Protobuf type {@code com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteFinished}
      */
-    public  static final class TestSuiteFinished extends
+    public static final class TestSuiteFinished extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteFinished)
         TestSuiteFinishedOrBuilder {
@@ -2485,6 +2494,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.google.protobuf.Any test_suite_result = 1;</code>
        * @return Whether the testSuiteResult field is set.
        */
+      @java.lang.Override
       public boolean hasTestSuiteResult() {
         return testSuiteResult_ != null;
       }
@@ -2496,6 +2506,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.google.protobuf.Any test_suite_result = 1;</code>
        * @return The testSuiteResult.
        */
+      @java.lang.Override
       public com.google.protobuf.Any getTestSuiteResult() {
         return testSuiteResult_ == null ? com.google.protobuf.Any.getDefaultInstance() : testSuiteResult_;
       }
@@ -2506,6 +2517,7 @@ public final class GradleAndroidTestResultListenerProto {
        *
        * <code>.google.protobuf.Any test_suite_result = 1;</code>
        */
+      @java.lang.Override
       public com.google.protobuf.AnyOrBuilder getTestSuiteResultOrBuilder() {
         return getTestSuiteResult();
       }
@@ -3090,6 +3102,7 @@ public final class GradleAndroidTestResultListenerProto {
      * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteStarted test_suite_started = 1;</code>
      * @return Whether the testSuiteStarted field is set.
      */
+    @java.lang.Override
     public boolean hasTestSuiteStarted() {
       return stateCase_ == 1;
     }
@@ -3101,6 +3114,7 @@ public final class GradleAndroidTestResultListenerProto {
      * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteStarted test_suite_started = 1;</code>
      * @return The testSuiteStarted.
      */
+    @java.lang.Override
     public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteStarted getTestSuiteStarted() {
       if (stateCase_ == 1) {
          return (com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteStarted) state_;
@@ -3114,6 +3128,7 @@ public final class GradleAndroidTestResultListenerProto {
      *
      * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteStarted test_suite_started = 1;</code>
      */
+    @java.lang.Override
     public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteStartedOrBuilder getTestSuiteStartedOrBuilder() {
       if (stateCase_ == 1) {
          return (com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteStarted) state_;
@@ -3130,6 +3145,7 @@ public final class GradleAndroidTestResultListenerProto {
      * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseStarted test_case_started = 2;</code>
      * @return Whether the testCaseStarted field is set.
      */
+    @java.lang.Override
     public boolean hasTestCaseStarted() {
       return stateCase_ == 2;
     }
@@ -3141,6 +3157,7 @@ public final class GradleAndroidTestResultListenerProto {
      * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseStarted test_case_started = 2;</code>
      * @return The testCaseStarted.
      */
+    @java.lang.Override
     public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestCaseStarted getTestCaseStarted() {
       if (stateCase_ == 2) {
          return (com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestCaseStarted) state_;
@@ -3154,6 +3171,7 @@ public final class GradleAndroidTestResultListenerProto {
      *
      * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseStarted test_case_started = 2;</code>
      */
+    @java.lang.Override
     public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestCaseStartedOrBuilder getTestCaseStartedOrBuilder() {
       if (stateCase_ == 2) {
          return (com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestCaseStarted) state_;
@@ -3170,6 +3188,7 @@ public final class GradleAndroidTestResultListenerProto {
      * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseFinished test_case_finished = 3;</code>
      * @return Whether the testCaseFinished field is set.
      */
+    @java.lang.Override
     public boolean hasTestCaseFinished() {
       return stateCase_ == 3;
     }
@@ -3181,6 +3200,7 @@ public final class GradleAndroidTestResultListenerProto {
      * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseFinished test_case_finished = 3;</code>
      * @return The testCaseFinished.
      */
+    @java.lang.Override
     public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestCaseFinished getTestCaseFinished() {
       if (stateCase_ == 3) {
          return (com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestCaseFinished) state_;
@@ -3194,6 +3214,7 @@ public final class GradleAndroidTestResultListenerProto {
      *
      * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseFinished test_case_finished = 3;</code>
      */
+    @java.lang.Override
     public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestCaseFinishedOrBuilder getTestCaseFinishedOrBuilder() {
       if (stateCase_ == 3) {
          return (com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestCaseFinished) state_;
@@ -3210,6 +3231,7 @@ public final class GradleAndroidTestResultListenerProto {
      * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteFinished test_suite_finished = 4;</code>
      * @return Whether the testSuiteFinished field is set.
      */
+    @java.lang.Override
     public boolean hasTestSuiteFinished() {
       return stateCase_ == 4;
     }
@@ -3221,6 +3243,7 @@ public final class GradleAndroidTestResultListenerProto {
      * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteFinished test_suite_finished = 4;</code>
      * @return The testSuiteFinished.
      */
+    @java.lang.Override
     public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteFinished getTestSuiteFinished() {
       if (stateCase_ == 4) {
          return (com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteFinished) state_;
@@ -3234,6 +3257,7 @@ public final class GradleAndroidTestResultListenerProto {
      *
      * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteFinished test_suite_finished = 4;</code>
      */
+    @java.lang.Override
     public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteFinishedOrBuilder getTestSuiteFinishedOrBuilder() {
       if (stateCase_ == 4) {
          return (com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteFinished) state_;
@@ -3251,6 +3275,7 @@ public final class GradleAndroidTestResultListenerProto {
      * <code>string deviceId = 5;</code>
      * @return The deviceId.
      */
+    @java.lang.Override
     public java.lang.String getDeviceId() {
       java.lang.Object ref = deviceId_;
       if (ref instanceof java.lang.String) {
@@ -3271,6 +3296,7 @@ public final class GradleAndroidTestResultListenerProto {
      * <code>string deviceId = 5;</code>
      * @return The bytes for deviceId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDeviceIdBytes() {
       java.lang.Object ref = deviceId_;
@@ -3737,6 +3763,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteStarted test_suite_started = 1;</code>
        * @return Whether the testSuiteStarted field is set.
        */
+      @java.lang.Override
       public boolean hasTestSuiteStarted() {
         return stateCase_ == 1;
       }
@@ -3748,6 +3775,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteStarted test_suite_started = 1;</code>
        * @return The testSuiteStarted.
        */
+      @java.lang.Override
       public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteStarted getTestSuiteStarted() {
         if (testSuiteStartedBuilder_ == null) {
           if (stateCase_ == 1) {
@@ -3865,6 +3893,7 @@ public final class GradleAndroidTestResultListenerProto {
        *
        * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteStarted test_suite_started = 1;</code>
        */
+      @java.lang.Override
       public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteStartedOrBuilder getTestSuiteStartedOrBuilder() {
         if ((stateCase_ == 1) && (testSuiteStartedBuilder_ != null)) {
           return testSuiteStartedBuilder_.getMessageOrBuilder();
@@ -3911,6 +3940,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseStarted test_case_started = 2;</code>
        * @return Whether the testCaseStarted field is set.
        */
+      @java.lang.Override
       public boolean hasTestCaseStarted() {
         return stateCase_ == 2;
       }
@@ -3922,6 +3952,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseStarted test_case_started = 2;</code>
        * @return The testCaseStarted.
        */
+      @java.lang.Override
       public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestCaseStarted getTestCaseStarted() {
         if (testCaseStartedBuilder_ == null) {
           if (stateCase_ == 2) {
@@ -4039,6 +4070,7 @@ public final class GradleAndroidTestResultListenerProto {
        *
        * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseStarted test_case_started = 2;</code>
        */
+      @java.lang.Override
       public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestCaseStartedOrBuilder getTestCaseStartedOrBuilder() {
         if ((stateCase_ == 2) && (testCaseStartedBuilder_ != null)) {
           return testCaseStartedBuilder_.getMessageOrBuilder();
@@ -4085,6 +4117,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseFinished test_case_finished = 3;</code>
        * @return Whether the testCaseFinished field is set.
        */
+      @java.lang.Override
       public boolean hasTestCaseFinished() {
         return stateCase_ == 3;
       }
@@ -4096,6 +4129,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseFinished test_case_finished = 3;</code>
        * @return The testCaseFinished.
        */
+      @java.lang.Override
       public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestCaseFinished getTestCaseFinished() {
         if (testCaseFinishedBuilder_ == null) {
           if (stateCase_ == 3) {
@@ -4213,6 +4247,7 @@ public final class GradleAndroidTestResultListenerProto {
        *
        * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestCaseFinished test_case_finished = 3;</code>
        */
+      @java.lang.Override
       public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestCaseFinishedOrBuilder getTestCaseFinishedOrBuilder() {
         if ((stateCase_ == 3) && (testCaseFinishedBuilder_ != null)) {
           return testCaseFinishedBuilder_.getMessageOrBuilder();
@@ -4259,6 +4294,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteFinished test_suite_finished = 4;</code>
        * @return Whether the testSuiteFinished field is set.
        */
+      @java.lang.Override
       public boolean hasTestSuiteFinished() {
         return stateCase_ == 4;
       }
@@ -4270,6 +4306,7 @@ public final class GradleAndroidTestResultListenerProto {
        * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteFinished test_suite_finished = 4;</code>
        * @return The testSuiteFinished.
        */
+      @java.lang.Override
       public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteFinished getTestSuiteFinished() {
         if (testSuiteFinishedBuilder_ == null) {
           if (stateCase_ == 4) {
@@ -4387,6 +4424,7 @@ public final class GradleAndroidTestResultListenerProto {
        *
        * <code>.com.android.tools.utp.plugins.result.listener.gradle.proto.TestResultEvent.TestSuiteFinished test_suite_finished = 4;</code>
        */
+      @java.lang.Override
       public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteFinishedOrBuilder getTestSuiteFinishedOrBuilder() {
         if ((stateCase_ == 4) && (testSuiteFinishedBuilder_ != null)) {
           return testSuiteFinishedBuilder_.getMessageOrBuilder();
@@ -4582,7 +4620,7 @@ public final class GradleAndroidTestResultListenerProto {
    *
    * Protobuf type {@code com.android.tools.utp.plugins.result.listener.gradle.proto.RecordTestResultEventResponse}
    */
-  public  static final class RecordTestResultEventResponse extends
+  public static final class RecordTestResultEventResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:com.android.tools.utp.plugins.result.listener.gradle.proto.RecordTestResultEventResponse)
       RecordTestResultEventResponseOrBuilder {

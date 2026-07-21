@@ -25,6 +25,16 @@ public final class AndroidTestCoverageConfigProto {
      * </pre>
      *
      * <code>string single_coverage_file = 1;</code>
+     * @return Whether the singleCoverageFile field is set.
+     */
+    boolean hasSingleCoverageFile();
+    /**
+     * <pre>
+     * A file path to a single coverage file.
+     * Note: this mode must be used for HOST android test execution.
+     * </pre>
+     *
+     * <code>string single_coverage_file = 1;</code>
      * @return The singleCoverageFile.
      */
     java.lang.String getSingleCoverageFile();
@@ -40,6 +50,16 @@ public final class AndroidTestCoverageConfigProto {
     com.google.protobuf.ByteString
         getSingleCoverageFileBytes();
 
+    /**
+     * <pre>
+     * A path to a directory that contains multiple coverage files.
+     * Note: this mode must be used for Android test orchestrator.
+     * </pre>
+     *
+     * <code>string multiple_coverage_files_in_directory = 2;</code>
+     * @return Whether the multipleCoverageFilesInDirectory field is set.
+     */
+    boolean hasMultipleCoverageFilesInDirectory();
     /**
      * <pre>
      * A path to a directory that contains multiple coverage files.
@@ -128,7 +148,7 @@ public final class AndroidTestCoverageConfigProto {
    *
    * Protobuf type {@code com.android.tools.utp.plugins.host.coverage.proto.AndroidTestCoverageConfig}
    */
-  public  static final class AndroidTestCoverageConfig extends
+  public static final class AndroidTestCoverageConfig extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:com.android.tools.utp.plugins.host.coverage.proto.AndroidTestCoverageConfig)
       AndroidTestCoverageConfigOrBuilder {
@@ -282,6 +302,18 @@ public final class AndroidTestCoverageConfigProto {
      * </pre>
      *
      * <code>string single_coverage_file = 1;</code>
+     * @return Whether the singleCoverageFile field is set.
+     */
+    public boolean hasSingleCoverageFile() {
+      return testCoveragePathOnDeviceCase_ == 1;
+    }
+    /**
+     * <pre>
+     * A file path to a single coverage file.
+     * Note: this mode must be used for HOST android test execution.
+     * </pre>
+     *
+     * <code>string single_coverage_file = 1;</code>
      * @return The singleCoverageFile.
      */
     public java.lang.String getSingleCoverageFile() {
@@ -330,6 +362,18 @@ public final class AndroidTestCoverageConfigProto {
     }
 
     public static final int MULTIPLE_COVERAGE_FILES_IN_DIRECTORY_FIELD_NUMBER = 2;
+    /**
+     * <pre>
+     * A path to a directory that contains multiple coverage files.
+     * Note: this mode must be used for Android test orchestrator.
+     * </pre>
+     *
+     * <code>string multiple_coverage_files_in_directory = 2;</code>
+     * @return Whether the multipleCoverageFilesInDirectory field is set.
+     */
+    public boolean hasMultipleCoverageFilesInDirectory() {
+      return testCoveragePathOnDeviceCase_ == 2;
+    }
     /**
      * <pre>
      * A path to a directory that contains multiple coverage files.
@@ -397,6 +441,7 @@ public final class AndroidTestCoverageConfigProto {
      * <code>string run_as_package_name = 3;</code>
      * @return The runAsPackageName.
      */
+    @java.lang.Override
     public java.lang.String getRunAsPackageName() {
       java.lang.Object ref = runAsPackageName_;
       if (ref instanceof java.lang.String) {
@@ -420,6 +465,7 @@ public final class AndroidTestCoverageConfigProto {
      * <code>string run_as_package_name = 3;</code>
      * @return The bytes for runAsPackageName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getRunAsPackageNameBytes() {
       java.lang.Object ref = runAsPackageName_;
@@ -444,6 +490,7 @@ public final class AndroidTestCoverageConfigProto {
      * <code>string output_directory_on_host = 4;</code>
      * @return The outputDirectoryOnHost.
      */
+    @java.lang.Override
     public java.lang.String getOutputDirectoryOnHost() {
       java.lang.Object ref = outputDirectoryOnHost_;
       if (ref instanceof java.lang.String) {
@@ -464,6 +511,7 @@ public final class AndroidTestCoverageConfigProto {
      * <code>string output_directory_on_host = 4;</code>
      * @return The bytes for outputDirectoryOnHost.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getOutputDirectoryOnHostBytes() {
       java.lang.Object ref = outputDirectoryOnHost_;
@@ -489,6 +537,7 @@ public final class AndroidTestCoverageConfigProto {
      * <code>bool use_test_storage_service = 5;</code>
      * @return The useTestStorageService.
      */
+    @java.lang.Override
     public boolean getUseTestStorageService() {
       return useTestStorageService_;
     }
@@ -919,8 +968,22 @@ public final class AndroidTestCoverageConfigProto {
        * </pre>
        *
        * <code>string single_coverage_file = 1;</code>
+       * @return Whether the singleCoverageFile field is set.
+       */
+      @java.lang.Override
+      public boolean hasSingleCoverageFile() {
+        return testCoveragePathOnDeviceCase_ == 1;
+      }
+      /**
+       * <pre>
+       * A file path to a single coverage file.
+       * Note: this mode must be used for HOST android test execution.
+       * </pre>
+       *
+       * <code>string single_coverage_file = 1;</code>
        * @return The singleCoverageFile.
        */
+      @java.lang.Override
       public java.lang.String getSingleCoverageFile() {
         java.lang.Object ref = "";
         if (testCoveragePathOnDeviceCase_ == 1) {
@@ -947,6 +1010,7 @@ public final class AndroidTestCoverageConfigProto {
        * <code>string single_coverage_file = 1;</code>
        * @return The bytes for singleCoverageFile.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getSingleCoverageFileBytes() {
         java.lang.Object ref = "";
@@ -1031,8 +1095,22 @@ public final class AndroidTestCoverageConfigProto {
        * </pre>
        *
        * <code>string multiple_coverage_files_in_directory = 2;</code>
+       * @return Whether the multipleCoverageFilesInDirectory field is set.
+       */
+      @java.lang.Override
+      public boolean hasMultipleCoverageFilesInDirectory() {
+        return testCoveragePathOnDeviceCase_ == 2;
+      }
+      /**
+       * <pre>
+       * A path to a directory that contains multiple coverage files.
+       * Note: this mode must be used for Android test orchestrator.
+       * </pre>
+       *
+       * <code>string multiple_coverage_files_in_directory = 2;</code>
        * @return The multipleCoverageFilesInDirectory.
        */
+      @java.lang.Override
       public java.lang.String getMultipleCoverageFilesInDirectory() {
         java.lang.Object ref = "";
         if (testCoveragePathOnDeviceCase_ == 2) {
@@ -1059,6 +1137,7 @@ public final class AndroidTestCoverageConfigProto {
        * <code>string multiple_coverage_files_in_directory = 2;</code>
        * @return The bytes for multipleCoverageFilesInDirectory.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getMultipleCoverageFilesInDirectoryBytes() {
         java.lang.Object ref = "";
@@ -1353,6 +1432,7 @@ public final class AndroidTestCoverageConfigProto {
        * <code>bool use_test_storage_service = 5;</code>
        * @return The useTestStorageService.
        */
+      @java.lang.Override
       public boolean getUseTestStorageService() {
         return useTestStorageService_;
       }

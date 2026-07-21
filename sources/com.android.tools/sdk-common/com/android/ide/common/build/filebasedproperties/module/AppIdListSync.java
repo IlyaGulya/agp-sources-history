@@ -10,7 +10,7 @@ package com.android.ide.common.build.filebasedproperties.module;
  *
  * Protobuf type {@code AppIdListSync}
  */
-public  final class AppIdListSync extends
+public final class AppIdListSync extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:AppIdListSync)
     AppIdListSyncOrBuilder {
@@ -107,6 +107,7 @@ private static final long serialVersionUID = 0L;
    *
    * <code>repeated .AppIdSync appIds = 1;</code>
    */
+  @java.lang.Override
   public java.util.List<com.android.ide.common.build.filebasedproperties.module.AppIdSync> getAppIdsList() {
     return appIds_;
   }
@@ -117,6 +118,7 @@ private static final long serialVersionUID = 0L;
    *
    * <code>repeated .AppIdSync appIds = 1;</code>
    */
+  @java.lang.Override
   public java.util.List<? extends com.android.ide.common.build.filebasedproperties.module.AppIdSyncOrBuilder> 
       getAppIdsOrBuilderList() {
     return appIds_;
@@ -128,6 +130,7 @@ private static final long serialVersionUID = 0L;
    *
    * <code>repeated .AppIdSync appIds = 1;</code>
    */
+  @java.lang.Override
   public int getAppIdsCount() {
     return appIds_.size();
   }
@@ -138,6 +141,7 @@ private static final long serialVersionUID = 0L;
    *
    * <code>repeated .AppIdSync appIds = 1;</code>
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.module.AppIdSync getAppIds(int index) {
     return appIds_.get(index);
   }
@@ -148,6 +152,7 @@ private static final long serialVersionUID = 0L;
    *
    * <code>repeated .AppIdSync appIds = 1;</code>
    */
+  @java.lang.Override
   public com.android.ide.common.build.filebasedproperties.module.AppIdSyncOrBuilder getAppIdsOrBuilder(
       int index) {
     return appIds_.get(index);
