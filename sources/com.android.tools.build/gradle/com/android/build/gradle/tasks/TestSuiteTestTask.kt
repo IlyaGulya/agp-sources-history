@@ -208,7 +208,7 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
     if (
       engineInputParameters.any { inputParameter ->
         inputParameter.name == AgpTestSuiteInputParameters.TESTED_APKS.propertyName ||
-          inputParameter.name == AgpTestSuiteInputParameters.TESTING_APK.propertyName
+          inputParameter.name == AgpTestSuiteInputParameters.TEST_APKS.propertyName
       }
     ) {
       provisionDevicesAndExecute { onlineDevices -> executeTests(engineInputParameters, onlineDevices) }
@@ -501,6 +501,17 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
             // do nothing so far, we always do it but it might change in the near future.
           }
 
+          AgpTestSuiteInputParameters.TEST_APKS -> {
+            val testApkSourceContainer = creationConfig.sourceContainers.firstOrNull { it.source is TestSuiteSourceSet.TestApk }
+            if (testApkSourceContainer != null) {
+              task.engineInputParameters.add(
+                AgpTestSuiteInputParameter(AgpTestSuiteInputParameters.TEST_APKS, testApkSourceContainer.artifacts.get(SingleArtifact.APK))
+              )
+            } else {
+              throw RuntimeException("Engine requested TEST_APKS but no TestApk source set is configured for suite ${creationConfig.name}")
+            }
+          }
+
           else -> {
             println("I don't know of this parameter $inputParameter")
           }
@@ -537,7 +548,10 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
               sourceContainer.artifacts.forScope(ScopedArtifacts.Scope.PROJECT).getFinalArtifacts(ScopedArtifact.POST_COMPILATION_CLASSES)
             )
           }
-          is TestSuiteSourceSet.TestApk -> throw RuntimeException("Not implemented")
+          is TestSuiteSourceSet.TestApk -> {
+            task.testDefinitionDirs.from(sourceSet.manifestFile.parentFile)
+            task.failOnNoDiscoveredTests.setDisallowChanges(false)
+          }
         }
       }
 
@@ -698,7 +712,7 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
         task.engineInputParameters.add(AgpTestSuiteInputParameter(AgpTestSuiteInputParameters.TESTED_APKS, creationConfig.testedApks))
       }
       task.engineInputParameters.add(
-        AgpTestSuiteInputParameter(AgpTestSuiteInputParameters.TESTING_APK, creationConfig.artifacts.get(SingleArtifact.APK))
+        AgpTestSuiteInputParameter(AgpTestSuiteInputParameters.TEST_APKS, creationConfig.artifacts.get(SingleArtifact.APK))
       )
 
       task.engineInputProperties.put(TestEngineInputProperty.TESTED_APPLICATION_ID, testData.applicationId)
@@ -974,7 +988,7 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
         task.engineInputParameters.add(AgpTestSuiteInputParameter(AgpTestSuiteInputParameters.TESTED_APKS, creationConfig.testedApks))
       }
       task.engineInputParameters.add(
-        AgpTestSuiteInputParameter(AgpTestSuiteInputParameters.TESTING_APK, creationConfig.artifacts.get(SingleArtifact.APK))
+        AgpTestSuiteInputParameter(AgpTestSuiteInputParameters.TEST_APKS, creationConfig.artifacts.get(SingleArtifact.APK))
       )
 
       task.engineInputProperties.put(TestEngineInputProperty.TESTED_APPLICATION_ID, testData.applicationId)
