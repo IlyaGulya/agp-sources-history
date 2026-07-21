@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.component
+package com.android.build.api.variant.impl
+
+import com.android.build.api.component.impl.HostTestImpl
+import com.android.build.api.component.impl.UnitTestImpl
 
 /**
- * Represents the main variant of the kotlin multiplatform plugin.
+ * Internal marker interface for [VariantImpl] that potentially has associated host tests
+ * e.g. the unitTest component
  */
-interface KmpCreationConfig: KmpComponentCreationConfig, VariantCreationConfig, AarCreationConfig {
-    val unitTest: HostTestCreationConfig?
-    val androidTest: AndroidTestCreationConfig?
+interface HasHostTests {
+    var unitTest: UnitTestImpl?
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.ide.common.resources
 
-package com.android.build.api.variant.impl
+import java.util.ServiceLoader
 
-import com.android.build.api.component.impl.AndroidTestImpl
-
-/**
- * Internal marker interface for [VariantImpl] that potentially has associated android tests.
- */
-interface HasAndroidTest {
-    var androidTest: AndroidTestImpl?
+// Indirection so that `ResourceUpdateTracer` can be invoked from Lint
+abstract class ResourceUpdateTracerService {
+    companion object {
+        fun getInstance(): ResourceUpdateTracerService? =
+            ServiceLoader.load(ResourceUpdateTracerService::class.java, this::class.java.classLoader)
+                .firstOrNull()
+    }
+    abstract fun dumpTrace(message: String?)
 }

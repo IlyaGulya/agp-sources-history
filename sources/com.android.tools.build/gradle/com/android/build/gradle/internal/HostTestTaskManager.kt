@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.component
+package com.android.build.gradle.internal
 
-/**
- * Represents the main variant of the kotlin multiplatform plugin.
- */
-interface KmpCreationConfig: KmpComponentCreationConfig, VariantCreationConfig, AarCreationConfig {
-    val unitTest: HostTestCreationConfig?
-    val androidTest: AndroidTestCreationConfig?
+import com.android.build.api.artifact.impl.InternalScopedArtifacts
+import com.android.build.gradle.internal.tasks.factory.GlobalTaskCreationConfig
+import org.gradle.api.Project
+
+open class HostTestTaskManager(
+    project: Project,
+    globalConfig: GlobalTaskCreationConfig
+): TaskManager(project, globalConfig) {
+
+
+    override val javaResMergingScopes = setOf(
+        InternalScopedArtifacts.InternalScope.SUB_PROJECTS,
+        InternalScopedArtifacts.InternalScope.EXTERNAL_LIBS,
+        InternalScopedArtifacts.InternalScope.LOCAL_DEPS,
+    )
 }
