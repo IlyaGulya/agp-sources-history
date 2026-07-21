@@ -102,6 +102,8 @@ public interface VariantScope extends TransformVariantScope {
 
     boolean isPrecompileRemoteResourcesEnabled();
 
+    boolean isPrecompileLocalResourcesEnabled();
+
     boolean isCrunchPngs();
 
     boolean consumesFeatureJars();
@@ -192,6 +194,9 @@ public interface VariantScope extends TransformVariantScope {
 
     @NonNull
     FileCollection getProvidedOnlyClasspath();
+
+    @NonNull
+    Provider<FileSystemLocation> getRJarForUnitTests();
 
     @NonNull
     File getDefaultMergeResourcesOutputDir();

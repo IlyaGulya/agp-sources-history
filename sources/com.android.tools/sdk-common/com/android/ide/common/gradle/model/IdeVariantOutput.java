@@ -21,14 +21,15 @@ import com.android.build.FilterData;
 import com.android.build.OutputFile;
 import com.android.build.VariantOutput;
 import com.google.common.collect.ImmutableList;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
 /** Creates a deep copy of a {@link VariantOutput}. */
-public abstract class IdeVariantOutput extends IdeModel implements VariantOutput {
+public abstract class IdeVariantOutput implements VariantOutput, Serializable {
     // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     @NonNull private final Collection<? extends OutputFile> myOutputs;
     @NonNull private final Collection<String> myFilterTypes;
@@ -36,39 +37,49 @@ public abstract class IdeVariantOutput extends IdeModel implements VariantOutput
     @Nullable private final OutputFile myMainOutputFile;
     @Nullable private final String myOutputType;
     private final int myVersionCode;
-    private final int myHashCode;
+    private final int hashCode;
+
+    // Used for serialization by the IDE.
+    IdeVariantOutput() {
+        myOutputs = Collections.emptyList();
+        myFilterTypes = Collections.emptyList();
+        myFilters = null;
+        myMainOutputFile = null;
+        myOutputType = null;
+        myVersionCode = 0;
+
+        hashCode = 0;
+    }
 
     public IdeVariantOutput(@NonNull VariantOutput output, @NonNull ModelCache modelCache) {
-        super(output, modelCache);
         //noinspection deprecation
         myOutputs =
-                copy(
+                IdeModel.copy(
                         output.getOutputs(),
                         modelCache,
                         outputFile -> new IdeOutputFile(outputFile, modelCache));
         myFilterTypes =
-                copyNewProperty(
+                IdeModel.copyNewProperty(
                         () -> ImmutableList.copyOf(output.getFilterTypes()),
                         Collections.emptyList());
         myFilters = copyFilters(output, modelCache);
         myMainOutputFile =
-                copyNewProperty(
+                IdeModel.copyNewProperty(
                         modelCache,
                         output::getMainOutputFile,
                         file -> new IdeOutputFile(file, modelCache),
                         null);
-        myOutputType = copyNewProperty(output::getOutputType, null);
+        myOutputType = IdeModel.copyNewProperty(output::getOutputType, null);
         myVersionCode = output.getVersionCode();
 
-        myHashCode = calculateHashCode();
+        hashCode = calculateHashCode();
     }
 
     @Nullable
     private static Collection<FilterData> copyFilters(
             @NonNull VariantOutput output, @NonNull ModelCache modelCache) {
         try {
-            return copy(
-                    output.getFilters(), modelCache, data -> new IdeFilterData(data, modelCache));
+            return IdeModel.copy(output.getFilters(), modelCache, data -> new IdeFilterData(data));
         } catch (UnsupportedOperationException ignored) {
             return null;
         }
@@ -142,7 +153,7 @@ public abstract class IdeVariantOutput extends IdeModel implements VariantOutput
 
     @Override
     public int hashCode() {
-        return myHashCode;
+        return hashCode;
     }
 
     protected int calculateHashCode() {

@@ -18,17 +18,22 @@ package com.android.ide.common.gradle.model;
 
 import com.android.annotations.NonNull;
 import com.android.builder.model.Dependencies;
+import java.io.Serializable;
 import java.util.Objects;
 
-public class IdeProjectIdentifierImpl extends IdeModel implements IdeProjectIdentifier {
+public class IdeProjectIdentifierImpl implements IdeProjectIdentifier, Serializable {
 
     @NonNull private final String buildId;
     @NonNull private final String projectPath;
 
-    public IdeProjectIdentifierImpl(
-            @NonNull Dependencies.ProjectIdentifier projectIdentifier,
-            @NonNull ModelCache modelCache) {
-        super(projectIdentifier, modelCache);
+    // Used for serialization by the IDE.
+    @SuppressWarnings("unused")
+    public IdeProjectIdentifierImpl() {
+        buildId = "";
+        projectPath = "";
+    }
+
+    public IdeProjectIdentifierImpl(@NonNull Dependencies.ProjectIdentifier projectIdentifier) {
         this.buildId = projectIdentifier.getBuildId();
         this.projectPath = projectIdentifier.getProjectPath();
     }

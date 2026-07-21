@@ -27,15 +27,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.io.File;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public final class IdeNativeAndroidProjectImpl extends IdeModel implements IdeNativeAndroidProject {
+public final class IdeNativeAndroidProjectImpl implements IdeNativeAndroidProject, Serializable {
     // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     @NonNull private final String myModelVersion;
     @NonNull private final String myName;
@@ -49,6 +50,23 @@ public final class IdeNativeAndroidProjectImpl extends IdeModel implements IdeNa
     private final int myApiVersion;
     private final int myHashCode;
 
+    // Used for serialization by the IDE.
+    @SuppressWarnings("unused")
+    public IdeNativeAndroidProjectImpl() {
+        myModelVersion = "";
+        myName = "";
+        myBuildFiles = Collections.emptyList();
+        myVariantInfos = Collections.emptyMap();
+        myArtifacts = Collections.emptyList();
+        myToolChains = Collections.emptyList();
+        mySettings = Collections.emptyList();
+        myFileExtensions = Collections.emptyMap();
+        myBuildSystems = Collections.emptyList();
+        myApiVersion = 0;
+
+        myHashCode = 0;
+    }
+
     public IdeNativeAndroidProjectImpl(@NonNull NativeAndroidProject project) {
         this(project, new ModelCache());
     }
@@ -56,27 +74,26 @@ public final class IdeNativeAndroidProjectImpl extends IdeModel implements IdeNa
     @VisibleForTesting
     IdeNativeAndroidProjectImpl(
             @NonNull NativeAndroidProject project, @NonNull ModelCache modelCache) {
-        super(project, modelCache);
         myModelVersion = project.getModelVersion();
         myApiVersion = project.getApiVersion();
         myName = project.getName();
         myBuildFiles = ImmutableList.copyOf(project.getBuildFiles());
         myVariantInfos = copyVariantInfos(project, modelCache);
         myArtifacts =
-                copy(
+                IdeModel.copy(
                         project.getArtifacts(),
                         modelCache,
                         artifact -> new IdeNativeArtifact(artifact, modelCache));
         myToolChains =
-                copy(
+                IdeModel.copy(
                         project.getToolChains(),
                         modelCache,
-                        toolchain -> new IdeNativeToolchain(toolchain, modelCache));
+                        toolchain -> new IdeNativeToolchain(toolchain));
         mySettings =
-                copy(
+                IdeModel.copy(
                         project.getSettings(),
                         modelCache,
-                        settings -> new IdeNativeSettings(settings, modelCache));
+                        settings -> new IdeNativeSettings(settings));
         myFileExtensions = ImmutableMap.copyOf(project.getFileExtensions());
         myBuildSystems = copyBuildSystems(project);
         myHashCode = calculateHashCode();
@@ -86,7 +103,7 @@ public final class IdeNativeAndroidProjectImpl extends IdeModel implements IdeNa
     private static Map<String, NativeVariantInfo> copyVariantInfos(
             @NonNull NativeAndroidProject project, @NonNull ModelCache modelCache) {
         try {
-            return copy(
+            return IdeModel.copy(
                     project.getVariantInfos(),
                     modelCache,
                     variantInfo ->

@@ -55,8 +55,8 @@ import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.scope.MutableTaskContainer;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.DeviceProviderInstrumentTestTask;
+import com.android.build.gradle.internal.tasks.ExportConsumerProguardFilesTask;
 import com.android.build.gradle.internal.tasks.ExtractApksTask;
-import com.android.build.gradle.internal.tasks.MergeConsumerProguardFilesTask;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.internal.variant.TestVariantData;
 import com.android.build.gradle.internal.variant.TestedVariantData;
@@ -111,7 +111,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -130,8 +129,6 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.component.BuildIdentifier;
 import org.gradle.api.artifacts.result.ResolvedArtifactResult;
 import org.gradle.api.file.FileCollection;
-import org.gradle.api.file.FileSystemLocation;
-import org.gradle.api.provider.Provider;
 import org.gradle.tooling.provider.model.ParameterizedToolingModelBuilder;
 
 /** Builder for the custom Android model. */
@@ -488,14 +485,12 @@ public class ModelBuilder<Extension extends BaseExtension>
             } catch (XMLStreamException | IOException e) {
                 extraModelInfo
                         .getSyncIssueHandler()
-                        .reportIssue(
+                        .reportError(
                                 Type.GENERIC,
-                                EvalIssueReporter.Severity.ERROR,
                                 "Failed to parse XML in "
                                         + manifest.getPath()
                                         + "\n"
-                                        + e.getMessage(),
-                                null);
+                                        + e.getMessage());
             }
         }
         return false;
@@ -576,14 +571,12 @@ public class ModelBuilder<Extension extends BaseExtension>
             } catch (Throwable e) {
                 extraModelInfo
                         .getSyncIssueHandler()
-                        .reportIssue(
+                        .reportError(
                                 Type.GENERIC,
-                                EvalIssueReporter.Severity.ERROR,
                                 "Failed to parse XML in "
                                         + manifest.getPath()
                                         + "\n"
-                                        + e.getMessage(),
-                                null);
+                                        + e.getMessage());
             }
         }
 
@@ -655,19 +648,15 @@ public class ModelBuilder<Extension extends BaseExtension>
             List<File> consumerProguardFiles = variantScope.getConsumerProguardFilesForFeatures();
 
             boolean isDynamicFeature = variantScope.getType().isDynamicFeature();
-            MergeConsumerProguardFilesTask.checkProguardFiles(
+            ExportConsumerProguardFilesTask.checkProguardFiles(
                     project,
                     isDynamicFeature,
                     hasFeaturePlugin,
                     consumerProguardFiles,
-                    exception ->
+                    errorMessage ->
                             extraModelInfo
                                     .getSyncIssueHandler()
-                                    .reportIssue(
-                                            Type.GENERIC,
-                                            EvalIssueReporter.Severity.ERROR,
-                                            exception.getMessage(),
-                                            exception.getData()));
+                                    .reportError(Type.GENERIC, errorMessage));
         }
     }
 
@@ -736,24 +725,9 @@ public class ModelBuilder<Extension extends BaseExtension>
                             .getAsFile());
         }
         // The separately compile R class, if applicable.
-        BuildArtifactsHolder testedArtifacts =
-                Objects.requireNonNull(scope.getTestedVariantData()).getScope().getArtifacts();
-        if (testedArtifacts.hasFinalProduct(
-                InternalArtifactType.COMPILE_ONLY_NOT_NAMESPACED_R_CLASS_JAR)) {
-            additionalTestClasses.add(
-                    testedArtifacts
-                            .getFinalProduct(
-                                    InternalArtifactType.COMPILE_ONLY_NOT_NAMESPACED_R_CLASS_JAR)
-                            .get()
-                            .getAsFile());
-        }
-
-        if (testedArtifacts.hasFinalProduct(
-                InternalArtifactType.COMPILE_AND_RUNTIME_NOT_NAMESPACED_R_CLASS_JAR)) {
-            Provider<FileSystemLocation> rClassJar =
-                    testedArtifacts.getFinalProduct(
-                            InternalArtifactType.COMPILE_AND_RUNTIME_NOT_NAMESPACED_R_CLASS_JAR);
-            additionalTestClasses.add(rClassJar.get().getAsFile());
+        if (!globalScope.getExtension().getAaptOptions().getNamespaced()
+                && !globalScope.getProjectOptions().get(BooleanOption.GENERATE_R_JAVA)) {
+            additionalTestClasses.add(scope.getRJarForUnitTests().get().getAsFile());
         }
 
         // No files are possible if the SDK was not configured properly.
@@ -841,10 +815,7 @@ public class ModelBuilder<Extension extends BaseExtension>
                                 + "declared in the application module.";
                 extraModelInfo
                         .getSyncIssueHandler()
-                        .reportIssue(
-                                Type.SIGNING_CONFIG_DECLARED_IN_DYNAMIC_FEATURE,
-                                EvalIssueReporter.Severity.WARNING,
-                                message);
+                        .reportWarning(Type.SIGNING_CONFIG_DECLARED_IN_DYNAMIC_FEATURE, message);
             }
         }
     }
@@ -907,11 +878,7 @@ public class ModelBuilder<Extension extends BaseExtension>
                     message ->
                             extraModelInfo
                                     .getSyncIssueHandler()
-                                    .reportIssue(
-                                            Type.GENERIC,
-                                            EvalIssueReporter.Severity.ERROR,
-                                            message,
-                                            null));
+                                    .reportError(Type.GENERIC, message));
 
             TestOptions testOptionsDsl = scope.getGlobalScope().getExtension().getTestOptions();
             testOptions =
@@ -929,9 +896,7 @@ public class ModelBuilder<Extension extends BaseExtension>
         } catch (RuntimeException e) {
             // don't crash. just throw a sync error.
             applicationId = "";
-            extraModelInfo
-                    .getSyncIssueHandler()
-                    .reportIssue(Type.GENERIC, EvalIssueReporter.Severity.ERROR, e.getMessage());
+            extraModelInfo.getSyncIssueHandler().reportError(Type.GENERIC, e);
         }
         final MutableTaskContainer taskContainer = scope.getTaskContainer();
         return new AndroidArtifactImpl(
@@ -976,9 +941,8 @@ public class ModelBuilder<Extension extends BaseExtension>
             // report an error since min sdk version should not be in the manifest.
             extraModelInfo
                     .getSyncIssueHandler()
-                    .reportIssue(
+                    .reportError(
                             EvalIssueReporter.Type.MIN_SDK_VERSION_IN_MANIFEST,
-                            EvalIssueReporter.Severity.ERROR,
                             "The minSdk version should not be declared in the android"
                                     + " manifest file. You can move the version from the manifest"
                                     + " to the defaultConfig in the build.gradle file.");
@@ -990,9 +954,8 @@ public class ModelBuilder<Extension extends BaseExtension>
             // report a warning since target sdk version should not be in the manifest.
             extraModelInfo
                     .getSyncIssueHandler()
-                    .reportIssue(
+                    .reportWarning(
                             EvalIssueReporter.Type.TARGET_SDK_VERSION_IN_MANIFEST,
-                            EvalIssueReporter.Severity.WARNING,
                             "The targetSdk version should not be declared in the android"
                                     + " manifest file. You can move the version from the manifest"
                                     + " to the defaultConfig in the build.gradle file.");

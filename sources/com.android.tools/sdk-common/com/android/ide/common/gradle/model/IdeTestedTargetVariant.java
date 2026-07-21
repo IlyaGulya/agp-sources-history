@@ -17,20 +17,30 @@ package com.android.ide.common.gradle.model;
 
 import com.android.annotations.NonNull;
 import com.android.builder.model.TestedTargetVariant;
+import com.google.common.annotations.VisibleForTesting;
+import java.io.Serializable;
 import java.util.Objects;
 
 /** Creates a deep copy of a {@link TestedTargetVariant}. */
-public final class IdeTestedTargetVariant extends IdeModel implements TestedTargetVariant {
+public final class IdeTestedTargetVariant implements TestedTargetVariant, Serializable {
     // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     @NonNull private final String myTargetProjectPath;
     @NonNull private final String myTargetVariant;
     private final int myHashCode;
 
-    public IdeTestedTargetVariant(
-            @NonNull TestedTargetVariant variant, @NonNull ModelCache modelCache) {
-        super(variant, modelCache);
+    // Used for serialization by the IDE.
+    @VisibleForTesting
+    @SuppressWarnings("unused")
+    public IdeTestedTargetVariant() {
+        myTargetProjectPath = "";
+        myTargetVariant = "";
+
+        myHashCode = 0;
+    }
+
+    public IdeTestedTargetVariant(@NonNull TestedTargetVariant variant) {
         myTargetProjectPath = variant.getTargetProjectPath();
         myTargetVariant = variant.getTargetVariant();
 

@@ -38,6 +38,7 @@ import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.BundleLibraryClasses;
 import com.android.build.gradle.internal.tasks.BundleLibraryJavaRes;
+import com.android.build.gradle.internal.tasks.ExportConsumerProguardFilesTask;
 import com.android.build.gradle.internal.tasks.LibraryAarJarsTask;
 import com.android.build.gradle.internal.tasks.LibraryDexingTask;
 import com.android.build.gradle.internal.tasks.LibraryJniLibsTask;
@@ -53,13 +54,13 @@ import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.tasks.BuildArtifactReportTask;
 import com.android.build.gradle.tasks.BundleAar;
+import com.android.build.gradle.tasks.CompileLibraryResourcesTask;
 import com.android.build.gradle.tasks.ExtractAnnotations;
 import com.android.build.gradle.tasks.ExtractDeepLinksTask;
 import com.android.build.gradle.tasks.MergeResources;
 import com.android.build.gradle.tasks.MergeSourceSetFolders;
 import com.android.build.gradle.tasks.VerifyLibraryResourcesTask;
 import com.android.build.gradle.tasks.ZipMergingTask;
-import com.android.builder.errors.EvalIssueException;
 import com.android.builder.errors.EvalIssueReporter.Type;
 import com.android.builder.profile.Recorder;
 import com.google.common.base.Preconditions;
@@ -128,6 +129,8 @@ public class LibraryTaskManager extends TaskManager {
 
         createMergeResourcesTasks(variantScope);
 
+        createCompileLibraryResourcesTask(variantScope);
+
         createShaderTask(variantScope);
 
         // Add tasks to merge the assets folders
@@ -141,7 +144,6 @@ public class LibraryTaskManager extends TaskManager {
         // of the r.txt file to be directly in the bundle.
         createProcessResTask(
                 variantScope,
-                variantScope.getSymbolTableFile(),
                 null,
                 // Switch to package where possible so we stop merging resources in
                 // libraries
@@ -184,6 +186,8 @@ public class LibraryTaskManager extends TaskManager {
         // merge consumer proguard files from different build types and flavors
         taskFactory.register(new MergeConsumerProguardFilesTask.CreationAction(variantScope));
 
+        taskFactory.register(new ExportConsumerProguardFilesTask.CreationAction(variantScope));
+
         // Some versions of retrolambda remove the actions from the extract annotations task.
         // TODO: remove this hack once tests are moved to a version that doesn't do this
         // b/37564303
@@ -219,10 +223,9 @@ public class LibraryTaskManager extends TaskManager {
                         .getErrorHandler()
                         .reportError(
                                 Type.GENERIC,
-                                new EvalIssueException(
-                                        String.format(
-                                                "Transforms with scopes '%s' cannot be applied to library projects.",
-                                                scopes)));
+                                String.format(
+                                        "Transforms with scopes '%s' cannot be applied to library projects.",
+                                        scopes));
             }
 
             List<Object> deps = customTransformsDependencies.get(i);
@@ -421,7 +424,14 @@ public class LibraryTaskManager extends TaskManager {
 
         // This task merges all the resources, including the dependencies of this library.
         // This should be unused, except that external libraries might consume it.
+        // Also used by the VerifyLibraryResourcesTask (only ran in release builds).
         createMergeResourcesTask(variantScope, false /*processResources*/, ImmutableSet.of());
+    }
+
+    private void createCompileLibraryResourcesTask(@NonNull VariantScope variantScope) {
+        if (variantScope.isPrecompileLocalResourcesEnabled()) {
+            taskFactory.register(new CompileLibraryResourcesTask.CreationAction(variantScope));
+        }
     }
 
     @Override

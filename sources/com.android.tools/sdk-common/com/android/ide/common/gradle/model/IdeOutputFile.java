@@ -15,21 +15,24 @@
  */
 package com.android.ide.common.gradle.model;
 
+import static com.android.utils.ImmutableCollectors.toImmutableList;
+
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.FilterData;
 import com.android.build.OutputFile;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Objects;
 
 /** Creates a deep copy of an {@link OutputFile}. */
-public final class IdeOutputFile extends IdeModel implements OutputFile {
+public final class IdeOutputFile implements OutputFile, Serializable {
     // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     @NonNull private final String myOutputType;
     @NonNull private final Collection<String> myFilterTypes;
@@ -40,33 +43,54 @@ public final class IdeOutputFile extends IdeModel implements OutputFile {
     @Nullable private final Integer myVersionCode;
     private final int myHashCode;
 
+    // Used for serialization by the IDE.
+    @SuppressWarnings("unused")
+    IdeOutputFile() {
+        myOutputType = "";
+        myFilterTypes = Collections.emptyList();
+        myFilters = Collections.emptyList();
+        //noinspection ConstantConditions
+        myOutputFile = null;
+        myOutputs = Collections.emptyList();
+        myMainOutputFile = null;
+        myVersionCode = null;
+
+        myHashCode = 0;
+    }
+
     public IdeOutputFile(@NonNull OutputFile file, @NonNull ModelCache modelCache) {
-        super(file, modelCache);
         myOutputType = file.getOutputType();
         myFilterTypes = ImmutableList.copyOf(file.getFilterTypes());
-        myFilters =
-                copy(file.getFilters(), modelCache, data -> new IdeFilterData(data, modelCache));
+        myFilters = IdeModel.copy(file.getFilters(), modelCache, data -> new IdeFilterData(data));
         myOutputFile = file.getOutputFile();
         myMainOutputFile =
-                copyNewProperty(
-                        modelCache,
-                        file::getMainOutputFile,
-                        outputFile -> new IdeOutputFile(outputFile, modelCache),
-                        null);
+                file == file.getMainOutputFile()
+                        ? this
+                        : IdeModel.copyNewProperty(
+                                modelCache,
+                                file::getMainOutputFile,
+                                outputFile -> new IdeOutputFile(outputFile, modelCache),
+                                null);
         //noinspection deprecation
         myOutputs = copyOutputs(file, modelCache);
-        myVersionCode = copyNewProperty(file::getVersionCode, null);
+        myVersionCode = IdeModel.copyNewProperty(file::getVersionCode, null);
 
         myHashCode = calculateHashCode();
     }
 
     @NonNull
-    private static Collection<? extends OutputFile> copyOutputs(
+    private Collection<? extends OutputFile> copyOutputs(
             @NonNull OutputFile file, @NonNull ModelCache modelCache) {
         try {
             //noinspection deprecation
-            Collection<? extends OutputFile> key = file.getOutputs();
-            return copy(key, modelCache, outputFile -> new IdeOutputFile(outputFile, modelCache));
+            return file.getOutputs()
+                    .stream()
+                    .map(
+                            outputFile ->
+                                    outputFile == file
+                                            ? this
+                                            : new IdeOutputFile(outputFile, modelCache))
+                    .collect(toImmutableList());
         } catch (UnsupportedOperationException ignored) {
             return Collections.emptyList();
         }
@@ -179,7 +203,7 @@ public final class IdeOutputFile extends IdeModel implements OutputFile {
         int result = myOutputType.hashCode();
         result = 31 * result + myFilterTypes.hashCode();
         result = 31 * result + myFilters.hashCode();
-        result = 31 * result + myOutputFile.hashCode();
+        result = 31 * result + hashCode(myOutputFile);
         result = 31 * result + hashCode(myMainOutputFile);
         result = 31 * result + hashCode(myOutputs);
         result = 31 * result + Objects.hashCode(myVersionCode);
@@ -194,8 +218,8 @@ public final class IdeOutputFile extends IdeModel implements OutputFile {
         return hashCode;
     }
 
-    private int hashCode(@Nullable OutputFile outputFile) {
-        return outputFile != this ? Objects.hashCode(outputFile) : 1;
+    private <T> int hashCode(@Nullable T obj) {
+        return obj != this ? Objects.hashCode(obj) : 1;
     }
 
     @Override

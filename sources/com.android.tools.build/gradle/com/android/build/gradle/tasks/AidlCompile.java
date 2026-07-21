@@ -29,14 +29,12 @@ import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.NonIncrementalTask;
-import com.android.build.gradle.internal.tasks.Workers;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
 import com.android.builder.compiling.DependencyFileProcessor;
 import com.android.builder.internal.compiler.AidlProcessor;
 import com.android.builder.internal.compiler.DirectoryWalker;
 import com.android.builder.internal.incremental.DependencyData;
 import com.android.ide.common.process.LoggedProcessOutputHandler;
-import com.android.ide.common.process.ProcessExecutor;
 import com.android.ide.common.workers.WorkerExecutorFacade;
 import com.android.utils.FileUtils;
 import com.google.common.collect.Lists;
@@ -65,7 +63,14 @@ import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.util.PatternSet;
 
-/** Task to compile aidl files. Supports incremental update. */
+/**
+ * Task to compile aidl files. Supports incremental update.
+ *
+ * <p>TODO(b/124424292)
+ *
+ * <p>We can not use gradle worker in this task as we use {@link GradleProcessExecutor} for
+ * compiling aidl files, which should not be serialized.
+ */
 @CacheableTask
 public abstract class AidlCompile extends NonIncrementalTask {
 
@@ -79,20 +84,6 @@ public abstract class AidlCompile extends NonIncrementalTask {
 
     private Provider<File> aidlExecutableProvider;
     private Provider<File> aidlFrameworkProvider;
-
-    private ProcessExecutor processExecutor;
-
-    private WorkerExecutorFacade workers;
-
-    /**
-     * TODO(b/124424292)
-     *
-     * <p>We can not use gradle worker in this task as we use {@link GradleProcessExecutor} for
-     * compiling aidl files, which should not be serialized.
-     */
-    public AidlCompile() {
-        this.workers = Workers.INSTANCE.withThreads(getProject().getName(), getPath());
-    }
 
     @InputFile
     @PathSensitive(PathSensitivity.NONE)
@@ -132,7 +123,7 @@ public abstract class AidlCompile extends NonIncrementalTask {
             FileUtils.cleanOutputDir(parcelableDir.getAsFile());
         }
 
-        try (WorkerExecutorFacade workers = this.workers) {
+        try (WorkerExecutorFacade workers = getWorkerFacadeWithThreads(false)) {
             Collection<File> sourceFolders = sourceDirs.get();
             Set<File> importFolders = getImportDirs().getFiles();
 
@@ -150,7 +141,7 @@ public abstract class AidlCompile extends NonIncrementalTask {
                             parcelableDir != null ? parcelableDir.getAsFile() : null,
                             packageWhitelist,
                             new DepFileProcessor(),
-                            processExecutor,
+                            new GradleProcessExecutor(getProject()),
                             new LoggedProcessOutputHandler(new LoggerWrapper(getLogger())));
 
             for (File dir : sourceFolders) {
@@ -242,7 +233,6 @@ public abstract class AidlCompile extends NonIncrementalTask {
                     scope.getGlobalScope().getSdkComponents().getAidlExecutableProvider();
             compileTask.aidlFrameworkProvider =
                     scope.getGlobalScope().getSdkComponents().getAidlFrameworkProvider();
-            compileTask.processExecutor = scope.getGlobalScope().getProcessExecutor();
 
             compileTask.sourceDirs = variantConfiguration::getAidlSourceList;
             compileTask.importDirs = scope.getArtifactFileCollection(

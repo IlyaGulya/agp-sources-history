@@ -24,7 +24,7 @@ import com.android.build.api.transform.QualifiedContent.ScopeType
 import com.android.build.gradle.internal.InternalScope
 import com.android.build.gradle.internal.packaging.ParsedPackagingOptions
 import com.android.build.gradle.internal.packaging.SerializablePackagingOptions
-import com.android.builder.files.FileCacheByPath
+import com.android.builder.files.KeyedFileCache
 import com.android.builder.merge.IncrementalFileMergerInput
 import com.android.ide.common.resources.FileStatus
 import com.android.utils.FileUtils
@@ -46,7 +46,7 @@ class MergeJavaResRunnable @Inject constructor(val params: Params) : Runnable {
         }
         FileUtils.mkdirs(params.cacheDir)
 
-        val zipCache = FileCacheByPath(params.cacheDir)
+        val zipCache = KeyedFileCache(params.cacheDir, KeyedFileCache::fileNameKey)
         val cacheUpdates = mutableListOf<Runnable>()
         val contentMap = mutableMapOf<IncrementalFileMergerInput, QualifiedContent>()
 
@@ -75,7 +75,8 @@ class MergeJavaResRunnable @Inject constructor(val params: Params) : Runnable {
                 ParsedPackagingOptions(params.packagingOptions),
                 params.contentType,
                 params.incrementalStateFile,
-                params.isIncremental
+                params.isIncremental,
+                params.noCompress
             )
         mergeJavaResDelegate.run()
         cacheUpdates.forEach(Runnable::run)
@@ -92,6 +93,7 @@ class MergeJavaResRunnable @Inject constructor(val params: Params) : Runnable {
         val isIncremental: Boolean,
         val cacheDir: File,
         val changedInputs: Map<File, FileStatus>?,
-        val contentType: ContentType
+        val contentType: ContentType,
+        val noCompress: Collection<String>
     ): Serializable
 }

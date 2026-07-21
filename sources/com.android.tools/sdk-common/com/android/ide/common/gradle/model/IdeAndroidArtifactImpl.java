@@ -28,7 +28,7 @@ import java.util.*;
 public final class IdeAndroidArtifactImpl extends IdeBaseArtifactImpl
         implements IdeAndroidArtifact {
     // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 4L;
+    private static final long serialVersionUID = 5L;
 
     @NonNull private final Collection<AndroidArtifactOutput> myOutputs;
     @NonNull private final String myApplicationId;
@@ -49,6 +49,29 @@ public final class IdeAndroidArtifactImpl extends IdeBaseArtifactImpl
     private final boolean mySigned;
     private final int myHashCode;
 
+    // Used for serialization by the IDE.
+    IdeAndroidArtifactImpl() {
+        super();
+        myOutputs = Collections.emptyList();
+        myApplicationId = "";
+        mySourceGenTaskName = "";
+        myGeneratedResourceFolders = Collections.emptyList();
+        myAdditionalRuntimeApks = Collections.emptyList();
+        myBuildConfigFields = Collections.emptyMap();
+        myResValues = Collections.emptyMap();
+        myInstantRun = null;
+        mySigningConfigName = null;
+        myAbiFilters = null;
+        myNativeLibraries = null;
+        myTestOptions = null;
+        myInstrumentedTestTaskName = null;
+        myBundleTaskName = null;
+        myApkFromBundleTaskName = null;
+        mySigned = false;
+
+        myHashCode = 0;
+    }
+
     public IdeAndroidArtifactImpl(
             @NonNull AndroidArtifact artifact,
             @NonNull ModelCache modelCache,
@@ -60,44 +83,45 @@ public final class IdeAndroidArtifactImpl extends IdeBaseArtifactImpl
         mySourceGenTaskName = artifact.getSourceGenTaskName();
         myGeneratedResourceFolders = ImmutableList.copyOf(artifact.getGeneratedResourceFolders());
         myBuildConfigFields =
-                copy(
+                IdeModel.copy(
                         artifact.getBuildConfigFields(),
                         modelCache,
-                        classField -> new IdeClassField(classField, modelCache));
+                        classField -> new IdeClassField(classField));
         myResValues =
-                copy(
+                IdeModel.copy(
                         artifact.getResValues(),
                         modelCache,
-                        classField -> new IdeClassField(classField, modelCache));
+                        classField -> new IdeClassField(classField));
         myInstantRun =
-                copyNewProperty(
+                IdeModel.copyNewProperty(
                         modelCache,
                         artifact::getInstantRun,
-                        instantRun -> new IdeInstantRun(instantRun, modelCache),
+                        instantRun -> new IdeInstantRun(instantRun),
                         null);
         mySigningConfigName = artifact.getSigningConfigName();
-        myAbiFilters = copy(artifact.getAbiFilters());
+        myAbiFilters = IdeModel.copy(artifact.getAbiFilters());
         myNativeLibraries = copy(modelCache, artifact.getNativeLibraries());
         mySigned = artifact.isSigned();
         myAdditionalRuntimeApks =
-                copyNewProperty(artifact::getAdditionalRuntimeApks, Collections.emptySet());
+                IdeModel.copyNewProperty(
+                        artifact::getAdditionalRuntimeApks, Collections.emptySet());
         myTestOptions =
-                copyNewProperty(
+                IdeModel.copyNewProperty(
                         modelCache,
                         artifact::getTestOptions,
-                        testOptions -> new IdeTestOptions(testOptions, modelCache),
+                        testOptions -> new IdeTestOptions(testOptions),
                         null);
         myInstrumentedTestTaskName =
-                copyNewProperty(
+                IdeModel.copyNewProperty(
                         modelCache,
                         artifact::getInstrumentedTestTaskName,
                         taskName -> taskName,
                         null);
         myBundleTaskName =
-                copyNewProperty(
+                IdeModel.copyNewProperty(
                         modelCache, artifact::getBundleTaskName, taskName -> taskName, null);
         myApkFromBundleTaskName =
-                copyNewProperty(
+                IdeModel.copyNewProperty(
                         modelCache, artifact::getApkFromBundleTaskName, taskName -> taskName, null);
         myHashCode = calculateHashCode();
     }
@@ -108,11 +132,12 @@ public final class IdeAndroidArtifactImpl extends IdeBaseArtifactImpl
         Collection<AndroidArtifactOutput> outputs;
         try {
             outputs = artifact.getOutputs();
-            return copy(
+            return IdeModel.copy(
                     outputs,
                     modelCache,
                     output -> new IdeAndroidArtifactOutput(output, modelCache));
         } catch (RuntimeException e) {
+            System.err.println("Caught exception: " + e);
             // See http://b/64305584
             return Collections.emptyList();
         }
@@ -122,7 +147,7 @@ public final class IdeAndroidArtifactImpl extends IdeBaseArtifactImpl
     private static Collection<NativeLibrary> copy(
             @NonNull ModelCache modelCache, @Nullable Collection<NativeLibrary> original) {
         return original != null
-                ? copy(original, modelCache, library -> new IdeNativeLibrary(library, modelCache))
+                ? IdeModel.copy(original, modelCache, library -> new IdeNativeLibrary(library))
                 : null;
     }
 

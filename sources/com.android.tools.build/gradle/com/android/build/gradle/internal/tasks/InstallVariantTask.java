@@ -21,6 +21,7 @@ import com.android.build.OutputFile;
 import com.android.build.gradle.internal.LoggerWrapper;
 import com.android.build.gradle.internal.TaskManager;
 import com.android.build.gradle.internal.core.GradleVariantConfiguration;
+import com.android.build.gradle.internal.process.GradleProcessExecutor;
 import com.android.build.gradle.internal.scope.ExistingBuildElements;
 import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.scope.VariantScope;
@@ -67,10 +68,6 @@ public abstract class InstallVariantTask extends NonIncrementalTask {
     private Provider<File> adbExecutableProvider;
     private Provider<File> splitSelectExeProvider;
 
-    private ProcessExecutor processExecutor;
-
-    private String projectName;
-
     private int timeOutInMs = 0;
 
     private Collection<String> installOptions;
@@ -89,6 +86,7 @@ public abstract class InstallVariantTask extends NonIncrementalTask {
         final ILogger iLogger = new LoggerWrapper(getLogger());
         DeviceProvider deviceProvider =
                 new ConnectedDeviceProvider(adbExecutableProvider.get(), getTimeOutInMs(), iLogger);
+        GradleProcessExecutor gradleProcessExecutor = new GradleProcessExecutor(getProject());
         deviceProvider.use(
                 () -> {
                     BaseVariantData variantData = getVariantData();
@@ -105,7 +103,7 @@ public abstract class InstallVariantTask extends NonIncrementalTask {
                             variantConfig.getFullName(),
                             deviceProvider,
                             variantConfig.getMinSdkVersion(),
-                            getProcessExecutor(),
+                            gradleProcessExecutor,
                             getSplitSelectExe().getOrNull(),
                             outputs,
                             variantConfig.getSupportedAbis(),
@@ -198,22 +196,6 @@ public abstract class InstallVariantTask extends NonIncrementalTask {
         return splitSelectExeProvider;
     }
 
-    public ProcessExecutor getProcessExecutor() {
-        return processExecutor;
-    }
-
-    public void setProcessExecutor(ProcessExecutor processExecutor) {
-        this.processExecutor = processExecutor;
-    }
-
-    public String getProjectName() {
-        return projectName;
-    }
-
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
-
     @Input
     public int getTimeOutInMs() {
         return timeOutInMs;
@@ -270,14 +252,12 @@ public abstract class InstallVariantTask extends NonIncrementalTask {
 
             task.setDescription("Installs the " + scope.getVariantData().getDescription() + ".");
             task.setGroup(TaskManager.INSTALL_GROUP);
-            task.setProjectName(scope.getGlobalScope().getProject().getName());
             scope.getArtifacts()
                     .setTaskInputToFinalProduct(InternalArtifactType.APK, task.getApkDirectory());
             task.setTimeOutInMs(
                     scope.getGlobalScope().getExtension().getAdbOptions().getTimeOutInMs());
             task.setInstallOptions(
                     scope.getGlobalScope().getExtension().getAdbOptions().getInstallOptions());
-            task.setProcessExecutor(scope.getGlobalScope().getProcessExecutor());
             task.adbExecutableProvider =
                     scope.getGlobalScope().getSdkComponents().getAdbExecutableProvider();
             task.splitSelectExeProvider =

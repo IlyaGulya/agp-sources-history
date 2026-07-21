@@ -19,13 +19,15 @@ import com.android.annotations.NonNull;
 import com.android.builder.model.NativeLibrary;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 /** Creates a deep copy of a {@link NativeLibrary}. */
-public final class IdeNativeLibrary extends IdeModel implements NativeLibrary {
+public final class IdeNativeLibrary implements NativeLibrary, Serializable {
     // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     @NonNull private final String myName;
     @NonNull private final String myAbi;
@@ -41,8 +43,26 @@ public final class IdeNativeLibrary extends IdeModel implements NativeLibrary {
     @NonNull private final List<File> myDebuggableLibraryFolders;
     private final int myHashCode;
 
-    public IdeNativeLibrary(@NonNull NativeLibrary library, @NonNull ModelCache modelCache) {
-        super(library, modelCache);
+    // Used for serialization by the IDE.
+    @SuppressWarnings("unused")
+    public IdeNativeLibrary() {
+        myName = "";
+        myAbi = "";
+        myToolchainName = "";
+        myCIncludeDirs = Collections.emptyList();
+        myCppCompilerFlags = Collections.emptyList();
+        myCSystemIncludeDirs = Collections.emptyList();
+        myCppIncludeDirs = Collections.emptyList();
+        myCppSystemIncludeDirs = Collections.emptyList();
+        myCDefines = Collections.emptyList();
+        myCppDefines = Collections.emptyList();
+        myCCompilerFlags = Collections.emptyList();
+        myDebuggableLibraryFolders = Collections.emptyList();
+
+        myHashCode = 0;
+    }
+
+    public IdeNativeLibrary(@NonNull NativeLibrary library) {
         myName = library.getName();
         myAbi = library.getAbi();
         myToolchainName = library.getToolchainName();

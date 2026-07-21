@@ -19,14 +19,15 @@ import com.android.annotations.NonNull;
 import com.android.builder.model.SourceProvider;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
 /** Creates a deep copy of a {@link SourceProvider}. */
-public final class IdeSourceProvider extends IdeModel implements SourceProvider {
+public final class IdeSourceProvider implements SourceProvider, Serializable {
     // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     @NonNull private final String myName;
     @NonNull private final File myManifestFile;
@@ -42,8 +43,26 @@ public final class IdeSourceProvider extends IdeModel implements SourceProvider 
     @NonNull private final Collection<File> myShadersDirectories;
     private final int myHashCode;
 
-    public IdeSourceProvider(@NonNull SourceProvider provider, @NonNull ModelCache modelCache) {
-        super(provider, modelCache);
+    // Used for serialization by the IDE.
+    IdeSourceProvider() {
+        myName = "";
+        //noinspection ConstantConditions
+        myManifestFile = null;
+        myJavaDirectories = Collections.emptyList();
+        myResourcesDirectories = Collections.emptyList();
+        myAidlDirectories = Collections.emptyList();
+        myRenderscriptDirectories = Collections.emptyList();
+        myCDirectories = Collections.emptyList();
+        myCppDirectories = Collections.emptyList();
+        myResDirectories = Collections.emptyList();
+        myAssetsDirectories = Collections.emptyList();
+        myJniLibsDirectories = Collections.emptyList();
+        myShadersDirectories = Collections.emptyList();
+
+        myHashCode = 0;
+    }
+
+    public IdeSourceProvider(@NonNull SourceProvider provider) {
         myName = provider.getName();
         myManifestFile = provider.getManifestFile();
         myJavaDirectories = ImmutableList.copyOf(provider.getJavaDirectories());
@@ -56,7 +75,7 @@ public final class IdeSourceProvider extends IdeModel implements SourceProvider 
         myAssetsDirectories = ImmutableList.copyOf(provider.getAssetsDirectories());
         myJniLibsDirectories = ImmutableList.copyOf(provider.getJniLibsDirectories());
         myShadersDirectories =
-                copyNewProperty(
+                IdeModel.copyNewProperty(
                         () -> ImmutableList.copyOf(provider.getShadersDirectories()),
                         Collections.emptyList());
         myHashCode = calculateHashCode();
