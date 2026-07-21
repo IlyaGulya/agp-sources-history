@@ -33,6 +33,7 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
@@ -49,6 +50,7 @@ import javax.inject.Inject
 /**
  * Task to merge native libs from multiple modules
  */
+@CacheableTask
 abstract class MergeNativeLibsTask
 @Inject constructor(objects: ObjectFactory) : IncrementalTask() {
 
@@ -153,12 +155,10 @@ abstract class MergeNativeLibsTask
         ) {
             super.handleProvider(taskProvider)
 
-            creationConfig.artifacts.producesDir(
-                MERGED_NATIVE_LIBS,
+            creationConfig.artifacts.setInitialProvider(
                 taskProvider,
-                MergeNativeLibsTask::outputDir,
-                fileName = "out"
-            )
+                MergeNativeLibsTask::outputDir
+            ).withName("out").on(MERGED_NATIVE_LIBS)
         }
 
         override fun configure(
@@ -230,7 +230,7 @@ fun getProjectNativeLibs(componentProperties: ComponentPropertiesImpl): FileColl
 
     // add merged project native libs
     nativeLibs.from(
-        artifacts.getFinalProduct(InternalArtifactType.MERGED_JNI_LIBS)
+        artifacts.get(InternalArtifactType.MERGED_JNI_LIBS)
     )
     // add content of the local external native build
     if (taskContainer.externalNativeJsonGenerator != null) {
@@ -243,7 +243,7 @@ fun getProjectNativeLibs(componentProperties: ComponentPropertiesImpl): FileColl
     // add renderscript compilation output if support mode is enabled.
     if (componentProperties.variantDslInfo.renderscriptSupportModeEnabled) {
         val rsFileCollection: ConfigurableFileCollection =
-                project.files(artifacts.getFinalProduct(RENDERSCRIPT_LIB))
+                project.files(artifacts.get(RENDERSCRIPT_LIB))
         val rsLibs = globalScope.sdkComponents.supportNativeLibFolderProvider.orNull
         if (rsLibs?.isDirectory != null) {
             rsFileCollection.from(rsLibs)

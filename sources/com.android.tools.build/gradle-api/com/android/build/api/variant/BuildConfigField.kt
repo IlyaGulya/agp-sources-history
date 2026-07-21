@@ -17,9 +17,8 @@
 package com.android.build.api.variant
 
 import org.gradle.api.Incubating
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
 import java.io.Serializable
+import java.lang.Boolean
 
 /**
  * Field definition for the generated BuildConfig class.
@@ -27,18 +26,17 @@ import java.io.Serializable
  * The field is generated as: <type> <name> = <value>;
  */
 @Incubating
-data class BuildConfigField(
-
+data class BuildConfigField<T: Serializable>(
     /**
-     * Type of the generated field.
+     * Generated field type, must be one of the [SupportedType]
      */
-    val type: String,
+    val type: SupportedType<T>,
 
     /**
      * Value of the generated field.
      * If [type] is [String], then [value] should include quotes.
      */
-    val value: String,
+    val value: T,
 
     /**
      * Optional field comment that will be added to the generated source file or null if no comment
@@ -47,15 +45,18 @@ data class BuildConfigField(
     val comment: String?
 ) : Serializable {
 
+    /**
+     * List of supported types for BuildConfig Fields.
+     */
     @Incubating
-    companion object {
-
-        /**
-         * make a new instance of [BuildConfigField] with a type and value.
-         */
-        @JvmStatic
-        @JvmOverloads
-        fun make(type: String, value: String, comment: String? = "Field from Variant API") =
-            BuildConfigField(type, value, comment)
+    sealed class SupportedType<T: Serializable>: Serializable {
+        @Incubating
+        object BOOLEAN: SupportedType<kotlin.Boolean>()
+        @Incubating
+        object INT: SupportedType<Int>()
+        @Incubating
+        object LONG: SupportedType<Long>()
+        @Incubating
+        object STRING: SupportedType<String>()
     }
 }

@@ -19,11 +19,13 @@ package com.android.build.gradle.internal.cxx.configure
 import com.android.SdkConstants.FD_NDK
 import com.android.SdkConstants.FD_NDK_SIDE_BY_SIDE
 import com.android.SdkConstants.NDK_DIR_PROPERTY
+import com.android.build.gradle.internal.SdkHandler
 import com.android.build.gradle.internal.SdkLocator
 import com.android.build.gradle.internal.cxx.caching.cache
 import com.android.build.gradle.internal.cxx.configure.SdkSourceProperties.Companion.SdkSourceProperty.SDK_PKG_REVISION
 import com.android.build.gradle.internal.cxx.logging.IssueReporterLoggingEnvironment
 import com.android.build.gradle.internal.cxx.logging.PassThroughDeduplicatingLoggingEnvironment
+import com.android.build.gradle.internal.cxx.logging.PassThroughPrefixingLoggingEnvironment
 import com.android.build.gradle.internal.cxx.logging.errorln
 import com.android.build.gradle.internal.cxx.logging.infoln
 import com.android.build.gradle.internal.cxx.logging.warnln
@@ -31,8 +33,8 @@ import com.android.builder.errors.IssueReporter
 import com.android.repository.Revision
 import com.android.utils.FileUtils.join
 import com.google.common.annotations.VisibleForTesting
+import org.gradle.api.InvalidUserDataException
 import java.io.File
-import java.io.FileNotFoundException
 
 /**
  * The hard-coded NDK version for this Android Gradle Plugin.
@@ -40,12 +42,7 @@ import java.io.FileNotFoundException
 const val ANDROID_GRADLE_PLUGIN_FIXED_DEFAULT_NDK_VERSION = "21.1.6352462"
 
 /**
- * Logic to find the NDK.
- *
- * userSettings - information that comes from the user in some way. Includes android.ndkVersion,
- *   for example.
- * getNdkSourceProperties - given a folder to an NDK, this function returns source.properties
- *   content or null if that file doesn't exist.
+ * Logic to find the NDK and optionally download it if not found.
  *
  * The high-level behavior of this function is:
  * (1) Use android.ndkPath if possible
@@ -54,50 +51,58 @@ const val ANDROID_GRADLE_PLUGIN_FIXED_DEFAULT_NDK_VERSION = "21.1.6352462"
  * (4) Otherwise, use $SDK/ndk-bundle if possible.
  * (5) Otherwise, return null
  *
- * This function uses errorln(...) for extraordinary cases that shouldn't happen in the real world.
- * For example, if NDK source.properties doesn't contain Pkg.Revision then that's an errorln(...).
- *
- * It also uses errorln(...) when the user made a mistake in specifying android.ndkVersion. For
- * example, not specifying enough precision. This case can't be ignored with warnln(...) because
- * otherwise we could fall back to an NDK version the user didn't intend.
- *
- * In the case that an NDK couldn't be found warnln(...) is used and null is returned. This is to
- * allow the build to proceed and fail naturally when the NDK is needed.
+ * @param userSettings Information that comes from the user in some way. Includes
+ *   android.ndkVersion, for example.
+ * @param getNdkSourceProperties Given a folder to an NDK, this function returns source.properties
+ *   content or null if that file doesn't exist.
+ * @param sdkHandler If present, used to download and install NDK with [SdkHandler.installNdk]. If
+ *   null, then don't download.
+ * @return If the NDK was located, NdkLocatorRecord contains the path to it and the parsed
+ *   [Revision] that the path refers to. If the NDK was not located then null is returned.
  */
 private fun findNdkPathImpl(
-    userSettings : NdkLocatorKey,
-    getNdkSourceProperties: (File) -> SdkSourceProperties?
-): File? {
+    userSettings: NdkLocatorKey,
+    getNdkSourceProperties: (File) -> SdkSourceProperties?,
+    sdkHandler: SdkHandler?
+): NdkLocatorRecord? {
     with(userSettings) {
 
         // Record status of user-supplied information
         logUserInputs(userSettings)
 
-        // Try to get the parsed revision for the requested version. If it's unparseable then
-        // emit an error and return.
-        val ndkVersion =
-            parseRevision(getNdkVersionOrDefault(ndkVersionFromDsl)) ?: return null
-
         // Function to get the parsed Pkg.Revision, return null if that failed for some reason.
         fun getNdkFolderRevision(ndkDirFolder: File) =
             getNdkFolderParsedRevision(ndkDirFolder, getNdkSourceProperties)
 
+        // Try to get the parsed revision for the requested version. If it's unparseable then
+        // emit an error and return.
+        val revisionFromNdkVersion =
+            parseRevision(getNdkVersionOrDefault(ndkVersionFromDsl)) ?: return null
+
         // If android.ndkPath value is present then use it.
         if (!ndkPathFromDsl.isNullOrBlank()) {
-            if (!ndkVersionFromDsl.isNullOrBlank()) {
-                errorln("NDK from android.ndkPath '$ndkPathFromDsl' and " +
-                        "android.ndkVersion '$ndkVersionFromDsl' are both set. Only one is allowed.")
-                return null
-            }
             val ndkPathFolder = File(ndkPathFromDsl)
-            if (getNdkFolderRevision(ndkPathFolder) == null) {
-                warnln(
-                    "Location specified by android.ndkPath ($ndkPathFolder) did not contain a valid " +
-                            "NDK and couldn't be used"
+            val revisionFromNdkPath = getNdkFolderRevision(ndkPathFolder)
+            if (revisionFromNdkPath == null) {
+                errorln(
+                    "Location specified by android.ndkPath ($ndkPathFromDsl) did not contain " +
+                            "a valid NDK and couldn't be used"
                 )
                 return null
             }
-            return ndkPathFolder
+            if (!ndkDirProperty.isNullOrBlank()) {
+                errorln("Both android.ndkPath and ndk.dir in local.properties are set")
+                return null
+            }
+            if (!ndkVersionFromDsl.isNullOrBlank()) {
+                if (revisionFromNdkVersion != revisionFromNdkPath) {
+                    errorln("android.ndkVersion is [$revisionFromNdkVersion] " +
+                            "but android.ndkPath $ndkPathFolder refers to a different version " +
+                            "[$revisionFromNdkPath].")
+                    return null
+                }
+            }
+            return NdkLocatorRecord(ndkPathFolder, revisionFromNdkPath)
         }
 
         // If ndk.dir value is present then use it.
@@ -107,18 +112,70 @@ private fun findNdkPathImpl(
             if (revision != null) {
                 // If the user request a version in android.ndkVersion and it doesn't agree with
                 // the version of the NDK supplied by ndk.dir then report an error.
-                if (revision != ndkVersion && ndkVersionFromDsl != null) {
-                    errorln("NDK from ndk.dir at '$ndkDirFolder' had version $revision " +
-                            "which disagrees with android.ndkVersion $ndkVersion")
+                if (revision != revisionFromNdkVersion && ndkVersionFromDsl != null) {
+                    errorln("NDK from ndk.dir at $ndkDirFolder had version [$revision] " +
+                            "which disagrees with android.ndkVersion [$revisionFromNdkVersion]")
                     return null
                 }
+                val resolutionWithNdkDir = NdkLocatorRecord(ndkDirFolder, revision)
+
+                // Check whether this same NDK folder would be located if ndk.dir was deleted
+                // from local.properties and android.ndkVersion was set to this NDK version.
+                // If so, we can suggest deleting ndk.dir.
+                infoln("Checking whether deleting ndk.dir and setting " +
+                        "android.ndkVersion to [$revision] would result in the same NDK")
+                val resolutionWithoutNdkDir = PassThroughPrefixingLoggingEnvironment(
+                    tag = "ndk.dir delete check",
+                    treatWarningsAndErrorsAsInfo = true // We don't want hypothetical warnings and errors
+                    ).use {
+                        val resolutionWithoutNdkDir = findNdkPathImpl(
+                            userSettings.copy(
+                                ndkVersionFromDsl = revision.toString(),
+                                ndkDirProperty = null
+                            ),
+                            getNdkSourceProperties,
+                            sdkHandler = null // Don't want to download hypothetical NDK
+                        )
+                        if (resolutionWithoutNdkDir == resolutionWithNdkDir) {
+                            infoln("Deleting ndk.dir and setting android.ndkVersion to " +
+                                    "[$revision] would result in the same NDK.")
+                        } else {
+                            infoln("Deleting ndk.dir and setting android.ndkVersion to " +
+                                    "[$revision] would *not* result in the same NDK.")
+                        }
+                        resolutionWithoutNdkDir
+                    }
+                if (resolutionWithNdkDir == resolutionWithoutNdkDir) {
+                    // Deleting ndk.dir and setting android.ndkDir to 'revision' would
+                    // result in exactly the same NDK being found so the deprecation
+                    // warning can indicate it's safe to delete.
+                    warnln("NDK was located by using ndk.dir property. This method is " +
+                            "deprecated and will be removed in a future release. Please " +
+                            "delete ndk.dir from local.properties and set android.ndkVersion " +
+                            "to [$revision] in all native modules in the project. " +
+                            "https://developer.android.com/r/studio-ui/ndk-dir")
+                    return resolutionWithNdkDir
+                }
+
+                if (resolutionWithoutNdkDir == null) {
+                    // Couldn't resolve any NDK after ndk.dir was removed.
+                    warnln("NDK was located by using ndk.dir property. This method is " +
+                            "deprecated and will be removed in a future release. Please use " +
+                            "android.ndkVersion or android.ndkPath in build.gradle to specify " +
+                            "the NDK to use. https://developer.android.com/r/studio-ui/ndk-dir")
+                    return resolutionWithNdkDir
+                }
+
+                // Resolved an NDK after ndk.dir was removed, but it wasn't the same.
                 warnln("NDK was located by using ndk.dir property. This method is " +
-                        "deprecated and will be removed in a future release. Please use " +
-                        "android.ndkVersion or android.ndkPath in build.gradle to specify " +
-                        "the NDK to use. ")
-                return ndkDirFolder
+                        "deprecated and will be removed in a future release. If you delete " +
+                        "ndk.dir from local.properties and set android.ndkVersion to " +
+                        "[$revision] then NDK at ${resolutionWithoutNdkDir.ndk} will be " +
+                        "used. https://developer.android.com/r/studio-ui/ndk-dir")
+
+                return resolutionWithNdkDir
             }
-            warnln(
+            errorln(
                 "Location specified by ndk.dir ($ndkDirProperty) did not contain a valid " +
                         "NDK and couldn't be used"
             )
@@ -129,27 +186,42 @@ private fun findNdkPathImpl(
         // folder value is missing then don't search for sub-folders.
         if (sdkFolder != null) {
             // If a folder exists under $SDK/ndk/$ndkVersion then use it.
-            val versionedNdkPath = File(File(sdkFolder, FD_NDK_SIDE_BY_SIDE), "$ndkVersion")
-            if (getNdkFolderRevision(versionedNdkPath) != null) return versionedNdkPath
+            val versionedNdkPath = File(File(sdkFolder, FD_NDK_SIDE_BY_SIDE), "$revisionFromNdkVersion")
+            val sideBySideRevision = getNdkFolderRevision(versionedNdkPath)
+            if (sideBySideRevision != null) {
+                return NdkLocatorRecord(versionedNdkPath, sideBySideRevision)
+            }
 
-            // If $SDK/ndk-bundle exists then use it.
+            // If $SDK/ndk-bundle exists and matches the requested version then use it.
             val ndkBundlePath = File(sdkFolder, FD_NDK)
             val bundleRevision = getNdkFolderRevision(ndkBundlePath)
-            if (bundleRevision != null && bundleRevision == ndkVersion) return ndkBundlePath
+            if (bundleRevision != null && bundleRevision == revisionFromNdkVersion) {
+                return NdkLocatorRecord(ndkBundlePath, bundleRevision)
+            }
         }
 
-        // No NDK was found. Emit a warning that includes the locally-available versions in
-        // the SxS folder.
-        val available = sideBySideNdkFolderNames
-            .map { File(it).name }
-            .sortedBy { File(it).name }
-            .joinToString(", ")
-        warnln("No version of NDK matched the required version $ndkVersion. " +
-                "Versions available locally: $available")
-        return null
+        if (sdkHandler == null) {
+            // Caller requested no NDK download by passing sdkHandler == null.
+            return null
+        }
+
+        infoln("No NDK was found. Trying to download it now.")
+        val downloaded = sdkHandler.installNdk(revisionFromNdkVersion)
+
+        if (downloaded != null) {
+            infoln("NDK $revisionFromNdkVersion was downloaded to $downloaded. Using that.")
+            return NdkLocatorRecord(downloaded, revisionFromNdkVersion)
+        }
+
+        // Throw error expected by Android Studio. If the text isn't this, then Android Studio won't
+        // recognize the error and provide hyperlink to install NDK.
+        // TODO(b/131320700) convert to errorln(..) which requires co-updating Android Studio.
+        throw InvalidUserDataException(
+            "NDK not configured. Download " +
+                    "it with SDK manager. Preferred NDK version is " +
+                    "'$ANDROID_GRADLE_PLUGIN_FIXED_DEFAULT_NDK_VERSION'. ")
     }
 }
-
 
 /**
  * Given a candidate NDK folder, get Pkg.Revision as parsed Revision.
@@ -179,7 +251,7 @@ fun getNdkFolderParsedRevision(
  */
 private fun logUserInputs(userSettings : NdkLocatorKey) {
     with(userSettings) {
-        infoln("android.ndkVersion from module build.gradle is ${ndkVersionFromDsl ?: "not set"}")
+        infoln("android.ndkVersion from module build.gradle is [${ndkVersionFromDsl ?: "not set"}]")
         infoln("android.ndkPath from module build.gradle is ${ndkPathFromDsl ?: "not set"}")
         infoln("$NDK_DIR_PROPERTY in local.properties is ${ndkDirProperty ?: "not set"}")
         infoln("Not considering ANDROID_NDK_HOME because support was removed after deprecation period.")
@@ -203,7 +275,7 @@ private fun getNdkVersionOrDefault(ndkVersionFromDsl : String?) =
     if (ndkVersionFromDsl.isNullOrBlank()) {
         infoln(
             "Because no explicit NDK was requested, the default version " +
-                    "'$ANDROID_GRADLE_PLUGIN_FIXED_DEFAULT_NDK_VERSION' for this Android Gradle " +
+                    "[$ANDROID_GRADLE_PLUGIN_FIXED_DEFAULT_NDK_VERSION] for this Android Gradle " +
                     "Plugin will be used"
         )
         ANDROID_GRADLE_PLUGIN_FIXED_DEFAULT_NDK_VERSION
@@ -220,7 +292,7 @@ private fun parseRevision(version : String) : Revision? {
             stripPreviewFromRevision(Revision.parseRevision(version))
         if (revision.toIntArray(true).size < 3) {
             errorln(
-                "Specified NDK version '$version' does not have " +
+                "Specified NDK version [$version] does not have " +
                         "enough precision. Use major.minor.micro in version."
             )
             return null
@@ -238,11 +310,20 @@ private fun parseRevision(version : String) : Revision? {
  */
 @VisibleForTesting
 fun getNdkVersionInfo(ndkRoot: File): SdkSourceProperties? {
-    return try {
-        SdkSourceProperties.fromInstallFolder(ndkRoot)
-    } catch (e: FileNotFoundException) {
-        null
+    if (!ndkRoot.exists()) {
+        return null
     }
+    val sourceProperties = File(ndkRoot, "source.properties")
+    if (!sourceProperties.exists()) {
+        val releaseTxt = ndkRoot.resolve("RELEASE.TXT")
+        if (releaseTxt.exists()) {
+            errorln("NDK at $ndkRoot is not supported (pre-r11)")
+            return null
+        }
+        errorln("NDK at $ndkRoot did not have a source.properties file")
+        return null
+    }
+    return SdkSourceProperties.fromInstallFolder(ndkRoot)
 }
 
 /**
@@ -283,11 +364,15 @@ data class NdkLocatorKey(
  * The result of NDK resolution saved into cache.
  */
 data class NdkLocatorRecord(
-    val ndkFolder: File?
+    val ndk: File,
+    val revision: Revision
 )
 
 /**
  * Wraps findNdkPathImpl with caching.
+ *
+ * The function getNdkSourceProperties returns content of source.properties in a specific NDK
+ * or null if it doesn't exist or there's is an incompatibility problem.
  */
 @VisibleForTesting
 fun findNdkPathImpl(
@@ -295,61 +380,62 @@ fun findNdkPathImpl(
     ndkPathFromDsl: String?,
     ndkDirProperty: String?,
     sdkFolder: File?,
-    getNdkVersionedFolderNames: (File) -> List<String>,
-    getNdkSourceProperties: (File) -> SdkSourceProperties?
-): File? {
+    ndkVersionedFolderNames: List<String>,
+    getNdkSourceProperties: (File) -> SdkSourceProperties?,
+    sdkHandler: SdkHandler?
+): NdkLocatorRecord? {
     val key = NdkLocatorKey(
         ndkVersionFromDsl,
         ndkPathFromDsl,
         ndkDirProperty,
         sdkFolder,
-        if(sdkFolder != null) getNdkVersionedFolderNames(join(sdkFolder, FD_NDK_SIDE_BY_SIDE)) else listOf())
+        ndkVersionedFolderNames)
     // Result of NDK location could be cached at machine level.
     // Here, it's cached at module level instead because uncleanable caches can lead to difficult bugs.
     return cache(key, {
         PassThroughDeduplicatingLoggingEnvironment().use {
-            val ndkFolder = findNdkPathImpl(
+            findNdkPathImpl(
                 key,
-                getNdkSourceProperties
-            )
-            NdkLocatorRecord(
-                ndkFolder = ndkFolder
+                getNdkSourceProperties,
+                sdkHandler
             )
         }
-    }).ndkFolder
+    })
 }
-
-/**
- * There are three possible physical locations for NDK:
- *
- *  (1) SDK unversioned: $(SDK)/ndk-bundle
- *  (2) SDK versioned: $(SDK)/ndk/18.1.2 (where 18.1.2 is an example)
- *  (3) Custom: Any location on disk
- *
- * There are several ways the user can tell Android Gradle Plugin where to find the NDK
- *
- *  (1) Set an explicit folder in local.settings for ndk.dir
- *  (2) Don't specify a folder which implies an NDK from the SDK folder should be used
- *
- * If the user specifies android.ndkVersion in build.gradle then that version must be available
- * or it is an error. If no such version is specified then the default version is used.
- */
-fun findNdkPath(
-    issueReporter: IssueReporter,
-    ndkVersionFromDsl: String?,
-    ndkPathFromDsl: String?,
-    projectDir: File
-): File? {
-    IssueReporterLoggingEnvironment(issueReporter).use {
-        val properties = gradleLocalProperties(projectDir)
-        val sdkPath = SdkLocator.getSdkDirectory(projectDir, issueReporter)
-        return findNdkPathImpl(
-            ndkVersionFromDsl,
-            ndkPathFromDsl,
-            properties.getProperty(NDK_DIR_PROPERTY),
-            sdkPath,
-            ::getNdkVersionedFolders,
-            ::getNdkVersionInfo
-        )
+data class NdkLocator(
+    private val issueReporter: IssueReporter,
+    private val ndkVersionFromDsl: String?,
+    private val ndkPathFromDsl: String?,
+    private val projectDir: File,
+    private val sdkHandler: SdkHandler) {
+    /**
+     * There are three possible physical locations for NDK:
+     *
+     *  (1) SDK unversioned: $(SDK)/ndk-bundle
+     *  (2) SDK versioned: $(SDK)/ndk/18.1.2 (where 18.1.2 is an example)
+     *  (3) Custom: Any location on disk
+     *
+     * There are several ways the user can tell Android Gradle Plugin where to find the NDK
+     *
+     *  (1) Set an explicit folder in local.settings for ndk.dir
+     *  (2) Don't specify a folder which implies an NDK from the SDK folder should be used
+     *
+     * If the user specifies android.ndkVersion in build.gradle then that version must be available
+     * or it is an error. If no such version is specified then the default version is used.
+     */
+    fun findNdkPath(downloadOkay: Boolean): NdkLocatorRecord? {
+        IssueReporterLoggingEnvironment(issueReporter).use {
+            val properties = gradleLocalProperties(projectDir)
+            val sdkPath = SdkLocator.getSdkDirectory(projectDir, issueReporter)
+            return findNdkPathImpl(
+                ndkVersionFromDsl,
+                ndkPathFromDsl,
+                properties.getProperty(NDK_DIR_PROPERTY),
+                sdkPath,
+                getNdkVersionedFolders(File(sdkPath, FD_NDK_SIDE_BY_SIDE)),
+                ::getNdkVersionInfo,
+                if (downloadOkay) sdkHandler else null
+            )
+        }
     }
 }

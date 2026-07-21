@@ -40,6 +40,7 @@ import com.android.build.gradle.internal.tasks.AppPreBuildTask;
 import com.android.build.gradle.internal.tasks.ApplicationIdWriterTask;
 import com.android.build.gradle.internal.tasks.CheckManifest;
 import com.android.build.gradle.internal.tasks.CheckMultiApkLibrariesTask;
+import com.android.build.gradle.internal.tasks.CompressAssetsTask;
 import com.android.build.gradle.internal.tasks.ExtractNativeDebugMetadataTask;
 import com.android.build.gradle.internal.tasks.ModuleMetadataWriterTask;
 import com.android.build.gradle.internal.tasks.StripDebugSymbolsTask;
@@ -48,6 +49,7 @@ import com.android.build.gradle.internal.tasks.factory.TaskFactoryUtils;
 import com.android.build.gradle.internal.tasks.featuresplit.PackagedDependenciesWriterTask;
 import com.android.build.gradle.internal.variant.ComponentInfo;
 import com.android.build.gradle.options.BooleanOption;
+import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.tasks.ExtractDeepLinksTask;
 import com.android.build.gradle.tasks.MergeResources;
 import com.android.builder.core.VariantType;
@@ -104,8 +106,6 @@ public abstract class AbstractAppTaskManager<
         // TODO remove case once TaskManager's type param is based on BaseCreationConfig
         createApplicationIdWriterTask(apkCreationConfig);
 
-        createBuildArtifactReportTask(appVariantProperties);
-
         // Add a task to check the manifest
         taskFactory.register(new CheckManifest.CreationAction(appVariantProperties));
 
@@ -126,6 +126,8 @@ public abstract class AbstractAppTaskManager<
 
         // Add a task to merge the asset folders
         createMergeAssetsTask(appVariantProperties);
+
+        taskFactory.register(new CompressAssetsTask.CreationAction(apkCreationConfig));
 
         // Add a task to create the BuildConfig class
         createBuildConfigTask(appVariantProperties);
@@ -150,8 +152,7 @@ public abstract class AbstractAppTaskManager<
         // Add data binding tasks if enabled
         createDataBindingTasksIfNecessary(appVariantProperties);
 
-        // Add a task to auto-generate classes for helping run inference on ML model files under
-        // assets folder.
+        // Add a task to auto-generate classes for ML model files.
         createMlkitTask(appVariantProperties);
 
         // Add a compile task
@@ -189,7 +190,7 @@ public abstract class AbstractAppTaskManager<
     @Override
     protected void postJavacCreation(@NonNull ComponentPropertiesImpl componentProperties) {
         final Provider<Directory> javacOutput =
-                componentProperties.getArtifacts().getFinalProduct(JAVAC.INSTANCE);
+                componentProperties.getArtifacts().get(JAVAC.INSTANCE);
         final FileCollection preJavacGeneratedBytecode =
                 componentProperties.getVariantData().getAllPreJavacGeneratedBytecode();
         final FileCollection postJavacGeneratedBytecode =
@@ -291,17 +292,18 @@ public abstract class AbstractAppTaskManager<
                 true,
                 Sets.immutableEnumSet(MergeResources.Flag.PROCESS_VECTOR_DRAWABLES));
 
-        // TODO(b/138780301): Also use it in android tests.
-        if (variantProperties
-                        .getServices()
-                        .getProjectOptions()
-                        .get(BooleanOption.ENABLE_APP_COMPILE_TIME_R_CLASS)
+        ProjectOptions projectOptions = variantProperties.getServices().getProjectOptions();
+        // TODO: get rid of separate flag for app modules.
+        boolean nonTransitiveR =
+                projectOptions.get(BooleanOption.NON_TRANSITIVE_R_CLASS)
+                        && projectOptions.get(BooleanOption.NON_TRANSITIVE_APP_R_CLASS);
+        boolean namespaced =
+                variantProperties.getGlobalScope().getExtension().getAaptOptions().getNamespaced();
+
+        // TODO(b/138780301): Also use compile time R class in android tests.
+        if ((projectOptions.get(BooleanOption.ENABLE_APP_COMPILE_TIME_R_CLASS) || nonTransitiveR)
                 && !variantProperties.getVariantType().isForTesting()
-                && !variantProperties
-                        .getGlobalScope()
-                        .getExtension()
-                        .getAaptOptions()
-                        .getNamespaced()) {
+                && !namespaced) {
             // The "small merge" of only the app's local resources (can be multiple source-sets, but
             // most of the time it's just one). This is used by the Process for generating the local
             // R-def.txt file containing a list of resources defined in this module.

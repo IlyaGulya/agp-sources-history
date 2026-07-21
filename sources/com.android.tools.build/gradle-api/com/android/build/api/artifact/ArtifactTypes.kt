@@ -24,7 +24,7 @@ import org.gradle.api.file.RegularFile
 /**
  * Public [ArtifactType] for Android Gradle Plugin.
  *
- * All methods in [Operations] should be supported with any subclass of this
+ * All methods in [Artifacts] should be supported with any subclass of this
  * class.
  */
 @Incubating
@@ -52,5 +52,8 @@ sealed class ArtifactTypes<T : FileSystemLocation>(
 
     @Incubating
     object OBFUSCATION_MAPPING_FILE: ArtifactTypes<RegularFile>(FILE, FileNames.OBFUSCATION_MAPPING_FILE), Single
+
+    @Incubating
+    object BUNDLE: ArtifactTypes<RegularFile>(FILE), Single, Transformable
 
 }

@@ -19,6 +19,7 @@ import static com.android.SdkConstants.FD_RES_VALUES;
 import static com.android.build.gradle.internal.TaskManager.MergeType.MERGE;
 import static com.android.build.gradle.internal.scope.InternalArtifactType.DATA_BINDING_LAYOUT_INFO_TYPE_MERGE;
 import static com.android.build.gradle.internal.scope.InternalArtifactType.DATA_BINDING_LAYOUT_INFO_TYPE_PACKAGE;
+import static com.android.ide.common.resources.AndroidAaptIgnoreKt.ANDROID_AAPT_IGNORE;
 import static com.google.common.base.Preconditions.checkState;
 
 import android.databinding.tool.LayoutXmlProcessor;
@@ -238,6 +239,9 @@ public abstract class MergeResources extends ResourceAwareTask {
 
     private SyncOptions.ErrorFormatMode errorFormatMode;
 
+    @Internal
+    public abstract Property<String> getAaptEnv();
+
     @Override
     protected void doFullTaskAction() throws IOException, JAXBException {
         ResourcePreprocessor preprocessor = getPreprocessor();
@@ -250,7 +254,8 @@ public abstract class MergeResources extends ResourceAwareTask {
                     getDataBindingLayoutInfoOutFolder().get().getAsFile());
         }
 
-        List<ResourceSet> resourceSets = getConfiguredResourceSets(preprocessor);
+        List<ResourceSet> resourceSets =
+                getConfiguredResourceSets(preprocessor, getAaptEnv().getOrNull());
 
         // create a new merger and populate it with the sets.
         ResourceMerger merger = new ResourceMerger(getMinSdk().get());
@@ -367,7 +372,8 @@ public abstract class MergeResources extends ResourceAwareTask {
         // create a merger and load the known state.
         ResourceMerger merger = new ResourceMerger(getMinSdk().get());
         try {
-            if (!merger.loadFromBlob(getIncrementalFolder(), true /*incrementalState*/)) {
+            if (!merger.loadFromBlob(
+                    getIncrementalFolder(), true /*incrementalState*/, getAaptEnv().getOrNull())) {
                 doFullTaskAction();
                 return;
             }
@@ -391,7 +397,8 @@ public abstract class MergeResources extends ResourceAwareTask {
                 resourceSet.setPreprocessor(preprocessor);
             }
 
-            List<ResourceSet> resourceSets = getConfiguredResourceSets(preprocessor);
+            List<ResourceSet> resourceSets =
+                    getConfiguredResourceSets(preprocessor, getAaptEnv().getOrNull());
 
             // compare the known state to the current sets to detect incompatibility.
             // This is in case there's a change that's too hard to do incrementally. In this case
@@ -670,17 +677,19 @@ public abstract class MergeResources extends ResourceAwareTask {
     }
 
     @NonNull
-    private List<ResourceSet> getConfiguredResourceSets(ResourcePreprocessor preprocessor) {
+    private List<ResourceSet> getConfiguredResourceSets(
+            ResourcePreprocessor preprocessor, @Nullable String aaptEnv) {
         // It is possible that this get called twice in case the incremental run fails and reverts
         // back to full task run. Because the cached ResourceList is modified we don't want
         // to recompute this twice (plus, why recompute it twice anyway?)
         if (processedInputs == null) {
-            processedInputs = getResourcesComputer().compute(precompileDependenciesResources);
+            processedInputs =
+                    getResourcesComputer().compute(precompileDependenciesResources, aaptEnv);
             List<ResourceSet> generatedSets = new ArrayList<>(processedInputs.size());
 
             for (ResourceSet resourceSet : processedInputs) {
                 resourceSet.setPreprocessor(preprocessor);
-                ResourceSet generatedSet = new GeneratedResourceSet(resourceSet);
+                ResourceSet generatedSet = new GeneratedResourceSet(resourceSet, aaptEnv);
                 resourceSet.setGeneratedSet(generatedSet);
                 generatedSets.add(generatedSet);
             }
@@ -846,23 +855,21 @@ public abstract class MergeResources extends ResourceAwareTask {
 
             creationConfig
                     .getArtifacts()
-                    .producesDir(
+                    .setInitialProvider(
+                            taskProvider, MergeResources::getDataBindingLayoutInfoOutFolder)
+                    .withName("out")
+                    .on(
                             mergeType == MERGE
                                     ? DATA_BINDING_LAYOUT_INFO_TYPE_MERGE.INSTANCE
-                                    : DATA_BINDING_LAYOUT_INFO_TYPE_PACKAGE.INSTANCE,
-                            taskProvider,
-                            MergeResources::getDataBindingLayoutInfoOutFolder,
-                            "out");
+                                    : DATA_BINDING_LAYOUT_INFO_TYPE_PACKAGE.INSTANCE);
 
             // only the full run with dependencies generates the blame folder
             if (includeDependencies) {
                 creationConfig
                         .getArtifacts()
-                        .producesDir(
-                                InternalArtifactType.MERGED_RES_BLAME_FOLDER.INSTANCE,
-                                taskProvider,
-                                MergeResources::getBlameLogOutputFolder,
-                                "out");
+                        .setInitialProvider(taskProvider, MergeResources::getBlameLogOutputFolder)
+                        .withName("out")
+                        .on(InternalArtifactType.MERGED_RES_BLAME_FOLDER.INSTANCE);
             }
         }
 
@@ -992,11 +999,15 @@ public abstract class MergeResources extends ResourceAwareTask {
             HasConfigurableValuesKt.setDisallowChanges(
                     task.getAapt2WorkersBuildService(),
                     BuildServicesKt.getBuildService(
-                            task.getProject(), Aapt2WorkersBuildService.class));
+                            creationConfig.getServices().getBuildServiceRegistry(),
+                            Aapt2WorkersBuildService.class));
             HasConfigurableValuesKt.setDisallowChanges(
                     task.getAapt2DaemonBuildService(),
                     BuildServicesKt.getBuildService(
-                            task.getProject(), Aapt2DaemonBuildService.class));
+                            creationConfig.getServices().getBuildServiceRegistry(),
+                            Aapt2DaemonBuildService.class));
+            task.getAaptEnv()
+                    .set(task.getProject().getProviders().environmentVariable(ANDROID_AAPT_IGNORE));
         }
     }
 
