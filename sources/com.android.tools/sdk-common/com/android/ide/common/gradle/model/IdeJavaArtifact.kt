@@ -13,23 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.ide.common.gradle.model
 
-package com.android.tools.lint.model
+import com.android.builder.model.JavaArtifact
 
-enum class LmNamespacingMode {
-    /**
-     * Resources are not namespaced.
-     *
-     * They are merged at the application level, as was the behavior with AAPT1
-     */
-    DISABLED,
-
-    /**
-     * Resources must be namespaced.
-     *
-     * Each library is compiled in to an AAPT2 static library with its own namespace.
-     *
-     * Projects using this *cannot* consume non-namespaced dependencies.
-     */
-    REQUIRED
-}
+interface IdeJavaArtifact: JavaArtifact, IdeBaseArtifact

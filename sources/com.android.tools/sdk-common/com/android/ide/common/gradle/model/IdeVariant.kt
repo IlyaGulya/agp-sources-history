@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.ide.common.gradle.model
 
-package com.android.builder.model
+import com.android.builder.model.Variant
+import java.io.Serializable
 
-interface PrefabPackagingOptions {
-    var name: String
-    var headers: String?
-    var libraryName: String?
+interface IdeVariant : Variant, Serializable {
+  override fun getMainArtifact(): IdeAndroidArtifact
+  val androidTestArtifact: IdeAndroidArtifact?
+  val unitTestArtifact: IdeJavaArtifact?
+  override fun getExtraAndroidArtifacts(): Collection<IdeAndroidArtifact>
+  override fun getExtraJavaArtifacts(): Collection<IdeJavaArtifact>
+  val testArtifacts: Collection<IdeBaseArtifact>
 }
