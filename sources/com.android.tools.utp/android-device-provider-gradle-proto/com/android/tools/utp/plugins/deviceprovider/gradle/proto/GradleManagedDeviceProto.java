@@ -134,6 +134,26 @@ public final class GradleManagedDeviceProto {
      * <code>.google.protobuf.Any emulator_path = 5;</code>
      */
     com.google.protobuf.AnyOrBuilder getEmulatorPathOrBuilder();
+
+    /**
+     * <pre>
+     * The name of the Managed Device as provided from the dsl.
+     * </pre>
+     *
+     * <code>string gradle_dsl_device_name = 6;</code>
+     * @return The gradleDslDeviceName.
+     */
+    java.lang.String getGradleDslDeviceName();
+    /**
+     * <pre>
+     * The name of the Managed Device as provided from the dsl.
+     * </pre>
+     *
+     * <code>string gradle_dsl_device_name = 6;</code>
+     * @return The bytes for gradleDslDeviceName.
+     */
+    com.google.protobuf.ByteString
+        getGradleDslDeviceNameBytes();
   }
   /**
    * <pre>
@@ -154,6 +174,7 @@ public final class GradleManagedDeviceProto {
     private GradleManagedDeviceConfig() {
       avdName_ = "";
       avdId_ = "";
+      gradleDslDeviceName_ = "";
     }
 
     @java.lang.Override
@@ -227,6 +248,12 @@ public final class GradleManagedDeviceProto {
                 emulatorPath_ = subBuilder.buildPartial();
               }
 
+              break;
+            }
+            case 50: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              gradleDslDeviceName_ = s;
               break;
             }
             default: {
@@ -446,6 +473,50 @@ public final class GradleManagedDeviceProto {
       return getEmulatorPath();
     }
 
+    public static final int GRADLE_DSL_DEVICE_NAME_FIELD_NUMBER = 6;
+    private volatile java.lang.Object gradleDslDeviceName_;
+    /**
+     * <pre>
+     * The name of the Managed Device as provided from the dsl.
+     * </pre>
+     *
+     * <code>string gradle_dsl_device_name = 6;</code>
+     * @return The gradleDslDeviceName.
+     */
+    public java.lang.String getGradleDslDeviceName() {
+      java.lang.Object ref = gradleDslDeviceName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        gradleDslDeviceName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The name of the Managed Device as provided from the dsl.
+     * </pre>
+     *
+     * <code>string gradle_dsl_device_name = 6;</code>
+     * @return The bytes for gradleDslDeviceName.
+     */
+    public com.google.protobuf.ByteString
+        getGradleDslDeviceNameBytes() {
+      java.lang.Object ref = gradleDslDeviceName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        gradleDslDeviceName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -475,6 +546,9 @@ public final class GradleManagedDeviceProto {
       if (emulatorPath_ != null) {
         output.writeMessage(5, getEmulatorPath());
       }
+      if (!getGradleDslDeviceNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, gradleDslDeviceName_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -501,6 +575,9 @@ public final class GradleManagedDeviceProto {
       if (emulatorPath_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, getEmulatorPath());
+      }
+      if (!getGradleDslDeviceNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, gradleDslDeviceName_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -533,6 +610,8 @@ public final class GradleManagedDeviceProto {
         if (!getEmulatorPath()
             .equals(other.getEmulatorPath())) return false;
       }
+      if (!getGradleDslDeviceName()
+          .equals(other.getGradleDslDeviceName())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -559,6 +638,8 @@ public final class GradleManagedDeviceProto {
         hash = (37 * hash) + EMULATOR_PATH_FIELD_NUMBER;
         hash = (53 * hash) + getEmulatorPath().hashCode();
       }
+      hash = (37 * hash) + GRADLE_DSL_DEVICE_NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getGradleDslDeviceName().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -714,6 +795,8 @@ public final class GradleManagedDeviceProto {
           emulatorPath_ = null;
           emulatorPathBuilder_ = null;
         }
+        gradleDslDeviceName_ = "";
+
         return this;
       }
 
@@ -753,6 +836,7 @@ public final class GradleManagedDeviceProto {
         } else {
           result.emulatorPath_ = emulatorPathBuilder_.build();
         }
+        result.gradleDslDeviceName_ = gradleDslDeviceName_;
         onBuilt();
         return result;
       }
@@ -817,6 +901,10 @@ public final class GradleManagedDeviceProto {
         }
         if (other.hasEmulatorPath()) {
           mergeEmulatorPath(other.getEmulatorPath());
+        }
+        if (!other.getGradleDslDeviceName().isEmpty()) {
+          gradleDslDeviceName_ = other.gradleDslDeviceName_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -1427,6 +1515,102 @@ public final class GradleManagedDeviceProto {
         }
         return emulatorPathBuilder_;
       }
+
+      private java.lang.Object gradleDslDeviceName_ = "";
+      /**
+       * <pre>
+       * The name of the Managed Device as provided from the dsl.
+       * </pre>
+       *
+       * <code>string gradle_dsl_device_name = 6;</code>
+       * @return The gradleDslDeviceName.
+       */
+      public java.lang.String getGradleDslDeviceName() {
+        java.lang.Object ref = gradleDslDeviceName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          gradleDslDeviceName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the Managed Device as provided from the dsl.
+       * </pre>
+       *
+       * <code>string gradle_dsl_device_name = 6;</code>
+       * @return The bytes for gradleDslDeviceName.
+       */
+      public com.google.protobuf.ByteString
+          getGradleDslDeviceNameBytes() {
+        java.lang.Object ref = gradleDslDeviceName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          gradleDslDeviceName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The name of the Managed Device as provided from the dsl.
+       * </pre>
+       *
+       * <code>string gradle_dsl_device_name = 6;</code>
+       * @param value The gradleDslDeviceName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setGradleDslDeviceName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        gradleDslDeviceName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the Managed Device as provided from the dsl.
+       * </pre>
+       *
+       * <code>string gradle_dsl_device_name = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearGradleDslDeviceName() {
+        
+        gradleDslDeviceName_ = getDefaultInstance().getGradleDslDeviceName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The name of the Managed Device as provided from the dsl.
+       * </pre>
+       *
+       * <code>string gradle_dsl_device_name = 6;</code>
+       * @param value The bytes for gradleDslDeviceName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setGradleDslDeviceNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        gradleDslDeviceName_ = value;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -1497,13 +1681,14 @@ public final class GradleManagedDeviceProto {
       "\n\"gradle_managed_device_config.proto\0229co" +
       "m.android.tools.utp.plugins.deviceprovid" +
       "er.gradle.proto\032\031google/protobuf/any.pro" +
-      "to\"\254\001\n\031GradleManagedDeviceConfig\022(\n\navd_" +
+      "to\"\314\001\n\031GradleManagedDeviceConfig\022(\n\navd_" +
       "folder\030\001 \001(\0132\024.google.protobuf.Any\022\020\n\010av" +
       "d_name\030\002 \001(\t\022\016\n\006avd_id\030\003 \001(\t\022\026\n\016enable_d" +
       "isplay\030\004 \001(\010\022+\n\remulator_path\030\005 \001(\0132\024.go" +
-      "ogle.protobuf.AnyBU\n9com.android.tools.u" +
-      "tp.plugins.deviceprovider.gradle.protoB\030" +
-      "GradleManagedDeviceProtob\006proto3"
+      "ogle.protobuf.Any\022\036\n\026gradle_dsl_device_n" +
+      "ame\030\006 \001(\tBU\n9com.android.tools.utp.plugi" +
+      "ns.deviceprovider.gradle.protoB\030GradleMa" +
+      "nagedDeviceProtob\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -1515,7 +1700,7 @@ public final class GradleManagedDeviceProto {
     internal_static_com_android_tools_utp_plugins_deviceprovider_gradle_proto_GradleManagedDeviceConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_android_tools_utp_plugins_deviceprovider_gradle_proto_GradleManagedDeviceConfig_descriptor,
-        new java.lang.String[] { "AvdFolder", "AvdName", "AvdId", "EnableDisplay", "EmulatorPath", });
+        new java.lang.String[] { "AvdFolder", "AvdName", "AvdId", "EnableDisplay", "EmulatorPath", "GradleDslDeviceName", });
     com.google.protobuf.AnyProto.getDescriptor();
   }
 
