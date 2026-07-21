@@ -845,9 +845,6 @@ public class ProcessApplicationManifest extends ManifestProcessorTask {
                 features.add(Feature.ADVANCED_PROFILING);
             }
         }
-        if (variantScope.getInstantRunBuildContext().isInInstantRunMode()) {
-            features.add(Feature.INSTANT_RUN_REPLACEMENT);
-        }
         if (variantScope.getVariantConfiguration().getDexingType() == DexingType.LEGACY_MULTIDEX) {
             if (variantScope
                     .getGlobalScope()
@@ -858,6 +855,14 @@ public class ProcessApplicationManifest extends ManifestProcessorTask {
                 features.add(Feature.ADD_SUPPORT_MULTIDEX_APPLICATION_IF_NO_NAME);
             }
         }
+
+        if (variantScope
+                .getGlobalScope()
+                .getProjectOptions()
+                .get(BooleanOption.ENFORCE_UNIQUE_PACKAGE_NAMES)) {
+            features.add(Feature.ENFORCE_UNIQUE_PACKAGE_NAME);
+        }
+
         return features.isEmpty() ? EnumSet.noneOf(Feature.class) : EnumSet.copyOf(features);
     }
 }

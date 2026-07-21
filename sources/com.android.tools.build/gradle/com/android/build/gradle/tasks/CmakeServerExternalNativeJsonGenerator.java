@@ -486,7 +486,7 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
                     NativeLibraryValue nativeLibraryValue =
                             getNativeLibraryValue(
                                     abiConfig.getAbiName(),
-                                    project.buildDirectory,
+                                    abiConfig.getExternalNativeBuildFolder(),
                                     target,
                                     strings);
                     nativeLibraryValue.toolchain = toolchainHashString;
@@ -503,7 +503,7 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
     @VisibleForTesting
     protected NativeLibraryValue getNativeLibraryValue(
             @NonNull String abi,
-            @NonNull String workingDirectory,
+            @NonNull File workingDirectory,
             @NonNull Target target,
             StringTable strings)
             throws FileNotFoundException {
@@ -525,7 +525,7 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
             boolean isDebuggable,
             @NonNull JsonReader compileCommandsJson,
             @NonNull String abi,
-            @NonNull String workingDirectory,
+            @NonNull File workingDirectory,
             @NonNull Target target,
             @NonNull StringTable strings) {
         NativeLibraryValue nativeLibraryValue = new NativeLibraryValue();
@@ -543,10 +543,20 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
         nativeLibraryValue.headers = new ArrayList<>();
         Map<String, Integer> compilationDatabaseFlags = Maps.newHashMap();
 
-        int workingDirectoryOrdinal = strings.intern(workingDirectory);
+        int workingDirectoryOrdinal = strings.intern(normalizeFilePath(workingDirectory));
         for (FileGroup fileGroup : target.fileGroups) {
             for (String source : fileGroup.sources) {
-                File sourceFile = new File(target.sourceDirectory, source);
+                Path sourceFilePath = Paths.get(target.sourceDirectory, source).normalize();
+                // It is important to not use sourceFile as the key to any dictionary, but instead
+                // use its normalized path, because the the File object may contain "../" or "./" in
+                // it (b/123123307).
+                if (sourceFilePath.toString().isEmpty()) {
+                    // If the normalized path is empty, use the non-normalized path to protect the
+                    // rest of the code and also make it more debuggable.
+                    sourceFilePath = Paths.get(target.sourceDirectory, source);
+                }
+                File sourceFile = sourceFilePath.toFile();
+
                 if (hasCmakeHeaderFileExtensions(sourceFile)) {
                     nativeLibraryValue.headers.add(
                             new NativeHeaderFileValue(sourceFile, workingDirectoryOrdinal));
@@ -563,9 +573,9 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
                         compilationDatabaseFlags =
                                 indexCompilationDatabase(compileCommandsJson, strings);
                     }
-                    if (compilationDatabaseFlags.containsKey(sourceFile.getPath())) {
+                    if (compilationDatabaseFlags.containsKey(sourceFilePath.toString())) {
                         nativeSourceFileValue.flagsOrdinal =
-                                compilationDatabaseFlags.get(sourceFile.getPath());
+                                compilationDatabaseFlags.get(sourceFilePath.toString());
                     } else {
                         // TODO I think this path is always wrong because it won't have --targets
                         // I don't want to make it an exception this late in 3.3 cycle so I'm
@@ -824,7 +834,7 @@ class CmakeServerExternalNativeJsonGenerator extends CmakeExternalNativeJsonGene
 
         // Include the original android toolchain
         tempAndroidToolchain
-                .append(String.format("include(%s)", normalizeFilePath(getToolChainFile())))
+                .append(String.format("include(\"%s\")", normalizeFilePath(getToolChainFile())))
                 .append(System.lineSeparator());
         // Overwrite the CMAKE_SYSTEM_VERSION to 1 so we skip CMake's Android toolchain.
         tempAndroidToolchain.append("set(CMAKE_SYSTEM_VERSION 1)").append(System.lineSeparator());
