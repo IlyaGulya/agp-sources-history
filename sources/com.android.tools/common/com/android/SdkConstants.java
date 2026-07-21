@@ -886,6 +886,7 @@ public final class SdkConstants {
     public static final String CLASS_COMPOSE = "androidx.compose.Compose";
     public static final String CLASS_COMPOSE_VIEW_ADAPTER =
             "androidx.ui.tooling.preview.ComposeViewAdapter";
+    public static final String CLASS_COMPOSE_INSPECTABLE = "androidx.ui.tooling.InspectableKt";
 
     /**
      * Returns the appropriate name for the 'mksdcard' command, which is 'mksdcard.exe' for Windows
@@ -1135,6 +1136,7 @@ public final class SdkConstants {
     public static final String TAG_INCLUDE = "include";
     public static final String TAG_DEEP_LINK = "deepLink";
     public static final String TAG_NAVIGATION = "navigation";
+    public static final String TAG_FRAGMENT = "fragment";
     public static final String ATTR_MODULE_NAME = "moduleName";
 
     public static final String VIEW = "View"; //$NON-NLS-1$
@@ -2725,7 +2727,7 @@ public final class SdkConstants {
     public static final String VALUE_HORIZONTAL = "horizontal"; //$NON-NLS-1$
 
     public static final String GRADLE_PLUGIN_NAME = "com.android.tools.build:gradle:";
-    public static final String GRADLE_MINIMUM_VERSION = "6.4-rc-2";
+    public static final String GRADLE_MINIMUM_VERSION = "6.5-milestone-1";
     public static final String GRADLE_LATEST_VERSION = GRADLE_MINIMUM_VERSION;
     public static final String GRADLE_PLUGIN_MINIMUM_VERSION = "1.0.0";
     public static final String GRADLE_PLUGIN_RECOMMENDED_VERSION = "3.3.2";

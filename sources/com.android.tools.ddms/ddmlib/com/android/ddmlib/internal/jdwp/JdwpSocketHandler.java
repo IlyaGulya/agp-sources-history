@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.tools.mlkit.exception;
+package com.android.ddmlib.internal.jdwp;
+
+import com.android.ddmlib.TimeoutException;
+import java.io.IOException;
 
 /**
- * Exception to throw when TensorFlow Lite Model is invalid, which is impossible to use in UI or
- * codegen.
+ * Interface to make managing reading / shutting down sockets {@link JdwpProxyClient} and
+ * {@link JdwpClientManager} easier. Objects of this type are registered with the selector
+ * apart of {@link JdwpProxyServer}
  */
-public class InvalidTfliteException extends TfliteModelException {
-    public InvalidTfliteException(String errorMessage) {
-        super(errorMessage);
-    }
+interface JdwpSocketHandler {
+    /**
+     * Read data from internal socket
+     */
+    void read() throws IOException, TimeoutException;
+
+    /**
+     * Shutdown connection with internal socket.
+     */
+    void shutdown() throws IOException;
 }
