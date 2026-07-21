@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.ide.common.gradle.model.impl
+package com.android.ide.common.gradle.model.impl.ndk.v1
 
-import com.android.ide.common.gradle.model.IdeAndroidArtifactOutput
-import com.android.ide.common.gradle.model.IdeFilterData
+import com.android.ide.common.gradle.model.ndk.v1.IdeNativeFile
 import java.io.File
 import java.io.Serializable
 
-data class IdeAndroidArtifactOutputImpl(
-  override val filters: Collection<IdeFilterData>,
-  override val versionCode: Int,
-  override val outputFile: File
-) : IdeAndroidArtifactOutput, Serializable
+data class IdeNativeFileImpl(
+  override val filePath: File,
+  override val settingsName: String,
+  override val workingDirectory: File?
+) : IdeNativeFile, Serializable
