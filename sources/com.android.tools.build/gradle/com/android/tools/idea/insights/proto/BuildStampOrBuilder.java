@@ -77,4 +77,24 @@ public interface BuildStampOrBuilder extends
    * <code>.BuildInfo build_info = 2;</code>
    */
   com.android.tools.idea.insights.proto.BuildInfoOrBuilder getBuildInfoOrBuilder();
+
+  /**
+   * <pre>
+   * Extra debug info which will help users identify issues
+   * </pre>
+   *
+   * <code>string generate_error_reason = 3;</code>
+   * @return The generateErrorReason.
+   */
+  java.lang.String getGenerateErrorReason();
+  /**
+   * <pre>
+   * Extra debug info which will help users identify issues
+   * </pre>
+   *
+   * <code>string generate_error_reason = 3;</code>
+   * @return The bytes for generateErrorReason.
+   */
+  com.google.protobuf.ByteString
+      getGenerateErrorReasonBytes();
 }

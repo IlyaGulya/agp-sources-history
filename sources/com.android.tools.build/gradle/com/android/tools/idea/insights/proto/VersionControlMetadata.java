@@ -49,13 +49,14 @@ public final class VersionControlMetadata {
       "_DIRTY\020\002\"\202\001\n\tBuildInfo\022\016\n\006job_id\030\001 \001(\t\022\017" +
       "\n\007job_url\030\002 \001(\t\022\020\n\010build_id\030\003 \001(\t\022\r\n\005lab" +
       "el\030\004 \001(\t\0223\n\017build_timestamp\030\005 \001(\0132\032.goog" +
-      "le.protobuf.Timestamp\"S\n\nBuildStamp\022%\n\014r" +
+      "le.protobuf.Timestamp\"r\n\nBuildStamp\022%\n\014r" +
       "epositories\030\001 \003(\0132\017.RepositoryInfo\022\036\n\nbu" +
-      "ild_info\030\002 \001(\0132\n.BuildInfo*f\n\024VersionCon" +
-      "trolSystem\022&\n\"VERSION_CONTROL_SYSTEM_UNS" +
-      "PECIFIED\020\000\022\007\n\003GIT\020\001\022\007\n\003SVN\020\002\022\006\n\002HG\020\003\022\014\n\010" +
-      "PERFORCE\020\004B)\n%com.android.tools.idea.ins" +
-      "ights.protoP\001b\006proto3"
+      "ild_info\030\002 \001(\0132\n.BuildInfo\022\035\n\025generate_e" +
+      "rror_reason\030\003 \001(\t*f\n\024VersionControlSyste" +
+      "m\022&\n\"VERSION_CONTROL_SYSTEM_UNSPECIFIED\020" +
+      "\000\022\007\n\003GIT\020\001\022\007\n\003SVN\020\002\022\006\n\002HG\020\003\022\014\n\010PERFORCE\020" +
+      "\004B)\n%com.android.tools.idea.insights.pro" +
+      "toP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -79,7 +80,7 @@ public final class VersionControlMetadata {
     internal_static_BuildStamp_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_BuildStamp_descriptor,
-        new java.lang.String[] { "Repositories", "BuildInfo", });
+        new java.lang.String[] { "Repositories", "BuildInfo", "GenerateErrorReason", });
     com.google.protobuf.TimestampProto.getDescriptor();
   }
 
