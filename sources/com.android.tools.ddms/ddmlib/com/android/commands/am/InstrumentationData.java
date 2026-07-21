@@ -263,11 +263,6 @@ public final class InstrumentationData {
       return new ResultsBundleEntry();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.android.commands.am.InstrumentationData.internal_static_android_am_ResultsBundleEntry_descriptor;
@@ -283,7 +278,8 @@ public final class InstrumentationData {
 
     private int bitField0_;
     public static final int KEY_FIELD_NUMBER = 1;
-    private volatile java.lang.Object key_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object key_ = "";
     /**
      * <code>optional string key = 1;</code>
      * @return Whether the key field is set.
@@ -331,7 +327,8 @@ public final class InstrumentationData {
     }
 
     public static final int VALUE_STRING_FIELD_NUMBER = 2;
-    private volatile java.lang.Object valueString_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object valueString_ = "";
     /**
      * <code>optional string value_string = 2;</code>
      * @return Whether the valueString field is set.
@@ -379,7 +376,7 @@ public final class InstrumentationData {
     }
 
     public static final int VALUE_INT_FIELD_NUMBER = 3;
-    private int valueInt_;
+    private int valueInt_ = 0;
     /**
      * <code>optional sint32 value_int = 3;</code>
      * @return Whether the valueInt field is set.
@@ -398,7 +395,7 @@ public final class InstrumentationData {
     }
 
     public static final int VALUE_FLOAT_FIELD_NUMBER = 4;
-    private float valueFloat_;
+    private float valueFloat_ = 0F;
     /**
      * <code>optional float value_float = 4;</code>
      * @return Whether the valueFloat field is set.
@@ -417,7 +414,7 @@ public final class InstrumentationData {
     }
 
     public static final int VALUE_DOUBLE_FIELD_NUMBER = 5;
-    private double valueDouble_;
+    private double valueDouble_ = 0D;
     /**
      * <code>optional double value_double = 5;</code>
      * @return Whether the valueDouble field is set.
@@ -436,7 +433,7 @@ public final class InstrumentationData {
     }
 
     public static final int VALUE_LONG_FIELD_NUMBER = 6;
-    private long valueLong_;
+    private long valueLong_ = 0L;
     /**
      * <code>optional sint64 value_long = 6;</code>
      * @return Whether the valueLong field is set.
@@ -481,7 +478,7 @@ public final class InstrumentationData {
     }
 
     public static final int VALUE_BYTES_FIELD_NUMBER = 8;
-    private com.google.protobuf.ByteString valueBytes_;
+    private com.google.protobuf.ByteString valueBytes_ = com.google.protobuf.ByteString.EMPTY;
     /**
      * <code>optional bytes value_bytes = 8;</code>
      * @return Whether the valueBytes field is set.
@@ -813,26 +810,19 @@ public final class InstrumentationData {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         key_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
         valueString_ = "";
-        bitField0_ = (bitField0_ & ~0x00000002);
         valueInt_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000004);
         valueFloat_ = 0F;
-        bitField0_ = (bitField0_ & ~0x00000008);
         valueDouble_ = 0D;
-        bitField0_ = (bitField0_ & ~0x00000010);
         valueLong_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000020);
-        if (valueBundleBuilder_ == null) {
-          valueBundle_ = null;
-        } else {
-          valueBundleBuilder_.clear();
+        valueBundle_ = null;
+        if (valueBundleBuilder_ != null) {
+          valueBundleBuilder_.dispose();
+          valueBundleBuilder_ = null;
         }
-        bitField0_ = (bitField0_ & ~0x00000040);
         valueBytes_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000080);
         return this;
       }
 
@@ -859,16 +849,22 @@ public final class InstrumentationData {
       @java.lang.Override
       public com.android.commands.am.InstrumentationData.ResultsBundleEntry buildPartial() {
         com.android.commands.am.InstrumentationData.ResultsBundleEntry result = new com.android.commands.am.InstrumentationData.ResultsBundleEntry(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.android.commands.am.InstrumentationData.ResultsBundleEntry result) {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.key_ = key_;
           to_bitField0_ |= 0x00000001;
         }
-        result.key_ = key_;
         if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.valueString_ = valueString_;
           to_bitField0_ |= 0x00000002;
         }
-        result.valueString_ = valueString_;
         if (((from_bitField0_ & 0x00000004) != 0)) {
           result.valueInt_ = valueInt_;
           to_bitField0_ |= 0x00000004;
@@ -886,54 +882,18 @@ public final class InstrumentationData {
           to_bitField0_ |= 0x00000020;
         }
         if (((from_bitField0_ & 0x00000040) != 0)) {
-          if (valueBundleBuilder_ == null) {
-            result.valueBundle_ = valueBundle_;
-          } else {
-            result.valueBundle_ = valueBundleBuilder_.build();
-          }
+          result.valueBundle_ = valueBundleBuilder_ == null
+              ? valueBundle_
+              : valueBundleBuilder_.build();
           to_bitField0_ |= 0x00000040;
         }
         if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.valueBytes_ = valueBytes_;
           to_bitField0_ |= 0x00000080;
         }
-        result.valueBytes_ = valueBytes_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
+        result.bitField0_ |= to_bitField0_;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.android.commands.am.InstrumentationData.ResultsBundleEntry) {
@@ -947,13 +907,13 @@ public final class InstrumentationData {
       public Builder mergeFrom(com.android.commands.am.InstrumentationData.ResultsBundleEntry other) {
         if (other == com.android.commands.am.InstrumentationData.ResultsBundleEntry.getDefaultInstance()) return this;
         if (other.hasKey()) {
-          bitField0_ |= 0x00000001;
           key_ = other.key_;
+          bitField0_ |= 0x00000001;
           onChanged();
         }
         if (other.hasValueString()) {
-          bitField0_ |= 0x00000002;
           valueString_ = other.valueString_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         if (other.hasValueInt()) {
@@ -1109,11 +1069,9 @@ public final class InstrumentationData {
        */
       public Builder setKey(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+        if (value == null) { throw new NullPointerException(); }
         key_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -1122,8 +1080,8 @@ public final class InstrumentationData {
        * @return This builder for chaining.
        */
       public Builder clearKey() {
-        bitField0_ = (bitField0_ & ~0x00000001);
         key_ = getDefaultInstance().getKey();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -1134,11 +1092,9 @@ public final class InstrumentationData {
        */
       public Builder setKeyBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+        if (value == null) { throw new NullPointerException(); }
         key_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -1193,11 +1149,9 @@ public final class InstrumentationData {
        */
       public Builder setValueString(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
+        if (value == null) { throw new NullPointerException(); }
         valueString_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -1206,8 +1160,8 @@ public final class InstrumentationData {
        * @return This builder for chaining.
        */
       public Builder clearValueString() {
-        bitField0_ = (bitField0_ & ~0x00000002);
         valueString_ = getDefaultInstance().getValueString();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -1218,11 +1172,9 @@ public final class InstrumentationData {
        */
       public Builder setValueStringBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
+        if (value == null) { throw new NullPointerException(); }
         valueString_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -1250,8 +1202,9 @@ public final class InstrumentationData {
        * @return This builder for chaining.
        */
       public Builder setValueInt(int value) {
-        bitField0_ |= 0x00000004;
+
         valueInt_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -1289,8 +1242,9 @@ public final class InstrumentationData {
        * @return This builder for chaining.
        */
       public Builder setValueFloat(float value) {
-        bitField0_ |= 0x00000008;
+
         valueFloat_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -1328,8 +1282,9 @@ public final class InstrumentationData {
        * @return This builder for chaining.
        */
       public Builder setValueDouble(double value) {
-        bitField0_ |= 0x00000010;
+
         valueDouble_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -1367,8 +1322,9 @@ public final class InstrumentationData {
        * @return This builder for chaining.
        */
       public Builder setValueLong(long value) {
-        bitField0_ |= 0x00000020;
+
         valueLong_ = value;
+        bitField0_ |= 0x00000020;
         onChanged();
         return this;
       }
@@ -1413,11 +1369,11 @@ public final class InstrumentationData {
             throw new NullPointerException();
           }
           valueBundle_ = value;
-          onChanged();
         } else {
           valueBundleBuilder_.setMessage(value);
         }
         bitField0_ |= 0x00000040;
+        onChanged();
         return this;
       }
       /**
@@ -1427,11 +1383,11 @@ public final class InstrumentationData {
           com.android.commands.am.InstrumentationData.ResultsBundle.Builder builderForValue) {
         if (valueBundleBuilder_ == null) {
           valueBundle_ = builderForValue.build();
-          onChanged();
         } else {
           valueBundleBuilder_.setMessage(builderForValue.build());
         }
         bitField0_ |= 0x00000040;
+        onChanged();
         return this;
       }
       /**
@@ -1440,31 +1396,30 @@ public final class InstrumentationData {
       public Builder mergeValueBundle(com.android.commands.am.InstrumentationData.ResultsBundle value) {
         if (valueBundleBuilder_ == null) {
           if (((bitField0_ & 0x00000040) != 0) &&
-              valueBundle_ != null &&
-              valueBundle_ != com.android.commands.am.InstrumentationData.ResultsBundle.getDefaultInstance()) {
-            valueBundle_ =
-              com.android.commands.am.InstrumentationData.ResultsBundle.newBuilder(valueBundle_).mergeFrom(value).buildPartial();
+            valueBundle_ != null &&
+            valueBundle_ != com.android.commands.am.InstrumentationData.ResultsBundle.getDefaultInstance()) {
+            getValueBundleBuilder().mergeFrom(value);
           } else {
             valueBundle_ = value;
           }
-          onChanged();
         } else {
           valueBundleBuilder_.mergeFrom(value);
         }
         bitField0_ |= 0x00000040;
+        onChanged();
         return this;
       }
       /**
        * <code>optional .android.am.ResultsBundle value_bundle = 7;</code>
        */
       public Builder clearValueBundle() {
-        if (valueBundleBuilder_ == null) {
-          valueBundle_ = null;
-          onChanged();
-        } else {
-          valueBundleBuilder_.clear();
-        }
         bitField0_ = (bitField0_ & ~0x00000040);
+        valueBundle_ = null;
+        if (valueBundleBuilder_ != null) {
+          valueBundleBuilder_.dispose();
+          valueBundleBuilder_ = null;
+        }
+        onChanged();
         return this;
       }
       /**
@@ -1526,11 +1481,9 @@ public final class InstrumentationData {
        * @return This builder for chaining.
        */
       public Builder setValueBytes(com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000080;
+        if (value == null) { throw new NullPointerException(); }
         valueBytes_ = value;
+        bitField0_ |= 0x00000080;
         onChanged();
         return this;
       }
@@ -1659,11 +1612,6 @@ public final class InstrumentationData {
       return new ResultsBundle();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.android.commands.am.InstrumentationData.internal_static_android_am_ResultsBundle_descriptor;
@@ -1678,6 +1626,7 @@ public final class InstrumentationData {
     }
 
     public static final int ENTRIES_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<com.android.commands.am.InstrumentationData.ResultsBundleEntry> entries_;
     /**
      * <code>repeated .android.am.ResultsBundleEntry entries = 1;</code>
@@ -1907,6 +1856,7 @@ public final class InstrumentationData {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (entriesBuilder_ == null) {
           entries_ = java.util.Collections.emptyList();
         } else {
@@ -1940,7 +1890,13 @@ public final class InstrumentationData {
       @java.lang.Override
       public com.android.commands.am.InstrumentationData.ResultsBundle buildPartial() {
         com.android.commands.am.InstrumentationData.ResultsBundle result = new com.android.commands.am.InstrumentationData.ResultsBundle(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(com.android.commands.am.InstrumentationData.ResultsBundle result) {
         if (entriesBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             entries_ = java.util.Collections.unmodifiableList(entries_);
@@ -1950,42 +1906,12 @@ public final class InstrumentationData {
         } else {
           result.entries_ = entriesBuilder_.build();
         }
-        onBuilt();
-        return result;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
+      private void buildPartial0(com.android.commands.am.InstrumentationData.ResultsBundle result) {
+        int from_bitField0_ = bitField0_;
       }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.android.commands.am.InstrumentationData.ResultsBundle) {
@@ -2453,11 +2379,6 @@ public final class InstrumentationData {
       return new TestStatus();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.android.commands.am.InstrumentationData.internal_static_android_am_TestStatus_descriptor;
@@ -2473,7 +2394,7 @@ public final class InstrumentationData {
 
     private int bitField0_;
     public static final int RESULT_CODE_FIELD_NUMBER = 3;
-    private int resultCode_;
+    private int resultCode_ = 0;
     /**
      * <code>optional sint32 result_code = 3;</code>
      * @return Whether the resultCode field is set.
@@ -2518,7 +2439,8 @@ public final class InstrumentationData {
     }
 
     public static final int LOGCAT_FIELD_NUMBER = 5;
-    private volatile java.lang.Object logcat_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object logcat_ = "";
     /**
      * <code>optional string logcat = 5;</code>
      * @return Whether the logcat field is set.
@@ -2795,16 +2717,14 @@ public final class InstrumentationData {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         resultCode_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        if (resultsBuilder_ == null) {
-          results_ = null;
-        } else {
-          resultsBuilder_.clear();
+        results_ = null;
+        if (resultsBuilder_ != null) {
+          resultsBuilder_.dispose();
+          resultsBuilder_ = null;
         }
-        bitField0_ = (bitField0_ & ~0x00000002);
         logcat_ = "";
-        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -2831,6 +2751,12 @@ public final class InstrumentationData {
       @java.lang.Override
       public com.android.commands.am.InstrumentationData.TestStatus buildPartial() {
         com.android.commands.am.InstrumentationData.TestStatus result = new com.android.commands.am.InstrumentationData.TestStatus(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.android.commands.am.InstrumentationData.TestStatus result) {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
@@ -2838,54 +2764,18 @@ public final class InstrumentationData {
           to_bitField0_ |= 0x00000001;
         }
         if (((from_bitField0_ & 0x00000002) != 0)) {
-          if (resultsBuilder_ == null) {
-            result.results_ = results_;
-          } else {
-            result.results_ = resultsBuilder_.build();
-          }
+          result.results_ = resultsBuilder_ == null
+              ? results_
+              : resultsBuilder_.build();
           to_bitField0_ |= 0x00000002;
         }
         if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.logcat_ = logcat_;
           to_bitField0_ |= 0x00000004;
         }
-        result.logcat_ = logcat_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
+        result.bitField0_ |= to_bitField0_;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.android.commands.am.InstrumentationData.TestStatus) {
@@ -2905,8 +2795,8 @@ public final class InstrumentationData {
           mergeResults(other.getResults());
         }
         if (other.hasLogcat()) {
-          bitField0_ |= 0x00000004;
           logcat_ = other.logcat_;
+          bitField0_ |= 0x00000004;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -2992,8 +2882,9 @@ public final class InstrumentationData {
        * @return This builder for chaining.
        */
       public Builder setResultCode(int value) {
-        bitField0_ |= 0x00000001;
+
         resultCode_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -3038,11 +2929,11 @@ public final class InstrumentationData {
             throw new NullPointerException();
           }
           results_ = value;
-          onChanged();
         } else {
           resultsBuilder_.setMessage(value);
         }
         bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -3052,11 +2943,11 @@ public final class InstrumentationData {
           com.android.commands.am.InstrumentationData.ResultsBundle.Builder builderForValue) {
         if (resultsBuilder_ == null) {
           results_ = builderForValue.build();
-          onChanged();
         } else {
           resultsBuilder_.setMessage(builderForValue.build());
         }
         bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -3065,31 +2956,30 @@ public final class InstrumentationData {
       public Builder mergeResults(com.android.commands.am.InstrumentationData.ResultsBundle value) {
         if (resultsBuilder_ == null) {
           if (((bitField0_ & 0x00000002) != 0) &&
-              results_ != null &&
-              results_ != com.android.commands.am.InstrumentationData.ResultsBundle.getDefaultInstance()) {
-            results_ =
-              com.android.commands.am.InstrumentationData.ResultsBundle.newBuilder(results_).mergeFrom(value).buildPartial();
+            results_ != null &&
+            results_ != com.android.commands.am.InstrumentationData.ResultsBundle.getDefaultInstance()) {
+            getResultsBuilder().mergeFrom(value);
           } else {
             results_ = value;
           }
-          onChanged();
         } else {
           resultsBuilder_.mergeFrom(value);
         }
         bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
        * <code>optional .android.am.ResultsBundle results = 4;</code>
        */
       public Builder clearResults() {
-        if (resultsBuilder_ == null) {
-          results_ = null;
-          onChanged();
-        } else {
-          resultsBuilder_.clear();
-        }
         bitField0_ = (bitField0_ & ~0x00000002);
+        results_ = null;
+        if (resultsBuilder_ != null) {
+          resultsBuilder_.dispose();
+          resultsBuilder_ = null;
+        }
+        onChanged();
         return this;
       }
       /**
@@ -3178,11 +3068,9 @@ public final class InstrumentationData {
        */
       public Builder setLogcat(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
+        if (value == null) { throw new NullPointerException(); }
         logcat_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -3191,8 +3079,8 @@ public final class InstrumentationData {
        * @return This builder for chaining.
        */
       public Builder clearLogcat() {
-        bitField0_ = (bitField0_ & ~0x00000004);
         logcat_ = getDefaultInstance().getLogcat();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -3203,11 +3091,9 @@ public final class InstrumentationData {
        */
       public Builder setLogcatBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
+        if (value == null) { throw new NullPointerException(); }
         logcat_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -3357,11 +3243,6 @@ public final class InstrumentationData {
       return new SessionStatus();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.android.commands.am.InstrumentationData.internal_static_android_am_SessionStatus_descriptor;
@@ -3377,7 +3258,7 @@ public final class InstrumentationData {
 
     private int bitField0_;
     public static final int STATUS_CODE_FIELD_NUMBER = 1;
-    private int statusCode_;
+    private int statusCode_ = 0;
     /**
      * <code>optional .android.am.SessionStatusCode status_code = 1;</code>
      * @return Whether the statusCode field is set.
@@ -3390,13 +3271,13 @@ public final class InstrumentationData {
      * @return The statusCode.
      */
     @java.lang.Override public com.android.commands.am.InstrumentationData.SessionStatusCode getStatusCode() {
-      @SuppressWarnings("deprecation")
-      com.android.commands.am.InstrumentationData.SessionStatusCode result = com.android.commands.am.InstrumentationData.SessionStatusCode.valueOf(statusCode_);
+      com.android.commands.am.InstrumentationData.SessionStatusCode result = com.android.commands.am.InstrumentationData.SessionStatusCode.forNumber(statusCode_);
       return result == null ? com.android.commands.am.InstrumentationData.SessionStatusCode.SESSION_FINISHED : result;
     }
 
     public static final int ERROR_TEXT_FIELD_NUMBER = 2;
-    private volatile java.lang.Object errorText_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object errorText_ = "";
     /**
      * <code>optional string error_text = 2;</code>
      * @return Whether the errorText field is set.
@@ -3444,7 +3325,7 @@ public final class InstrumentationData {
     }
 
     public static final int RESULT_CODE_FIELD_NUMBER = 3;
-    private int resultCode_;
+    private int resultCode_ = 0;
     /**
      * <code>optional sint32 result_code = 3;</code>
      * @return Whether the resultCode field is set.
@@ -3733,18 +3614,15 @@ public final class InstrumentationData {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         statusCode_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000001);
         errorText_ = "";
-        bitField0_ = (bitField0_ & ~0x00000002);
         resultCode_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000004);
-        if (resultsBuilder_ == null) {
-          results_ = null;
-        } else {
-          resultsBuilder_.clear();
+        results_ = null;
+        if (resultsBuilder_ != null) {
+          resultsBuilder_.dispose();
+          resultsBuilder_ = null;
         }
-        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -3771,65 +3649,35 @@ public final class InstrumentationData {
       @java.lang.Override
       public com.android.commands.am.InstrumentationData.SessionStatus buildPartial() {
         com.android.commands.am.InstrumentationData.SessionStatus result = new com.android.commands.am.InstrumentationData.SessionStatus(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.android.commands.am.InstrumentationData.SessionStatus result) {
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.statusCode_ = statusCode_;
           to_bitField0_ |= 0x00000001;
         }
-        result.statusCode_ = statusCode_;
         if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.errorText_ = errorText_;
           to_bitField0_ |= 0x00000002;
         }
-        result.errorText_ = errorText_;
         if (((from_bitField0_ & 0x00000004) != 0)) {
           result.resultCode_ = resultCode_;
           to_bitField0_ |= 0x00000004;
         }
         if (((from_bitField0_ & 0x00000008) != 0)) {
-          if (resultsBuilder_ == null) {
-            result.results_ = results_;
-          } else {
-            result.results_ = resultsBuilder_.build();
-          }
+          result.results_ = resultsBuilder_ == null
+              ? results_
+              : resultsBuilder_.build();
           to_bitField0_ |= 0x00000008;
         }
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
+        result.bitField0_ |= to_bitField0_;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.android.commands.am.InstrumentationData.SessionStatus) {
@@ -3846,8 +3694,8 @@ public final class InstrumentationData {
           setStatusCode(other.getStatusCode());
         }
         if (other.hasErrorText()) {
-          bitField0_ |= 0x00000002;
           errorText_ = other.errorText_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         if (other.hasResultCode()) {
@@ -3942,8 +3790,7 @@ public final class InstrumentationData {
        */
       @java.lang.Override
       public com.android.commands.am.InstrumentationData.SessionStatusCode getStatusCode() {
-        @SuppressWarnings("deprecation")
-        com.android.commands.am.InstrumentationData.SessionStatusCode result = com.android.commands.am.InstrumentationData.SessionStatusCode.valueOf(statusCode_);
+        com.android.commands.am.InstrumentationData.SessionStatusCode result = com.android.commands.am.InstrumentationData.SessionStatusCode.forNumber(statusCode_);
         return result == null ? com.android.commands.am.InstrumentationData.SessionStatusCode.SESSION_FINISHED : result;
       }
       /**
@@ -4021,11 +3868,9 @@ public final class InstrumentationData {
        */
       public Builder setErrorText(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
+        if (value == null) { throw new NullPointerException(); }
         errorText_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -4034,8 +3879,8 @@ public final class InstrumentationData {
        * @return This builder for chaining.
        */
       public Builder clearErrorText() {
-        bitField0_ = (bitField0_ & ~0x00000002);
         errorText_ = getDefaultInstance().getErrorText();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -4046,11 +3891,9 @@ public final class InstrumentationData {
        */
       public Builder setErrorTextBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
+        if (value == null) { throw new NullPointerException(); }
         errorText_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -4078,8 +3921,9 @@ public final class InstrumentationData {
        * @return This builder for chaining.
        */
       public Builder setResultCode(int value) {
-        bitField0_ |= 0x00000004;
+
         resultCode_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -4124,11 +3968,11 @@ public final class InstrumentationData {
             throw new NullPointerException();
           }
           results_ = value;
-          onChanged();
         } else {
           resultsBuilder_.setMessage(value);
         }
         bitField0_ |= 0x00000008;
+        onChanged();
         return this;
       }
       /**
@@ -4138,11 +3982,11 @@ public final class InstrumentationData {
           com.android.commands.am.InstrumentationData.ResultsBundle.Builder builderForValue) {
         if (resultsBuilder_ == null) {
           results_ = builderForValue.build();
-          onChanged();
         } else {
           resultsBuilder_.setMessage(builderForValue.build());
         }
         bitField0_ |= 0x00000008;
+        onChanged();
         return this;
       }
       /**
@@ -4151,31 +3995,30 @@ public final class InstrumentationData {
       public Builder mergeResults(com.android.commands.am.InstrumentationData.ResultsBundle value) {
         if (resultsBuilder_ == null) {
           if (((bitField0_ & 0x00000008) != 0) &&
-              results_ != null &&
-              results_ != com.android.commands.am.InstrumentationData.ResultsBundle.getDefaultInstance()) {
-            results_ =
-              com.android.commands.am.InstrumentationData.ResultsBundle.newBuilder(results_).mergeFrom(value).buildPartial();
+            results_ != null &&
+            results_ != com.android.commands.am.InstrumentationData.ResultsBundle.getDefaultInstance()) {
+            getResultsBuilder().mergeFrom(value);
           } else {
             results_ = value;
           }
-          onChanged();
         } else {
           resultsBuilder_.mergeFrom(value);
         }
         bitField0_ |= 0x00000008;
+        onChanged();
         return this;
       }
       /**
        * <code>optional .android.am.ResultsBundle results = 4;</code>
        */
       public Builder clearResults() {
-        if (resultsBuilder_ == null) {
-          results_ = null;
-          onChanged();
-        } else {
-          resultsBuilder_.clear();
-        }
         bitField0_ = (bitField0_ & ~0x00000008);
+        results_ = null;
+        if (resultsBuilder_ != null) {
+          resultsBuilder_.dispose();
+          resultsBuilder_ = null;
+        }
+        onChanged();
         return this;
       }
       /**
@@ -4343,11 +4186,6 @@ public final class InstrumentationData {
       return new Session();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.android.commands.am.InstrumentationData.internal_static_android_am_Session_descriptor;
@@ -4363,6 +4201,7 @@ public final class InstrumentationData {
 
     private int bitField0_;
     public static final int TEST_STATUS_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<com.android.commands.am.InstrumentationData.TestStatus> testStatus_;
     /**
      * <code>repeated .android.am.TestStatus test_status = 1;</code>
@@ -4641,6 +4480,7 @@ public final class InstrumentationData {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (testStatusBuilder_ == null) {
           testStatus_ = java.util.Collections.emptyList();
         } else {
@@ -4648,12 +4488,11 @@ public final class InstrumentationData {
           testStatusBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000001);
-        if (sessionStatusBuilder_ == null) {
-          sessionStatus_ = null;
-        } else {
-          sessionStatusBuilder_.clear();
+        sessionStatus_ = null;
+        if (sessionStatusBuilder_ != null) {
+          sessionStatusBuilder_.dispose();
+          sessionStatusBuilder_ = null;
         }
-        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -4680,8 +4519,13 @@ public final class InstrumentationData {
       @java.lang.Override
       public com.android.commands.am.InstrumentationData.Session buildPartial() {
         com.android.commands.am.InstrumentationData.Session result = new com.android.commands.am.InstrumentationData.Session(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(com.android.commands.am.InstrumentationData.Session result) {
         if (testStatusBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             testStatus_ = java.util.Collections.unmodifiableList(testStatus_);
@@ -4691,51 +4535,20 @@ public final class InstrumentationData {
         } else {
           result.testStatus_ = testStatusBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000002) != 0)) {
-          if (sessionStatusBuilder_ == null) {
-            result.sessionStatus_ = sessionStatus_;
-          } else {
-            result.sessionStatus_ = sessionStatusBuilder_.build();
-          }
-          to_bitField0_ |= 0x00000001;
-        }
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
+      private void buildPartial0(com.android.commands.am.InstrumentationData.Session result) {
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.sessionStatus_ = sessionStatusBuilder_ == null
+              ? sessionStatus_
+              : sessionStatusBuilder_.build();
+          to_bitField0_ |= 0x00000001;
+        }
+        result.bitField0_ |= to_bitField0_;
       }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.android.commands.am.InstrumentationData.Session) {
@@ -5110,11 +4923,11 @@ public final class InstrumentationData {
             throw new NullPointerException();
           }
           sessionStatus_ = value;
-          onChanged();
         } else {
           sessionStatusBuilder_.setMessage(value);
         }
         bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -5124,11 +4937,11 @@ public final class InstrumentationData {
           com.android.commands.am.InstrumentationData.SessionStatus.Builder builderForValue) {
         if (sessionStatusBuilder_ == null) {
           sessionStatus_ = builderForValue.build();
-          onChanged();
         } else {
           sessionStatusBuilder_.setMessage(builderForValue.build());
         }
         bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
@@ -5137,31 +4950,30 @@ public final class InstrumentationData {
       public Builder mergeSessionStatus(com.android.commands.am.InstrumentationData.SessionStatus value) {
         if (sessionStatusBuilder_ == null) {
           if (((bitField0_ & 0x00000002) != 0) &&
-              sessionStatus_ != null &&
-              sessionStatus_ != com.android.commands.am.InstrumentationData.SessionStatus.getDefaultInstance()) {
-            sessionStatus_ =
-              com.android.commands.am.InstrumentationData.SessionStatus.newBuilder(sessionStatus_).mergeFrom(value).buildPartial();
+            sessionStatus_ != null &&
+            sessionStatus_ != com.android.commands.am.InstrumentationData.SessionStatus.getDefaultInstance()) {
+            getSessionStatusBuilder().mergeFrom(value);
           } else {
             sessionStatus_ = value;
           }
-          onChanged();
         } else {
           sessionStatusBuilder_.mergeFrom(value);
         }
         bitField0_ |= 0x00000002;
+        onChanged();
         return this;
       }
       /**
        * <code>optional .android.am.SessionStatus session_status = 2;</code>
        */
       public Builder clearSessionStatus() {
-        if (sessionStatusBuilder_ == null) {
-          sessionStatus_ = null;
-          onChanged();
-        } else {
-          sessionStatusBuilder_.clear();
-        }
         bitField0_ = (bitField0_ & ~0x00000002);
+        sessionStatus_ = null;
+        if (sessionStatusBuilder_ != null) {
+          sessionStatusBuilder_.dispose();
+          sessionStatusBuilder_ = null;
+        }
+        onChanged();
         return this;
       }
       /**

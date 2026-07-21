@@ -31,11 +31,6 @@ private static final long serialVersionUID = 0L;
     return new InstrumentedTestInfo();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_InstrumentedTestInfo_descriptor;
@@ -63,7 +58,8 @@ private static final long serialVersionUID = 0L;
 
   private int bitField0_;
   public static final int NAMESPACE_FIELD_NUMBER = 1;
-  private volatile java.lang.Object namespace_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object namespace_ = "";
   /**
    * <code>optional string namespace = 1;</code>
    * @return Whether the namespace field is set.
@@ -109,7 +105,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int TEST_INSTRUMENTATION_RUNNER_FIELD_NUMBER = 2;
-  private volatile java.lang.Object testInstrumentationRunner_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object testInstrumentationRunner_ = "";
   /**
    * <code>optional string test_instrumentation_runner = 2;</code>
    * @return Whether the testInstrumentationRunner field is set.
@@ -166,6 +163,7 @@ private static final long serialVersionUID = 0L;
                 com.google.protobuf.WireFormat.FieldType.STRING,
                 "");
   }
+  @SuppressWarnings("serial")
   private com.google.protobuf.MapField<
       java.lang.String, java.lang.String> testInstrumentationRunnerArguments_;
   private com.google.protobuf.MapField<java.lang.String, java.lang.String>
@@ -176,14 +174,12 @@ private static final long serialVersionUID = 0L;
     }
     return testInstrumentationRunnerArguments_;
   }
-
   public int getTestInstrumentationRunnerArgumentsCount() {
     return internalGetTestInstrumentationRunnerArguments().getMap().size();
   }
   /**
    * <code>map&lt;string, string&gt; test_instrumentation_runner_arguments = 3;</code>
    */
-
   @java.lang.Override
   public boolean containsTestInstrumentationRunnerArguments(
       java.lang.String key) {
@@ -202,7 +198,6 @@ private static final long serialVersionUID = 0L;
    * <code>map&lt;string, string&gt; test_instrumentation_runner_arguments = 3;</code>
    */
   @java.lang.Override
-
   public java.util.Map<java.lang.String, java.lang.String> getTestInstrumentationRunnerArgumentsMap() {
     return internalGetTestInstrumentationRunnerArguments().getMap();
   }
@@ -210,10 +205,11 @@ private static final long serialVersionUID = 0L;
    * <code>map&lt;string, string&gt; test_instrumentation_runner_arguments = 3;</code>
    */
   @java.lang.Override
-
-  public java.lang.String getTestInstrumentationRunnerArgumentsOrDefault(
+  public /* nullable */
+java.lang.String getTestInstrumentationRunnerArgumentsOrDefault(
       java.lang.String key,
-      java.lang.String defaultValue) {
+      /* nullable */
+java.lang.String defaultValue) {
     if (key == null) { throw new NullPointerException("map key"); }
     java.util.Map<java.lang.String, java.lang.String> map =
         internalGetTestInstrumentationRunnerArguments().getMap();
@@ -223,7 +219,6 @@ private static final long serialVersionUID = 0L;
    * <code>map&lt;string, string&gt; test_instrumentation_runner_arguments = 3;</code>
    */
   @java.lang.Override
-
   public java.lang.String getTestInstrumentationRunnerArgumentsOrThrow(
       java.lang.String key) {
     if (key == null) { throw new NullPointerException("map key"); }
@@ -608,23 +603,20 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       namespace_ = "";
-      bitField0_ = (bitField0_ & ~0x00000001);
       testInstrumentationRunner_ = "";
-      bitField0_ = (bitField0_ & ~0x00000002);
       internalGetMutableTestInstrumentationRunnerArguments().clear();
-      if (signingConfigBuilder_ == null) {
-        signingConfig_ = null;
-      } else {
-        signingConfigBuilder_.clear();
+      signingConfig_ = null;
+      if (signingConfigBuilder_ != null) {
+        signingConfigBuilder_.dispose();
+        signingConfigBuilder_ = null;
       }
-      bitField0_ = (bitField0_ & ~0x00000008);
-      if (assembleTaskOutputListingFileBuilder_ == null) {
-        assembleTaskOutputListingFile_ = null;
-      } else {
-        assembleTaskOutputListingFileBuilder_.clear();
+      assembleTaskOutputListingFile_ = null;
+      if (assembleTaskOutputListingFileBuilder_ != null) {
+        assembleTaskOutputListingFileBuilder_.dispose();
+        assembleTaskOutputListingFileBuilder_ = null;
       }
-      bitField0_ = (bitField0_ & ~0x00000010);
       return this;
     }
 
@@ -651,71 +643,41 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.kotlin.multiplatform.models.InstrumentedTestInfo buildPartial() {
       com.android.kotlin.multiplatform.models.InstrumentedTestInfo result = new com.android.kotlin.multiplatform.models.InstrumentedTestInfo(this);
-      int from_bitField0_ = bitField0_;
-      int to_bitField0_ = 0;
-      if (((from_bitField0_ & 0x00000001) != 0)) {
-        to_bitField0_ |= 0x00000001;
-      }
-      result.namespace_ = namespace_;
-      if (((from_bitField0_ & 0x00000002) != 0)) {
-        to_bitField0_ |= 0x00000002;
-      }
-      result.testInstrumentationRunner_ = testInstrumentationRunner_;
-      result.testInstrumentationRunnerArguments_ = internalGetTestInstrumentationRunnerArguments();
-      result.testInstrumentationRunnerArguments_.makeImmutable();
-      if (((from_bitField0_ & 0x00000008) != 0)) {
-        if (signingConfigBuilder_ == null) {
-          result.signingConfig_ = signingConfig_;
-        } else {
-          result.signingConfig_ = signingConfigBuilder_.build();
-        }
-        to_bitField0_ |= 0x00000004;
-      }
-      if (((from_bitField0_ & 0x00000010) != 0)) {
-        if (assembleTaskOutputListingFileBuilder_ == null) {
-          result.assembleTaskOutputListingFile_ = assembleTaskOutputListingFile_;
-        } else {
-          result.assembleTaskOutputListingFile_ = assembleTaskOutputListingFileBuilder_.build();
-        }
-        to_bitField0_ |= 0x00000008;
-      }
-      result.bitField0_ = to_bitField0_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.kotlin.multiplatform.models.InstrumentedTestInfo result) {
+      int from_bitField0_ = bitField0_;
+      int to_bitField0_ = 0;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.namespace_ = namespace_;
+        to_bitField0_ |= 0x00000001;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.testInstrumentationRunner_ = testInstrumentationRunner_;
+        to_bitField0_ |= 0x00000002;
+      }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.testInstrumentationRunnerArguments_ = internalGetTestInstrumentationRunnerArguments();
+        result.testInstrumentationRunnerArguments_.makeImmutable();
+      }
+      if (((from_bitField0_ & 0x00000008) != 0)) {
+        result.signingConfig_ = signingConfigBuilder_ == null
+            ? signingConfig_
+            : signingConfigBuilder_.build();
+        to_bitField0_ |= 0x00000004;
+      }
+      if (((from_bitField0_ & 0x00000010) != 0)) {
+        result.assembleTaskOutputListingFile_ = assembleTaskOutputListingFileBuilder_ == null
+            ? assembleTaskOutputListingFile_
+            : assembleTaskOutputListingFileBuilder_.build();
+        to_bitField0_ |= 0x00000008;
+      }
+      result.bitField0_ |= to_bitField0_;
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.kotlin.multiplatform.models.InstrumentedTestInfo) {
@@ -729,17 +691,18 @@ private static final long serialVersionUID = 0L;
     public Builder mergeFrom(com.android.kotlin.multiplatform.models.InstrumentedTestInfo other) {
       if (other == com.android.kotlin.multiplatform.models.InstrumentedTestInfo.getDefaultInstance()) return this;
       if (other.hasNamespace()) {
-        bitField0_ |= 0x00000001;
         namespace_ = other.namespace_;
+        bitField0_ |= 0x00000001;
         onChanged();
       }
       if (other.hasTestInstrumentationRunner()) {
-        bitField0_ |= 0x00000002;
         testInstrumentationRunner_ = other.testInstrumentationRunner_;
+        bitField0_ |= 0x00000002;
         onChanged();
       }
       internalGetMutableTestInstrumentationRunnerArguments().mergeFrom(
           other.internalGetTestInstrumentationRunnerArguments());
+      bitField0_ |= 0x00000004;
       if (other.hasSigningConfig()) {
         mergeSigningConfig(other.getSigningConfig());
       }
@@ -788,6 +751,7 @@ private static final long serialVersionUID = 0L;
                   TestInstrumentationRunnerArgumentsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
               internalGetMutableTestInstrumentationRunnerArguments().getMutableMap().put(
                   testInstrumentationRunnerArguments__.getKey(), testInstrumentationRunnerArguments__.getValue());
+              bitField0_ |= 0x00000004;
               break;
             } // case 26
             case 34: {
@@ -869,11 +833,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setNamespace(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+      if (value == null) { throw new NullPointerException(); }
       namespace_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -882,8 +844,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearNamespace() {
-      bitField0_ = (bitField0_ & ~0x00000001);
       namespace_ = getDefaultInstance().getNamespace();
+      bitField0_ = (bitField0_ & ~0x00000001);
       onChanged();
       return this;
     }
@@ -894,12 +856,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setNamespaceBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000001;
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       namespace_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -952,11 +912,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setTestInstrumentationRunner(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
+      if (value == null) { throw new NullPointerException(); }
       testInstrumentationRunner_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -965,8 +923,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearTestInstrumentationRunner() {
-      bitField0_ = (bitField0_ & ~0x00000002);
       testInstrumentationRunner_ = getDefaultInstance().getTestInstrumentationRunner();
+      bitField0_ = (bitField0_ & ~0x00000002);
       onChanged();
       return this;
     }
@@ -977,12 +935,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setTestInstrumentationRunnerBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000002;
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       testInstrumentationRunner_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -990,7 +946,7 @@ private static final long serialVersionUID = 0L;
     private com.google.protobuf.MapField<
         java.lang.String, java.lang.String> testInstrumentationRunnerArguments_;
     private com.google.protobuf.MapField<java.lang.String, java.lang.String>
-    internalGetTestInstrumentationRunnerArguments() {
+        internalGetTestInstrumentationRunnerArguments() {
       if (testInstrumentationRunnerArguments_ == null) {
         return com.google.protobuf.MapField.emptyMapField(
             TestInstrumentationRunnerArgumentsDefaultEntryHolder.defaultEntry);
@@ -998,8 +954,7 @@ private static final long serialVersionUID = 0L;
       return testInstrumentationRunnerArguments_;
     }
     private com.google.protobuf.MapField<java.lang.String, java.lang.String>
-    internalGetMutableTestInstrumentationRunnerArguments() {
-      onChanged();;
+        internalGetMutableTestInstrumentationRunnerArguments() {
       if (testInstrumentationRunnerArguments_ == null) {
         testInstrumentationRunnerArguments_ = com.google.protobuf.MapField.newMapField(
             TestInstrumentationRunnerArgumentsDefaultEntryHolder.defaultEntry);
@@ -1007,16 +962,16 @@ private static final long serialVersionUID = 0L;
       if (!testInstrumentationRunnerArguments_.isMutable()) {
         testInstrumentationRunnerArguments_ = testInstrumentationRunnerArguments_.copy();
       }
+      bitField0_ |= 0x00000004;
+      onChanged();
       return testInstrumentationRunnerArguments_;
     }
-
     public int getTestInstrumentationRunnerArgumentsCount() {
       return internalGetTestInstrumentationRunnerArguments().getMap().size();
     }
     /**
      * <code>map&lt;string, string&gt; test_instrumentation_runner_arguments = 3;</code>
      */
-
     @java.lang.Override
     public boolean containsTestInstrumentationRunnerArguments(
         java.lang.String key) {
@@ -1035,7 +990,6 @@ private static final long serialVersionUID = 0L;
      * <code>map&lt;string, string&gt; test_instrumentation_runner_arguments = 3;</code>
      */
     @java.lang.Override
-
     public java.util.Map<java.lang.String, java.lang.String> getTestInstrumentationRunnerArgumentsMap() {
       return internalGetTestInstrumentationRunnerArguments().getMap();
     }
@@ -1043,10 +997,11 @@ private static final long serialVersionUID = 0L;
      * <code>map&lt;string, string&gt; test_instrumentation_runner_arguments = 3;</code>
      */
     @java.lang.Override
-
-    public java.lang.String getTestInstrumentationRunnerArgumentsOrDefault(
+    public /* nullable */
+java.lang.String getTestInstrumentationRunnerArgumentsOrDefault(
         java.lang.String key,
-        java.lang.String defaultValue) {
+        /* nullable */
+java.lang.String defaultValue) {
       if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetTestInstrumentationRunnerArguments().getMap();
@@ -1056,7 +1011,6 @@ private static final long serialVersionUID = 0L;
      * <code>map&lt;string, string&gt; test_instrumentation_runner_arguments = 3;</code>
      */
     @java.lang.Override
-
     public java.lang.String getTestInstrumentationRunnerArgumentsOrThrow(
         java.lang.String key) {
       if (key == null) { throw new NullPointerException("map key"); }
@@ -1067,8 +1021,8 @@ private static final long serialVersionUID = 0L;
       }
       return map.get(key);
     }
-
     public Builder clearTestInstrumentationRunnerArguments() {
+      bitField0_ = (bitField0_ & ~0x00000004);
       internalGetMutableTestInstrumentationRunnerArguments().getMutableMap()
           .clear();
       return this;
@@ -1076,7 +1030,6 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>map&lt;string, string&gt; test_instrumentation_runner_arguments = 3;</code>
      */
-
     public Builder removeTestInstrumentationRunnerArguments(
         java.lang.String key) {
       if (key == null) { throw new NullPointerException("map key"); }
@@ -1089,7 +1042,8 @@ private static final long serialVersionUID = 0L;
      */
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String>
-    getMutableTestInstrumentationRunnerArguments() {
+        getMutableTestInstrumentationRunnerArguments() {
+      bitField0_ |= 0x00000004;
       return internalGetMutableTestInstrumentationRunnerArguments().getMutableMap();
     }
     /**
@@ -1099,22 +1053,20 @@ private static final long serialVersionUID = 0L;
         java.lang.String key,
         java.lang.String value) {
       if (key == null) { throw new NullPointerException("map key"); }
-      if (value == null) {
-  throw new NullPointerException("map value");
-}
-
+      if (value == null) { throw new NullPointerException("map value"); }
       internalGetMutableTestInstrumentationRunnerArguments().getMutableMap()
           .put(key, value);
+      bitField0_ |= 0x00000004;
       return this;
     }
     /**
      * <code>map&lt;string, string&gt; test_instrumentation_runner_arguments = 3;</code>
      */
-
     public Builder putAllTestInstrumentationRunnerArguments(
         java.util.Map<java.lang.String, java.lang.String> values) {
       internalGetMutableTestInstrumentationRunnerArguments().getMutableMap()
           .putAll(values);
+      bitField0_ |= 0x00000004;
       return this;
     }
 
@@ -1160,11 +1112,11 @@ private static final long serialVersionUID = 0L;
           throw new NullPointerException();
         }
         signingConfig_ = value;
-        onChanged();
       } else {
         signingConfigBuilder_.setMessage(value);
       }
       bitField0_ |= 0x00000008;
+      onChanged();
       return this;
     }
     /**
@@ -1178,11 +1130,11 @@ private static final long serialVersionUID = 0L;
         com.android.builder.model.proto.ide.SigningConfig.Builder builderForValue) {
       if (signingConfigBuilder_ == null) {
         signingConfig_ = builderForValue.build();
-        onChanged();
       } else {
         signingConfigBuilder_.setMessage(builderForValue.build());
       }
       bitField0_ |= 0x00000008;
+      onChanged();
       return this;
     }
     /**
@@ -1195,18 +1147,17 @@ private static final long serialVersionUID = 0L;
     public Builder mergeSigningConfig(com.android.builder.model.proto.ide.SigningConfig value) {
       if (signingConfigBuilder_ == null) {
         if (((bitField0_ & 0x00000008) != 0) &&
-            signingConfig_ != null &&
-            signingConfig_ != com.android.builder.model.proto.ide.SigningConfig.getDefaultInstance()) {
-          signingConfig_ =
-            com.android.builder.model.proto.ide.SigningConfig.newBuilder(signingConfig_).mergeFrom(value).buildPartial();
+          signingConfig_ != null &&
+          signingConfig_ != com.android.builder.model.proto.ide.SigningConfig.getDefaultInstance()) {
+          getSigningConfigBuilder().mergeFrom(value);
         } else {
           signingConfig_ = value;
         }
-        onChanged();
       } else {
         signingConfigBuilder_.mergeFrom(value);
       }
       bitField0_ |= 0x00000008;
+      onChanged();
       return this;
     }
     /**
@@ -1217,13 +1168,13 @@ private static final long serialVersionUID = 0L;
      * <code>optional .SigningConfig signing_config = 4;</code>
      */
     public Builder clearSigningConfig() {
-      if (signingConfigBuilder_ == null) {
-        signingConfig_ = null;
-        onChanged();
-      } else {
-        signingConfigBuilder_.clear();
-      }
       bitField0_ = (bitField0_ & ~0x00000008);
+      signingConfig_ = null;
+      if (signingConfigBuilder_ != null) {
+        signingConfigBuilder_.dispose();
+        signingConfigBuilder_ = null;
+      }
+      onChanged();
       return this;
     }
     /**
@@ -1319,11 +1270,11 @@ private static final long serialVersionUID = 0L;
           throw new NullPointerException();
         }
         assembleTaskOutputListingFile_ = value;
-        onChanged();
       } else {
         assembleTaskOutputListingFileBuilder_.setMessage(value);
       }
       bitField0_ |= 0x00000010;
+      onChanged();
       return this;
     }
     /**
@@ -1338,11 +1289,11 @@ private static final long serialVersionUID = 0L;
         com.android.builder.model.proto.ide.File.Builder builderForValue) {
       if (assembleTaskOutputListingFileBuilder_ == null) {
         assembleTaskOutputListingFile_ = builderForValue.build();
-        onChanged();
       } else {
         assembleTaskOutputListingFileBuilder_.setMessage(builderForValue.build());
       }
       bitField0_ |= 0x00000010;
+      onChanged();
       return this;
     }
     /**
@@ -1356,18 +1307,17 @@ private static final long serialVersionUID = 0L;
     public Builder mergeAssembleTaskOutputListingFile(com.android.builder.model.proto.ide.File value) {
       if (assembleTaskOutputListingFileBuilder_ == null) {
         if (((bitField0_ & 0x00000010) != 0) &&
-            assembleTaskOutputListingFile_ != null &&
-            assembleTaskOutputListingFile_ != com.android.builder.model.proto.ide.File.getDefaultInstance()) {
-          assembleTaskOutputListingFile_ =
-            com.android.builder.model.proto.ide.File.newBuilder(assembleTaskOutputListingFile_).mergeFrom(value).buildPartial();
+          assembleTaskOutputListingFile_ != null &&
+          assembleTaskOutputListingFile_ != com.android.builder.model.proto.ide.File.getDefaultInstance()) {
+          getAssembleTaskOutputListingFileBuilder().mergeFrom(value);
         } else {
           assembleTaskOutputListingFile_ = value;
         }
-        onChanged();
       } else {
         assembleTaskOutputListingFileBuilder_.mergeFrom(value);
       }
       bitField0_ |= 0x00000010;
+      onChanged();
       return this;
     }
     /**
@@ -1379,13 +1329,13 @@ private static final long serialVersionUID = 0L;
      * <code>optional .File assemble_task_output_listing_file = 5;</code>
      */
     public Builder clearAssembleTaskOutputListingFile() {
-      if (assembleTaskOutputListingFileBuilder_ == null) {
-        assembleTaskOutputListingFile_ = null;
-        onChanged();
-      } else {
-        assembleTaskOutputListingFileBuilder_.clear();
-      }
       bitField0_ = (bitField0_ & ~0x00000010);
+      assembleTaskOutputListingFile_ = null;
+      if (assembleTaskOutputListingFileBuilder_ != null) {
+        assembleTaskOutputListingFileBuilder_.dispose();
+        assembleTaskOutputListingFileBuilder_ = null;
+      }
+      onChanged();
       return this;
     }
     /**

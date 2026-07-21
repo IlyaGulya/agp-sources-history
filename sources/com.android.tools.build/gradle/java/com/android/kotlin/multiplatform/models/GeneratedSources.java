@@ -30,11 +30,6 @@ private static final long serialVersionUID = 0L;
     return new GeneratedSources();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_GeneratedSources_descriptor;
@@ -49,6 +44,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int SOURCE_FOLDERS_FIELD_NUMBER = 1;
+  @SuppressWarnings("serial")
   private java.util.List<com.android.builder.model.proto.ide.File> sourceFolders_;
   /**
    * <code>repeated .File source_folders = 1;</code>
@@ -282,6 +278,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       if (sourceFoldersBuilder_ == null) {
         sourceFolders_ = java.util.Collections.emptyList();
       } else {
@@ -315,7 +312,13 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.kotlin.multiplatform.models.GeneratedSources buildPartial() {
       com.android.kotlin.multiplatform.models.GeneratedSources result = new com.android.kotlin.multiplatform.models.GeneratedSources(this);
-      int from_bitField0_ = bitField0_;
+      buildPartialRepeatedFields(result);
+      if (bitField0_ != 0) { buildPartial0(result); }
+      onBuilt();
+      return result;
+    }
+
+    private void buildPartialRepeatedFields(com.android.kotlin.multiplatform.models.GeneratedSources result) {
       if (sourceFoldersBuilder_ == null) {
         if (((bitField0_ & 0x00000001) != 0)) {
           sourceFolders_ = java.util.Collections.unmodifiableList(sourceFolders_);
@@ -325,42 +328,12 @@ private static final long serialVersionUID = 0L;
       } else {
         result.sourceFolders_ = sourceFoldersBuilder_.build();
       }
-      onBuilt();
-      return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.kotlin.multiplatform.models.GeneratedSources result) {
+      int from_bitField0_ = bitField0_;
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.kotlin.multiplatform.models.GeneratedSources) {

@@ -380,6 +380,7 @@ public final class ManifestOuterClass {
    * description of the current SDK, including but not limited to, the version,
    * installing apks and their details, required gservices overrides and supported
    * devices.
+   *
    * The proto serialization is read by Android Studio.
    * </pre>
    *
@@ -408,11 +409,6 @@ public final class ManifestOuterClass {
       return new Manifest();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return wireless.android.instantapps.sdk.ManifestOuterClass.internal_static_wireless_android_instantapps_sdk_Manifest_descriptor;
@@ -427,7 +423,7 @@ public final class ManifestOuterClass {
     }
 
     public static final int VERSION_CODE_FIELD_NUMBER = 1;
-    private int versionCode_;
+    private int versionCode_ = 0;
     /**
      * <pre>
      * Integer representation of SDK number. Higher number guarantees a newer SDK.
@@ -442,7 +438,8 @@ public final class ManifestOuterClass {
     }
 
     public static final int VERSION_NAME_FIELD_NUMBER = 2;
-    private volatile java.lang.Object versionName_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object versionName_ = "";
     /**
      * <pre>
      * Human readable SDK version string.
@@ -488,6 +485,7 @@ public final class ManifestOuterClass {
     }
 
     public static final int APKS_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
     private java.util.List<wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo> apks_;
     /**
      * <pre>
@@ -582,10 +580,11 @@ public final class ManifestOuterClass {
      */
     @java.lang.Override
     public wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibilityOrBuilder getLibraryCompatibilityOrBuilder() {
-      return getLibraryCompatibility();
+      return libraryCompatibility_ == null ? wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility.getDefaultInstance() : libraryCompatibility_;
     }
 
     public static final int ENABLED_DEVICES_FIELD_NUMBER = 5;
+    @SuppressWarnings("serial")
     private java.util.List<wireless.android.instantapps.sdk.ManifestOuterClass.Device> enabledDevices_;
     /**
      * <pre>
@@ -646,6 +645,7 @@ public final class ManifestOuterClass {
     }
 
     public static final int GSERVICES_OVERRIDES_FIELD_NUMBER = 6;
+    @SuppressWarnings("serial")
     private java.util.List<wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride> gservicesOverrides_;
     /**
      * <pre>
@@ -931,6 +931,7 @@ public final class ManifestOuterClass {
      * description of the current SDK, including but not limited to, the version,
      * installing apks and their details, required gservices overrides and supported
      * devices.
+     *
      * The proto serialization is read by Android Studio.
      * </pre>
      *
@@ -966,21 +967,19 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         versionCode_ = 0;
-
         versionName_ = "";
-
         if (apksBuilder_ == null) {
           apks_ = java.util.Collections.emptyList();
         } else {
           apks_ = null;
           apksBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000001);
-        if (libraryCompatibilityBuilder_ == null) {
-          libraryCompatibility_ = null;
-        } else {
-          libraryCompatibility_ = null;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        libraryCompatibility_ = null;
+        if (libraryCompatibilityBuilder_ != null) {
+          libraryCompatibilityBuilder_.dispose();
           libraryCompatibilityBuilder_ = null;
         }
         if (enabledDevicesBuilder_ == null) {
@@ -989,14 +988,14 @@ public final class ManifestOuterClass {
           enabledDevices_ = null;
           enabledDevicesBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000010);
         if (gservicesOverridesBuilder_ == null) {
           gservicesOverrides_ = java.util.Collections.emptyList();
         } else {
           gservicesOverrides_ = null;
           gservicesOverridesBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000020);
         return this;
       }
 
@@ -1023,77 +1022,57 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public wireless.android.instantapps.sdk.ManifestOuterClass.Manifest buildPartial() {
         wireless.android.instantapps.sdk.ManifestOuterClass.Manifest result = new wireless.android.instantapps.sdk.ManifestOuterClass.Manifest(this);
-        int from_bitField0_ = bitField0_;
-        result.versionCode_ = versionCode_;
-        result.versionName_ = versionName_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(wireless.android.instantapps.sdk.ManifestOuterClass.Manifest result) {
         if (apksBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0)) {
+          if (((bitField0_ & 0x00000004) != 0)) {
             apks_ = java.util.Collections.unmodifiableList(apks_);
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000004);
           }
           result.apks_ = apks_;
         } else {
           result.apks_ = apksBuilder_.build();
         }
-        if (libraryCompatibilityBuilder_ == null) {
-          result.libraryCompatibility_ = libraryCompatibility_;
-        } else {
-          result.libraryCompatibility_ = libraryCompatibilityBuilder_.build();
-        }
         if (enabledDevicesBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) != 0)) {
+          if (((bitField0_ & 0x00000010) != 0)) {
             enabledDevices_ = java.util.Collections.unmodifiableList(enabledDevices_);
-            bitField0_ = (bitField0_ & ~0x00000002);
+            bitField0_ = (bitField0_ & ~0x00000010);
           }
           result.enabledDevices_ = enabledDevices_;
         } else {
           result.enabledDevices_ = enabledDevicesBuilder_.build();
         }
         if (gservicesOverridesBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) != 0)) {
+          if (((bitField0_ & 0x00000020) != 0)) {
             gservicesOverrides_ = java.util.Collections.unmodifiableList(gservicesOverrides_);
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000020);
           }
           result.gservicesOverrides_ = gservicesOverrides_;
         } else {
           result.gservicesOverrides_ = gservicesOverridesBuilder_.build();
         }
-        onBuilt();
-        return result;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
+      private void buildPartial0(wireless.android.instantapps.sdk.ManifestOuterClass.Manifest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.versionCode_ = versionCode_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.versionName_ = versionName_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.libraryCompatibility_ = libraryCompatibilityBuilder_ == null
+              ? libraryCompatibility_
+              : libraryCompatibilityBuilder_.build();
+        }
       }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof wireless.android.instantapps.sdk.ManifestOuterClass.Manifest) {
@@ -1111,13 +1090,14 @@ public final class ManifestOuterClass {
         }
         if (!other.getVersionName().isEmpty()) {
           versionName_ = other.versionName_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         if (apksBuilder_ == null) {
           if (!other.apks_.isEmpty()) {
             if (apks_.isEmpty()) {
               apks_ = other.apks_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000004);
             } else {
               ensureApksIsMutable();
               apks_.addAll(other.apks_);
@@ -1130,7 +1110,7 @@ public final class ManifestOuterClass {
               apksBuilder_.dispose();
               apksBuilder_ = null;
               apks_ = other.apks_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000004);
               apksBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getApksFieldBuilder() : null;
@@ -1146,7 +1126,7 @@ public final class ManifestOuterClass {
           if (!other.enabledDevices_.isEmpty()) {
             if (enabledDevices_.isEmpty()) {
               enabledDevices_ = other.enabledDevices_;
-              bitField0_ = (bitField0_ & ~0x00000002);
+              bitField0_ = (bitField0_ & ~0x00000010);
             } else {
               ensureEnabledDevicesIsMutable();
               enabledDevices_.addAll(other.enabledDevices_);
@@ -1159,7 +1139,7 @@ public final class ManifestOuterClass {
               enabledDevicesBuilder_.dispose();
               enabledDevicesBuilder_ = null;
               enabledDevices_ = other.enabledDevices_;
-              bitField0_ = (bitField0_ & ~0x00000002);
+              bitField0_ = (bitField0_ & ~0x00000010);
               enabledDevicesBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getEnabledDevicesFieldBuilder() : null;
@@ -1172,7 +1152,7 @@ public final class ManifestOuterClass {
           if (!other.gservicesOverrides_.isEmpty()) {
             if (gservicesOverrides_.isEmpty()) {
               gservicesOverrides_ = other.gservicesOverrides_;
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000020);
             } else {
               ensureGservicesOverridesIsMutable();
               gservicesOverrides_.addAll(other.gservicesOverrides_);
@@ -1185,7 +1165,7 @@ public final class ManifestOuterClass {
               gservicesOverridesBuilder_.dispose();
               gservicesOverridesBuilder_ = null;
               gservicesOverrides_ = other.gservicesOverrides_;
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000020);
               gservicesOverridesBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getGservicesOverridesFieldBuilder() : null;
@@ -1222,12 +1202,12 @@ public final class ManifestOuterClass {
                 break;
               case 8: {
                 versionCode_ = input.readInt32();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
                 versionName_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
@@ -1247,7 +1227,7 @@ public final class ManifestOuterClass {
                 input.readMessage(
                     getLibraryCompatibilityFieldBuilder().getBuilder(),
                     extensionRegistry);
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 34
               case 42: {
@@ -1316,8 +1296,9 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder setVersionCode(int value) {
-        
+
         versionCode_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -1330,7 +1311,7 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearVersionCode() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         versionCode_ = 0;
         onChanged();
         return this;
@@ -1389,11 +1370,9 @@ public final class ManifestOuterClass {
        */
       public Builder setVersionName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         versionName_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -1406,8 +1385,8 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearVersionName() {
-        
         versionName_ = getDefaultInstance().getVersionName();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -1422,12 +1401,10 @@ public final class ManifestOuterClass {
        */
       public Builder setVersionNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         versionName_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -1435,9 +1412,9 @@ public final class ManifestOuterClass {
       private java.util.List<wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo> apks_ =
         java.util.Collections.emptyList();
       private void ensureApksIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!((bitField0_ & 0x00000004) != 0)) {
           apks_ = new java.util.ArrayList<wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo>(apks_);
-          bitField0_ |= 0x00000001;
+          bitField0_ |= 0x00000004;
          }
       }
 
@@ -1631,7 +1608,7 @@ public final class ManifestOuterClass {
       public Builder clearApks() {
         if (apksBuilder_ == null) {
           apks_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000004);
           onChanged();
         } else {
           apksBuilder_.clear();
@@ -1736,7 +1713,7 @@ public final class ManifestOuterClass {
           apksBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo, wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo.Builder, wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfoOrBuilder>(
                   apks_,
-                  ((bitField0_ & 0x00000001) != 0),
+                  ((bitField0_ & 0x00000004) != 0),
                   getParentForChildren(),
                   isClean());
           apks_ = null;
@@ -1756,7 +1733,7 @@ public final class ManifestOuterClass {
        * @return Whether the libraryCompatibility field is set.
        */
       public boolean hasLibraryCompatibility() {
-        return libraryCompatibilityBuilder_ != null || libraryCompatibility_ != null;
+        return ((bitField0_ & 0x00000008) != 0);
       }
       /**
        * <pre>
@@ -1786,11 +1763,11 @@ public final class ManifestOuterClass {
             throw new NullPointerException();
           }
           libraryCompatibility_ = value;
-          onChanged();
         } else {
           libraryCompatibilityBuilder_.setMessage(value);
         }
-
+        bitField0_ |= 0x00000008;
+        onChanged();
         return this;
       }
       /**
@@ -1804,11 +1781,11 @@ public final class ManifestOuterClass {
           wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility.Builder builderForValue) {
         if (libraryCompatibilityBuilder_ == null) {
           libraryCompatibility_ = builderForValue.build();
-          onChanged();
         } else {
           libraryCompatibilityBuilder_.setMessage(builderForValue.build());
         }
-
+        bitField0_ |= 0x00000008;
+        onChanged();
         return this;
       }
       /**
@@ -1820,17 +1797,18 @@ public final class ManifestOuterClass {
        */
       public Builder mergeLibraryCompatibility(wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility value) {
         if (libraryCompatibilityBuilder_ == null) {
-          if (libraryCompatibility_ != null) {
-            libraryCompatibility_ =
-              wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility.newBuilder(libraryCompatibility_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000008) != 0) &&
+            libraryCompatibility_ != null &&
+            libraryCompatibility_ != wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility.getDefaultInstance()) {
+            getLibraryCompatibilityBuilder().mergeFrom(value);
           } else {
             libraryCompatibility_ = value;
           }
-          onChanged();
         } else {
           libraryCompatibilityBuilder_.mergeFrom(value);
         }
-
+        bitField0_ |= 0x00000008;
+        onChanged();
         return this;
       }
       /**
@@ -1841,14 +1819,13 @@ public final class ManifestOuterClass {
        * <code>.wireless.android.instantapps.sdk.LibraryCompatibility library_compatibility = 4;</code>
        */
       public Builder clearLibraryCompatibility() {
-        if (libraryCompatibilityBuilder_ == null) {
-          libraryCompatibility_ = null;
-          onChanged();
-        } else {
-          libraryCompatibility_ = null;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        libraryCompatibility_ = null;
+        if (libraryCompatibilityBuilder_ != null) {
+          libraryCompatibilityBuilder_.dispose();
           libraryCompatibilityBuilder_ = null;
         }
-
+        onChanged();
         return this;
       }
       /**
@@ -1859,7 +1836,7 @@ public final class ManifestOuterClass {
        * <code>.wireless.android.instantapps.sdk.LibraryCompatibility library_compatibility = 4;</code>
        */
       public wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility.Builder getLibraryCompatibilityBuilder() {
-        
+        bitField0_ |= 0x00000008;
         onChanged();
         return getLibraryCompatibilityFieldBuilder().getBuilder();
       }
@@ -1902,9 +1879,9 @@ public final class ManifestOuterClass {
       private java.util.List<wireless.android.instantapps.sdk.ManifestOuterClass.Device> enabledDevices_ =
         java.util.Collections.emptyList();
       private void ensureEnabledDevicesIsMutable() {
-        if (!((bitField0_ & 0x00000002) != 0)) {
+        if (!((bitField0_ & 0x00000010) != 0)) {
           enabledDevices_ = new java.util.ArrayList<wireless.android.instantapps.sdk.ManifestOuterClass.Device>(enabledDevices_);
-          bitField0_ |= 0x00000002;
+          bitField0_ |= 0x00000010;
          }
       }
 
@@ -2098,7 +2075,7 @@ public final class ManifestOuterClass {
       public Builder clearEnabledDevices() {
         if (enabledDevicesBuilder_ == null) {
           enabledDevices_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000010);
           onChanged();
         } else {
           enabledDevicesBuilder_.clear();
@@ -2203,7 +2180,7 @@ public final class ManifestOuterClass {
           enabledDevicesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               wireless.android.instantapps.sdk.ManifestOuterClass.Device, wireless.android.instantapps.sdk.ManifestOuterClass.Device.Builder, wireless.android.instantapps.sdk.ManifestOuterClass.DeviceOrBuilder>(
                   enabledDevices_,
-                  ((bitField0_ & 0x00000002) != 0),
+                  ((bitField0_ & 0x00000010) != 0),
                   getParentForChildren(),
                   isClean());
           enabledDevices_ = null;
@@ -2214,9 +2191,9 @@ public final class ManifestOuterClass {
       private java.util.List<wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride> gservicesOverrides_ =
         java.util.Collections.emptyList();
       private void ensureGservicesOverridesIsMutable() {
-        if (!((bitField0_ & 0x00000004) != 0)) {
+        if (!((bitField0_ & 0x00000020) != 0)) {
           gservicesOverrides_ = new java.util.ArrayList<wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride>(gservicesOverrides_);
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000020;
          }
       }
 
@@ -2410,7 +2387,7 @@ public final class ManifestOuterClass {
       public Builder clearGservicesOverrides() {
         if (gservicesOverridesBuilder_ == null) {
           gservicesOverrides_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000020);
           onChanged();
         } else {
           gservicesOverridesBuilder_.clear();
@@ -2515,7 +2492,7 @@ public final class ManifestOuterClass {
           gservicesOverridesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride, wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride.Builder, wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverrideOrBuilder>(
                   gservicesOverrides_,
-                  ((bitField0_ & 0x00000004) != 0),
+                  ((bitField0_ & 0x00000020) != 0),
                   getParentForChildren(),
                   isClean());
           gservicesOverrides_ = null;
@@ -2731,11 +2708,6 @@ public final class ManifestOuterClass {
       return new Device();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return wireless.android.instantapps.sdk.ManifestOuterClass.internal_static_wireless_android_instantapps_sdk_Device_descriptor;
@@ -2750,7 +2722,8 @@ public final class ManifestOuterClass {
     }
 
     public static final int MANUFACTURER_FIELD_NUMBER = 1;
-    private volatile java.lang.Object manufacturer_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object manufacturer_ = "";
     /**
      * <pre>
      * ro.product.manufacturer.
@@ -2796,7 +2769,8 @@ public final class ManifestOuterClass {
     }
 
     public static final int ANDROID_DEVICE_FIELD_NUMBER = 2;
-    private volatile java.lang.Object androidDevice_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object androidDevice_ = "";
     /**
      * <pre>
      * ro.product.device
@@ -2842,6 +2816,7 @@ public final class ManifestOuterClass {
     }
 
     public static final int SDK_INT_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
     private com.google.protobuf.Internal.IntList sdkInt_;
     /**
      * <pre>
@@ -2882,7 +2857,8 @@ public final class ManifestOuterClass {
     private int sdkIntMemoizedSerializedSize = -1;
 
     public static final int PRODUCT_FIELD_NUMBER = 4;
-    private volatile java.lang.Object product_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object product_ = "";
     /**
      * <pre>
      * ro.product.name
@@ -2928,7 +2904,8 @@ public final class ManifestOuterClass {
     }
 
     public static final int HARDWARE_FIELD_NUMBER = 5;
-    private volatile java.lang.Object hardware_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object hardware_ = "";
     /**
      * <pre>
      * ro.hardware
@@ -3223,16 +3200,12 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         manufacturer_ = "";
-
         androidDevice_ = "";
-
         sdkInt_ = emptyIntList();
-        bitField0_ = (bitField0_ & ~0x00000001);
         product_ = "";
-
         hardware_ = "";
-
         return this;
       }
 
@@ -3259,52 +3232,36 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public wireless.android.instantapps.sdk.ManifestOuterClass.Device buildPartial() {
         wireless.android.instantapps.sdk.ManifestOuterClass.Device result = new wireless.android.instantapps.sdk.ManifestOuterClass.Device(this);
-        int from_bitField0_ = bitField0_;
-        result.manufacturer_ = manufacturer_;
-        result.androidDevice_ = androidDevice_;
-        if (((bitField0_ & 0x00000001) != 0)) {
-          sdkInt_.makeImmutable();
-          bitField0_ = (bitField0_ & ~0x00000001);
-        }
-        result.sdkInt_ = sdkInt_;
-        result.product_ = product_;
-        result.hardware_ = hardware_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
+      private void buildPartialRepeatedFields(wireless.android.instantapps.sdk.ManifestOuterClass.Device result) {
+        if (((bitField0_ & 0x00000004) != 0)) {
+          sdkInt_.makeImmutable();
+          bitField0_ = (bitField0_ & ~0x00000004);
+        }
+        result.sdkInt_ = sdkInt_;
       }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
+
+      private void buildPartial0(wireless.android.instantapps.sdk.ManifestOuterClass.Device result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.manufacturer_ = manufacturer_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.androidDevice_ = androidDevice_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.product_ = product_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.hardware_ = hardware_;
+        }
       }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof wireless.android.instantapps.sdk.ManifestOuterClass.Device) {
@@ -3319,16 +3276,18 @@ public final class ManifestOuterClass {
         if (other == wireless.android.instantapps.sdk.ManifestOuterClass.Device.getDefaultInstance()) return this;
         if (!other.getManufacturer().isEmpty()) {
           manufacturer_ = other.manufacturer_;
+          bitField0_ |= 0x00000001;
           onChanged();
         }
         if (!other.getAndroidDevice().isEmpty()) {
           androidDevice_ = other.androidDevice_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         if (!other.sdkInt_.isEmpty()) {
           if (sdkInt_.isEmpty()) {
             sdkInt_ = other.sdkInt_;
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000004);
           } else {
             ensureSdkIntIsMutable();
             sdkInt_.addAll(other.sdkInt_);
@@ -3337,10 +3296,12 @@ public final class ManifestOuterClass {
         }
         if (!other.getProduct().isEmpty()) {
           product_ = other.product_;
+          bitField0_ |= 0x00000008;
           onChanged();
         }
         if (!other.getHardware().isEmpty()) {
           hardware_ = other.hardware_;
+          bitField0_ |= 0x00000010;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -3371,12 +3332,12 @@ public final class ManifestOuterClass {
                 break;
               case 10: {
                 manufacturer_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 18: {
                 androidDevice_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 24: {
@@ -3397,12 +3358,12 @@ public final class ManifestOuterClass {
               } // case 26
               case 34: {
                 product_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 34
               case 42: {
                 hardware_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000010;
                 break;
               } // case 42
               default: {
@@ -3475,11 +3436,9 @@ public final class ManifestOuterClass {
        */
       public Builder setManufacturer(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         manufacturer_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -3492,8 +3451,8 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearManufacturer() {
-        
         manufacturer_ = getDefaultInstance().getManufacturer();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -3508,12 +3467,10 @@ public final class ManifestOuterClass {
        */
       public Builder setManufacturerBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         manufacturer_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -3571,11 +3528,9 @@ public final class ManifestOuterClass {
        */
       public Builder setAndroidDevice(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         androidDevice_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -3588,8 +3543,8 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearAndroidDevice() {
-        
         androidDevice_ = getDefaultInstance().getAndroidDevice();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -3604,22 +3559,20 @@ public final class ManifestOuterClass {
        */
       public Builder setAndroidDeviceBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         androidDevice_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
 
       private com.google.protobuf.Internal.IntList sdkInt_ = emptyIntList();
       private void ensureSdkIntIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!((bitField0_ & 0x00000004) != 0)) {
           sdkInt_ = mutableCopy(sdkInt_);
-          bitField0_ |= 0x00000001;
-         }
+          bitField0_ |= 0x00000004;
+        }
       }
       /**
        * <pre>
@@ -3631,7 +3584,7 @@ public final class ManifestOuterClass {
        */
       public java.util.List<java.lang.Integer>
           getSdkIntList() {
-        return ((bitField0_ & 0x00000001) != 0) ?
+        return ((bitField0_ & 0x00000004) != 0) ?
                  java.util.Collections.unmodifiableList(sdkInt_) : sdkInt_;
       }
       /**
@@ -3669,6 +3622,7 @@ public final class ManifestOuterClass {
        */
       public Builder setSdkInt(
           int index, int value) {
+
         ensureSdkIntIsMutable();
         sdkInt_.setInt(index, value);
         onChanged();
@@ -3684,6 +3638,7 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder addSdkInt(int value) {
+
         ensureSdkIntIsMutable();
         sdkInt_.addInt(value);
         onChanged();
@@ -3716,7 +3671,7 @@ public final class ManifestOuterClass {
        */
       public Builder clearSdkInt() {
         sdkInt_ = emptyIntList();
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -3774,11 +3729,9 @@ public final class ManifestOuterClass {
        */
       public Builder setProduct(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         product_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -3791,8 +3744,8 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearProduct() {
-        
         product_ = getDefaultInstance().getProduct();
+        bitField0_ = (bitField0_ & ~0x00000008);
         onChanged();
         return this;
       }
@@ -3807,12 +3760,10 @@ public final class ManifestOuterClass {
        */
       public Builder setProductBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         product_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -3870,11 +3821,9 @@ public final class ManifestOuterClass {
        */
       public Builder setHardware(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         hardware_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -3887,8 +3836,8 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearHardware() {
-        
         hardware_ = getDefaultInstance().getHardware();
+        bitField0_ = (bitField0_ & ~0x00000010);
         onChanged();
         return this;
       }
@@ -3903,12 +3852,10 @@ public final class ManifestOuterClass {
        */
       public Builder setHardwareBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         hardware_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -4093,11 +4040,6 @@ public final class ManifestOuterClass {
       return new GservicesOverride();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return wireless.android.instantapps.sdk.ManifestOuterClass.internal_static_wireless_android_instantapps_sdk_GservicesOverride_descriptor;
@@ -4112,6 +4054,7 @@ public final class ManifestOuterClass {
     }
 
     public static final int DEVICE_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<wireless.android.instantapps.sdk.ManifestOuterClass.Device> device_;
     /**
      * <pre>
@@ -4172,7 +4115,8 @@ public final class ManifestOuterClass {
     }
 
     public static final int KEY_FIELD_NUMBER = 2;
-    private volatile java.lang.Object key_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object key_ = "";
     /**
      * <pre>
      * Overriding key.
@@ -4218,7 +4162,8 @@ public final class ManifestOuterClass {
     }
 
     public static final int VALUE_FIELD_NUMBER = 3;
-    private volatile java.lang.Object value_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object value_ = "";
     /**
      * <pre>
      * Value to be set.
@@ -4477,6 +4422,7 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (deviceBuilder_ == null) {
           device_ = java.util.Collections.emptyList();
         } else {
@@ -4485,9 +4431,7 @@ public final class ManifestOuterClass {
         }
         bitField0_ = (bitField0_ & ~0x00000001);
         key_ = "";
-
         value_ = "";
-
         return this;
       }
 
@@ -4514,7 +4458,13 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride buildPartial() {
         wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride result = new wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride result) {
         if (deviceBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             device_ = java.util.Collections.unmodifiableList(device_);
@@ -4524,44 +4474,18 @@ public final class ManifestOuterClass {
         } else {
           result.device_ = deviceBuilder_.build();
         }
-        result.key_ = key_;
-        result.value_ = value_;
-        onBuilt();
-        return result;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
+      private void buildPartial0(wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.key_ = key_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.value_ = value_;
+        }
       }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride) {
@@ -4602,10 +4526,12 @@ public final class ManifestOuterClass {
         }
         if (!other.getKey().isEmpty()) {
           key_ = other.key_;
+          bitField0_ |= 0x00000002;
           onChanged();
         }
         if (!other.getValue().isEmpty()) {
           value_ = other.value_;
+          bitField0_ |= 0x00000004;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -4649,12 +4575,12 @@ public final class ManifestOuterClass {
               } // case 10
               case 18: {
                 key_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 18
               case 26: {
                 value_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               default: {
@@ -5039,11 +4965,9 @@ public final class ManifestOuterClass {
        */
       public Builder setKey(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         key_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -5056,8 +4980,8 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearKey() {
-        
         key_ = getDefaultInstance().getKey();
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -5072,12 +4996,10 @@ public final class ManifestOuterClass {
        */
       public Builder setKeyBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         key_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -5135,11 +5057,9 @@ public final class ManifestOuterClass {
        */
       public Builder setValue(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         value_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -5152,8 +5072,8 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearValue() {
-        
         value_ = getDefaultInstance().getValue();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -5168,12 +5088,10 @@ public final class ManifestOuterClass {
        */
       public Builder setValueBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         value_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -5327,11 +5245,6 @@ public final class ManifestOuterClass {
       return new LibraryCompatibility();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return wireless.android.instantapps.sdk.ManifestOuterClass.internal_static_wireless_android_instantapps_sdk_LibraryCompatibility_descriptor;
@@ -5346,7 +5259,7 @@ public final class ManifestOuterClass {
     }
 
     public static final int AIA_COMPAT_API_MIN_VERSION_FIELD_NUMBER = 1;
-    private int aiaCompatApiMinVersion_;
+    private int aiaCompatApiMinVersion_ = 0;
     /**
      * <pre>
      * Matches the one in AndroidManifest.xml of InstantApps API.
@@ -5361,6 +5274,7 @@ public final class ManifestOuterClass {
     }
 
     public static final int GCORE_COMPAT_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
     private java.util.List<wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility> gcoreCompat_;
     /**
      * <pre>
@@ -5626,15 +5540,15 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         aiaCompatApiMinVersion_ = 0;
-
         if (gcoreCompatBuilder_ == null) {
           gcoreCompat_ = java.util.Collections.emptyList();
         } else {
           gcoreCompat_ = null;
           gcoreCompatBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -5661,53 +5575,31 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility buildPartial() {
         wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility result = new wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility(this);
-        int from_bitField0_ = bitField0_;
-        result.aiaCompatApiMinVersion_ = aiaCompatApiMinVersion_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility result) {
         if (gcoreCompatBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0)) {
+          if (((bitField0_ & 0x00000002) != 0)) {
             gcoreCompat_ = java.util.Collections.unmodifiableList(gcoreCompat_);
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000002);
           }
           result.gcoreCompat_ = gcoreCompat_;
         } else {
           result.gcoreCompat_ = gcoreCompatBuilder_.build();
         }
-        onBuilt();
-        return result;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
+      private void buildPartial0(wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.aiaCompatApiMinVersion_ = aiaCompatApiMinVersion_;
+        }
       }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility) {
@@ -5727,7 +5619,7 @@ public final class ManifestOuterClass {
           if (!other.gcoreCompat_.isEmpty()) {
             if (gcoreCompat_.isEmpty()) {
               gcoreCompat_ = other.gcoreCompat_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000002);
             } else {
               ensureGcoreCompatIsMutable();
               gcoreCompat_.addAll(other.gcoreCompat_);
@@ -5740,7 +5632,7 @@ public final class ManifestOuterClass {
               gcoreCompatBuilder_.dispose();
               gcoreCompatBuilder_ = null;
               gcoreCompat_ = other.gcoreCompat_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000002);
               gcoreCompatBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getGcoreCompatFieldBuilder() : null;
@@ -5777,7 +5669,7 @@ public final class ManifestOuterClass {
                 break;
               case 8: {
                 aiaCompatApiMinVersion_ = input.readInt32();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 8
               case 18: {
@@ -5833,8 +5725,9 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder setAiaCompatApiMinVersion(int value) {
-        
+
         aiaCompatApiMinVersion_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -5847,7 +5740,7 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearAiaCompatApiMinVersion() {
-        
+        bitField0_ = (bitField0_ & ~0x00000001);
         aiaCompatApiMinVersion_ = 0;
         onChanged();
         return this;
@@ -5856,9 +5749,9 @@ public final class ManifestOuterClass {
       private java.util.List<wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility> gcoreCompat_ =
         java.util.Collections.emptyList();
       private void ensureGcoreCompatIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!((bitField0_ & 0x00000002) != 0)) {
           gcoreCompat_ = new java.util.ArrayList<wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility>(gcoreCompat_);
-          bitField0_ |= 0x00000001;
+          bitField0_ |= 0x00000002;
          }
       }
 
@@ -6052,7 +5945,7 @@ public final class ManifestOuterClass {
       public Builder clearGcoreCompat() {
         if (gcoreCompatBuilder_ == null) {
           gcoreCompat_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000002);
           onChanged();
         } else {
           gcoreCompatBuilder_.clear();
@@ -6157,7 +6050,7 @@ public final class ManifestOuterClass {
           gcoreCompatBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility, wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility.Builder, wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibilityOrBuilder>(
                   gcoreCompat_,
-                  ((bitField0_ & 0x00000001) != 0),
+                  ((bitField0_ & 0x00000002) != 0),
                   getParentForChildren(),
                   isClean());
           gcoreCompat_ = null;
@@ -6293,11 +6186,6 @@ public final class ManifestOuterClass {
       return new GcoreLibraryCompatibility();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return wireless.android.instantapps.sdk.ManifestOuterClass.internal_static_wireless_android_instantapps_sdk_GcoreLibraryCompatibility_descriptor;
@@ -6312,7 +6200,8 @@ public final class ManifestOuterClass {
     }
 
     public static final int NAME_FIELD_NUMBER = 1;
-    private volatile java.lang.Object name_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object name_ = "";
     /**
      * <pre>
      * GmsCore API module name. Should be a substring of the description
@@ -6360,7 +6249,7 @@ public final class ManifestOuterClass {
     }
 
     public static final int MINIMUM_VERSION_FIELD_NUMBER = 2;
-    private int minimumVersion_;
+    private int minimumVersion_ = 0;
     /**
      * <pre>
      * GmsCore version code, where this API is supported.
@@ -6578,10 +6467,9 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         name_ = "";
-
         minimumVersion_ = 0;
-
         return this;
       }
 
@@ -6608,44 +6496,21 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility buildPartial() {
         wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility result = new wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility(this);
-        result.name_ = name_;
-        result.minimumVersion_ = minimumVersion_;
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
+      private void buildPartial0(wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.name_ = name_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.minimumVersion_ = minimumVersion_;
+        }
       }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility) {
@@ -6660,6 +6525,7 @@ public final class ManifestOuterClass {
         if (other == wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility.getDefaultInstance()) return this;
         if (!other.getName().isEmpty()) {
           name_ = other.name_;
+          bitField0_ |= 0x00000001;
           onChanged();
         }
         if (other.getMinimumVersion() != 0) {
@@ -6693,12 +6559,12 @@ public final class ManifestOuterClass {
                 break;
               case 10: {
                 name_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 16: {
                 minimumVersion_ = input.readInt32();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               default: {
@@ -6716,6 +6582,7 @@ public final class ManifestOuterClass {
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object name_ = "";
       /**
@@ -6773,11 +6640,9 @@ public final class ManifestOuterClass {
        */
       public Builder setName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         name_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -6791,8 +6656,8 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearName() {
-        
         name_ = getDefaultInstance().getName();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -6808,12 +6673,10 @@ public final class ManifestOuterClass {
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         name_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -6845,8 +6708,9 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder setMinimumVersion(int value) {
-        
+
         minimumVersion_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -6861,7 +6725,7 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearMinimumVersion() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         minimumVersion_ = 0;
         onChanged();
         return this;
@@ -7083,11 +6947,6 @@ public final class ManifestOuterClass {
       return new ApkVersionInfo();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return wireless.android.instantapps.sdk.ManifestOuterClass.internal_static_wireless_android_instantapps_sdk_ApkVersionInfo_descriptor;
@@ -7102,7 +6961,8 @@ public final class ManifestOuterClass {
     }
 
     public static final int PATH_FIELD_NUMBER = 1;
-    private volatile java.lang.Object path_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object path_ = "";
     /**
      * <pre>
      * Relative path within the SDK that points to this apk file.
@@ -7148,7 +7008,7 @@ public final class ManifestOuterClass {
     }
 
     public static final int ARCH_FIELD_NUMBER = 2;
-    private int arch_;
+    private int arch_ = 0;
     /**
      * <pre>
      * Supported architecture of this APK
@@ -7169,13 +7029,13 @@ public final class ManifestOuterClass {
      * @return The arch.
      */
     @java.lang.Override public wireless.android.instantapps.sdk.ManifestOuterClass.Arch getArch() {
-      @SuppressWarnings("deprecation")
-      wireless.android.instantapps.sdk.ManifestOuterClass.Arch result = wireless.android.instantapps.sdk.ManifestOuterClass.Arch.valueOf(arch_);
+      wireless.android.instantapps.sdk.ManifestOuterClass.Arch result = wireless.android.instantapps.sdk.ManifestOuterClass.Arch.forNumber(arch_);
       return result == null ? wireless.android.instantapps.sdk.ManifestOuterClass.Arch.UNRECOGNIZED : result;
     }
 
     public static final int PACKAGE_NAME_FIELD_NUMBER = 3;
-    private volatile java.lang.Object packageName_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object packageName_ = "";
     /**
      * <pre>
      * Package name of this apk.
@@ -7221,7 +7081,7 @@ public final class ManifestOuterClass {
     }
 
     public static final int VERSION_CODE_FIELD_NUMBER = 4;
-    private int versionCode_;
+    private int versionCode_ = 0;
     /**
      * <pre>
      * Version code of this apk.
@@ -7236,7 +7096,8 @@ public final class ManifestOuterClass {
     }
 
     public static final int VERSION_NAME_FIELD_NUMBER = 5;
-    private volatile java.lang.Object versionName_;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object versionName_ = "";
     /**
      * <pre>
      * Version name of this apk.
@@ -7282,6 +7143,7 @@ public final class ManifestOuterClass {
     }
 
     public static final int SDK_INT_FIELD_NUMBER = 6;
+    @SuppressWarnings("serial")
     private com.google.protobuf.Internal.IntList sdkInt_;
     /**
      * <pre>
@@ -7581,18 +7443,13 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         path_ = "";
-
         arch_ = 0;
-
         packageName_ = "";
-
         versionCode_ = 0;
-
         versionName_ = "";
-
         sdkInt_ = emptyIntList();
-        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -7619,53 +7476,39 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo buildPartial() {
         wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo result = new wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo(this);
-        int from_bitField0_ = bitField0_;
-        result.path_ = path_;
-        result.arch_ = arch_;
-        result.packageName_ = packageName_;
-        result.versionCode_ = versionCode_;
-        result.versionName_ = versionName_;
-        if (((bitField0_ & 0x00000001) != 0)) {
-          sdkInt_.makeImmutable();
-          bitField0_ = (bitField0_ & ~0x00000001);
-        }
-        result.sdkInt_ = sdkInt_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
         onBuilt();
         return result;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
+      private void buildPartialRepeatedFields(wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo result) {
+        if (((bitField0_ & 0x00000020) != 0)) {
+          sdkInt_.makeImmutable();
+          bitField0_ = (bitField0_ & ~0x00000020);
+        }
+        result.sdkInt_ = sdkInt_;
       }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
+
+      private void buildPartial0(wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.path_ = path_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.arch_ = arch_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.packageName_ = packageName_;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.versionCode_ = versionCode_;
+        }
+        if (((from_bitField0_ & 0x00000010) != 0)) {
+          result.versionName_ = versionName_;
+        }
       }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo) {
@@ -7680,6 +7523,7 @@ public final class ManifestOuterClass {
         if (other == wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo.getDefaultInstance()) return this;
         if (!other.getPath().isEmpty()) {
           path_ = other.path_;
+          bitField0_ |= 0x00000001;
           onChanged();
         }
         if (other.arch_ != 0) {
@@ -7687,6 +7531,7 @@ public final class ManifestOuterClass {
         }
         if (!other.getPackageName().isEmpty()) {
           packageName_ = other.packageName_;
+          bitField0_ |= 0x00000004;
           onChanged();
         }
         if (other.getVersionCode() != 0) {
@@ -7694,12 +7539,13 @@ public final class ManifestOuterClass {
         }
         if (!other.getVersionName().isEmpty()) {
           versionName_ = other.versionName_;
+          bitField0_ |= 0x00000010;
           onChanged();
         }
         if (!other.sdkInt_.isEmpty()) {
           if (sdkInt_.isEmpty()) {
             sdkInt_ = other.sdkInt_;
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000020);
           } else {
             ensureSdkIntIsMutable();
             sdkInt_.addAll(other.sdkInt_);
@@ -7734,27 +7580,27 @@ public final class ManifestOuterClass {
                 break;
               case 10: {
                 path_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000001;
                 break;
               } // case 10
               case 16: {
                 arch_ = input.readEnum();
-
+                bitField0_ |= 0x00000002;
                 break;
               } // case 16
               case 26: {
                 packageName_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000004;
                 break;
               } // case 26
               case 32: {
                 versionCode_ = input.readInt32();
-
+                bitField0_ |= 0x00000008;
                 break;
               } // case 32
               case 42: {
                 versionName_ = input.readStringRequireUtf8();
-
+                bitField0_ |= 0x00000010;
                 break;
               } // case 42
               case 48: {
@@ -7843,11 +7689,9 @@ public final class ManifestOuterClass {
        */
       public Builder setPath(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         path_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -7860,8 +7704,8 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearPath() {
-        
         path_ = getDefaultInstance().getPath();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -7876,12 +7720,10 @@ public final class ManifestOuterClass {
        */
       public Builder setPathBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         path_ = value;
+        bitField0_ |= 0x00000001;
         onChanged();
         return this;
       }
@@ -7908,8 +7750,8 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder setArchValue(int value) {
-        
         arch_ = value;
+        bitField0_ |= 0x00000002;
         onChanged();
         return this;
       }
@@ -7923,8 +7765,7 @@ public final class ManifestOuterClass {
        */
       @java.lang.Override
       public wireless.android.instantapps.sdk.ManifestOuterClass.Arch getArch() {
-        @SuppressWarnings("deprecation")
-        wireless.android.instantapps.sdk.ManifestOuterClass.Arch result = wireless.android.instantapps.sdk.ManifestOuterClass.Arch.valueOf(arch_);
+        wireless.android.instantapps.sdk.ManifestOuterClass.Arch result = wireless.android.instantapps.sdk.ManifestOuterClass.Arch.forNumber(arch_);
         return result == null ? wireless.android.instantapps.sdk.ManifestOuterClass.Arch.UNRECOGNIZED : result;
       }
       /**
@@ -7940,7 +7781,7 @@ public final class ManifestOuterClass {
         if (value == null) {
           throw new NullPointerException();
         }
-        
+        bitField0_ |= 0x00000002;
         arch_ = value.getNumber();
         onChanged();
         return this;
@@ -7954,7 +7795,7 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearArch() {
-        
+        bitField0_ = (bitField0_ & ~0x00000002);
         arch_ = 0;
         onChanged();
         return this;
@@ -8013,11 +7854,9 @@ public final class ManifestOuterClass {
        */
       public Builder setPackageName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         packageName_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -8030,8 +7869,8 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearPackageName() {
-        
         packageName_ = getDefaultInstance().getPackageName();
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
@@ -8046,12 +7885,10 @@ public final class ManifestOuterClass {
        */
       public Builder setPackageNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         packageName_ = value;
+        bitField0_ |= 0x00000004;
         onChanged();
         return this;
       }
@@ -8079,8 +7916,9 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder setVersionCode(int value) {
-        
+
         versionCode_ = value;
+        bitField0_ |= 0x00000008;
         onChanged();
         return this;
       }
@@ -8093,7 +7931,7 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearVersionCode() {
-        
+        bitField0_ = (bitField0_ & ~0x00000008);
         versionCode_ = 0;
         onChanged();
         return this;
@@ -8152,11 +7990,9 @@ public final class ManifestOuterClass {
        */
       public Builder setVersionName(
           java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+        if (value == null) { throw new NullPointerException(); }
         versionName_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
@@ -8169,8 +8005,8 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder clearVersionName() {
-        
         versionName_ = getDefaultInstance().getVersionName();
+        bitField0_ = (bitField0_ & ~0x00000010);
         onChanged();
         return this;
       }
@@ -8185,22 +8021,20 @@ public final class ManifestOuterClass {
        */
       public Builder setVersionNameBytes(
           com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
         versionName_ = value;
+        bitField0_ |= 0x00000010;
         onChanged();
         return this;
       }
 
       private com.google.protobuf.Internal.IntList sdkInt_ = emptyIntList();
       private void ensureSdkIntIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!((bitField0_ & 0x00000020) != 0)) {
           sdkInt_ = mutableCopy(sdkInt_);
-          bitField0_ |= 0x00000001;
-         }
+          bitField0_ |= 0x00000020;
+        }
       }
       /**
        * <pre>
@@ -8212,7 +8046,7 @@ public final class ManifestOuterClass {
        */
       public java.util.List<java.lang.Integer>
           getSdkIntList() {
-        return ((bitField0_ & 0x00000001) != 0) ?
+        return ((bitField0_ & 0x00000020) != 0) ?
                  java.util.Collections.unmodifiableList(sdkInt_) : sdkInt_;
       }
       /**
@@ -8250,6 +8084,7 @@ public final class ManifestOuterClass {
        */
       public Builder setSdkInt(
           int index, int value) {
+
         ensureSdkIntIsMutable();
         sdkInt_.setInt(index, value);
         onChanged();
@@ -8265,6 +8100,7 @@ public final class ManifestOuterClass {
        * @return This builder for chaining.
        */
       public Builder addSdkInt(int value) {
+
         ensureSdkIntIsMutable();
         sdkInt_.addInt(value);
         onChanged();
@@ -8297,7 +8133,7 @@ public final class ManifestOuterClass {
        */
       public Builder clearSdkInt() {
         sdkInt_ = emptyIntList();
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000020);
         onChanged();
         return this;
       }
@@ -8420,11 +8256,6 @@ public final class ManifestOuterClass {
       return new GservicesOverridesList();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return wireless.android.instantapps.sdk.ManifestOuterClass.internal_static_wireless_android_instantapps_sdk_GservicesOverridesList_descriptor;
@@ -8439,6 +8270,7 @@ public final class ManifestOuterClass {
     }
 
     public static final int OVERRIDE_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride> override_;
     /**
      * <code>repeated .wireless.android.instantapps.sdk.GservicesOverride override = 1;</code>
@@ -8672,6 +8504,7 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (overrideBuilder_ == null) {
           override_ = java.util.Collections.emptyList();
         } else {
@@ -8705,7 +8538,13 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverridesList buildPartial() {
         wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverridesList result = new wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverridesList(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverridesList result) {
         if (overrideBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             override_ = java.util.Collections.unmodifiableList(override_);
@@ -8715,42 +8554,12 @@ public final class ManifestOuterClass {
         } else {
           result.override_ = overrideBuilder_.build();
         }
-        onBuilt();
-        return result;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
+      private void buildPartial0(wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverridesList result) {
+        int from_bitField0_ = bitField0_;
       }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverridesList) {
@@ -9203,11 +9012,6 @@ public final class ManifestOuterClass {
       return new EnabledDevicesList();
     }
 
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return wireless.android.instantapps.sdk.ManifestOuterClass.internal_static_wireless_android_instantapps_sdk_EnabledDevicesList_descriptor;
@@ -9222,6 +9026,7 @@ public final class ManifestOuterClass {
     }
 
     public static final int DEVICE_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
     private java.util.List<wireless.android.instantapps.sdk.ManifestOuterClass.Device> device_;
     /**
      * <code>repeated .wireless.android.instantapps.sdk.Device device = 1;</code>
@@ -9455,6 +9260,7 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        bitField0_ = 0;
         if (deviceBuilder_ == null) {
           device_ = java.util.Collections.emptyList();
         } else {
@@ -9488,7 +9294,13 @@ public final class ManifestOuterClass {
       @java.lang.Override
       public wireless.android.instantapps.sdk.ManifestOuterClass.EnabledDevicesList buildPartial() {
         wireless.android.instantapps.sdk.ManifestOuterClass.EnabledDevicesList result = new wireless.android.instantapps.sdk.ManifestOuterClass.EnabledDevicesList(this);
-        int from_bitField0_ = bitField0_;
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(wireless.android.instantapps.sdk.ManifestOuterClass.EnabledDevicesList result) {
         if (deviceBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
             device_ = java.util.Collections.unmodifiableList(device_);
@@ -9498,42 +9310,12 @@ public final class ManifestOuterClass {
         } else {
           result.device_ = deviceBuilder_.build();
         }
-        onBuilt();
-        return result;
       }
 
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
+      private void buildPartial0(wireless.android.instantapps.sdk.ManifestOuterClass.EnabledDevicesList result) {
+        int from_bitField0_ = bitField0_;
       }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof wireless.android.instantapps.sdk.ManifestOuterClass.EnabledDevicesList) {
