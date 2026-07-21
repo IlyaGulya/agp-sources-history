@@ -23,6 +23,7 @@ import static com.android.builder.model.AndroidProject.FD_INTERMEDIATES;
 
 import android.databinding.tool.DataBindingBuilder;
 import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
 import com.android.build.api.transform.QualifiedContent.Scope;
 import com.android.build.gradle.AndroidConfig;
 import com.android.build.gradle.internal.aapt.AaptGeneration;
@@ -46,7 +47,7 @@ import com.android.build.gradle.internal.transforms.InstantRunDependenciesApkBui
 import com.android.build.gradle.internal.transforms.InstantRunSliceSplitApkBuilder;
 import com.android.build.gradle.internal.variant.ApplicationVariantData;
 import com.android.build.gradle.internal.variant.BaseVariantData;
-import com.android.build.gradle.internal.variant.SplitHandlingPolicy;
+import com.android.build.gradle.internal.variant.MultiOutputPolicy;
 import com.android.build.gradle.options.OptionalBooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.builder.core.AndroidBuilder;
@@ -224,10 +225,7 @@ public class ApplicationTaskManager extends TaskManager {
 
         createStripNativeLibraryTask(tasks, variantScope);
 
-        if (variantScope
-                .getSplitScope()
-                .getSplitHandlingPolicy()
-                .equals(SplitHandlingPolicy.RELEASE_21_AND_AFTER_POLICY)) {
+        if (variantScope.getOutputScope().getMultiOutputPolicy().equals(MultiOutputPolicy.SPLITS)) {
             if (extension.getBuildToolsRevision().getMajor() < 21) {
                 throw new RuntimeException(
                         "Pure splits can only be used with buildtools 21 and later");
@@ -245,11 +243,8 @@ public class ApplicationTaskManager extends TaskManager {
                 project.getPath(),
                 variantScope.getFullVariantName(),
                 () -> {
-                    @NonNull
                     AndroidTask<BuildInfoWriterTask> buildInfoWriterTask =
-                            createBuildInfoWriterTask(tasks, variantScope);
-
-                    createInstantRunPackagingTasks(tasks, buildInfoWriterTask, variantScope);
+                            createInstantRunPackagingTasks(tasks, variantScope);
                     createPackagingTask(tasks, variantScope, buildInfoWriterTask);
                 });
 
@@ -259,13 +254,6 @@ public class ApplicationTaskManager extends TaskManager {
                 project.getPath(),
                 variantScope.getFullVariantName(),
                 () -> createLintTasks(tasks, variantScope));
-    }
-
-    @NonNull
-    protected AndroidTask<BuildInfoWriterTask> createBuildInfoWriterTask(
-            @NonNull TaskFactory tasks, VariantScope scope) {
-        return getAndroidTasks().create(tasks,
-                        new BuildInfoWriterTask.ConfigAction(scope, getLogger()));
     }
 
     private void addCompileTask(@NonNull TaskFactory tasks, @NonNull VariantScope variantScope) {
@@ -307,18 +295,21 @@ public class ApplicationTaskManager extends TaskManager {
         createPostCompilationTasks(tasks, variantScope);
     }
 
-    /**
-     * Create tasks related to creating pure split APKs containing sharded dex files.
-     */
-    protected void createInstantRunPackagingTasks(
-            @NonNull TaskFactory tasks,
-            @NonNull AndroidTask<BuildInfoWriterTask> buildInfoGeneratorTask,
-            @NonNull VariantScope variantScope) {
+    /** Create tasks related to creating pure split APKs containing sharded dex files. */
+    @Nullable
+    private AndroidTask<BuildInfoWriterTask> createInstantRunPackagingTasks(
+            @NonNull TaskFactory tasks, @NonNull VariantScope variantScope) {
 
         if (!variantScope.getInstantRunBuildContext().isInInstantRunMode()
                 || variantScope.getInstantRunTaskManager() == null) {
-            return;
+            return null;
         }
+
+        AndroidTask<BuildInfoWriterTask> buildInfoGeneratorTask =
+                getAndroidTasks()
+                        .create(
+                                tasks,
+                                new BuildInfoWriterTask.ConfigAction(variantScope, getLogger()));
 
         variantScope.getInstantRunTaskManager()
                         .configureBuildInfoWriterTask(buildInfoGeneratorTask);
@@ -326,7 +317,7 @@ public class ApplicationTaskManager extends TaskManager {
         InstantRunPatchingPolicy patchingPolicy =
                 variantScope.getInstantRunBuildContext().getPatchingPolicy();
 
-        if (patchingPolicy == InstantRunPatchingPolicy.MULTI_APK) {
+        if (InstantRunPatchingPolicy.useMultiApk(patchingPolicy)) {
 
             PackagingScope packagingScope = new DefaultGradlePackagingScope(variantScope);
 
@@ -343,7 +334,11 @@ public class ApplicationTaskManager extends TaskManager {
                             AaptGeneration.fromProjectOptions(projectOptions),
                             packagingScope.getAaptOptions(),
                             new File(packagingScope.getInstantRunSplitApkOutputFolder(), "dep"),
-                            packagingScope.getInstantRunSupportDir());
+                            packagingScope.getInstantRunSupportDir(),
+                            new File(
+                                    packagingScope.getIncrementalDir(
+                                            "InstantRunDependenciesApkBuilder"),
+                                    "aapt-temp"));
 
             Optional<AndroidTask<TransformTask>> dependenciesApkBuilderTask =
                     variantScope
@@ -367,6 +362,10 @@ public class ApplicationTaskManager extends TaskManager {
                             packagingScope.getAaptOptions(),
                             new File(packagingScope.getInstantRunSplitApkOutputFolder(), "slices"),
                             packagingScope.getInstantRunSupportDir(),
+                            new File(
+                                    packagingScope.getIncrementalDir(
+                                            "InstantRunSliceSplitApkBuilder"),
+                                    "aapt-temp"),
                             globalScope
                                     .getProjectOptions()
                                     .get(OptionalBooleanOption.SERIAL_AAPT2));
@@ -376,6 +375,7 @@ public class ApplicationTaskManager extends TaskManager {
 
             if (transformTaskAndroidTask.isPresent()) {
                 AndroidTask<TransformTask> splitApk = transformTaskAndroidTask.get();
+                splitApk.dependsOn(tasks, getValidateSigningTask(tasks, packagingScope));
                 variantScope.getAssembleTask().dependsOn(tasks, splitApk);
                 buildInfoGeneratorTask
                         .configure(tasks, task -> task.mustRunAfter(splitApk.getName()));
@@ -385,6 +385,7 @@ public class ApplicationTaskManager extends TaskManager {
             // the build-info.xml.
             variantScope.getAssembleTask().dependsOn(tasks, buildInfoGeneratorTask);
         }
+        return buildInfoGeneratorTask;
     }
 
     @Override

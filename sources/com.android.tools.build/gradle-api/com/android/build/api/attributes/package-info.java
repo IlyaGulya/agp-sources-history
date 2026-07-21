@@ -14,9 +14,5 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.dependency;
-
-import org.gradle.api.Named;
-
-/** Type for Product Flavors attributes in Gradle's configuration objects. */
-public interface ProductFlavorAttr extends Named {}
+/** Attributes used in the variant aware dependency management of Gradle. */
+package com.android.build.api.attributes;

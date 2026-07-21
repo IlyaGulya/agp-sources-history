@@ -21,11 +21,12 @@ import com.android.annotations.Nullable;
 import com.android.build.gradle.internal.incremental.DexPackagingPolicy;
 import com.android.build.gradle.internal.incremental.FileType;
 import com.android.build.gradle.internal.incremental.InstantRunPatchingPolicy;
+import com.android.build.gradle.internal.scope.OutputScope;
 import com.android.build.gradle.internal.scope.PackagingScope;
-import com.android.build.gradle.internal.scope.SplitScope;
 import com.android.build.gradle.internal.scope.TaskOutputHolder;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.builder.profile.ProcessProfileWriter;
+import com.android.builder.utils.FileCache;
 import com.google.wireless.android.sdk.stats.GradleBuildProjectMetrics;
 import java.io.File;
 import java.io.IOException;
@@ -103,7 +104,8 @@ public class PackageApplication extends PackageAndroidArtifact {
                 @NonNull FileCollection resourceFiles,
                 @NonNull FileCollection manifests,
                 @NonNull VariantScope.TaskOutputType manifestType,
-                @NonNull SplitScope splitScope,
+                @NonNull OutputScope outputScope,
+                @Nullable FileCache fileCache,
                 @NonNull TaskOutputHolder.TaskOutputType expectedOutputType) {
             super(
                     packagingScope,
@@ -113,7 +115,8 @@ public class PackageApplication extends PackageAndroidArtifact {
                     resourceFiles,
                     manifests,
                     manifestType,
-                    splitScope);
+                    fileCache,
+                    outputScope);
             this.expectedOutputType = expectedOutputType;
         }
 
@@ -153,7 +156,8 @@ public class PackageApplication extends PackageAndroidArtifact {
                 @NonNull FileCollection resourceFiles,
                 @NonNull FileCollection manifests,
                 @NonNull VariantScope.TaskOutputType manifestType,
-                @NonNull SplitScope splitScope) {
+                @Nullable FileCache fileCache,
+                @NonNull OutputScope outputScope) {
             super(
                     scope,
                     outputFile.getParentFile(),
@@ -162,7 +166,8 @@ public class PackageApplication extends PackageAndroidArtifact {
                     resourceFiles,
                     manifests,
                     manifestType,
-                    splitScope);
+                    fileCache,
+                    outputScope);
             mOutputFile = outputFile;
         }
 

@@ -29,8 +29,8 @@ import com.android.build.gradle.internal.dsl.VariantOutputFactory;
 import com.android.build.gradle.internal.pipeline.TransformManager;
 import com.android.build.gradle.internal.scope.AndroidTask;
 import com.android.build.gradle.internal.scope.GlobalScope;
-import com.android.build.gradle.internal.scope.SplitFactory;
-import com.android.build.gradle.internal.scope.SplitScope;
+import com.android.build.gradle.internal.scope.OutputFactory;
+import com.android.build.gradle.internal.scope.OutputScope;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.scope.VariantScopeImpl;
 import com.android.build.gradle.internal.tasks.CheckManifest;
@@ -157,9 +157,9 @@ public abstract class BaseVariantData implements TaskContainer {
      */
     public boolean outputsAreSigned = false;
 
-    @NonNull private final SplitScope splitScope;
+    @NonNull private final OutputScope outputScope;
 
-    @NonNull private final SplitFactory splitFactory;
+    @NonNull private final OutputFactory outputFactory;
     public VariantOutputFactory variantOutputFactory;
 
     public BaseVariantData(
@@ -173,15 +173,15 @@ public abstract class BaseVariantData implements TaskContainer {
         this.taskManager = taskManager;
 
         // eventually, this will require a more open ended comparison.
-        SplitHandlingPolicy splitHandlingPolicy =
+        MultiOutputPolicy multiOutputPolicy =
                 androidConfig.getGeneratePureSplits()
                                 && variantConfiguration.getMinSdkVersionValue() >= 21
-                        ? SplitHandlingPolicy.RELEASE_21_AND_AFTER_POLICY
-                        : SplitHandlingPolicy.PRE_21_POLICY;
+                        ? MultiOutputPolicy.SPLITS
+                        : MultiOutputPolicy.MULTI_APK;
 
         // warn the user in case we are forced to ignore the generatePureSplits flag.
         if (androidConfig.getGeneratePureSplits()
-                && splitHandlingPolicy != SplitHandlingPolicy.RELEASE_21_AND_AFTER_POLICY) {
+                && multiOutputPolicy != MultiOutputPolicy.SPLITS) {
             Logging.getLogger(BaseVariantData.class).warn(
                     String.format("Variant %s, MinSdkVersion %s is too low (<21) "
                                     + "to support pure splits, reverting to full APKs",
@@ -200,10 +200,10 @@ public abstract class BaseVariantData implements TaskContainer {
                                 errorReporter,
                                 recorder),
                         this);
-        splitScope = new SplitScope(splitHandlingPolicy);
-        splitFactory =
-                new SplitFactory(
-                        globalScope.getProjectBaseName(), variantConfiguration, splitScope);
+        outputScope = new OutputScope(multiOutputPolicy);
+        outputFactory =
+                new OutputFactory(
+                        globalScope.getProjectBaseName(), variantConfiguration, outputScope);
 
         taskManager.configureScopeForNdk(scope);
 
@@ -237,13 +237,13 @@ public abstract class BaseVariantData implements TaskContainer {
     }
 
     @NonNull
-    public SplitScope getSplitScope() {
-        return splitScope;
+    public OutputScope getOutputScope() {
+        return outputScope;
     }
 
     @NonNull
-    public SplitFactory getSplitFactory() {
-        return splitFactory;
+    public OutputFactory getOutputFactory() {
+        return outputFactory;
     }
 
     @Override
@@ -455,7 +455,7 @@ public abstract class BaseVariantData implements TaskContainer {
      */
     public void calculateFilters(Splits splits) {
         List<File> folders = Lists.newArrayList(getGeneratedResFolders());
-        folders.addAll(variantConfiguration.getResourceFolders());
+        folders.addAll(variantConfiguration.getSourceFiles(SourceProvider::getResDirectories));
         densityFilters = getFilters(folders, DiscoverableFilterType.DENSITY, splits);
         languageFilters = getFilters(folders, DiscoverableFilterType.LANGUAGE, splits);
         abiFilters = getFilters(folders, DiscoverableFilterType.ABI, splits);
@@ -506,7 +506,8 @@ public abstract class BaseVariantData implements TaskContainer {
     @NonNull
     public List<String> discoverListOfResourceConfigs() {
         List<String> resFoldersOnDisk = new ArrayList<String>();
-        Set<File> resourceFolders = variantConfiguration.getResourceFolders();
+        Set<File> resourceFolders =
+                variantConfiguration.getSourceFiles(SourceProvider::getResDirectories);
         resFoldersOnDisk.addAll(getAllFilters(
                 resourceFolders,
                 DiscoverableFilterType.LANGUAGE.folderPrefix,

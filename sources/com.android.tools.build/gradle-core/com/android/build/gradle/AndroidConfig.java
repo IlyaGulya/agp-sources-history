@@ -23,7 +23,6 @@ import com.android.build.gradle.api.AndroidSourceSet;
 import com.android.build.gradle.api.BaseVariantOutput;
 import com.android.build.gradle.internal.CompileOptions;
 import com.android.build.gradle.internal.coverage.JacocoOptions;
-import com.android.build.gradle.internal.dependency.ProductFlavorAttr;
 import com.android.build.gradle.internal.dsl.AaptOptions;
 import com.android.build.gradle.internal.dsl.AdbOptions;
 import com.android.build.gradle.internal.dsl.CoreBuildType;
@@ -48,7 +47,6 @@ import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
-import org.gradle.api.attributes.Attribute;
 
 /**
  * User configuration settings for all android plugins.
@@ -161,6 +159,12 @@ public interface AndroidConfig {
 
     /** Whether the feature module is the base feature. */
     Boolean getBaseFeature();
+
+    @NonNull
+    Map<String, Map<String, List<String>>> getFlavorAttrMap();
+
+    @NonNull
+    Map<String, List<String>> getBuildTypeAttrMap();
 
     final class DeprecatedConfigurationAction implements Action<Dependency> {
 

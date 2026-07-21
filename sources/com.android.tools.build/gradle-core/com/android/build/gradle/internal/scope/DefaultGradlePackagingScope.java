@@ -23,8 +23,9 @@ import com.android.build.gradle.internal.dsl.DslAdaptersKt;
 import com.android.build.gradle.internal.dsl.PackagingOptions;
 import com.android.build.gradle.internal.incremental.InstantRunBuildContext;
 import com.android.build.gradle.internal.pipeline.StreamFilter;
-import com.android.build.gradle.internal.variant.SplitHandlingPolicy;
+import com.android.build.gradle.internal.variant.MultiOutputPolicy;
 import com.android.build.gradle.internal.variant.TaskContainer;
+import com.android.build.gradle.options.ProjectOptions;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.internal.aapt.AaptOptions;
 import com.android.ide.common.build.ApkData;
@@ -111,8 +112,8 @@ public class DefaultGradlePackagingScope implements PackagingScope {
 
     @NonNull
     @Override
-    public SplitHandlingPolicy getSplitHandlingPolicy() {
-        return mVariantScope.getVariantData().getSplitScope().getSplitHandlingPolicy();
+    public MultiOutputPolicy getMultiOutputPolicy() {
+        return mVariantScope.getVariantData().getOutputScope().getMultiOutputPolicy();
     }
 
     @NonNull
@@ -187,7 +188,7 @@ public class DefaultGradlePackagingScope implements PackagingScope {
     @Override
     public int getVersionCode() {
         // FIX ME : DELETE this API and have everyone use the concept of mainSplit.
-        ApkData mainApkData = mVariantScope.getSplitScope().getMainSplit();
+        ApkData mainApkData = mVariantScope.getOutputScope().getMainSplit();
         if (mainApkData != null) {
             return mainApkData.getVersionCode();
         }
@@ -207,8 +208,13 @@ public class DefaultGradlePackagingScope implements PackagingScope {
     }
 
     @Override
-    public SplitScope getSplitScope() {
-        return mVariantScope.getSplitScope();
+    public ProjectOptions getProjectOptions() {
+        return mGlobalScope.getProjectOptions();
+    }
+
+    @Override
+    public OutputScope getOutputScope() {
+        return mVariantScope.getOutputScope();
     }
 
     // TaskOutputHolder
@@ -251,5 +257,11 @@ public class DefaultGradlePackagingScope implements PackagingScope {
     @Override
     public void addTask(TaskContainer.TaskKind taskKind, Task task) {
         mVariantScope.getVariantData().addTask(taskKind, task);
+    }
+
+    @NonNull
+    @Override
+    public File getInstantRunResourceApkFolder() {
+        return mVariantScope.getInstantRunResourceApkFolder();
     }
 }

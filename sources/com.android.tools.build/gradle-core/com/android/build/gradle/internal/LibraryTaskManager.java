@@ -554,12 +554,12 @@ public class LibraryTaskManager extends TaskManager {
                 variantScope.getMergeAssetsTask().getName());
         bundle.dependsOn(variantScope.getNdkBuildable());
 
-        Preconditions.checkNotNull(variantScope.getSplitScope().getMainSplit());
+        Preconditions.checkNotNull(variantScope.getOutputScope().getMainSplit());
         bundle.setDescription("Assembles a bundle containing the library in " +
                 variantConfig.getFullName() + ".");
         bundle.setDestinationDir(variantScope.getAarLocation());
         bundle.setArchiveNameSupplier(
-                () -> variantScope.getSplitScope().getMainSplit().getOutputFileName());
+                () -> variantScope.getOutputScope().getMainSplit().getOutputFileName());
         bundle.setExtension(BuilderConstants.EXT_LIB_ARCHIVE);
         bundle.from(variantScope.getOutput(TaskOutputType.LIBRARY_MANIFEST));
         bundle.from(variantBundleDir);
@@ -575,7 +575,7 @@ public class LibraryTaskManager extends TaskManager {
                                 new File(
                                         variantScope.getAarLocation(),
                                         variantScope
-                                                .getSplitScope()
+                                                .getOutputScope()
                                                 .getMainSplit()
                                                 .getOutputFileName()),
                 bundle.getName());
@@ -590,8 +590,12 @@ public class LibraryTaskManager extends TaskManager {
             VariantHelper.setupArchivesConfig(
                     project, variantScope.getVariantDependencies().getRuntimeClasspath());
 
-            // add the artifact that will be published
-            project.getArtifacts().add("archives", bundle);
+            // add the artifact that will be published.
+            // it must be default so that it can be found by other library modules during
+            // publishing to a maven repo. Adding it to "archives" only allows the current
+            // module to be published by not to be found by consumer who are themselves published
+            // (leading to their pom not containing dependencies).
+            project.getArtifacts().add("default", bundle);
         }
 
         recorder.record(

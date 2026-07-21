@@ -111,10 +111,18 @@ public interface ProgressIndicator {
      */
     default ProgressIndicator createSubProgress(double max) {
         double start = getFraction();
+        // Unfortunately some dummy indicators always report their fraction as 1. In that case just
+        // return the indicator itself.
+        if (start == 1) {
+            return this;
+        }
+
         double subRange = max - start;
-        // Check that we're at least close to being greater than 0. If we're equal to or less than 0
+        // Check that we're at least close to being a valid value. If we're equal to or less than 0
         // we'll treat it as 0 (that is, sets do nothing and gets just return the 0).
-        assert subRange > -0.0001;
+        if (subRange < -0.0001 || subRange > 1.0001) {
+            logError("Progress subrange out of bounds: " + subRange);
+        }
 
         return new DelegatingProgressIndicator(ProgressIndicator.this) {
             @Override
@@ -127,8 +135,9 @@ public interface ProgressIndicator {
 
             @Override
             public double getFraction() {
-                double result = subRange > 0 ? (super.getFraction() - start) / subRange : 0;
-                return Math.min(1, Math.max(0, result));
+                return Math.min(
+                        1,
+                        Math.max(0, subRange > 0 ? (super.getFraction() - start) / subRange : 0));
             }
         };
     }

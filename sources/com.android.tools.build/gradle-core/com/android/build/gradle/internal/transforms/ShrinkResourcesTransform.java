@@ -16,11 +16,6 @@
 
 package com.android.build.gradle.internal.transforms;
 
-import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.ALL;
-import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.MANIFEST;
-import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.SYMBOL_LIST;
-import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH;
-
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.api.transform.DirectoryInput;
@@ -33,32 +28,24 @@ import com.android.build.api.transform.TransformException;
 import com.android.build.api.transform.TransformInput;
 import com.android.build.api.transform.TransformInvocation;
 import com.android.build.gradle.internal.aapt.AaptGeneration;
-import com.android.build.gradle.internal.aapt.AaptGradleFactory;
 import com.android.build.gradle.internal.core.GradleVariantConfiguration;
 import com.android.build.gradle.internal.dsl.AaptOptions;
-import com.android.build.gradle.internal.dsl.DslAdaptersKt;
 import com.android.build.gradle.internal.pipeline.TransformManager;
 import com.android.build.gradle.internal.scope.BuildOutput;
 import com.android.build.gradle.internal.scope.BuildOutputs;
 import com.android.build.gradle.internal.scope.GlobalScope;
+import com.android.build.gradle.internal.scope.OutputScope;
 import com.android.build.gradle.internal.scope.SplitList;
-import com.android.build.gradle.internal.scope.SplitScope;
 import com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutputType;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.variant.BaseVariantData;
-import com.android.build.gradle.internal.variant.SplitHandlingPolicy;
-import com.android.build.gradle.tasks.ProcessAndroidResources;
+import com.android.build.gradle.internal.variant.MultiOutputPolicy;
 import com.android.build.gradle.tasks.ResourceUsageAnalyzer;
-import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.VariantType;
-import com.android.builder.internal.aapt.Aapt;
-import com.android.builder.internal.aapt.AaptPackageConfig;
-import com.android.builder.utils.FileCache;
 import com.android.ide.common.build.ApkData;
-import com.android.ide.common.process.LoggedProcessOutputHandler;
 import com.android.utils.FileUtils;
 import com.google.common.base.Joiner;
-import com.google.common.base.Verify;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -70,7 +57,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.gradle.api.artifacts.ArtifactCollection;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.api.logging.Logger;
@@ -101,8 +87,6 @@ public class ShrinkResourcesTransform extends Transform {
      */
     @NonNull private final BaseVariantData variantData;
 
-    @NonNull private final AndroidBuilder androidBuilder;
-    @Nullable private final FileCache fileCache;
     @NonNull private final Logger logger;
 
     @NonNull private final File sourceDir;
@@ -116,34 +100,27 @@ public class ShrinkResourcesTransform extends Transform {
     @NonNull private final AaptOptions aaptOptions;
     @NonNull private final VariantType variantType;
     private final boolean isDebuggableBuildType;
-    @NonNull private final SplitHandlingPolicy splitHandlingPolicy;
+    @NonNull private final MultiOutputPolicy multiOutputPolicy;
 
     @NonNull private final File compressedResources;
-
-    @NonNull private final ArtifactCollection symbolFiles;
-    @NonNull private final ArtifactCollection manifests;
-    @Nullable private List<AaptPackageConfig.LibraryInfo> libraryInfoList;
 
     public ShrinkResourcesTransform(
             @NonNull BaseVariantData variantData,
             @NonNull FileCollection uncompressedResources,
             @NonNull File compressedResources,
-            @NonNull AndroidBuilder androidBuilder,
-            @Nullable FileCache fileCache,
             @NonNull AaptGeneration aaptGeneration,
             @NonNull FileCollection splitListInput,
             @NonNull Logger logger) {
-        this.fileCache = fileCache;
         VariantScope variantScope = variantData.getScope();
         GlobalScope globalScope = variantScope.getGlobalScope();
         GradleVariantConfiguration variantConfig = variantData.getVariantConfiguration();
 
         this.variantData = variantData;
-        this.androidBuilder = androidBuilder;
         this.logger = logger;
 
         this.sourceDir = variantScope.getRClassSourceOutputDir();
-        this.resourceDir = variantScope.getResourceShrinkerInputFolder();
+        this.resourceDir =
+                Preconditions.checkNotNull(variantScope.getResourceShrinkerInputFolder());
         this.mappingFileSrc =
                 variantScope.hasOutput(TaskOutputType.APK_MAPPING)
                         ? variantScope.getOutput(TaskOutputType.APK_MAPPING)
@@ -156,12 +133,9 @@ public class ShrinkResourcesTransform extends Transform {
         this.aaptOptions = globalScope.getExtension().getAaptOptions();
         this.variantType = variantData.getType();
         this.isDebuggableBuildType = variantConfig.getBuildType().isDebuggable();
-        this.splitHandlingPolicy = variantData.getSplitScope().getSplitHandlingPolicy();
+        this.multiOutputPolicy = variantData.getOutputScope().getMultiOutputPolicy();
 
         this.compressedResources = compressedResources;
-
-        this.symbolFiles = variantScope.getArtifactCollection(RUNTIME_CLASSPATH, ALL, SYMBOL_LIST);
-        this.manifests = variantScope.getArtifactCollection(RUNTIME_CLASSPATH, ALL, MANIFEST);
     }
 
     @NonNull
@@ -211,9 +185,6 @@ public class ShrinkResourcesTransform extends Transform {
         secondaryFiles.add(SecondaryFile.nonIncremental(uncompressedResources));
         secondaryFiles.add(SecondaryFile.nonIncremental(splitListInput));
 
-        secondaryFiles.add(SecondaryFile.nonIncremental(symbolFiles.getArtifactFiles()));
-        secondaryFiles.add(SecondaryFile.nonIncremental(manifests.getArtifactFiles()));
-
         return secondaryFiles;
     }
 
@@ -239,7 +210,7 @@ public class ShrinkResourcesTransform extends Transform {
                                 aaptOptions.getCruncherProcesses()));
         params.put("variantType", variantType.name());
         params.put("isDebuggableBuildType", isDebuggableBuildType);
-        params.put("splitHandlingPolicy", splitHandlingPolicy);
+        params.put("splitHandlingPolicy", multiOutputPolicy);
 
         return params;
     }
@@ -259,21 +230,17 @@ public class ShrinkResourcesTransform extends Transform {
     public void transform(@NonNull TransformInvocation invocation)
             throws IOException, TransformException, InterruptedException {
 
-        // compute the library info list up front in the normal thread since it's resolving
-        // dependencies and we cannot do this in the executor threads.
-        libraryInfoList = ProcessAndroidResources.computeLibraryInfoList(symbolFiles, manifests);
-
         SplitList splitList = SplitList.load(splitListInput);
         Collection<BuildOutput> uncompressedBuildOutputs = BuildOutputs.load(uncompressedResources);
-        SplitScope splitScope = variantData.getScope().getSplitScope();
-        splitScope.parallelForEachOutput(
+        OutputScope outputScope = variantData.getScope().getOutputScope();
+        outputScope.parallelForEachOutput(
                 uncompressedBuildOutputs,
                 TaskOutputType.PROCESSED_RES,
                 TaskOutputType.SHRUNK_PROCESSED_RES,
                 this::splitAction,
                 invocation,
                 splitList);
-        splitScope.save(TaskOutputType.SHRUNK_PROCESSED_RES, compressedResources);
+        outputScope.save(TaskOutputType.SHRUNK_PROCESSED_RES, compressedResources);
     }
 
     @Nullable
@@ -315,7 +282,7 @@ public class ShrinkResourcesTransform extends Transform {
 
         Collection<BuildOutput> mergedManifests = BuildOutputs.load(this.mergedManifests);
         BuildOutput mergedManifest =
-                SplitScope.getOutput(mergedManifests, TaskOutputType.MERGED_MANIFESTS, apkData);
+                OutputScope.getOutput(mergedManifests, TaskOutputType.MERGED_MANIFESTS, apkData);
         if (mergedManifest == null) {
             try {
                 FileUtils.copyFile(uncompressedResourceFile, compressedResourceFile);
@@ -340,67 +307,8 @@ public class ShrinkResourcesTransform extends Transform {
             analyzer.setDebug(logger.isEnabled(LogLevel.DEBUG));
             analyzer.analyze();
 
-            if (ResourceUsageAnalyzer.TWO_PASS_AAPT) {
-                // This is currently not working; we need support from aapt to be able
-                // to assign a stable set of resources that it should use.
-                File destination =
-                        new File(resourceDir.getParentFile(), resourceDir.getName() + "-stripped");
-                analyzer.removeUnused(destination);
-
-                File sourceOutputs = new File(sourceDir.getParentFile(),
-                        sourceDir.getName() + "-stripped");
-                FileUtils.mkdirs(sourceOutputs);
-
-                // We don't need to emit R files again, but we can do this here such that
-                // we can *verify* that the R classes generated in the second aapt pass
-                // matches those we saw the first time around.
-                //String sourceOutputPath = sourceOutputs?.getAbsolutePath();
-                String sourceOutputPath = null;
-
-                // Repackage the resources:
-                Aapt aapt =
-                        AaptGradleFactory.make(
-                                aaptGeneration,
-                                androidBuilder,
-                                new LoggedProcessOutputHandler(
-                                        new AaptGradleFactory.FilteringLogger(
-                                                androidBuilder.getLogger())),
-                                fileCache,
-                                true,
-                                FileUtils.mkdirs(
-                                        new File(
-                                                invocation.getContext().getTemporaryDir(),
-                                                "temp-aapt")),
-                                variantData
-                                        .getScope()
-                                        .getGlobalScope()
-                                        .getExtension()
-                                        .getAaptOptions()
-                                        .getCruncherProcesses());
-
-                AaptPackageConfig.Builder aaptPackageConfig =
-                        new AaptPackageConfig.Builder()
-                                .setManifestFile(mergedManifest.getOutputFile())
-                                .setOptions(DslAdaptersKt.convert(aaptOptions))
-                                .setResourceOutputApk(destination)
-                                .setLibraries(Verify.verifyNotNull(libraryInfoList))
-                                // FIX ME : this does not seem to have ever worked.
-                                // .setCustomPackageForR(processResourcesTask.getPackageForR())
-                                .setSourceOutputDir(
-                                        sourceOutputPath != null
-                                                ? new File(sourceOutputPath)
-                                                : null)
-                                .setVariantType(variantType)
-                                .setDebuggable(isDebuggableBuildType)
-                                .setResourceConfigs(
-                                        splitList.getFilters(SplitList.RESOURCE_CONFIGS))
-                                .setSplits(SplitList.getSplits(splitList, splitHandlingPolicy));
-
-                androidBuilder.processResources(aapt, aaptPackageConfig);
-            } else {
-                // Just rewrite the .ap_ file to strip out the res/ files for unused resources
-                analyzer.rewriteResourceZip(uncompressedResourceFile, compressedResourceFile);
-            }
+            // Just rewrite the .ap_ file to strip out the res/ files for unused resources
+            analyzer.rewriteResourceZip(uncompressedResourceFile, compressedResourceFile);
 
             // Dump some stats
             int unused = analyzer.getUnusedResourceCount();

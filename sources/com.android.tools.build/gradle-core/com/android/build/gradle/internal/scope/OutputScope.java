@@ -20,7 +20,7 @@ import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.FilterData;
 import com.android.build.OutputFile;
-import com.android.build.gradle.internal.variant.SplitHandlingPolicy;
+import com.android.build.gradle.internal.variant.MultiOutputPolicy;
 import com.android.ide.common.build.ApkData;
 import com.android.ide.common.build.ApkInfo;
 import com.android.ide.common.internal.WaitableExecutor;
@@ -44,44 +44,44 @@ import java.util.stream.Collectors;
 import org.gradle.tooling.BuildException;
 
 /**
- * Information about expected Outputs from a build. Expected outputs can contain :
+ * Information about expected Outputs from a build.
+ *
+ * <p>This will either contain:
  *
  * <ul>
- *   a single main APK
- * </ul>
- *
- * <ul>
- *   multiple FULL_APKs
- * </ul>
- *
- * <ul>
- *   a single main APK with multiple split APKs
+ *   <li>A single main APK
+ *   <li>Multiple full APKs when the {@code multiOutputPolicy} is {@link
+ *       MultiOutputPolicy#MULTI_APK}
+ *   <li>A single main APK with multiple split APKs (when the {@code multiOutputPolicy} is {@link
+ *       MultiOutputPolicy#SPLITS}
  * </ul>
  */
-public class SplitScope implements Serializable {
+public class OutputScope implements Serializable {
 
-    private final SplitHandlingPolicy splitHandlingPolicy;
-    private final List<ApkData> apkDatas;
+    @NonNull private final MultiOutputPolicy multiOutputPolicy;
+    @NonNull private final List<ApkData> apkDatas;
+
+    @NonNull
     private final SetMultimap<VariantScope.OutputType, BuildOutput> splitOutputs =
             Multimaps.synchronizedSetMultimap(HashMultimap.create());
 
-    public SplitScope(SplitHandlingPolicy splitHandlingPolicy) {
-        this.splitHandlingPolicy = splitHandlingPolicy;
+    public OutputScope(@NonNull MultiOutputPolicy multiOutputPolicy) {
+        this.multiOutputPolicy = multiOutputPolicy;
         this.apkDatas = new ArrayList<>();
     }
 
-    public SplitScope(SplitHandlingPolicy splitHandlingPolicy, Collection<ApkData> apkDatas) {
-        this.splitHandlingPolicy = splitHandlingPolicy;
+    public OutputScope(
+            @NonNull MultiOutputPolicy multiOutputPolicy, @NonNull Collection<ApkData> apkDatas) {
+        this.multiOutputPolicy = multiOutputPolicy;
         this.apkDatas = new ArrayList<>(apkDatas);
     }
 
-    public SplitHandlingPolicy getSplitHandlingPolicy() {
-        return splitHandlingPolicy;
+    @NonNull
+    public MultiOutputPolicy getMultiOutputPolicy() {
+        return multiOutputPolicy;
     }
 
-    // TODO : make this method package private again once bazel can handle
-    // package private methods and sandbox testing.
-    public void addSplit(@NonNull ApkData apkData) {
+    void addSplit(@NonNull ApkData apkData) {
         apkDatas.add(apkData);
     }
 
@@ -118,7 +118,7 @@ public class SplitScope implements Serializable {
         Optional<ApkData> universal =
                 getApkDatas()
                         .stream()
-                        .filter(split -> split.getFilterName().equals(SplitFactory.UNIVERSAL))
+                        .filter(split -> split.getFilterName().equals(OutputFactory.UNIVERSAL))
                         .findFirst();
         if (universal.isPresent()) {
             return universal.get();
@@ -336,15 +336,15 @@ public class SplitScope implements Serializable {
         if (!super.equals(o)) {
             return false;
         }
-        SplitScope that = (SplitScope) o;
+        OutputScope that = (OutputScope) o;
         return Objects.equals(splitOutputs, that.splitOutputs)
                 && Objects.equals(apkDatas, that.apkDatas)
-                && splitHandlingPolicy == that.splitHandlingPolicy;
+                && multiOutputPolicy == that.multiOutputPolicy;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), splitOutputs, apkDatas, splitHandlingPolicy);
+        return Objects.hash(super.hashCode(), splitOutputs, apkDatas, multiOutputPolicy);
     }
 
     public void addOutputForSplit(

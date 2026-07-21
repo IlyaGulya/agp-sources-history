@@ -17,14 +17,15 @@
 package com.android.build.gradle.tasks;
 
 import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
 import com.android.build.OutputFile;
 import com.android.build.gradle.internal.aapt.AaptGeneration;
 import com.android.build.gradle.internal.aapt.AaptGradleFactory;
 import com.android.build.gradle.internal.dsl.AaptOptions;
 import com.android.build.gradle.internal.dsl.AbiSplitOptions;
 import com.android.build.gradle.internal.dsl.DslAdaptersKt;
-import com.android.build.gradle.internal.scope.SplitFactory;
-import com.android.build.gradle.internal.scope.SplitScope;
+import com.android.build.gradle.internal.scope.OutputFactory;
+import com.android.build.gradle.internal.scope.OutputScope;
 import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.BaseTask;
@@ -70,11 +71,12 @@ public class GenerateSplitAbiRes extends BaseTask {
     private File outputDirectory;
     private boolean debuggable;
     private AaptOptions aaptOptions;
-    private SplitScope splitScope;
-    private SplitFactory splitFactory;
+    private OutputScope outputScope;
+    private OutputFactory outputFactory;
     private VariantType variantType;
     private VariantScope variantScope;
     private FileCache fileCache;
+    @Nullable private String featureName;
 
     @Input
     public String getApplicationId() {
@@ -122,15 +124,22 @@ public class GenerateSplitAbiRes extends BaseTask {
         return aaptOptions;
     }
 
+    @Input
+    @Optional
+    @Nullable
+    public String getFeatureName() {
+        return featureName;
+    }
+
     @TaskAction
     protected void doFullTaskAction() throws IOException, InterruptedException, ProcessException {
 
-        splitScope.deleteAllEntries(VariantScope.TaskOutputType.ABI_PROCESSED_SPLIT_RES);
+        outputScope.deleteAllEntries(VariantScope.TaskOutputType.ABI_PROCESSED_SPLIT_RES);
         for (String split : getSplits()) {
             File resPackageFile = getOutputFileForSplit(split);
 
             ApkData abiApkData =
-                    splitFactory.addConfigurationSplit(
+                    outputFactory.addConfigurationSplit(
                             OutputFile.FilterType.ABI, split, resPackageFile.getName());
             abiApkData.setVersionCode(variantScope.getVariantConfiguration().getVersionCode());
             abiApkData.setVersionName(variantScope.getVariantConfiguration().getVersionName());
@@ -140,7 +149,19 @@ public class GenerateSplitAbiRes extends BaseTask {
                 variantScope.getVariantData().variantOutputFactory.create(abiApkData);
             }
 
-            File tmpDirectory = new File(outputDirectory, getOutputBaseName());
+            // Split name can only contains 0-9, a-z, A-Z, '.' and '_'.  Replace all other
+            // characters with underscore.
+            CharMatcher charMatcher =
+                    CharMatcher.inRange('0', '9')
+                            .or(CharMatcher.inRange('A', 'Z'))
+                            .or(CharMatcher.inRange('a', 'z'))
+                            .or(CharMatcher.is('_'))
+                            .or(CharMatcher.is('.'))
+                            .negate();
+
+            String abiName = charMatcher.replaceFrom(split, '_');
+
+            File tmpDirectory = new File(outputDirectory, abiName);
             FileUtils.mkdirs(tmpDirectory);
 
             File tmpFile = new File(tmpDirectory, "AndroidManifest.xml");
@@ -152,15 +173,17 @@ public class GenerateSplitAbiRes extends BaseTask {
 
             try (OutputStreamWriter fileWriter =
                          new OutputStreamWriter(new FileOutputStream(tmpFile), "UTF-8")) {
-                // Split name can only contains 0-9, a-z, A-Z, '.' and '_'.  Replace all other
-                // characters with underscore.
-                String splitName = CharMatcher.inRange('0', '9')
-                        .or(CharMatcher.inRange('A', 'Z'))
-                        .or(CharMatcher.inRange('a', 'z'))
-                        .or(CharMatcher.is('_'))
-                        .or(CharMatcher.is('.'))
-                        .negate()
-                        .replaceFrom(split + "_" + getOutputBaseName(), '_');
+
+                String sanitizedFeatureName =
+                        featureName != null ? featureName.replaceAll("[^a-zA-Z0-9-]", "") : null;
+
+                String encodedSplitName =
+                        charMatcher.replaceFrom(
+                                (sanitizedFeatureName != null ? sanitizedFeatureName + "." : "")
+                                        + "config."
+                                        + split,
+                                '_');
+
                 fileWriter.append(
                         "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
                                 + "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n"
@@ -172,9 +195,18 @@ public class GenerateSplitAbiRes extends BaseTask {
                                 + "\"\n"
                                 + "      android:versionName=\""
                                 + versionNameToUse
+                                + "\"\n");
+
+                if (sanitizedFeatureName != null) {
+                    fileWriter.append("      configForSplit=\"" + sanitizedFeatureName + "\"\n");
+                }
+
+                fileWriter.append(
+                        "      split=\""
+                                + encodedSplitName
                                 + "\"\n"
-                                + "      split=\"lib_"
-                                + splitName
+                                + "      targetABI=\""
+                                + abiName
                                 + "\">\n"
                                 + "       <uses-sdk android:minSdkVersion=\"21\"/>\n"
                                 + "</manifest> ");
@@ -208,13 +240,13 @@ public class GenerateSplitAbiRes extends BaseTask {
                     .setVariantType(variantType);
 
             getBuilder().processResources(aapt, aaptConfig);
-            splitScope.addOutputForSplit(
+            outputScope.addOutputForSplit(
                     VariantScope.TaskOutputType.ABI_PROCESSED_SPLIT_RES,
                     abiApkData,
                     resPackageFile);
         }
 
-        splitScope.save(VariantScope.TaskOutputType.ABI_PROCESSED_SPLIT_RES, outputDirectory);
+        outputScope.save(VariantScope.TaskOutputType.ABI_PROCESSED_SPLIT_RES, outputDirectory);
     }
 
     // FIX ME : this calculation should move to SplitScope.Split interface
@@ -252,6 +284,10 @@ public class GenerateSplitAbiRes extends BaseTask {
 
             generateSplitAbiRes.setAndroidBuilder(scope.getGlobalScope().getAndroidBuilder());
             generateSplitAbiRes.setVariantName(config.getFullName());
+            generateSplitAbiRes.featureName =
+                    scope.getVariantConfiguration().getType() == VariantType.FEATURE
+                            ? scope.getGlobalScope().getProjectBaseName()
+                            : null;
 
             // not used directly, but considered as input for the task.
             generateSplitAbiRes.versionCode = config.getVersionCode();
@@ -271,8 +307,8 @@ public class GenerateSplitAbiRes extends BaseTask {
             generateSplitAbiRes.debuggable = config.getBuildType().isDebuggable();
             generateSplitAbiRes.aaptOptions =
                     scope.getGlobalScope().getExtension().getAaptOptions();
-            generateSplitAbiRes.splitScope = scope.getSplitScope();
-            generateSplitAbiRes.splitFactory = scope.getVariantData().getSplitFactory();
+            generateSplitAbiRes.outputScope = scope.getOutputScope();
+            generateSplitAbiRes.outputFactory = scope.getVariantData().getOutputFactory();
         }
     }
 }

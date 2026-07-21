@@ -1682,6 +1682,8 @@ public final class SdkConstants {
 
     public static final String EXT_JSON = "json";
 
+    public static final String EXT_CSV = "csv";
+
     private static final String DOT = "."; //$NON-NLS-1$
 
     /** Dot-Extension of the Application package Files, i.e. ".apk". */
@@ -2211,7 +2213,6 @@ public final class SdkConstants {
     public static final String GOOGLE_SUPPORT_ARTIFACT_PREFIX = "com.google.android.";
     /** Prefix of firebase groupIds */
     public static final String FIREBASE_ARTIFACT_PREFIX = "com.google.firebase.";
-
 
     @Deprecated
     public static String androidCmdName() {

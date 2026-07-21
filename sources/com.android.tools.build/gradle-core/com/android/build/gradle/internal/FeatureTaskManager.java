@@ -20,6 +20,7 @@ import static com.android.build.gradle.internal.scope.TaskOutputHolder.TaskOutpu
 
 import android.databinding.tool.DataBindingBuilder;
 import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
 import com.android.build.api.transform.QualifiedContent;
 import com.android.build.gradle.AndroidConfig;
 import com.android.build.gradle.internal.incremental.BuildInfoWriterTask;
@@ -37,7 +38,7 @@ import com.android.build.gradle.internal.tasks.featuresplit.FeatureSplitPackageI
 import com.android.build.gradle.internal.tasks.featuresplit.FeatureSplitPackageIdsWriterTask;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.internal.variant.FeatureVariantData;
-import com.android.build.gradle.internal.variant.SplitHandlingPolicy;
+import com.android.build.gradle.internal.variant.MultiOutputPolicy;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.tasks.ManifestProcessorTask;
 import com.android.build.gradle.tasks.MergeManifests;
@@ -251,10 +252,7 @@ public class FeatureTaskManager extends TaskManager {
                 variantScope.getFullVariantName(),
                 () -> createStripNativeLibraryTask(tasks, variantScope));
 
-        if (variantScope
-                .getSplitScope()
-                .getSplitHandlingPolicy()
-                .equals(SplitHandlingPolicy.RELEASE_21_AND_AFTER_POLICY)) {
+        if (variantScope.getOutputScope().getMultiOutputPolicy().equals(MultiOutputPolicy.SPLITS)) {
             if (extension.getBuildToolsRevision().getMajor() < 21) {
                 throw new RuntimeException(
                         "Pure splits can only be used with buildtools 21 and later");
@@ -482,6 +480,7 @@ public class FeatureTaskManager extends TaskManager {
     protected ProcessAndroidResources.ConfigAction createProcessAndroidResourcesConfigAction(
             @NonNull VariantScope scope,
             @NonNull Supplier<File> symbolLocation,
+            @Nullable File symbolsWithPackageName,
             @NonNull File resPackageOutputFolder,
             boolean useAaptToGenerateLegacyMultidexMainDexProguardRules,
             @NonNull MergeType sourceTaskOutputType,
@@ -492,6 +491,7 @@ public class FeatureTaskManager extends TaskManager {
             return super.createProcessAndroidResourcesConfigAction(
                     scope,
                     symbolLocation,
+                    symbolsWithPackageName,
                     resPackageOutputFolder,
                     useAaptToGenerateLegacyMultidexMainDexProguardRules,
                     sourceTaskOutputType,
@@ -501,6 +501,7 @@ public class FeatureTaskManager extends TaskManager {
             return new ProcessAndroidResources.FeatureSplitConfigAction(
                     scope,
                     symbolLocation,
+                    symbolsWithPackageName,
                     resPackageOutputFolder,
                     useAaptToGenerateLegacyMultidexMainDexProguardRules,
                     sourceTaskOutputType,

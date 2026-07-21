@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.dependency;
+package com.android.apksig.internal.pkcs7;
 
-import org.gradle.api.attributes.Attribute;
+/**
+ * Assorted PKCS #7 constants from RFC 5652.
+ */
+public abstract class Pkcs7Constants {
+    private Pkcs7Constants() {}
 
-/** Type for Build Type attributes in Gradle's configuration objects. */
-public interface BuildTypeAttr extends org.gradle.api.Named {
-
-    Attribute<BuildTypeAttr> ATTRIBUTE = Attribute.of(BuildTypeAttr.class);
+    public static final String OID_DATA = "1.2.840.113549.1.7.1";
+    public static final String OID_SIGNED_DATA = "1.2.840.113549.1.7.2";
 }

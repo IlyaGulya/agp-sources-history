@@ -44,6 +44,7 @@ import com.android.build.gradle.internal.InstantRunTaskManager;
 import com.android.build.gradle.internal.LoggerWrapper;
 import com.android.build.gradle.internal.PostprocessingFeatures;
 import com.android.build.gradle.internal.SdkHandler;
+import com.android.build.gradle.internal.aapt.AaptGeneration;
 import com.android.build.gradle.internal.core.Abi;
 import com.android.build.gradle.internal.core.GradleVariantConfiguration;
 import com.android.build.gradle.internal.coverage.JacocoReportTask;
@@ -229,9 +230,11 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
         this.instantRunBuildContext =
                 new InstantRunBuildContext(
                         variantData.getVariantConfiguration().isInstantRunBuild(globalScope),
+                        AaptGeneration.fromProjectOptions(projectOptions),
                         DeploymentDevice.getDeploymentDeviceAndroidVersion(projectOptions),
                         projectOptions.get(StringOption.IDE_BUILD_TARGET_ABI),
-                        projectOptions.get(StringOption.IDE_BUILD_TARGET_DENSITY));
+                        projectOptions.get(StringOption.IDE_BUILD_TARGET_DENSITY),
+                        projectOptions.get(BooleanOption.ENABLE_SEPARATE_APK_RESOURCES));
 
         validatePostprocessingOptions();
     }
@@ -461,9 +464,10 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
     @Nullable
     @Override
     public CodeShrinker getCodeShrinker() {
+        boolean isForTesting = getVariantConfiguration().getType().isForTesting();
+
         //noinspection ConstantConditions - getType() will not return null for a testing variant.
-        if (getVariantConfiguration().getType().isForTesting()
-                && getTestedVariantData().getType() == VariantType.LIBRARY) {
+        if (isForTesting && getTestedVariantData().getType() == VariantType.LIBRARY) {
             // For now we seem to include the production library code as both program and library
             // input to the test ProGuard run, which confuses it.
             return null;
@@ -471,23 +475,35 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
         PostprocessingOptions postprocessingOptions = getPostprocessingOptionsIfUsed();
 
-        if (postprocessingOptions == null) {
+        if (postprocessingOptions == null) { // Old DSL used:
             CoreBuildType coreBuildType = getCoreBuildType();
             //noinspection deprecation - this needs to use the old DSL methods.
             if (!coreBuildType.isMinifyEnabled()) {
                 return null;
-            } else {
-                //noinspection deprecation - this needs to use the old DSL methods.
-                Boolean useProguard = coreBuildType.isUseProguard();
-
-                if (useProguard == null) {
-                    return getDefaultCodeShrinker();
-                } else {
-                    return useProguard ? PROGUARD : ANDROID_GRADLE;
-                }
-
             }
-        } else {
+
+            CodeShrinker shrinkerForBuildType;
+
+            //noinspection deprecation - this needs to use the old DSL methods.
+            Boolean useProguard = coreBuildType.isUseProguard();
+            if (useProguard == null) {
+                shrinkerForBuildType = getDefaultCodeShrinker();
+            } else {
+                shrinkerForBuildType = useProguard ? PROGUARD : ANDROID_GRADLE;
+            }
+
+            if (!isForTesting) {
+                return shrinkerForBuildType;
+            } else {
+                if (shrinkerForBuildType == PROGUARD) {
+                    // ProGuard is used for main app code and we don't know if it gets
+                    // obfuscated, so we need to run ProGuard on test code just in case.
+                    return PROGUARD;
+                } else {
+                    return null;
+                }
+            }
+        } else { // New DSL used:
             CodeShrinker chosenShrinker = postprocessingOptions.getCodeShrinkerEnum();
             if (chosenShrinker == null) {
                 chosenShrinker = getDefaultCodeShrinker();
@@ -495,13 +511,22 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
             switch (chosenShrinker) {
                 case PROGUARD:
-                    boolean somethingToDo =
-                            postprocessingOptions.isRemoveUnusedCode()
-                                    || postprocessingOptions.isObfuscate()
-                                    || postprocessingOptions.isOptimizeCode();
-                    return somethingToDo ? PROGUARD : null;
+                    if (!isForTesting) {
+                        boolean somethingToDo =
+                                postprocessingOptions.isRemoveUnusedCode()
+                                        || postprocessingOptions.isObfuscate()
+                                        || postprocessingOptions.isOptimizeCode();
+                        return somethingToDo ? PROGUARD : null;
+                    } else {
+                        // For testing code, we only run ProGuard if main code is obfuscated.
+                        return postprocessingOptions.isObfuscate() ? PROGUARD : null;
+                    }
                 case ANDROID_GRADLE:
-                    return postprocessingOptions.isRemoveUnusedCode() ? ANDROID_GRADLE : null;
+                    if (isForTesting) {
+                        return null;
+                    } else {
+                        return postprocessingOptions.isRemoveUnusedCode() ? ANDROID_GRADLE : null;
+                    }
                 default:
                     throw new AssertionError("Unknown value " + chosenShrinker);
             }
@@ -661,8 +686,8 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     private boolean isInstantRunDexingTypeOverride() {
         return getInstantRunBuildContext().isInInstantRunMode()
-                && getInstantRunBuildContext().getPatchingPolicy()
-                        == InstantRunPatchingPolicy.MULTI_APK;
+                && InstantRunPatchingPolicy.useMultiApk(
+                        getInstantRunBuildContext().getPatchingPolicy());
     }
 
     @NonNull
@@ -1403,6 +1428,16 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     @NonNull
     @Override
+    public File getInstantRunResourceApkFolder() {
+        return FileUtils.join(
+                globalScope.getIntermediatesDir(),
+                "resources",
+                "instant-run",
+                getVariantConfiguration().getDirName());
+    }
+
+    @NonNull
+    @Override
     public File getShrunkProcessedResourcesOutputDirectory() {
         return FileUtils.join(
                 globalScope.getIntermediatesDir(),
@@ -2009,8 +2044,8 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     @Override
     @NonNull
-    public SplitScope getSplitScope() {
-        return variantData.getSplitScope();
+    public OutputScope getOutputScope() {
+        return variantData.getOutputScope();
     }
 
     @NonNull

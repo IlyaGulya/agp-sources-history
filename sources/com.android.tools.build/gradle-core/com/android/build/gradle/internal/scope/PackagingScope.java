@@ -21,8 +21,9 @@ import com.android.annotations.Nullable;
 import com.android.build.gradle.internal.dsl.CoreSigningConfig;
 import com.android.build.gradle.internal.dsl.PackagingOptions;
 import com.android.build.gradle.internal.incremental.InstantRunBuildContext;
-import com.android.build.gradle.internal.variant.SplitHandlingPolicy;
+import com.android.build.gradle.internal.variant.MultiOutputPolicy;
 import com.android.build.gradle.internal.variant.TaskContainer;
+import com.android.build.gradle.options.ProjectOptions;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.internal.aapt.AaptOptions;
 import com.android.sdklib.AndroidVersion;
@@ -31,6 +32,7 @@ import java.util.Set;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.file.FileCollection;
+import org.gradle.internal.impldep.org.jetbrains.annotations.NotNull;
 
 /** Data needed by the packaging tasks. */
 public interface PackagingScope extends TaskOutputHolder {
@@ -76,7 +78,7 @@ public interface PackagingScope extends TaskOutputHolder {
     FileCollection getJniFolders();
 
     @NonNull
-    SplitHandlingPolicy getSplitHandlingPolicy();
+    MultiOutputPolicy getMultiOutputPolicy();
 
     @NonNull
     Set<String> getAbiFilters();
@@ -120,7 +122,13 @@ public interface PackagingScope extends TaskOutputHolder {
     @NonNull
     AaptOptions getAaptOptions();
 
-    SplitScope getSplitScope();
+    @NotNull
+    ProjectOptions getProjectOptions();
+
+    OutputScope getOutputScope();
 
     void addTask(TaskContainer.TaskKind taskKind, Task task);
+
+    @NonNull
+    File getInstantRunResourceApkFolder();
 }

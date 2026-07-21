@@ -17,6 +17,7 @@
 package com.android.build.gradle.internal;
 
 import static com.android.SdkConstants.FD_ASSETS;
+import static com.android.SdkConstants.FD_RES;
 import static com.android.SdkConstants.FN_ANDROID_MANIFEST_XML;
 import static com.android.SdkConstants.FN_RESOURCE_TEXT;
 import static com.android.SdkConstants.FN_SPLIT_LIST;
@@ -130,10 +131,11 @@ import com.android.build.gradle.internal.transforms.StripDebugSymbolTransform;
 import com.android.build.gradle.internal.variant.AndroidArtifactVariantData;
 import com.android.build.gradle.internal.variant.ApkVariantData;
 import com.android.build.gradle.internal.variant.BaseVariantData;
-import com.android.build.gradle.internal.variant.SplitHandlingPolicy;
+import com.android.build.gradle.internal.variant.MultiOutputPolicy;
 import com.android.build.gradle.internal.variant.TaskContainer;
 import com.android.build.gradle.internal.variant.TestVariantData;
 import com.android.build.gradle.options.BooleanOption;
+import com.android.build.gradle.options.IntegerOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.options.StringOption;
 import com.android.build.gradle.tasks.AidlCompile;
@@ -149,6 +151,7 @@ import com.android.build.gradle.tasks.GenerateBuildConfig;
 import com.android.build.gradle.tasks.GenerateResValues;
 import com.android.build.gradle.tasks.GenerateSplitAbiRes;
 import com.android.build.gradle.tasks.GenerateTestConfig;
+import com.android.build.gradle.tasks.InstantRunResourcesApkBuilder;
 import com.android.build.gradle.tasks.JavaPreCompileTask;
 import com.android.build.gradle.tasks.Lint;
 import com.android.build.gradle.tasks.ManifestProcessorTask;
@@ -1068,12 +1071,21 @@ public abstract class TaskManager {
                     splitsDiscoveryAndroidTask.getName());
         }
 
+        File symbolTableWithPackageName =
+                FileUtils.join(
+                        globalScope.getIntermediatesDir(),
+                        FD_RES,
+                        "symbol-table-with-package",
+                        scope.getVariantConfiguration().getDirName(),
+                        "package-aware-r.txt");
+
         AndroidTask<ProcessAndroidResources> processAndroidResources =
                 androidTasks.create(
                         tasks,
                         createProcessAndroidResourcesConfigAction(
                                 scope,
                                 symbolLocation,
+                                symbolTableWithPackageName,
                                 resPackageOutputFolder,
                                 useAaptToGenerateLegacyMultidexMainDexProguardRules,
                                 mergeType,
@@ -1085,6 +1097,13 @@ public abstract class TaskManager {
         scope.addTaskOutput(
                 VariantScope.TaskOutputType.SYMBOL_LIST,
                 new File(symbolLocation.get(), FN_RESOURCE_TEXT),
+                taskName);
+
+        // Synthetic output for AARs (see SymbolTableWithPackageNameTransform), and created in
+        // process resources for local subprojects.
+        scope.addTaskOutput(
+                VariantScope.TaskOutputType.SYMBOL_LIST_WITH_PACKAGE_NAME,
+                symbolTableWithPackageName,
                 taskName);
 
         scope.setProcessResourcesTask(processAndroidResources);
@@ -1100,6 +1119,7 @@ public abstract class TaskManager {
     protected ProcessAndroidResources.ConfigAction createProcessAndroidResourcesConfigAction(
             @NonNull VariantScope scope,
             @NonNull Supplier<File> symbolLocation,
+            @Nullable File symbolWithPackageName,
             @NonNull File resPackageOutputFolder,
             boolean useAaptToGenerateLegacyMultidexMainDexProguardRules,
             @NonNull MergeType sourceTaskOutputType,
@@ -1107,6 +1127,7 @@ public abstract class TaskManager {
         return new ProcessAndroidResources.ConfigAction(
                 scope,
                 symbolLocation,
+                symbolWithPackageName,
                 resPackageOutputFolder,
                 useAaptToGenerateLegacyMultidexMainDexProguardRules,
                 sourceTaskOutputType,
@@ -1128,9 +1149,9 @@ public abstract class TaskManager {
 
         checkState(
                 variantData
-                        .getSplitScope()
-                        .getSplitHandlingPolicy()
-                        .equals(SplitHandlingPolicy.RELEASE_21_AND_AFTER_POLICY),
+                        .getOutputScope()
+                        .getMultiOutputPolicy()
+                        .equals(MultiOutputPolicy.SPLITS),
                 "Can only create split resources tasks for pure splits.");
 
         File densityOrLanguagesPackages = scope.getSplitDensityOrLanguagesPackagesOutputDirectory();
@@ -1159,9 +1180,9 @@ public abstract class TaskManager {
 
         checkState(
                 variantData
-                        .getSplitScope()
-                        .getSplitHandlingPolicy()
-                        .equals(SplitHandlingPolicy.RELEASE_21_AND_AFTER_POLICY),
+                        .getOutputScope()
+                        .getMultiOutputPolicy()
+                        .equals(MultiOutputPolicy.SPLITS),
                 "split ABI tasks are only compatible with pure splits.");
 
         Set<String> filters = AbiSplitOptions.getAbiFilters(extension.getSplits().getAbiFilters());
@@ -1170,7 +1191,7 @@ public abstract class TaskManager {
         }
 
         List<ApkData> fullApkDatas =
-                variantData.getSplitScope().getSplitsByType(OutputFile.OutputType.FULL_SPLIT);
+                variantData.getOutputScope().getSplitsByType(OutputFile.OutputType.FULL_SPLIT);
         if (!fullApkDatas.isEmpty()) {
             throw new RuntimeException(
                     "In release 21 and later, there cannot be full splits and pure splits, "
@@ -2178,7 +2199,10 @@ public abstract class TaskManager {
                         variantScope.getGlobalScope().getAndroidBuilder().getErrorReporter(),
                         userLevelCache,
                         variantScope.getMinSdkVersion().getFeatureLevel(),
-                        variantScope.getDexer());
+                        variantScope.getDexer(),
+                        projectOptions.get(BooleanOption.ENABLE_GRADLE_WORKERS),
+                        projectOptions.get(IntegerOption.DEXING_READ_BUFFER_SIZE),
+                        projectOptions.get(IntegerOption.DEXING_WRITE_BUFFER_SIZE));
         transformManager
                 .addTransform(tasks, variantScope, preDexTransform)
                 .ifPresent(variantScope::addColdSwapBuildTask);
@@ -2570,8 +2594,7 @@ public abstract class TaskManager {
                         : VariantScope.TaskOutputType.MERGED_MANIFESTS;
 
         final boolean splitsArePossible =
-                variantScope.getSplitScope().getSplitHandlingPolicy()
-                        == SplitHandlingPolicy.RELEASE_21_AND_AFTER_POLICY;
+                variantScope.getOutputScope().getMultiOutputPolicy() == MultiOutputPolicy.SPLITS;
 
         FileCollection manifests = variantScope.getOutput(manifestType);
         // this is where the final APKs will be located.
@@ -2604,34 +2627,48 @@ public abstract class TaskManager {
                                 variantScope.getOutput(resourceFilesInputType),
                                 manifests,
                                 manifestType,
-                                variantScope.getSplitScope(),
+                                variantScope.getOutputScope(),
+                                globalScope.getBuildCache(),
                                 taskOutputType));
         variantScope.addTaskOutput(taskOutputType, outputDirectory, packageApp.getName());
 
-        AndroidTask<PackageApplication> packageInstantRunResources = null;
+        AndroidTask<? extends Task> packageInstantRunResources = null;
 
         if (variantScope.getInstantRunBuildContext().isInInstantRunMode()) {
-            packageInstantRunResources =
-                    androidTasks.create(
-                            tasks,
-                            new PackageApplication.InstantRunResourcesConfigAction(
-                                    // FIX ME : this seems incorrect, we only use one per variant instead
-                                    // of one per full split.
-                                    variantScope.getInstantRunResourcesFile(),
-                                    packagingScope,
-                                    patchingPolicy,
-                                    resourceFilesInputType,
-                                    variantScope.getOutput(resourceFilesInputType),
-                                    manifests,
-                                    VariantScope.TaskOutputType.INSTANT_RUN_MERGED_MANIFESTS,
-                                    variantScope.getSplitScope()));
+            if (variantScope.getInstantRunBuildContext().getPatchingPolicy()
+                    == InstantRunPatchingPolicy.MULTI_APK_SEPARATE_RESOURCES) {
+                packageInstantRunResources =
+                        androidTasks.create(
+                                tasks,
+                                new InstantRunResourcesApkBuilder.ConfigAction(
+                                        resourceFilesInputType,
+                                        variantScope.getOutput(resourceFilesInputType),
+                                        packagingScope));
+                packageInstantRunResources.dependsOn(
+                        tasks, getValidateSigningTask(tasks, packagingScope));
+            } else {
+                // in instantRunMode, there is no user configured splits, only one apk.
+                packageInstantRunResources =
+                        androidTasks.create(
+                                tasks,
+                                new PackageApplication.InstantRunResourcesConfigAction(
+                                        variantScope.getInstantRunResourcesFile(),
+                                        packagingScope,
+                                        patchingPolicy,
+                                        resourceFilesInputType,
+                                        variantScope.getOutput(resourceFilesInputType),
+                                        manifests,
+                                        VariantScope.TaskOutputType.INSTANT_RUN_MERGED_MANIFESTS,
+                                        globalScope.getBuildCache(),
+                                        variantScope.getOutputScope()));
+            }
 
             // Make sure the MAIN artifact is registered after the RESOURCES one.
             packageApp.dependsOn(tasks, packageInstantRunResources);
         }
 
         // Common code for both packaging tasks.
-        Consumer<AndroidTask<PackageApplication>> configureResourcesAndAssetsDependencies =
+        Consumer<AndroidTask<? extends Task>> configureResourcesAndAssetsDependencies =
                 task -> {
                     task.dependsOn(tasks, variantScope.getMergeAssetsTask());
                     task.dependsOn(tasks, variantScope.getProcessResourcesTask());
@@ -2660,10 +2697,10 @@ public abstract class TaskManager {
         variantScope.setPackageApplicationTask(packageApp);
         variantScope.getAssembleTask().dependsOn(tasks, packageApp.getName());
 
-            checkState(variantScope.getAssembleTask() != null);
-            if (fullBuildInfoGeneratorTask != null) {
-                AndroidTask<PackageApplication> finalPackageInstantRunResources =
-                        packageInstantRunResources;
+        checkState(variantScope.getAssembleTask() != null);
+        if (fullBuildInfoGeneratorTask != null) {
+            AndroidTask<? extends Task> finalPackageInstantRunResources =
+                    packageInstantRunResources;
             fullBuildInfoGeneratorTask.configure(
                     tasks,
                     task -> {
@@ -2672,9 +2709,8 @@ public abstract class TaskManager {
                             task.mustRunAfter(finalPackageInstantRunResources.getName());
                         }
                     });
-                variantScope.getAssembleTask().dependsOn(
-                        tasks, fullBuildInfoGeneratorTask.getName());
-            }
+            variantScope.getAssembleTask().dependsOn(tasks, fullBuildInfoGeneratorTask.getName());
+        }
 
         if (splitsArePossible) {
 
@@ -2771,18 +2807,14 @@ public abstract class TaskManager {
             @NonNull final VariantScope variantScope,
             @NonNull CodeShrinker codeShrinker,
             @Nullable FileCollection mappingFileCollection) {
-        Optional<AndroidTask<TransformTask>> transformTask = Optional.empty();
+        Optional<AndroidTask<TransformTask>> transformTask;
         switch (codeShrinker) {
             case PROGUARD:
                 transformTask =
                         createProguardTransform(taskFactory, variantScope, mappingFileCollection);
                 break;
             case ANDROID_GRADLE:
-                // Since the built-in class shrinker does not obfuscate, there's no point running
-                // it on the test FULL_APK (it also doesn't have a -dontshrink mode).
-                if (variantScope.getTestedVariantData() == null) {
-                    transformTask = createBuiltInShrinkerTransform(variantScope, taskFactory);
-                }
+                transformTask = createBuiltInShrinkerTransform(variantScope, taskFactory);
                 break;
             default:
                 throw new AssertionError("Unknown value " + codeShrinker);
@@ -2828,34 +2860,38 @@ public abstract class TaskManager {
             return Optional.empty();
         }
 
-        final BaseVariantData variantData = variantScope.getVariantData();
-        final GradleVariantConfiguration variantConfig = variantData.getVariantConfiguration();
         final BaseVariantData testedVariantData = variantScope.getTestedVariantData();
 
         ProGuardTransform transform = new ProGuardTransform(variantScope);
 
         if (testedVariantData != null) {
+            // This is an androidTest variant inside an app/library.
             applyProguardDefaultsForTest(transform);
+
             // All -dontwarn rules for test dependencies should go in here:
             transform.setConfigurationFiles(
                     project.files(
                             TaskInputHelper.bypassFileCallable(
                                     testedVariantData.getScope()::getTestProguardFiles)));
 
-            // register the mapping file which may or may not exists (only exist if obfuscation)
+            // Register the mapping file which may or may not exists (only exist if obfuscation)
             // is enabled.
             final VariantScope testedScope = testedVariantData.getScope();
             transform.applyTestedMapping(
                     testedScope.hasOutput(APK_MAPPING) ? testedScope.getOutput(APK_MAPPING) : null);
         } else if (isTestedAppObfuscated(variantScope)) {
+            // This is a test-only module and the app being tested was obfuscated with ProGuard.
             applyProguardDefaultsForTest(transform);
+
             // All -dontwarn rules for test dependencies should go in here:
             transform.setConfigurationFiles(
                     project.files(
                             TaskInputHelper.bypassFileCallable(
                                     variantScope::getTestProguardFiles)));
+
             transform.applyTestedMapping(mappingFileCollection);
         } else {
+            // This is a "normal" variant in an app/library.
             applyProguardConfig(transform, variantScope);
 
             if (mappingFileCollection != null) {
@@ -2916,8 +2952,6 @@ public abstract class TaskManager {
                         scope.getVariantData(),
                         scope.getOutput(TaskOutputHolder.TaskOutputType.PROCESSED_RES),
                         scope.getShrunkProcessedResourcesOutputDirectory(),
-                        androidBuilder,
-                        globalScope.getBuildCache(),
                         AaptGeneration.fromProjectOptions(projectOptions),
                         scope.getOutput(TaskOutputHolder.TaskOutputType.SPLIT_LIST),
                         logger);
