@@ -1,2 +1,14 @@
 Manifest-Version: 1.0
 
+Name: com/android/dvlib/DeviceSchema.java
+SHA-256-Digest: nXMxpyTtSA7fnDTbrdlKtrJmofzTzEKVwhb0uR5TNO4=
+
+Name: com/android/dvlib/devices-1.xsd
+SHA-256-Digest: S2tbyibWBp2wzoF79DuXbhE8XIelf8BGUUup8ho0q0A=
+
+Name: com/android/dvlib/devices-2.xsd
+SHA-256-Digest: tJ8tDwab3YrxK1FPl/lwB7sdSXumyeet5n7aaEqik7A=
+
+Name: com/android/dvlib/devices-3.xsd
+SHA-256-Digest: PITr4hU4q5DLbtL62w7AlacvICYUsH1Sr6c5LwV0eWw=
+

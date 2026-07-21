@@ -1,2 +1,86 @@
 Manifest-Version: 1.0
 
+Name: com/android/manifmerger/OrphanXmlElement.java
+SHA-256-Digest: OaQ/7zLK2xYW/iplgtuXEr2a1kVGwzNr96b7m/VpEMo=
+
+Name: com/android/manifmerger/ManifestMerger2.java
+SHA-256-Digest: FvDWzgF1VWlrxj+7NlIVkBuuQEGhNW01xPiP0KNyDHw=
+
+Name: com/android/manifmerger/OtherOperationType.java
+SHA-256-Digest: nbSksd8/Ka9i1NLMi8U5InYKVnGpsMP6OwLwf2IuaDk=
+
+Name: com/android/manifmerger/ManifestProvider.java
+SHA-256-Digest: eV2RY88Gf7n3XutoIG1YCPEBkioGMURB3k5LJRNa4GM=
+
+Name: com/android/manifmerger/XmlLoader.java
+SHA-256-Digest: bcchoJWmnENo5pp5AHRF8MGRSjVE4njAAzE/OClMtZU=
+
+Name: com/android/manifmerger/NodeOperationType.java
+SHA-256-Digest: +cGb3P0HbHcEIycIDIfN9VG0DlUs5m4hwc3qCqjiWcI=
+
+Name: com/android/manifmerger/MergingReport.java
+SHA-256-Digest: AIPsqC1NsD2Ez83obWpvPNuKLS4fp1xbVe1QwUNy818=
+
+Name: com/android/manifmerger/XmlNode.java
+SHA-256-Digest: /dxV6twtbNYWrKNbIMC1WvN+pc21YtghOWlTzPfr2P0=
+
+Name: com/android/manifmerger/ActionRecorder.java
+SHA-256-Digest: ZDDvH++UBoGboYhXE3tJ4PEvo7M5avM+bKdgvT0ujYU=
+
+Name: com/android/manifmerger/XmlElement.java
+SHA-256-Digest: CxoqujCxy6IEtikpkrhwJsstfnbGV2lPCKFcTNJZ74k=
+
+Name: com/android/manifmerger/AttributeOperationType.java
+SHA-256-Digest: f/FCbaKVV5WeGZ0xMb+J8F3tzEzytkQgiOWGVIorXVo=
+
+Name: com/android/manifmerger/ToolsInstructionsCleaner.java
+SHA-256-Digest: Blw7PDd8mBjARM3H+vIqAXDw3O/S4iz+ImR2kJAcgc4=
+
+Name: com/android/manifmerger/KeyResolver.java
+SHA-256-Digest: b0NR8W9Inp/QfcpUSBvx/hfMA6NnWzvz1b9vhnE3CU4=
+
+Name: com/android/manifmerger/Selector.java
+SHA-256-Digest: ExRwGf0LWQq9O6w0f9eFNPVtitMVrynAySnA4TaSD+w=
+
+Name: com/android/manifmerger/Merger.java
+SHA-256-Digest: GUJzX+3ngufafD5OQoZxi+xu9JtnamxYqkJsdFy/b5Q=
+
+Name: com/android/manifmerger/MergeType.java
+SHA-256-Digest: zk+ZVA5P4NQDjUYU4YwzacNBJSgSzGQ7UvE3Rr2q9uA=
+
+Name: com/android/manifmerger/PreValidator.java
+SHA-256-Digest: VDfJgCfaSyjxoInhD2QnWYvt8C+UKdBxCE6VZ8tlhhU=
+
+Name: com/android/manifmerger/ConvertibleName.java
+SHA-256-Digest: EZnGLmqt8HdYHllkvsgjq+2dpzZIqBhLRCjX6mKSxtc=
+
+Name: com/android/manifmerger/AttributeModel.java
+SHA-256-Digest: Cw5W6KtaUKUED75pYXtXpzr1Yfw+tCgHzSRaXmdb2H8=
+
+Name: com/android/manifmerger/ManifestSystemProperty.java
+SHA-256-Digest: KaFxsIO8vRlpn+ypN++US/4RuEP/zfbcGyBzaKnFcv8=
+
+Name: com/android/manifmerger/ManifestModel.java
+SHA-256-Digest: fdUPps/iuvXRf3sZcVhhLzbDzvZNHyxJvi4m7fjyQJQ=
+
+Name: com/android/manifmerger/PostValidator.java
+SHA-256-Digest: FIH5rb/j0Folul1qeYSihhY3eBcz+RHTU6Pdj3oMS68=
+
+Name: com/android/manifmerger/PlaceholderHandler.java
+SHA-256-Digest: WziNCEsgksvL/fT7eT+aoQOE+l/U8WaYFXh8RqVwyPQ=
+
+Name: com/android/manifmerger/XmlDocument.java
+SHA-256-Digest: A03JQ2wINuGg9Fu0bJlyTlV7F1McmieaH2+G05W/jZ0=
+
+Name: com/android/manifmerger/Actions.java
+SHA-256-Digest: Wumr2fSvXCnRbJ3HlSo/EZa95jNjmVPXX/wDhuKzCow=
+
+Name: com/android/manifmerger/PlaceholderEncoder.java
+SHA-256-Digest: jBaNJ2e7VuFuI1wg53gALdfp5sZ33y8mP4PzHLeVXI4=
+
+Name: com/android/manifmerger/XmlAttribute.java
+SHA-256-Digest: 1H/f2us03EcFfPCK1PDqmSPYTCZ++/lcJV7y8pUiMKM=
+
+Name: com/android/manifmerger/ElementsTrimmer.java
+SHA-256-Digest: c2lNLQkvmPWJfl8J/mHzcdr6ZrmYmLVqwfoCt8wBVCs=
+

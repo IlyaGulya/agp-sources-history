@@ -1,2 +1,101 @@
 Manifest-Version: 1.0
 
+Name: com/android/tools/lint/EcjParser.java
+SHA-256-Digest: cNO+3l9H/gDcmb70bH9mChuGQOL+en8J2DXFBcKeCRE=
+
+Name: com/android/tools/lint/psi/ExternalPsiAnnotation.java
+SHA-256-Digest: Jcw9iZSjMuiKMqKamjfuRSxC4AfdRyLsP3ZxmLE+1gg=
+
+Name: com/android/tools/lint/LintInferredAnnotationsManager.java
+SHA-256-Digest: 5nWwJwt0TE2QRruNGTGzpfzvvqHuAEinqAyWyodmoD4=
+
+Name: com/android/tools/lint/LintSyntaxHighlighter.java
+SHA-256-Digest: X8OqY5bNLIu95/I3x8pk0mx+qvQbFDSB9+n62+4tDCI=
+
+Name: com/android/tools/lint/lint-error.png
+SHA-256-Digest: CSwRQE/DdWOiJdIiAaxRSECKvHyluqS4pvTE2TB0Bls=
+
+Name: com/android/tools/lint/psi/EcjPsiElement.java
+SHA-256-Digest: ++i0iwVDw2Zrhkei9v5LuuiWLgXwwhCrslmdoIM7DjI=
+
+Name: com/android/tools/lint/LintCoreProjectEnvironment.java
+SHA-256-Digest: AeKJ22ced9bv5lNw1+x5unGCBrRczTX4NCHGrA2iq74=
+
+Name: com/android/tools/lint/Reporter.java
+SHA-256-Digest: itWayHeM17fJTUuycW+iFWay/++yU8MlxZg2iOegB0E=
+
+Name: com/android/tools/lint/psi/ExternalPsiAnnotationLiteralMemberVal
+ ue.java
+SHA-256-Digest: 7fpj34BUTBSLjPOMUOOAROByZfi61olKRB2pmD9DL90=
+
+Name: com/android/tools/lint/ProjectInitializer.kt
+SHA-256-Digest: +m5KummqBM86pRcCA5g3t2FR5Qlom8MGtxeV6+Uo8bo=
+
+Name: com/android/tools/lint/lint-warning.png
+SHA-256-Digest: pESyBmPvnOpUMoL7kSJPWiFCNqS/Ef2UH4vZEE5z4rI=
+
+Name: com/android/tools/lint/LintCoreApplicationEnvironment.java
+SHA-256-Digest: KsYkYicJnBFEtvx2GFmJmaJRxeMv3ZOwO+s0GU1VT58=
+
+Name: com/android/tools/lint/ExternalAnnotationRepository.java
+SHA-256-Digest: kGdB+Cdm5u0DRKwfH6GRJrBv57V3Umv5RqIauN3QrWk=
+
+Name: com/android/tools/lint/psi/ExternalPsiAnnotationMemberValue.java
+SHA-256-Digest: PDnwYllHkTf1BqvV15x6qgxnzoEa2Soi3GscUhro2RE=
+
+Name: com/android/tools/lint/psi/ExternalPsiArrayInitializerMemberValu
+ e.java
+SHA-256-Digest: oTaYGzdhRkHf/+qQ+g/Pmeu1uSqDsMJE2fskPx2pd2s=
+
+Name: com/android/tools/lint/LintCliXmlParser.java
+SHA-256-Digest: j3QBmqr2fACGjX81JlIKG+nv0ECGM2XeWNLNNJ9GuWQ=
+
+Name: com/android/tools/lint/XmlReporter.kt
+SHA-256-Digest: KuUCSI2V9rSe9QbDJdcg1zhzudPjbfoRY3FSVCeSZQA=
+
+Name: com/android/tools/lint/LintCliFlags.java
+SHA-256-Digest: NQkQONLHI2U6kKc/Evcqw+cb3MPWXjkYt7583HAssDI=
+
+Name: com/android/tools/lint/EcjSourceFile.java
+SHA-256-Digest: 9CPoNm2LaulmZtAv3H3FlZS/clsAZaIS/VqfP2mqcSA=
+
+Name: com/android/tools/lint/hololike.css
+SHA-256-Digest: m35PH/xo71zl4ePCtiuN8ucL/kR6HXV1gordCEKwpyM=
+
+Name: com/android/tools/lint/HtmlReporter.java
+SHA-256-Digest: zwlKGyc7DwtPD3UHdq64QW73BYTPRyC03kuh8EbGFB4=
+
+Name: com/android/tools/lint/psi/ExternalPsiNameValuePair.java
+SHA-256-Digest: D9kXspCvseorUOTeMdgGuBMqOAL7gdoqBTD8Zc8iACY=
+
+Name: com/android/tools/lint/psi/ExternalPsiReferenceExpressionMemberV
+ alue.java
+SHA-256-Digest: lOyCegHe8sefYM4Zk9wwkpdAYjwI7kmimUYNooXjMzM=
+
+Name: com/android/tools/lint/MultiProjectHtmlReporter.java
+SHA-256-Digest: 3fELqnX59CxfPYtXpZiMrvRkjFzSSHm6HRW6+WqD8Lo=
+
+Name: com/android/tools/lint/Main.java
+SHA-256-Digest: 6dpha5nuHj9MXnhVxe/lDi2PuOmV1VBeFdJDPVyva4g=
+
+Name: com/android/tools/lint/default.css
+SHA-256-Digest: ZodzQIEMNBlp5Md6KYYzhVdS8qhg/YKBjaFsJsMEMys=
+
+Name: com/android/tools/lint/TextReporter.java
+SHA-256-Digest: 3j5WIb6rb9Zq+JhUjXVweAOJ8MByVBCb/MytJBZxXKA=
+
+Name: com/android/tools/lint/MaterialHtmlReporter.java
+SHA-256-Digest: P+uvfmqIF4BnzZDVPnFYB+Ch3IO6tQVAM+cWnS0w6lg=
+
+Name: com/android/tools/lint/Warning.java
+SHA-256-Digest: ZhukjzRc5on81E80eU9xCCt5iptsoKhgLMo0p1NpOTI=
+
+Name: com/android/tools/lint/LintCliClient.java
+SHA-256-Digest: RLkdDB0CU/Ql0BUggU05krAVN6HW6cOh1YacfO0rUec=
+
+Name: com/android/tools/lint/lint-run.png
+SHA-256-Digest: uHnOzIP6Y0Heh808Pw5fi5AUOMkN6pHotExSA0myb+E=
+
+Name: com/android/tools/lint/LintExternalAnnotationsManager.java
+SHA-256-Digest: GgSw1+oQbYgMb9Apd34LJbGo2oB4dewntDXEwi2dJ5Q=
+
