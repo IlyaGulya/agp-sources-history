@@ -89,6 +89,26 @@ public final class GradleAndroidTestResultListenerConfigProto {
      */
     com.google.protobuf.ByteString
         getTrustCertCollectionFilePathBytes();
+
+    /**
+     * <pre>
+     * A device ID to listen to for test results.
+     * </pre>
+     *
+     * <code>string deviceId = 5;</code>
+     * @return The deviceId.
+     */
+    java.lang.String getDeviceId();
+    /**
+     * <pre>
+     * A device ID to listen to for test results.
+     * </pre>
+     *
+     * <code>string deviceId = 5;</code>
+     * @return The bytes for deviceId.
+     */
+    com.google.protobuf.ByteString
+        getDeviceIdBytes();
   }
   /**
    * <pre>
@@ -110,6 +130,7 @@ public final class GradleAndroidTestResultListenerConfigProto {
       resultListenerClientCertFilePath_ = "";
       resultListenerClientPrivateKeyFilePath_ = "";
       trustCertCollectionFilePath_ = "";
+      deviceId_ = "";
     }
 
     @java.lang.Override
@@ -163,6 +184,12 @@ public final class GradleAndroidTestResultListenerConfigProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               trustCertCollectionFilePath_ = s;
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              deviceId_ = s;
               break;
             }
             default: {
@@ -345,6 +372,50 @@ public final class GradleAndroidTestResultListenerConfigProto {
       }
     }
 
+    public static final int DEVICEID_FIELD_NUMBER = 5;
+    private volatile java.lang.Object deviceId_;
+    /**
+     * <pre>
+     * A device ID to listen to for test results.
+     * </pre>
+     *
+     * <code>string deviceId = 5;</code>
+     * @return The deviceId.
+     */
+    public java.lang.String getDeviceId() {
+      java.lang.Object ref = deviceId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        deviceId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * A device ID to listen to for test results.
+     * </pre>
+     *
+     * <code>string deviceId = 5;</code>
+     * @return The bytes for deviceId.
+     */
+    public com.google.protobuf.ByteString
+        getDeviceIdBytes() {
+      java.lang.Object ref = deviceId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        deviceId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -371,6 +442,9 @@ public final class GradleAndroidTestResultListenerConfigProto {
       if (!getTrustCertCollectionFilePathBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, trustCertCollectionFilePath_);
       }
+      if (!getDeviceIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, deviceId_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -392,6 +466,9 @@ public final class GradleAndroidTestResultListenerConfigProto {
       }
       if (!getTrustCertCollectionFilePathBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, trustCertCollectionFilePath_);
+      }
+      if (!getDeviceIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, deviceId_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -416,6 +493,8 @@ public final class GradleAndroidTestResultListenerConfigProto {
           .equals(other.getResultListenerClientPrivateKeyFilePath())) return false;
       if (!getTrustCertCollectionFilePath()
           .equals(other.getTrustCertCollectionFilePath())) return false;
+      if (!getDeviceId()
+          .equals(other.getDeviceId())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -435,6 +514,8 @@ public final class GradleAndroidTestResultListenerConfigProto {
       hash = (53 * hash) + getResultListenerClientPrivateKeyFilePath().hashCode();
       hash = (37 * hash) + TRUSTCERTCOLLECTIONFILEPATH_FIELD_NUMBER;
       hash = (53 * hash) + getTrustCertCollectionFilePath().hashCode();
+      hash = (37 * hash) + DEVICEID_FIELD_NUMBER;
+      hash = (53 * hash) + getDeviceId().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -580,6 +661,8 @@ public final class GradleAndroidTestResultListenerConfigProto {
 
         trustCertCollectionFilePath_ = "";
 
+        deviceId_ = "";
+
         return this;
       }
 
@@ -610,6 +693,7 @@ public final class GradleAndroidTestResultListenerConfigProto {
         result.resultListenerClientCertFilePath_ = resultListenerClientCertFilePath_;
         result.resultListenerClientPrivateKeyFilePath_ = resultListenerClientPrivateKeyFilePath_;
         result.trustCertCollectionFilePath_ = trustCertCollectionFilePath_;
+        result.deviceId_ = deviceId_;
         onBuilt();
         return result;
       }
@@ -671,6 +755,10 @@ public final class GradleAndroidTestResultListenerConfigProto {
         }
         if (!other.getTrustCertCollectionFilePath().isEmpty()) {
           trustCertCollectionFilePath_ = other.trustCertCollectionFilePath_;
+          onChanged();
+        }
+        if (!other.getDeviceId().isEmpty()) {
+          deviceId_ = other.deviceId_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -1036,6 +1124,102 @@ public final class GradleAndroidTestResultListenerConfigProto {
         onChanged();
         return this;
       }
+
+      private java.lang.Object deviceId_ = "";
+      /**
+       * <pre>
+       * A device ID to listen to for test results.
+       * </pre>
+       *
+       * <code>string deviceId = 5;</code>
+       * @return The deviceId.
+       */
+      public java.lang.String getDeviceId() {
+        java.lang.Object ref = deviceId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          deviceId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A device ID to listen to for test results.
+       * </pre>
+       *
+       * <code>string deviceId = 5;</code>
+       * @return The bytes for deviceId.
+       */
+      public com.google.protobuf.ByteString
+          getDeviceIdBytes() {
+        java.lang.Object ref = deviceId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          deviceId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A device ID to listen to for test results.
+       * </pre>
+       *
+       * <code>string deviceId = 5;</code>
+       * @param value The deviceId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDeviceId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        deviceId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A device ID to listen to for test results.
+       * </pre>
+       *
+       * <code>string deviceId = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDeviceId() {
+        
+        deviceId_ = getDefaultInstance().getDeviceId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A device ID to listen to for test results.
+       * </pre>
+       *
+       * <code>string deviceId = 5;</code>
+       * @param value The bytes for deviceId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDeviceIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        deviceId_ = value;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -1106,15 +1290,15 @@ public final class GradleAndroidTestResultListenerConfigProto {
       "\n0gradle_android_test_result_listener_co" +
       "nfig.proto\022:com.android.tools.utp.plugin" +
       "s.result.listener.gradle.proto\032\031google/p" +
-      "rotobuf/any.proto\"\310\001\n%GradleAndroidTestR" +
+      "rotobuf/any.proto\"\332\001\n%GradleAndroidTestR" +
       "esultListenerConfig\022 \n\030resultListenerSer" +
       "verPort\030\001 \001(\005\022(\n resultListenerClientCer" +
       "tFilePath\030\002 \001(\t\022.\n&resultListenerClientP" +
       "rivateKeyFilePath\030\003 \001(\t\022#\n\033trustCertColl" +
-      "ectionFilePath\030\004 \001(\tBh\n:com.android.tool" +
-      "s.utp.plugins.result.listener.gradle.pro" +
-      "toB*GradleAndroidTestResultListenerConfi" +
-      "gProtob\006proto3"
+      "ectionFilePath\030\004 \001(\t\022\020\n\010deviceId\030\005 \001(\tBh" +
+      "\n:com.android.tools.utp.plugins.result.l" +
+      "istener.gradle.protoB*GradleAndroidTestR" +
+      "esultListenerConfigProtob\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -1126,7 +1310,7 @@ public final class GradleAndroidTestResultListenerConfigProto {
     internal_static_com_android_tools_utp_plugins_result_listener_gradle_proto_GradleAndroidTestResultListenerConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_android_tools_utp_plugins_result_listener_gradle_proto_GradleAndroidTestResultListenerConfig_descriptor,
-        new java.lang.String[] { "ResultListenerServerPort", "ResultListenerClientCertFilePath", "ResultListenerClientPrivateKeyFilePath", "TrustCertCollectionFilePath", });
+        new java.lang.String[] { "ResultListenerServerPort", "ResultListenerClientCertFilePath", "ResultListenerClientPrivateKeyFilePath", "TrustCertCollectionFilePath", "DeviceId", });
     com.google.protobuf.AnyProto.getDescriptor();
   }
 
