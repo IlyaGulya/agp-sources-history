@@ -130,7 +130,7 @@ fun runR8(
     }
 
     pathsAdder(inputs, { p -> r8CommandBuilder.addProgramFiles(p) })
-    pathsAdder(libraries, { p -> r8CommandBuilder.addLibraryFiles(p) })
+    libraries.forEach { p -> r8CommandBuilder.addLibraryFiles(p) }
 
     val logger: Logger = Logger.getLogger("R8")
     if (logger.isLoggable(Level.FINE)) {
@@ -143,13 +143,6 @@ fun runR8(
     }
 
     R8.run(r8CommandBuilder.build())
-
-    proguardConfig.proguardMapOutput?.let {
-        if (Files.notExists(it)) {
-            // R8 might not create a mapping file, so we have to create it, http://b/37053758.
-            Files.createFile(it)
-        }
-    }
 }
 
 enum class R8OutputType {

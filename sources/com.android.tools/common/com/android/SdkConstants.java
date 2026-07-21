@@ -48,8 +48,22 @@ public final class SdkConstants {
      */
     public static final int CURRENT_PLATFORM = currentPlatform();
 
-    /** Environment variable that specifies the path of an Android SDK. */
+    /**
+     * ANDROID_HOME environment variable that specifies the installation path of an Android SDK.
+     *
+     * @deprecated Use {@link #ANDROID_SDK_ROOT_ENV} instead.
+     * @see <a href="https://developer.android.com/studio/command-line/variables">Android SDK
+     *     environment variables</a>
+     */
     public static final String ANDROID_HOME_ENV = "ANDROID_HOME";
+
+    /**
+     * ANDROID_SDK_ROOT environment variable that specifies the installation path of an Android SDK.
+     *
+     * @see <a href="https://developer.android.com/studio/command-line/variables">Android SDK
+     *     environment variables</a>
+     */
+    public static final String ANDROID_SDK_ROOT_ENV = "ANDROID_SDK_ROOT";
 
     /** Property in local.properties file that specifies the path of the Android SDK. */
     public static final String SDK_DIR_PROPERTY = "sdk.dir";
@@ -286,13 +300,7 @@ public final class SdkConstants {
     /** properties file for the SDK */
     public static final String FN_SDK_PROP = "sdk.properties"; //$NON-NLS-1$
 
-    public static final String FN_ANDROIDX_RS_JAR = "androidx-rs.jar"; //$NON-NLS-1$
     public static final String FN_RENDERSCRIPT_V8_JAR = "renderscript-v8.jar"; //$NON-NLS-1$
-
-    public static final String FN_ANDROIDX_RENDERSCRIPT_PACKAGE =
-            "androidx.renderscript"; //$NON-NLS-1$
-    public static final String FN_RENDERSCRIPT_V8_PACKAGE =
-            "android.support.v8.renderscript"; //$NON-NLS-1$
 
     /** filename for gdbserver. */
     public static final String FN_GDBSERVER = "gdbserver"; //$NON-NLS-1$
@@ -793,9 +801,8 @@ public final class SdkConstants {
             "android.support.percent.PercentRelativeLayout"; //$NON-NLS-1$
     public static final String CLASS_PERCENT_FRAME_LAYOUT =
             "android.support.percent.PercentFrameLayout"; //$NON-NLS-1$
-
-    public static final AndroidxName MULTI_DEX_APPLICATION =
-            AndroidxName.of("android.support.multidex.", "MultiDexApplication");
+    public static final String SUPPORT_MULTI_DEX_APPLICATION =
+            "android.support.multidex.MultiDexApplication";
 
     /* Material Components */
     public static final AndroidxName CLASS_APP_BAR_LAYOUT =
@@ -824,7 +831,8 @@ public final class SdkConstants {
             "com.google.android.material.bottomappbar.BottomAppBar";
     public static final String CLASS_CHIP = "com.google.android.material.chip.Chip";
     public static final String CLASS_CHIP_GROUP = "com.google.android.material.chip.ChipGroup";
-    public static final String CLASS_MATERIAL_BUTTON = "com.google.android.material.button.Button";
+    public static final String CLASS_MATERIAL_BUTTON =
+            "com.google.android.material.button.MaterialButton";
 
     /* Android ConstraintLayout Constants */
     public static final AndroidxName CLASS_CONSTRAINT_LAYOUT =
@@ -1379,7 +1387,6 @@ public final class SdkConstants {
     public static final String ATTR_AUTO_VERIFY = "autoVerify";
     public static final String ATTR_DEFAULT_NAV_HOST = "defaultNavHost";
     public static final String ATTR_START_DESTINATION = "startDestination";
-    public static final String ATTR_ARG_TYPE = "argType";
 
     // TextView attributes
     public static final String ATTR_TEXT_APPEARANCE = "textAppearance"; //$NON-NLS-1$
@@ -1706,7 +1713,8 @@ public final class SdkConstants {
     public static final String ATTR_HIDE_MOTION_SPEC = "hideMotionSpec";
 
     // Material BottomNavigationView Attributes
-    public static final String ATTR_ITEM_HORIZONTAL_TRANSLATION = "itemHorizontalTranslation";
+    public static final String ATTR_ITEM_HORIZONTAL_TRANSLATION_ENABLED =
+            "itemHorizontalTranslationEnabled";
     public static final String ATTR_LABEL_VISIBILITY_MODE = "labelVisibilityMode";
 
     // Material ChipGroup Attributes
@@ -1774,16 +1782,7 @@ public final class SdkConstants {
     public static final String ATTR_PASSWORD_TOGGLE_TINT = "passwordToggleTint";
     public static final String ATTR_PASSWORD_TOGGLE_TINT_MODE = "passwordToggleTintMode";
     public static final String ATTR_BOX_BACKGROUND_MODE = "boxBackgroundMode";
-    public static final String ATTR_BOX_PADDING_LEFT = "boxPaddingLeft";
     public static final String ATTR_BOX_COLLAPSED_PADDING_TOP = "boxCollapsedPaddingTop";
-    public static final String ATTR_EXPANDED_PADDING_TOP = "boxExpandedPaddingTop";
-    public static final String ATTR_BOX_PADDING_RIGHT = "boxPaddingRight";
-    public static final String ATTR_BOX_COLLAPSED_PADDING_BOTTOM = "boxCollapsedPaddingBottom";
-    public static final String ATTR_BOX_CORNER_RADIUS_TOP_LEFT = "boxCornerRadiusTopLeft";
-    public static final String ATTR_BOX_CORNER_RADIUS_TOP_RIGHT = "boxCornerRadiusTopRight";
-    public static final String ATTR_BOX_CORNER_RADIUS_BOTTOM_LEFT = "boxCornerRadiusBottomLeft";
-    public static final String ATTR_BOX_CORNER_RADIUS_BOTTOM_RIGHT = "boxCornerRadiusBottomRight";
-    public static final String ATTR_BOX_EXPANDED_PADDING_BOTTOM = "boxExpandedPaddingBottom";
     public static final String ATTR_BOX_STROKE_COLOR = "boxStrokeColor";
     public static final String ATTR_BOX_BACKGROUND_COLOR = "boxBackgroundColor";
     public static final String ATTR_BOX_STROKE_WIDTH = "boxStrokeWidth";
@@ -1880,6 +1879,8 @@ public final class SdkConstants {
     public static final String EXT_XML = "xml"; //$NON-NLS-1$
     /** Extension of gradle files, i.e. "gradle" */
     public static final String EXT_GRADLE = "gradle"; //$NON-NLS-1$
+    /** Extension of Kotlin gradle files, i.e. "gradle.kts" */
+    public static final String EXT_GRADLE_KTS = "gradle.kts"; //$NON-NLS-1$
     /** Extension of jar files, i.e. "jar" */
     public static final String EXT_JAR = "jar"; //$NON-NLS-1$
     /** Extension of ZIP files, i.e. "zip" */
@@ -2270,33 +2271,6 @@ public final class SdkConstants {
     /** The com.google.android.material. package prefix */
     public static final String ANDROID_MATERIAL_PKG = "com.google.android.material.";
 
-    /** The android.support.constraint. package prefix */
-    public static final String CONSTRAINT_LAYOUT_PKG = "android.support.constraint.";
-
-    /** The androidx.constraintlayout. package prefix */
-    public static final String ANDROIDX_CONSTRAINT_LAYOUT_PKG = "androidx.constraintlayout.";
-
-    /** The androidx.recyclerview. package prefix */
-    public static final String ANDROIDX_RECYCLER_VIEW_PKG = "androidx.recyclerview.";
-
-    /** The androidx.cardview. package prefix */
-    public static final String ANDROIDX_CARD_VIEW_PKG = "androidx.cardview.";
-
-    /** The androidx.gridlayout. package prefix */
-    public static final String ANDROIDX_GRID_LAYOUT_PKG = "androidx.gridlayout.";
-
-    /** The androidx.leanback. package prefix */
-    public static final String ANDROIDX_LEANBACK_PKG = "androidx.leanback.";
-
-    /** The androidx.core. package prefix */
-    public static final String ANDROIDX_CORE_PKG = "androidx.core.";
-
-    /** The androidx.viewpager. package prefix */
-    public static final String ANDROIDX_VIEWPAGER_PKG = "androidx.viewpager.";
-
-    /** The androidx.appcompat. package prefix */
-    public static final String ANDROIDX_APPCOMPAT_PKG = "androidx.appcompat.";
-
     /** The android.support.v17.leanback. package prefix */
     public static final String ANDROID_SUPPORT_LEANBACK_V17_PKG =
             ANDROID_SUPPORT_PKG_PREFIX + "v17.leanback."; //$NON-NLS-1$
@@ -2433,7 +2407,7 @@ public final class SdkConstants {
     public static final String GRADLE_PLUGIN_NAME = "com.android.tools.build:gradle:";
     public static final String GRADLE_EXPERIMENTAL_PLUGIN_NAME =
             "com.android.tools.build:gradle-experimental:";
-    public static final String GRADLE_MINIMUM_VERSION = "4.6";
+    public static final String GRADLE_MINIMUM_VERSION = "4.8";
     public static final String GRADLE_LATEST_VERSION = GRADLE_MINIMUM_VERSION;
     public static final String GRADLE_PLUGIN_MINIMUM_VERSION = "1.0.0";
     public static final String GRADLE_PLUGIN_RECOMMENDED_VERSION = "3.1.0";
@@ -2454,7 +2428,7 @@ public final class SdkConstants {
     public static final String GRADLE_ANDROID_TEST_API_CONFIGURATION = "androidTestApi";
 
     public static final String GRADLE_ANDROID_TEST_UTIL_CONFIGURATION = "androidTestUtil";
-    public static final String CURRENT_BUILD_TOOLS_VERSION = "28.0.3";
+    public static final String CURRENT_BUILD_TOOLS_VERSION = "27.0.3";
     public static final String SUPPORT_LIB_GROUP_ID = "com.android.support";
     public static final String SUPPORT_LIB_ARTIFACT = "com.android.support:support-v4";
     public static final String DESIGN_LIB_ARTIFACT = "com.android.support:design";
@@ -2480,10 +2454,7 @@ public final class SdkConstants {
     public static final String ANDROIDX_LEANBACK_ARTIFACT = "androidx.leanback:leanback";
     public static final String ANDROIDX_ANNOTATIONS_ARTIFACT = "androidx.annotations:annotations";
     public static final String ANDROIDX_SUPPORT_LIB_ARTIFACT = "androidx.legacy:legacy-support-v4";
-    public static final String ANDROIDX_VIEW_PAGER_LIB_ARTIFACT = "androidx.viewpager:viewpager";
     public static final String ANDROIDX_APPCOMPAT_LIB_ARTIFACT = "androidx.appcompat:appcompat";
-    public static final String ANDROIDX_CONSTRAINT_LAYOUT_LIB_ARTIFACT =
-            "androidx.constraintlayout:constraintlayout";
 
     // Annotations
     public static final AndroidxName SUPPORT_ANNOTATIONS_PREFIX =
