@@ -337,7 +337,7 @@ abstract class PackageBundleTask : NonIncrementalTask() {
             get() = PackageBundleTask::class.java
 
         override fun handleProvider(
-            taskProvider: TaskProvider<out PackageBundleTask>
+            taskProvider: TaskProvider<PackageBundleTask>
         ) {
             super.handleProvider(taskProvider)
 
@@ -386,7 +386,7 @@ abstract class PackageBundleTask : NonIncrementalTask() {
                 MergeNativeDebugMetadataTask.getNativeDebugMetadataFiles(creationConfig)
             )
 
-            task.aaptOptionsNoCompress.setDisallowChanges(creationConfig.aaptOptions.noCompress)
+            task.aaptOptionsNoCompress.setDisallowChanges(creationConfig.globalScope.extension.aaptOptions.noCompress)
 
             task.bundleOptions =
                 ((creationConfig.globalScope.extension as BaseAppModuleExtension).bundle).convert()

@@ -20,10 +20,13 @@ import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.core.Abi
 import com.android.build.gradle.internal.cxx.attribution.generateChromeTrace
+import com.android.build.gradle.internal.cxx.gradle.generator.ExternalNativeJsonGenerator
 import com.android.build.gradle.internal.cxx.json.AndroidBuildGradleJsons
+import com.android.build.gradle.internal.cxx.json.NativeBuildConfigValue
 import com.android.build.gradle.internal.cxx.json.NativeBuildConfigValueMini
 import com.android.build.gradle.internal.cxx.json.NativeLibraryValueMini
 import com.android.build.gradle.internal.cxx.logging.IssueReporterLoggingEnvironment
+import com.android.build.gradle.internal.cxx.logging.errorln
 import com.android.build.gradle.internal.cxx.logging.infoln
 import com.android.build.gradle.internal.cxx.model.ninjaLogFile
 import com.android.build.gradle.internal.cxx.process.createProcessOutputJunction
@@ -317,6 +320,7 @@ abstract class ExternalNativeBuildTask : UnsafeOutputsTask("External Native Buil
     ): List<NativeLibraryValueMini> {
         val librariesToBuild = Lists.newArrayList<NativeLibraryValueMini>()
         val targets = generator.get().variant.buildTargetSet
+        val implicitTargets = generator.get().variant.implicitBuildTargetSet.toMutableSet()
         loop@for (libraryValue in config.libraries.values) {
             infoln("evaluate library ${libraryValue.artifactName} (${libraryValue.abi})")
             if (targets.isNotEmpty() && !targets.contains(libraryValue.artifactName)) {
@@ -344,13 +348,20 @@ abstract class ExternalNativeBuildTask : UnsafeOutputsTask("External Native Buil
                     continue
                 }
 
-                when (Files.getFileExtension(output.name)) {
-                    "a" -> infoln("building target library ${libraryValue.artifactName!!} because no targets are specified.")
-                    "so" -> infoln("building target library ${libraryValue.artifactName!!} because no targets are specified.")
-                    "" -> infoln("building target executable ${libraryValue.artifactName!!} because no targets are specified.")
-                    else -> {
-                        infoln("not building target ${libraryValue.artifactName!!} because the type cannot be determined.")
-                        continue@loop
+                if (generator.get().variant.implicitBuildTargetSet.contains(libraryValue.artifactName)) {
+                    infoln("building target ${libraryValue.artifactName} because it is required by the build")
+                } else {
+                    when (Files.getFileExtension(output.name)) {
+                        "a" -> {
+                            infoln("not building target library ${libraryValue.artifactName!!} because static libraries are not build by default.")
+                            continue@loop
+                        }
+                        "so" -> infoln("building target library ${libraryValue.artifactName!!} because no targets are specified.")
+                        "" -> infoln("building target executable ${libraryValue.artifactName!!} because no targets are specified.")
+                        else -> {
+                            infoln("not building target ${libraryValue.artifactName!!} because the type cannot be determined.")
+                            continue@loop
+                        }
                     }
                 }
             }
@@ -358,6 +369,10 @@ abstract class ExternalNativeBuildTask : UnsafeOutputsTask("External Native Buil
             librariesToBuild.add(libraryValue)
         }
 
+        implicitTargets.removeAll(librariesToBuild.map { it.artifactName })
+        if (implicitTargets.isNotEmpty()) {
+            errorln("did not find implicitly required targets: ${implicitTargets.joinToString(", ")}")
+        }
         return librariesToBuild
     }
 
@@ -461,7 +476,7 @@ abstract class ExternalNativeBuildTask : UnsafeOutputsTask("External Native Buil
             get() = ExternalNativeBuildTask::class.java
 
         override fun handleProvider(
-            taskProvider: TaskProvider<out ExternalNativeBuildTask>
+            taskProvider: TaskProvider<ExternalNativeBuildTask>
         ) {
             super.handleProvider(taskProvider)
             assert(creationConfig.taskContainer.externalNativeBuildTask == null)

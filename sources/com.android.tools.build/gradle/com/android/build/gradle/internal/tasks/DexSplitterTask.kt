@@ -22,7 +22,7 @@ import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactSco
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.REVERSE_METADATA_CLASSES
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.REVERSE_METADATA_VALUES
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.MultipleArtifactType
+import com.android.build.gradle.internal.scope.InternalMultipleArtifactType
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.builder.dexing.DexSplitterTool
 import com.android.utils.FileUtils
@@ -99,7 +99,7 @@ abstract class DexSplitterTask : NonIncrementalTask() {
         override val name =  computeTaskName("split", "Dex")
 
         override fun handleProvider(
-            taskProvider: TaskProvider<out DexSplitterTask>
+            taskProvider: TaskProvider<DexSplitterTask>
         ) {
             super.handleProvider(taskProvider)
             creationConfig.artifacts.setInitialProvider(
@@ -135,7 +135,7 @@ abstract class DexSplitterTask : NonIncrementalTask() {
                     InternalArtifactType.MAIN_DEX_LIST_FOR_BUNDLE,
                     task.mainDexList)
 
-            task.inputDirs.from(artifacts.getAll(MultipleArtifactType.DEX))
+            task.inputDirs.from(artifacts.getAll(InternalMultipleArtifactType.DEX))
         }
     }
 

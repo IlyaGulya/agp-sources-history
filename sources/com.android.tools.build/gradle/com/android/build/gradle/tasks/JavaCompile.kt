@@ -72,7 +72,7 @@ class JavaCompileCreationAction(private val componentProperties: ComponentProper
     override val type: Class<JavaCompile>
         get() = JavaCompile::class.java
 
-    override fun handleProvider(taskProvider: TaskProvider<out JavaCompile>) {
+    override fun handleProvider(taskProvider: TaskProvider<JavaCompile>) {
         super.handleProvider(taskProvider)
 
         componentProperties.taskContainer.javacTask = taskProvider
@@ -182,9 +182,9 @@ fun registerDataBindingOutputs(
             .withName("out")
             .on(DATA_BINDING_ARTIFACT)
     } else {
-        artifacts
-            .replace(taskProvider) { dataBindingArtifactDir }
-            .on(DATA_BINDING_ARTIFACT)
+        artifacts.use(taskProvider)
+            .wiredWith { dataBindingArtifactDir }
+            .toCreate(DATA_BINDING_ARTIFACT)
     }
     if (isExportDataBindingClassList) {
         if (firstRegistration) {
@@ -192,9 +192,9 @@ fun registerDataBindingOutputs(
                 .setInitialProvider(taskProvider) { dataBindingExportClassListFile }
                 .on(DATA_BINDING_EXPORT_CLASS_LIST)
         } else {
-            artifacts
-                .replace(taskProvider) { dataBindingExportClassListFile }
-                .on(DATA_BINDING_EXPORT_CLASS_LIST)
+            artifacts.use(taskProvider)
+                .wiredWith { dataBindingExportClassListFile }
+                .toCreate(DATA_BINDING_EXPORT_CLASS_LIST)
         }
     }
 }

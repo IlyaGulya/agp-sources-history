@@ -30,20 +30,20 @@ import com.android.build.gradle.internal.publishing.AndroidArtifacts.MODULE_PATH
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.InternalArtifactType.MERGED_NATIVE_LIBS
 import com.android.build.gradle.internal.scope.InternalArtifactType.STRIPPED_NATIVE_LIBS
-import com.android.build.gradle.internal.scope.MultipleArtifactType
+import com.android.build.gradle.internal.scope.InternalMultipleArtifactType
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.getDesugarLibDexFromTransform
 import com.android.builder.files.NativeLibraryAbiPredicate
 import com.android.builder.model.CodeShrinker
 import com.android.builder.packaging.JarCreator
 import com.android.builder.packaging.JarMerger
-import com.android.utils.FileUtils
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
@@ -95,9 +95,7 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
     abstract val nativeLibsFiles: ConfigurableFileCollection
 
     @get:Input
-    @get:Optional
-    var abiFilters: Set<String>? = null
-        private set
+    abstract val abiFilters: SetProperty<String>
 
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.NAME_ONLY)
@@ -122,8 +120,8 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
         jarCreator.setCompressionLevel(Deflater.NO_COMPRESSION)
 
         val filters = appMetadata.singleOrNull()?.let {
-            ModuleMetadata.load(it).abiFilters?.toSet()
-        } ?: abiFilters
+            ModuleMetadata.load(it).abiFilters.toSet()
+        } ?: abiFilters.get()
 
         val abiFilter = filters?.let { NativeLibraryAbiPredicate(it, false) }
 
@@ -200,7 +198,7 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
             get() = PerModuleBundleTask::class.java
 
         override fun handleProvider(
-            taskProvider: TaskProvider<out PerModuleBundleTask>
+            taskProvider: TaskProvider<PerModuleBundleTask>
         ) {
             super.handleProvider(taskProvider)
             creationConfig.artifacts.setInitialProvider(
@@ -238,7 +236,7 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
                 if (creationConfig.variantScope.consumesFeatureJars()) {
                     artifacts.get(InternalArtifactType.BASE_DEX)
                 } else {
-                    artifacts.getAll(MultipleArtifactType.DEX)
+                    artifacts.getAll(InternalMultipleArtifactType.DEX)
                 }
             )
             task.dexFiles.from(
@@ -283,8 +281,9 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
                     )
                 )
             } else {
-                task.abiFilters = creationConfig.variantDslInfo.supportedAbis
+                task.abiFilters.set(creationConfig.variantDslInfo.supportedAbis)
             }
+            task.abiFilters.disallowChanges()
             task.appMetadata.disallowChanges()
 
             task.jarCreatorType.set(creationConfig.variantScope.jarCreatorType)

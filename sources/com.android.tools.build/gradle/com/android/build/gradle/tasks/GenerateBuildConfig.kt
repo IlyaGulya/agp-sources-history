@@ -27,7 +27,7 @@ import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.build.gradle.options.BooleanOption
-import com.android.builder.compiling.BuildConfigCreator
+import com.android.builder.compiling.GeneratedCodeFileCreator
 import com.android.build.gradle.internal.generators.BuildConfigGenerator
 import com.android.utils.FileUtils
 import org.gradle.api.file.DirectoryProperty
@@ -58,7 +58,7 @@ abstract class GenerateBuildConfig : NonIncrementalTask() {
 
     @get:OutputFile
     @get:Optional
-    abstract val bytecodeOutputFolder: RegularFileProperty
+    abstract val bytecodeOutputFile: RegularFileProperty
 
     // ----- PRIVATE TASK API -----
 
@@ -105,28 +105,18 @@ abstract class GenerateBuildConfig : NonIncrementalTask() {
     @get:Input
     abstract val items: MapProperty<String, BuildConfigField<out Serializable>>
 
-    @get:Input
-    abstract val outputAsBytecode: Property<Boolean>
-
     @get:InputFiles
     @get:Optional
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val mergedManifests: DirectoryProperty
 
     override fun doTaskAction() {
-        // must clear the folder in case the packagename changed, otherwise,
-        // there'll be two classes.
-        if (sourceOutputDir.isPresent) {
-            val destinationDir = sourceOutputDir.get().asFile
-            FileUtils.cleanOutputDir(destinationDir)
-        }
-
         val itemsToGenerate = items.get()
 
         val buildConfigData = BuildConfigData.Builder()
                 .setBuildConfigPackageName(buildConfigPackageName.get())
                 .apply {
-                    if (!outputAsBytecode.get() || !itemsToGenerate.none()) {
+                    if (sourceOutputDir.isPresent) {
                         addBooleanField("DEBUG", debuggable.get())
                     }
 
@@ -163,15 +153,19 @@ abstract class GenerateBuildConfig : NonIncrementalTask() {
                     }
                 }
 
-        val generator: BuildConfigCreator =
-                if (outputAsBytecode.get() && itemsToGenerate.none()) {
+        val generator: GeneratedCodeFileCreator =
+                if (bytecodeOutputFile.isPresent) {
+                    FileUtils.deleteIfExists(bytecodeOutputFile.get().asFile)
                     val byteCodeBuildConfigData = buildConfigData
-                            .setOutputPath(bytecodeOutputFolder.get().asFile.toPath())
+                            .setOutputPath(bytecodeOutputFile.get().asFile.parentFile.toPath())
                             .addBooleanField("DEBUG", debuggable.get())
                             .build()
                     BuildConfigByteCodeGenerator(byteCodeBuildConfigData)
-
                 } else {
+                    // must clear the folder in case the packagename changed, otherwise,
+                    // there'll be two classes.
+                    val destinationDir = sourceOutputDir.get().asFile
+                    FileUtils.cleanOutputDir(destinationDir)
                     val sourceCodeBuildConfigData = buildConfigData
                             .setOutputPath(sourceOutputDir.get().asFile.toPath())
                             .apply {
@@ -201,17 +195,17 @@ abstract class GenerateBuildConfig : NonIncrementalTask() {
         override val type: Class<GenerateBuildConfig> = GenerateBuildConfig::class.java
 
         override fun handleProvider(
-            taskProvider: TaskProvider<out GenerateBuildConfig>
+            taskProvider: TaskProvider<GenerateBuildConfig>
         ) {
             super.handleProvider(taskProvider)
             val outputBytecode = creationConfig.services.projectOptions
                     .get(BooleanOption.ENABLE_BUILD_CONFIG_AS_BYTECODE)
-            val generateItems = creationConfig.variantDslInfo.getBuildConfigFields().none()
+            val generateItems = creationConfig.variantDslInfo.getBuildConfigFields().any()
             creationConfig.taskContainer.generateBuildConfigTask = taskProvider
-            if (outputBytecode && generateItems) {
+            if (outputBytecode && !generateItems) {
                 creationConfig.artifacts.setInitialProvider(
                                 taskProvider,
-                                GenerateBuildConfig::bytecodeOutputFolder
+                                GenerateBuildConfig::bytecodeOutputFile
                         ).withName("BuildConfig.jar")
                         .on(InternalArtifactType.COMPILE_BUILD_CONFIG_JAR)
             } else {
@@ -262,9 +256,6 @@ abstract class GenerateBuildConfig : NonIncrementalTask() {
             if (creationConfig is VariantCreationConfig) {
                 task.items.set(creationConfig.buildConfigFields)
             }
-
-            task.outputAsBytecode.setDisallowChanges(creationConfig.services.projectOptions
-                    .get(BooleanOption.ENABLE_BUILD_CONFIG_AS_BYTECODE))
 
             if (creationConfig.variantType.isTestComponent) {
                 creationConfig.artifacts.setTaskInputToFinalProduct(

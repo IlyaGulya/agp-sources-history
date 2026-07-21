@@ -16,7 +16,7 @@
 package com.android.build.gradle.tasks
 
 import com.android.build.api.artifact.ArtifactTransformationRequest
-import com.android.build.api.artifact.ArtifactType
+import com.android.build.api.artifact.Artifact
 import com.android.build.api.variant.impl.BuiltArtifactsImpl
 import com.android.build.gradle.internal.component.ApkCreationConfig
 import com.android.build.gradle.internal.scope.InternalArtifactType
@@ -33,10 +33,10 @@ import java.nio.file.Files
 
 /** Task to package an Android application (APK).  */
 abstract class PackageApplication : PackageAndroidArtifact() {
-    private lateinit var transformationRequest: ArtifactTransformationRequest
+    private lateinit var transformationRequest: ArtifactTransformationRequest<PackageApplication>
 
     @Internal
-    override fun getTransformationRequest(): ArtifactTransformationRequest {
+    override fun getTransformationRequest(): ArtifactTransformationRequest<PackageApplication> {
         return transformationRequest
     }
     // ----- CreationAction -----
@@ -49,7 +49,7 @@ abstract class PackageApplication : PackageAndroidArtifact() {
         private val outputDirectory: File,
         useResourceShrinker: Boolean,
         manifests: Provider<Directory?>,
-        manifestType: ArtifactType<Directory>,
+        manifestType: Artifact<Directory>,
         packageCustomClassDependencies: Boolean
     ) : PackageAndroidArtifact.CreationAction<PackageApplication>(
         creationConfig,
@@ -58,7 +58,7 @@ abstract class PackageApplication : PackageAndroidArtifact() {
         manifestType,
         packageCustomClassDependencies
     ) {
-        private var transformationRequest: ArtifactTransformationRequest? = null
+        private var transformationRequest: ArtifactTransformationRequest<PackageApplication>? = null
         private var task: PackageApplication? = null
         override val name: String
             get() = computeTaskName("package")
@@ -67,22 +67,24 @@ abstract class PackageApplication : PackageAndroidArtifact() {
             get() = PackageApplication::class.java
 
         override fun handleProvider(
-            taskProvider: TaskProvider<out PackageApplication>
+            taskProvider: TaskProvider<PackageApplication>
         ) {
             super.handleProvider(taskProvider)
             creationConfig.taskContainer.packageAndroidTask = taskProvider
+            val operationRequest = creationConfig.artifacts.use(taskProvider)
+                .wiredWithDirectories(
+                    PackageAndroidArtifact::getResourceFiles,
+                    PackageApplication::getOutputDirectory)
             transformationRequest = (if (useResourceShrinker)
-                 creationConfig.artifacts.use(taskProvider)
-                    .toRead(InternalArtifactType.SHRUNK_PROCESSED_RES,
-                        PackageAndroidArtifact::getResourceFiles)
-            else
-                creationConfig.artifacts.use(taskProvider)
-                    .toRead(InternalArtifactType.PROCESSED_RES,
-                        PackageAndroidArtifact::getResourceFiles))
-                .andWrite(
-                    InternalArtifactType.APK,
-                    PackageApplication::getOutputDirectory,
-                    outputDirectory.absolutePath)
+                    operationRequest.toTransformMany(
+                        InternalArtifactType.SHRUNK_PROCESSED_RES,
+                        InternalArtifactType.APK,
+                        outputDirectory.absolutePath)
+                else
+                    operationRequest.toTransformMany(
+                        InternalArtifactType.PROCESSED_RES,
+                        InternalArtifactType.APK,
+                        outputDirectory.absolutePath))
 
             // in case configure is called before handleProvider, we need to save the request.
             transformationRequest?.let {

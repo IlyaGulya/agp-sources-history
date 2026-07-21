@@ -17,7 +17,6 @@
 package com.android.build.gradle.internal.tasks
 
 import com.android.build.gradle.internal.component.ApplicationCreationConfig
-import com.android.build.gradle.internal.res.namespaced.GenerateNamespacedLibraryRFilesTask
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.setDisallowChanges
@@ -58,7 +57,6 @@ abstract class ModuleMetadataWriterTask : NonIncrementalTask() {
     abstract val debuggable: Property<Boolean>
 
     @get:Input
-    @get:Optional
     abstract val abiFilters: ListProperty<String>
 
     @get:OutputFile
@@ -71,7 +69,7 @@ abstract class ModuleMetadataWriterTask : NonIncrementalTask() {
                 versionCode = versionCode.orNull?.toString(),
                 versionName = versionName.orNull,
                 debuggable = debuggable.get(),
-                abiFilters = abiFilters.orNull
+                abiFilters = abiFilters.get()
             )
 
         declaration.save(outputFile.get().asFile)
@@ -88,7 +86,7 @@ abstract class ModuleMetadataWriterTask : NonIncrementalTask() {
             get() = ModuleMetadataWriterTask::class.java
 
         override fun handleProvider(
-            taskProvider: TaskProvider<out ModuleMetadataWriterTask>
+            taskProvider: TaskProvider<ModuleMetadataWriterTask>
         ) {
             super.handleProvider(taskProvider)
             // publish the ID for the dynamic features (whether it's hybrid or not) to consume.
@@ -107,7 +105,7 @@ abstract class ModuleMetadataWriterTask : NonIncrementalTask() {
             task.debuggable.setDisallowChanges(creationConfig.debuggable)
             task.versionCode.setDisallowChanges(creationConfig.outputs.getMainSplit().versionCode)
             task.versionName.setDisallowChanges(creationConfig.outputs.getMainSplit().versionName)
-            task.abiFilters.setDisallowChanges(creationConfig.variantDslInfo.supportedAbis?.sorted())
+            task.abiFilters.setDisallowChanges(creationConfig.variantDslInfo.supportedAbis.sorted())
         }
     }
 }

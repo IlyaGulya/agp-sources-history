@@ -18,7 +18,6 @@ package com.android.build.gradle.internal.core
 import com.android.build.api.component.ComponentIdentity
 import com.android.build.api.variant.BuildConfigField
 import com.android.build.api.variant.impl.ResValue
-import com.android.build.api.variant.impl.VariantPropertiesImpl
 import com.android.build.gradle.ProguardFiles
 import com.android.build.gradle.api.JavaCompileOptions
 import com.android.build.gradle.internal.PostprocessingFeatures
@@ -57,6 +56,7 @@ import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
 import com.google.common.collect.Sets
+import jdk.internal.org.objectweb.asm.Type
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Provider
 import java.io.File
@@ -121,6 +121,7 @@ open class VariantDslInfoImpl internal constructor(
     private val mergedExternalNativeBuildOptions =
         MergedExternalNativeBuildOptions()
     private val mergedJavaCompileOptions = MergedJavaCompileOptions(dslServices)
+    private val mergedAarMetadata = MergedAarMetadata()
 
     init {
         mergeOptions()
@@ -705,29 +706,8 @@ open class VariantDslInfoImpl internal constructor(
 
         fun addToListIfNotAlreadyPresent(classField: ClassField, comment: String) {
             if (!buildConfigFieldsMap.containsKey(classField.name)) {
-
-                buildConfigFieldsMap[classField.name] = when (classField.type) {
-                    "boolean" -> BuildConfigField(
-                        BuildConfigField.SupportedType.BOOLEAN,
-                        classField.value.toBoolean(),
-                        comment
-                    )
-                    "int" -> BuildConfigField(
-                        BuildConfigField.SupportedType.INT,
-                        classField.value.toInt(),
-                        comment)
-                    "long" -> BuildConfigField(
-                        BuildConfigField.SupportedType.LONG,
-                        if (classField.value.endsWith("L"))
-                            classField.value.dropLast(1).toLong()
-                        else classField.value.toLong(),
-                        comment)
-                    "String" ->BuildConfigField(
-                        BuildConfigField.SupportedType.STRING,
-                        classField.value,
-                        comment)
-                    else -> throw java.lang.RuntimeException("Unsupported BuildConfig type : ${classField.type}")
-                }
+                buildConfigFieldsMap[classField.name] =
+                        BuildConfigField(classField.type , classField.value, comment)
             }
         }
 
@@ -955,6 +935,11 @@ open class VariantDslInfoImpl internal constructor(
             { externalNativeBuildOptions },
             { externalNativeBuildOptions }
         )
+        computeMergedOptions(
+            mergedAarMetadata,
+            { aarMetadata },
+            { aarMetadata }
+        )
     }
 
     override val ndkConfig: MergedNdkConfig
@@ -963,14 +948,17 @@ open class VariantDslInfoImpl internal constructor(
     override val externalNativeBuildOptions: CoreExternalNativeBuildOptions
         get() = mergedExternalNativeBuildOptions
 
+    override val aarMetadata: MergedAarMetadata
+        get() = mergedAarMetadata
+
     /**
-     * Returns the ABI filters associated with the artifact, or null if there are no filters.
+     * Returns the ABI filters associated with the artifact, or empty set if there are no filters.
      *
      * If the list contains values, then the artifact only contains these ABIs and excludes
      * others.
      */
-    override val supportedAbis: Set<String>?
-        get() = if (variantType.isDynamicFeature) null else mergedNdkConfig.abiFilters
+    override val supportedAbis: Set<String>
+        get() = if (variantType.isDynamicFeature) setOf() else mergedNdkConfig.abiFilters
 
     override fun gatherProguardFiles(type: ProguardFileType): List<File> {
         val result: MutableList<File> = ArrayList(defaultConfig.getProguardFiles(type))

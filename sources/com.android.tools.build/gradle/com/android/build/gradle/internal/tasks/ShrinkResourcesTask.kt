@@ -35,7 +35,7 @@ import com.android.build.gradle.internal.res.shrinker.obfuscation.ProguardMappin
 import com.android.build.gradle.internal.res.shrinker.usages.DexUsageRecorder
 import com.android.build.gradle.internal.res.shrinker.usages.XmlAndroidManifestUsageRecorder
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.MultipleArtifactType
+import com.android.build.gradle.internal.scope.InternalMultipleArtifactType
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.build.gradle.options.BooleanOption
@@ -119,7 +119,7 @@ abstract class ShrinkResourcesTask : NonIncrementalTask() {
     abstract val variantOutputs: ListProperty<VariantOutputImpl>
 
     @get:Internal
-    abstract val artifactTransformationRequest: Property<ArtifactTransformationRequest>
+    abstract val artifactTransformationRequest: Property<ArtifactTransformationRequest<ShrinkResourcesTask>>
 
     @get:Classpath
     abstract val classes: ConfigurableFileCollection
@@ -188,16 +188,21 @@ abstract class ShrinkResourcesTask : NonIncrementalTask() {
                         || contentTypes.contains(ExtendedContentType.DEX))
             }
 
-        private lateinit var artifactTransformationRequest: ArtifactTransformationRequest
+        private lateinit var artifactTransformationRequest: ArtifactTransformationRequest<ShrinkResourcesTask>
 
         override fun handleProvider(
-            taskProvider: TaskProvider<out ShrinkResourcesTask>
+            taskProvider: TaskProvider<ShrinkResourcesTask>
         ) {
             super.handleProvider(taskProvider)
 
             artifactTransformationRequest = creationConfig.artifacts.use(taskProvider)
-                .toRead(InternalArtifactType.PROCESSED_RES, ShrinkResourcesTask::uncompressedResources)
-                .andWrite(InternalArtifactType.SHRUNK_PROCESSED_RES, ShrinkResourcesTask::compressedResources)
+                .wiredWithDirectories(
+                    ShrinkResourcesTask::uncompressedResources,
+                    ShrinkResourcesTask::compressedResources)
+                .toTransformMany(
+                    InternalArtifactType.PROCESSED_RES,
+                    InternalArtifactType.SHRUNK_PROCESSED_RES)
+
         }
 
         override fun configure(
@@ -254,7 +259,7 @@ abstract class ShrinkResourcesTask : NonIncrementalTask() {
                     && creationConfig.variantType.isAar) {
                     creationConfig.artifacts.get(InternalArtifactType.SHRUNK_CLASSES)
                 } else {
-                    artifacts.getAll(MultipleArtifactType.DEX)
+                    artifacts.getAll(InternalMultipleArtifactType.DEX)
                         .map {
                             if (it.isEmpty()) { classes } else {
                                 creationConfig.globalScope.project.files(it)
@@ -394,7 +399,7 @@ abstract class ShrinkResourcesTask : NonIncrementalTask() {
                 ResourcesGathererFromRTxt(parameters.rSourceVariant.get().asFile, ""),
                 ProguardMappingsRecorder(parameters.mappingFile.get().asFile.toPath()),
                 listOf(manifestUsageRecorder) + dexClassesUsageRecorder,
-                RawResourcesGraphBuilder(listOf(parameters.resourceDir.get().asFile.toPath())),
+                RawResourcesGraphBuilder(parameters.resourceDir.get().asFile.toPath()),
                 reporter,
                 ApkFormat.BINARY
             )

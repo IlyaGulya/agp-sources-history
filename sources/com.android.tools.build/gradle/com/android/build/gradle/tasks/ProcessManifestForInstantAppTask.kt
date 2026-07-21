@@ -65,7 +65,7 @@ abstract class ProcessManifestForInstantAppTask @Inject constructor(
     abstract val mergedManifests: DirectoryProperty
 
     @get:Internal
-    abstract val transformationRequest: Property<ArtifactTransformationRequest>
+    abstract val transformationRequest: Property<ArtifactTransformationRequest<ProcessManifestForInstantAppTask>>
 
     @TaskAction
     override fun doTaskAction() {
@@ -129,19 +129,17 @@ abstract class ProcessManifestForInstantAppTask @Inject constructor(
         override val type: Class<ProcessManifestForInstantAppTask>
             get() = ProcessManifestForInstantAppTask::class.java
 
-        private lateinit var transformationRequest: ArtifactTransformationRequest
+        private lateinit var transformationRequest: ArtifactTransformationRequest<ProcessManifestForInstantAppTask>
 
-        override fun handleProvider(taskProvider: TaskProvider<out ProcessManifestForInstantAppTask>) {
+        override fun handleProvider(taskProvider: TaskProvider<ProcessManifestForInstantAppTask>) {
             super.handleProvider(taskProvider)
             transformationRequest = creationConfig.artifacts.use(taskProvider)
-                .toRead(
+                .wiredWithDirectories(
+                    ProcessManifestForInstantAppTask::mergedManifests,
+                    ProcessManifestForInstantAppTask::instantAppManifests)
+                .toTransformMany(
                     InternalArtifactType.MERGED_MANIFESTS,
-                    ProcessManifestForInstantAppTask::mergedManifests
-                )
-                .andWrite(
-                    InternalArtifactType.INSTANT_APP_MANIFEST,
-                    ProcessManifestForInstantAppTask::instantAppManifests
-                )
+                    InternalArtifactType.INSTANT_APP_MANIFEST)
         }
 
         override fun configure(task: ProcessManifestForInstantAppTask) {

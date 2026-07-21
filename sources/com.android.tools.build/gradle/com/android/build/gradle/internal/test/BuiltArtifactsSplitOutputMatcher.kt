@@ -27,19 +27,19 @@ import java.io.File
 object BuiltArtifactsSplitOutputMatcher {
 
     /**
-     * Determines and return the list of APKs to use based on given device density and abis.
+     * Determines and return the list of APKs to use based on given device abis.
      *
      * @param deviceConfigProvider the device configuration.
      * @param builtArtifacts the tested variant built artifacts.
      * @param variantAbiFilters a list of abi filters applied to the variant. This is used in place
-     * of the outputs, if there is a single output with no abi filters. If the list is null or
+     * of the outputs, if there is a single output with no abi filters. If the list is
      * empty, then the variant does not restrict ABI packaging.
      * @return the list of APK files to install.
      */
     fun computeBestOutput(
         deviceConfigProvider: DeviceConfigProvider,
         builtArtifacts: BuiltArtifacts,
-        variantAbiFilters: Collection<String?>?
+        variantAbiFilters: Collection<String>
     ): List<File> {
         val adaptedBuiltArtifactType = GenericBuiltArtifacts(
             version = BuiltArtifacts.METADATA_FILE_VERSION,
@@ -69,7 +69,6 @@ object BuiltArtifactsSplitOutputMatcher {
         return GenericBuiltArtifactsSplitOutputMatcher.computeBestOutput(
             adaptedBuiltArtifactType,
             variantAbiFilters,
-            deviceConfigProvider.density,
             deviceConfigProvider.abis
         )
     }

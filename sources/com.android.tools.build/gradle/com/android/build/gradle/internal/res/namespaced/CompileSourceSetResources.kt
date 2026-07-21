@@ -19,7 +19,7 @@ import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.res.Aapt2CompileRunnable
 import com.android.build.gradle.internal.res.getAapt2FromMavenAndVersion
-import com.android.build.gradle.internal.scope.MultipleArtifactType
+import com.android.build.gradle.internal.scope.InternalMultipleArtifactType
 import com.android.build.gradle.internal.services.Aapt2DaemonBuildService
 import com.android.build.gradle.internal.services.getBuildService
 import com.android.build.gradle.internal.tasks.IncrementalTask
@@ -200,19 +200,17 @@ abstract class CompileSourceSetResources : IncrementalTask() {
             get() = CompileSourceSetResources::class.java
 
         override fun handleProvider(
-            taskProvider: TaskProvider<out CompileSourceSetResources>
+            taskProvider: TaskProvider<CompileSourceSetResources>
         ) {
             super.handleProvider(taskProvider)
 
-            creationConfig.artifacts.append(
-                taskProvider,
-                CompileSourceSetResources::partialRDirectory
-            ).on(MultipleArtifactType.PARTIAL_R_FILES)
+            creationConfig.artifacts.use(taskProvider)
+                .wiredWith(CompileSourceSetResources::partialRDirectory)
+                .toAppendTo(InternalMultipleArtifactType.PARTIAL_R_FILES)
 
-            creationConfig.artifacts.append(
-                taskProvider,
-                CompileSourceSetResources::outputDirectory
-            ).on(MultipleArtifactType.RES_COMPILED_FLAT_FILES)
+            creationConfig.artifacts.use(taskProvider)
+                .wiredWith(CompileSourceSetResources::outputDirectory)
+                .toAppendTo(InternalMultipleArtifactType.RES_COMPILED_FLAT_FILES)
         }
 
         override fun configure(

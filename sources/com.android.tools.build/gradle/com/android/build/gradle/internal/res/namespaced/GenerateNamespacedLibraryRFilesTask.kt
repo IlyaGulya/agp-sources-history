@@ -19,7 +19,7 @@ package com.android.build.gradle.internal.res.namespaced
 import com.android.SdkConstants
 import com.android.build.api.component.impl.ComponentPropertiesImpl
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.scope.MultipleArtifactType
+import com.android.build.gradle.internal.scope.InternalMultipleArtifactType
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.setDisallowChanges
@@ -141,7 +141,7 @@ abstract class GenerateNamespacedLibraryRFilesTask @Inject constructor(objects: 
             get() = GenerateNamespacedLibraryRFilesTask::class.java
 
         override fun handleProvider(
-            taskProvider: TaskProvider<out GenerateNamespacedLibraryRFilesTask>
+            taskProvider: TaskProvider<GenerateNamespacedLibraryRFilesTask>
         ) {
             super.handleProvider(taskProvider)
             creationConfig.artifacts.setInitialProvider(
@@ -168,7 +168,7 @@ abstract class GenerateNamespacedLibraryRFilesTask @Inject constructor(objects: 
 
             task.partialRFiles.setDisallowChanges(
                 creationConfig.artifacts.getAll(
-                MultipleArtifactType.PARTIAL_R_FILES))
+                InternalMultipleArtifactType.PARTIAL_R_FILES))
             task.packageForR.setDisallowChanges(creationConfig.packageName)
         }
     }

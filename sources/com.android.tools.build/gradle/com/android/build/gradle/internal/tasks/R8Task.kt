@@ -21,10 +21,9 @@ import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.PostprocessingFeatures
 import com.android.build.gradle.internal.component.BaseCreationConfig
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
-import com.android.build.gradle.internal.res.namespaced.GenerateNamespacedLibraryRFilesTask
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.InternalArtifactType.DUPLICATE_CLASSES_CHECK
-import com.android.build.gradle.internal.scope.MultipleArtifactType
+import com.android.build.gradle.internal.scope.InternalMultipleArtifactType
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.utils.getDesugarLibConfig
 import com.android.build.gradle.internal.utils.setDisallowChanges
@@ -184,7 +183,7 @@ abstract class R8Task: ProguardConfigurableTask() {
         private val proguardConfigurations: MutableList<String> = mutableListOf("-ignorewarnings")
 
         override fun handleProvider(
-            taskProvider: TaskProvider<out R8Task>
+            taskProvider: TaskProvider<R8Task>
         ) {
             super.handleProvider(taskProvider)
 
@@ -213,9 +212,9 @@ abstract class R8Task: ProguardConfigurableTask() {
                     }
                 }
                 else -> {
-                    creationConfig.artifacts.append(
-                        taskProvider, R8Task::outputDex
-                    ).on(MultipleArtifactType.DEX)
+                    creationConfig.artifacts.use(taskProvider)
+                        .wiredWith(R8Task::outputDex)
+                        .toAppendTo(InternalMultipleArtifactType.DEX)
                     if (creationConfig.variantScope.needsShrinkDesugarLibrary) {
                         creationConfig.artifacts
                             .setInitialProvider(taskProvider, R8Task::projectOutputKeepRules)

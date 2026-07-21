@@ -16,7 +16,6 @@
 package com.android.ide.common.build
 
 import com.android.builder.testing.api.DeviceConfigProvider
-import com.android.resources.Density
 import com.google.common.base.Strings
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.Lists
@@ -26,7 +25,7 @@ import java.util.Collections
 object GenericBuiltArtifactsSplitOutputMatcher {
 
     /**
-     * Determines and return the list of APKs to use based on given device density and abis.
+     * Determines and return the list of APKs to use based on given device abis.
      *
      * @param deviceConfigProvider the device configuration.
      * @param builtArtifacts the tested variant built artifacts.
@@ -35,22 +34,21 @@ object GenericBuiltArtifactsSplitOutputMatcher {
      * empty, then the variant does not restrict ABI packaging.
      * @return the list of APK files to install.
      */
-    fun computeBestOutput(
+    fun computeBestOutputs(
         deviceConfigProvider: DeviceConfigProvider,
         builtArtifacts: GenericBuiltArtifacts,
-        variantAbiFilters: Collection<String?>?
+        variantAbiFilters: Collection<String>
     ): List<File> {
         // now look for a matching output file
         return computeBestOutput(
             builtArtifacts,
             variantAbiFilters,
-            deviceConfigProvider.density,
             deviceConfigProvider.abis
         )
     }
 
     /**
-     * Determines and return the list of APKs to use based on given device density and abis.
+     * Determines and return the list of APKs to use based on given device abis.
      *
      *
      * This uses the same logic as the store, using two passes: First, find all the compatible
@@ -58,25 +56,23 @@ object GenericBuiltArtifactsSplitOutputMatcher {
      *
      * @param outputs the outputs to choose from.
      * @param variantAbiFilters a list of abi filters applied to the variant. This is used in place
-     * of the outputs, if there is a single output with no abi filters. If the list is null,
+     * of the outputs, if there is a single output with no abi filters. If the list is empty
      * then the variant does not restrict ABI packaging.
-     * @param deviceDensity the density of the device.
      * @param deviceAbis a list of ABIs supported by the device.
      * @return the list of APKs to install or null if none are compatible.
      */
     fun computeBestOutput(
         outputs: GenericBuiltArtifacts,
-        variantAbiFilters: Collection<String?>?,
-        deviceDensity: Int,
+        variantAbiFilters: Collection<String>,
         deviceAbis: List<String?>
     ): List<File> =
-        computeBestArtifact(outputs.elements, variantAbiFilters, deviceDensity, deviceAbis)?.let {
+        computeBestArtifact(outputs.elements, variantAbiFilters, deviceAbis)?.let {
             ImmutableList.of(File(it.outputFile))
         } ?: ImmutableList.of<File>()
 
 
     /**
-     * Determines and return the list of APKs to use based on given device density and abis.
+     * Determines and return the list of APKs to use based on given device abis.
      *
      *
      * This uses the same logic as the store, using two passes: First, find all the compatible
@@ -84,33 +80,23 @@ object GenericBuiltArtifactsSplitOutputMatcher {
      *
      * @param outputs the outputs to choose from.
      * @param variantAbiFilters a list of abi filters applied to the variant. This is used in place
-     * of the outputs, if there is a single output with no abi filters. If the list is null,
+     * of the outputs, if there is a single output with no abi filters. If the list is empty
      * then the variant does not restrict ABI packaging.
-     * @param deviceDensity the density of the device.
      * @param deviceAbis a list of ABIs supported by the device.
      * @return the list of APKs to install or null if none are compatible.
      */
     fun computeBestArtifact(
         outputs: Collection<GenericBuiltArtifact>,
-        variantAbiFilters: Collection<String?>?,
-        deviceDensity: Int,
+        variantAbiFilters: Collection<String>,
         deviceAbis: List<String?>
     ): GenericBuiltArtifact? {
-        val densityEnum = Density.getEnum(deviceDensity)
-        val densityValue: String?
-        densityValue = densityEnum?.resourceValue
         // gather all compatible matches.
         val matches: MutableList<GenericBuiltArtifact> =
             Lists.newArrayList()
         // find a matching output.
         for (builtArtifact in outputs) {
-            val densityFilter =
-                getFilter(builtArtifact, "DENSITY")
             val abiFilter =
                 getFilter(builtArtifact, "ABI")
-            if (densityFilter != null && densityFilter != densityValue) {
-                continue
-            }
             if (abiFilter != null && !deviceAbis.contains(abiFilter)) {
                 continue
             }
@@ -176,11 +162,10 @@ object GenericBuiltArtifactsSplitOutputMatcher {
 
     private fun isMainApkCompatibleWithDevice(
         mainBuiltArtifact: GenericBuiltArtifact,
-        variantAbiFilters: Collection<String?>?,
+        variantAbiFilters: Collection<String>,
         deviceAbis: Collection<String?>
     ): Boolean { // so far, we are not dealing with the pure split files...
-        if (getFilter(mainBuiltArtifact, "ABI")
-            == null && variantAbiFilters != null && !variantAbiFilters.isEmpty()
+        if ((getFilter(mainBuiltArtifact, "ABI") == null) && !variantAbiFilters.isEmpty()
         ) { // if we have a match that has no abi filter, and we have variant-level filters, then
 // we need to make sure that the variant filters are compatible with the device abis.
             for (abi in deviceAbis) {
