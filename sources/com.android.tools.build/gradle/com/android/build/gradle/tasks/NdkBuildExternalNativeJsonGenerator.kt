@@ -23,11 +23,12 @@ import com.android.build.gradle.internal.cxx.logging.errorln
 import com.android.build.gradle.internal.cxx.logging.infoln
 import com.android.build.gradle.internal.cxx.logging.warnln
 import com.android.build.gradle.internal.cxx.model.CxxAbiModel
-import com.android.build.gradle.internal.cxx.model.CxxBuildModel
 import com.android.build.gradle.internal.cxx.model.CxxVariantModel
 import com.android.build.gradle.internal.cxx.model.jsonFile
 import com.android.build.gradle.internal.cxx.model.soFolder
+import com.android.build.gradle.internal.cxx.model.statsBuilder
 import com.android.build.gradle.internal.cxx.services.createProcessOutputJunction
+import com.android.build.gradle.internal.cxx.services.exec
 import com.android.ide.common.process.ProcessException
 import com.android.ide.common.process.ProcessInfoBuilder
 import com.google.common.base.Charsets
@@ -35,11 +36,7 @@ import com.google.common.base.Joiner
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
 import com.google.gson.GsonBuilder
-import com.google.wireless.android.sdk.stats.GradleBuildVariant
 import com.google.wireless.android.sdk.stats.GradleNativeAndroidModule
-import org.gradle.api.Action
-import org.gradle.process.ExecResult
-import org.gradle.process.ExecSpec
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -49,11 +46,9 @@ import java.nio.file.Files
  * JSON can be generated during configuration.
  */
 internal class NdkBuildExternalNativeJsonGenerator(
-    build: CxxBuildModel,
     variant: CxxVariantModel,
-    abis: List<CxxAbiModel>,
-    stats: GradleBuildVariant.Builder
-) : ExternalNativeJsonGeneratorBase(build, variant, abis, stats) {
+    abis: List<CxxAbiModel>
+) : ExternalNativeJsonGenerator(variant, abis) {
     @Throws(IOException::class)
     override fun processBuildOutput(
         buildOutput: String,
@@ -142,10 +137,7 @@ internal class NdkBuildExternalNativeJsonGenerator(
     }
 
     @Throws(ProcessException::class, IOException::class)
-    override fun executeProcess(
-        abi: CxxAbiModel,
-        execOperation: (Action<in ExecSpec?>) -> ExecResult
-    ): String {
+    override fun executeProcess(abi: CxxAbiModel): String {
         return abi.variant.module.createProcessOutputJunction(
             abi.soFolder,
             "android_gradle_generate_ndk_build_json_" + abi.abi.tag,
@@ -153,11 +145,9 @@ internal class NdkBuildExternalNativeJsonGenerator(
             ""
         )
             .logStderrToInfo()
-            .executeAndReturnStdoutString(execOperation)
+            .executeAndReturnStdoutString(abi.variant.module.project.exec)
     }
 
-    override val nativeBuildSystem: NativeBuildSystem
-        get() = NativeBuildSystem.NDK_BUILD
 
     override fun getStlSharedObjectFiles(): Map<Abi, File> {
         return Maps.newHashMap()
@@ -299,7 +289,7 @@ internal class NdkBuildExternalNativeJsonGenerator(
     }
 
     init {
-        this.stats.nativeBuildSystemType = GradleNativeAndroidModule.NativeBuildSystemType.NDK_BUILD
+        variant.statsBuilder.nativeBuildSystemType = GradleNativeAndroidModule.NativeBuildSystemType.NDK_BUILD
 
         // Do some basic sync time checks.
         if (makefile.isDirectory) {

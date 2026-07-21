@@ -37,7 +37,7 @@ fun <T: Serializable> BuildConfigField<T>.emit(name: String, writer: ClassWriter
         "long" ->
             writer.visitField(pfsOpcodes, name, Type.getDescriptor(Long::class.java), null, value).visitEnd()
         "String" ->
-            writer.visitField(pfsOpcodes, name, Type.getDescriptor(String::class.java), null, value.toString().removeSurrounding("\"")).visitEnd()
+            writer.visitField(pfsOpcodes, name, Type.getDescriptor(String::class.java), null, value).visitEnd()
         else -> throw IllegalArgumentException(
             """BuildConfigField name: $name type: $type and value type: ${value.javaClass
                 .name} cannot be emitted.""".trimMargin())
@@ -50,7 +50,7 @@ fun <T: Serializable> BuildConfigField<T>.emit(name: String, writer: JavaWriter)
     if (comment != null) {
         writer.emitSingleLineComment(comment)
     }
-    val valueAsString = value.toString()
+    val valueToWrite = value
     // Hack (see IDEA-100046): We want to avoid reporting "condition is always
     // true" from the data flow inspection, so use a non-constant value.
     // However, that defeats the purpose of this flag (when not in debug mode,
@@ -59,18 +59,30 @@ fun <T: Serializable> BuildConfigField<T>.emit(name: String, writer: JavaWriter)
     // true, which is the most likely scenario while the user is looking
     // at source code. map.put(PH_DEBUG, Boolean.toString(mDebug));
     val emitValue = if (name == "DEBUG") {
-        if (valueAsString == "true") "Boolean.parseBoolean(\"true\")" else "false"
+        if (value is Boolean && value == true) "Boolean.parseBoolean(\"true\")" else "false"
     } else {
-        when (type) {
-            "long" -> if (valueAsString.toLongOrNull() == null) valueAsString else valueAsString.ensureSuffix('L')
-            "float" -> if (valueAsString.toFloatOrNull() == null) valueAsString else valueAsString.ensureSuffix('f')
-            else -> valueAsString
-        }
+        if (valueToWrite is String) {
+            if (valueToWrite.length > 2 && valueToWrite.first() == '"' && valueToWrite.last() == '"') {
+                valueToWrite
+            } else {
+                """"$valueToWrite""""
+            }
+        } else valueToWrite.toString()
     }
 
-    writer.emitField(type, name, publicStaticFinal, emitValue)
-}
-
-private fun String.ensureSuffix(suffix: Char): String {
-    return if (endsWith(suffix)) this else "$this$suffix"
+    val formattedEmitValue = if (!type.contains("string", true)) {
+        val removedQuotes = emitValue.removeSurrounding('"'.toString())
+        when {
+            type.contains("long", true) && !removedQuotes.endsWith("L") -> {
+                removedQuotes.plus("L")
+            }
+            type.contains("float", true) && !removedQuotes.endsWith("f") -> {
+                removedQuotes.plus("f")
+            }
+            else -> removedQuotes
+        }
+    } else {
+        emitValue
+    }
+    writer.emitField(type, name, publicStaticFinal, formattedEmitValue)
 }

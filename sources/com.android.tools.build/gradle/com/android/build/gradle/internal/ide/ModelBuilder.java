@@ -268,7 +268,7 @@ public class ModelBuilder<Extension extends BaseExtension>
         // Cannot be injected, as the project might not be the same as the project used to construct
         // the model builder e.g. when lint explicitly builds the model.
         ProjectOptions projectOptions = new ProjectOptions(project);
-        Integer modelLevelInt = SyncOptions.buildModelOnlyVersion(projectOptions);
+        Integer modelLevelInt = SyncOptions.buildModelOnlyVersion(projectOptions, project);
         if (modelLevelInt != null) {
             modelLevel = modelLevelInt;
         }
@@ -687,8 +687,7 @@ public class ModelBuilder<Extension extends BaseExtension>
                 componentProperties.getBaseName(),
                 componentProperties.getBuildType(),
                 getProductFlavorNames(componentProperties),
-                new ProductFlavorImpl(
-                        variantDslInfo.getMergedFlavor(), variantDslInfo.getApplicationId()),
+                new ProductFlavorImpl(variantDslInfo.getMergedFlavor()),
                 mainArtifact,
                 extraAndroidArtifacts,
                 clonedExtraJavaArtifacts,
@@ -782,8 +781,7 @@ public class ModelBuilder<Extension extends BaseExtension>
                             .getAsFile());
         }
         // The separately compile R class, if applicable.
-        if (!globalScope.getExtension().getAaptOptions().getNamespaced()
-                && componentProperties.getBuildFeatures().getAndroidResources()) {
+        if (!globalScope.getExtension().getAaptOptions().getNamespaced()) {
             additionalTestClasses.add(
                     componentProperties.getVariantScope().getRJarForUnitTests().get().getAsFile());
         }
@@ -1093,7 +1091,6 @@ public class ModelBuilder<Extension extends BaseExtension>
         }
 
         result.add(componentProperties.getPaths().getRenderscriptResOutputDir());
-        result.add(componentProperties.getPaths().getGeneratedResOutputDir());
 
         return result;
     }

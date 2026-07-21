@@ -18,14 +18,11 @@
 
 package com.android.build.gradle.internal.ide.dependencies
 
-import com.android.build.gradle.internal.dependency.ConstraintHandler
 import com.android.build.gradle.internal.services.ServiceRegistrationAction
 import com.android.builder.dependency.MavenCoordinatesImpl
 import com.android.builder.model.MavenCoordinates
 import com.android.ide.common.caching.CreatingCache
 import org.gradle.api.Project
-import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 import java.io.File
@@ -33,45 +30,35 @@ import java.io.File
 private const val LOCAL_AAR_GROUPID = "__local_aars__"
 
 /** Build service used to cache maven coordinates for libraries. */
-abstract class MavenCoordinatesCacheBuildService :
-    BuildService<MavenCoordinatesCacheBuildService.Parameters>, AutoCloseable {
+abstract class MavenCoordinatesCacheBuildService : BuildService<BuildServiceParameters.None>,
+    AutoCloseable {
 
-    interface Parameters: BuildServiceParameters {
-        val stringCache: Property<ConstraintHandler.CachedStringBuildService>
-    }
-
-    val cache =
+    private val mavenCoordinatesCache =
         CreatingCache(
             CreatingCache.ValueFactory<ResolvedArtifact, MavenCoordinates> {
-                it.computeMavenCoordinates(parameters.stringCache.get())
+                it.computeMavenCoordinates()
             })
 
     fun getMavenCoordForLocalFile(artifactFile: File): MavenCoordinatesImpl {
-        return MavenCoordinatesImpl.create(
-            parameters.stringCache.get(),
-            LOCAL_AAR_GROUPID, artifactFile.path,
-            "unspecified"
-        )
+        return MavenCoordinatesImpl(LOCAL_AAR_GROUPID, artifactFile.path, "unspecified")
     }
 
     fun getMavenCoordinates(resolvedArtifact: ResolvedArtifact): MavenCoordinates {
-        return cache.get(resolvedArtifact)
+        return mavenCoordinatesCache.get(resolvedArtifact)
             ?: throw RuntimeException("Failed to compute maven coordinates for $this")
     }
 
     override fun close() {
-        cache.clear()
+        mavenCoordinatesCache.clear()
     }
 
-    class RegistrationAction(
-        project: Project,
-        private val stringCache: Provider<ConstraintHandler.CachedStringBuildService>
-    ) : ServiceRegistrationAction<MavenCoordinatesCacheBuildService, Parameters>(
-        project,
-        MavenCoordinatesCacheBuildService::class.java
-    ) {
-        override fun configure(parameters: Parameters) {
-            parameters.stringCache.set(stringCache)
+    class RegistrationAction(project: Project) :
+        ServiceRegistrationAction<MavenCoordinatesCacheBuildService, BuildServiceParameters.None>(
+            project,
+            MavenCoordinatesCacheBuildService::class.java
+        ) {
+        override fun configure(parameters: BuildServiceParameters.None) {
+            // do nothing
         }
     }
 }

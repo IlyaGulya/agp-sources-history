@@ -23,23 +23,19 @@ import com.android.build.gradle.internal.cxx.settings.getFinalCmakeCommandLineAr
 import com.android.build.gradle.internal.core.Abi
 import com.android.build.gradle.internal.cxx.configure.CommandLineArgument
 import com.android.build.gradle.internal.cxx.model.CxxAbiModel
-import com.android.build.gradle.internal.cxx.model.CxxBuildModel
 import com.android.build.gradle.internal.cxx.model.CxxCmakeModuleModel
 import com.android.build.gradle.internal.cxx.model.CxxVariantModel
 import com.android.build.gradle.internal.cxx.model.cmakeSettingsFile
+import com.android.build.gradle.internal.cxx.model.statsBuilder
 import com.android.build.gradle.internal.ndk.Stl
 import com.android.ide.common.process.ProcessException
 import com.android.ide.common.process.ProcessInfoBuilder
-import com.google.wireless.android.sdk.stats.GradleBuildVariant
 import com.google.wireless.android.sdk.stats.GradleNativeAndroidModule
-import org.gradle.api.Action
 import java.io.File
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
-import org.gradle.process.ExecResult
-import org.gradle.process.ExecSpec
 import java.io.IOException
 
 /**
@@ -47,11 +43,9 @@ import java.io.IOException
  * be generated during configuration.
  */
 internal abstract class CmakeExternalNativeJsonGenerator(
-    build: CxxBuildModel,
     variant: CxxVariantModel,
-    abis: List<CxxAbiModel>,
-    stats: GradleBuildVariant.Builder
-) : ExternalNativeJsonGeneratorBase(build, variant, abis, stats) {
+    abis: List<CxxAbiModel>
+) : ExternalNativeJsonGenerator(variant, abis) {
     @JvmField
     protected val cmake: CxxCmakeModuleModel
 
@@ -64,7 +58,7 @@ internal abstract class CmakeExternalNativeJsonGenerator(
     }
 
     init {
-        this.stats.nativeBuildSystemType = GradleNativeAndroidModule.NativeBuildSystemType.CMAKE
+        variant.statsBuilder.nativeBuildSystemType = GradleNativeAndroidModule.NativeBuildSystemType.CMAKE
         this.cmake = variant.module.cmake!!
 
         // Check some basic requirements. This code executes at sync time but any call to
@@ -95,10 +89,10 @@ internal abstract class CmakeExternalNativeJsonGenerator(
      * @return Returns the combination of STDIO and STDERR from running the process.
      */
     @Throws(IOException::class, ProcessException::class)
-    abstract fun executeProcessAndGetOutput(abi: CxxAbiModel, execOperations: (Action<in ExecSpec?>) -> ExecResult): String
+    abstract fun executeProcessAndGetOutput(abi: CxxAbiModel): String
 
-    override fun executeProcess(abi: CxxAbiModel, execOperation: (Action<in ExecSpec?>) -> ExecResult): String {
-        val output = executeProcessAndGetOutput(abi, execOperation)
+    override fun executeProcess(abi: CxxAbiModel): String {
+        val output = executeProcessAndGetOutput(abi)
         return makeCmakeMessagePathsAbsolute(output, makefile.parentFile)
     }
 
@@ -113,8 +107,6 @@ internal abstract class CmakeExternalNativeJsonGenerator(
         builder.addArgs(arguments.convertCmakeCommandLineArgumentsToStringList())
         return builder
     }
-
-    override val nativeBuildSystem: NativeBuildSystem = NativeBuildSystem.CMAKE
 
     override fun getStlSharedObjectFiles(): Map<Abi, File> {
         // Search for ANDROID_STL build argument. Process in order / later flags take precedent.

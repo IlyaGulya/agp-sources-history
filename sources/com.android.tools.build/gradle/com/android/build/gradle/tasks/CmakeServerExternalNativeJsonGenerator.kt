@@ -49,7 +49,6 @@ import com.android.build.gradle.internal.cxx.logging.errorln
 import com.android.build.gradle.internal.cxx.logging.infoln
 import com.android.build.gradle.internal.cxx.logging.warnln
 import com.android.build.gradle.internal.cxx.model.CxxAbiModel
-import com.android.build.gradle.internal.cxx.model.CxxBuildModel
 import com.android.build.gradle.internal.cxx.model.CxxVariantModel
 import com.android.build.gradle.internal.cxx.model.compileCommandsJsonFile
 import com.android.build.gradle.internal.cxx.model.jsonFile
@@ -63,10 +62,6 @@ import com.google.common.collect.Lists
 import com.google.common.collect.Maps
 import com.google.common.primitives.UnsignedInts
 import com.google.gson.stream.JsonReader
-import com.google.wireless.android.sdk.stats.GradleBuildVariant
-import org.gradle.api.Action
-import org.gradle.process.ExecResult
-import org.gradle.process.ExecSpec
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileReader
@@ -83,16 +78,11 @@ import java.util.HashMap
  * project and generate the android build JSON.
  */
 internal class CmakeServerExternalNativeJsonGenerator(
-    build: CxxBuildModel,
     variant: CxxVariantModel,
-    abis: List<CxxAbiModel>,
-    stats: GradleBuildVariant.Builder
-) : CmakeExternalNativeJsonGenerator(build, variant, abis, stats) {
+    abis: List<CxxAbiModel>
+) : CmakeExternalNativeJsonGenerator(variant, abis) {
     @Throws(ProcessException::class, IOException::class)
-    override fun executeProcessAndGetOutput(
-        abi: CxxAbiModel,
-        execOperations: (Action<in ExecSpec?>) -> ExecResult
-    ): String {
+    override fun executeProcessAndGetOutput(abi: CxxAbiModel): String {
         // Once a Cmake server object is created
         // - connect to the server
         // - perform a handshake
@@ -550,50 +540,18 @@ internal class CmakeServerExternalNativeJsonGenerator(
                     continue
                 }
 
-                // We don't actually care about the normalization here except that it makes it
-                // possible to write a test for https://issuetracker.google.com/158317988. Without
-                // it, the runtimeFile is sometimes a path that includes .. that resolves to the
-                // same place as the destination, but sometimes isn't (within bazel's sandbox it is,
-                // outside it isn't, could be related to the path lengths since CMake tries to keep
-                // those short when possible). If the paths passed to Files.copy are equal the
-                // operation will throw IllegalArgumentException, but only if they are exactly equal
-                // (without normalization). Users were encountering this but it was being hidden
-                // from tests because of the lack of normalization.
-                val libraryPath = Paths.get(library).let {
-                    if (!it.isAbsolute) {
-                        Paths.get(target.buildDirectory).resolve(it)
-                    } else {
-                        it
-                    }
-                }.normalize()
-
-                // Note: This used to contain a check for libraryPath.exists() to defend against any
-                // items in the linkLibraries that were neither files nor - prefixed arguments. This
-                // hasn't been observed and I'm not sure there are any valid inputs to
-                // target_link_libraries that would have that problem.
-                //
-                // Ignoring files that didn't exist was causing different results depending on
-                // whether this function was being run before or after a build. If run before a
-                // build, any libraries the user is building will not be present yet and would not
-                // be added to runtimeFiles. After a build they would. We no longer skip non-present
-                // files for the sake of consistency.
+                // Filter out any other arguments that aren't files.
+                val libraryPath = Paths.get(library)
+                if (!Files.exists(libraryPath)) {
+                    continue
+                }
 
                 // Anything under the sysroot shouldn't be included in the APK. This isn't strictly
                 // true since the STLs live here, but those are handled separately by
                 // ExternalNativeBuildTask::buildImpl.
-                if (libraryPath.startsWith(sysroot)) {
-                    continue
+                if (!libraryPath.startsWith(sysroot)) {
+                    runtimeFiles.add(libraryPath.toFile())
                 }
-
-                // We could alternatively filter for .so files rather than filtering out .a files,
-                // but it's possible that the user has things like libfoo.so.1. It's not common for
-                // Android, but possible.
-                val pathMatcher = libraryPath.fileSystem.getPathMatcher("glob:*.a")
-                if (pathMatcher.matches(libraryPath.fileName)) {
-                    continue
-                }
-
-                runtimeFiles.add(libraryPath.toFile())
             }
             return runtimeFiles
         }
@@ -636,7 +594,7 @@ internal class CmakeServerExternalNativeJsonGenerator(
             )
             val files = mutableListOf<NativeSourceFileValue>()
             val headers = mutableListOf<NativeHeaderFileValue>()
-            for (fileGroup in target.fileGroups.orEmpty()) {
+            for (fileGroup in target.fileGroups) {
                 for (source in fileGroup.sources) {
                     // Skip object files in sources
                     if (source.endsWith(".o")) continue

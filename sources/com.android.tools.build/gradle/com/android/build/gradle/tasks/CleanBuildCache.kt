@@ -65,4 +65,4 @@ abstract class CleanBuildCache : DefaultTask() {
     }
 }
 
-private const val CLEAN_BUILD_CACHE_TASK_NAME = "cleanBuildCache"
+const val CLEAN_BUILD_CACHE_TASK_NAME = "cleanBuildCache"

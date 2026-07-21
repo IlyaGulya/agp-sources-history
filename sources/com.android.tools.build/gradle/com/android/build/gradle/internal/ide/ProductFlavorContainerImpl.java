@@ -71,7 +71,7 @@ final class ProductFlavorContainerImpl implements ProductFlavorContainer, Serial
         }
 
         return new ProductFlavorContainerImpl(
-                new ProductFlavorImpl(productFlavor, null),
+                new ProductFlavorImpl(productFlavor),
                 new SourceProviderImpl(variantDimensionData.getSourceSet()),
                 clonedContainers);
     }

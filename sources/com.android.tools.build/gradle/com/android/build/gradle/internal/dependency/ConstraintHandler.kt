@@ -17,7 +17,6 @@
 package com.android.build.gradle.internal.dependency
 
 import com.android.build.gradle.internal.services.ServiceRegistrationAction
-import com.android.builder.internal.StringCachingService
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -87,15 +86,15 @@ class ConstraintHandler(
 
     /** Build service used to cache strings used to specify why versions of dependencies change.  */
     abstract class CachedStringBuildService : BuildService<BuildServiceParameters.None>,
-        AutoCloseable, StringCachingService {
+        AutoCloseable {
         private val strings = mutableMapOf<String, String>()
 
-        override fun cacheString(string: String): String {
+        internal fun cacheString(newString: String): String {
             synchronized(strings) {
-                val existingString = strings[string]
+                val existingString = strings[newString]
                 return if (existingString == null) {
-                    strings[string] = string
-                    string
+                    strings[newString] = newString
+                    newString
                 } else {
                     existingString
                 }

@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import org.gradle.api.provider.Provider;
 
 /**
  * Implementation of ProductFlavor that is serializable. Objects used in the DSL cannot be
@@ -63,8 +62,8 @@ final class ProductFlavorImpl extends BaseConfigImpl implements ProductFlavor, S
     private final DefaultVectorDrawablesOptions mVectorDrawablesOptions;
     private final Boolean mWearAppUnbundled;
 
-    public ProductFlavorImpl(
-            @NonNull ProductFlavor productFlavor, @Nullable Provider<String> applicationId) {
+
+    public ProductFlavorImpl(@NonNull ProductFlavor productFlavor) {
         super(productFlavor);
 
         this.name = productFlavor.getName();
@@ -80,10 +79,7 @@ final class ProductFlavorImpl extends BaseConfigImpl implements ProductFlavor, S
         this.mVersionCode = productFlavor.getVersionCode();
         this.mVersionName = productFlavor.getVersionName();
 
-        // in case of merged product flavor, we can never determine the final application at this
-        // time.
-        this.mApplicationId =
-                applicationId != null ? applicationId.get() : productFlavor.getApplicationId();
+        this.mApplicationId = productFlavor.getApplicationId();
 
         this.mTestApplicationId = productFlavor.getTestApplicationId();
         this.mTestInstrumentationRunner = productFlavor.getTestInstrumentationRunner();

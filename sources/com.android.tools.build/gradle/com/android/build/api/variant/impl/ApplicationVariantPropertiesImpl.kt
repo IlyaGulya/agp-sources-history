@@ -72,7 +72,8 @@ open class ApplicationVariantPropertiesImpl @Inject constructor(
     override val debuggable: Boolean
         get() = variantDslInfo.isDebuggable
 
-    override val applicationId: Property<String> = variantDslInfo.applicationId
+    override val applicationId: Property<String> =
+        internalServices.propertyOf(String::class.java, variantDslInfo.applicationId)
 
     override val embedsMicroApp: Boolean
         get() = variantDslInfo.isEmbedMicroApp
@@ -99,9 +100,6 @@ open class ApplicationVariantPropertiesImpl @Inject constructor(
 
     override val needAssetPackTasks: Property<Boolean> =
         internalServices.propertyOf(Boolean::class.java, false)
-
-    override val shouldPackageDesugarLibDex: Boolean
-        get() = variantScope.isCoreLibraryDesugaringEnabled
 
     // ---------------------------------------------------------------------------------------------
     // Private stuff

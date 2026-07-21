@@ -69,9 +69,6 @@ public class JacocoTaskDelegate {
     private static final Pattern KOTLIN_MODULE_PATTERN =
             Pattern.compile("^META-INF/.*\\.kotlin_module$");
 
-    @NonNull
-    private static final LoggerWrapper logger = LoggerWrapper.getLogger(JacocoTaskDelegate.class);
-
     @NonNull private final FileCollection jacocoAntTaskConfiguration;
     @NonNull private final Provider<Directory> output;
     @NonNull private final FileCollection inputClasses;
@@ -200,7 +197,7 @@ public class JacocoTaskDelegate {
                 });
 
         // remove old output
-        for (Path basePath : basePathToRemove.keySet()) {
+        for (Path basePath : basePathToRemove.keys()) {
             for (Path toRemove : basePathToRemove.get(basePath)) {
                 Action action = calculateAction(toRemove.toFile(), basePath.toFile());
                 if (action == Action.IGNORE) {
@@ -209,11 +206,6 @@ public class JacocoTaskDelegate {
 
                 Path outputPath =
                         getOutputPath(basePath, toRemove, output.get().getAsFile().toPath());
-                logger.info(
-                        "Removing instrumented output for "
-                                + toRemove
-                                + " with output file"
-                                + outputPath);
                 PathUtils.deleteRecursivelyIfExists(outputPath);
             }
         }

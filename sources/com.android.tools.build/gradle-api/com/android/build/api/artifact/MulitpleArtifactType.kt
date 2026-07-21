@@ -20,9 +20,9 @@ import org.gradle.api.Incubating
 import org.gradle.api.file.FileSystemLocation
 
 /**
- * Public [Artifact] for Android Gradle plugin.
+ * Public [Artifact] for Android Gradle Plugin.
  *
- * This type inherits [Artifact.MultipleArtifact]. For single artifacts, see [ArtifactType].
+ * These are [Artifact.MultipleArtifact], see [ArtifactType] for single ones.
  *
  * All methods in [Artifacts] should be supported with any subclass of this
  * class.

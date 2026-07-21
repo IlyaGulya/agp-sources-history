@@ -128,7 +128,10 @@ data class CxxProjectModelData(
     override val sdkFolder: File = File("."),
     override val chromeTraceJsonFolder: File? = null,
     override val isPrefabEnabled: Boolean = false
-) : CxxProjectModel
+) : CxxProjectModel {
+    override val services: CxxServiceRegistry
+        get() = throw RuntimeException("Cannot use services from deserialized CxxModuleModel")
+}
 
 private fun CxxProjectModel.toData() = CxxProjectModelData(
     compilerSettingsCacheFolder = compilerSettingsCacheFolder,
@@ -267,10 +270,7 @@ internal data class CxxAbiModelData(
     override val originalCxxBuildFolder: File = File("."),
     override val variant: CxxVariantModelData = CxxVariantModelData(),
     override val prefabFolder: File = File(".")
-) : CxxAbiModel {
-    override val services: CxxServiceRegistry
-        get() = throw RuntimeException("Cannot use services from deserialized CxxAbiModel")
-}
+) : CxxAbiModel
 
 private fun CxxAbiModel.toData(): CxxAbiModel = CxxAbiModelData(
     abi = abi,

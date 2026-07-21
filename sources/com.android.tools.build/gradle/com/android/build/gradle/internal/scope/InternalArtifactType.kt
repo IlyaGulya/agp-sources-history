@@ -158,7 +158,7 @@ InternalArtifactType<T : FileSystemLocation>(
     // compiled resources (output of aapt)
     object PROCESSED_RES: InternalArtifactType<Directory>(DIRECTORY), Replaceable, ContainsMany
     // Processed res after an AAPT2 optimize operation
-    object OPTIMIZED_PROCESSED_RES: InternalArtifactType<Directory>(DIRECTORY), Replaceable
+    object OPTIMIZED_PROCESSED_RES: InternalArtifactType<Directory>(DIRECTORY), Replaceable, ContainsMany
     // package resources for aar publishing.
     object PACKAGED_RES: InternalArtifactType<Directory>(DIRECTORY), Replaceable
     // R.txt output for libraries - contains mock resource IDs used only at compile time.
@@ -179,7 +179,7 @@ InternalArtifactType<T : FileSystemLocation>(
     object DENSITY_OR_LANGUAGE_PACKAGED_SPLIT: InternalArtifactType<Directory>(DIRECTORY), Replaceable
     // linked res for the unified bundle
     object LINKED_RES_FOR_BUNDLE: InternalArtifactType<RegularFile>(FILE), Replaceable
-    object SHRUNK_LINKED_RES_FOR_BUNDLE: InternalArtifactType<RegularFile>(FILE), Replaceable
+    object LEGACY_SHRUNK_LINKED_RES_FOR_BUNDLE: InternalArtifactType<RegularFile>(FILE), Replaceable
     object COMPILED_LOCAL_RESOURCES: InternalArtifactType<Directory>(DIRECTORY), Replaceable
     object STABLE_RESOURCE_IDS_FILE: InternalArtifactType<RegularFile>(FILE)
 
@@ -351,11 +351,16 @@ InternalArtifactType<T : FileSystemLocation>(
     // The final Bundle: InternalArtifactType<RegularFile>(FILE), Replaceable including feature module: InternalArtifactType<RegularFile>(FILE), Replaceable ready for consumption at Play Store.
     // This is only valid for the base module.
     object BUNDLE: InternalArtifactType<RegularFile>(FILE, Category.OUTPUTS), Replaceable
-    // The bundle artifact: InternalArtifactType<RegularFile>(FILE), Replaceable including feature module: InternalArtifactType<RegularFile>(FILE), Replaceable used as the base for further processing: InternalArtifactType<RegularFile>(FILE), Replaceable
+    // The bundle artifact including feature modulee used as the base for further processing
     // like extracting APKs. It's cheaper to produce but not suitable as a final artifact to send
     // to the Play Store.
+    // Can be transformed by shrinking resources in originally built bundle.
     // This is only valid for the base module.
-    object INTERMEDIARY_BUNDLE: InternalArtifactType<RegularFile>(FILE), Replaceable
+    object INTERMEDIARY_BUNDLE: InternalArtifactType<RegularFile>(FILE), Transformable {
+        override fun getFileSystemLocationName(): String {
+            return "intermediary-bundle.aab"
+        }
+    }
     // APK Set archive with APKs generated from a bundle.
     object APKS_FROM_BUNDLE: InternalArtifactType<RegularFile>(FILE), Replaceable
     // output of ExtractApks applied to APKS_FROM_BUNDLE and a device config.

@@ -19,7 +19,6 @@ package com.android.build.gradle.internal.ide.dependencies
 import com.android.SdkConstants.EXT_AAR
 import com.android.SdkConstants.EXT_JAR
 import com.android.builder.dependency.MavenCoordinatesImpl
-import com.android.builder.internal.StringCachingService
 import com.android.builder.model.MavenCoordinates
 import com.google.common.collect.ImmutableMap
 import org.gradle.api.artifacts.component.ComponentIdentifier
@@ -78,9 +77,7 @@ data class ResolvedArtifact(
     /**
      * Computes Maven Coordinate for a given artifact result.
      */
-    fun computeMavenCoordinates(
-        stringCachingService: StringCachingService
-    ): MavenCoordinates {
+    fun computeMavenCoordinates(): MavenCoordinates {
         return when (componentIdentifier) {
             is ModuleComponentIdentifier -> {
                 val module = componentIdentifier.module
@@ -99,23 +96,11 @@ data class ResolvedArtifact(
                     }
                 }
 
-                MavenCoordinatesImpl.create(
-                    stringCachingService = stringCachingService,
-                    groupId = componentIdentifier.group,
-                    artifactId = module,
-                    version = version,
-                    packaging = extension,
-                    classifier = classifier
-                )
+                MavenCoordinatesImpl(componentIdentifier.group, module, version, extension, classifier)
             }
 
             is ProjectComponentIdentifier -> {
-                MavenCoordinatesImpl.create(
-                    stringCachingService = stringCachingService,
-                    groupId = "artifacts",
-                    artifactId = componentIdentifier.projectPath,
-                    version = "unspecified"
-                )
+                MavenCoordinatesImpl("artifacts", componentIdentifier.projectPath, "unspecified")
             }
 
             is OpaqueComponentArtifactIdentifier -> {

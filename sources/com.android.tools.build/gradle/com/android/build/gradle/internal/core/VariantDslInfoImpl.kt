@@ -56,12 +56,9 @@ import com.google.common.collect.ImmutableSet
 import com.google.common.collect.Lists
 import com.google.common.collect.Maps
 import com.google.common.collect.Sets
-import jdk.internal.org.objectweb.asm.Type
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import java.io.File
-import java.lang.IllegalArgumentException
 import java.util.ArrayList
 import java.util.concurrent.Callable
 
@@ -102,9 +99,7 @@ open class VariantDslInfoImpl internal constructor(
      *
      * Still, DO NOT USE. You should mostly use [VariantDslInfo] which does not give access to this.
      */
-    val mergedFlavor: MergedFlavor by lazy {
-        mergeFlavors(defaultConfig, productFlavorList, applicationId, dslServices)
-    }
+    val mergedFlavor: MergedFlavor = mergeFlavors(defaultConfig, productFlavorList, dslServices)
 
     /** Variant-specific build Config fields.  */
     private val mBuildConfigFields: MutableMap<String, ClassField> = Maps.newTreeMap()
@@ -317,15 +312,8 @@ open class VariantDslInfoImpl internal constructor(
      *
      * @return the application ID
      */
-    override val applicationId: Property<String> =
-        services.newPropertyBackingDeprecatedApi(
-            String::class.java,
-            initApplicationId(),
-            "applicationId"
-        )
-
-
-    private fun initApplicationId(): Provider<String> {
+    override val applicationId: Provider<String>
+        get() {
             // -------------
             // Special case for test components and separate test sub-projects
             if (variantType.isForTesting) {
@@ -336,9 +324,7 @@ open class VariantDslInfoImpl internal constructor(
                         ?: defaultConfig.testApplicationId
 
                 return if (testAppIdFromFlavors == null) {
-                    testedVariantImpl?.applicationId?.map {
-                        "$it.test"
-                    } ?: packageName
+                    packageName
                 } else {
                     // needed to make nullability work in kotlinc
                     val finalTestAppIdFromFlavors: String = testAppIdFromFlavors
@@ -371,7 +357,7 @@ open class VariantDslInfoImpl internal constructor(
                 services.provider(
                     Callable { "$finalAppIdFromFlavors${computeApplicationIdSuffix()}" })
             }
-    }
+        }
 
     /**
      * Combines all the appId suffixes into a single one.
@@ -383,21 +369,30 @@ open class VariantDslInfoImpl internal constructor(
         // want the higher priority one to be last.
         val suffixes = mutableListOf<String>()
         defaultConfig.applicationIdSuffix?.let {
-            suffixes.add(it)
+            suffixes.add(it.prependDot())
         }
 
-        suffixes.addAll(productFlavorList.mapNotNull { it.applicationIdSuffix })
+        suffixes.addAll(productFlavorList.mapNotNull { it.applicationIdSuffix?.prependDot() })
 
         // then we add the build type after.
         buildTypeObj.applicationIdSuffix?.let {
-            suffixes.add(it)
+            suffixes.add(it.prependDot())
         }
-        val nonEmptySuffixes = suffixes.filter { it.isNotEmpty() }
-        return if (nonEmptySuffixes.isNotEmpty()) {
-            ".${nonEmptySuffixes.joinToString(separator = ".", transform = { it.removePrefix(".") })}"
+
+        return if (suffixes.isNotEmpty()) {
+            suffixes.joinToString(separator = "")
         } else {
             ""
         }
+    }
+
+    /**
+     * Returns the same string with a '.' at the start unless there is already one.
+     */
+    private fun String.prependDot(): String = if (this[0] == '.') {
+        this
+    } else {
+        ".$this"
     }
 
     override val versionName: Provider<String?>
@@ -472,7 +467,7 @@ open class VariantDslInfoImpl internal constructor(
 
             // TODO: figure out whether it's worth it to put all this inside a Provider to make it lazy.
             val injectedVersionCode =
-                services.projectOptions[IntegerOption.IDE_VERSION_CODE_OVERRIDE]
+                services.projectOptions.getValue(IntegerOption.IDE_VERSION_CODE_OVERRIDE)
             if (injectedVersionCode != null) {
                 return services.provider(Callable { injectedVersionCode })
             }
@@ -904,7 +899,7 @@ open class VariantDslInfoImpl internal constructor(
      */
     override val minSdkVersionWithTargetDeviceApi: AndroidVersion
         get() {
-            val targetApiLevel = dslServices.projectOptions[IntegerOption.IDE_TARGET_DEVICE_API]
+            val targetApiLevel = dslServices.projectOptions.getValue(IntegerOption.IDE_TARGET_DEVICE_API)
             return if (targetApiLevel != null && isMultiDexEnabled && buildTypeObj.isDebuggable) {
                 // Consider runtime API passed from the IDE only if multi-dex is enabled and the app is
                 // debuggable.

@@ -32,6 +32,8 @@ import com.android.build.gradle.internal.scope.InternalArtifactType.MERGED_NATIV
 import com.android.build.gradle.internal.scope.InternalArtifactType.STRIPPED_NATIVE_LIBS
 import com.android.build.gradle.internal.scope.InternalMultipleArtifactType
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
+import com.android.build.gradle.internal.utils.getDesugarLibDexFromTransform
+import com.android.build.gradle.options.BooleanOption
 import com.android.builder.files.NativeLibraryAbiPredicate
 import com.android.builder.model.CodeShrinker
 import com.android.builder.packaging.JarCreator
@@ -222,9 +224,11 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
             creationConfig.artifacts.setTaskInputToFinalProduct(
                  InternalArtifactType.MERGED_ASSETS, task.assetsFiles)
 
+            val legacyShrinkerEnabled = creationConfig.variantScope.useResourceShrinker() &&
+                !creationConfig.services.projectOptions[BooleanOption.ENABLE_NEW_RESOURCE_SHRINKER]
             task.resFiles.set(
-                if (creationConfig.variantScope.useResourceShrinker()) {
-                    artifacts.get(InternalArtifactType.SHRUNK_LINKED_RES_FOR_BUNDLE)
+                if (legacyShrinkerEnabled){
+                    artifacts.get(InternalArtifactType.LEGACY_SHRUNK_LINKED_RES_FOR_BUNDLE)
                 } else {
                     artifacts.get(InternalArtifactType.LINKED_RES_FOR_BUNDLE)
                 }
@@ -238,11 +242,13 @@ abstract class PerModuleBundleTask @Inject constructor(objects: ObjectFactory) :
                     artifacts.getAll(InternalMultipleArtifactType.DEX)
                 }
             )
-            if (creationConfig.shouldPackageDesugarLibDex) {
-                task.dexFiles.from(
+            task.dexFiles.from(
+                if (creationConfig.variantScope.needsShrinkDesugarLibrary) {
                     artifacts.get(InternalArtifactType.DESUGAR_LIB_DEX)
-                )
-            }
+                } else {
+                    getDesugarLibDexFromTransform(creationConfig)
+                }
+            )
 
             task.featureDexFiles.from(
                 creationConfig.variantDependencies.getArtifactFileCollection(

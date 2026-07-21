@@ -440,11 +440,10 @@ public final class AndroidSdkHandler {
      *     RemotePackage}s instead.
      */
     @Nullable
-    public RemotePackage getLatestRemotePackageForPrefix(@NonNull String prefix,
-            @Nullable Predicate<Revision> filter, boolean allowPreview,
-            @NonNull ProgressIndicator progress) {
-        return getLatestRemotePackageForPrefix(prefix, filter, allowPreview,
-                Revision::safeParseRevision, progress);
+    public RemotePackage getLatestRemotePackageForPrefix(
+            @NonNull String prefix, boolean allowPreview, @NonNull ProgressIndicator progress) {
+        return getLatestRemotePackageForPrefix(prefix, allowPreview, Revision::safeParseRevision,
+                progress);
     }
 
     /**
@@ -454,11 +453,11 @@ public final class AndroidSdkHandler {
     @Nullable
     public RemotePackage getLatestRemotePackageForPrefix(
             @NonNull String prefix,
-            @Nullable Predicate<Revision> filter, boolean allowPreview,
+            boolean allowPreview,
             @NonNull Function<String, ? extends Comparable> mapper,
             @NonNull ProgressIndicator progress) {
-        return getLatestRemotePackageForPrefix(prefix, filter, allowPreview,
-                mapper, Comparator.naturalOrder(), progress);
+        return getLatestRemotePackageForPrefix(prefix, allowPreview, mapper,
+                Comparator.naturalOrder(), progress);
     }
 
     /**
@@ -467,12 +466,11 @@ public final class AndroidSdkHandler {
      */
     @Nullable
     public <T> RemotePackage getLatestRemotePackageForPrefix(@NonNull String prefix,
-            @Nullable Predicate<Revision> filter, boolean allowPreview,
-            @NonNull Function<String, T> mapper, @NonNull Comparator<T> comparator,
-            @NonNull ProgressIndicator progress) {
+            boolean allowPreview, @NonNull Function<String, T> mapper,
+            @NonNull Comparator<T> comparator, @NonNull ProgressIndicator progress) {
         return getLatestPackageFromPrefixCollection(
                 getSdkManager(progress).getPackages().getRemotePackagesForPrefix(prefix),
-                filter, allowPreview, mapper, comparator);
+                null, allowPreview, mapper, comparator);
     }
 
     /**

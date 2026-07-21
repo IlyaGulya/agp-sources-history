@@ -18,18 +18,17 @@ package com.android.ide.common.gradle.model.level2;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.builder.model.level2.Library;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
 
 /** Creates a deep copy of {@link Library} of type LIBRARY_JAVA. */
-public final class IdeJavaLibrary implements Library, Serializable {
-    // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 3L;
-
+public final class IdeJavaLibrary implements IdeLibrary {
     @NonNull private final String myArtifactAddress;
     @NonNull private final File myArtifactFile;
+
+    private boolean myIsProvided;
     private final int myType;
     private final int myHashCode;
 
@@ -39,15 +38,19 @@ public final class IdeJavaLibrary implements Library, Serializable {
         myArtifactAddress = "";
         //noinspection ConstantConditions
         myArtifactFile = null;
+        myIsProvided = false;
         myType = 0;
 
         myHashCode = 0;
     }
 
-    IdeJavaLibrary(@NonNull String artifactAddress, @NonNull File artifactFile) {
+    @VisibleForTesting
+    public IdeJavaLibrary(
+            @NonNull String artifactAddress, @NonNull File artifactFile, boolean isProvided) {
         myType = LIBRARY_JAVA;
         myArtifactAddress = artifactAddress;
         myArtifactFile = artifactFile;
+        myIsProvided = isProvided;
         myHashCode = calculateHashCode();
     }
 
@@ -66,6 +69,11 @@ public final class IdeJavaLibrary implements Library, Serializable {
     @NonNull
     public File getArtifact() {
         return myArtifactFile;
+    }
+
+    @Override
+    public boolean isProvided() {
+        return myIsProvided;
     }
 
     @Override
@@ -200,7 +208,8 @@ public final class IdeJavaLibrary implements Library, Serializable {
         IdeJavaLibrary that = (IdeJavaLibrary) o;
         return myType == that.myType
                 && Objects.equals(myArtifactAddress, that.myArtifactAddress)
-                && Objects.equals(myArtifactFile, that.myArtifactFile);
+                && Objects.equals(myArtifactFile, that.myArtifactFile)
+                && Objects.equals(myIsProvided, that.myIsProvided);
     }
 
     @Override
@@ -209,7 +218,7 @@ public final class IdeJavaLibrary implements Library, Serializable {
     }
 
     private int calculateHashCode() {
-        return Objects.hash(myType, myArtifactAddress, myArtifactFile);
+        return Objects.hash(myType, myArtifactAddress, myArtifactFile, myIsProvided);
     }
 
     @Override
@@ -222,6 +231,9 @@ public final class IdeJavaLibrary implements Library, Serializable {
                 + '\''
                 + ", myArtifactFile="
                 + myArtifactFile
+                + '\''
+                + ", myIsProvided="
+                + myIsProvided
                 + '}';
     }
 }

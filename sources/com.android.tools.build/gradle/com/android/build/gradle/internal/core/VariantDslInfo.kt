@@ -33,7 +33,6 @@ import com.android.sdklib.AndroidVersion
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import java.io.File
 
@@ -162,7 +161,7 @@ interface VariantDslInfo {
      *
      * @return the application ID
      */
-    val applicationId: Property<String>
+    val applicationId: Provider<String>
 
     /**
      * Returns the version name for this variant. This could be specified by the product flavors,

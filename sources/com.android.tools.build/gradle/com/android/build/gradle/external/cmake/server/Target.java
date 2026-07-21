@@ -16,8 +16,6 @@
 
 package com.android.build.gradle.external.cmake.server;
 
-import com.android.annotations.Nullable;
-
 /**
  * System target object. More info:
  * https://cmake.org/cmake/help/v3.8/manual/cmake-server.7.html#type-codemodel
@@ -25,7 +23,7 @@ import com.android.annotations.Nullable;
 public class Target {
     public final String artifacts[];
     public final String buildDirectory;
-    @Nullable public final FileGroup fileGroups[];
+    public final FileGroup fileGroups[];
     public final String fullName;
     public final String linkLibraries;
     public final String linkerLanguage;

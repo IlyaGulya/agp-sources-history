@@ -51,7 +51,7 @@ class TfliteModelGenerator(
     private val logger: Logger = Logging.getLogger(this.javaClass)
     private val modelInfo: ModelInfo = ModelInfo.buildFrom(ByteBuffer.wrap(modelFile.readBytes()))
     private val className: String = MlNames.computeModelClassName(localModelPath)
-    private val androidLogger: LoggerWrapper get() = LoggerWrapper(logger)
+    private val androidLogger: LoggerWrapper = LoggerWrapper(logger)
 
     override fun generateBuildClass(outputDirProperty: DirectoryProperty) {
         val classBuilder = TypeSpec.classBuilder(className).addModifiers(
@@ -62,7 +62,7 @@ class TfliteModelGenerator(
         if (modelInfo.isMetadataVersionTooHigh) {
             androidLogger.warning(
                 "Model is not fully supported in current Android Gradle Plugin" +
-                        " and will use fallback APIs, so please update to the latest version: ${modelFile.absolutePath}"
+                        " and will use fallback API, please upgrade to latest version if necessary: ${modelFile.absolutePath}"
             )
         }
 

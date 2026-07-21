@@ -77,7 +77,7 @@ import com.android.build.gradle.internal.component.BaseCreationConfig;
 import com.android.build.gradle.internal.core.VariantDslInfo;
 import com.android.build.gradle.internal.coverage.JacocoConfigurations;
 import com.android.build.gradle.internal.coverage.JacocoReportTask;
-import com.android.build.gradle.internal.cxx.gradle.generator.ExternalNativeJsonGenerator;
+import com.android.build.gradle.internal.cxx.gradle.generator.CxxMetadataGenerator;
 import com.android.build.gradle.internal.cxx.model.CxxModuleModel;
 import com.android.build.gradle.internal.dependency.AndroidXDependencySubstitution;
 import com.android.build.gradle.internal.dependency.VariantDependencies;
@@ -159,7 +159,7 @@ import com.android.build.gradle.internal.test.BundleTestDataImpl;
 import com.android.build.gradle.internal.test.TestDataImpl;
 import com.android.build.gradle.internal.testing.ConnectedDeviceProvider;
 import com.android.build.gradle.internal.transforms.CustomClassTransform;
-import com.android.build.gradle.internal.transforms.ShrinkBundleResourcesTask;
+import com.android.build.gradle.internal.transforms.LegacyShrinkBundleModuleResourcesTask;
 import com.android.build.gradle.internal.variant.ApkVariantData;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.internal.variant.ComponentInfo;
@@ -169,11 +169,12 @@ import com.android.build.gradle.options.StringOption;
 import com.android.build.gradle.tasks.AidlCompile;
 import com.android.build.gradle.tasks.AnalyzeDependenciesTask;
 import com.android.build.gradle.tasks.CleanBuildCache;
+import com.android.build.gradle.tasks.CleanBuildCacheKt;
 import com.android.build.gradle.tasks.CompatibleScreensManifest;
 import com.android.build.gradle.tasks.ExternalNativeBuildJsonTask;
 import com.android.build.gradle.tasks.ExternalNativeBuildTask;
 import com.android.build.gradle.tasks.ExternalNativeCleanTask;
-import com.android.build.gradle.tasks.ExternalNativeJsonGeneratorBase;
+import com.android.build.gradle.tasks.ExternalNativeJsonGenerator;
 import com.android.build.gradle.tasks.GenerateBuildConfig;
 import com.android.build.gradle.tasks.GenerateManifestJarTask;
 import com.android.build.gradle.tasks.GenerateResValues;
@@ -304,9 +305,9 @@ public abstract class TaskManager<
     // Temporary static variables for Kotlin+Compose configuration
     public static final String KOTLIN_COMPILER_CLASSPATH_CONFIGURATION_NAME =
             "kotlinCompilerClasspath";
-    public static final String COMPOSE_KOTLIN_COMPILER_EXTENSION_VERSION = "0.1.0-dev09";
+    public static final String COMPOSE_KOTLIN_COMPILER_EXTENSION_VERSION = "0.1.0-dev13";
     public static final String COMPOSE_KOTLIN_COMPILER_VERSION =
-            "1.3.61-dev-withExperimentalGoogleExtensions-20191127";
+            "1.3.70-dev-withExperimentalGoogleExtensions-20200424";
     public static final String CREATE_MOCKABLE_JAR_TASK_NAME = "createMockableJar";
 
     @NonNull protected final Project project;
@@ -624,7 +625,13 @@ public abstract class TaskManager<
 
         globalScope.setAndroidJarConfig(createAndroidJarConfig(project));
 
-        taskFactory.register(new CleanBuildCache.CreationAction(globalScope));
+        // Register the cleanBuildCache task only for the root project
+        TaskFactory rootProjectTaskFactory =
+                new TaskFactoryImpl(project.getRootProject().getTasks());
+        if (rootProjectTaskFactory.findByName(CleanBuildCacheKt.CLEAN_BUILD_CACHE_TASK_NAME)
+                == null) {
+            rootProjectTaskFactory.register(new CleanBuildCache.CreationAction(globalScope));
+        }
 
         // for testing only.
         taskFactory.register(
@@ -1338,23 +1345,6 @@ public abstract class TaskManager<
                         new GenerateLibraryRFileTask.CreationAction(
                                 componentProperties, isLibrary()));
             }
-
-            if (!componentProperties.getVariantDslInfo().isDebuggable()
-                    && projectOptions.get(BooleanOption.ENABLE_RESOURCE_OPTIMIZATIONS)) {
-                if (componentProperties.getVariantScope().useResourceShrinker()) {
-                    taskFactory.register(
-                            new OptimizeResourcesTask.CreateAction(componentProperties));
-                    // Republish the RES_PROCESSED_OPTIMIZED as PROCESSED_RES
-                    componentProperties
-                            .getArtifacts()
-                            .republish(
-                                    InternalArtifactType.OPTIMIZED_PROCESSED_RES.INSTANCE,
-                                    InternalArtifactType.PROCESSED_RES.INSTANCE);
-                } else {
-                    logger.error(
-                            "Cannot apply AAPT2 OPTIMIZE without resource shrinker being enabled.");
-                }
-            }
         } else {
             // MergeType.MERGE means we merged the whole universe.
             taskFactory.register(
@@ -1387,6 +1377,11 @@ public abstract class TaskManager<
                                     artifacts.get(
                                             COMPILE_AND_RUNTIME_NOT_NAMESPACED_R_CLASS_JAR
                                                     .INSTANCE)));
+
+            if (!componentProperties.getVariantDslInfo().isDebuggable()
+                    && projectOptions.get(BooleanOption.ENABLE_RESOURCE_OPTIMIZATIONS)) {
+                taskFactory.register(new OptimizeResourcesTask.CreateAction(componentProperties));
+            }
         }
     }
 
@@ -1595,18 +1590,17 @@ public abstract class TaskManager<
 
         componentProperties
                 .getTaskContainer()
-                .setExternalNativeJsonGenerator(
+                .setCxxMetadataGenerator(
                         project.provider(
                                 () ->
-                                        ExternalNativeJsonGeneratorBase.create(
+                                        ExternalNativeJsonGenerator.create(
                                                 module, componentProperties)));
     }
 
     public void createExternalNativeBuildTasks(
             @NonNull ComponentPropertiesImpl componentProperties) {
         final MutableTaskContainer taskContainer = componentProperties.getTaskContainer();
-        Provider<ExternalNativeJsonGenerator> generator =
-                taskContainer.getExternalNativeJsonGenerator();
+        Provider<CxxMetadataGenerator> generator = taskContainer.getCxxMetadataGenerator();
         if (generator == null) {
             return;
         }
@@ -1733,8 +1727,7 @@ public abstract class TaskManager<
                                 testConfigInputs.getPackageNameOfFinalRClass());
                     });
         } else {
-            if (testedVariant.getVariantType().isAar()
-                    && testedVariant.getBuildFeatures().getAndroidResources()) {
+            if (testedVariant.getVariantType().isAar()) {
                 // With compile classpath R classes, we need to generate a dummy R class for unit tests
                 // See https://issuetracker.google.com/143762955 for more context.
                 taskFactory.register(
@@ -2231,7 +2224,7 @@ public abstract class TaskManager<
         maybeCreateJavaCodeShrinkerTask(componentProperties);
         if (componentProperties.getVariantScope().getCodeShrinker() == CodeShrinker.R8) {
             maybeCreateResourcesShrinkerTasks(componentProperties);
-            maybeCreateDexDesugarLibTask(creationConfig, componentProperties, false);
+            maybeCreateDexDesugarLibTask(componentProperties, false);
             return;
         }
 
@@ -2255,8 +2248,7 @@ public abstract class TaskManager<
             taskFactory.register(new D8MainDexListTask.CreationAction(componentProperties, true));
         }
 
-        createDexTasks(
-                creationConfig, componentProperties, dexingType, registeredExternalTransform);
+        createDexTasks(componentProperties, dexingType, registeredExternalTransform);
 
         maybeCreateResourcesShrinkerTasks(componentProperties);
 
@@ -2323,7 +2315,6 @@ public abstract class TaskManager<
      * archives in order to enable incremental dexing support.
      */
     private void createDexTasks(
-            @NonNull ApkCreationConfig apkCreationConfig,
             @NonNull ComponentPropertiesImpl componentProperties,
             @NonNull DexingType dexingType,
             boolean registeredExternalTransform) {
@@ -2366,8 +2357,7 @@ public abstract class TaskManager<
                         enableDexingArtifactTransform,
                         componentProperties));
 
-        maybeCreateDexDesugarLibTask(
-                apkCreationConfig, componentProperties, enableDexingArtifactTransform);
+        maybeCreateDexDesugarLibTask(componentProperties, enableDexingArtifactTransform);
 
         createDexMergingTasks(componentProperties, dexingType, enableDexingArtifactTransform);
     }
@@ -3027,7 +3017,7 @@ public abstract class TaskManager<
     }
 
     /**
-     * Checks if {@link ShrinkResourcesTask} and {@link ShrinkBundleResourcesTask} should be added
+     * Checks if {@link ShrinkResourcesTask} and {@link LegacyShrinkBundleModuleResourcesTask} should be added
      * to the build pipeline and creates the tasks
      */
     protected void maybeCreateResourcesShrinkerTasks(
@@ -3042,7 +3032,10 @@ public abstract class TaskManager<
         taskFactory.register(new ShrinkResourcesTask.CreationAction(componentProperties));
 
         // And for the bundle
-        taskFactory.register(new ShrinkBundleResourcesTask.CreationAction(componentProperties));
+        if (!globalScope.getProjectOptions().get(BooleanOption.ENABLE_NEW_RESOURCE_SHRINKER)) {
+            taskFactory.register(
+                    new LegacyShrinkBundleModuleResourcesTask.CreationAction(componentProperties));
+        }
     }
 
     private void createReportTasks() {
@@ -3422,14 +3415,13 @@ public abstract class TaskManager<
     }
 
     private void maybeCreateDexDesugarLibTask(
-            @NonNull ApkCreationConfig apkCreationConfig,
             @NonNull ComponentPropertiesImpl componentProperties,
             boolean enableDexingArtifactTransform) {
         boolean separateFileDependenciesDexingTask =
                 componentProperties.getVariantScope().getJava8LangSupportType()
                                 == Java8LangSupport.D8
                         && enableDexingArtifactTransform;
-        if (apkCreationConfig.getShouldPackageDesugarLibDex()) {
+        if (componentProperties.getVariantScope().getNeedsShrinkDesugarLibrary()) {
             taskFactory.register(
                     new L8DexDesugarLibTask.CreationAction(
                             componentProperties,

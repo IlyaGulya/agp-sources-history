@@ -53,7 +53,7 @@ interface ExternalNativeNdkBuildOptions {
      *
      * @since 2.2.0
      */
-    val arguments: MutableList<String>
+    var arguments: MutableList<String>
 
     /**
      * Specifies arguments for ndk-build.
@@ -108,7 +108,7 @@ interface ExternalNativeNdkBuildOptions {
      *
      * @since 2.2.0
      */
-    val cFlags: MutableList<String>
+    var cFlags: MutableList<String>
 
     /**
      * Specifies flags for the C compiler.
@@ -160,7 +160,7 @@ interface ExternalNativeNdkBuildOptions {
      *
      * @since 2.2.0
      */
-    val cppFlags: MutableList<String>
+    var cppFlags: MutableList<String>
 
     /**
      * Specifies flags for the C++ compiler.
@@ -208,7 +208,7 @@ interface ExternalNativeNdkBuildOptions {
      *
      * @since 2.2.0
      */
-    val abiFilters: MutableSet<String>
+    var abiFilters: MutableSet<String>
 
     /**
      * Specifies the Application Binary Interfaces (ABI) that Gradle should build outputs for. The
@@ -270,7 +270,7 @@ interface ExternalNativeNdkBuildOptions {
      *
      * @since 2.2.0
      */
-    val targets: MutableSet<String>
+    var targets: MutableSet<String>
 
     /**
      * Specifies the library and executable targets from your ndk-build project that Gradle should

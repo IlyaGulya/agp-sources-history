@@ -49,7 +49,6 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
@@ -91,7 +90,7 @@ public abstract class JacocoReportTask extends NonIncrementalTask {
     }
 
     // PathSensitivity.NONE since only the contents of the files under the directory matter as input
-    @InputDirectory
+    @InputFiles
     @PathSensitive(PathSensitivity.NONE)
     @Optional
     public abstract DirectoryProperty getCoverageDirectories();

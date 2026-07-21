@@ -45,7 +45,6 @@ import com.android.build.gradle.internal.TaskManager;
 import com.android.build.gradle.internal.VariantManager;
 import com.android.build.gradle.internal.attribution.AttributionListenerInitializer;
 import com.android.build.gradle.internal.crash.CrashReporting;
-import com.android.build.gradle.internal.dependency.ConstraintHandler;
 import com.android.build.gradle.internal.dependency.SourceSetManager;
 import com.android.build.gradle.internal.dsl.BuildType;
 import com.android.build.gradle.internal.dsl.DefaultConfig;
@@ -292,17 +291,11 @@ public abstract class BasePlugin<
     private void configureProject() {
         final Gradle gradle = project.getGradle();
 
-        Provider<ConstraintHandler.CachedStringBuildService> cachedStringBuildServiceProvider =
-                new ConstraintHandler.CachedStringBuildService.RegistrationAction(project)
-                        .execute();
-        Provider<MavenCoordinatesCacheBuildService> mavenCoordinatesCacheBuildService =
-                new MavenCoordinatesCacheBuildService.RegistrationAction(
-                                project, cachedStringBuildServiceProvider)
-                        .execute();
-
         new LibraryDependencyCacheBuildService.RegistrationAction(project).execute();
-
-        extraModelInfo = new ExtraModelInfo(mavenCoordinatesCacheBuildService);
+        extraModelInfo =
+                new ExtraModelInfo(
+                        new MavenCoordinatesCacheBuildService.RegistrationAction(project)
+                                .execute());
 
         ProjectOptions projectOptions = projectServices.getProjectOptions();
         IssueReporter issueReporter = projectServices.getIssueReporter();

@@ -37,7 +37,4 @@ interface ApkCreationConfig: BaseCreationConfig {
     val testOnlyApk: Boolean
 
     val resValues: MapProperty<ResValue.Key, ResValue>
-
-    /** If this variant should package desugar_lib DEX in the final APK. */
-    val shouldPackageDesugarLibDex: Boolean
 }

@@ -42,24 +42,14 @@ open class ProductFlavor @Inject constructor(name: String, dslServices: DslServi
         get() = _isDefaultProperty.get()
         set(isDefault) = _isDefaultProperty.set(isDefault)
 
-    override val matchingFallbacks: MutableList<String> = mutableListOf()
-
-    fun setMatchingFallbacks(fallbacks: List<String>) {
-        val newFallbacks = ArrayList(fallbacks)
-        matchingFallbacks.clear()
-        matchingFallbacks.addAll(newFallbacks)
-    }
+    override var matchingFallbacks: MutableList<String> = mutableListOf()
 
     fun setMatchingFallbacks(vararg fallbacks: String) {
-        matchingFallbacks.clear()
-        for (fallback in fallbacks) {
-            matchingFallbacks.add(fallback)
-        }
+        matchingFallbacks = mutableListOf(*fallbacks)
     }
 
     fun setMatchingFallbacks(fallback: String) {
-        matchingFallbacks.clear()
-        matchingFallbacks.add(fallback)
+        matchingFallbacks = mutableListOf(fallback)
     }
 
     fun setIsDefault(isDefault: Boolean) {
@@ -88,7 +78,8 @@ open class ProductFlavor @Inject constructor(name: String, dslServices: DslServi
         }
         super._initWith(that)
         if (that is ProductFlavor) {
-            setMatchingFallbacks(that.matchingFallbacks)
+            matchingFallbacks =
+                that.matchingFallbacks
         }
     }
 }

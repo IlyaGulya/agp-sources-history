@@ -53,6 +53,7 @@ import com.android.build.gradle.internal.tasks.ModuleMetadata;
 import com.android.build.gradle.internal.tasks.NewIncrementalTask;
 import com.android.build.gradle.internal.tasks.PerModuleBundleTaskKt;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
+import com.android.build.gradle.internal.utils.DesugarLibUtils;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.IntegerOption;
 import com.android.build.gradle.options.ProjectOptions;
@@ -234,14 +235,6 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
     @Optional
     public Integer getTargetApi() {
         return targetApi;
-    }
-
-    /** Desired output format. */
-    protected IncrementalPackagerBuilder.ApkFormat apkFormat;
-
-    @Input
-    public String getApkFormat() {
-        return apkFormat.name();
     }
 
     /**
@@ -428,7 +421,6 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
                             IncrementalChangesUtils.getChangesInSerializableForm(
                                     changes, getJniFolders()));
             parameter.getManifestType().set(manifestType);
-            parameter.getApkFormat().set(apkFormat);
             parameter.getSigningConfig().set(signingConfig.convertToParams());
 
             if (getAppMetadata().isEmpty()) {
@@ -553,9 +545,6 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
 
         @NonNull
         public abstract Property<Artifact<Directory>> getManifestType();
-
-        @NonNull
-        public abstract Property<IncrementalPackagerBuilder.ApkFormat> getApkFormat();
 
         @Optional
         @NonNull
@@ -694,8 +683,7 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
                         : null;
 
         try (IncrementalPackager packager =
-                new IncrementalPackagerBuilder(
-                                params.getApkFormat().get(), params.getPackagerMode().get())
+                new IncrementalPackagerBuilder(params.getPackagerMode().get())
                         .withOutputFile(outputFile)
                         .withSigning(
                                 params.getSigningConfig().get().resolve(),
@@ -1061,15 +1049,8 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
                             ? projectOptions.get(StringOption.IDE_BUILD_TARGET_DENSITY)
                             : null;
 
-            packageAndroidArtifact.apkFormat =
-                    projectOptions.get(BooleanOption.DEPLOYMENT_USES_DIRECTORY)
-                            ? IncrementalPackagerBuilder.ApkFormat.DIRECTORY
-                            : projectOptions.get(BooleanOption.DEPLOYMENT_PROVIDES_LIST_OF_CHANGES)
-                                    ? IncrementalPackagerBuilder.ApkFormat.FILE_WITH_LIST_OF_CHANGES
-                                    : IncrementalPackagerBuilder.ApkFormat.FILE;
-
             packageAndroidArtifact.targetApi =
-                    projectOptions.get(IntegerOption.IDE_TARGET_DEVICE_API);
+                    projectOptions.getValue(IntegerOption.IDE_TARGET_DEVICE_API);
 
             packageAndroidArtifact.apkCreatorType =
                     creationConfig.getVariantScope().getApkCreatorType();
@@ -1167,15 +1148,17 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
 
         @NonNull
         private FileCollection getDesugarLibDexIfExists(@NonNull ApkCreationConfig creationConfig) {
-            if (!creationConfig.getShouldPackageDesugarLibDex()) {
-                return creationConfig.getServices().fileCollection();
+            if (creationConfig.getVariantType().isDynamicFeature()) {
+                return creationConfig.getGlobalScope().getProject().files();
             }
-            return creationConfig
-                    .getServices()
-                    .fileCollection(
-                            creationConfig
-                                    .getArtifacts()
-                                    .get(InternalArtifactType.DESUGAR_LIB_DEX.INSTANCE));
+            if (creationConfig.getVariantScope().getNeedsShrinkDesugarLibrary()) {
+                return project.files(
+                        creationConfig
+                                .getArtifacts()
+                                .get(InternalArtifactType.DESUGAR_LIB_DEX.INSTANCE));
+            } else {
+                return DesugarLibUtils.getDesugarLibDexFromTransform(creationConfig);
+            }
         }
     }
 }

@@ -18,17 +18,14 @@ package com.android.ide.common.gradle.model.level2;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.builder.model.level2.Library;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
 /** Creates a deep copy of {@link Library} of type LIBRARY_ANDROID. */
-public final class IdeAndroidLibrary implements Library, Serializable {
-    // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 4L;
-
+public final class IdeAndroidLibrary implements IdeLibrary {
     @NonNull private final String myArtifactAddress;
     @NonNull private final File myFolder;
     @NonNull private final String myManifest;
@@ -47,6 +44,8 @@ public final class IdeAndroidLibrary implements Library, Serializable {
     @NonNull private final String myPublicResources;
     @NonNull private final File myArtifactFile;
     @NonNull private final String mySymbolFile;
+
+    private final boolean myIsProvided;
     private final int myType;
     private final int myHashCode;
 
@@ -73,12 +72,14 @@ public final class IdeAndroidLibrary implements Library, Serializable {
         //noinspection ConstantConditions
         myArtifactFile = null;
         mySymbolFile = "";
+        myIsProvided = false;
         myType = 0;
 
         myHashCode = 0;
     }
 
-    IdeAndroidLibrary(
+    @VisibleForTesting
+    public IdeAndroidLibrary(
             @NonNull String artifactAddress,
             @NonNull File folder,
             @NonNull String manifest,
@@ -96,7 +97,8 @@ public final class IdeAndroidLibrary implements Library, Serializable {
             @NonNull String externalAnnotations,
             @NonNull String publicResources,
             @NonNull File artifactFile,
-            @NonNull String symbolFile) {
+            @NonNull String symbolFile,
+            boolean isProvided) {
         myType = LIBRARY_ANDROID;
         myArtifactAddress = artifactAddress;
         myFolder = folder;
@@ -116,6 +118,7 @@ public final class IdeAndroidLibrary implements Library, Serializable {
         myPublicResources = publicResources;
         mySymbolFile = symbolFile;
         myArtifactFile = artifactFile;
+        myIsProvided = isProvided;
         myHashCode = calculateHashCode();
     }
 
@@ -233,6 +236,11 @@ public final class IdeAndroidLibrary implements Library, Serializable {
     }
 
     @Override
+    public boolean isProvided() {
+        return myIsProvided;
+    }
+
+    @Override
     @Nullable
     public String getVariant() {
         throw unsupportedMethodForAndroidLibrary("getVariant");
@@ -284,7 +292,8 @@ public final class IdeAndroidLibrary implements Library, Serializable {
                 && Objects.equals(myExternalAnnotations, that.myExternalAnnotations)
                 && Objects.equals(myPublicResources, that.myPublicResources)
                 && Objects.equals(mySymbolFile, that.mySymbolFile)
-                && Objects.equals(myArtifactFile, that.myArtifactFile);
+                && Objects.equals(myArtifactFile, that.myArtifactFile)
+                && Objects.equals(myIsProvided, that.myIsProvided);
     }
 
     @Override
@@ -312,7 +321,8 @@ public final class IdeAndroidLibrary implements Library, Serializable {
                 myExternalAnnotations,
                 myPublicResources,
                 mySymbolFile,
-                myArtifactFile);
+                myArtifactFile,
+                myIsProvided);
     }
 
     @Override
@@ -371,6 +381,9 @@ public final class IdeAndroidLibrary implements Library, Serializable {
                 + '\''
                 + ", myArtifactFile="
                 + myArtifactFile
+                + '\''
+                + ", myIsProvided="
+                + myIsProvided
                 + '}';
     }
 }

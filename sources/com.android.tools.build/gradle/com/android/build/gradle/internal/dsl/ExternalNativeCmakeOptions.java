@@ -48,6 +48,7 @@ public class ExternalNativeCmakeOptions
         return arguments;
     }
 
+    @Override
     public void setArguments(@NonNull List<String> arguments) {
         this.arguments.addAll(arguments);
     }
@@ -63,6 +64,11 @@ public class ExternalNativeCmakeOptions
         return cFlags;
     }
 
+    @Override
+    public void setCFlags(@NonNull List<String> cFlags) {
+        this.cFlags.addAll(cFlags);
+    }
+
     @NonNull
     @Override
     public List<String> getcFlags() {
@@ -70,7 +76,7 @@ public class ExternalNativeCmakeOptions
     }
 
     public void setcFlags(@NonNull List<String> flags) {
-        this.cFlags.addAll(flags);
+        setCFlags(flags);
     }
 
     @Override
@@ -84,6 +90,7 @@ public class ExternalNativeCmakeOptions
         return cppFlags;
     }
 
+    @Override
     public void setCppFlags(@NonNull List<String> flags) {
         this.cppFlags.addAll(flags);
     }
@@ -99,6 +106,7 @@ public class ExternalNativeCmakeOptions
         return abiFilters;
     }
 
+    @Override
     public void setAbiFilters(@NonNull Set<String> abiFilters) {
         this.abiFilters.addAll(abiFilters);
     }
@@ -114,6 +122,7 @@ public class ExternalNativeCmakeOptions
         return targets;
     }
 
+    @Override
     public void setTargets(@NonNull Set<String> targets) {
         this.targets.addAll(targets);
     }

@@ -117,6 +117,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
     }
 
     private DeviceProvider deviceProvider;
+    private final DirectoryProperty coverageDir;
     private File reportsDir;
     private FileCollection buddyApks;
     private ProcessExecutor processExecutor;
@@ -149,6 +150,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
     @Inject
     public DeviceProviderInstrumentTestTask(
             ObjectFactory objectFactory, @NonNull ExecOperations execOperations) {
+        coverageDir = objectFactory.directoryProperty();
         this.execOperations = execOperations;
     }
 
@@ -173,7 +175,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
             additionalTestOutputDir = null;
         }
 
-        File coverageOutDir = getCoverageDirectory().get().getAsFile();
+        File coverageOutDir = getCoverageDir().get().getAsFile();
         FileUtils.cleanOutputDir(coverageOutDir);
 
         boolean success;
@@ -296,12 +298,8 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
     public abstract DirectoryProperty getAdditionalTestOutputDir();
 
     @OutputDirectory
-    public abstract DirectoryProperty getCoverageDirectory();
-
-    @Deprecated
-    @Internal
-    public File getCoverageDir() {
-        return getCoverageDirectory().get().getAsFile();
+    public DirectoryProperty getCoverageDir() {
+        return coverageDir;
     }
 
     @Deprecated
@@ -466,8 +464,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
                 creationConfig
                         .getArtifacts()
                         .setInitialProvider(
-                                taskProvider,
-                                DeviceProviderInstrumentTestTask::getCoverageDirectory)
+                                taskProvider, DeviceProviderInstrumentTestTask::getCoverageDir)
                         .withName(deviceProvider.getName())
                         .on(InternalArtifactType.CODE_COVERAGE.INSTANCE);
             } else {
@@ -488,8 +485,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
                 creationConfig
                         .getArtifacts()
                         .setInitialProvider(
-                                taskProvider,
-                                DeviceProviderInstrumentTestTask::getCoverageDirectory)
+                                taskProvider, DeviceProviderInstrumentTestTask::getCoverageDir)
                         .withName(deviceProvider.getName())
                         .on(InternalArtifactType.DEVICE_PROVIDER_CODE_COVERAGE.INSTANCE);
             }
@@ -584,7 +580,7 @@ public abstract class DeviceProviderInstrumentTestTask extends NonIncrementalTas
                     case HOST:
                         if (shardBetweenDevices) {
                             Integer numShards =
-                                    projectOptions.get(IntegerOption.ANDROID_TEST_SHARD_COUNT);
+                                    projectOptions.getValue(IntegerOption.ANDROID_TEST_SHARD_COUNT);
                             task.testRunnerFactory =
                                     (splitSelect, processExecutor, javaProcessExecutor) ->
                                             new ShardedTestRunner(

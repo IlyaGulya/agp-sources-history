@@ -18,14 +18,12 @@ package com.android.build.gradle.internal.cxx.services
 
 import com.android.build.gradle.internal.scope.GlobalScope
 
-
 /**
- * Create the default service registry for build model.
+ * Create the default module-level service registry.
  */
-fun createBuildModelServiceRegistry() : CxxServiceRegistry {
+fun createDefaultProjectServiceRegistry(global : GlobalScope) : CxxServiceRegistry {
     val registry = CxxServiceRegistryBuilder()
-    createFinishListenerService(registry)
-    createBuildModelListenerService(registry)
+    createExecService(global, registry)
     return registry.build()
 }
 
@@ -36,15 +34,7 @@ fun createDefaultServiceRegistry(global : GlobalScope) : CxxServiceRegistry {
     val registry = CxxServiceRegistryBuilder()
     createProcessJunctionService(registry)
     createIssueReporterService(global, registry)
+    createExecService(global, registry)
     createModelDependencyService(global, registry)
-    return registry.build()
-}
-
-/**
- * Create the default module-level service registry.
- */
-fun createDefaultAbiServiceRegistry() : CxxServiceRegistry {
-    val registry = CxxServiceRegistryBuilder()
-    createSyncListenerService(registry)
     return registry.build()
 }

@@ -502,11 +502,7 @@ abstract class ComponentPropertiesImpl(
                         artifacts.get(COMPILE_AND_RUNTIME_NOT_NAMESPACED_R_CLASS_JAR)
                     )
                 } else {
-                    if (buildFeatures.androidResources) {
-                        internalServices.fileCollection(variantScope.rJarForUnitTests)
-                    } else {
-                        internalServices.fileCollection()
-                    }
+                    internalServices.fileCollection(variantScope.rJarForUnitTests)
                 }
             }
         }
@@ -584,10 +580,5 @@ abstract class ComponentPropertiesImpl(
         } else {
             BuildConfigType.JAVA_CLASS
         }
-    }
-
-    companion object {
-        // String to
-        final val ENABLE_LEGACY_API: String = "Turn on with by putting '${BooleanOption.ENABLE_LEGACY_API.propertyName}=true in gradle.properties'"
     }
 }

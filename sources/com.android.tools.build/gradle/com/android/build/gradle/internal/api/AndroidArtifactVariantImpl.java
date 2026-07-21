@@ -68,8 +68,10 @@ public abstract class AndroidArtifactVariantImpl extends BaseVariantImpl
                             IssueReporter.Type.GENERIC,
                             new RuntimeException(
                                     "Access to deprecated legacy com.android.build.gradle.api.VersionedVariant.getVersionName() requires compatibility mode for Property values in new com.android.build.api.variant.VariantOutput.versionName\n"
-                                            + ComponentPropertiesImpl.Companion
-                                                    .getENABLE_LEGACY_API()));
+                                            + "Turn on with by putting '"
+                                            + BooleanOption.ENABLE_LEGACY_API.getPropertyName()
+                                            + "=true'\n"
+                                            + "in gradle.properties"));
             // return default value during sync
             return null;
         }
@@ -85,8 +87,10 @@ public abstract class AndroidArtifactVariantImpl extends BaseVariantImpl
                             IssueReporter.Type.GENERIC,
                             new RuntimeException(
                                     "Access to deprecated legacy com.android.build.gradle.api.VersionedVariant.getVersionCode() requires compatibility mode for Property values in new com.android.build.api.variant.VariantOutput.versionCode\n"
-                                            + ComponentPropertiesImpl.Companion
-                                                    .getENABLE_LEGACY_API()));
+                                            + "Turn on with by putting '"
+                                            + BooleanOption.ENABLE_LEGACY_API.getPropertyName()
+                                            + "=true'\n"
+                                            + "in gradle.properties"));
             // return default value during sync
             return -1;
         }

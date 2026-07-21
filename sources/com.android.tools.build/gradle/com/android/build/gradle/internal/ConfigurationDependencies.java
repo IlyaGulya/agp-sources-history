@@ -69,9 +69,7 @@ public class ConfigurationDependencies implements Dependencies {
                             null /*projectPath*/,
                             ImmutableList.<JavaLibrary>of(),
                             null /*requestedCoordinate*/,
-                            MavenCoordinatesImpl.create(
-                                    // no-op impl of stringCachingService
-                                    string -> string,
+                            new MavenCoordinatesImpl(
                                     "unknown-" + configuration.getName(),
                                     "unknown" + (index++),
                                     "unspecified"),
