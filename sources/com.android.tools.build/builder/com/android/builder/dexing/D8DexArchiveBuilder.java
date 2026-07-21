@@ -24,7 +24,6 @@ import com.android.tools.r8.CompilationMode;
 import com.android.tools.r8.D8;
 import com.android.tools.r8.D8Command;
 import com.android.tools.r8.Diagnostic;
-import com.android.tools.r8.StringConsumer.FileConsumer;
 import com.android.tools.r8.errors.UnsupportedFeatureDiagnostic;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.io.File;
@@ -99,6 +98,8 @@ final class D8DexArchiveBuilder extends DexArchiveBuilder {
             if (globalSyntheticsOutput != null) {
                 builder.setGlobalSyntheticsConsumer(
                         new D8GlobalSyntheticsConsumer(globalSyntheticsOutput));
+                // Enable this flag along with the support for global synthetics (b/231547906)
+                builder.setEnableExperimentalMissingLibraryApiModeling(true);
             }
 
             if (dexParams.getWithDesugaring()) {
@@ -109,12 +110,8 @@ final class D8DexArchiveBuilder extends DexArchiveBuilder {
 
                 if (dexParams.getCoreLibDesugarConfig() != null) {
                     builder.addSpecialLibraryConfiguration(dexParams.getCoreLibDesugarConfig());
-                    if (dexParams.getCoreLibDesugarOutputKeepRuleFile() != null) {
-                        builder.setDesugaredLibraryKeepRuleConsumer(
-                                new FileConsumer(
-                                        dexParams.getCoreLibDesugarOutputKeepRuleFile().toPath()));
-                    }
                 }
+
                 if (desugarGraphUpdater != null) {
                     builder.setDesugarGraphConsumer(
                             new D8DesugarGraphConsumerAdapter(desugarGraphUpdater));
