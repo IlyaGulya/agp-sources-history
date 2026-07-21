@@ -41,6 +41,7 @@ import com.android.build.gradle.internal.services.Aapt2Workers;
 import com.android.build.gradle.internal.services.Aapt2WorkersBuildService;
 import com.android.build.gradle.internal.tasks.Blocks;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
+import com.android.build.gradle.internal.utils.HasConfigurableValuesKt;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.SyncOptions;
@@ -142,6 +143,12 @@ public abstract class MergeResources extends ResourceAwareTask {
 
     private ImmutableSet<Flag> flags;
 
+    @Input
+    public abstract Property<Boolean> getDataBindingEnabled();
+
+    @Input
+    public abstract Property<Boolean> getViewBindingEnabled();
+
     /**
      * Set of absolute paths to resource directories that are located outside of the root project
      * directory when data binding / view binding is enabled.
@@ -189,7 +196,7 @@ public abstract class MergeResources extends ResourceAwareTask {
 
         Aapt2DaemonServiceKey aapt2ServiceKey =
                 aapt2DaemonBuildService.registerAaptService(
-                        aapt2FromMaven, new LoggerWrapper(logger));
+                        aapt2FromMaven.getSingleFile(), new LoggerWrapper(logger));
 
         return new WorkerExecutorResourceCompilationService(
                 projectName,
@@ -769,6 +776,12 @@ public abstract class MergeResources extends ResourceAwareTask {
             final BuildFeatureValues features = globalScope.getBuildFeatures();
             final boolean isDataBindingEnabled = features.getDataBinding();
             boolean isViewBindingEnabled = features.getViewBinding();
+
+            HasConfigurableValuesKt.setDisallowChanges(
+                    task.getDataBindingEnabled(), isDataBindingEnabled);
+            HasConfigurableValuesKt.setDisallowChanges(
+                    task.getViewBindingEnabled(), isViewBindingEnabled);
+
             if (isDataBindingEnabled || isViewBindingEnabled) {
                 // Keep as an output.
                 task.dataBindingLayoutProcessor =

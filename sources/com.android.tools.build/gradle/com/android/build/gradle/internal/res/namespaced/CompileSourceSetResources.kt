@@ -84,7 +84,6 @@ abstract class CompileSourceSetResources : IncrementalTask() {
         get() = true
 
     override fun doFullTaskAction() {
-        FileUtils.cleanOutputDir(outputDirectory.get().asFile)
         val requests = mutableListOf<CompileResourceRequest>()
         val addedFiles = mutableMapOf<Path, Path>()
         for (inputDirectory in inputDirectories) {
@@ -171,7 +170,7 @@ abstract class CompileSourceSetResources : IncrementalTask() {
             return
         }
         val aapt2ServiceKey = aapt2DaemonBuildService.get().registerAaptService(
-            aapt2FromMaven = aapt2FromMaven,
+            aapt2FromMaven = aapt2FromMaven.singleFile,
             logger = LoggerWrapper(logger)
         )
         for (request in requests) {
