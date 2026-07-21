@@ -37,6 +37,9 @@ public interface AndroidProject {
     // Sent by Studio 2.4+. Additional model feature trigger on a case by case basis
     // Value is simply true to enable.
     String PROPERTY_BUILD_MODEL_FEATURE_FULL_DEPENDENCIES = "android.injected.build.model.feature.full.dependencies";
+    // property to disable source download during model sync. This is used for lint.
+    String PROPERTY_BUILD_MODEL_DISABLE_SRC_DOWNLOAD =
+            "android.injected.build.model.disable.src.download";
 
     // Sent by Studio 2.2+
     // This property will enable compatibility checks between Android Studio and the Android
@@ -76,6 +79,9 @@ public interface AndroidProject {
 
     String PROPERTY_RESTRICT_VARIANT_PROJECT = "android.injected.restrict.variant.project";
     String PROPERTY_RESTRICT_VARIANT_NAME = "android.injected.restrict.variant.name";
+
+    // workaround for JNI AAPT2 not able to build apks in parallel.
+    String PROPERTY_INVOKE_JNI_AAPT2_LINK_SERIALLY = "android.injected.aapt2.serial";
 
     String PROPERTY_SIGNING_STORE_FILE = "android.injected.signing.store.file";
     String PROPERTY_SIGNING_STORE_PASSWORD = "android.injected.signing.store.password";
