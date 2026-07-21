@@ -235,4 +235,48 @@ public interface MainVariantInfoOrBuilder extends
    * @return The minificationEnabled.
    */
   boolean getMinificationEnabled();
+
+  /**
+   * <pre>
+   * Folders containing assets generated during the build and should be included in the main AAR.
+   * </pre>
+   *
+   * <code>repeated .File generated_asset_folders = 8;</code>
+   */
+  java.util.List<com.android.builder.model.proto.ide.File> 
+      getGeneratedAssetFoldersList();
+  /**
+   * <pre>
+   * Folders containing assets generated during the build and should be included in the main AAR.
+   * </pre>
+   *
+   * <code>repeated .File generated_asset_folders = 8;</code>
+   */
+  com.android.builder.model.proto.ide.File getGeneratedAssetFolders(int index);
+  /**
+   * <pre>
+   * Folders containing assets generated during the build and should be included in the main AAR.
+   * </pre>
+   *
+   * <code>repeated .File generated_asset_folders = 8;</code>
+   */
+  int getGeneratedAssetFoldersCount();
+  /**
+   * <pre>
+   * Folders containing assets generated during the build and should be included in the main AAR.
+   * </pre>
+   *
+   * <code>repeated .File generated_asset_folders = 8;</code>
+   */
+  java.util.List<? extends com.android.builder.model.proto.ide.FileOrBuilder> 
+      getGeneratedAssetFoldersOrBuilderList();
+  /**
+   * <pre>
+   * Folders containing assets generated during the build and should be included in the main AAR.
+   * </pre>
+   *
+   * <code>repeated .File generated_asset_folders = 8;</code>
+   */
+  com.android.builder.model.proto.ide.FileOrBuilder getGeneratedAssetFoldersOrBuilder(
+      int index);
 }

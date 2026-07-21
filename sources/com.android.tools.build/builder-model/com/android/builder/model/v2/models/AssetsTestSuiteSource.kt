@@ -16,7 +16,12 @@
 
 package com.android.builder.model.v2.models
 
-/**
- * Types of source associated to the test suite with its own set of dependencies
- */
-enum class SourceType { ASSETS, HOST_JAR, TEST_APK }
+import java.io.File
+
+interface AssetsTestSuiteSource: TestSuiteSource {
+
+    override val type: SourceType
+        get() = SourceType.ASSETS
+
+    val directories: Collection<File>
+}
