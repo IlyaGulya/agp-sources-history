@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.apksig.util;
+package com.android.ide.common.workers
 
-public interface RunnablesExecutor {
-    RunnablesExecutor SINGLE_THREADED = p -> p.createRunnable().run();
+import java.util.UUID
 
-    void execute(RunnablesProvider provider);
+interface BuildMBean {
+    val sessionId: UUID
 }
