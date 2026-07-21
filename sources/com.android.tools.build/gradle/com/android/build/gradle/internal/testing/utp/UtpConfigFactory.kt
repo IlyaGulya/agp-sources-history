@@ -124,7 +124,6 @@ class UtpConfigFactory {
         trustCertCollection: File,
         installApkTimeout: Int?,
         extractedSdkApks: List<List<Path>>,
-        uninstallApksAfterTest: Boolean,
         shardConfig: ShardConfig? = null,
     ): RunnerConfigProto.RunnerConfig {
         return RunnerConfigProto.RunnerConfig.newBuilder().apply {
@@ -151,7 +150,7 @@ class UtpConfigFactory {
                     coverageOutputDir,
                     installApkTimeout,
                     shardConfig,
-                    uninstallApksAfterTest,
+                    false,
                     extractedSdkApks,
                 )
             )
@@ -216,7 +215,6 @@ class UtpConfigFactory {
         showEmulatorKernelLogging: Boolean,
         installApkTimeout: Int?,
         extractedSdkApks: List<List<Path>>,
-        uninstallApksAfterTest: Boolean,
         shardConfig: ShardConfig? = null,
     ): RunnerConfigProto.RunnerConfig {
         return RunnerConfigProto.RunnerConfig.newBuilder().apply {
@@ -234,7 +232,7 @@ class UtpConfigFactory {
                     additionalTestOutputDir?.let {
                         findAdditionalTestOutputDirectoryOnManagedDevice(device, testData)
                     },
-                    coverageOutputDir, installApkTimeout, shardConfig, uninstallApksAfterTest,
+                    coverageOutputDir, installApkTimeout, shardConfig, true,
                     extractedSdkApks,
                 )
             )
@@ -358,7 +356,7 @@ class UtpConfigFactory {
         coverageOutputDir: File,
         installApkTimeout: Int?,
         shardConfig: ShardConfig?,
-        uninstallApksAfterTest: Boolean,
+        isManagedDevice: Boolean,
         extractedSdkApks: List<List<Path>>,
     ): FixtureProto.TestFixture {
         return FixtureProto.TestFixture.newBuilder().apply {
@@ -442,7 +440,7 @@ class UtpConfigFactory {
                     installApkTimeout,
                     additionalInstallOptions,
                     testData,
-                    uninstallApksAfterTest,
+                    isManagedDevice,
                     utpDependencies,
                 )
             )
@@ -732,7 +730,7 @@ class UtpConfigFactory {
         installApkTimeout: Int?,
         additionalInstallOptions: Iterable<String>,
         testData: StaticTestData,
-        uninstallApksAfterTest: Boolean,
+        isManagedDevice: Boolean,
         utpDependencies: UtpDependencies,
     ): ExtensionProto.Extension {
         return ANDROID_TEST_PLUGIN_APK_INSTALLER.toExtensionProto(
@@ -750,7 +748,6 @@ class UtpConfigFactory {
                                 installApkTimeout
                             )
                         }.build()
-                        uninstallAfterTest = uninstallApksAfterTest
                     }.build()
                 }
             }
@@ -763,7 +760,7 @@ class UtpConfigFactory {
                         installAsSplitApk = targetApkConfigBundle.isSplitApk
                         if (installApkTimeout != null) setInstallApkTimeout(installApkTimeout)
                     }.build()
-                    uninstallAfterTest = uninstallApksAfterTest
+                    uninstallAfterTest = !isManagedDevice
                     addAllApksPackageName(
                         listOf(
                             testData.testedApplicationId,
@@ -781,7 +778,6 @@ class UtpConfigFactory {
                         if (installApkTimeout != null) setInstallApkTimeout(installApkTimeout)
                         installAsTestService = true
                     }.build()
-                    uninstallAfterTest = uninstallApksAfterTest
                 }.build()
             }
 
@@ -792,7 +788,6 @@ class UtpConfigFactory {
                         addAllCommandLineParameter(additionalInstallOptions)
                         if (installApkTimeout != null) setInstallApkTimeout(installApkTimeout)
                     }.build()
-                    uninstallAfterTest = uninstallApksAfterTest
                 }.build()
             }
         }

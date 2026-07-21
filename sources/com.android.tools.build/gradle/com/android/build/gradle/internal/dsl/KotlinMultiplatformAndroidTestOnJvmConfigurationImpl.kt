@@ -16,17 +16,22 @@
 
 package com.android.build.gradle.internal.dsl
 
-import com.android.build.api.dsl.KotlinMultiplatformAndroidTestOnJvm
+import com.android.build.api.dsl.KotlinMultiplatformAndroidTestOnJvmConfiguration
+import com.android.build.gradle.internal.plugins.KotlinMultiplatformAndroidPlugin.Companion.getNamePrefixedWithTarget
 import com.android.build.gradle.internal.services.DslServices
 import org.gradle.api.Action
 import org.gradle.api.tasks.testing.Test
 import javax.inject.Inject
 
-abstract class KotlinMultiplatformAndroidTestOnJvmImpl @Inject constructor(
+abstract class KotlinMultiplatformAndroidTestOnJvmConfigurationImpl @Inject constructor(
+    compilationName: String,
     val dslServices: DslServices,
-): KotlinMultiplatformAndroidTestOnJvm {
+): KotlinMultiplatformAndroidTestOnJvmConfiguration, KotlinMultiplatformAndroidTestConfigurationImpl(compilationName) {
     // Used by testTasks.all below, DSL docs generator can't handle diamond operator.
     private val testTasks = dslServices.domainObjectSet(Test::class.java)
+
+    override var defaultSourceSetName: String = compilationName.getNamePrefixedWithTarget()
+    override var sourceSetTree: String? = null
 
     override var isReturnDefaultValues: Boolean = false
     override var isIncludeAndroidResources: Boolean = false

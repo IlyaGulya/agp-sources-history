@@ -18,8 +18,9 @@ package com.android.build.gradle.internal.dsl
 
 import com.android.build.api.dsl.ApkSigningConfig
 import com.android.build.api.dsl.Installation
-import com.android.build.api.dsl.KotlinMultiplatformAndroidTestOnDevice
+import com.android.build.api.dsl.KotlinMultiplatformAndroidTestOnDeviceConfiguration
 import com.android.build.api.dsl.MultiDexConfig
+import com.android.build.gradle.internal.plugins.KotlinMultiplatformAndroidPlugin.Companion.getNamePrefixedWithTarget
 import com.android.build.gradle.internal.services.DslServices
 import com.android.builder.core.BuilderConstants
 import com.android.builder.model.TestOptions
@@ -29,9 +30,10 @@ import com.google.common.base.Verify
 import org.gradle.api.Action
 import javax.inject.Inject
 
-abstract class KotlinMultiplatformAndroidTestOnDeviceImpl @Inject constructor(
+abstract class KotlinMultiplatformAndroidTestOnDeviceConfigurationImpl @Inject constructor(
+    compilationName: String,
     val dslServices: DslServices,
-): KotlinMultiplatformAndroidTestOnDevice {
+): KotlinMultiplatformAndroidTestOnDeviceConfiguration, KotlinMultiplatformAndroidTestConfigurationImpl(compilationName) {
 
     private val executionConverter = HelpfulEnumConverter(TestOptions.Execution::class.java)
     private var _execution = TestOptions.Execution.HOST
@@ -39,6 +41,8 @@ abstract class KotlinMultiplatformAndroidTestOnDeviceImpl @Inject constructor(
     override var applicationId: String? = null
     override var functionalTest: Boolean? = null
     override var handleProfiling: Boolean? = null
+    override var defaultSourceSetName: String = compilationName.getNamePrefixedWithTarget()
+    override var sourceSetTree: String? = null
 
     override var animationsDisabled: Boolean = false
     override var enableCoverage: Boolean = false

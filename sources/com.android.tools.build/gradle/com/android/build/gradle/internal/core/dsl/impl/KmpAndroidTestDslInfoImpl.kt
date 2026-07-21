@@ -33,7 +33,7 @@ import com.android.build.gradle.internal.dsl.AaptOptions
 import com.android.build.gradle.internal.dsl.KotlinMultiplatformAndroidExtensionImpl
 import com.android.build.gradle.internal.dsl.SigningConfig
 import com.android.build.gradle.internal.manifest.ManifestDataProvider
-import com.android.build.gradle.internal.plugins.KotlinMultiplatformAndroidPlugin.Companion.getNamePrefixedWithAndroidTarget
+import com.android.build.gradle.internal.plugins.KotlinMultiplatformAndroidPlugin.Companion.getNamePrefixedWithTarget
 import com.android.build.gradle.internal.services.DslServices
 import com.android.build.gradle.internal.services.VariantServices
 import com.android.builder.core.ComponentTypeImpl
@@ -57,11 +57,12 @@ class KmpAndroidTestDslInfoImpl(
     extension, services, withJava
 ), AndroidTestComponentDslInfo, KmpComponentDslInfo {
 
-    private val testOnDeviceConfig = (extension as KotlinMultiplatformAndroidExtensionImpl).androidTestOnDeviceOptions!!
+    private val testOnDeviceConfig
+        get() = (extension as KotlinMultiplatformAndroidExtensionImpl).androidTestOnDeviceConfiguration!!
 
     override val componentType = ComponentTypeImpl.ANDROID_TEST
     override val componentIdentity = ComponentIdentityImpl(
-        (extension as KotlinMultiplatformAndroidExtensionImpl).androidTestOnDeviceBuilder!!.compilationName.getNamePrefixedWithAndroidTarget()
+        testOnDeviceConfig.compilationName.getNamePrefixedWithTarget()
     )
 
     override val namespace: Provider<String> by lazy {

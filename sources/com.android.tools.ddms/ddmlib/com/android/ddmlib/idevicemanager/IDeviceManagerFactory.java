@@ -13,17 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.ddmlib.idevicemanager;
 
-package com.android.build.api.variant.impl
+import com.android.annotations.NonNull;
+import com.android.ddmlib.AndroidDebugBridge;
+import com.android.ddmlib.IDevice;
 
-import com.android.build.api.dsl.KotlinMultiplatformAndroidTestOnDevice
-import com.android.build.api.dsl.KotlinMultiplatformAndroidTestOnDeviceCompilation
-import org.jetbrains.kotlin.gradle.ExternalKotlinTargetApi
+/**
+ * An extension point to {@code ddmlib} that allows {@link AndroidDebugBridge} to delegate {@link
+ * IDevice} device tracking to an external component. See {@link AndroidDebugBridge#getDevices()}.
+ */
+public interface IDeviceManagerFactory {
 
-@OptIn(ExternalKotlinTargetApi::class)
-class KotlinMultiplatformAndroidTestOnDeviceCompilationImpl(
-    private val testOnDevice: KotlinMultiplatformAndroidTestOnDevice,
-    delegate: Delegate,
-) : KotlinMultiplatformAndroidCompilationImpl(delegate),
-    KotlinMultiplatformAndroidTestOnDeviceCompilation,
-    KotlinMultiplatformAndroidTestOnDevice by testOnDevice
+    @NonNull
+    IDeviceManager createIDeviceManager(
+            @NonNull AndroidDebugBridge bridge,
+            @NonNull IDeviceManagerListener iDeviceManagerListener);
+}

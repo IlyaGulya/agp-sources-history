@@ -201,7 +201,7 @@ open class ApplicationVariantImpl @Inject constructor(
     private val variantOutputs = mutableListOf<VariantOutputImpl>()
 
     override val outputs: VariantOutputList
-        get() = VariantOutputList(variantOutputs.toList(), paths.targetFilterConfigurations)
+        get() = VariantOutputList(variantOutputs.toList())
 
     override fun addVariantOutput(variantOutputConfiguration: VariantOutputConfiguration) {
         variantOutputs.add(

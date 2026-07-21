@@ -22,31 +22,33 @@ import com.android.build.api.dsl.ManagedDevices
 import com.android.build.api.variant.AndroidVersion
 import com.android.build.gradle.internal.core.dsl.features.AndroidTestOptionsDslInfo
 import com.android.build.gradle.internal.dsl.KotlinMultiplatformAndroidExtensionImpl
-import com.android.build.gradle.internal.plugins.KotlinMultiplatformAndroidPlugin
+import com.android.build.gradle.internal.dsl.KotlinMultiplatformAndroidTestOnDeviceConfigurationImpl
 import com.android.build.gradle.internal.utils.createTargetSdkVersion
+import com.android.builder.model.TestOptions
 
 internal class KmpAndroidTestOptionsDslInfoImpl(
     private val extension: KotlinMultiplatformAndroidExtensionImpl,
 ): AndroidTestOptionsDslInfo {
-    private val testOnDeviceConfig
-        get() = extension.androidTestOnDeviceOptions ?: throw RuntimeException(
-            "Android tests on device are not enabled. (use `kotlin.${KotlinMultiplatformAndroidPlugin.ANDROID_EXTENSION_ON_KOTLIN_EXTENSION_NAME}.withAndroidTestOnDevice()` to enable)"
-        )
+    private val testOnDeviceConfig: KotlinMultiplatformAndroidTestOnDeviceConfigurationImpl?
+        get() = extension.androidTestOnDeviceConfiguration
     override val animationsDisabled: Boolean
-        get() = testOnDeviceConfig.animationsDisabled
+        get() = testOnDeviceConfig?.animationsDisabled ?: false
     override val execution: String
-        get() = testOnDeviceConfig.execution
+        get() = testOnDeviceConfig?.execution ?: TestOptions.Execution.HOST.name
 
     override val resultsDir: String?
         get() = null
     override val reportDir: String?
         get() = null
     override val managedDevices: ManagedDevices
-        get() = testOnDeviceConfig.managedDevices
+        get() = testOnDeviceConfig?.managedDevices
+            ?: throw IllegalAccessException("Test on device configuration does not exist")
     override val emulatorControl: EmulatorControl
-        get() = testOnDeviceConfig.emulatorControl
+        get() = testOnDeviceConfig?.emulatorControl
+            ?: throw IllegalAccessException("Test on device configuration does not exist")
     override val emulatorSnapshots: EmulatorSnapshots
-        get() = testOnDeviceConfig.emulatorSnapshots
+        get() = testOnDeviceConfig?.emulatorSnapshots
+            ?: throw IllegalAccessException("Test on device configuration does not exist")
     override val targetSdkVersion: AndroidVersion?
         get() = extension.run { createTargetSdkVersion(compileSdk, compileSdkPreview) }
 }

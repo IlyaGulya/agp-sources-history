@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.build.api.variant.impl
+package com.android.build.gradle.internal.dsl
 
-import com.android.build.api.dsl.KotlinMultiplatformAndroidTestOnJvm
-import com.android.build.api.dsl.KotlinMultiplatformAndroidTestOnJvmCompilation
-import org.jetbrains.kotlin.gradle.ExternalKotlinTargetApi
+import com.android.build.api.dsl.KotlinMultiplatformAndroidTestConfiguration
 
-@OptIn(ExternalKotlinTargetApi::class)
-class KotlinMultiplatformAndroidTestOnJvmCompilationImpl(
-    private val testOnJvm: KotlinMultiplatformAndroidTestOnJvm,
-    delegate: Delegate,
-) : KotlinMultiplatformAndroidCompilationImpl(delegate),
-    KotlinMultiplatformAndroidTestOnJvmCompilation,
-    KotlinMultiplatformAndroidTestOnJvm by testOnJvm
+abstract class KotlinMultiplatformAndroidTestConfigurationImpl(
+    val compilationName: String
+) : KotlinMultiplatformAndroidTestConfiguration

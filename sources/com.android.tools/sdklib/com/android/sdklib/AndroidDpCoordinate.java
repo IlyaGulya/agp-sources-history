@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.sdklib;
 
-package com.android.build.gradle.internal.dsl
+import static java.lang.annotation.ElementType.*;
 
-import com.android.build.api.dsl.HasConfigurableValue
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-class HasConfigurableValueImpl<T>(
-    private val value: T
-): HasConfigurableValue<T> {
-
-    override fun configure(action: T.() -> Unit) {
-        value.action()
-    }
-}
+@Documented
+@Retention(RetentionPolicy.SOURCE)
+@Target({METHOD, PARAMETER, LOCAL_VARIABLE, FIELD})
+public @interface AndroidDpCoordinate {}

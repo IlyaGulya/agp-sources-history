@@ -60,6 +60,7 @@ import com.android.build.gradle.internal.scope.MutableTaskContainer
 import com.android.build.gradle.internal.services.getBuildService
 import com.android.build.gradle.internal.tasks.AnchorTaskNames
 import com.android.build.gradle.internal.tasks.DeviceProviderInstrumentTestTask
+import com.android.build.gradle.internal.tasks.ExtractPrivacySandboxCompatApks
 import com.android.build.gradle.internal.utils.getDesugarLibConfigFile
 import com.android.build.gradle.internal.utils.getDesugaredMethods
 import com.android.build.gradle.internal.utils.toImmutableSet
@@ -88,7 +89,6 @@ import com.android.builder.model.v2.ide.TestedTargetVariant
 import com.android.builder.model.v2.models.AndroidDsl
 import com.android.builder.model.v2.models.AndroidProject
 import com.android.builder.model.v2.models.BasicAndroidProject
-import com.android.builder.model.v2.models.BuildMap
 import com.android.builder.model.v2.models.ModelBuilderParameter
 import com.android.builder.model.v2.models.ProjectSyncIssues
 import com.android.builder.model.v2.models.VariantDependencies
@@ -98,7 +98,6 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
 import org.gradle.api.Project
-import org.gradle.api.invocation.Gradle
 import org.gradle.tooling.provider.model.ParameterizedToolingModelBuilder
 import java.io.File
 import java.io.FileInputStream
@@ -132,7 +131,6 @@ class ModelBuilder<
 
     override fun canBuild(className: String): Boolean {
         return className == Versions::class.java.name
-                || className == BuildMap::class.java.name
                 || className == BasicAndroidProject::class.java.name
                 || className == AndroidProject::class.java.name
                 || className == AndroidDsl::class.java.name
@@ -146,7 +144,6 @@ class ModelBuilder<
      */
     override fun buildAll(className: String, project: Project): Any = when (className) {
         Versions::class.java.name -> buildModelVersions()
-        BuildMap::class.java.name -> buildBuildMap(project)
         BasicAndroidProject::class.java.name -> buildBasicAndroidProjectModel(project)
         AndroidProject::class.java.name -> buildAndroidProjectModel(project)
         AndroidDsl::class.java.name -> buildAndroidDslModel(project)
@@ -169,7 +166,6 @@ class ModelBuilder<
         VariantDependencies::class.java.name -> buildVariantDependenciesModel(project, parameter)
         VariantDependenciesAdjacencyList::class.java.name -> buildVariantDependenciesModel(project, parameter, adjacencyList=true)
         Versions::class.java.name,
-        BuildMap::class.java.name,
         AndroidProject::class.java.name,
         AndroidDsl::class.java.name,
         ProjectSyncIssues::class.java.name -> throw RuntimeException(
@@ -190,7 +186,7 @@ class ModelBuilder<
          * after the next version of Studio becomes stable, dropping support for previous
          * Android Studio versions.
          */
-        val minimumModelConsumerVersion = VersionImpl(major = 64, minor = 0, humanReadable = "Android Studio Giraffe")
+        val minimumModelConsumerVersion = VersionImpl(major = 66, minor = 0, humanReadable = "Android Studio I")
         return VersionsImpl(
             agp = Version.ANDROID_GRADLE_PLUGIN_VERSION,
             versions = mutableMapOf<String, Versions.Version>(
@@ -206,8 +202,6 @@ class ModelBuilder<
             }
         )
     }
-
-    private fun buildBuildMap(project: Project): BuildMap = BuildMapImpl(getBuildMap(project))
 
     /**
      * Indicates the dimensions used for a variant
@@ -417,27 +411,6 @@ class ModelBuilder<
             modelSyncFiles = modelSyncFiles,
             desugarLibConfig = desugarLibConfig,
         )
-    }
-
-    /**
-     * Returns the build map and the current name
-     */
-    private fun getBuildMap(project: Project): Map<String, File> {
-        var rootGradle = project.gradle
-        while (rootGradle.parent != null) {
-            rootGradle = rootGradle.parent!!
-        }
-
-        return mutableMapOf<String, File>().also { map ->
-            map[":"] = rootGradle.rootProject.projectDir
-            getBuildMap(rootGradle, map)
-        }
-    }
-
-    private fun getBuildMap(gradle: Gradle, map: MutableMap<String, File>) {
-        for (build in gradle.includedBuilds) {
-            map[build.name] = build.projectDir
-        }
     }
 
     private fun buildAndroidDslModel(project: Project): AndroidDsl {
@@ -676,12 +649,19 @@ class ModelBuilder<
         if (!component.services.projectOptions[BooleanOption.PRIVACY_SANDBOX_SDK_SUPPORT]) {
             return null
         }
-        return component.artifacts.get(InternalArtifactType.EXTRACTED_APKS_FROM_PRIVACY_SANDBOX_SDKs_IDE_MODEL).orNull?.let {
-            PrivacySandboxSdkInfoImpl(
+        val extractedApksFromPrivacySandboxIdeModel =
+                component.artifacts.get(InternalArtifactType.EXTRACTED_APKS_FROM_PRIVACY_SANDBOX_SDKs_IDE_MODEL).orNull?.asFile
+                        ?: return null
+        val legacyExtractedApksForPrivacySandboxIdeModel =
+                component.artifacts.get(InternalArtifactType.APK_FROM_SDKS_IDE_MODEL).orNull?.asFile
+                        ?: return null
+
+        return PrivacySandboxSdkInfoImpl(
                 task = BuildPrivacySandboxSdkApks.CreationAction.getTaskName(component),
-                outputListingFile = it.asFile,
-            )
-        }
+                outputListingFile = extractedApksFromPrivacySandboxIdeModel,
+                taskLegacy = ExtractPrivacySandboxCompatApks.CreationAction.getTaskName(component),
+                outputListingLegacyFile = legacyExtractedApksForPrivacySandboxIdeModel
+        )
     }
 
     private fun createAndroidArtifact(component: ComponentCreationConfig): AndroidArtifactImpl {

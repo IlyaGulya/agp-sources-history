@@ -220,8 +220,7 @@ class JdkTools(
             setExecutable(jmodExecutable)
             addArgs("create")
             addArgs("--module-version", jlinkVersion)
-            // Use LINUX-OTHER to be compatible with JDK 21+ b/294137077
-            addArgs("--target-platform", "LINUX-OTHER")
+            addArgs("--target-platform", "android")
             addArgs("--class-path", moduleJar.absolutePath)
             addArgs(jmodFile.absolutePath)
         }

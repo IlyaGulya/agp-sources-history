@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.ddmlib.idevicemanager;
 
-package com.android.build.api.dsl
+import com.android.annotations.NonNull;
+import com.android.annotations.concurrency.WorkerThread;
+import com.android.ddmlib.IDevice;
+import java.util.List;
 
-import org.gradle.api.Incubating
+public interface IDeviceManagerListener {
+    @WorkerThread
+    void addedDevices(@NonNull List<IDevice> deviceList);
 
-@Incubating
-interface KotlinMultiplatformAndroidTestOnJvmCompilation:
-    KotlinMultiplatformAndroidTestOnJvm,
-    KotlinMultiplatformAndroidCompilation
+    @WorkerThread
+    void removedDevices(@NonNull List<IDevice> deviceList);
+}

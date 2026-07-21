@@ -24,15 +24,15 @@ import com.android.build.api.attributes.ProductFlavorAttr
 import com.android.build.api.component.analytics.AnalyticsEnabledKotlinMultiplatformAndroidVariant
 import com.android.build.api.component.impl.KmpAndroidTestImpl
 import com.android.build.api.component.impl.KmpUnitTestImpl
-import com.android.build.api.dsl.KotlinMultiplatformAndroidCompilation
 import com.android.build.api.dsl.KotlinMultiplatformAndroidExtension
-import com.android.build.api.dsl.KotlinMultiplatformAndroidTarget
 import com.android.build.api.dsl.SdkComponents
 import com.android.build.api.dsl.SettingsExtension
 import com.android.build.api.extension.impl.KotlinMultiplatformAndroidComponentsExtensionImpl
 import com.android.build.api.extension.impl.MultiplatformVariantApiOperationsRegistrar
+import com.android.build.api.variant.KotlinMultiplatformAndroidCompilation
 import com.android.build.api.variant.KotlinMultiplatformAndroidComponentsExtension
-import com.android.build.api.variant.impl.KmpAndroidCompilationType
+import com.android.build.api.dsl.KotlinMultiplatformAndroidTarget
+import com.android.build.api.variant.impl.KmpPredefinedAndroidCompilation
 import com.android.build.api.variant.impl.KmpVariantImpl
 import com.android.build.api.variant.impl.KotlinMultiplatformAndroidCompilationImpl
 import com.android.build.api.variant.impl.KotlinMultiplatformAndroidTargetImpl
@@ -41,6 +41,7 @@ import com.android.build.gradle.internal.DependencyConfigurator
 import com.android.build.gradle.internal.SdkComponentsBuildService
 import com.android.build.gradle.internal.TaskManager
 import com.android.build.gradle.internal.VariantManager.Companion.finalizeAllComponents
+import com.android.build.gradle.internal.component.KmpComponentCreationConfig
 import com.android.build.gradle.internal.core.dsl.KmpComponentDslInfo
 import com.android.build.gradle.internal.core.dsl.impl.KmpAndroidTestDslInfoImpl
 import com.android.build.gradle.internal.core.dsl.impl.KmpUnitTestDslInfoImpl
@@ -52,15 +53,20 @@ import com.android.build.gradle.internal.dependency.ModelArtifactCompatibilityRu
 import com.android.build.gradle.internal.dependency.SingleVariantBuildTypeRule
 import com.android.build.gradle.internal.dependency.SingleVariantProductFlavorRule
 import com.android.build.gradle.internal.dependency.VariantDependencies
+import com.android.build.gradle.internal.dependency.configureKotlinTestDependencyForInstrumentedTestCompilation
+import com.android.build.gradle.internal.dependency.configureKotlinTestDependencyForUnitTestCompilation
 import com.android.build.gradle.internal.dsl.KotlinMultiplatformAndroidExtensionImpl
+import com.android.build.gradle.internal.dsl.KotlinMultiplatformAndroidTestConfigurationImpl
 import com.android.build.gradle.internal.dsl.SdkComponentsImpl
+import com.android.build.gradle.internal.dsl.decorator.androidPluginDslDecorator
 import com.android.build.gradle.internal.ide.dependencies.LibraryDependencyCacheBuildService
 import com.android.build.gradle.internal.ide.dependencies.MavenCoordinatesCacheBuildService
+import com.android.build.gradle.internal.ide.kmp.KotlinAndroidSourceSetMarker
+import com.android.build.gradle.internal.ide.kmp.KotlinAndroidSourceSetMarker.Companion.android
+import com.android.build.gradle.internal.ide.kmp.KotlinIdeImportConfigurator
 import com.android.build.gradle.internal.ide.v2.GlobalSyncService
 import com.android.build.gradle.internal.lint.LintFixBuildService
 import com.android.build.gradle.internal.manifest.LazyManifestParser
-import com.android.build.gradle.internal.multiplatform.KotlinMultiplatformAndroidHandler
-import com.android.build.gradle.internal.multiplatform.KotlinMultiplatformAndroidHandlerImpl
 import com.android.build.gradle.internal.scope.KotlinMultiplatformBuildFeaturesValuesImpl
 import com.android.build.gradle.internal.scope.MutableTaskContainer
 import com.android.build.gradle.internal.services.Aapt2DaemonBuildService
@@ -98,21 +104,35 @@ import org.gradle.api.Incubating
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
 import org.gradle.build.event.BuildEventsListenerRegistry
+import org.jetbrains.kotlin.gradle.ExternalKotlinTargetApi
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
+import org.jetbrains.kotlin.gradle.plugin.mpp.external.ExternalKotlinTargetDescriptor
+import org.jetbrains.kotlin.gradle.plugin.mpp.external.createExternalKotlinTarget
 import javax.inject.Inject
 
+@OptIn(ExternalKotlinTargetApi::class)
 @Incubating
 abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
     listenerRegistry: BuildEventsListenerRegistry
 ): AndroidPluginBaseServices(listenerRegistry), Plugin<Project> {
 
     private lateinit var global: GlobalTaskCreationConfig
+
+    private lateinit var kotlinExtension: KotlinMultiplatformExtension
     private lateinit var androidExtension: KotlinMultiplatformAndroidExtensionImpl
+    private lateinit var androidTarget: KotlinMultiplatformAndroidTargetImpl
     private lateinit var kotlinMultiplatformAndroidComponentsExtension: KotlinMultiplatformAndroidComponentsExtension
     private lateinit var kmpVariantApiOperationsRegistrar: MultiplatformVariantApiOperationsRegistrar
 
     private lateinit var mainVariant: KmpVariantImpl
+
+    private val sourceSetToCreationConfigMap = mutableMapOf<KotlinSourceSet, KmpComponentCreationConfig>()
+    private val extraSourceSetsToIncludeInResolution = mutableSetOf<KotlinSourceSet>()
 
     private val dslServices by lazy {
         withProject("dslServices") { project ->
@@ -126,15 +146,6 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
                 projectServices,
                 sdkComponentsBuildService,
                 ProjectType.LIBRARY
-            )
-        }
-    }
-
-    private val kotlinMultiplatformHandler: KotlinMultiplatformAndroidHandler by lazy(LazyThreadSafetyMode.NONE) {
-        withProject("kotlinMultiplatformHandler") { project ->
-            KotlinMultiplatformAndroidHandlerImpl(
-                project = project,
-                dslServices = dslServices
             )
         }
     }
@@ -174,7 +185,34 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
     }
 
     override fun configureExtension(project: Project) {
-        androidExtension = kotlinMultiplatformHandler.createAndroidExtension()
+        val extensionImplClass = androidPluginDslDecorator
+            .decorate(KotlinMultiplatformAndroidExtensionImpl::class.java)
+        androidExtension = dslServices.newInstance(
+            extensionImplClass,
+            dslServices,
+            { jvmConfiguration: KotlinMultiplatformAndroidTestConfigurationImpl ->
+                if (project.pluginManager.hasPlugin(KOTLIN_MPP_PLUGIN_ID)) {
+                    createCompilation(
+                        compilationName = jvmConfiguration.compilationName,
+                        defaultSourceSetName = jvmConfiguration.defaultSourceSetName,
+                        compilationToAssociateWith = listOf(androidTarget.compilations.getByName(
+                            KmpPredefinedAndroidCompilation.MAIN.compilationName
+                        ))
+                    )
+                }
+            },
+            { deviceConfiguration: KotlinMultiplatformAndroidTestConfigurationImpl ->
+                if (project.pluginManager.hasPlugin(KOTLIN_MPP_PLUGIN_ID)) {
+                    createCompilation(
+                        compilationName = deviceConfiguration.compilationName,
+                        defaultSourceSetName = deviceConfiguration.defaultSourceSetName,
+                        compilationToAssociateWith = listOf(androidTarget.compilations.getByName(
+                            KmpPredefinedAndroidCompilation.MAIN.compilationName
+                        ))
+                    )
+                }
+            }
+        )
 
         kmpVariantApiOperationsRegistrar = MultiplatformVariantApiOperationsRegistrar(
             androidExtension
@@ -185,6 +223,64 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
         }
 
         BasePlugin.createAndroidTestUtilConfiguration(project)
+
+        project.pluginManager.withPlugin(KOTLIN_MPP_PLUGIN_ID) {
+            kotlinExtension = project.extensions.getByName("kotlin") as KotlinMultiplatformExtension
+
+            androidTarget = kotlinExtension.createExternalKotlinTarget {
+                targetName = androidTargetName
+                platformType = KotlinPlatformType.jvm
+                targetFactory = ExternalKotlinTargetDescriptor.TargetFactory { delegate ->
+                    KotlinMultiplatformAndroidTargetImpl(
+                        delegate, kotlinExtension, androidExtension
+                    )
+                }
+                configureIdeImport {
+                    KotlinIdeImportConfigurator.configure(
+                        project,
+                        lazy { androidTarget },
+                        androidExtension,
+                        this,
+                        sourceSetToCreationConfigMap = lazy {
+                            addSourceSetsThatShouldBeResolvedAsAndroid()
+                            sourceSetToCreationConfigMap
+                        },
+                        extraSourceSetsToIncludeInResolution = lazy {
+                            addSourceSetsThatShouldBeResolvedAsAndroid()
+                            extraSourceSetsToIncludeInResolution
+                        }
+                    )
+                }
+            }
+
+            (kotlinExtension as ExtensionAware).extensions.add(
+                KotlinMultiplatformAndroidTarget::class.java,
+                androidExtensionOnKotlinExtensionName,
+                androidTarget
+            )
+
+            val mainCompilation = createCompilation(
+                compilationName = KmpPredefinedAndroidCompilation.MAIN.compilationName,
+                defaultSourceSetName = KmpPredefinedAndroidCompilation.MAIN.compilationName.getNamePrefixedWithTarget(),
+                compilationToAssociateWith = emptyList()
+            )
+
+            androidExtension.androidTestOnJvmConfiguration?.let { jvmConfiguration ->
+                createCompilation(
+                    compilationName = jvmConfiguration.compilationName,
+                    defaultSourceSetName = jvmConfiguration.defaultSourceSetName,
+                    compilationToAssociateWith = listOf(mainCompilation)
+                )
+            }
+
+            androidExtension.androidTestOnDeviceConfiguration?.let { deviceConfiguration ->
+                createCompilation(
+                    compilationName = deviceConfiguration.compilationName,
+                    defaultSourceSetName = deviceConfiguration.defaultSourceSetName,
+                    compilationToAssociateWith = listOf(mainCompilation)
+                )
+            }
+        }
 
         val versionedSdkLoaderService = withProject("versionedSdkLoaderService") {
             VersionedSdkLoaderService(
@@ -271,6 +367,25 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
         }
     }
 
+    private fun createCompilation(
+        compilationName: String,
+        defaultSourceSetName: String,
+        compilationToAssociateWith: List<KotlinMultiplatformAndroidCompilation>
+    ): KotlinMultiplatformAndroidCompilation {
+        kotlinExtension.sourceSets.maybeCreate(
+            defaultSourceSetName
+        ).apply {
+            android = KotlinAndroidSourceSetMarker()
+        }
+        return androidTarget.compilations.maybeCreate(
+            compilationName
+        ).also { main ->
+            compilationToAssociateWith.forEach { other ->
+                main.associateWith(other)
+            }
+        }
+    }
+
     private fun getCompileSdkVersion(): String =
         androidExtension.compileSdkPreview?.let { validatePreviewTargetValue(it) }?.let { "android-$it" } ?:
         androidExtension.compileSdkExtension?.let { "android-${androidExtension.compileSdk}-ext$it" } ?:
@@ -278,7 +393,7 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
             "compileSdk version is not set.\n" +
                     "Specify the compileSdk version in the module's build file like so:\n" +
                     "kotlin {\n" +
-                    "    $ANDROID_EXTENSION_ON_KOTLIN_EXTENSION_NAME {\n" +
+                    "    $androidExtensionOnKotlinExtensionName {\n" +
                     "        compileSdk = ${MAX_SUPPORTED_ANDROID_PLATFORM_VERSION.apiLevel}\n" +
                     "    }\n" +
                     "}\n"
@@ -316,7 +431,7 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
             global,
             variantServices,
             taskServices,
-            kotlinMultiplatformHandler.getAndroidTarget()
+            androidTarget
         )
 
         val unitTest = createUnitTestComponent(
@@ -324,7 +439,7 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
             global,
             variantServices,
             taskServices,
-            kotlinMultiplatformHandler.getAndroidTarget()
+            androidTarget
         )
 
         val androidTest = createAndroidTestComponent(
@@ -333,7 +448,7 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
             variantServices,
             taskServices,
             taskManager,
-            kotlinMultiplatformHandler.getAndroidTarget()
+            androidTarget
         )
 
         mainVariant.unitTest = unitTest
@@ -357,6 +472,10 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
 
         listOfNotNull(mainVariant, unitTest, androidTest).forEach {
             it.syncAndroidAndKmpClasspathAndSources()
+
+            it.androidKotlinCompilation.kotlinSourceSets.forEach { sourceSet ->
+                sourceSetToCreationConfigMap[sourceSet] = it
+            }
         }
 
         (global.compileOptions as CompileOptions).finalizeSourceAndTargetCompatibility(project)
@@ -380,7 +499,45 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
 
         finalizeAllComponents(listOfNotNull(mainVariant, unitTest, androidTest))
 
-        kotlinMultiplatformHandler.finalize(mainVariant)
+        unitTest?.let {
+            configureKotlinTestDependencyForUnitTestCompilation(
+                project,
+                it,
+                kotlinExtension
+            )
+        }
+
+        androidTest?.let {
+            configureKotlinTestDependencyForInstrumentedTestCompilation(
+                project,
+                it,
+                kotlinExtension
+            )
+        }
+    }
+
+    private fun addSourceSetsThatShouldBeResolvedAsAndroid() {
+        // Here we check if there are sourceSets that are included only in the androidTarget, this
+        // means that the sourceSet should be treated as android sourceSet in IDE Import and its
+        // dependencies should be resolved from the component that maps to the compilation
+        // containing this sourceSet.
+        kotlinExtension.sourceSets.mapNotNull { sourceSet ->
+            val targetsContainingSourceSet = kotlinExtension.targets.filter { target ->
+                target.platformType != KotlinPlatformType.common &&
+                        target.compilations.any { compilation ->
+                            compilation.allKotlinSourceSets.contains(sourceSet)
+                        }
+            }
+            sourceSet.takeIf { targetsContainingSourceSet.singleOrNull() == androidTarget }
+        }.forEach { commonSourceSet ->
+            for (component in listOfNotNull(mainVariant, mainVariant.unitTest, mainVariant.androidTest)) {
+                if (component.androidKotlinCompilation.allKotlinSourceSets.contains(commonSourceSet)) {
+                    sourceSetToCreationConfigMap[commonSourceSet] = component
+                    extraSourceSetsToIncludeInResolution.add(commonSourceSet)
+                    break
+                }
+            }
+        }
     }
 
     private fun Configuration.forMainVariantConfiguration(
@@ -394,8 +551,8 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
     private fun createVariantDependencies(
         project: Project,
         dslInfo: KmpComponentDslInfo,
-        androidKotlinCompilation: KotlinMultiplatformAndroidCompilation,
-        androidTarget: KotlinMultiplatformAndroidTarget
+        androidKotlinCompilation: KotlinMultiplatformAndroidCompilationImpl,
+        androidTarget: KotlinMultiplatformAndroidTargetImpl
     ): VariantDependencies = VariantDependencies.createForKotlinMultiplatform(
         project = project,
         projectOptions = projectServices.projectOptions,
@@ -409,8 +566,7 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
         runtimeClasspath = project.configurations.getByName(
             androidKotlinCompilation.runtimeDependencyConfigurationName!!
         ),
-        apiElements = (androidTarget as KotlinMultiplatformAndroidTargetImpl)
-            .apiElementsConfiguration.forMainVariantConfiguration(dslInfo),
+        apiElements = androidTarget.apiElementsConfiguration.forMainVariantConfiguration(dslInfo),
         runtimeElements = androidTarget.runtimeElementsConfiguration.forMainVariantConfiguration(dslInfo),
         sourcesElements = project.configurations.findByName(
             androidTarget.sourcesElementsConfigurationName
@@ -433,14 +589,14 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
         global: GlobalTaskCreationConfig,
         variantServices: VariantServices,
         taskCreationServices: TaskCreationServices,
-        androidTarget: KotlinMultiplatformAndroidTarget
+        androidTarget: KotlinMultiplatformAndroidTargetImpl
     ): KmpVariantImpl {
 
         val dslInfo = KmpVariantDslInfoImpl(
             androidExtension,
             variantServices,
             project.layout.buildDirectory,
-            (androidTarget as KotlinMultiplatformAndroidTargetImpl).enableJavaSources
+            androidTarget.enableJavaSources
         )
 
         val paths = VariantPathHelper(
@@ -452,7 +608,7 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
         val artifacts = ArtifactsImpl(project, dslInfo.componentIdentity.name)
 
         val kotlinCompilation = androidTarget.compilations.getByName(
-            KmpAndroidCompilationType.MAIN.defaultCompilationName
+            KmpPredefinedAndroidCompilation.MAIN.compilationName
         ) as KotlinMultiplatformAndroidCompilationImpl
 
         return KmpVariantImpl(
@@ -475,7 +631,7 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
         global: GlobalTaskCreationConfig,
         variantServices: VariantServices,
         taskCreationServices: TaskCreationServices,
-        androidTarget: KotlinMultiplatformAndroidTarget
+        androidTarget: KotlinMultiplatformAndroidTargetImpl
     ): KmpUnitTestImpl? {
         if (!mainVariant.dslInfo.enabledUnitTest) {
             return null
@@ -485,7 +641,7 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
             androidExtension,
             variantServices,
             mainVariant.dslInfo,
-            (androidTarget as KotlinMultiplatformAndroidTargetImpl).enableJavaSources,
+            androidTarget.enableJavaSources,
             dslServices
         )
 
@@ -498,7 +654,7 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
         val artifacts = ArtifactsImpl(project, dslInfo.componentIdentity.name)
 
         val kotlinCompilation = androidTarget.compilations.getByName(
-            androidExtension.androidTestOnJvmBuilder!!.compilationName
+            androidExtension.androidTestOnJvmConfiguration!!.compilationName
         ) as KotlinMultiplatformAndroidCompilationImpl
 
         return KmpUnitTestImpl(
@@ -525,14 +681,14 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
         variantServices: VariantServices,
         taskCreationServices: TaskCreationServices,
         taskManager: KmpTaskManager,
-        androidTarget: KotlinMultiplatformAndroidTarget
+        androidTarget: KotlinMultiplatformAndroidTargetImpl
     ): KmpAndroidTestImpl? {
         if (!mainVariant.dslInfo.enableAndroidTest) {
             return null
         }
 
         val kotlinCompilation = androidTarget.compilations.getByName(
-            androidExtension.androidTestOnDeviceBuilder!!.compilationName
+            androidExtension.androidTestOnDeviceConfiguration!!.compilationName
         ) as KotlinMultiplatformAndroidCompilationImpl
 
         val manifestLocation = getAndroidManifestDefaultLocation(kotlinCompilation)
@@ -554,7 +710,7 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
             mainVariant.dslInfo,
             createSigningOverride(dslServices),
             dslServices,
-            (androidTarget as KotlinMultiplatformAndroidTargetImpl).enableJavaSources
+            androidTarget.enableJavaSources
         )
 
         val paths = VariantPathHelper(
@@ -621,9 +777,9 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
         val sdkComponents: SdkComponents = dslServices.newInstance(
             SdkComponentsImpl::class.java,
             dslServices,
-            project.provider(::getCompileSdkVersion),
-            project.provider(::getBuildToolsVersion),
-            project.provider(global::ndkVersion),
+            project.provider<String>(::getCompileSdkVersion),
+            project.provider<Revision>(::getBuildToolsVersion),
+            project.provider<String>(global::ndkVersion),
             project.provider<String>(global::ndkPath),
             project.provider(
                 bootClasspathConfig::bootClasspath
@@ -634,6 +790,7 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
             KotlinMultiplatformAndroidComponentsExtension::class.java,
             "androidComponents",
             KotlinMultiplatformAndroidComponentsExtensionImpl::class.java,
+            dslServices,
             sdkComponents,
             managedDeviceRegistry,
             variantApiOperationsRegistrar
@@ -641,8 +798,8 @@ abstract class KotlinMultiplatformAndroidPlugin @Inject constructor(
     }
 
     companion object {
-        internal const val ANDROID_TARGET_NAME = "android"
-        const val ANDROID_EXTENSION_ON_KOTLIN_EXTENSION_NAME = "androidLibrary"
-        fun String.getNamePrefixedWithAndroidTarget() = ANDROID_TARGET_NAME.appendCapitalized(this)
+        internal const val androidTargetName = "android"
+        const val androidExtensionOnKotlinExtensionName = "androidLibrary"
+        fun String.getNamePrefixedWithTarget() = androidTargetName.appendCapitalized(this)
     }
 }

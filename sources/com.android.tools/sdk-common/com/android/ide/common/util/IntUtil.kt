@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:JvmName("IntUtil")
+package com.android.ide.common.util
 
-package com.android.build.gradle.internal.dsl
+import kotlin.math.roundToInt
 
-import com.android.build.api.dsl.LibraryAndroidResources
-import com.android.build.gradle.internal.services.DslServices
-import javax.inject.Inject
-
-abstract class LibraryAndroidResourcesImpl @Inject constructor(dslServices: DslServices) :
-        LibraryAndroidResources, AaptOptions(dslServices) {
-
+fun String?.parseIntOrDefault(defaultValue: Int): Int {
+    if (this == null) {
+        return defaultValue
+    }
+    return try {
+        java.lang.Float.parseFloat(this).roundToInt()
+    } catch (ex: NumberFormatException) {
+        defaultValue
+    }
 }

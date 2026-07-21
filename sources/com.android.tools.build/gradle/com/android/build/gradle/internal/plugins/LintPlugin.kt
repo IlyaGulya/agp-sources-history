@@ -323,7 +323,7 @@ abstract class LintPlugin : Plugin<Project> {
                     ?.targets
                     ?.filter {
                         it.platformType == KotlinPlatformType.jvm
-                                && it.name != KotlinMultiplatformAndroidPlugin.ANDROID_TARGET_NAME
+                                && it.name != KotlinMultiplatformAndroidPlugin.androidTargetName
                     }
                     ?.map { it.name }
                     ?: listOf("jvm")

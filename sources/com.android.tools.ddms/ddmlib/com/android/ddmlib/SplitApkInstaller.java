@@ -39,7 +39,7 @@ public class SplitApkInstaller extends SplitApkInstallerBase {
      * Installs an Android application made of several APK files by streaming from files on host
      *
      * @param timeout installation timeout
-     * @param timeoutUnit {@link TimeUnit} corresponding to the timeout parameter
+     * @param unit {@link TimeUnit} corresponding to the timeout parameter
      * @return {@link InstallMetrics} metrics for time elapsed during this installation
      * @throws InstallException if the installation fails.
      */
@@ -115,14 +115,9 @@ public class SplitApkInstaller extends SplitApkInstallerBase {
                             "Directory upload not supported: %s", fileToUpload.getAbsolutePath()));
             return false;
         }
-        String baseName =
-                fileToUpload.getName().lastIndexOf('.') != -1
-                        ? fileToUpload
-                                .getName()
-                                .substring(0, fileToUpload.getName().lastIndexOf('.'))
-                        : fileToUpload.getName();
 
-        baseName = UNSAFE_PM_INSTALL_SESSION_SPLIT_NAME_CHARS.replaceFrom(baseName, '_');
+        String baseName =
+                UNSAFE_PM_INSTALL_SESSION_SPLIT_NAME_CHARS.replaceFrom(fileToUpload.getName(), '_');
 
         String command =
                 String.format(
@@ -137,11 +132,9 @@ public class SplitApkInstaller extends SplitApkInstallerBase {
         try {
             inputStream = new BufferedInputStream(new FileInputStream(fileToUpload));
             InstallReceiver receiver = new InstallReceiver();
-            AdbHelper.executeRemoteCommand(
-                    AndroidDebugBridge.getSocketAddress(),
+            mDevice.executeRemoteCommand(
                     getServiceWrite(),
                     command,
-                    getDevice(),
                     receiver,
                     timeout,
                     unit,
@@ -192,7 +185,7 @@ public class SplitApkInstaller extends SplitApkInstallerBase {
      * @param device the device to install APK, must include at least the main APK.
      * @param apks list of APK files.
      * @param reInstall whether to enable reinstall option.
-     * @param options list of install options.
+     * @param installOptions list of install options.
      */
     public static SplitApkInstaller create(
             @NonNull IDevice device,
@@ -212,7 +205,7 @@ public class SplitApkInstaller extends SplitApkInstallerBase {
      *     with.
      * @param apks list of APK files.
      * @param reInstall whether to enable reinstall option.
-     * @param pmOptions list of install options.
+     * @param installOptions list of install options.
      */
     public static SplitApkInstaller create(
             @NonNull IDevice device,

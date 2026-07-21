@@ -101,14 +101,6 @@ abstract class CommonExtensionImpl<
         action.execute(aaptOptions)
     }
 
-    override fun androidResources(action: AndroidResourcesT.() -> Unit) {
-        action(androidResources)
-    }
-
-    override fun androidResources(action: Action<AndroidResourcesT>) {
-        action.execute(androidResources)
-    }
-
     override val installation: Installation = dslServices.newDecoratedInstance(
         AdbOptions::class.java,
         dslServices

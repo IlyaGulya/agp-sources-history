@@ -33,6 +33,8 @@ import com.android.build.gradle.internal.KotlinMultiplatformCompileOptionsImpl
 import com.android.build.gradle.internal.SdkComponentsBuildService
 import com.android.build.gradle.internal.attribution.BuildAnalyzerIssueReporter
 import com.android.build.gradle.internal.core.SettingsOptions
+import com.android.build.gradle.internal.core.dsl.features.AndroidTestOptionsDslInfo
+import com.android.build.gradle.internal.core.dsl.features.UnitTestOptionsDslInfo
 import com.android.build.gradle.internal.core.dsl.impl.features.KmpAndroidTestOptionsDslInfoImpl
 import com.android.build.gradle.internal.core.dsl.impl.features.KmpUnitTestOptionsDslInfoImpl
 import com.android.build.gradle.internal.dependency.VariantDependencies
@@ -118,13 +120,11 @@ internal class KmpGlobalTaskCreationConfigImpl(
             .artifactFiles
     }
 
-    override val androidTestOptions by lazy(LazyThreadSafetyMode.NONE) {
-        KmpAndroidTestOptionsDslInfoImpl(extension)
-    }
+    override val androidTestOptions: AndroidTestOptionsDslInfo
+        get() = KmpAndroidTestOptionsDslInfoImpl(extension)
 
-    override val unitTestOptions by lazy(LazyThreadSafetyMode.NONE) {
-        KmpUnitTestOptionsDslInfoImpl(extension)
-    }
+    override val unitTestOptions: UnitTestOptionsDslInfo
+        get() = KmpUnitTestOptionsDslInfoImpl(extension)
 
     override val libraryRequests: Collection<LibraryRequest>
         get() = extension.libraryRequests
@@ -152,7 +152,7 @@ internal class KmpGlobalTaskCreationConfigImpl(
     }
 
     override val installationOptions: Installation
-        get() = extension.androidTestOnDeviceOptions!!.installation
+        get() = extension.androidTestOnDeviceConfiguration!!.installation
 
     override val deviceProviders: List<DeviceProvider>
         get() = emptyList()

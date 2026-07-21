@@ -21,7 +21,7 @@ import com.android.build.api.dsl.AarMetadata
 import com.android.build.api.dsl.KotlinMultiplatformAndroidExtension
 import com.android.build.api.dsl.Packaging
 import com.android.build.api.dsl.TestFixtures
-import com.android.build.api.variant.impl.KmpAndroidCompilationType
+import com.android.build.api.variant.impl.KmpPredefinedAndroidCompilation
 import com.android.build.api.variant.impl.MutableAndroidVersion
 import com.android.build.gradle.ProguardFiles
 import com.android.build.gradle.internal.PostprocessingFeatures
@@ -37,7 +37,8 @@ import com.android.build.gradle.internal.core.dsl.features.ShadersDslInfo
 import com.android.build.gradle.internal.dsl.LibraryKeepRulesImpl
 import com.android.build.gradle.internal.dsl.KmpOptimizationImpl
 import com.android.build.gradle.internal.dsl.KotlinMultiplatformAndroidExtensionImpl
-import com.android.build.gradle.internal.plugins.KotlinMultiplatformAndroidPlugin.Companion.ANDROID_EXTENSION_ON_KOTLIN_EXTENSION_NAME
+import com.android.build.gradle.internal.plugins.KotlinMultiplatformAndroidPlugin.Companion.androidExtensionOnKotlinExtensionName
+import com.android.build.gradle.internal.plugins.KotlinMultiplatformAndroidPlugin.Companion.getNamePrefixedWithTarget
 import com.android.build.gradle.internal.services.VariantServices
 import com.android.builder.core.ComponentTypeImpl
 import org.gradle.api.file.DirectoryProperty
@@ -57,7 +58,7 @@ class KmpVariantDslInfoImpl(
 
     override val componentType = ComponentTypeImpl.KMP_ANDROID
     override val componentIdentity = ComponentIdentityImpl(
-        KmpAndroidCompilationType.MAIN.defaultSourceSetName
+        KmpPredefinedAndroidCompilation.MAIN.compilationName.getNamePrefixedWithTarget()
     )
 
     override val aarMetadata: AarMetadata
@@ -68,7 +69,7 @@ class KmpVariantDslInfoImpl(
             ?: throw RuntimeException(
                 "Namespace not specified. Specify a namespace in the module's build file like so:\n" +
                         "kotlin {\n" +
-                        "    $ANDROID_EXTENSION_ON_KOTLIN_EXTENSION_NAME {\n" +
+                        "    $androidExtensionOnKotlinExtensionName {\n" +
                         "        namespace = \"com.example.namespace\"\n" +
                         "    }\n" +
                         "}\n"
@@ -82,7 +83,7 @@ class KmpVariantDslInfoImpl(
         get() = extension.packaging
 
     override val testInstrumentationRunnerArguments: Map<String, String>
-        get() = (extension as KotlinMultiplatformAndroidExtensionImpl).androidTestOnDeviceOptions
+        get() = (extension as KotlinMultiplatformAndroidExtensionImpl).androidTestOnDeviceConfiguration
             ?.instrumentationRunnerArguments ?: emptyMap()
 
     override val experimentalProperties: Map<String, Any>
@@ -95,9 +96,9 @@ class KmpVariantDslInfoImpl(
     }
 
     override val enabledUnitTest: Boolean
-        get() = (extension as KotlinMultiplatformAndroidExtensionImpl).androidTestOnJvmOptions != null
+        get() = (extension as KotlinMultiplatformAndroidExtensionImpl).androidTestOnJvmConfiguration != null
     override val enableAndroidTest: Boolean
-        get() = (extension as KotlinMultiplatformAndroidExtensionImpl).androidTestOnDeviceOptions != null
+        get() =  (extension as KotlinMultiplatformAndroidExtensionImpl).androidTestOnDeviceConfiguration != null
 
     // not supported
     override val targetSdkVersion: MutableAndroidVersion? = null

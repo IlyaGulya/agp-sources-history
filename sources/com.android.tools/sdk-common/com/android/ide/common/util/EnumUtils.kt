@@ -13,10 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.ide.common.util
 
-package com.android.build.api.dsl
+/**
+ * Returns an [Enum] of which [Enum.name] matches [value] from the given class [E]. If no Enum matches, returns [default] instead.
+ */
+inline fun <reified E : Enum<E>> enumValueOfOrDefault(value: String, default: E): E = enumValueOfOrNull<E>(value) ?: default
 
-interface HasConfigurableValue<T> {
-
-    fun configure(action: T.() -> Unit)
+/**
+ * Returns an [Enum] of which [Enum.name] matches [value] from the given class [E]. Null if no Enum matches [value].
+ */
+inline fun <reified E : Enum<E>> enumValueOfOrNull(value: String): E? {
+  return try {
+    enumValueOf<E>(value)
+  }
+  catch (_: Exception) {
+    null
+  }
 }

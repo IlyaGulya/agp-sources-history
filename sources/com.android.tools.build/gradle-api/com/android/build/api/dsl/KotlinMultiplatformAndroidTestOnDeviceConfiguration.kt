@@ -18,8 +18,13 @@ package com.android.build.api.dsl
 
 import org.gradle.api.Incubating
 
+/**
+ * Specific options to configure test on device configuration for kotlin multiplatform android
+ */
 @Incubating
-interface KotlinMultiplatformAndroidTestOnDevice {
+interface KotlinMultiplatformAndroidTestOnDeviceConfiguration:
+    KotlinMultiplatformAndroidTestConfiguration {
+
     /**
      * The test application id.
      */

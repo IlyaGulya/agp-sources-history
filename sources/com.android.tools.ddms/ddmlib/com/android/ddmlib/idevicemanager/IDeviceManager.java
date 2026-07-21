@@ -13,14 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.ddmlib.idevicemanager;
 
-package com.android.build.gradle.internal.dsl
+import com.android.annotations.NonNull;
+import com.android.ddmlib.AndroidDebugBridge;
+import com.android.ddmlib.IDevice;
+import java.util.List;
 
-import com.android.build.api.dsl.TestAndroidResources
-import com.android.build.gradle.internal.services.DslServices
-import javax.inject.Inject
+/**
+ * An extension point to {@code ddmlib} that allows {@link AndroidDebugBridge} to delegate {@link
+ * IDevice} device tracking to an external component. See {@link AndroidDebugBridge#getDevices()}.
+ */
+public interface IDeviceManager extends AutoCloseable {
 
-abstract class TestAndroidResourcesImpl @Inject constructor(dslServices: DslServices) :
-        TestAndroidResources, AaptOptions(dslServices) {
-
+    /** Returns the current of list of {@link IDevice} */
+    @NonNull
+    List<IDevice> getDevices();
 }

@@ -251,6 +251,7 @@ public final class SdkConstants {
             "com.android.tools.build.profiles";
     public static final String FN_BINARY_ART_PROFILE = "baseline.prof";
     public static final String FN_BINARY_ART_PROFILE_METADATA = "baseline.profm";
+    public static final String FN_DEX_METADATA_PROP = "dex-metadata-map.properties";
 
     /** aapt executable (with extension for the current OS) */
     public static final String FN_AAPT =
@@ -2114,6 +2115,7 @@ public final class SdkConstants {
     public static final String DOT_JAR = ".jar";
     public static final String DOT_KOTLIN_MODULE = ".kotlin_module";
     public static final String DOT_SRCJAR = ".srcjar";
+    public static final String DOT_KLIB = ".klib";
     public static final String DOT_GRADLE = ".gradle";
     public static final String DOT_PROPERTIES = ".properties";
     public static final String DOT_JSON = ".json";
@@ -2845,7 +2847,7 @@ public final class SdkConstants {
      * Studio product. It need not actually be the latest version of Gradle, but it will most likely
      * be fairly recent.
      */
-    public static final String GRADLE_LATEST_VERSION = "8.2";
+    public static final String GRADLE_LATEST_VERSION = "8.3-rc-2";
 
     /**
      * The minimum released version of the Android Gradle Plugin that this version of Studio will

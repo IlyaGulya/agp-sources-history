@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.sdklib
 
-package com.android.build.gradle.internal.ide.v2
-
-import com.android.builder.model.v2.models.BuildMap
-import java.io.File
-import java.io.Serializable
-
-data class BuildMapImpl(
-    override val buildIdMap: Map<String, File>
-): BuildMap, Serializable {
-    companion object {
-        @JvmStatic
-        private val serialVersionUID: Long = 1L
-    }
-}
+@Retention(AnnotationRetention.SOURCE)
+@Target(
+  AnnotationTarget.FUNCTION,
+  AnnotationTarget.PROPERTY_GETTER,
+  AnnotationTarget.PROPERTY_SETTER,
+  AnnotationTarget.VALUE_PARAMETER,
+  AnnotationTarget.LOCAL_VARIABLE,
+  AnnotationTarget.FIELD,
+  AnnotationTarget.PROPERTY
+)
+annotation class AndroidCoordinate
