@@ -30,7 +30,6 @@ import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.transforms.TransformInputUtil.getAllFiles
 import com.android.build.gradle.options.BooleanOption
 import com.android.builder.core.VariantType
-import com.android.builder.dexing.DexingType
 import com.android.builder.dexing.MainDexListConfig
 import com.android.builder.dexing.ProguardConfig
 import com.android.builder.dexing.R8OutputType
@@ -67,7 +66,6 @@ class R8Transform(
     variantType: VariantType,
     includeFeaturesInScopes: Boolean,
     private val messageReceiver: MessageReceiver,
-    private val dexingType: DexingType,
     private val useFullR8: Boolean = false
 ) :
         ProguardConfigurable(proguardConfigurationFiles, variantType, includeFeaturesInScopes) {
@@ -100,7 +98,6 @@ class R8Transform(
                 scope.variantData.type,
                 scope.consumesFeatureJars(),
                 scope.globalScope.messageReceiver,
-                scope.dexingType,
                 scope.globalScope.projectOptions[BooleanOption.FULL_R8]
             )
 
@@ -127,8 +124,7 @@ class R8Transform(
                 "java8Support" to (java8Support == VariantScope.Java8LangSupport.R8),
                 "disableMinification" to disableMinification,
                 "proguardConfiguration" to proguardConfigurations,
-                "fullMode" to useFullR8,
-                "dexingType" to dexingType
+                "fullMode" to useFullR8
         )
 
     override fun getSecondaryFileOutputs(): MutableCollection<File> =
@@ -197,16 +193,12 @@ class R8Transform(
                 proguardConfigurations
         )
 
-        val mainDexListConfig = if (dexingType == DexingType.LEGACY_MULTIDEX) {
-            MainDexListConfig(
-                mainDexRulesFiles.files.map { it.toPath() },
-                mainDexListFiles.files.map { it.toPath() },
-                getPlatformRules(),
-                mainDexListOutput?.toPath()
-            )
-        } else {
-            MainDexListConfig()
-        }
+        val mainDexListConfig = MainDexListConfig(
+            mainDexRulesFiles.files.map { it.toPath() },
+            mainDexListFiles.files.map { it.toPath() },
+            getPlatformRules(),
+            mainDexListOutput?.toPath()
+        )
 
         val output = outputProvider.getContentLocation(
                 "main",

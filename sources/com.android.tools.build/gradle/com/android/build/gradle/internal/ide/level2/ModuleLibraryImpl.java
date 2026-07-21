@@ -107,13 +107,6 @@ public final class ModuleLibraryImpl implements Library, Serializable {
 
     @NonNull
     @Override
-    public String getCompileJarFile() {
-        throw new UnsupportedOperationException(
-                "getCompileJarFile() cannot be called when getType() returns LIBRARY_MODULE");
-    }
-
-    @NonNull
-    @Override
     public String getResFolder() {
         throw new UnsupportedOperationException(
                 "getResFolder() cannot be called when getType() returns LIBRARY_MODULE");

@@ -87,9 +87,6 @@ fun populateCompilationDatabaseToolchains(
     cppExtensions: Collection<String>,
     cExtensions: Collection<String>)  : CompilationDatabaseToolchain {
     val visitor = CompilationDatabaseToolchainVisitor(cppExtensions, cExtensions)
-    CompilationDatabaseStreamingParser(JsonReader(FileReader(compilationDatabase)), visitor).use {
-        it.parse()
-    }
-
+    CompilationDatabaseStreamingParser(JsonReader(FileReader(compilationDatabase)), visitor).parse()
     return visitor.result()
 }

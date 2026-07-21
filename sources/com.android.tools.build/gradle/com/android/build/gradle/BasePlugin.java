@@ -33,7 +33,6 @@ import com.android.build.gradle.internal.ClasspathVerifier;
 import com.android.build.gradle.internal.DependencyResolutionChecks;
 import com.android.build.gradle.internal.ExtraModelInfo;
 import com.android.build.gradle.internal.LoggerWrapper;
-import com.android.build.gradle.internal.NativeLibraryFactoryImpl;
 import com.android.build.gradle.internal.NonFinalPluginExpiry;
 import com.android.build.gradle.internal.PluginInitializer;
 import com.android.build.gradle.internal.SdkHandler;
@@ -510,7 +509,12 @@ public abstract class BasePlugin<E extends BaseExtension2>
 
         project.getExtensions().add("buildOutputs", buildOutputs);
 
-        sourceSetManager = createSourceSetManager();
+        sourceSetManager =
+                new SourceSetManager(
+                        project,
+                        isPackagePublished(),
+                        globalScope.getDslScope(),
+                        new DelayedActionsExecutor());
 
         extension =
                 createExtension(
@@ -559,14 +563,9 @@ public abstract class BasePlugin<E extends BaseExtension2>
 
         buildTypeContainer.whenObjectAdded(
                 buildType -> {
-                    if (!this.getClass().isAssignableFrom(DynamicFeaturePlugin.class)) {
-                        SigningConfig signingConfig =
-                                signingConfigContainer.findByName(BuilderConstants.DEBUG);
-                        buildType.init(signingConfig);
-                    } else {
-                        // initialize it without the signingConfig for dynamic-features.
-                        buildType.init();
-                    }
+                    SigningConfig signingConfig =
+                            signingConfigContainer.findByName(BuilderConstants.DEBUG);
+                    buildType.init(signingConfig);
                     variantManager.addBuildType(buildType);
                 });
 
@@ -617,7 +616,6 @@ public abstract class BasePlugin<E extends BaseExtension2>
                         taskManager,
                         config,
                         extraModelInfo,
-                        new NativeLibraryFactoryImpl(globalScope.getNdkHandler()),
                         getProjectType(),
                         AndroidProject.GENERATION_ORIGINAL));
     }
@@ -800,7 +798,6 @@ public abstract class BasePlugin<E extends BaseExtension2>
 
         taskManager.createAnchorAssembleTasks(
                 variantScopes,
-                extension.getProductFlavors().size(),
                 flavorDimensionCount,
                 variantFactory.getVariantConfigurationTypes().size());
 
@@ -1049,17 +1046,6 @@ public abstract class BasePlugin<E extends BaseExtension2>
             // if kotlin plugin code changes unexpectedly.
             return "unknown";
         }
-    }
-
-    private SourceSetManager createSourceSetManager() {
-        return new SourceSetManager(
-                project,
-                isPackagePublished(),
-                new DslScopeImpl(
-                        extraModelInfo.getSyncIssueHandler(),
-                        extraModelInfo.getDeprecationReporter(),
-                        project.getObjects()),
-                new DelayedActionsExecutor());
     }
 
     /**

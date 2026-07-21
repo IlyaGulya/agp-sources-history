@@ -29,7 +29,6 @@ import com.android.ide.common.blame.MessageReceiver
 import com.android.ide.common.workers.WorkerExecutorFacade
 import com.google.common.util.concurrent.MoreExecutors
 import org.gradle.api.file.Directory
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
@@ -60,7 +59,7 @@ open class LibraryDexingTask @Inject constructor(executor: WorkerExecutor) : And
         private set
 
     @get:OutputDirectory
-    var output: Provider<Directory>? = null
+    lateinit var output: Provider<Directory>
         private set
 
     @get:Input
@@ -80,7 +79,7 @@ open class LibraryDexingTask @Inject constructor(executor: WorkerExecutor) : And
                     minSdkVersion,
                     SerializableMessageReceiver(messageReceiver),
                     classes.single(),
-                    output?.get()!!.asFile
+                    output.get().asFile
                 )
             )
         }

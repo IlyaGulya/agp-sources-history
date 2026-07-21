@@ -492,12 +492,12 @@ public abstract class ExternalNativeJsonGenerator {
      *
      * @param abi - ABI for which JSON generation process needs to be executed
      * @param abiPlatformVersion - ABIs platform version
-     * @param outputJsonFile - directory where the JSON file and other information needs to be
+     * @param outputJsonDir - directory where the JSON file and other information needs to be
      *     created
      * @return Returns the combination of STDIO and STDERR from running the process.
      */
     abstract String executeProcess(
-            @NonNull String abi, int abiPlatformVersion, @NonNull File outputJsonFile)
+            @NonNull String abi, int abiPlatformVersion, @NonNull File outputJsonDir)
             throws ProcessException, IOException;
 
     /**

@@ -17,6 +17,7 @@ package com.android.build.gradle.tasks;
 
 import com.android.annotations.Nullable;
 import com.android.build.api.artifact.BuildableArtifact;
+import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.tasks.IncrementalTask;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
@@ -30,8 +31,6 @@ import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.OutputFile;
-import org.gradle.api.tasks.PathSensitive;
-import org.gradle.api.tasks.PathSensitivity;
 
 /**
  * A task that processes the manifest
@@ -57,7 +56,6 @@ public abstract class ManifestProcessorTask extends IncrementalTask {
     protected BuildableArtifact checkManifestResult;
 
     @InputFiles
-    @PathSensitive(PathSensitivity.NONE)
     @Optional
     public BuildableArtifact getCheckManifestResult() {
         return checkManifestResult;
@@ -75,12 +73,10 @@ public abstract class ManifestProcessorTask extends IncrementalTask {
 
     /** The processed Manifests files folder. */
     @OutputDirectory
+    @InternalID(InternalArtifactType.MERGED_MANIFESTS)
+    @Initial(out = "")
     public Provider<Directory> getManifestOutputDirectory() {
         return manifestOutputDirectory;
-    }
-
-    public void setManifestOutputDirectory(Provider<Directory> manifestOutputDirectory) {
-        this.manifestOutputDirectory = manifestOutputDirectory;
     }
 
     @OutputDirectory

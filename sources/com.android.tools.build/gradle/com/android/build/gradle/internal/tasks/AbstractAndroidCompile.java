@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.ndk;
+package com.android.build.gradle.internal.tasks;
 
+import org.gradle.api.tasks.compile.AbstractCompile;
 
-
-/**
- * Factory for creating STL specification for NDK r14.
- */
-public class NdkR14StlSpecificationFactory extends NdkR13StlSpecificationFactory{
-}
+public abstract class AbstractAndroidCompile extends AbstractCompile implements VariantAwareTask {}

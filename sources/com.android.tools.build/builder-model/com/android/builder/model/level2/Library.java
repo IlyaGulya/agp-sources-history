@@ -102,25 +102,15 @@ public interface Library {
     String getManifest();
 
     /**
-     * Returns the location of the jar file to use for compiling and packaging.
+     * Returns the location of the jar file to use for either packaging or compiling depending on
+     * the bundle type.
      *
-     * <p>Only valid for Android Library where {@link #getType()} is {@link #LIBRARY_ANDROID}.
+     * Only valid for Android Library where {@link #getType()} is {@link #LIBRARY_ANDROID}
      *
-     * @return the path to the jar file. The path may not point to an existing file.
+     * @return a File for the jar file. The file may not point to an existing file.
      */
     @NonNull
     String getJarFile();
-
-    /**
-     * Returns the location of the jar file to use for compilation.
-     *
-     * <p>Only valid for Android Library where {@link #getType()} is {@link #LIBRARY_ANDROID}.
-     *
-     * @return path to the jar file used for compilation. The path may not point to an existing
-     *     file.
-     */
-    @NonNull
-    String getCompileJarFile();
 
     /**
      * Returns the location of the res folder.

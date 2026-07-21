@@ -55,13 +55,8 @@ public class OutputFactory {
     }
 
     private String getOutputFileName(String baseName) {
-        // we only know if it is signed during configuration, if its the base module.
-        // Otherwise, don't differentiate between signed and unsigned.
         String suffix =
-                (variantConfiguration.isSigningReady()
-                                || !variantConfiguration.getType().isBaseModule())
-                        ? DOT_ANDROID_PACKAGE
-                        : "-unsigned.apk";
+                variantConfiguration.isSigningReady() ? DOT_ANDROID_PACKAGE : "-unsigned.apk";
         return projectBaseName + "-" + baseName + suffix;
     }
 
@@ -131,20 +126,19 @@ public class OutputFactory {
         return apkData;
     }
 
+    public ApkData addConfigurationSplit(OutputFile.FilterType filterType, String filterValue) {
+        ImmutableList<FilterData> filtersList =
+                ImmutableList.of(new FilterDataImpl(filterType, filterValue));
+        String filterName = getFilterNameForSplits(filtersList);
+        String baseName = variantConfiguration.computeBaseNameWithSplits(filterName);
+        return addConfigurationSplit(filtersList, getOutputFileName(baseName), filterValue);
+    }
+
     public ApkData addConfigurationSplit(
             OutputFile.FilterType filterType, String filterValue, String fileName) {
         ImmutableList<FilterData> filtersList =
                 ImmutableList.of(new FilterDataImpl(filterType, filterValue));
-        return addConfigurationSplit(filtersList, fileName);
-    }
-
-    public ApkData addConfigurationSplit(
-            OutputFile.FilterType filterType,
-            String filterValue,
-            String fileName,
-            String filterDisplayName) {
-        ImmutableList<FilterData> filtersList =
-                ImmutableList.of(new FilterDataImpl(filterType, filterValue));
+        String filterDisplayName = getFilterNameForSplits(filtersList);
         return addConfigurationSplit(filtersList, fileName, filterDisplayName);
     }
 
@@ -152,11 +146,6 @@ public class OutputFactory {
     public static String getFilterNameForSplits(Collection<FilterData> filters) {
         return Joiner.on("-")
                 .join(filters.stream().map(FilterData::getIdentifier).collect(Collectors.toList()));
-    }
-
-    private ApkData addConfigurationSplit(ImmutableList<FilterData> filtersList, String fileName) {
-        String filterDisplayName = getFilterNameForSplits(filtersList);
-        return addConfigurationSplit(filtersList, fileName, filterDisplayName);
     }
 
     private ApkData addConfigurationSplit(

@@ -118,9 +118,9 @@ public class ChunkBasedByteStorage implements ByteStorage {
     long end = source.size();
     long start = 0;
     while (start < end) {
-      long chunkSize = Math.min(end - start, maxChunkSize);
-      sources.add(delegate.fromSource(source.slice(start, chunkSize)));
-      start += chunkSize;
+      long sliceEnd = Math.min(end, start + maxChunkSize);
+      sources.add(delegate.fromSource(source.slice(start, sliceEnd)));
+      start = sliceEnd;
     }
 
     return new ChunkBasedCloseableByteSource(sources);

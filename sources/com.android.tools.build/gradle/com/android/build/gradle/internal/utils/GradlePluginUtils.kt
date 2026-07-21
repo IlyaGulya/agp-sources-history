@@ -18,12 +18,11 @@
 
 package com.android.build.gradle.internal.utils
 
-import com.android.annotations.VisibleForTesting
 import com.android.builder.errors.EvalIssueException
 import com.android.builder.errors.EvalIssueReporter
 import com.android.ide.common.repository.GradleVersion
 import org.gradle.api.Project
-import org.gradle.api.artifacts.result.DependencyResult
+import org.gradle.api.artifacts.component.ModuleComponentSelector
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.gradle.api.initialization.dsl.ScriptHandler.CLASSPATH_CONFIGURATION
 
@@ -31,17 +30,6 @@ private const val INTERNAL__CHECKED_MINIMUM_PLUGIN_VERSIONS =
     "INTERNAL__CHECKED_MINIMUM_PLUGIN_VERSIONS"
 
 private val pluginList = listOf(
-    /**
-     *  https://issuetracker.google.com/116747159
-     *  (task generateDebugR2 fails on 3.3a12 when generating separate R classes)
-     */
-    DependencyInfo(
-        "Butterknife",
-        "com.jakewharton",
-        "butterknife-gradle-plugin",
-        GradleVersion.parse("9.0.0-rc2")
-    ),
-
     // https://issuetracker.google.com/79997489
     DependencyInfo(
         "Crashlytics",
@@ -58,17 +46,16 @@ private val pluginList = listOf(
         GradleVersion.parse("0.8.6")
     ),
 
-    // https://issuetracker.google.com/118644551
+    // https://issuetracker.google.com/69243050
     DependencyInfo(
         "Kotlin",
         "org.jetbrains.kotlin",
         "kotlin-gradle-plugin",
-        GradleVersion.parse("1.3.0")
+        GradleVersion.parse("1.2.51")
     )
 )
 
-@VisibleForTesting
-internal data class DependencyInfo(
+private data class DependencyInfo(
     val displayName: String,
     val dependencyGroup: String,
     val dependencyName: String,
@@ -113,7 +100,7 @@ private fun enforceMinimumVersionOfPlugin(
     val pathsToViolatingPlugins = mutableListOf<String>()
     for (dependency in buildScriptClasspath.incoming.resolutionResult.root.dependencies) {
         visitDependency(
-            dependency,
+            dependency as ResolvedDependencyResult,
             project.displayName,
             pluginInfo,
             pathsToViolatingPlugins,
@@ -143,53 +130,50 @@ private fun enforceMinimumVersionOfPlugin(
     }
 }
 
-@VisibleForTesting
-internal fun visitDependency(
-    dependencyResult: DependencyResult,
+private fun visitDependency(
+    dependency: ResolvedDependencyResult,
     parentPath: String,
     dependencyInfo: DependencyInfo,
     pathsToViolatingDeps: MutableList<String>,
     visitedDependencies: MutableSet<String>
 ) {
-    // The dependency must have been resolved
-    check(dependencyResult is ResolvedDependencyResult) {
-        "Expected ${ResolvedDependencyResult::class.java.name}" +
-                " but found ${dependencyResult.javaClass.name}"
-    }
+    val fullName = dependency.selected.moduleVersion!!
+    val group = fullName.module.group
+    val name = fullName.module.name
+    val selectedVersion = fullName.version
 
-    // The selected dependency may be different from the requested dependency, but we are interested
-    // in only the selected dependency
-    val dependency = (dependencyResult as ResolvedDependencyResult).selected
-    val moduleVersion = dependency.moduleVersion!!
-    val group = moduleVersion.group
-    val name = moduleVersion.name
-    val version = moduleVersion.version
+    // The selected version may be different than the requested version
+    val requestedVersion = (dependency.requested as ModuleComponentSelector).version
 
-    // Compute the path to the dependency
-    val currentPath = "$parentPath -> $group:$name:$version"
+    val requestedToSelectedVersion =
+        if (requestedVersion == selectedVersion) selectedVersion
+        else "$requestedVersion->$selectedVersion"
+    val currentPath = "$parentPath -> $group:$name:$requestedToSelectedVersion"
 
     // Detect violating dependencies
     if (group == dependencyInfo.dependencyGroup && name == dependencyInfo.dependencyName) {
         // Use GradleVersion to parse the version since the format accepted by GradleVersion is
         // general enough. In the unlikely event that the version cannot be parsed (the return
         // result is null), let's be lenient and ignore the error.
-        val parsedVersion = GradleVersion.tryParse(version)
-        if (parsedVersion != null && parsedVersion < dependencyInfo.minimumVersion) {
+        val parsedSelectedVersion = GradleVersion.tryParse(selectedVersion)
+        if (parsedSelectedVersion != null
+            && parsedSelectedVersion < dependencyInfo.minimumVersion
+        ) {
             pathsToViolatingDeps.add(currentPath)
         }
     }
 
     // Don't visit a dependency twice (except for the dependency being searched, that's why this
     // check should be after the detection above)
-    val dependencyFullName = "$group:$name:$version"
+    val dependencyFullName = "$group:$name:$selectedVersion"
     if (visitedDependencies.contains(dependencyFullName)) {
         return
     }
     visitedDependencies.add(dependencyFullName)
 
-    for (childDependency in dependency.dependencies) {
+    for (childDependency in dependency.selected.dependencies) {
         visitDependency(
-            childDependency,
+            childDependency as ResolvedDependencyResult,
             currentPath,
             dependencyInfo,
             pathsToViolatingDeps,

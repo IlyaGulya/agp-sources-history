@@ -264,7 +264,7 @@ public abstract class AbstractPackageOperation implements PackageOperation {
         return null;
     }
 
-    protected void cleanup(@NonNull ProgressIndicator progress) {
+    private void cleanup(@NonNull ProgressIndicator progress) {
         mFop.deleteFileOrFolder(new File(getLocation(progress), InstallerUtil.INSTALLER_DIR_FN));
     }
 

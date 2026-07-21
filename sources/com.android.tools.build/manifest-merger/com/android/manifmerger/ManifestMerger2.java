@@ -185,15 +185,11 @@ public class ManifestMerger2 {
         Optional<XmlDocument> xmlDocumentOptional = Optional.absent();
         for (File inputFile : mFlavorsAndBuildTypeFiles) {
             mLogger.verbose("Merging flavors and build manifest %s \n", inputFile.getPath());
-            LoadedManifestInfo overlayDocument =
-                    load(
-                            new ManifestInfo(
-                                    null,
-                                    inputFile,
-                                    XmlDocument.Type.OVERLAY,
-                                    mainPackageAttribute.transform(it -> it.getValue())),
-                            selectors,
-                            mergingReportBuilder);
+            LoadedManifestInfo overlayDocument = load(
+                    new ManifestInfo(null, inputFile, XmlDocument.Type.OVERLAY,
+                            Optional.of(mainPackageAttribute.get().getValue())),
+                    selectors,
+                    mergingReportBuilder);
 
             // check package declaration.
             Optional<XmlAttribute> packageAttribute =
@@ -235,13 +231,8 @@ public class ManifestMerger2 {
                 return mergingReportBuilder.build();
             }
 
-            if (mainPackageAttribute.isPresent()) {
-                overlayDocument
-                        .getXmlDocument()
-                        .getRootNode()
-                        .getXml()
-                        .setAttribute("package", mainPackageAttribute.get().getValue());
-            }
+            overlayDocument.getXmlDocument().getRootNode().getXml().setAttribute("package",
+                    mainPackageAttribute.get().getValue());
             xmlDocumentOptional = merge(xmlDocumentOptional, overlayDocument, mergingReportBuilder);
 
             if (!xmlDocumentOptional.isPresent()) {

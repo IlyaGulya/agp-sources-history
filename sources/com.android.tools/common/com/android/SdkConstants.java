@@ -98,8 +98,6 @@ public final class SdkConstants {
             "SharedLibraryAndroidManifest.xml"; // $NON-NLS-1$
     /** pre-dex jar filename. i.e. "classes.jar" */
     public static final String FN_CLASSES_JAR = "classes.jar"; //$NON-NLS-1$
-    /** api.jar filename */
-    public static final String FN_API_JAR = "api.jar"; //$NON-NLS-1$
     /** Dex filename inside the APK. i.e. "classes.dex" */
     public static final String FN_APK_CLASSES_DEX = "classes.dex"; //$NON-NLS-1$
     /** Dex filename inside the APK. i.e. "classes.dex" */
@@ -1081,9 +1079,6 @@ public final class SdkConstants {
     public static final String TAG_META_DATA = "meta-data";
     public static final String TAG_RESOURCE = "resource";
     public static final String TAG_MODULE = "module";
-    public static final String TAG_NAV_GRAPH = "nav-graph";
-    public static final String TAG_QUERIES = "queries";
-    public static final String TAG_INTENT = "intent";
 
     // Tags: Resources
     public static final String TAG_RESOURCES = "resources"; //$NON-NLS-1$
@@ -1239,16 +1234,19 @@ public final class SdkConstants {
     public static final String CONSTRAINT_REFERENCED_IDS = "constraint_referenced_ids";
 
     // Tags: Drawables
-    public static final String TAG_PATH = "path";
+    public static final String TAG_ANIMATED_SELECTOR = "animated-selector";
+    public static final String TAG_ANIMATED_VECTOR = "animated-vector"; //$NON-NLS-1$
+    public static final String TAG_BITMAP = "bitmap"; //$NON-NLS-1$
     public static final String TAG_CLIP_PATH = "clip-path";
     public static final String TAG_GRADIENT = "gradient";
-    public static final String TAG_BITMAP = "bitmap"; //$NON-NLS-1$
-    public static final String TAG_VECTOR = "vector"; //$NON-NLS-1$
-    public static final String TAG_ANIMATED_VECTOR = "animated-vector"; //$NON-NLS-1$
-    public static final String TAG_SHAPE = "shape";
+    public static final String TAG_INSET = "inset"; //$NON-NLS-1$
+    public static final String TAG_LAYER_LIST = "layer-list"; //$NON-NLS-1$
+    public static final String TAG_PATH = "path";
     public static final String TAG_RIPPLE = "ripple";
-    public static final String TAG_ANIMATED_SELECTOR = "animated-selector";
+    public static final String TAG_SHAPE = "shape";
     public static final String TAG_SELECTOR = "selector"; //$NON-NLS-1$
+    public static final String TAG_TRANSITION = "transition"; //$NON-NLS-1$
+    public static final String TAG_VECTOR = "vector"; //$NON-NLS-1$
 
     // Tags: Data-Binding
     public static final String TAG_LAYOUT = "layout"; //$NON-NLS-1$
@@ -1722,6 +1720,7 @@ public final class SdkConstants {
     public static final String ATTR_COMPLETION_HINT = "completionHint"; //$NON-NLS-1$
     public static final String ATTR_LAYOUT_MANAGER = "layoutManager"; //$NON-NLS-1$
     public static final String ATTR_SPAN_COUNT = "spanCount";
+    public static final String ATTR_NAVIGATION_ICON = "navigationIcon";
 
     // Material BottomAppBar Attributes
     public static final String ATTR_FAB_ALIGNMENT_MODE = "fabAlignmentMode";

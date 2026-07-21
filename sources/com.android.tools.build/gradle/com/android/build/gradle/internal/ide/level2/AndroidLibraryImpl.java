@@ -24,7 +24,6 @@ import static com.android.SdkConstants.FD_RENDERSCRIPT;
 import static com.android.SdkConstants.FD_RES;
 import static com.android.SdkConstants.FN_ANDROID_MANIFEST_XML;
 import static com.android.SdkConstants.FN_ANNOTATIONS_ZIP;
-import static com.android.SdkConstants.FN_API_JAR;
 import static com.android.SdkConstants.FN_CLASSES_JAR;
 import static com.android.SdkConstants.FN_LINT_JAR;
 import static com.android.SdkConstants.FN_PROGUARD_TXT;
@@ -34,7 +33,6 @@ import static com.android.SdkConstants.FN_RESOURCE_TEXT;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.builder.model.level2.Library;
-import com.android.utils.FileUtils;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
@@ -101,14 +99,6 @@ public final class AndroidLibraryImpl implements Library, Serializable {
     @Override
     public String getJarFile() {
         return FD_JARS + File.separatorChar + FN_CLASSES_JAR;
-    }
-
-    @NonNull
-    @Override
-    public String getCompileJarFile() {
-        // Use api.jar file for compilation if that file exists (api.jar is optional in an
-        // AAR); otherwise, use the regular jar file.
-        return FileUtils.join(folder, FN_API_JAR).exists() ? FN_API_JAR : getJarFile();
     }
 
     @NonNull

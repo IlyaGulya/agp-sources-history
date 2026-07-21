@@ -103,10 +103,9 @@ class BasicInstaller extends AbstractInstaller {
         return false;
     }
 
-    @Override
-    protected void cleanup(@NonNull ProgressIndicator progress) {
-        super.cleanup(progress);
-        mFop.deleteFileOrFolder(getLocation(progress));
+    @SuppressWarnings("MethodMayBeStatic")
+    protected void cleanup(@NonNull File installPath, @NonNull FileOp fop) {
+        fop.deleteFileOrFolder(new File(installPath, InstallerUtil.INSTALLER_DIR_FN));
     }
 
     /**

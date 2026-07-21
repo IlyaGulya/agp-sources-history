@@ -24,7 +24,6 @@ import static com.android.SdkConstants.FD_RENDERSCRIPT;
 import static com.android.SdkConstants.FD_RES;
 import static com.android.SdkConstants.FN_ANDROID_MANIFEST_XML;
 import static com.android.SdkConstants.FN_ANNOTATIONS_ZIP;
-import static com.android.SdkConstants.FN_API_JAR;
 import static com.android.SdkConstants.FN_CLASSES_JAR;
 import static com.android.SdkConstants.FN_LINT_JAR;
 import static com.android.SdkConstants.FN_PROGUARD_TXT;
@@ -135,15 +134,6 @@ public final class AndroidLibraryImpl extends LibraryImpl implements AndroidLibr
     @Override
     public File getJarFile() {
         return FileUtils.join(folder, FD_JARS, FN_CLASSES_JAR);
-    }
-
-    @NonNull
-    @Override
-    public File getCompileJarFile() {
-        // We use the api.jar file for compiling if that file exists (api.jar is optional in an
-        // AAR); otherwise, we use the regular jar file for compiling.
-        File apiJarFile = FileUtils.join(folder, FN_API_JAR);
-        return apiJarFile.exists() ? apiJarFile : getJarFile();
     }
 
     @NonNull

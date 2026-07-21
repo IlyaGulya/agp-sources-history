@@ -204,28 +204,19 @@ object AnalyticsSettings {
   @JvmOverloads
   fun initialize(logger: ILogger, scheduler: ScheduledExecutorService? = null) {
     synchronized(gate) {
-      try {
-        if (instance != null) {
-          return
-        }
-        initialized = true
-        instance = loadSettingsData(logger)
-      } catch (e : IOException) {
-        // null out metrics in case of failure to load.
-        initialized = true
-        instance = AnalyticsSettingsData()
-        logger.warning("Unable to initialize metrics, ensure %s is writable, details: %s",
-                       AnalyticsPaths.getAndEnsureAndroidSettingsHome(), e.message)
+      if (instance != null) {
+        return
       }
+      initialized = true
+      instance = loadSettingsData(logger)
     }
     scheduler?.submit {
       try {
         val gp = WebServerDateProvider(URL("https://play.google.com/"))
         dateProvider = gp
         googlePlayDateProvider = gp
-      } 
-      catch (_: IOException) {
-        logger.warning("Unable to get current time from Google's servers, using local system time instead.")
+      } catch(e: IOException) {
+        logger.error(e, "Unable to get current time from Google's servers")
       }
     }
   }
