@@ -78,6 +78,9 @@ public final class SdkConstants {
 
     /** An SDK Project's AndroidManifest.xml file */
     public static final String FN_ANDROID_MANIFEST_XML = "AndroidManifest.xml"; //$NON-NLS-1$
+
+    public static final String FN_SHARED_LIBRARY_ANDROID_MANIFEST_XML =
+            "SharedLibraryAndroidManifest.xml"; // $NON-NLS-1$
     /** pre-dex jar filename. i.e. "classes.jar" */
     public static final String FN_CLASSES_JAR = "classes.jar"; //$NON-NLS-1$
     /** Dex filename inside the APK. i.e. "classes.dex" */
@@ -730,6 +733,8 @@ public final class SdkConstants {
             "android.support.design.widget.CoordinatorLayout"; //$NON-NLS-1$
     public static final String CLASS_APP_BAR_LAYOUT =
             "android.support.design.widget.AppBarLayout"; //$NON-NLS-1$
+    public static final String CLASS_BOTTOM_NAVIGATION_VIEW =
+            "android.support.design.widget.BottomNavigationView"; //$NON-NLS-1$
     public static final String CLASS_FLOATING_ACTION_BUTTON =
             "android.support.design.widget.FloatingActionButton"; //$NON-NLS-1$
     public static final String CLASS_COLLAPSING_TOOLBAR_LAYOUT =
@@ -1047,6 +1052,10 @@ public final class SdkConstants {
     public static final String REQUEST_FOCUS = "requestFocus"; //$NON-NLS-1$
     public static final String TAG = "tag"; //$NON-NLS-1$
 
+    // Tags: Navigation
+    public static final String TAG_INCLUDE = "include";
+    public static final String TAG_DEEPLINK = "deeplink";
+
     public static final String VIEW = "View"; //$NON-NLS-1$
     public static final String VIEW_GROUP = "ViewGroup"; //$NON-NLS-1$
     public static final String FRAME_LAYOUT = "FrameLayout"; //$NON-NLS-1$
@@ -1108,6 +1117,7 @@ public final class SdkConstants {
     /* Android Support Tag Constants */
     public static final String COORDINATOR_LAYOUT = CLASS_COORDINATOR_LAYOUT;
     public static final String APP_BAR_LAYOUT = CLASS_APP_BAR_LAYOUT;
+    public static final String BOTTOM_NAVIGATION_VIEW = CLASS_BOTTOM_NAVIGATION_VIEW;
     public static final String FLOATING_ACTION_BUTTON = CLASS_FLOATING_ACTION_BUTTON;
     public static final String COLLAPSING_TOOLBAR_LAYOUT = CLASS_COLLAPSING_TOOLBAR_LAYOUT;
     public static final String NAVIGATION_VIEW = CLASS_NAVIGATION_VIEW;
@@ -1290,6 +1300,11 @@ public final class SdkConstants {
     public static final String ATTR_PARENT_TAG = "parentTag"; //$NON-NLS-1$
     public static final String ATTR_WIDTH = "width"; //$NON-NLS-1$
     public static final String ATTR_HEIGHT = "height"; //$NON-NLS-1$
+
+    // Attributes: Navigation
+    public static final String ATTR_GRAPH = "graph";
+    public static final String ATTR_URI = "uri";
+    public static final String ATTR_AUTO_VERIFY = "autoVerify";
 
     // TextView attributes
     public static final String ATTR_TEXT_APPEARANCE = "textAppearance"; //$NON-NLS-1$
@@ -1758,6 +1773,12 @@ public final class SdkConstants {
     public static final String FN_RESOURCE_TEXT = FN_RESOURCE_BASE + DOT_TXT;
     /** Filename for public resources in AAR archives */
     public static final String FN_PUBLIC_TXT = "public.txt";
+    /** Resource static library */
+    public static final String FN_RESOURCE_STATIC_LIBRARY = "res.apk";
+    /** Resource shared library */
+    public static final String FN_RESOURCE_SHARED_STATIC_LIBRARY = "shared.apk";
+    /** R class jar, used for resource static library */
+    public static final String FN_R_CLASS_JAR = "R.jar";
     /** Generated manifest class name */
     public static final String FN_MANIFEST_BASE = "Manifest"; //$NON-NLS-1$
     /** Generated BuildConfig class name */
@@ -1797,6 +1818,7 @@ public final class SdkConstants {
     public static final String FONT_PREFIX = "@font/"; //$NON-NLS-1$
     public static final String AAPT_ATTR_PREFIX = "@aapt:_aapt/";
     public static final String SAMPLE_PREFIX = "@sample/";
+    public static final String NAVIGATION_PREFIX = "@navigation/"; //$NON-NLS-1$
 
     public static final String TOOLS_SAMPLE_PREFIX = "@tools:sample/";
 
@@ -1965,6 +1987,7 @@ public final class SdkConstants {
         public static final String PREFERENCE_SCREEN = "PreferenceScreen";
         public static final String RINGTONE_PREFERENCE = "RingtonePreference";
         public static final String SWITCH_PREFERENCE = "SwitchPreference";
+        public static final String INTENT = "intent";
     }
 
     public static final class PreferenceAttributes {
@@ -2172,13 +2195,9 @@ public final class SdkConstants {
     public static final String GRADLE_MINIMUM_VERSION = "4.1";
     public static final String GRADLE_LATEST_VERSION = GRADLE_MINIMUM_VERSION;
     public static final String GRADLE_PLUGIN_MINIMUM_VERSION = "1.0.0";
-    // Always update GRADLE_PLUGIN_RECOMMENDED_VERSION and GRADLE_EXPERIMENTAL_PLUGIN_RECOMMENDED_VERSION together.
     public static final String GRADLE_PLUGIN_RECOMMENDED_VERSION = "2.3.2";
-    public static final String GRADLE_EXPERIMENTAL_PLUGIN_RECOMMENDED_VERSION = "0.9.0";
     // Temporary - can be removed once the recommended version supports AIA (with splits).
     public static final String GRADLE_PLUGIN_LATEST_VERSION = GRADLE_PLUGIN_RECOMMENDED_VERSION;
-    public static final String GRADLE_EXPERIMENTAL_PLUGIN_LATEST_VERSION =
-            GRADLE_EXPERIMENTAL_PLUGIN_RECOMMENDED_VERSION;
     public static final String GRADLE_COMPILE_CONFIGURATION = "compile";
     public static final String GRADLE_TEST_COMPILE_CONFIGURATION = "testCompile";
     public static final String GRADLE_ANDROID_TEST_COMPILE_CONFIGURATION = "androidTestCompile";

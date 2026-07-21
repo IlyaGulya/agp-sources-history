@@ -40,9 +40,8 @@ final class PackagedFileUpdates {
             @NonNull Map<RelativeFile, FileStatus> set) {
         Set<PackagedFileUpdate> r = Sets.newHashSet();
         for (Map.Entry<RelativeFile, FileStatus> entry : set.entrySet()) {
-            r.add(
-                    new PackagedFileUpdate(
-                            entry.getKey(), entry.getKey().getRelativePath(), entry.getValue()));
+            r.add(new PackagedFileUpdate(entry.getKey(),
+                    entry.getKey().getOsIndependentRelativePath(), entry.getValue()));
         }
 
         return r;

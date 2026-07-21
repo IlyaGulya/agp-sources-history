@@ -104,29 +104,23 @@ public class LazyIncrementalFileMergerInput implements IncrementalFileMergerInpu
             @NonNull CachedSupplier<ImmutableSet<RelativeFile>> files) {
         this.name = name;
         this.updates = updates;
-        this.updatePaths =
-                new CachedSupplier<>(
-                        () -> {
-                            ImmutableMap.Builder<String, RelativeFile> pathsBuilder =
-                                    ImmutableMap.builder();
-                            for (Map.Entry<RelativeFile, FileStatus> e : updates.get().entrySet()) {
-                                pathsBuilder.put(e.getKey().getRelativePath(), e.getKey());
-                            }
+        this.updatePaths = new CachedSupplier<>(() -> {
+            ImmutableMap.Builder<String, RelativeFile> pathsBuilder = ImmutableMap.builder();
+            for (Map.Entry<RelativeFile, FileStatus> e : updates.get().entrySet()) {
+                pathsBuilder.put(e.getKey().getOsIndependentRelativePath(), e.getKey());
+            }
 
-                            return pathsBuilder.build();
-                        });
+            return pathsBuilder.build();
+        });
 
-        this.filePaths =
-                new CachedSupplier<>(
-                        () -> {
-                            ImmutableMap.Builder<String, RelativeFile> pathsBuilder =
-                                    ImmutableMap.builder();
-                            for (RelativeFile rf : files.get()) {
-                                pathsBuilder.put(rf.getRelativePath(), rf);
-                            }
+        this.filePaths = new CachedSupplier<>(() -> {
+            ImmutableMap.Builder<String, RelativeFile> pathsBuilder = ImmutableMap.builder();
+            for (RelativeFile rf : files.get()) {
+                pathsBuilder.put(rf.getOsIndependentRelativePath(), rf);
+            }
 
-                            return pathsBuilder.build();
-                        });
+            return pathsBuilder.build();
+        });
 
         this.zips = new CachedSupplier<>(() -> {
             /*
@@ -185,18 +179,14 @@ public class LazyIncrementalFileMergerInput implements IncrementalFileMergerInpu
         Preconditions.checkState(openZips != null, "input not open");
 
         RelativeFile rf = filePaths.get().get(path);
-        Preconditions.checkState(rf != null, "Unknown file: %s", path);
+        Preconditions.checkState(rf != null, "Unknown file " + rf);
 
         if (zips.get().contains(rf.getBase())) {
             ZFile zf = openZips.get(rf.getBase());
-            Preconditions.checkState(zf != null, "Unknown base: %s", rf.getBase().getName());
+            assert zf != null;
 
             StoredEntry entry = zf.get(path);
-            Preconditions.checkState(
-                    entry != null,
-                    "Unknown path %s in zip file %s",
-                    path,
-                    zf.getFile().getAbsolutePath());
+            assert entry != null;
 
             try {
                 return entry.open();
@@ -205,7 +195,7 @@ public class LazyIncrementalFileMergerInput implements IncrementalFileMergerInpu
             }
         } else {
             try {
-                return new FileInputStream(new File(rf.getBase(), rf.getRelativePath()));
+                return new FileInputStream(rf.getFile());
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }

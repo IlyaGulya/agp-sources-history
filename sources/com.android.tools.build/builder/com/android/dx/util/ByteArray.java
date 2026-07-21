@@ -19,6 +19,7 @@ package com.android.dx.util;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * Wrapper for a {@code byte[]}, which provides read-only access and
@@ -27,7 +28,6 @@ import java.io.InputStream;
  * <b>Note:</b> Multibyte accessors all use big-endian order.
  */
 public final class ByteArray {
-
     /** {@code non-null;} underlying array */
     private final byte[] bytes;
 
@@ -96,9 +96,8 @@ public final class ByteArray {
      */
     public ByteArray slice(int start, int end) {
         checkOffsets(start, end);
-        byte[] slicedOut = new byte[end - start];
-        System.arraycopy(bytes, start, slicedOut, 0, end - start);
-        return new ByteArray(slicedOut, 0, slicedOut.length);
+        byte[] slicedOut = Arrays.copyOfRange(bytes, start, end);
+        return new ByteArray(slicedOut);
     }
 
     /**
@@ -106,16 +105,11 @@ public final class ByteArray {
      * offset into this instance.
      *
      * @param offset offset into this instance
-     * @param bytes {@code non-null;} (alleged) underlying array
      * @return corresponding offset into {@code bytes}
      * @throws IllegalArgumentException thrown if {@code bytes} is
      * not the underlying array of this instance
      */
-    public int underlyingOffset(int offset, byte[] bytes) {
-        if (bytes != this.bytes) {
-            throw new IllegalArgumentException("wrong bytes");
-        }
-
+    public int underlyingOffset(int offset) {
         return start + offset;
     }
 
@@ -304,6 +298,7 @@ public final class ByteArray {
             mark = 0;
         }
 
+        @Override
         public int read() throws IOException {
             if (cursor >= size) {
                 return -1;
@@ -314,6 +309,7 @@ public final class ByteArray {
             return result;
         }
 
+        @Override
         public int read(byte[] arr, int offset, int length) {
             if ((offset + length) > arr.length) {
                 length = arr.length - offset;
@@ -329,17 +325,22 @@ public final class ByteArray {
             return length;
         }
 
+        @Override
         public int available() {
             return size - cursor;
         }
+
+        @Override
         public void mark(int reserve) {
             mark = cursor;
         }
 
+        @Override
         public void reset() {
             cursor = mark;
         }
 
+        @Override
         public boolean markSupported() {
             return true;
         }

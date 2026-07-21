@@ -22,13 +22,11 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.io.IOException;
-import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -298,13 +296,8 @@ public class DirectoryWalker {
             return this;
         }
 
-        Set<FileVisitOption> options =
-                Sets.newEnumSet(Arrays.asList(FileVisitOption.FOLLOW_LINKS), FileVisitOption.class);
-
         Files.walkFileTree(
                 root,
-                options,
-                Integer.MAX_VALUE,
                 new SimpleFileVisitor<Path>() {
                     @Override
                     public FileVisitResult visitFile(Path path, BasicFileAttributes attrs)
