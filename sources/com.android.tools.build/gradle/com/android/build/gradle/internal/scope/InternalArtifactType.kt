@@ -341,6 +341,10 @@ InternalArtifactType<T : FileSystemLocation>(
     // downstream.
     object LINT_PARTIAL_RESULTS: InternalArtifactType<Directory>(DIRECTORY)
     object LINT_VITAL_PARTIAL_RESULTS: InternalArtifactType<Directory>(DIRECTORY)
+    // File containing lint model metadata to be included in the LOCAL_AAR_FOR_LINT file
+    object LINT_MODEL_METADATA: InternalArtifactType<RegularFile>(FILE), Replaceable
+    // Local .aar file used when running lint from a downstream module
+    object LOCAL_AAR_FOR_LINT: InternalArtifactType<RegularFile>(FILE), Replaceable
 
     // the zip file output of the extract annotation class.
     object ANNOTATIONS_ZIP: InternalArtifactType<RegularFile>(FILE), Replaceable
@@ -487,6 +491,10 @@ InternalArtifactType<T : FileSystemLocation>(
     object MICRO_APK_MANIFEST_FILE: InternalArtifactType<RegularFile>(FILE)
     // Micro APK res directory
     object MICRO_APK_RES: InternalArtifactType<Directory>(DIRECTORY)
+
+    // Human readable Art profile artifacts
+    object MERGED_ART_PROFILE: InternalArtifactType<RegularFile>(FILE)
+    object LIBRARY_ART_PROFILE: InternalArtifactType<RegularFile>(FILE)
 
     override fun getFolderName(): String {
         return folderName ?: super.getFolderName()

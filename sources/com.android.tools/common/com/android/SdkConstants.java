@@ -93,6 +93,11 @@ public final class SdkConstants {
     public static final String ANDROID_GRADLE_PLUGIN_VERSION_PROPERTY =
             "androidGradlePluginVersion";
 
+    /** Properties in lint-model-metadata.properties file */
+    public static final String MAVEN_GROUP_ID_PROPERTY = "mavenGroupId";
+
+    public static final String MAVEN_ARTIFACT_ID_PROPERTY = "mavenArtifactId";
+
     /**
      * The encoding we strive to use for all files we write.
      *
@@ -217,12 +222,11 @@ public final class SdkConstants {
     /** Skin layout file */
     public static final String FN_SKIN_LAYOUT = "layout";
 
-    /** dx.jar file */
-    public static final String FN_DX_JAR = "dx.jar";
+    /** android private metadata folder */
+    public static final String FN_ANDROID_PRIVATE_ASSETS = "META-INF";
 
-    /** dx executable (with extension for the current OS) */
-    public static final String FN_DX =
-            "dx" + ext(".bat", "");
+    /** name of the art runtime profile in aar files (located in the android private assets) */
+    public static final String FN_ART_PROFILE = "art-profile.txt";
 
     /** aapt executable (with extension for the current OS) */
     public static final String FN_AAPT =

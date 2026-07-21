@@ -56,6 +56,7 @@ import com.android.build.gradle.internal.tasks.CheckManifest;
 import com.android.build.gradle.internal.tasks.ExportConsumerProguardFilesTask;
 import com.android.build.gradle.internal.tasks.LibraryAarJarsTask;
 import com.android.build.gradle.internal.tasks.LibraryJniLibsTask;
+import com.android.build.gradle.internal.tasks.LintModelMetadataTask;
 import com.android.build.gradle.internal.tasks.MergeConsumerProguardFilesTask;
 import com.android.build.gradle.internal.tasks.MergeGeneratedProguardFilesCreationAction;
 import com.android.build.gradle.internal.tasks.PackageRenderscriptTask;
@@ -71,6 +72,7 @@ import com.android.build.gradle.tasks.ExtractAnnotations;
 import com.android.build.gradle.tasks.ExtractDeepLinksTask;
 import com.android.build.gradle.tasks.MergeResources;
 import com.android.build.gradle.tasks.MergeSourceSetFolders;
+import com.android.build.gradle.tasks.ProcessLibraryArtProfileTask;
 import com.android.build.gradle.tasks.ProcessLibraryManifest;
 import com.android.build.gradle.tasks.ZipMergingTask;
 import com.android.builder.errors.IssueReporter;
@@ -336,6 +338,10 @@ public class LibraryTaskManager extends TaskManager<LibraryVariantBuilderImpl, L
         // Add a task to create the AAR metadata file
         taskFactory.register(new AarMetadataTask.CreationAction(libraryVariant));
 
+        // Add tasks to write the lint model metadata file and the local lint AAR file
+        taskFactory.register(new LintModelMetadataTask.CreationAction(libraryVariant));
+        taskFactory.register(new BundleAar.LibraryLocalLintCreationAction(libraryVariant));
+
         createBundleTask(libraryVariant);
     }
 
@@ -463,6 +469,13 @@ public class LibraryTaskManager extends TaskManager<LibraryVariantBuilderImpl, L
                                 creationConfig.getVariantData().getAllPreJavacGeneratedBytecode(),
                                 creationConfig.getVariantData().getAllPostJavacGeneratedBytecode());
         creationConfig.getArtifacts().appendToAllClasses(files);
+
+        if (creationConfig
+                .getServices()
+                .getProjectOptions()
+                .get(BooleanOption.ENABLE_ART_PROFILES)) {
+            taskFactory.register(new ProcessLibraryArtProfileTask.CreationAction(creationConfig));
+        }
 
         // Create jar used for publishing to API elements (for other projects to compile against).
         taskFactory.register(
