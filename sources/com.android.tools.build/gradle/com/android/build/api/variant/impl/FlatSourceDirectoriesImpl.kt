@@ -95,9 +95,6 @@ open class FlatSourceDirectoriesImpl(
     }
 
     override fun addStaticSource(directoryEntry: DirectoryEntry){
-        if (directoryEntry.isGenerated) throw IllegalArgumentException(
-            "The task ${directoryEntry.name} is generating code and should not be added as a Static source")
-
         addSource(directoryEntry)
         staticDirectories.addAll(
             directoryEntry.asFiles(
@@ -135,14 +132,8 @@ open class FlatSourceDirectoriesImpl(
 
     internal fun getVariantSources(): List<DirectoryEntry> = variantSources.get()
 
-    internal fun addStaticOrGeneratedSources(sourceDirectories: Iterable<DirectoryEntry>) {
-        sourceDirectories.forEach { directoryEntry ->
-            if (directoryEntry.isGenerated) {
-                addSource(directoryEntry)
-            } else {
-                addStaticSource(directoryEntry)
-            }
-        }
+    internal fun addStaticSources(sourceDirectories: Iterable<DirectoryEntry>) {
+        sourceDirectories.forEach(::addStaticSource)
     }
     /*
      * Internal API that can only be used by the model.

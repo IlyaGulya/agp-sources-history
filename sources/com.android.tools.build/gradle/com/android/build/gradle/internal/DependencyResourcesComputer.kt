@@ -245,9 +245,13 @@ abstract class DependencyResourcesComputer {
                         )
                     }
             }
-            extraGeneratedResFolders.disallowChanges()
         }
         resources.disallowChanges()
+
+        creationConfig.oldVariantApiLegacySupport?.variantData?.extraGeneratedResFolders?.let {
+            extraGeneratedResFolders.from(it)
+        }
+        extraGeneratedResFolders.disallowChanges()
 
         if (creationConfig.artifacts.get(InternalArtifactType.GENERATED_RES).isPresent) {
             generatedResOutputDir.fromDisallowChanges(

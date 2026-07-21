@@ -54,7 +54,7 @@ class SourcesImpl(
         ).also { sourceDirectoriesImpl ->
 
             defaultSourceProvider.getJava(sourceDirectoriesImpl).run {
-                sourceDirectoriesImpl.addStaticOrGeneratedSources(this)
+                sourceDirectoriesImpl.addStaticSources(this)
             }
             updateSourceDirectories(sourceDirectoriesImpl, variantSourceProvider?.java)
         }
@@ -67,7 +67,7 @@ class SourcesImpl(
         ).also { sourceDirectoriesImpl ->
 
             defaultSourceProvider.getKotlin(sourceDirectoriesImpl).run {
-                sourceDirectoriesImpl.addStaticOrGeneratedSources(this)
+                sourceDirectoriesImpl.addStaticSources(this)
             }
             updateSourceDirectories(
                 sourceDirectoriesImpl,
@@ -82,7 +82,7 @@ class SourcesImpl(
         ).also { sourceDirectoriesImpl ->
 
             defaultSourceProvider.getBaselineProfiles(sourceDirectoriesImpl).run {
-                sourceDirectoriesImpl.addStaticOrGeneratedSources(this)
+                sourceDirectoriesImpl.addStaticSources(this)
             }
             updateSourceDirectories(
                 sourceDirectoriesImpl,
@@ -126,7 +126,7 @@ class SourcesImpl(
         ).also { sourceDirectoriesImpl ->
 
             defaultSourceProvider.getResources(sourceDirectoriesImpl).run {
-                sourceDirectoriesImpl.addStaticOrGeneratedSources(this)
+                sourceDirectoriesImpl.addStaticSources(this)
             }
             updateSourceDirectories(sourceDirectoriesImpl, variantSourceProvider?.resources)
         }
@@ -202,7 +202,7 @@ class SourcesImpl(
         ).let { sourceDirectoriesImpl ->
             val defaultAidlDirectories =
                     defaultSourceProvider.getAidl(sourceDirectoriesImpl) ?: return@let null
-            sourceDirectoriesImpl.addStaticOrGeneratedSources(defaultAidlDirectories)
+            sourceDirectoriesImpl.addStaticSources(defaultAidlDirectories)
             updateSourceDirectories(sourceDirectoriesImpl, variantSourceProvider?.aidl)
             return@let sourceDirectoriesImpl
         }
@@ -218,7 +218,7 @@ class SourcesImpl(
             val defaultRenderscriptDirectories =
                     defaultSourceProvider.getRenderscript(sourceDirectoriesImpl) ?: return@let null
 
-            sourceDirectoriesImpl.addStaticOrGeneratedSources(defaultRenderscriptDirectories)
+            sourceDirectoriesImpl.addStaticSources(defaultRenderscriptDirectories)
             updateSourceDirectories(sourceDirectoriesImpl, variantSourceProvider?.renderscript)
             return@let sourceDirectoriesImpl
         }

@@ -33,7 +33,6 @@ import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactSco
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.JAR
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.ANNOTATION_PROCESSOR
 import com.android.build.gradle.internal.services.getBuildService
-import com.android.build.gradle.options.BooleanOption
 import com.android.builder.errors.DefaultIssueReporter
 import com.android.builder.errors.IssueReporter
 import com.android.sdklib.AndroidTargetHash
@@ -112,8 +111,7 @@ fun JavaCompile.configureProperties(creationConfig: ComponentCreationConfig) {
 
     checkReleaseOption(creationConfig.services.issueReporter)
     checkDeprecatedSourceAndTargetAtExecutionTime(
-        compileOptions.sourceCompatibility, compileOptions.targetCompatibility,
-        creationConfig.services.projectOptions.get(BooleanOption.JAVA_COMPILE_SUPPRESS_SOURCE_TARGET_DEPRECATION_WARNING)
+        compileOptions.sourceCompatibility, compileOptions.targetCompatibility
     )
 }
 
@@ -388,8 +386,7 @@ private fun JavaCompile.checkReleaseOption(issueReporter: IssueReporter) {
 
 private fun JavaCompile.checkDeprecatedSourceAndTargetAtExecutionTime(
     sourceCompatibility: JavaVersion,
-    targetCompatibility: JavaVersion,
-    suppressWarning: Boolean
+    targetCompatibility: JavaVersion
 ) {
     // Run this check at execution time as we don't want to run it if the task doesn't run (e.g.,
     // when there are no Java sources).
@@ -398,7 +395,6 @@ private fun JavaCompile.checkDeprecatedSourceAndTargetAtExecutionTime(
             (it as JavaCompile).javaCompiler.get().metadata.languageVersion.asJavaVersion(),
             sourceCompatibility,
             targetCompatibility,
-            suppressWarning,
             DefaultIssueReporter(LoggerWrapper(logger)),
         )
     }
@@ -408,33 +404,26 @@ private fun checkDeprecatedSourceAndTarget(
     javacVersion: JavaVersion,
     sourceCompatibility: JavaVersion,
     targetCompatibility: JavaVersion,
-    suppressWarning: Boolean,
     issueReporter: IssueReporter
 ) {
-    val severity = determineJavacSupportForSourceAndTarget(javacVersion, sourceCompatibility, targetCompatibility)
-    if (severity == null || severity == IssueReporter.Severity.WARNING && suppressWarning) {
-        return
-    }
-
+    val severity =
+        determineJavacSupportForSourceAndTarget(javacVersion, sourceCompatibility, targetCompatibility)
+        ?: return
     val removedOrDeprecated = when (severity) {
         IssueReporter.Severity.ERROR -> "removed"
         IssueReporter.Severity.WARNING -> "deprecated"
     }
-    val suppressWarningMessage = if (severity == IssueReporter.Severity.WARNING) {
-        "To suppress this warning, set ${BooleanOption.JAVA_COMPILE_SUPPRESS_SOURCE_TARGET_DEPRECATION_WARNING.propertyName}=true in gradle.properties."
-    } else null
     val message =
         """
         Java compiler version $javacVersion has $removedOrDeprecated support for compiling with source/target version ${min(sourceCompatibility.majorVersion.toInt(), targetCompatibility.majorVersion.toInt())}.
         Try one of the following options:
-            1. [Recommended] Use Java toolchain with a lower language version
+            1. [Recommended] Set a lower Java compiler version (using Java toolchain)
             2. Set a higher source/target version
-            3. Use a lower version of the JDK running the build (if you're not using Java toolchain)
+            3. If you don't want to use Java toolchain, try using a lower version of the JDK running the build
+               (e.g., by setting the `JAVA_HOME` environment variable or the `org.gradle.java.home` Gradle property)
         For more details on how to configure these settings, see https://developer.android.com/build/jdks.
-        """.trimIndent() + suppressWarningMessage?.let { "\n" + it }
-
+        """.trimIndent()
     val data = "javacVersion=$javacVersion,sourceCompatibility=$sourceCompatibility,targetCompatibility=$targetCompatibility"
-
     when (severity) {
         IssueReporter.Severity.ERROR -> issueReporter.reportError(IssueReporter.Type.GENERIC, message, data)
         IssueReporter.Severity.WARNING -> issueReporter.reportWarning(IssueReporter.Type.GENERIC, message, data)

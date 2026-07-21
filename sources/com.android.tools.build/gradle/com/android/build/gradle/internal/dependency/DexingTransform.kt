@@ -24,7 +24,6 @@ import com.android.build.gradle.internal.dexing.writeDesugarGraph
 import com.android.build.gradle.internal.errors.MessageReceiverImpl
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.scope.Java8LangSupport
-import com.android.build.gradle.internal.utils.DesugarConfigJson.Companion.combineFileContents
 import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.options.SyncOptions.ErrorFormatMode
 import com.android.build.gradle.tasks.toSerializable
@@ -56,11 +55,8 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.CompileClasspath
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import org.slf4j.LoggerFactory
@@ -82,9 +78,8 @@ abstract class BaseDexingTransform<T : BaseDexingTransform.Parameters> : Transfo
         @get:Internal
         val errorFormat: Property<ErrorFormatMode>
         @get:Optional
-        @get:InputFiles
-        @get:PathSensitive(PathSensitivity.NONE)
-        val desugarLibConfigFiles: ConfigurableFileCollection
+        @get:Input
+        val libConfiguration: Property<String>
         @get:Input
         val enableGlobalSynthetics: Property<Boolean>
         @get:Input
@@ -267,7 +262,7 @@ abstract class BaseDexingTransform<T : BaseDexingTransform.Parameters> : Transfo
                         classpath?.map(File::toPath) ?: emptyList()
                     )
                         .also { closer.register(it) },
-                    coreLibDesugarConfig = combineFileContents(parameters.desugarLibConfigFiles.files),
+                    coreLibDesugarConfig = parameters.libConfiguration.orNull,
                     enableApiModeling = parameters.enableApiModeling.get(),
                     messageReceiver = MessageReceiverImpl(
                         parameters.errorFormat.get(),
@@ -396,7 +391,7 @@ object DexingRegistration {
         val dependencyHandler: DependencyHandler,
         val bootClasspath: ConfigurableFileCollection,
         val errorFormat: ErrorFormatMode,
-        val desugarLibConfigFiles: FileCollection,
+        val libConfiguration: Provider<String>,
         val disableIncrementalDexing: Boolean,
         val components: List<ComponentCreationConfig>
     )
@@ -511,7 +506,7 @@ object DexingRegistration {
                 }
                 errorFormat.set(allComponents.errorFormat)
                 if (component.enableCoreLibraryDesugaring) {
-                    desugarLibConfigFiles.setFrom(allComponents.desugarLibConfigFiles)
+                    libConfiguration.set(allComponents.libConfiguration)
                 }
                 enableGlobalSynthetics.set(component.enableGlobalSynthetics)
                 enableApiModeling.set(component.enableApiModeling)

@@ -22,7 +22,6 @@ import com.android.build.api.artifact.SingleArtifact;
 import com.android.build.api.component.impl.ComponentUtils;
 import com.android.build.api.variant.ResValue;
 import com.android.build.api.variant.impl.ConfigurableFileTreeBasedDirectoryEntryImpl;
-import com.android.build.api.variant.impl.FileCollectionBasedDirectoryEntryImpl;
 import com.android.build.api.variant.impl.ResValueKeyImpl;
 import com.android.build.api.variant.impl.TaskProviderBasedDirectoryEntryImpl;
 import com.android.build.gradle.api.BaseVariant;
@@ -653,28 +652,19 @@ public abstract class BaseVariantImpl implements BaseVariant, InternalBaseVarian
 
     @Override
     public void registerGeneratedResFolders(@NonNull FileCollection folders) {
-        component
-                .getSources()
-                .res(
-                        resSources -> {
-                            resSources.addSource$gradle_core(
-                                    new FileCollectionBasedDirectoryEntryImpl(
-                                            "legacy_api_res", folders));
-                            return Unit.INSTANCE;
-                        });
+        getVariantData().registerGeneratedResFolders(folders);
     }
 
     @Override
     @Deprecated
     public void registerResGeneratingTask(@NonNull Task task, @NonNull File... generatedResFolders) {
-        registerResGeneratingTask(task, Arrays.asList(generatedResFolders));
+        getVariantData().registerResGeneratingTask(task, generatedResFolders);
     }
 
     @Override
     @Deprecated
     public void registerResGeneratingTask(@NonNull Task task, @NonNull Collection<File> generatedResFolders) {
-        registerGeneratedResFolders(
-                component.getServices().fileCollection().from(generatedResFolders).builtBy(task));
+        getVariantData().registerResGeneratingTask(task, generatedResFolders);
     }
 
     @Override

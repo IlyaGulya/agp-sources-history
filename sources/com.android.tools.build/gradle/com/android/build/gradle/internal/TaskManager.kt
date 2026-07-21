@@ -1780,16 +1780,8 @@ abstract class TaskManager(
             if (creationConfig.componentType.isAar) {
                 task.dependsOn(PrepareLintJarForPublish.NAME)
             }
-            creationConfig.sources.res {res ->
-                res.forAllSources { directoryEntry ->
-                    if (directoryEntry.isGenerated && directoryEntry.isUserAdded){
-                        task.dependsOn(
-                            directoryEntry.asFiles(
-                                creationConfig.services.projectInfo.buildDirectory
-                            )
-                        )
-                    }
-                }
+            creationConfig.oldVariantApiLegacySupport?.variantData?.extraGeneratedResFolders?.let {
+                task.dependsOn(it)
             }
         }
         creationConfig
