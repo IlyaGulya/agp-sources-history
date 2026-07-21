@@ -285,7 +285,7 @@ public class VariantScopeImpl implements VariantScope {
     @NonNull
     @Override
     public String getName() {
-        return variantDslInfo.getVariantConfiguration().getName();
+        return variantDslInfo.getComponentIdentity().getName();
     }
 
     @Override
@@ -922,7 +922,8 @@ public class VariantScopeImpl implements VariantScope {
         // scope in order to compile.
         // We only do this for the AndroidTest.
         // We do have to however keep the Android resources.
-        if (tested instanceof ApplicationVariantData
+        if ((tested instanceof ApplicationVariantData
+                || tested.getScope().getType().isDynamicFeature())
                 && configType == RUNTIME_CLASSPATH
                 && getType().isApk()) {
             if (artifactType == ArtifactType.ANDROID_RES
@@ -933,6 +934,22 @@ public class VariantScopeImpl implements VariantScope {
                                 getVariantDependencies().getIncomingRuntimeDependencies(),
                                 getVariantDependencies().getRuntimeClasspath().getIncoming());
             } else {
+                if (tested.getScope().getType().isDynamicFeature()) {
+                    // If we're in an Android Test for a Dynamic Feature we need to first filter out
+                    // artifacts from the base and its dependencies.
+                    FileCollection excludedDirectories =
+                            computeArtifactCollection(
+                                    RUNTIME_CLASSPATH,
+                                    PROJECT,
+                                    ArtifactType.PACKAGED_DEPENDENCIES,
+                                    null)
+                                    .getArtifactFiles();
+
+                    artifacts =
+                            new FilteredArtifactCollection(
+                                    getProject(), new FilteringSpec(artifacts, excludedDirectories));
+                }
+                // Subtract artifacts from the tested variant.
                 ArtifactCollection testedArtifactCollection =
                         testedScope.getArtifactCollection(
                                 configType, scope, artifactType, attributeMap);
@@ -1370,7 +1387,7 @@ public class VariantScopeImpl implements VariantScope {
                                         + "gradle.properties file to enable Java 8 "
                                         + "language support.",
                                 missingFlag.name()),
-                        variantDslInfo.getVariantConfiguration().getName());
+                        variantDslInfo.getComponentIdentity().getName());
         return Java8LangSupport.INVALID;
     }
 
@@ -1397,7 +1414,7 @@ public class VariantScopeImpl implements VariantScope {
                     .getDslScope()
                     .getIssueReporter()
                     .reportError(
-                            Type.GENERIC, msg, variantDslInfo.getVariantConfiguration().getName());
+                            Type.GENERIC, msg, variantDslInfo.getComponentIdentity().getName());
             return false;
         }
     }

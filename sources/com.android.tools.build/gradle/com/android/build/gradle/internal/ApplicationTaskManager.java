@@ -426,20 +426,35 @@ public class ApplicationTaskManager extends TaskManager {
         taskFactory.register(
                 new PerModuleBundleTask.CreationAction(
                         scope, packagesCustomClassDependencies(scope, projectOptions)));
-        if (addBundleDependenciesTask(scope)) {
+        boolean debuggable = scope.getVariantDslInfo().isDebuggable();
+        boolean includeInApk =
+                extension instanceof BaseAppModuleExtension
+                        && ((BaseAppModuleExtension) extension)
+                                .getDependenciesInfo()
+                                .getIncludeInApk();
+        boolean includeInBundle =
+                extension instanceof BaseAppModuleExtension
+                        && ((BaseAppModuleExtension) extension)
+                                .getDependenciesInfo()
+                                .getIncludeInBundle();
+        if (!debuggable) {
             taskFactory.register(new PerModuleReportDependenciesTask.CreationAction(scope));
         }
 
         if (scope.getType().isBaseModule()) {
-            if (scope.getGlobalScope().getProjectOptions()
-                .get(BooleanOption.INCLUDE_DEPENDENCY_INFO_IN_APKS)) {
-                taskFactory.register(new SdkDependencyDataGeneratorTask.CreationAction(scope));
-            }
             taskFactory.register(new ParseIntegrityConfigTask.CreationAction(scope));
             taskFactory.register(new PackageBundleTask.CreationAction(scope));
             taskFactory.register(new FinalizeBundleTask.CreationAction(scope));
-            if (addBundleDependenciesTask(scope)) {
-                taskFactory.register(new BundleReportDependenciesTask.CreationAction(scope));
+            if (!debuggable) {
+                if (includeInBundle) {
+                    taskFactory.register(new BundleReportDependenciesTask.CreationAction(scope));
+                }
+                if (includeInApk
+                        && scope.getGlobalScope()
+                                .getProjectOptions()
+                                .get(BooleanOption.INCLUDE_DEPENDENCY_INFO_IN_APKS)) {
+                    taskFactory.register(new SdkDependencyDataGeneratorTask.CreationAction(scope));
+                }
             }
 
             taskFactory.register(new BundleToApkTask.CreationAction(scope));
@@ -474,10 +489,6 @@ public class ApplicationTaskManager extends TaskManager {
                     ImmutableSet.of(),
                     null);
         }
-    }
-
-    private static boolean addBundleDependenciesTask(@NonNull VariantScope scope) {
-        return !scope.getVariantDslInfo().isDebuggable();
     }
 
     private void createAssetPackTasks(@NonNull VariantScope variantScope) {

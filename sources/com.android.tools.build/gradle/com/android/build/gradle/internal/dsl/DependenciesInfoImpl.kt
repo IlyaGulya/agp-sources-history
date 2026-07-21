@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.build.api.variant
 
-import org.gradle.api.Incubating
-import org.gradle.api.Named
+package com.android.build.gradle.internal.dsl
+
+import com.android.build.api.dsl.DependenciesInfo
 
 /**
- * Tag interface for interfaces or classes that can be used as parameter to an
- * [org.gradle.api.Action] or lambda in the Variant API.
+ * DSL options for specifying whether to include SDK dependency information in APKs and Bundles.
  */
-@Incubating
-interface ActionableVariantObject
+open class DependenciesInfoImpl : DependenciesInfo {
+
+  override var includeInApk: Boolean = true
+  override var includeInBundle: Boolean = true
+}
