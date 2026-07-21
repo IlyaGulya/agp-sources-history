@@ -38,87 +38,6 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private ObjectFileCacheEvent(
-      com.google.protobuf.CodedInputStream input,
-      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-      throws com.google.protobuf.InvalidProtocolBufferException {
-    this();
-    if (extensionRegistry == null) {
-      throw new java.lang.NullPointerException();
-    }
-    com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-        com.google.protobuf.UnknownFieldSet.newBuilder();
-    try {
-      boolean done = false;
-      while (!done) {
-        int tag = input.readTag();
-        switch (tag) {
-          case 0:
-            done = true;
-            break;
-          case 8: {
-            int rawValue = input.readEnum();
-
-            outcome_ = rawValue;
-            break;
-          }
-          case 18: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            keyDisplayName_ = s;
-            break;
-          }
-          case 26: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            keyHashCode_ = s;
-            break;
-          }
-          case 34: {
-            com.android.build.gradle.internal.cxx.caching.Compilation.Builder subBuilder = null;
-            if (compilation_ != null) {
-              subBuilder = compilation_.toBuilder();
-            }
-            compilation_ = input.readMessage(com.android.build.gradle.internal.cxx.caching.Compilation.parser(), extensionRegistry);
-            if (subBuilder != null) {
-              subBuilder.mergeFrom(compilation_);
-              compilation_ = subBuilder.buildPartial();
-            }
-
-            break;
-          }
-          case 42: {
-            com.android.build.gradle.internal.cxx.caching.Compilation.Builder subBuilder = null;
-            if (hashedCompilation_ != null) {
-              subBuilder = hashedCompilation_.toBuilder();
-            }
-            hashedCompilation_ = input.readMessage(com.android.build.gradle.internal.cxx.caching.Compilation.parser(), extensionRegistry);
-            if (subBuilder != null) {
-              subBuilder.mergeFrom(hashedCompilation_);
-              hashedCompilation_ = subBuilder.buildPartial();
-            }
-
-            break;
-          }
-          default: {
-            if (!parseUnknownField(
-                input, unknownFields, extensionRegistry, tag)) {
-              done = true;
-            }
-            break;
-          }
-        }
-      }
-    } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-      throw e.setUnfinishedMessage(this);
-    } catch (java.io.IOException e) {
-      throw new com.google.protobuf.InvalidProtocolBufferException(
-          e).setUnfinishedMessage(this);
-    } finally {
-      this.unknownFields = unknownFields.build();
-      makeExtensionsImmutable();
-    }
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.build.gradle.internal.cxx.caching.CxxCaching.internal_static_ObjectFileCacheEvent_descriptor;
@@ -632,7 +551,7 @@ private static final long serialVersionUID = 0L;
     if (hashedCompilation_ != null) {
       output.writeMessage(5, getHashedCompilation());
     }
-    unknownFields.writeTo(output);
+    getUnknownFields().writeTo(output);
   }
 
   @java.lang.Override
@@ -659,7 +578,7 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(5, getHashedCompilation());
     }
-    size += unknownFields.getSerializedSize();
+    size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
   }
@@ -689,7 +608,7 @@ private static final long serialVersionUID = 0L;
       if (!getHashedCompilation()
           .equals(other.getHashedCompilation())) return false;
     }
-    if (!unknownFields.equals(other.unknownFields)) return false;
+    if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
 
@@ -714,7 +633,7 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + HASHED_COMPILATION_FIELD_NUMBER;
       hash = (53 * hash) + getHashedCompilation().hashCode();
     }
-    hash = (29 * hash) + unknownFields.hashCode();
+    hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
   }
@@ -836,18 +755,13 @@ private static final long serialVersionUID = 0L;
 
     // Construct using com.android.build.gradle.internal.cxx.caching.ObjectFileCacheEvent.newBuilder()
     private Builder() {
-      maybeForceBuilderInitialization();
+
     }
 
     private Builder(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       super(parent);
-      maybeForceBuilderInitialization();
-    }
-    private void maybeForceBuilderInitialization() {
-      if (com.google.protobuf.GeneratedMessageV3
-              .alwaysUseFieldBuilders) {
-      }
+
     }
     @java.lang.Override
     public Builder clear() {
@@ -974,7 +888,7 @@ private static final long serialVersionUID = 0L;
       if (other.hasHashedCompilation()) {
         mergeHashedCompilation(other.getHashedCompilation());
       }
-      this.mergeUnknownFields(other.unknownFields);
+      this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
     }
@@ -989,17 +903,59 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      com.android.build.gradle.internal.cxx.caching.ObjectFileCacheEvent parsedMessage = null;
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       try {
-        parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+              outcome_ = input.readEnum();
+
+              break;
+            } // case 8
+            case 18: {
+              keyDisplayName_ = input.readStringRequireUtf8();
+
+              break;
+            } // case 18
+            case 26: {
+              keyHashCode_ = input.readStringRequireUtf8();
+
+              break;
+            } // case 26
+            case 34: {
+              input.readMessage(
+                  getCompilationFieldBuilder().getBuilder(),
+                  extensionRegistry);
+
+              break;
+            } // case 34
+            case 42: {
+              input.readMessage(
+                  getHashedCompilationFieldBuilder().getBuilder(),
+                  extensionRegistry);
+
+              break;
+            } // case 42
+            default: {
+              if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                done = true; // was an endgroup tag
+              }
+              break;
+            } // default:
+          } // switch (tag)
+        } // while (!done)
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (com.android.build.gradle.internal.cxx.caching.ObjectFileCacheEvent) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
-        if (parsedMessage != null) {
-          mergeFrom(parsedMessage);
-        }
-      }
+        onChanged();
+      } // finally
       return this;
     }
 
@@ -1625,7 +1581,18 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new ObjectFileCacheEvent(input, extensionRegistry);
+      Builder builder = newBuilder();
+      try {
+        builder.mergeFrom(input, extensionRegistry);
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(builder.buildPartial());
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(e)
+            .setUnfinishedMessage(builder.buildPartial());
+      }
+      return builder.buildPartial();
     }
   };
 

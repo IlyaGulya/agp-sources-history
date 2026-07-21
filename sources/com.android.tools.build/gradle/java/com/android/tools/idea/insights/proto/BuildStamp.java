@@ -37,75 +37,6 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private BuildStamp(
-      com.google.protobuf.CodedInputStream input,
-      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-      throws com.google.protobuf.InvalidProtocolBufferException {
-    this();
-    if (extensionRegistry == null) {
-      throw new java.lang.NullPointerException();
-    }
-    int mutable_bitField0_ = 0;
-    com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-        com.google.protobuf.UnknownFieldSet.newBuilder();
-    try {
-      boolean done = false;
-      while (!done) {
-        int tag = input.readTag();
-        switch (tag) {
-          case 0:
-            done = true;
-            break;
-          case 10: {
-            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-              repositories_ = new java.util.ArrayList<com.android.tools.idea.insights.proto.RepositoryInfo>();
-              mutable_bitField0_ |= 0x00000001;
-            }
-            repositories_.add(
-                input.readMessage(com.android.tools.idea.insights.proto.RepositoryInfo.parser(), extensionRegistry));
-            break;
-          }
-          case 18: {
-            com.android.tools.idea.insights.proto.BuildInfo.Builder subBuilder = null;
-            if (buildInfo_ != null) {
-              subBuilder = buildInfo_.toBuilder();
-            }
-            buildInfo_ = input.readMessage(com.android.tools.idea.insights.proto.BuildInfo.parser(), extensionRegistry);
-            if (subBuilder != null) {
-              subBuilder.mergeFrom(buildInfo_);
-              buildInfo_ = subBuilder.buildPartial();
-            }
-
-            break;
-          }
-          case 26: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            generateErrorReason_ = s;
-            break;
-          }
-          default: {
-            if (!parseUnknownField(
-                input, unknownFields, extensionRegistry, tag)) {
-              done = true;
-            }
-            break;
-          }
-        }
-      }
-    } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-      throw e.setUnfinishedMessage(this);
-    } catch (java.io.IOException e) {
-      throw new com.google.protobuf.InvalidProtocolBufferException(
-          e).setUnfinishedMessage(this);
-    } finally {
-      if (((mutable_bitField0_ & 0x00000001) != 0)) {
-        repositories_ = java.util.Collections.unmodifiableList(repositories_);
-      }
-      this.unknownFields = unknownFields.build();
-      makeExtensionsImmutable();
-    }
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.tools.idea.insights.proto.VersionControlMetadata.internal_static_BuildStamp_descriptor;
@@ -286,7 +217,7 @@ private static final long serialVersionUID = 0L;
     if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(generateErrorReason_)) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, generateErrorReason_);
     }
-    unknownFields.writeTo(output);
+    getUnknownFields().writeTo(output);
   }
 
   @java.lang.Override
@@ -306,7 +237,7 @@ private static final long serialVersionUID = 0L;
     if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(generateErrorReason_)) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, generateErrorReason_);
     }
-    size += unknownFields.getSerializedSize();
+    size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
   }
@@ -330,7 +261,7 @@ private static final long serialVersionUID = 0L;
     }
     if (!getGenerateErrorReason()
         .equals(other.getGenerateErrorReason())) return false;
-    if (!unknownFields.equals(other.unknownFields)) return false;
+    if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
 
@@ -351,7 +282,7 @@ private static final long serialVersionUID = 0L;
     }
     hash = (37 * hash) + GENERATE_ERROR_REASON_FIELD_NUMBER;
     hash = (53 * hash) + getGenerateErrorReason().hashCode();
-    hash = (29 * hash) + unknownFields.hashCode();
+    hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
   }
@@ -473,29 +404,24 @@ private static final long serialVersionUID = 0L;
 
     // Construct using com.android.tools.idea.insights.proto.BuildStamp.newBuilder()
     private Builder() {
-      maybeForceBuilderInitialization();
+
     }
 
     private Builder(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       super(parent);
-      maybeForceBuilderInitialization();
-    }
-    private void maybeForceBuilderInitialization() {
-      if (com.google.protobuf.GeneratedMessageV3
-              .alwaysUseFieldBuilders) {
-        getRepositoriesFieldBuilder();
-      }
+
     }
     @java.lang.Override
     public Builder clear() {
       super.clear();
       if (repositoriesBuilder_ == null) {
         repositories_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000001);
       } else {
+        repositories_ = null;
         repositoriesBuilder_.clear();
       }
+      bitField0_ = (bitField0_ & ~0x00000001);
       if (buildInfoBuilder_ == null) {
         buildInfo_ = null;
       } else {
@@ -627,7 +553,7 @@ private static final long serialVersionUID = 0L;
         generateErrorReason_ = other.generateErrorReason_;
         onChanged();
       }
-      this.mergeUnknownFields(other.unknownFields);
+      this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
     }
@@ -642,17 +568,55 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      com.android.tools.idea.insights.proto.BuildStamp parsedMessage = null;
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       try {
-        parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              com.android.tools.idea.insights.proto.RepositoryInfo m =
+                  input.readMessage(
+                      com.android.tools.idea.insights.proto.RepositoryInfo.parser(),
+                      extensionRegistry);
+              if (repositoriesBuilder_ == null) {
+                ensureRepositoriesIsMutable();
+                repositories_.add(m);
+              } else {
+                repositoriesBuilder_.addMessage(m);
+              }
+              break;
+            } // case 10
+            case 18: {
+              input.readMessage(
+                  getBuildInfoFieldBuilder().getBuilder(),
+                  extensionRegistry);
+
+              break;
+            } // case 18
+            case 26: {
+              generateErrorReason_ = input.readStringRequireUtf8();
+
+              break;
+            } // case 26
+            default: {
+              if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                done = true; // was an endgroup tag
+              }
+              break;
+            } // default:
+          } // switch (tag)
+        } // while (!done)
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (com.android.tools.idea.insights.proto.BuildStamp) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
-        if (parsedMessage != null) {
-          mergeFrom(parsedMessage);
-        }
-      }
+        onChanged();
+      } // finally
       return this;
     }
     private int bitField0_;
@@ -1252,7 +1216,18 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new BuildStamp(input, extensionRegistry);
+      Builder builder = newBuilder();
+      try {
+        builder.mergeFrom(input, extensionRegistry);
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(builder.buildPartial());
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(e)
+            .setUnfinishedMessage(builder.buildPartial());
+      }
+      return builder.buildPartial();
     }
   };
 

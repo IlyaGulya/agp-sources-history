@@ -46,186 +46,6 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private ConfigureInvalidationState(
-      com.google.protobuf.CodedInputStream input,
-      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-      throws com.google.protobuf.InvalidProtocolBufferException {
-    this();
-    if (extensionRegistry == null) {
-      throw new java.lang.NullPointerException();
-    }
-    int mutable_bitField0_ = 0;
-    com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-        com.google.protobuf.UnknownFieldSet.newBuilder();
-    try {
-      boolean done = false;
-      while (!done) {
-        int tag = input.readTag();
-        switch (tag) {
-          case 0:
-            done = true;
-            break;
-          case 8: {
-
-            forceConfigure_ = input.readBool();
-            break;
-          }
-          case 18: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            fingerPrintFile_ = s;
-            break;
-          }
-          case 26: {
-            java.lang.String s = input.readStringRequireUtf8();
-            if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-              inputFiles_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000001;
-            }
-            inputFiles_.add(s);
-            break;
-          }
-          case 34: {
-            java.lang.String s = input.readStringRequireUtf8();
-            if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-              requiredOutputFiles_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000002;
-            }
-            requiredOutputFiles_.add(s);
-            break;
-          }
-          case 42: {
-            java.lang.String s = input.readStringRequireUtf8();
-            if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-              optionalOutputFiles_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000004;
-            }
-            optionalOutputFiles_.add(s);
-            break;
-          }
-          case 50: {
-            java.lang.String s = input.readStringRequireUtf8();
-            if (!((mutable_bitField0_ & 0x00000008) != 0)) {
-              hardConfigureFiles_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000008;
-            }
-            hardConfigureFiles_.add(s);
-            break;
-          }
-          case 56: {
-
-            fingerPrintFileExisted_ = input.readBool();
-            break;
-          }
-          case 66: {
-            java.lang.String s = input.readStringRequireUtf8();
-            if (!((mutable_bitField0_ & 0x00000010) != 0)) {
-              removedSinceFingerPrintsFiles_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000010;
-            }
-            removedSinceFingerPrintsFiles_.add(s);
-            break;
-          }
-          case 74: {
-            java.lang.String s = input.readStringRequireUtf8();
-            if (!((mutable_bitField0_ & 0x00000020) != 0)) {
-              addedSinceFingerPrintsFiles_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000020;
-            }
-            addedSinceFingerPrintsFiles_.add(s);
-            break;
-          }
-          case 82: {
-            if (!((mutable_bitField0_ & 0x00000040) != 0)) {
-              changesToFingerPrintFiles_ = new java.util.ArrayList<com.android.build.gradle.internal.cxx.configure.ChangedFile>();
-              mutable_bitField0_ |= 0x00000040;
-            }
-            changesToFingerPrintFiles_.add(
-                input.readMessage(com.android.build.gradle.internal.cxx.configure.ChangedFile.parser(), extensionRegistry));
-            break;
-          }
-          case 90: {
-            java.lang.String s = input.readStringRequireUtf8();
-            if (!((mutable_bitField0_ & 0x00000080) != 0)) {
-              unchangedFingerPrintFiles_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000080;
-            }
-            unchangedFingerPrintFiles_.add(s);
-            break;
-          }
-          case 96: {
-            int rawValue = input.readEnum();
-
-            configureType_ = rawValue;
-            break;
-          }
-          case 106: {
-            if (!((mutable_bitField0_ & 0x00000100) != 0)) {
-              softConfigureReasons_ = new java.util.ArrayList<com.android.build.gradle.internal.cxx.configure.ChangedFile>();
-              mutable_bitField0_ |= 0x00000100;
-            }
-            softConfigureReasons_.add(
-                input.readMessage(com.android.build.gradle.internal.cxx.configure.ChangedFile.parser(), extensionRegistry));
-            break;
-          }
-          case 114: {
-            if (!((mutable_bitField0_ & 0x00000200) != 0)) {
-              hardConfigureReasons_ = new java.util.ArrayList<com.android.build.gradle.internal.cxx.configure.ChangedFile>();
-              mutable_bitField0_ |= 0x00000200;
-            }
-            hardConfigureReasons_.add(
-                input.readMessage(com.android.build.gradle.internal.cxx.configure.ChangedFile.parser(), extensionRegistry));
-            break;
-          }
-          default: {
-            if (!parseUnknownField(
-                input, unknownFields, extensionRegistry, tag)) {
-              done = true;
-            }
-            break;
-          }
-        }
-      }
-    } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-      throw e.setUnfinishedMessage(this);
-    } catch (java.io.IOException e) {
-      throw new com.google.protobuf.InvalidProtocolBufferException(
-          e).setUnfinishedMessage(this);
-    } finally {
-      if (((mutable_bitField0_ & 0x00000001) != 0)) {
-        inputFiles_ = inputFiles_.getUnmodifiableView();
-      }
-      if (((mutable_bitField0_ & 0x00000002) != 0)) {
-        requiredOutputFiles_ = requiredOutputFiles_.getUnmodifiableView();
-      }
-      if (((mutable_bitField0_ & 0x00000004) != 0)) {
-        optionalOutputFiles_ = optionalOutputFiles_.getUnmodifiableView();
-      }
-      if (((mutable_bitField0_ & 0x00000008) != 0)) {
-        hardConfigureFiles_ = hardConfigureFiles_.getUnmodifiableView();
-      }
-      if (((mutable_bitField0_ & 0x00000010) != 0)) {
-        removedSinceFingerPrintsFiles_ = removedSinceFingerPrintsFiles_.getUnmodifiableView();
-      }
-      if (((mutable_bitField0_ & 0x00000020) != 0)) {
-        addedSinceFingerPrintsFiles_ = addedSinceFingerPrintsFiles_.getUnmodifiableView();
-      }
-      if (((mutable_bitField0_ & 0x00000040) != 0)) {
-        changesToFingerPrintFiles_ = java.util.Collections.unmodifiableList(changesToFingerPrintFiles_);
-      }
-      if (((mutable_bitField0_ & 0x00000080) != 0)) {
-        unchangedFingerPrintFiles_ = unchangedFingerPrintFiles_.getUnmodifiableView();
-      }
-      if (((mutable_bitField0_ & 0x00000100) != 0)) {
-        softConfigureReasons_ = java.util.Collections.unmodifiableList(softConfigureReasons_);
-      }
-      if (((mutable_bitField0_ & 0x00000200) != 0)) {
-        hardConfigureReasons_ = java.util.Collections.unmodifiableList(hardConfigureReasons_);
-      }
-      this.unknownFields = unknownFields.build();
-      makeExtensionsImmutable();
-    }
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.build.gradle.internal.cxx.configure.CxxConfigure.internal_static_ConfigureInvalidationState_descriptor;
@@ -921,7 +741,7 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < hardConfigureReasons_.size(); i++) {
       output.writeMessage(14, hardConfigureReasons_.get(i));
     }
-    unknownFields.writeTo(output);
+    getUnknownFields().writeTo(output);
   }
 
   @java.lang.Override
@@ -1013,7 +833,7 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(14, hardConfigureReasons_.get(i));
     }
-    size += unknownFields.getSerializedSize();
+    size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
   }
@@ -1055,7 +875,7 @@ private static final long serialVersionUID = 0L;
         .equals(other.getSoftConfigureReasonsList())) return false;
     if (!getHardConfigureReasonsList()
         .equals(other.getHardConfigureReasonsList())) return false;
-    if (!unknownFields.equals(other.unknownFields)) return false;
+    if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
 
@@ -1116,7 +936,7 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + HARD_CONFIGURE_REASONS_FIELD_NUMBER;
       hash = (53 * hash) + getHardConfigureReasonsList().hashCode();
     }
-    hash = (29 * hash) + unknownFields.hashCode();
+    hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
   }
@@ -1237,21 +1057,13 @@ private static final long serialVersionUID = 0L;
 
     // Construct using com.android.build.gradle.internal.cxx.configure.ConfigureInvalidationState.newBuilder()
     private Builder() {
-      maybeForceBuilderInitialization();
+
     }
 
     private Builder(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       super(parent);
-      maybeForceBuilderInitialization();
-    }
-    private void maybeForceBuilderInitialization() {
-      if (com.google.protobuf.GeneratedMessageV3
-              .alwaysUseFieldBuilders) {
-        getChangesToFingerPrintFilesFieldBuilder();
-        getSoftConfigureReasonsFieldBuilder();
-        getHardConfigureReasonsFieldBuilder();
-      }
+
     }
     @java.lang.Override
     public Builder clear() {
@@ -1276,26 +1088,29 @@ private static final long serialVersionUID = 0L;
       bitField0_ = (bitField0_ & ~0x00000020);
       if (changesToFingerPrintFilesBuilder_ == null) {
         changesToFingerPrintFiles_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000040);
       } else {
+        changesToFingerPrintFiles_ = null;
         changesToFingerPrintFilesBuilder_.clear();
       }
+      bitField0_ = (bitField0_ & ~0x00000040);
       unchangedFingerPrintFiles_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       bitField0_ = (bitField0_ & ~0x00000080);
       configureType_ = 0;
 
       if (softConfigureReasonsBuilder_ == null) {
         softConfigureReasons_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000100);
       } else {
+        softConfigureReasons_ = null;
         softConfigureReasonsBuilder_.clear();
       }
+      bitField0_ = (bitField0_ & ~0x00000100);
       if (hardConfigureReasonsBuilder_ == null) {
         hardConfigureReasons_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000200);
       } else {
+        hardConfigureReasons_ = null;
         hardConfigureReasonsBuilder_.clear();
       }
+      bitField0_ = (bitField0_ & ~0x00000200);
       return this;
     }
 
@@ -1598,7 +1413,7 @@ private static final long serialVersionUID = 0L;
           }
         }
       }
-      this.mergeUnknownFields(other.unknownFields);
+      this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
     }
@@ -1613,17 +1428,131 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      com.android.build.gradle.internal.cxx.configure.ConfigureInvalidationState parsedMessage = null;
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       try {
-        parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+              forceConfigure_ = input.readBool();
+
+              break;
+            } // case 8
+            case 18: {
+              fingerPrintFile_ = input.readStringRequireUtf8();
+
+              break;
+            } // case 18
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+              ensureInputFilesIsMutable();
+              inputFiles_.add(s);
+              break;
+            } // case 26
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+              ensureRequiredOutputFilesIsMutable();
+              requiredOutputFiles_.add(s);
+              break;
+            } // case 34
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+              ensureOptionalOutputFilesIsMutable();
+              optionalOutputFiles_.add(s);
+              break;
+            } // case 42
+            case 50: {
+              java.lang.String s = input.readStringRequireUtf8();
+              ensureHardConfigureFilesIsMutable();
+              hardConfigureFiles_.add(s);
+              break;
+            } // case 50
+            case 56: {
+              fingerPrintFileExisted_ = input.readBool();
+
+              break;
+            } // case 56
+            case 66: {
+              java.lang.String s = input.readStringRequireUtf8();
+              ensureRemovedSinceFingerPrintsFilesIsMutable();
+              removedSinceFingerPrintsFiles_.add(s);
+              break;
+            } // case 66
+            case 74: {
+              java.lang.String s = input.readStringRequireUtf8();
+              ensureAddedSinceFingerPrintsFilesIsMutable();
+              addedSinceFingerPrintsFiles_.add(s);
+              break;
+            } // case 74
+            case 82: {
+              com.android.build.gradle.internal.cxx.configure.ChangedFile m =
+                  input.readMessage(
+                      com.android.build.gradle.internal.cxx.configure.ChangedFile.parser(),
+                      extensionRegistry);
+              if (changesToFingerPrintFilesBuilder_ == null) {
+                ensureChangesToFingerPrintFilesIsMutable();
+                changesToFingerPrintFiles_.add(m);
+              } else {
+                changesToFingerPrintFilesBuilder_.addMessage(m);
+              }
+              break;
+            } // case 82
+            case 90: {
+              java.lang.String s = input.readStringRequireUtf8();
+              ensureUnchangedFingerPrintFilesIsMutable();
+              unchangedFingerPrintFiles_.add(s);
+              break;
+            } // case 90
+            case 96: {
+              configureType_ = input.readEnum();
+
+              break;
+            } // case 96
+            case 106: {
+              com.android.build.gradle.internal.cxx.configure.ChangedFile m =
+                  input.readMessage(
+                      com.android.build.gradle.internal.cxx.configure.ChangedFile.parser(),
+                      extensionRegistry);
+              if (softConfigureReasonsBuilder_ == null) {
+                ensureSoftConfigureReasonsIsMutable();
+                softConfigureReasons_.add(m);
+              } else {
+                softConfigureReasonsBuilder_.addMessage(m);
+              }
+              break;
+            } // case 106
+            case 114: {
+              com.android.build.gradle.internal.cxx.configure.ChangedFile m =
+                  input.readMessage(
+                      com.android.build.gradle.internal.cxx.configure.ChangedFile.parser(),
+                      extensionRegistry);
+              if (hardConfigureReasonsBuilder_ == null) {
+                ensureHardConfigureReasonsIsMutable();
+                hardConfigureReasons_.add(m);
+              } else {
+                hardConfigureReasonsBuilder_.addMessage(m);
+              }
+              break;
+            } // case 114
+            default: {
+              if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                done = true; // was an endgroup tag
+              }
+              break;
+            } // default:
+          } // switch (tag)
+        } // while (!done)
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (com.android.build.gradle.internal.cxx.configure.ConfigureInvalidationState) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
-        if (parsedMessage != null) {
-          mergeFrom(parsedMessage);
-        }
-      }
+        onChanged();
+      } // finally
       return this;
     }
     private int bitField0_;
@@ -3822,7 +3751,18 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new ConfigureInvalidationState(input, extensionRegistry);
+      Builder builder = newBuilder();
+      try {
+        builder.mergeFrom(input, extensionRegistry);
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(builder.buildPartial());
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(e)
+            .setUnfinishedMessage(builder.buildPartial());
+      }
+      return builder.buildPartial();
     }
   };
 
