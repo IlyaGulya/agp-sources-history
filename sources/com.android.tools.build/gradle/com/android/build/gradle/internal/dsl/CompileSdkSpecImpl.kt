@@ -89,11 +89,7 @@ internal data class CompileSdkVersionImpl(
       return "$vendorName:$addonName:$apiLevel"
     }
     var compileSdkString = "android-$apiLevel"
-    // since api level 37, minor version is included in platform hash even for .0(e.g. $SDK/platforms/android-37.0)
-    // in this case, when compile sdk is set using release(version: Int), the minorApiLevel is essentially 0
-    if (apiLevel >= 37 && minorApiLevel == null) {
-      compileSdkString += ".0"
-    } else if (minorApiLevel != null) {
+    if (minorApiLevel != null) {
       compileSdkString += ".$minorApiLevel"
     }
     if (sdkExtension != null) {

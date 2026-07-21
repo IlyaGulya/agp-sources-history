@@ -162,11 +162,11 @@ public class ManifestModel implements DocumentModel<ManifestModel.NodeTypes> {
 
                 @Override
                 public String getKey(Element element) {
-                    // if the provider is a sub-element from queries, we are not expecting any key.
-                    if (element.getParentNode()
-                            .getNodeName()
-                            .equals(ManifestModel.NodeTypes.QUERIES.name())) {
-                        return null;
+                    // if the provider is a sub-element from queries, use the authorities as key.
+                    if (element.getParentNode().getNodeName().equals(SdkConstants.TAG_QUERIES)) {
+                        String key =
+                                element.getAttributeNS(ANDROID_URI, SdkConstants.ATTR_AUTHORITIES);
+                        return Strings.isNullOrEmpty(key) ? null : key;
                     }
                     return DEFAULT_NAME_ATTRIBUTE_RESOLVER.getKey(element);
                 }
@@ -286,17 +286,15 @@ public class ManifestModel implements DocumentModel<ManifestModel.NodeTypes> {
         ACTION(MergeType.MERGE, DEFAULT_NAME_ATTRIBUTE_RESOLVER),
 
         /**
-         * Activity (contained in application) <br>
-         * <b>See also : </b> {@link <a
-         * href=http://developer.android.com/guide/topics/manifest/activity-element.html>Activity
-         * Xml documentation</a>}
+         * Activity (contained in application)
+         * <br>
+         * <b>See also : </b>
+         * {@link <a href=http://developer.android.com/guide/topics/manifest/activity-element.html>
+         *     Activity Xml documentation</a>}
          */
-        ACTIVITY(
-                MergeType.MERGE,
-                DEFAULT_NAME_ATTRIBUTE_RESOLVER,
+        ACTIVITY(MergeType.MERGE, DEFAULT_NAME_ATTRIBUTE_RESOLVER,
                 AttributeModel.newModel("parentActivityName").setIsPackageDependent(),
-                AttributeModel.newModel(SdkConstants.ATTR_NAME).setIsPackageDependent(),
-                AttributeModel.newModel("isPrivateComputeCoreProcess")),
+                AttributeModel.newModel(SdkConstants.ATTR_NAME).setIsPackageDependent()),
 
         /**
          * Activity-alias (contained in application)
@@ -350,21 +348,6 @@ public class ManifestModel implements DocumentModel<ManifestModel.NodeTypes> {
                         .setMergingPolicy(STRICT_MAIN_OR_OVERLAY_MERGING_POLICY),
                 AttributeModel.newModel(SdkConstants.ATTR_EXTRACT_NATIVE_LIBS)
                         .setMergingPolicy(STRICT_MAIN_OR_OVERLAY_MERGING_POLICY)),
-
-        /*
-         * Allow Component Access represents the set of rules, declared in an application's
-         *  manifest via the
-         * {@code <allow-component-access>} tag, that defines which other applications (and their
-         * components) the application is permitted to associate with.
-         *
-         * Feature in development, documentation link not yet available.
-         */
-        ALLOW_COMPONENT_ACCESS(
-                MergeType.MERGE,
-                new AttributeBasedNodeKeyResolver(
-                        ANDROID_URI, SdkConstants.ATTR_ACCESS_DEFAULT_COMPONENTS),
-                AttributeModel.newModel(SdkConstants.ATTR_ACCESS_DEFAULT_COMPONENTS)
-                        .setMergingPolicy(OR_MERGING_POLICY)),
 
         /**
          * Category (contained in intent-filter, intent) <br>
@@ -465,10 +448,7 @@ public class ManifestModel implements DocumentModel<ManifestModel.NodeTypes> {
         NAV_GRAPH(MergeType.MERGE, DEFAULT_NO_KEY_NODE_RESOLVER),
 
         /** App enumeration tags declaration (contained in manifest) */
-        PACKAGE(
-                MergeType.MERGE,
-                DEFAULT_NAME_ATTRIBUTE_RESOLVER,
-                AttributeModel.newModel(SdkConstants.ATTR_CERT_DIGEST)),
+        PACKAGE(MergeType.MERGE, DEFAULT_NAME_ATTRIBUTE_RESOLVER),
 
         /**
          * Path-permission (contained in provider) <br>
@@ -585,8 +565,7 @@ public class ManifestModel implements DocumentModel<ManifestModel.NodeTypes> {
         PROVIDER(
                 MergeType.MERGE,
                 PROVIDER_KEY_RESOLVER,
-                AttributeModel.newModel(SdkConstants.ATTR_NAME).setIsPackageDependent(),
-                AttributeModel.newModel(SdkConstants.ATTR_AUTHORITIES)),
+                AttributeModel.newModel(SdkConstants.ATTR_NAME).setIsPackageDependent()),
 
         /**
          * Queries <br>
@@ -641,8 +620,7 @@ public class ManifestModel implements DocumentModel<ManifestModel.NodeTypes> {
                 DEFAULT_NAME_ATTRIBUTE_RESOLVER,
                 AttributeModel.newModel(SdkConstants.ATTR_NAME).setIsPackageDependent(),
                 AttributeModel.newModel(SdkConstants.ATTR_FOREGROUND_SERVICE_TYPE)
-                        .setMergingPolicy(STRING_VALUE_MERGING_POLICY),
-                AttributeModel.newModel("isPrivateComputeCoreProcess")),
+                        .setMergingPolicy(STRING_VALUE_MERGING_POLICY)),
 
         /**
          * Supports-gl-texture (contained in manifest)
