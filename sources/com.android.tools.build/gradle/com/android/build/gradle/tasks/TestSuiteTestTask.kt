@@ -45,8 +45,6 @@ import com.android.build.gradle.internal.tasks.DeviceProviderInstrumentTestTask.
 import com.android.build.gradle.internal.tasks.GlobalTask
 import com.android.build.gradle.internal.tasks.factory.GlobalTaskCreationAction
 import com.android.build.gradle.internal.tasks.getApkFiles
-import com.android.build.gradle.internal.test.report.ReportType
-import com.android.build.gradle.internal.test.report.TestReport
 import com.android.build.gradle.internal.test.report.XMLReportAggregator
 import com.android.build.gradle.internal.test.report.processTestReportAggregation
 import com.android.build.gradle.internal.testing.TestData
@@ -170,8 +168,6 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
   @get:Input @get:Optional abstract val shardCount: Property<Int>
 
   @get:Internal abstract val avdService: Property<AvdComponentsBuildService>
-
-  @get:Input @get:Optional abstract val reportAggregationSupport: Property<Boolean>
 
   @Input
   override fun getIgnoreFailures(): Boolean {
@@ -414,22 +410,19 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
           """
           .trimIndent()
 
-      processTestReportAggregation(
-        testResultsDir,
-        xmlResultsDirectory,
-        this.modulePath.get(),
-        this.testedVariantName.get(),
-        this.testSuiteName.get(),
-        this.testSuiteTarget.get(),
-        logger,
-      )
+      if (xmlResultsDirectory.isPresent) {
+        processTestReportAggregation(
+          testResultsDir,
+          xmlResultsDirectory,
+          this.modulePath.get(),
+          this.testedVariantName.get(),
+          this.testSuiteName.get(),
+          this.testSuiteTarget.get(),
+          logger,
+        )
 
-      if (reportAggregationSupport.isPresent && reportAggregationSupport.get()) {
-        val aggregator = XMLReportAggregator(listOf(testResultsDir), this.modulePath.get())
+        val aggregator = XMLReportAggregator(listOf(xmlResultsDirectory.get().asFile), this.modulePath.get())
         aggregator.writeReport(htmlOutputDirFile)
-      } else {
-        val report = TestReport(ReportType.SINGLE_FLAVOR, testResultsDir, htmlOutputDirFile)
-        report.generateReport()
       }
 
       // Also write metadata to coverage directory so that the coverage collection task can identify the suite
@@ -593,7 +586,18 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
           AgpTestSuiteInputParameters.TEST_CLASSPATH -> {
             val testClasspath =
               task.project.objects.fileCollection().also { fc ->
-                creationConfig.sourceContainers.forEach { sc -> fc.from(sc.suiteSourceClasspath.runtimeClasspath) }
+                creationConfig.sourceContainers.forEach { sc ->
+                  fc.from(
+                    sc.suiteSourceClasspath.getRuntimeClasspathArtifacts(
+                      com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.CLASSES_JAR
+                    )
+                  )
+                  fc.from(
+                    sc.suiteSourceClasspath.getRuntimeClasspathArtifacts(
+                      com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.JAVA_RES
+                    )
+                  )
+                }
               }
             task.engineInputParameters.add(AgpTestSuiteInputParameter(AgpTestSuiteInputParameters.TEST_CLASSPATH, testClasspath))
           }
@@ -686,13 +690,7 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
 
                 // We map the FileCollection to a provider of the single valid directory to avoid passing multiple paths
                 layoutlibDataDir.set(
-                  task.project.layout.dir(
-                    extractedLayoutlib.elements.map { elements ->
-                      val dir = elements.firstOrNull { it.asFile.isDirectory && it.asFile.resolve("data").exists() }?.asFile
-                      requireNotNull(dir) { "Could not find extracted layoutlib-runtime with data directory" }
-                      dir
-                    }
-                  )
+                  task.project.layout.dir(extractedLayoutlib.elements.map { elements -> elements.firstOrNull()?.asFile })
                 )
               }
             }
@@ -706,7 +704,7 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
               task.project.objects.fileCollection().also { fc ->
                 creationConfig.sourceContainers.forEach { sc ->
                   if (sc.source is TestSuiteSourceSet.HostJar) {
-                    fc.from(sc.suiteSourceClasspath.hostRuntimeClasspath)
+                    fc.from(sc.suiteSourceClasspath.getHostRuntimeClasspathArtifacts(AndroidArtifacts.ArtifactType.CLASSES_JAR))
                   }
                 }
               }
@@ -841,8 +839,6 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
       task.legacyTestReportingRedirectionEnabled.setDisallowChanges(
         task.project.providers.gradleProperty(LegacyReportingTestSuiteTestTask.ENABLE_UTP_REPORTING_PROPERTY).orNull?.toBoolean() ?: false
       )
-
-      task.reportAggregationSupport.setDisallowChanges(creationConfig.services.projectOptions.get(BooleanOption.REPORT_AGGREGATION_SUPPORT))
     }
 
     override fun handleProvider(taskProvider: TaskProvider<LegacyReportingTestSuiteTestTask>) {
@@ -954,8 +950,6 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
           creationConfig.services.projectInfo.getReportsDir().map { it.dir("${BuilderConstants.FD_ANDROID_TESTS}/$subFolder") }
         )
       }
-
-      task.reportAggregationSupport.setDisallowChanges(creationConfig.services.projectOptions.get(BooleanOption.REPORT_AGGREGATION_SUPPORT))
     }
 
     override fun handleProvider(taskProvider: TaskProvider<LegacyReportingTestSuiteTestTask>) {
@@ -975,6 +969,11 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
           .toAppendTo(InternalMultipleArtifactType.TEST_SUITE_CODE_COVERAGE)
 
         creationConfig.mainVariant.artifacts
+          .use(taskProvider)
+          .wiredWith(TestSuiteTestTask::xmlResultsDirectory)
+          .toAppendTo(InternalMultipleArtifactType.TEST_SUITE_RESULTS)
+      } else {
+        creationConfig.artifacts
           .use(taskProvider)
           .wiredWith(TestSuiteTestTask::xmlResultsDirectory)
           .toAppendTo(InternalMultipleArtifactType.TEST_SUITE_RESULTS)
@@ -1059,6 +1058,18 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
           .atLocation(additionalTestOutputDir.absolutePath)
           .on(InternalArtifactType.MANAGED_DEVICE_ANDROID_TEST_ADDITIONAL_OUTPUT)
       }
+
+      if (creationConfig is DeviceTestCreationConfig) {
+        creationConfig.mainVariant.artifacts
+          .use(taskProvider)
+          .wiredWith(TestSuiteTestTask::xmlResultsDirectory)
+          .toAppendTo(InternalMultipleArtifactType.TEST_SUITE_RESULTS)
+      } else {
+        creationConfig.artifacts
+          .use(taskProvider)
+          .wiredWith(TestSuiteTestTask::xmlResultsDirectory)
+          .toAppendTo(InternalMultipleArtifactType.TEST_SUITE_RESULTS)
+      }
     }
 
     override fun configure(task: LegacyReportingTestSuiteTestTask) {
@@ -1072,7 +1083,7 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
       task.description = "Installs and runs the tests for $variantName on managed device ${device.name}."
       task.outputs.upToDateWhen { false }
 
-      task.testSuiteName.setDisallowChanges("androidTest")
+      task.testSuiteName.setDisallowChanges(CONNECTED_TEST_TEST_SUITE_NAME)
       task.testSuiteTarget.setDisallowChanges(device.name)
       task.testedVariantName.setDisallowChanges(variantName)
       task.modulePath.setDisallowChanges(creationConfig.services.projectInfo.path)
