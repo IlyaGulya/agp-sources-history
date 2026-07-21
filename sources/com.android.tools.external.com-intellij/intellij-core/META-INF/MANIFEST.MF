@@ -1,5 +1,2 @@
 Manifest-Version: 1.0
 
-Name: com/android/tools/external/intellij/core/Main.java
-SHA-256-Digest: FGcU6aqV4kNKLohd/lVvhqmDLSSEUhZQs7Z0jGpEO4Q=
-
