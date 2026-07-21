@@ -818,8 +818,12 @@ public final class DeviceMonitor implements ClientTracker {
                     if (mAdbConnection == null) {
                         mConnectionAttempt++;
                         Log.e("DeviceMonitor", "Connection attempts: " + mConnectionAttempt);
-                        if (mConnectionAttempt > 10) {
-                            if (!mBridge.startAdb()) {
+                        if (AndroidDebugBridge.isUserManagedAdbMode()) {
+                            Log.i("DeviceMonitor", "User managed ADB mode: Waiting for ADB connection to be re-established");
+                        } else if (mConnectionAttempt > 10) {
+                            if (!mBridge.startAdb(
+                                    AndroidDebugBridge.DEFAULT_START_ADB_TIMEOUT_MILLIS,
+                                    TimeUnit.MILLISECONDS)) {
                                 mRestartAttemptCount++;
                                 Log.e("DeviceMonitor",
                                         "adb restart attempts: " + mRestartAttemptCount);
