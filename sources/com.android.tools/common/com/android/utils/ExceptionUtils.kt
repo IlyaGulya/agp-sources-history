@@ -13,25 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.utils
 
-package com.android.builder.merge
+import java.util.concurrent.CancellationException
 
-open class DelegateFileMergerOutput(private val delegate: FileMergerOutput) : FileMergerOutput {
-
-  var isOpen = false
-
-  override fun open() {
-    delegate.open()
-    isOpen = true
-  }
-
-  override fun close() {
-    delegate.close()
-    isOpen = false
-  }
-
-  override fun create(path: String, inputs: List<FileMergerInputNonIncremental>, compress: Boolean) {
-    if (!isOpen) error("File Merger is not open.")
-    delegate.create(path, inputs, compress)
+/** Throws the exception if it is [CancellationException]. */
+fun Throwable.throwIfCancellation() {
+  if (this is CancellationException) {
+    throw this
   }
 }
