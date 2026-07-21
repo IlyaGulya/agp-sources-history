@@ -26,11 +26,6 @@ private static final long serialVersionUID = 0L;
     return new AndroidVersion();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.builder.model.proto.ide.IdeModelsProto.internal_static_AndroidVersion_descriptor;
@@ -45,7 +40,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int API_LEVEL_FIELD_NUMBER = 1;
-  private int apiLevel_;
+  private int apiLevel_ = 0;
   /**
    * <code>int32 api_level = 1;</code>
    * @return The apiLevel.
@@ -56,7 +51,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int CODENAME_FIELD_NUMBER = 2;
-  private volatile java.lang.Object codename_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object codename_ = "";
   /**
    * <code>string codename = 2;</code>
    * @return The codename.
@@ -291,10 +287,9 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       apiLevel_ = 0;
-
       codename_ = "";
-
       return this;
     }
 
@@ -321,44 +316,21 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.builder.model.proto.ide.AndroidVersion buildPartial() {
       com.android.builder.model.proto.ide.AndroidVersion result = new com.android.builder.model.proto.ide.AndroidVersion(this);
-      result.apiLevel_ = apiLevel_;
-      result.codename_ = codename_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.builder.model.proto.ide.AndroidVersion result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.apiLevel_ = apiLevel_;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.codename_ = codename_;
+      }
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.builder.model.proto.ide.AndroidVersion) {
@@ -376,6 +348,7 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getCodename().isEmpty()) {
         codename_ = other.codename_;
+        bitField0_ |= 0x00000002;
         onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
@@ -406,12 +379,12 @@ private static final long serialVersionUID = 0L;
               break;
             case 8: {
               apiLevel_ = input.readInt32();
-
+              bitField0_ |= 0x00000001;
               break;
             } // case 8
             case 18: {
               codename_ = input.readStringRequireUtf8();
-
+              bitField0_ |= 0x00000002;
               break;
             } // case 18
             default: {
@@ -429,6 +402,7 @@ private static final long serialVersionUID = 0L;
       } // finally
       return this;
     }
+    private int bitField0_;
 
     private int apiLevel_ ;
     /**
@@ -445,8 +419,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setApiLevel(int value) {
-      
+
       apiLevel_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -455,7 +430,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearApiLevel() {
-      
+      bitField0_ = (bitField0_ & ~0x00000001);
       apiLevel_ = 0;
       onChanged();
       return this;
@@ -502,11 +477,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setCodename(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      if (value == null) { throw new NullPointerException(); }
       codename_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -515,8 +488,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearCodename() {
-      
       codename_ = getDefaultInstance().getCodename();
+      bitField0_ = (bitField0_ & ~0x00000002);
       onChanged();
       return this;
     }
@@ -527,12 +500,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setCodenameBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       codename_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }

@@ -27,11 +27,6 @@ private static final long serialVersionUID = 0L;
     return new ProjectInfo();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.builder.model.proto.ide.IdeModelsProto.internal_static_ProjectInfo_descriptor;
@@ -73,7 +68,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int BUILD_ID_FIELD_NUMBER = 2;
-  private volatile java.lang.Object buildId_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object buildId_ = "";
   /**
    * <pre>
    * The build id.
@@ -131,7 +127,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int PROJECT_PATH_FIELD_NUMBER = 3;
-  private volatile java.lang.Object projectPath_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object projectPath_ = "";
   /**
    * <pre>
    * The project path.
@@ -417,16 +414,14 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      if (componentInfoBuilder_ == null) {
-        componentInfo_ = null;
-      } else {
-        componentInfoBuilder_.clear();
+      bitField0_ = 0;
+      componentInfo_ = null;
+      if (componentInfoBuilder_ != null) {
+        componentInfoBuilder_.dispose();
+        componentInfoBuilder_ = null;
       }
-      bitField0_ = (bitField0_ & ~0x00000001);
       buildId_ = "";
-      bitField0_ = (bitField0_ & ~0x00000002);
       projectPath_ = "";
-      bitField0_ = (bitField0_ & ~0x00000004);
       return this;
     }
 
@@ -453,61 +448,31 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.builder.model.proto.ide.ProjectInfo buildPartial() {
       com.android.builder.model.proto.ide.ProjectInfo result = new com.android.builder.model.proto.ide.ProjectInfo(this);
-      int from_bitField0_ = bitField0_;
-      int to_bitField0_ = 0;
-      if (((from_bitField0_ & 0x00000001) != 0)) {
-        if (componentInfoBuilder_ == null) {
-          result.componentInfo_ = componentInfo_;
-        } else {
-          result.componentInfo_ = componentInfoBuilder_.build();
-        }
-        to_bitField0_ |= 0x00000001;
-      }
-      if (((from_bitField0_ & 0x00000002) != 0)) {
-        to_bitField0_ |= 0x00000002;
-      }
-      result.buildId_ = buildId_;
-      if (((from_bitField0_ & 0x00000004) != 0)) {
-        to_bitField0_ |= 0x00000004;
-      }
-      result.projectPath_ = projectPath_;
-      result.bitField0_ = to_bitField0_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.builder.model.proto.ide.ProjectInfo result) {
+      int from_bitField0_ = bitField0_;
+      int to_bitField0_ = 0;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.componentInfo_ = componentInfoBuilder_ == null
+            ? componentInfo_
+            : componentInfoBuilder_.build();
+        to_bitField0_ |= 0x00000001;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.buildId_ = buildId_;
+        to_bitField0_ |= 0x00000002;
+      }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.projectPath_ = projectPath_;
+        to_bitField0_ |= 0x00000004;
+      }
+      result.bitField0_ |= to_bitField0_;
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.builder.model.proto.ide.ProjectInfo) {
@@ -524,13 +489,13 @@ private static final long serialVersionUID = 0L;
         mergeComponentInfo(other.getComponentInfo());
       }
       if (other.hasBuildId()) {
-        bitField0_ |= 0x00000002;
         buildId_ = other.buildId_;
+        bitField0_ |= 0x00000002;
         onChanged();
       }
       if (other.hasProjectPath()) {
-        bitField0_ |= 0x00000004;
         projectPath_ = other.projectPath_;
+        bitField0_ |= 0x00000004;
         onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
@@ -623,11 +588,11 @@ private static final long serialVersionUID = 0L;
           throw new NullPointerException();
         }
         componentInfo_ = value;
-        onChanged();
       } else {
         componentInfoBuilder_.setMessage(value);
       }
       bitField0_ |= 0x00000001;
+      onChanged();
       return this;
     }
     /**
@@ -637,11 +602,11 @@ private static final long serialVersionUID = 0L;
         com.android.builder.model.proto.ide.ComponentInfo.Builder builderForValue) {
       if (componentInfoBuilder_ == null) {
         componentInfo_ = builderForValue.build();
-        onChanged();
       } else {
         componentInfoBuilder_.setMessage(builderForValue.build());
       }
       bitField0_ |= 0x00000001;
+      onChanged();
       return this;
     }
     /**
@@ -650,31 +615,30 @@ private static final long serialVersionUID = 0L;
     public Builder mergeComponentInfo(com.android.builder.model.proto.ide.ComponentInfo value) {
       if (componentInfoBuilder_ == null) {
         if (((bitField0_ & 0x00000001) != 0) &&
-            componentInfo_ != null &&
-            componentInfo_ != com.android.builder.model.proto.ide.ComponentInfo.getDefaultInstance()) {
-          componentInfo_ =
-            com.android.builder.model.proto.ide.ComponentInfo.newBuilder(componentInfo_).mergeFrom(value).buildPartial();
+          componentInfo_ != null &&
+          componentInfo_ != com.android.builder.model.proto.ide.ComponentInfo.getDefaultInstance()) {
+          getComponentInfoBuilder().mergeFrom(value);
         } else {
           componentInfo_ = value;
         }
-        onChanged();
       } else {
         componentInfoBuilder_.mergeFrom(value);
       }
       bitField0_ |= 0x00000001;
+      onChanged();
       return this;
     }
     /**
      * <code>optional .ComponentInfo component_info = 1;</code>
      */
     public Builder clearComponentInfo() {
-      if (componentInfoBuilder_ == null) {
-        componentInfo_ = null;
-        onChanged();
-      } else {
-        componentInfoBuilder_.clear();
-      }
       bitField0_ = (bitField0_ & ~0x00000001);
+      componentInfo_ = null;
+      if (componentInfoBuilder_ != null) {
+        componentInfoBuilder_.dispose();
+        componentInfoBuilder_ = null;
+      }
+      onChanged();
       return this;
     }
     /**
@@ -777,11 +741,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setBuildId(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
+      if (value == null) { throw new NullPointerException(); }
       buildId_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -794,8 +756,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearBuildId() {
-      bitField0_ = (bitField0_ & ~0x00000002);
       buildId_ = getDefaultInstance().getBuildId();
+      bitField0_ = (bitField0_ & ~0x00000002);
       onChanged();
       return this;
     }
@@ -810,12 +772,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setBuildIdBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000002;
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       buildId_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -884,11 +844,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setProjectPath(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
+      if (value == null) { throw new NullPointerException(); }
       projectPath_ = value;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
@@ -901,8 +859,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearProjectPath() {
-      bitField0_ = (bitField0_ & ~0x00000004);
       projectPath_ = getDefaultInstance().getProjectPath();
+      bitField0_ = (bitField0_ & ~0x00000004);
       onChanged();
       return this;
     }
@@ -917,12 +875,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setProjectPathBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000004;
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       projectPath_ = value;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }

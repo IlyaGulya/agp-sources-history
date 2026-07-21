@@ -29,11 +29,6 @@ private static final long serialVersionUID = 0L;
     return new DependencyInfo();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_DependencyInfo_descriptor;
@@ -277,12 +272,12 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      if (libraryBuilder_ == null) {
-        library_ = null;
-      } else {
-        libraryBuilder_.clear();
+      bitField0_ = 0;
+      library_ = null;
+      if (libraryBuilder_ != null) {
+        libraryBuilder_.dispose();
+        libraryBuilder_ = null;
       }
-      bitField0_ = (bitField0_ & ~0x00000001);
       return this;
     }
 
@@ -309,53 +304,23 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.kotlin.multiplatform.models.DependencyInfo buildPartial() {
       com.android.kotlin.multiplatform.models.DependencyInfo result = new com.android.kotlin.multiplatform.models.DependencyInfo(this);
-      int from_bitField0_ = bitField0_;
-      int to_bitField0_ = 0;
-      if (((from_bitField0_ & 0x00000001) != 0)) {
-        if (libraryBuilder_ == null) {
-          result.library_ = library_;
-        } else {
-          result.library_ = libraryBuilder_.build();
-        }
-        to_bitField0_ |= 0x00000001;
-      }
-      result.bitField0_ = to_bitField0_;
+      if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(com.android.kotlin.multiplatform.models.DependencyInfo result) {
+      int from_bitField0_ = bitField0_;
+      int to_bitField0_ = 0;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.library_ = libraryBuilder_ == null
+            ? library_
+            : libraryBuilder_.build();
+        to_bitField0_ |= 0x00000001;
+      }
+      result.bitField0_ |= to_bitField0_;
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.kotlin.multiplatform.models.DependencyInfo) {
@@ -451,11 +416,11 @@ private static final long serialVersionUID = 0L;
           throw new NullPointerException();
         }
         library_ = value;
-        onChanged();
       } else {
         libraryBuilder_.setMessage(value);
       }
       bitField0_ |= 0x00000001;
+      onChanged();
       return this;
     }
     /**
@@ -465,11 +430,11 @@ private static final long serialVersionUID = 0L;
         com.android.builder.model.proto.ide.Library.Builder builderForValue) {
       if (libraryBuilder_ == null) {
         library_ = builderForValue.build();
-        onChanged();
       } else {
         libraryBuilder_.setMessage(builderForValue.build());
       }
       bitField0_ |= 0x00000001;
+      onChanged();
       return this;
     }
     /**
@@ -478,31 +443,30 @@ private static final long serialVersionUID = 0L;
     public Builder mergeLibrary(com.android.builder.model.proto.ide.Library value) {
       if (libraryBuilder_ == null) {
         if (((bitField0_ & 0x00000001) != 0) &&
-            library_ != null &&
-            library_ != com.android.builder.model.proto.ide.Library.getDefaultInstance()) {
-          library_ =
-            com.android.builder.model.proto.ide.Library.newBuilder(library_).mergeFrom(value).buildPartial();
+          library_ != null &&
+          library_ != com.android.builder.model.proto.ide.Library.getDefaultInstance()) {
+          getLibraryBuilder().mergeFrom(value);
         } else {
           library_ = value;
         }
-        onChanged();
       } else {
         libraryBuilder_.mergeFrom(value);
       }
       bitField0_ |= 0x00000001;
+      onChanged();
       return this;
     }
     /**
      * <code>optional .Library library = 1;</code>
      */
     public Builder clearLibrary() {
-      if (libraryBuilder_ == null) {
-        library_ = null;
-        onChanged();
-      } else {
-        libraryBuilder_.clear();
-      }
       bitField0_ = (bitField0_ & ~0x00000001);
+      library_ = null;
+      if (libraryBuilder_ != null) {
+        libraryBuilder_.dispose();
+        libraryBuilder_ = null;
+      }
+      onChanged();
       return this;
     }
     /**

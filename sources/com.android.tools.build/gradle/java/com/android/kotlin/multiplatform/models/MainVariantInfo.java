@@ -33,11 +33,6 @@ private static final long serialVersionUID = 0L;
     return new MainVariantInfo();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_MainVariantInfo_descriptor;
@@ -53,7 +48,8 @@ private static final long serialVersionUID = 0L;
 
   private int bitField0_;
   public static final int NAMESPACE_FIELD_NUMBER = 1;
-  private volatile java.lang.Object namespace_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object namespace_ = "";
   /**
    * <code>optional string namespace = 1;</code>
    * @return Whether the namespace field is set.
@@ -99,7 +95,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int COMPILE_SDK_TARGET_FIELD_NUMBER = 2;
-  private volatile java.lang.Object compileSdkTarget_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object compileSdkTarget_ = "";
   /**
    * <pre>
    * The compilation target as a string. This is the full extended target hash string.
@@ -195,7 +192,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int MAX_SDK_VERSION_FIELD_NUMBER = 4;
-  private int maxSdkVersion_;
+  private int maxSdkVersion_ = 0;
   /**
    * <pre>
    * The max SDK version of this artifact.
@@ -222,6 +219,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int PROGUARD_FILES_FIELD_NUMBER = 5;
+  @SuppressWarnings("serial")
   private java.util.List<com.android.builder.model.proto.ide.File> proguardFiles_;
   /**
    * <pre>
@@ -312,6 +310,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int CONSUMER_PROGUARD_FILES_FIELD_NUMBER = 6;
+  @SuppressWarnings("serial")
   private java.util.List<com.android.builder.model.proto.ide.File> consumerProguardFiles_;
   /**
    * <pre>
@@ -372,7 +371,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int MINIFICATION_ENABLED_FIELD_NUMBER = 7;
-  private boolean minificationEnabled_;
+  private boolean minificationEnabled_ = false;
   /**
    * <pre>
    * Whether code shrinking is enabled.
@@ -692,18 +691,15 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       namespace_ = "";
-      bitField0_ = (bitField0_ & ~0x00000001);
       compileSdkTarget_ = "";
-      bitField0_ = (bitField0_ & ~0x00000002);
-      if (minSdkVersionBuilder_ == null) {
-        minSdkVersion_ = null;
-      } else {
-        minSdkVersionBuilder_.clear();
+      minSdkVersion_ = null;
+      if (minSdkVersionBuilder_ != null) {
+        minSdkVersionBuilder_.dispose();
+        minSdkVersionBuilder_ = null;
       }
-      bitField0_ = (bitField0_ & ~0x00000004);
       maxSdkVersion_ = 0;
-      bitField0_ = (bitField0_ & ~0x00000008);
       if (proguardFilesBuilder_ == null) {
         proguardFiles_ = java.util.Collections.emptyList();
       } else {
@@ -719,7 +715,6 @@ private static final long serialVersionUID = 0L;
       }
       bitField0_ = (bitField0_ & ~0x00000020);
       minificationEnabled_ = false;
-      bitField0_ = (bitField0_ & ~0x00000040);
       return this;
     }
 
@@ -746,28 +741,13 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.kotlin.multiplatform.models.MainVariantInfo buildPartial() {
       com.android.kotlin.multiplatform.models.MainVariantInfo result = new com.android.kotlin.multiplatform.models.MainVariantInfo(this);
-      int from_bitField0_ = bitField0_;
-      int to_bitField0_ = 0;
-      if (((from_bitField0_ & 0x00000001) != 0)) {
-        to_bitField0_ |= 0x00000001;
-      }
-      result.namespace_ = namespace_;
-      if (((from_bitField0_ & 0x00000002) != 0)) {
-        to_bitField0_ |= 0x00000002;
-      }
-      result.compileSdkTarget_ = compileSdkTarget_;
-      if (((from_bitField0_ & 0x00000004) != 0)) {
-        if (minSdkVersionBuilder_ == null) {
-          result.minSdkVersion_ = minSdkVersion_;
-        } else {
-          result.minSdkVersion_ = minSdkVersionBuilder_.build();
-        }
-        to_bitField0_ |= 0x00000004;
-      }
-      if (((from_bitField0_ & 0x00000008) != 0)) {
-        result.maxSdkVersion_ = maxSdkVersion_;
-        to_bitField0_ |= 0x00000008;
-      }
+      buildPartialRepeatedFields(result);
+      if (bitField0_ != 0) { buildPartial0(result); }
+      onBuilt();
+      return result;
+    }
+
+    private void buildPartialRepeatedFields(com.android.kotlin.multiplatform.models.MainVariantInfo result) {
       if (proguardFilesBuilder_ == null) {
         if (((bitField0_ & 0x00000010) != 0)) {
           proguardFiles_ = java.util.Collections.unmodifiableList(proguardFiles_);
@@ -786,47 +766,36 @@ private static final long serialVersionUID = 0L;
       } else {
         result.consumerProguardFiles_ = consumerProguardFilesBuilder_.build();
       }
+    }
+
+    private void buildPartial0(com.android.kotlin.multiplatform.models.MainVariantInfo result) {
+      int from_bitField0_ = bitField0_;
+      int to_bitField0_ = 0;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.namespace_ = namespace_;
+        to_bitField0_ |= 0x00000001;
+      }
+      if (((from_bitField0_ & 0x00000002) != 0)) {
+        result.compileSdkTarget_ = compileSdkTarget_;
+        to_bitField0_ |= 0x00000002;
+      }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.minSdkVersion_ = minSdkVersionBuilder_ == null
+            ? minSdkVersion_
+            : minSdkVersionBuilder_.build();
+        to_bitField0_ |= 0x00000004;
+      }
+      if (((from_bitField0_ & 0x00000008) != 0)) {
+        result.maxSdkVersion_ = maxSdkVersion_;
+        to_bitField0_ |= 0x00000008;
+      }
       if (((from_bitField0_ & 0x00000040) != 0)) {
         result.minificationEnabled_ = minificationEnabled_;
         to_bitField0_ |= 0x00000010;
       }
-      result.bitField0_ = to_bitField0_;
-      onBuilt();
-      return result;
+      result.bitField0_ |= to_bitField0_;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
-    }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.kotlin.multiplatform.models.MainVariantInfo) {
@@ -840,13 +809,13 @@ private static final long serialVersionUID = 0L;
     public Builder mergeFrom(com.android.kotlin.multiplatform.models.MainVariantInfo other) {
       if (other == com.android.kotlin.multiplatform.models.MainVariantInfo.getDefaultInstance()) return this;
       if (other.hasNamespace()) {
-        bitField0_ |= 0x00000001;
         namespace_ = other.namespace_;
+        bitField0_ |= 0x00000001;
         onChanged();
       }
       if (other.hasCompileSdkTarget()) {
-        bitField0_ |= 0x00000002;
         compileSdkTarget_ = other.compileSdkTarget_;
+        bitField0_ |= 0x00000002;
         onChanged();
       }
       if (other.hasMinSdkVersion()) {
@@ -1054,11 +1023,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setNamespace(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+      if (value == null) { throw new NullPointerException(); }
       namespace_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -1067,8 +1034,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearNamespace() {
-      bitField0_ = (bitField0_ & ~0x00000001);
       namespace_ = getDefaultInstance().getNamespace();
+      bitField0_ = (bitField0_ & ~0x00000001);
       onChanged();
       return this;
     }
@@ -1079,12 +1046,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setNamespaceBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000001;
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       namespace_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -1153,11 +1118,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setCompileSdkTarget(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
+      if (value == null) { throw new NullPointerException(); }
       compileSdkTarget_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -1170,8 +1133,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearCompileSdkTarget() {
-      bitField0_ = (bitField0_ & ~0x00000002);
       compileSdkTarget_ = getDefaultInstance().getCompileSdkTarget();
+      bitField0_ = (bitField0_ & ~0x00000002);
       onChanged();
       return this;
     }
@@ -1186,12 +1149,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setCompileSdkTargetBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000002;
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       compileSdkTarget_ = value;
+      bitField0_ |= 0x00000002;
       onChanged();
       return this;
     }
@@ -1238,11 +1199,11 @@ private static final long serialVersionUID = 0L;
           throw new NullPointerException();
         }
         minSdkVersion_ = value;
-        onChanged();
       } else {
         minSdkVersionBuilder_.setMessage(value);
       }
       bitField0_ |= 0x00000004;
+      onChanged();
       return this;
     }
     /**
@@ -1256,11 +1217,11 @@ private static final long serialVersionUID = 0L;
         com.android.builder.model.proto.ide.AndroidVersion.Builder builderForValue) {
       if (minSdkVersionBuilder_ == null) {
         minSdkVersion_ = builderForValue.build();
-        onChanged();
       } else {
         minSdkVersionBuilder_.setMessage(builderForValue.build());
       }
       bitField0_ |= 0x00000004;
+      onChanged();
       return this;
     }
     /**
@@ -1273,18 +1234,17 @@ private static final long serialVersionUID = 0L;
     public Builder mergeMinSdkVersion(com.android.builder.model.proto.ide.AndroidVersion value) {
       if (minSdkVersionBuilder_ == null) {
         if (((bitField0_ & 0x00000004) != 0) &&
-            minSdkVersion_ != null &&
-            minSdkVersion_ != com.android.builder.model.proto.ide.AndroidVersion.getDefaultInstance()) {
-          minSdkVersion_ =
-            com.android.builder.model.proto.ide.AndroidVersion.newBuilder(minSdkVersion_).mergeFrom(value).buildPartial();
+          minSdkVersion_ != null &&
+          minSdkVersion_ != com.android.builder.model.proto.ide.AndroidVersion.getDefaultInstance()) {
+          getMinSdkVersionBuilder().mergeFrom(value);
         } else {
           minSdkVersion_ = value;
         }
-        onChanged();
       } else {
         minSdkVersionBuilder_.mergeFrom(value);
       }
       bitField0_ |= 0x00000004;
+      onChanged();
       return this;
     }
     /**
@@ -1295,13 +1255,13 @@ private static final long serialVersionUID = 0L;
      * <code>optional .AndroidVersion min_sdk_version = 3;</code>
      */
     public Builder clearMinSdkVersion() {
-      if (minSdkVersionBuilder_ == null) {
-        minSdkVersion_ = null;
-        onChanged();
-      } else {
-        minSdkVersionBuilder_.clear();
-      }
       bitField0_ = (bitField0_ & ~0x00000004);
+      minSdkVersion_ = null;
+      if (minSdkVersionBuilder_ != null) {
+        minSdkVersionBuilder_.dispose();
+        minSdkVersionBuilder_ = null;
+      }
+      onChanged();
       return this;
     }
     /**
@@ -1387,8 +1347,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setMaxSdkVersion(int value) {
-      bitField0_ |= 0x00000008;
+
       maxSdkVersion_ = value;
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -2174,8 +2135,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setMinificationEnabled(boolean value) {
-      bitField0_ |= 0x00000040;
+
       minificationEnabled_ = value;
+      bitField0_ |= 0x00000040;
       onChanged();
       return this;
     }

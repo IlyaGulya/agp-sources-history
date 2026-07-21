@@ -29,11 +29,6 @@ private static final long serialVersionUID = 0L;
     return new SigningConfig();
   }
 
-  @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.builder.model.proto.ide.IdeModelsProto.internal_static_SigningConfig_descriptor;
@@ -49,7 +44,8 @@ private static final long serialVersionUID = 0L;
 
   private int bitField0_;
   public static final int NAME_FIELD_NUMBER = 1;
-  private volatile java.lang.Object name_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object name_ = "";
   /**
    * <pre>
    * Returns the name of the Signing config
@@ -145,7 +141,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int STORE_PASSWORD_FIELD_NUMBER = 3;
-  private volatile java.lang.Object storePassword_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object storePassword_ = "";
   /**
    * <pre>
    * The keystore password.
@@ -203,7 +200,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int KEY_ALIAS_FIELD_NUMBER = 4;
-  private volatile java.lang.Object keyAlias_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object keyAlias_ = "";
   /**
    * <pre>
    * The key alias name.
@@ -261,7 +259,8 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int KEY_PASSWORD_FIELD_NUMBER = 5;
-  private volatile java.lang.Object keyPassword_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object keyPassword_ = "";
   /**
    * <pre>
    * The key password.
@@ -319,7 +318,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int ENABLE_V1_SIGNING_FIELD_NUMBER = 6;
-  private boolean enableV1Signing_;
+  private boolean enableV1Signing_ = false;
   /**
    * <pre>
    * Signing using JAR Signature Scheme (aka v1 scheme) is enabled.
@@ -346,7 +345,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int ENABLE_V2_SIGNING_FIELD_NUMBER = 7;
-  private boolean enableV2Signing_;
+  private boolean enableV2Signing_ = false;
   /**
    * <pre>
    * Signing using APK Signature Scheme v2 (aka v2 scheme) is enabled.
@@ -373,7 +372,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int ENABLE_V3_SIGNING_FIELD_NUMBER = 8;
-  private boolean enableV3Signing_;
+  private boolean enableV3Signing_ = false;
   /**
    * <pre>
    * Signing using JAR Signature Scheme v3 (aka v3 scheme) is enabled.
@@ -400,7 +399,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int ENABLE_V4_SIGNING_FIELD_NUMBER = 9;
-  private boolean enableV4Signing_;
+  private boolean enableV4Signing_ = false;
   /**
    * <pre>
    * Signing using JAR Signature Scheme v4 (aka v4 scheme) is enabled.
@@ -427,7 +426,7 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int IS_SIGNING_READY_FIELD_NUMBER = 10;
-  private boolean isSigningReady_;
+  private boolean isSigningReady_ = false;
   /**
    * <pre>
    * Whether the config is fully configured for signing.
@@ -781,30 +780,21 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       name_ = "";
-      bitField0_ = (bitField0_ & ~0x00000001);
-      if (storeFileBuilder_ == null) {
-        storeFile_ = null;
-      } else {
-        storeFileBuilder_.clear();
+      storeFile_ = null;
+      if (storeFileBuilder_ != null) {
+        storeFileBuilder_.dispose();
+        storeFileBuilder_ = null;
       }
-      bitField0_ = (bitField0_ & ~0x00000002);
       storePassword_ = "";
-      bitField0_ = (bitField0_ & ~0x00000004);
       keyAlias_ = "";
-      bitField0_ = (bitField0_ & ~0x00000008);
       keyPassword_ = "";
-      bitField0_ = (bitField0_ & ~0x00000010);
       enableV1Signing_ = false;
-      bitField0_ = (bitField0_ & ~0x00000020);
       enableV2Signing_ = false;
-      bitField0_ = (bitField0_ & ~0x00000040);
       enableV3Signing_ = false;
-      bitField0_ = (bitField0_ & ~0x00000080);
       enableV4Signing_ = false;
-      bitField0_ = (bitField0_ & ~0x00000100);
       isSigningReady_ = false;
-
       return this;
     }
 
@@ -831,32 +821,36 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.builder.model.proto.ide.SigningConfig buildPartial() {
       com.android.builder.model.proto.ide.SigningConfig result = new com.android.builder.model.proto.ide.SigningConfig(this);
+      if (bitField0_ != 0) { buildPartial0(result); }
+      onBuilt();
+      return result;
+    }
+
+    private void buildPartial0(com.android.builder.model.proto.ide.SigningConfig result) {
       int from_bitField0_ = bitField0_;
       int to_bitField0_ = 0;
       if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.name_ = name_;
         to_bitField0_ |= 0x00000001;
       }
-      result.name_ = name_;
       if (((from_bitField0_ & 0x00000002) != 0)) {
-        if (storeFileBuilder_ == null) {
-          result.storeFile_ = storeFile_;
-        } else {
-          result.storeFile_ = storeFileBuilder_.build();
-        }
+        result.storeFile_ = storeFileBuilder_ == null
+            ? storeFile_
+            : storeFileBuilder_.build();
         to_bitField0_ |= 0x00000002;
       }
       if (((from_bitField0_ & 0x00000004) != 0)) {
+        result.storePassword_ = storePassword_;
         to_bitField0_ |= 0x00000004;
       }
-      result.storePassword_ = storePassword_;
       if (((from_bitField0_ & 0x00000008) != 0)) {
+        result.keyAlias_ = keyAlias_;
         to_bitField0_ |= 0x00000008;
       }
-      result.keyAlias_ = keyAlias_;
       if (((from_bitField0_ & 0x00000010) != 0)) {
+        result.keyPassword_ = keyPassword_;
         to_bitField0_ |= 0x00000010;
       }
-      result.keyPassword_ = keyPassword_;
       if (((from_bitField0_ & 0x00000020) != 0)) {
         result.enableV1Signing_ = enableV1Signing_;
         to_bitField0_ |= 0x00000020;
@@ -873,44 +867,12 @@ private static final long serialVersionUID = 0L;
         result.enableV4Signing_ = enableV4Signing_;
         to_bitField0_ |= 0x00000100;
       }
-      result.isSigningReady_ = isSigningReady_;
-      result.bitField0_ = to_bitField0_;
-      onBuilt();
-      return result;
+      if (((from_bitField0_ & 0x00000200) != 0)) {
+        result.isSigningReady_ = isSigningReady_;
+      }
+      result.bitField0_ |= to_bitField0_;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
-    }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof com.android.builder.model.proto.ide.SigningConfig) {
@@ -924,26 +886,26 @@ private static final long serialVersionUID = 0L;
     public Builder mergeFrom(com.android.builder.model.proto.ide.SigningConfig other) {
       if (other == com.android.builder.model.proto.ide.SigningConfig.getDefaultInstance()) return this;
       if (other.hasName()) {
-        bitField0_ |= 0x00000001;
         name_ = other.name_;
+        bitField0_ |= 0x00000001;
         onChanged();
       }
       if (other.hasStoreFile()) {
         mergeStoreFile(other.getStoreFile());
       }
       if (other.hasStorePassword()) {
-        bitField0_ |= 0x00000004;
         storePassword_ = other.storePassword_;
+        bitField0_ |= 0x00000004;
         onChanged();
       }
       if (other.hasKeyAlias()) {
-        bitField0_ |= 0x00000008;
         keyAlias_ = other.keyAlias_;
+        bitField0_ |= 0x00000008;
         onChanged();
       }
       if (other.hasKeyPassword()) {
-        bitField0_ |= 0x00000010;
         keyPassword_ = other.keyPassword_;
+        bitField0_ |= 0x00000010;
         onChanged();
       }
       if (other.hasEnableV1Signing()) {
@@ -1036,7 +998,7 @@ private static final long serialVersionUID = 0L;
             } // case 72
             case 80: {
               isSigningReady_ = input.readBool();
-
+              bitField0_ |= 0x00000200;
               break;
             } // case 80
             default: {
@@ -1120,11 +1082,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setName(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+      if (value == null) { throw new NullPointerException(); }
       name_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -1137,8 +1097,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearName() {
-      bitField0_ = (bitField0_ & ~0x00000001);
       name_ = getDefaultInstance().getName();
+      bitField0_ = (bitField0_ & ~0x00000001);
       onChanged();
       return this;
     }
@@ -1153,12 +1113,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setNameBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000001;
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       name_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -1205,11 +1163,11 @@ private static final long serialVersionUID = 0L;
           throw new NullPointerException();
         }
         storeFile_ = value;
-        onChanged();
       } else {
         storeFileBuilder_.setMessage(value);
       }
       bitField0_ |= 0x00000002;
+      onChanged();
       return this;
     }
     /**
@@ -1223,11 +1181,11 @@ private static final long serialVersionUID = 0L;
         com.android.builder.model.proto.ide.File.Builder builderForValue) {
       if (storeFileBuilder_ == null) {
         storeFile_ = builderForValue.build();
-        onChanged();
       } else {
         storeFileBuilder_.setMessage(builderForValue.build());
       }
       bitField0_ |= 0x00000002;
+      onChanged();
       return this;
     }
     /**
@@ -1240,18 +1198,17 @@ private static final long serialVersionUID = 0L;
     public Builder mergeStoreFile(com.android.builder.model.proto.ide.File value) {
       if (storeFileBuilder_ == null) {
         if (((bitField0_ & 0x00000002) != 0) &&
-            storeFile_ != null &&
-            storeFile_ != com.android.builder.model.proto.ide.File.getDefaultInstance()) {
-          storeFile_ =
-            com.android.builder.model.proto.ide.File.newBuilder(storeFile_).mergeFrom(value).buildPartial();
+          storeFile_ != null &&
+          storeFile_ != com.android.builder.model.proto.ide.File.getDefaultInstance()) {
+          getStoreFileBuilder().mergeFrom(value);
         } else {
           storeFile_ = value;
         }
-        onChanged();
       } else {
         storeFileBuilder_.mergeFrom(value);
       }
       bitField0_ |= 0x00000002;
+      onChanged();
       return this;
     }
     /**
@@ -1262,13 +1219,13 @@ private static final long serialVersionUID = 0L;
      * <code>optional .File store_file = 2;</code>
      */
     public Builder clearStoreFile() {
-      if (storeFileBuilder_ == null) {
-        storeFile_ = null;
-        onChanged();
-      } else {
-        storeFileBuilder_.clear();
-      }
       bitField0_ = (bitField0_ & ~0x00000002);
+      storeFile_ = null;
+      if (storeFileBuilder_ != null) {
+        storeFileBuilder_.dispose();
+        storeFileBuilder_ = null;
+      }
+      onChanged();
       return this;
     }
     /**
@@ -1383,11 +1340,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setStorePassword(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
+      if (value == null) { throw new NullPointerException(); }
       storePassword_ = value;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
@@ -1400,8 +1355,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearStorePassword() {
-      bitField0_ = (bitField0_ & ~0x00000004);
       storePassword_ = getDefaultInstance().getStorePassword();
+      bitField0_ = (bitField0_ & ~0x00000004);
       onChanged();
       return this;
     }
@@ -1416,12 +1371,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setStorePasswordBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000004;
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       storePassword_ = value;
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
@@ -1490,11 +1443,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setKeyAlias(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
+      if (value == null) { throw new NullPointerException(); }
       keyAlias_ = value;
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -1507,8 +1458,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearKeyAlias() {
-      bitField0_ = (bitField0_ & ~0x00000008);
       keyAlias_ = getDefaultInstance().getKeyAlias();
+      bitField0_ = (bitField0_ & ~0x00000008);
       onChanged();
       return this;
     }
@@ -1523,12 +1474,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setKeyAliasBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000008;
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       keyAlias_ = value;
+      bitField0_ |= 0x00000008;
       onChanged();
       return this;
     }
@@ -1597,11 +1546,9 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setKeyPassword(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000010;
+      if (value == null) { throw new NullPointerException(); }
       keyPassword_ = value;
+      bitField0_ |= 0x00000010;
       onChanged();
       return this;
     }
@@ -1614,8 +1561,8 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearKeyPassword() {
-      bitField0_ = (bitField0_ & ~0x00000010);
       keyPassword_ = getDefaultInstance().getKeyPassword();
+      bitField0_ = (bitField0_ & ~0x00000010);
       onChanged();
       return this;
     }
@@ -1630,12 +1577,10 @@ private static final long serialVersionUID = 0L;
      */
     public Builder setKeyPasswordBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      bitField0_ |= 0x00000010;
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       keyPassword_ = value;
+      bitField0_ |= 0x00000010;
       onChanged();
       return this;
     }
@@ -1675,8 +1620,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setEnableV1Signing(boolean value) {
-      bitField0_ |= 0x00000020;
+
       enableV1Signing_ = value;
+      bitField0_ |= 0x00000020;
       onChanged();
       return this;
     }
@@ -1730,8 +1676,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setEnableV2Signing(boolean value) {
-      bitField0_ |= 0x00000040;
+
       enableV2Signing_ = value;
+      bitField0_ |= 0x00000040;
       onChanged();
       return this;
     }
@@ -1785,8 +1732,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setEnableV3Signing(boolean value) {
-      bitField0_ |= 0x00000080;
+
       enableV3Signing_ = value;
+      bitField0_ |= 0x00000080;
       onChanged();
       return this;
     }
@@ -1840,8 +1788,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setEnableV4Signing(boolean value) {
-      bitField0_ |= 0x00000100;
+
       enableV4Signing_ = value;
+      bitField0_ |= 0x00000100;
       onChanged();
       return this;
     }
@@ -1885,8 +1834,9 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setIsSigningReady(boolean value) {
-      
+
       isSigningReady_ = value;
+      bitField0_ |= 0x00000200;
       onChanged();
       return this;
     }
@@ -1900,7 +1850,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder clearIsSigningReady() {
-      
+      bitField0_ = (bitField0_ & ~0x00000200);
       isSigningReady_ = false;
       onChanged();
       return this;
