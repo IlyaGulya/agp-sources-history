@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.builder.model.v2.ide
-
-import com.android.builder.model.v2.AndroidModel
-import java.io.File
+package com.android.builder.model.v2.models
 
 /**
- * Basic information about a test suite that is applied to a variant.
+ * Defines all dependencies for a test suite.
+ *
+ * Each test suite can have 1 to many source folders, and each source folder can have its
+ * own set of dependencies. Use [TestSuiteSource.name] and [BaseTestSuiteSourceIdentity.name] to
+ * match sources and sources dependencies.
  */
-interface BasicTestSuiteArtifact: AndroidModel {
+interface TestSuiteDependencies {
 
-    val testSuiteName: String
+    /**
+     * The collection of dependencies per test sources.
+     */
+    val sourcesDependencies: Collection<TestSuiteSourceDependencies>
 }

@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.builder.model.v2.ide
-
-import com.android.builder.model.v2.AndroidModel
-import java.io.File
+package com.android.builder.model.v2.models
 
 /**
- * Basic information about a test suite that is applied to a variant.
+ * Information about a test suite attached to the project.
  */
-interface BasicTestSuiteArtifact: AndroidModel {
+interface BasicTestSuite {
 
-    val testSuiteName: String
+    val name: String
+
+    /**
+     * source folder(s) for this test suite.
+     */
+    val sources: Collection<TestSuiteSource>
 }

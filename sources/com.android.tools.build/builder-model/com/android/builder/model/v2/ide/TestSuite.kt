@@ -17,12 +17,16 @@
 package com.android.builder.model.v2.ide
 
 import com.android.builder.model.v2.AndroidModel
-import java.io.File
 
-/**
- * Basic information about a test suite that is applied to a variant.
- */
-interface BasicTestSuiteArtifact: AndroidModel {
+interface TestSuite: AndroidModel {
 
-    val testSuiteName: String
+    /**
+     * Name of the test suite.
+     */
+    val name: String
+
+    /**
+     * Configured junit engines for this test suite.
+     */
+    val junitEngineInfo: JUnitEngineInfo
 }

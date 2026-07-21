@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.builder.model.v2.ide
+package com.android.builder.model.v2.models
 
-import com.android.builder.model.v2.AndroidModel
-import java.io.File
+import com.android.builder.model.v2.ide.ArtifactDependenciesAdjacencyList
 
-/**
- * Basic information about a test suite that is applied to a variant.
- */
-interface BasicTestSuiteArtifact: AndroidModel {
+interface TestSuiteSourceDependenciesAdjacencyList: BaseTestSuiteSourceIdentity {
 
-    val testSuiteName: String
+    val artifactDependencies: ArtifactDependenciesAdjacencyList
 }
