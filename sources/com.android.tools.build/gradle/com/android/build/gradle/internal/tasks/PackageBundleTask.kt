@@ -321,11 +321,14 @@ open class PackageBundleTask @Inject constructor(workerExecutor: WorkerExecutor)
                         variantScope.artifacts.getFinalArtifactFiles(InternalArtifactType.APK_MAPPING)
             }
 
-            variantScope.variantConfiguration.signingConfig?.let {
-                task.keystoreFile = it.storeFile
-                task.keystorePassword = it.storePassword
-                task.keyAlias = it.keyAlias
-                task.keyPassword = it.keyPassword
+            // Don't sign debuggable bundles.
+            if (!variantScope.variantConfiguration.buildType.isDebuggable) {
+                variantScope.variantConfiguration.signingConfig?.let {
+                    task.keystoreFile = it.storeFile
+                    task.keystorePassword = it.storePassword
+                    task.keyAlias = it.keyAlias
+                    task.keyPassword = it.keyPassword
+                }
             }
         }
     }
