@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.dsl
+package com.android.build.gradle.api
 
-import com.android.build.api.dsl.BundleStoreArchive
+import org.gradle.api.Incubating
+import org.gradle.api.Plugin
+import org.gradle.api.Project
 
-abstract class BundleOptionsStoreArchive : BundleStoreArchive
+@Incubating
+class FusedLibrariesPlugin: Plugin<Project> {
+    override fun apply(project: Project) {
+        project.apply(mapOf("plugin" to "com.android.internal.fused-libraries"))
+    }
+}
