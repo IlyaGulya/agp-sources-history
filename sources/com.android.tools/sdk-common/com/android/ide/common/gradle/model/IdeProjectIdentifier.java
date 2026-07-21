@@ -13,17 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.projectmodel
 
-/**
- * Entry point for the Android model. It contains a collection of libraries, applications, instant apps, etc.
- *
- * New properties may be added in the future; clients that invoke the constructor are encouraged to
- * use Kotlin named arguments to stay source compatible.
- */
-data class AndroidModel(
-        /**
-         * List of [AndroidProject] that are present in this module.
-         */
-        val projects: List<AndroidProject> = emptyList()
-)
+package com.android.ide.common.gradle.model;
+
+import com.android.builder.model.Dependencies;
+import java.io.Serializable;
+
+public interface IdeProjectIdentifier extends Serializable, Dependencies.ProjectIdentifier {}
