@@ -38,191 +38,6 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private AndroidTarget(
-      com.google.protobuf.CodedInputStream input,
-      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-      throws com.google.protobuf.InvalidProtocolBufferException {
-    this();
-    if (extensionRegistry == null) {
-      throw new java.lang.NullPointerException();
-    }
-    int mutable_bitField0_ = 0;
-    com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-        com.google.protobuf.UnknownFieldSet.newBuilder();
-    try {
-      boolean done = false;
-      while (!done) {
-        int tag = input.readTag();
-        switch (tag) {
-          case 0:
-            done = true;
-            break;
-          case 10: {
-            java.lang.String s = input.readStringRequireUtf8();
-            bitField0_ |= 0x00000001;
-            agpVersion_ = s;
-            break;
-          }
-          case 18: {
-            java.lang.String s = input.readStringRequireUtf8();
-            bitField0_ |= 0x00000002;
-            projectPath_ = s;
-            break;
-          }
-          case 26: {
-            com.android.builder.model.proto.ide.File.Builder subBuilder = null;
-            if (((bitField0_ & 0x00000004) != 0)) {
-              subBuilder = buildDir_.toBuilder();
-            }
-            buildDir_ = input.readMessage(com.android.builder.model.proto.ide.File.parser(), extensionRegistry);
-            if (subBuilder != null) {
-              subBuilder.mergeFrom(buildDir_);
-              buildDir_ = subBuilder.buildPartial();
-            }
-            bitField0_ |= 0x00000004;
-            break;
-          }
-          case 34: {
-            if (!((mutable_bitField0_ & 0x00000008) != 0)) {
-              bootClasspath_ = new java.util.ArrayList<com.android.builder.model.proto.ide.File>();
-              mutable_bitField0_ |= 0x00000008;
-            }
-            bootClasspath_.add(
-                input.readMessage(com.android.builder.model.proto.ide.File.parser(), extensionRegistry));
-            break;
-          }
-          case 42: {
-            com.android.builder.model.proto.ide.TestInfo.Builder subBuilder = null;
-            if (((bitField0_ & 0x00000008) != 0)) {
-              subBuilder = testInfo_.toBuilder();
-            }
-            testInfo_ = input.readMessage(com.android.builder.model.proto.ide.TestInfo.parser(), extensionRegistry);
-            if (subBuilder != null) {
-              subBuilder.mergeFrom(testInfo_);
-              testInfo_ = subBuilder.buildPartial();
-            }
-            bitField0_ |= 0x00000008;
-            break;
-          }
-          case 50: {
-            com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.Builder subBuilder = null;
-            if (((bitField0_ & 0x00000010) != 0)) {
-              subBuilder = flags_.toBuilder();
-            }
-            flags_ = input.readMessage(com.android.builder.model.proto.ide.AndroidGradlePluginProjectFlags.parser(), extensionRegistry);
-            if (subBuilder != null) {
-              subBuilder.mergeFrom(flags_);
-              flags_ = subBuilder.buildPartial();
-            }
-            bitField0_ |= 0x00000010;
-            break;
-          }
-          case 58: {
-            if (!((mutable_bitField0_ & 0x00000040) != 0)) {
-              lintChecksJars_ = new java.util.ArrayList<com.android.builder.model.proto.ide.File>();
-              mutable_bitField0_ |= 0x00000040;
-            }
-            lintChecksJars_.add(
-                input.readMessage(com.android.builder.model.proto.ide.File.parser(), extensionRegistry));
-            break;
-          }
-          case 64: {
-            bitField0_ |= 0x00000020;
-            isCoreLibraryDesugaringEnabled_ = input.readBool();
-            break;
-          }
-          case 74: {
-            if (!((mutable_bitField0_ & 0x00000100) != 0)) {
-              desugarLibConfig_ = new java.util.ArrayList<com.android.builder.model.proto.ide.File>();
-              mutable_bitField0_ |= 0x00000100;
-            }
-            desugarLibConfig_.add(
-                input.readMessage(com.android.builder.model.proto.ide.File.parser(), extensionRegistry));
-            break;
-          }
-          case 82: {
-            java.lang.String s = input.readStringRequireUtf8();
-            bitField0_ |= 0x00000040;
-            groupId_ = s;
-            break;
-          }
-          case 90: {
-            java.lang.String s = input.readStringRequireUtf8();
-            bitField0_ |= 0x00000080;
-            buildToolsVersion_ = s;
-            break;
-          }
-          case 98: {
-            if (!((mutable_bitField0_ & 0x00000800) != 0)) {
-              desugaredMethodsFiles_ = new java.util.ArrayList<com.android.builder.model.proto.ide.File>();
-              mutable_bitField0_ |= 0x00000800;
-            }
-            desugaredMethodsFiles_.add(
-                input.readMessage(com.android.builder.model.proto.ide.File.parser(), extensionRegistry));
-            break;
-          }
-          case 106: {
-            com.android.builder.model.proto.ide.File.Builder subBuilder = null;
-            if (((bitField0_ & 0x00000100) != 0)) {
-              subBuilder = rootBuildId_.toBuilder();
-            }
-            rootBuildId_ = input.readMessage(com.android.builder.model.proto.ide.File.parser(), extensionRegistry);
-            if (subBuilder != null) {
-              subBuilder.mergeFrom(rootBuildId_);
-              rootBuildId_ = subBuilder.buildPartial();
-            }
-            bitField0_ |= 0x00000100;
-            break;
-          }
-          case 114: {
-            com.android.builder.model.proto.ide.File.Builder subBuilder = null;
-            if (((bitField0_ & 0x00000200) != 0)) {
-              subBuilder = buildId_.toBuilder();
-            }
-            buildId_ = input.readMessage(com.android.builder.model.proto.ide.File.parser(), extensionRegistry);
-            if (subBuilder != null) {
-              subBuilder.mergeFrom(buildId_);
-              buildId_ = subBuilder.buildPartial();
-            }
-            bitField0_ |= 0x00000200;
-            break;
-          }
-          case 120: {
-            bitField0_ |= 0x00000400;
-            withJava_ = input.readBool();
-            break;
-          }
-          default: {
-            if (!parseUnknownField(
-                input, unknownFields, extensionRegistry, tag)) {
-              done = true;
-            }
-            break;
-          }
-        }
-      }
-    } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-      throw e.setUnfinishedMessage(this);
-    } catch (java.io.IOException e) {
-      throw new com.google.protobuf.InvalidProtocolBufferException(
-          e).setUnfinishedMessage(this);
-    } finally {
-      if (((mutable_bitField0_ & 0x00000008) != 0)) {
-        bootClasspath_ = java.util.Collections.unmodifiableList(bootClasspath_);
-      }
-      if (((mutable_bitField0_ & 0x00000040) != 0)) {
-        lintChecksJars_ = java.util.Collections.unmodifiableList(lintChecksJars_);
-      }
-      if (((mutable_bitField0_ & 0x00000100) != 0)) {
-        desugarLibConfig_ = java.util.Collections.unmodifiableList(desugarLibConfig_);
-      }
-      if (((mutable_bitField0_ & 0x00000800) != 0)) {
-        desugaredMethodsFiles_ = java.util.Collections.unmodifiableList(desugaredMethodsFiles_);
-      }
-      this.unknownFields = unknownFields.build();
-      makeExtensionsImmutable();
-    }
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_AndroidTarget_descriptor;
@@ -1040,7 +855,7 @@ private static final long serialVersionUID = 0L;
     if (((bitField0_ & 0x00000400) != 0)) {
       output.writeBool(15, withJava_);
     }
-    unknownFields.writeTo(output);
+    getUnknownFields().writeTo(output);
   }
 
   @java.lang.Override
@@ -1105,7 +920,7 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(15, withJava_);
     }
-    size += unknownFields.getSerializedSize();
+    size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
   }
@@ -1183,7 +998,7 @@ private static final long serialVersionUID = 0L;
       if (getWithJava()
           != other.getWithJava()) return false;
     }
-    if (!unknownFields.equals(other.unknownFields)) return false;
+    if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
 
@@ -1256,7 +1071,7 @@ private static final long serialVersionUID = 0L;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getWithJava());
     }
-    hash = (29 * hash) + unknownFields.hashCode();
+    hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
   }
@@ -1410,10 +1225,11 @@ private static final long serialVersionUID = 0L;
       bitField0_ = (bitField0_ & ~0x00000004);
       if (bootClasspathBuilder_ == null) {
         bootClasspath_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000008);
       } else {
+        bootClasspath_ = null;
         bootClasspathBuilder_.clear();
       }
+      bitField0_ = (bitField0_ & ~0x00000008);
       if (testInfoBuilder_ == null) {
         testInfo_ = null;
       } else {
@@ -1428,28 +1244,31 @@ private static final long serialVersionUID = 0L;
       bitField0_ = (bitField0_ & ~0x00000020);
       if (lintChecksJarsBuilder_ == null) {
         lintChecksJars_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000040);
       } else {
+        lintChecksJars_ = null;
         lintChecksJarsBuilder_.clear();
       }
+      bitField0_ = (bitField0_ & ~0x00000040);
       isCoreLibraryDesugaringEnabled_ = false;
       bitField0_ = (bitField0_ & ~0x00000080);
       if (desugarLibConfigBuilder_ == null) {
         desugarLibConfig_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000100);
       } else {
+        desugarLibConfig_ = null;
         desugarLibConfigBuilder_.clear();
       }
+      bitField0_ = (bitField0_ & ~0x00000100);
       groupId_ = "";
       bitField0_ = (bitField0_ & ~0x00000200);
       buildToolsVersion_ = "";
       bitField0_ = (bitField0_ & ~0x00000400);
       if (desugaredMethodsFilesBuilder_ == null) {
         desugaredMethodsFiles_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000800);
       } else {
+        desugaredMethodsFiles_ = null;
         desugaredMethodsFilesBuilder_.clear();
       }
+      bitField0_ = (bitField0_ & ~0x00000800);
       if (rootBuildIdBuilder_ == null) {
         rootBuildId_ = null;
       } else {
@@ -1786,7 +1605,7 @@ private static final long serialVersionUID = 0L;
       if (other.hasWithJava()) {
         setWithJava(other.getWithJava());
       }
-      this.mergeUnknownFields(other.unknownFields);
+      this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
     }
@@ -1801,17 +1620,147 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      com.android.kotlin.multiplatform.models.AndroidTarget parsedMessage = null;
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       try {
-        parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              agpVersion_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000001;
+              break;
+            } // case 10
+            case 18: {
+              projectPath_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000002;
+              break;
+            } // case 18
+            case 26: {
+              input.readMessage(
+                  getBuildDirFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bitField0_ |= 0x00000004;
+              break;
+            } // case 26
+            case 34: {
+              com.android.builder.model.proto.ide.File m =
+                  input.readMessage(
+                      com.android.builder.model.proto.ide.File.parser(),
+                      extensionRegistry);
+              if (bootClasspathBuilder_ == null) {
+                ensureBootClasspathIsMutable();
+                bootClasspath_.add(m);
+              } else {
+                bootClasspathBuilder_.addMessage(m);
+              }
+              break;
+            } // case 34
+            case 42: {
+              input.readMessage(
+                  getTestInfoFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bitField0_ |= 0x00000010;
+              break;
+            } // case 42
+            case 50: {
+              input.readMessage(
+                  getFlagsFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bitField0_ |= 0x00000020;
+              break;
+            } // case 50
+            case 58: {
+              com.android.builder.model.proto.ide.File m =
+                  input.readMessage(
+                      com.android.builder.model.proto.ide.File.parser(),
+                      extensionRegistry);
+              if (lintChecksJarsBuilder_ == null) {
+                ensureLintChecksJarsIsMutable();
+                lintChecksJars_.add(m);
+              } else {
+                lintChecksJarsBuilder_.addMessage(m);
+              }
+              break;
+            } // case 58
+            case 64: {
+              isCoreLibraryDesugaringEnabled_ = input.readBool();
+              bitField0_ |= 0x00000080;
+              break;
+            } // case 64
+            case 74: {
+              com.android.builder.model.proto.ide.File m =
+                  input.readMessage(
+                      com.android.builder.model.proto.ide.File.parser(),
+                      extensionRegistry);
+              if (desugarLibConfigBuilder_ == null) {
+                ensureDesugarLibConfigIsMutable();
+                desugarLibConfig_.add(m);
+              } else {
+                desugarLibConfigBuilder_.addMessage(m);
+              }
+              break;
+            } // case 74
+            case 82: {
+              groupId_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000200;
+              break;
+            } // case 82
+            case 90: {
+              buildToolsVersion_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000400;
+              break;
+            } // case 90
+            case 98: {
+              com.android.builder.model.proto.ide.File m =
+                  input.readMessage(
+                      com.android.builder.model.proto.ide.File.parser(),
+                      extensionRegistry);
+              if (desugaredMethodsFilesBuilder_ == null) {
+                ensureDesugaredMethodsFilesIsMutable();
+                desugaredMethodsFiles_.add(m);
+              } else {
+                desugaredMethodsFilesBuilder_.addMessage(m);
+              }
+              break;
+            } // case 98
+            case 106: {
+              input.readMessage(
+                  getRootBuildIdFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bitField0_ |= 0x00001000;
+              break;
+            } // case 106
+            case 114: {
+              input.readMessage(
+                  getBuildIdFieldBuilder().getBuilder(),
+                  extensionRegistry);
+              bitField0_ |= 0x00002000;
+              break;
+            } // case 114
+            case 120: {
+              withJava_ = input.readBool();
+              bitField0_ |= 0x00004000;
+              break;
+            } // case 120
+            default: {
+              if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                done = true; // was an endgroup tag
+              }
+              break;
+            } // default:
+          } // switch (tag)
+        } // while (!done)
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (com.android.kotlin.multiplatform.models.AndroidTarget) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
-        if (parsedMessage != null) {
-          mergeFrom(parsedMessage);
-        }
-      }
+        onChanged();
+      } // finally
       return this;
     }
     private int bitField0_;
@@ -4513,7 +4462,18 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new AndroidTarget(input, extensionRegistry);
+      Builder builder = newBuilder();
+      try {
+        builder.mergeFrom(input, extensionRegistry);
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(builder.buildPartial());
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(e)
+            .setUnfinishedMessage(builder.buildPartial());
+      }
+      return builder.buildPartial();
     }
   };
 

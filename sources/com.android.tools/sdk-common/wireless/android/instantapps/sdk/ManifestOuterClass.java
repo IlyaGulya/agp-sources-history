@@ -413,104 +413,6 @@ public final class ManifestOuterClass {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private Manifest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              versionCode_ = input.readInt32();
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              versionName_ = s;
-              break;
-            }
-            case 26: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                apks_ = new java.util.ArrayList<wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              apks_.add(
-                  input.readMessage(wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo.parser(), extensionRegistry));
-              break;
-            }
-            case 34: {
-              wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility.Builder subBuilder = null;
-              if (libraryCompatibility_ != null) {
-                subBuilder = libraryCompatibility_.toBuilder();
-              }
-              libraryCompatibility_ = input.readMessage(wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(libraryCompatibility_);
-                libraryCompatibility_ = subBuilder.buildPartial();
-              }
-
-              break;
-            }
-            case 42: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                enabledDevices_ = new java.util.ArrayList<wireless.android.instantapps.sdk.ManifestOuterClass.Device>();
-                mutable_bitField0_ |= 0x00000002;
-              }
-              enabledDevices_.add(
-                  input.readMessage(wireless.android.instantapps.sdk.ManifestOuterClass.Device.parser(), extensionRegistry));
-              break;
-            }
-            case 50: {
-              if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-                gservicesOverrides_ = new java.util.ArrayList<wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride>();
-                mutable_bitField0_ |= 0x00000004;
-              }
-              gservicesOverrides_.add(
-                  input.readMessage(wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride.parser(), extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          apks_ = java.util.Collections.unmodifiableList(apks_);
-        }
-        if (((mutable_bitField0_ & 0x00000002) != 0)) {
-          enabledDevices_ = java.util.Collections.unmodifiableList(enabledDevices_);
-        }
-        if (((mutable_bitField0_ & 0x00000004) != 0)) {
-          gservicesOverrides_ = java.util.Collections.unmodifiableList(gservicesOverrides_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return wireless.android.instantapps.sdk.ManifestOuterClass.internal_static_wireless_android_instantapps_sdk_Manifest_descriptor;
@@ -835,7 +737,7 @@ public final class ManifestOuterClass {
       for (int i = 0; i < gservicesOverrides_.size(); i++) {
         output.writeMessage(6, gservicesOverrides_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -867,7 +769,7 @@ public final class ManifestOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, gservicesOverrides_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -897,7 +799,7 @@ public final class ManifestOuterClass {
           .equals(other.getEnabledDevicesList())) return false;
       if (!getGservicesOverridesList()
           .equals(other.getGservicesOverridesList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -928,7 +830,7 @@ public final class ManifestOuterClass {
         hash = (37 * hash) + GSERVICES_OVERRIDES_FIELD_NUMBER;
         hash = (53 * hash) + getGservicesOverridesList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -1053,21 +955,13 @@ public final class ManifestOuterClass {
 
       // Construct using wireless.android.instantapps.sdk.ManifestOuterClass.Manifest.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getApksFieldBuilder();
-          getEnabledDevicesFieldBuilder();
-          getGservicesOverridesFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -1078,10 +972,11 @@ public final class ManifestOuterClass {
 
         if (apksBuilder_ == null) {
           apks_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          apks_ = null;
           apksBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         if (libraryCompatibilityBuilder_ == null) {
           libraryCompatibility_ = null;
         } else {
@@ -1090,16 +985,18 @@ public final class ManifestOuterClass {
         }
         if (enabledDevicesBuilder_ == null) {
           enabledDevices_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
         } else {
+          enabledDevices_ = null;
           enabledDevicesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000002);
         if (gservicesOverridesBuilder_ == null) {
           gservicesOverrides_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
         } else {
+          gservicesOverrides_ = null;
           gservicesOverridesBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -1297,7 +1194,7 @@ public final class ManifestOuterClass {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -1312,17 +1209,86 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        wireless.android.instantapps.sdk.ManifestOuterClass.Manifest parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                versionCode_ = input.readInt32();
+
+                break;
+              } // case 8
+              case 18: {
+                versionName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo m =
+                    input.readMessage(
+                        wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo.parser(),
+                        extensionRegistry);
+                if (apksBuilder_ == null) {
+                  ensureApksIsMutable();
+                  apks_.add(m);
+                } else {
+                  apksBuilder_.addMessage(m);
+                }
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getLibraryCompatibilityFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 34
+              case 42: {
+                wireless.android.instantapps.sdk.ManifestOuterClass.Device m =
+                    input.readMessage(
+                        wireless.android.instantapps.sdk.ManifestOuterClass.Device.parser(),
+                        extensionRegistry);
+                if (enabledDevicesBuilder_ == null) {
+                  ensureEnabledDevicesIsMutable();
+                  enabledDevices_.add(m);
+                } else {
+                  enabledDevicesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 42
+              case 50: {
+                wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride m =
+                    input.readMessage(
+                        wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride.parser(),
+                        extensionRegistry);
+                if (gservicesOverridesBuilder_ == null) {
+                  ensureGservicesOverridesIsMutable();
+                  gservicesOverrides_.add(m);
+                } else {
+                  gservicesOverridesBuilder_.addMessage(m);
+                }
+                break;
+              } // case 50
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (wireless.android.instantapps.sdk.ManifestOuterClass.Manifest) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -2589,7 +2555,18 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Manifest(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -2758,92 +2735,6 @@ public final class ManifestOuterClass {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private Device(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              manufacturer_ = s;
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              androidDevice_ = s;
-              break;
-            }
-            case 24: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                sdkInt_ = newIntList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              sdkInt_.addInt(input.readInt32());
-              break;
-            }
-            case 26: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000001) != 0) && input.getBytesUntilLimit() > 0) {
-                sdkInt_ = newIntList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                sdkInt_.addInt(input.readInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              product_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              hardware_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          sdkInt_.makeImmutable(); // C
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -3116,7 +3007,7 @@ public final class ManifestOuterClass {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(hardware_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, hardware_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -3151,7 +3042,7 @@ public final class ManifestOuterClass {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(hardware_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, hardware_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -3176,7 +3067,7 @@ public final class ManifestOuterClass {
           .equals(other.getProduct())) return false;
       if (!getHardware()
           .equals(other.getHardware())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -3199,7 +3090,7 @@ public final class ManifestOuterClass {
       hash = (53 * hash) + getProduct().hashCode();
       hash = (37 * hash) + HARDWARE_FIELD_NUMBER;
       hash = (53 * hash) + getHardware().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -3321,18 +3212,13 @@ public final class ManifestOuterClass {
 
       // Construct using wireless.android.instantapps.sdk.ManifestOuterClass.Device.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -3457,7 +3343,7 @@ public final class ManifestOuterClass {
           hardware_ = other.hardware_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -3472,17 +3358,66 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        wireless.android.instantapps.sdk.ManifestOuterClass.Device parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                manufacturer_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                androidDevice_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 24: {
+                int v = input.readInt32();
+                ensureSdkIntIsMutable();
+                sdkInt_.addInt(v);
+                break;
+              } // case 24
+              case 26: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureSdkIntIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  sdkInt_.addInt(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 26
+              case 34: {
+                product_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 42: {
+                hardware_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (wireless.android.instantapps.sdk.ManifestOuterClass.Device) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -4010,7 +3945,18 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Device(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -4151,68 +4097,6 @@ public final class ManifestOuterClass {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private GservicesOverride(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                device_ = new java.util.ArrayList<wireless.android.instantapps.sdk.ManifestOuterClass.Device>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              device_.add(
-                  input.readMessage(wireless.android.instantapps.sdk.ManifestOuterClass.Device.parser(), extensionRegistry));
-              break;
-            }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              key_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              value_ = s;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          device_ = java.util.Collections.unmodifiableList(device_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -4402,7 +4286,7 @@ public final class ManifestOuterClass {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(value_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, value_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -4421,7 +4305,7 @@ public final class ManifestOuterClass {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(value_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, value_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -4442,7 +4326,7 @@ public final class ManifestOuterClass {
           .equals(other.getKey())) return false;
       if (!getValue()
           .equals(other.getValue())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -4461,7 +4345,7 @@ public final class ManifestOuterClass {
       hash = (53 * hash) + getKey().hashCode();
       hash = (37 * hash) + VALUE_FIELD_NUMBER;
       hash = (53 * hash) + getValue().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -4582,29 +4466,24 @@ public final class ManifestOuterClass {
 
       // Construct using wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getDeviceFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (deviceBuilder_ == null) {
           device_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          device_ = null;
           deviceBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         key_ = "";
 
         value_ = "";
@@ -4729,7 +4608,7 @@ public final class ManifestOuterClass {
           value_ = other.value_;
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -4744,17 +4623,53 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                wireless.android.instantapps.sdk.ManifestOuterClass.Device m =
+                    input.readMessage(
+                        wireless.android.instantapps.sdk.ManifestOuterClass.Device.parser(),
+                        extensionRegistry);
+                if (deviceBuilder_ == null) {
+                  ensureDeviceIsMutable();
+                  device_.add(m);
+                } else {
+                  deviceBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              case 18: {
+                key_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                value_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -5295,7 +5210,18 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new GservicesOverride(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -5406,61 +5332,6 @@ public final class ManifestOuterClass {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private LibraryCompatibility(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              aiaCompatApiMinVersion_ = input.readInt32();
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                gcoreCompat_ = new java.util.ArrayList<wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              gcoreCompat_.add(
-                  input.readMessage(wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility.parser(), extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          gcoreCompat_ = java.util.Collections.unmodifiableList(gcoreCompat_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return wireless.android.instantapps.sdk.ManifestOuterClass.internal_static_wireless_android_instantapps_sdk_LibraryCompatibility_descriptor;
@@ -5569,7 +5440,7 @@ public final class ManifestOuterClass {
       for (int i = 0; i < gcoreCompat_.size(); i++) {
         output.writeMessage(2, gcoreCompat_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -5586,7 +5457,7 @@ public final class ManifestOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, gcoreCompat_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -5605,7 +5476,7 @@ public final class ManifestOuterClass {
           != other.getAiaCompatApiMinVersion()) return false;
       if (!getGcoreCompatList()
           .equals(other.getGcoreCompatList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -5622,7 +5493,7 @@ public final class ManifestOuterClass {
         hash = (37 * hash) + GCORE_COMPAT_FIELD_NUMBER;
         hash = (53 * hash) + getGcoreCompatList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -5744,19 +5615,13 @@ public final class ManifestOuterClass {
 
       // Construct using wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getGcoreCompatFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -5765,10 +5630,11 @@ public final class ManifestOuterClass {
 
         if (gcoreCompatBuilder_ == null) {
           gcoreCompat_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          gcoreCompat_ = null;
           gcoreCompatBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -5883,7 +5749,7 @@ public final class ManifestOuterClass {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -5898,17 +5764,48 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                aiaCompatApiMinVersion_ = input.readInt32();
+
+                break;
+              } // case 8
+              case 18: {
+                wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility m =
+                    input.readMessage(
+                        wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility.parser(),
+                        extensionRegistry);
+                if (gcoreCompatBuilder_ == null) {
+                  ensureGcoreCompatIsMutable();
+                  gcoreCompat_.add(m);
+                } else {
+                  gcoreCompatBuilder_.addMessage(m);
+                }
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (wireless.android.instantapps.sdk.ManifestOuterClass.LibraryCompatibility) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -6300,7 +6197,18 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new LibraryCompatibility(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -6389,54 +6297,6 @@ public final class ManifestOuterClass {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private GcoreLibraryCompatibility(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              name_ = s;
-              break;
-            }
-            case 16: {
-
-              minimumVersion_ = input.readInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -6536,7 +6396,7 @@ public final class ManifestOuterClass {
       if (minimumVersion_ != 0) {
         output.writeInt32(2, minimumVersion_);
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -6552,7 +6412,7 @@ public final class ManifestOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, minimumVersion_);
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -6571,7 +6431,7 @@ public final class ManifestOuterClass {
           .equals(other.getName())) return false;
       if (getMinimumVersion()
           != other.getMinimumVersion()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -6586,7 +6446,7 @@ public final class ManifestOuterClass {
       hash = (53 * hash) + getName().hashCode();
       hash = (37 * hash) + MINIMUM_VERSION_FIELD_NUMBER;
       hash = (53 * hash) + getMinimumVersion();
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -6707,18 +6567,13 @@ public final class ManifestOuterClass {
 
       // Construct using wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -6810,7 +6665,7 @@ public final class ManifestOuterClass {
         if (other.getMinimumVersion() != 0) {
           setMinimumVersion(other.getMinimumVersion());
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -6825,17 +6680,40 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                minimumVersion_ = input.readInt32();
+
+                break;
+              } // case 16
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (wireless.android.instantapps.sdk.ManifestOuterClass.GcoreLibraryCompatibility) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
 
@@ -7021,7 +6899,18 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new GcoreLibraryCompatibility(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -7198,97 +7087,6 @@ public final class ManifestOuterClass {
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
-    }
-    private ApkVersionInfo(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              path_ = s;
-              break;
-            }
-            case 16: {
-              int rawValue = input.readEnum();
-
-              arch_ = rawValue;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              packageName_ = s;
-              break;
-            }
-            case 32: {
-
-              versionCode_ = input.readInt32();
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              versionName_ = s;
-              break;
-            }
-            case 48: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                sdkInt_ = newIntList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              sdkInt_.addInt(input.readInt32());
-              break;
-            }
-            case 50: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000001) != 0) && input.getBytesUntilLimit() > 0) {
-                sdkInt_ = newIntList();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                sdkInt_.addInt(input.readInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          sdkInt_.makeImmutable(); // C
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
@@ -7560,7 +7358,7 @@ public final class ManifestOuterClass {
       for (int i = 0; i < sdkInt_.size(); i++) {
         output.writeInt32NoTag(sdkInt_.getInt(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -7600,7 +7398,7 @@ public final class ManifestOuterClass {
         }
         sdkIntMemoizedSerializedSize = dataSize;
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -7626,7 +7424,7 @@ public final class ManifestOuterClass {
           .equals(other.getVersionName())) return false;
       if (!getSdkIntList()
           .equals(other.getSdkIntList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -7651,7 +7449,7 @@ public final class ManifestOuterClass {
         hash = (37 * hash) + SDK_INT_FIELD_NUMBER;
         hash = (53 * hash) + getSdkIntList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -7772,18 +7570,13 @@ public final class ManifestOuterClass {
 
       // Construct using wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
@@ -7913,7 +7706,7 @@ public final class ManifestOuterClass {
           }
           onChanged();
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -7928,17 +7721,71 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                path_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                arch_ = input.readEnum();
+
+                break;
+              } // case 16
+              case 26: {
+                packageName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 32: {
+                versionCode_ = input.readInt32();
+
+                break;
+              } // case 32
+              case 42: {
+                versionName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 48: {
+                int v = input.readInt32();
+                ensureSdkIntIsMutable();
+                sdkInt_.addInt(v);
+                break;
+              } // case 48
+              case 50: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureSdkIntIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  sdkInt_.addInt(input.readInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 50
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (wireless.android.instantapps.sdk.ManifestOuterClass.ApkVersionInfo) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -8487,7 +8334,18 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new ApkVersionInfo(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -8567,56 +8425,6 @@ public final class ManifestOuterClass {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private GservicesOverridesList(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                override_ = new java.util.ArrayList<wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              override_.add(
-                  input.readMessage(wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride.parser(), extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          override_ = java.util.Collections.unmodifiableList(override_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return wireless.android.instantapps.sdk.ManifestOuterClass.internal_static_wireless_android_instantapps_sdk_GservicesOverridesList_descriptor;
@@ -8687,7 +8495,7 @@ public final class ManifestOuterClass {
       for (int i = 0; i < override_.size(); i++) {
         output.writeMessage(1, override_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -8700,7 +8508,7 @@ public final class ManifestOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, override_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -8717,7 +8525,7 @@ public final class ManifestOuterClass {
 
       if (!getOverrideList()
           .equals(other.getOverrideList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -8732,7 +8540,7 @@ public final class ManifestOuterClass {
         hash = (37 * hash) + OVERRIDE_FIELD_NUMBER;
         hash = (53 * hash) + getOverrideList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -8853,29 +8661,24 @@ public final class ManifestOuterClass {
 
       // Construct using wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverridesList.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getOverrideFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (overrideBuilder_ == null) {
           override_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          override_ = null;
           overrideBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -8986,7 +8789,7 @@ public final class ManifestOuterClass {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -9001,17 +8804,43 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverridesList parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride m =
+                    input.readMessage(
+                        wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverride.parser(),
+                        extensionRegistry);
+                if (overrideBuilder_ == null) {
+                  ensureOverrideIsMutable();
+                  override_.add(m);
+                } else {
+                  overrideBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (wireless.android.instantapps.sdk.ManifestOuterClass.GservicesOverridesList) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -9288,7 +9117,18 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new GservicesOverridesList(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
@@ -9368,56 +9208,6 @@ public final class ManifestOuterClass {
     getUnknownFields() {
       return this.unknownFields;
     }
-    private EnabledDevicesList(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                device_ = new java.util.ArrayList<wireless.android.instantapps.sdk.ManifestOuterClass.Device>();
-                mutable_bitField0_ |= 0x00000001;
-              }
-              device_.add(
-                  input.readMessage(wireless.android.instantapps.sdk.ManifestOuterClass.Device.parser(), extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          device_ = java.util.Collections.unmodifiableList(device_);
-        }
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return wireless.android.instantapps.sdk.ManifestOuterClass.internal_static_wireless_android_instantapps_sdk_EnabledDevicesList_descriptor;
@@ -9488,7 +9278,7 @@ public final class ManifestOuterClass {
       for (int i = 0; i < device_.size(); i++) {
         output.writeMessage(1, device_.get(i));
       }
-      unknownFields.writeTo(output);
+      getUnknownFields().writeTo(output);
     }
 
     @java.lang.Override
@@ -9501,7 +9291,7 @@ public final class ManifestOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, device_.get(i));
       }
-      size += unknownFields.getSerializedSize();
+      size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
     }
@@ -9518,7 +9308,7 @@ public final class ManifestOuterClass {
 
       if (!getDeviceList()
           .equals(other.getDeviceList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
 
@@ -9533,7 +9323,7 @@ public final class ManifestOuterClass {
         hash = (37 * hash) + DEVICE_FIELD_NUMBER;
         hash = (53 * hash) + getDeviceList().hashCode();
       }
-      hash = (29 * hash) + unknownFields.hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
     }
@@ -9654,29 +9444,24 @@ public final class ManifestOuterClass {
 
       // Construct using wireless.android.instantapps.sdk.ManifestOuterClass.EnabledDevicesList.newBuilder()
       private Builder() {
-        maybeForceBuilderInitialization();
+
       }
 
       private Builder(
           com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-          getDeviceFieldBuilder();
-        }
+
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
         if (deviceBuilder_ == null) {
           device_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
+          device_ = null;
           deviceBuilder_.clear();
         }
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -9787,7 +9572,7 @@ public final class ManifestOuterClass {
             }
           }
         }
-        this.mergeUnknownFields(other.unknownFields);
+        this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
       }
@@ -9802,17 +9587,43 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        wireless.android.instantapps.sdk.ManifestOuterClass.EnabledDevicesList parsedMessage = null;
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
         try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                wireless.android.instantapps.sdk.ManifestOuterClass.Device m =
+                    input.readMessage(
+                        wireless.android.instantapps.sdk.ManifestOuterClass.Device.parser(),
+                        extensionRegistry);
+                if (deviceBuilder_ == null) {
+                  ensureDeviceIsMutable();
+                  device_.add(m);
+                } else {
+                  deviceBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (wireless.android.instantapps.sdk.ManifestOuterClass.EnabledDevicesList) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
+          onChanged();
+        } // finally
         return this;
       }
       private int bitField0_;
@@ -10089,7 +9900,18 @@ public final class ManifestOuterClass {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new EnabledDevicesList(input, extensionRegistry);
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
       }
     };
 
