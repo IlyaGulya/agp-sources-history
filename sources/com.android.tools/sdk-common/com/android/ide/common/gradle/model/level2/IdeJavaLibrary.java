@@ -101,12 +101,6 @@ public final class IdeJavaLibrary extends IdeModel implements Library {
 
     @Override
     @NonNull
-    public String getCompileJarFile() {
-        throw unsupportedMethodForJavaLibrary("getCompileJarFile");
-    }
-
-    @Override
-    @NonNull
     public String getResFolder() {
         throw unsupportedMethodForJavaLibrary("getResFolder");
     }
