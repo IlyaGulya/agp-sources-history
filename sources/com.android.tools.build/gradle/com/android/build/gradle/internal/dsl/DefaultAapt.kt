@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.build.api.variant
+package com.android.build.gradle.internal.dsl
 
-import com.android.build.api.dsl.Lint
+import com.android.build.api.variant.Aapt2
+import org.gradle.api.file.RegularFile
+import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 
-interface LintLifecycleExtension: DslLifecycle<Lint>
+class DefaultAapt(
+    @get:Internal
+    override val executable: Provider<RegularFile>,
+    @get:Input
+    override val version: Provider<String>
+) : Aapt2
+
