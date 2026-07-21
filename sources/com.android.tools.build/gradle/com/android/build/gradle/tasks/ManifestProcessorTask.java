@@ -30,6 +30,8 @@ import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
 
 /**
  * A task that processes the manifest
@@ -55,6 +57,7 @@ public abstract class ManifestProcessorTask extends IncrementalTask {
     protected BuildableArtifact checkManifestResult;
 
     @InputFiles
+    @PathSensitive(PathSensitivity.NONE)
     @Optional
     public BuildableArtifact getCheckManifestResult() {
         return checkManifestResult;
