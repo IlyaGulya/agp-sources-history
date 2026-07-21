@@ -133,8 +133,9 @@ public final class SdkConstants {
     /** An SDK Project's AndroidManifest.xml file */
     public static final String FN_ANDROID_MANIFEST_XML = "AndroidManifest.xml";
 
-    public static final String FN_SHARED_LIBRARY_ANDROID_MANIFEST_XML =
+    public static final String FN_NAMESPACED_SHARED_LIBRARY_ANDROID_MANIFEST_XML =
             "SharedLibraryAndroidManifest.xml";
+
     /** pre-dex jar filename. i.e. "classes.jar" */
     public static final String FN_CLASSES_JAR = "classes.jar";
     /** api.jar filename */
@@ -1269,6 +1270,7 @@ public final class SdkConstants {
 
     // Tags: Drawables
     public static final String TAG_ANIMATION_LIST = "animation-list";
+    public static final String TAG_ANIMATED_IMAGE = "animated-image";
     public static final String TAG_ANIMATED_SELECTOR = "animated-selector";
     public static final String TAG_ANIMATED_VECTOR = "animated-vector";
     public static final String TAG_BITMAP = "bitmap";
@@ -2881,7 +2883,7 @@ public final class SdkConstants {
      * Studio product. It need not actually be the latest version of Gradle, but it will most likely
      * be fairly recent.
      */
-    public static final String GRADLE_LATEST_VERSION = "8.8";
+    public static final String GRADLE_LATEST_VERSION = "8.9";
 
     /**
      * The minimum released version of the Android Gradle Plugin that this version of Studio will
@@ -2906,7 +2908,7 @@ public final class SdkConstants {
      * The version of NDK to use as default. If no specific version of NDK is specified in
      * build.gradle then this is the version that will be used.
      */
-    public static final String NDK_DEFAULT_VERSION = "26.1.10909125";
+    public static final String NDK_DEFAULT_VERSION = "27.0.12077973";
 
     /** use api or implementation */
     @Deprecated public static final String GRADLE_COMPILE_CONFIGURATION = "compile";
