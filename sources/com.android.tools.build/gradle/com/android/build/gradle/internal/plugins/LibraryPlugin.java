@@ -40,6 +40,7 @@ import com.android.build.gradle.internal.dsl.BuildType;
 import com.android.build.gradle.internal.dsl.DeclarativeLibraryExtensionImpl;
 import com.android.build.gradle.internal.dsl.DeclarativeServices;
 import com.android.build.gradle.internal.dsl.DefaultConfig;
+import com.android.build.gradle.internal.dsl.DslBindingUtils;
 import com.android.build.gradle.internal.dsl.LibraryDeclarativeDefinitionImpl;
 import com.android.build.gradle.internal.dsl.LibraryExtensionImpl;
 import com.android.build.gradle.internal.dsl.ProductFlavor;
@@ -68,6 +69,9 @@ import org.gradle.api.component.SoftwareComponentFactory;
 import org.gradle.api.configuration.BuildFeatures;
 import org.gradle.api.reflect.TypeOf;
 import org.gradle.build.event.BuildEventsListenerRegistry;
+import org.gradle.features.annotations.BindsProjectType;
+import org.gradle.features.binding.ProjectTypeBinding;
+import org.gradle.features.binding.ProjectTypeBindingBuilder;
 import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 
 import java.util.Collection;
@@ -76,6 +80,7 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 /** Gradle plugin class for 'library' projects. */
+@BindsProjectType(LibraryPlugin.Binding.class)
 public class LibraryPlugin
         extends BasePlugin<
                 LibraryExtension,
@@ -84,6 +89,29 @@ public class LibraryPlugin
                 LibraryVariantDslInfo,
                 LibraryCreationConfig,
                 LibraryVariant> {
+
+    static class Binding implements ProjectTypeBinding {
+        public void bind(ProjectTypeBindingBuilder builder) {
+            builder.bindProjectType(
+                            "androidLibrary",
+                            LibraryDeclarativeDefinition.class,
+                            (context, definition, buildModel) -> {
+                                DeclarativeServices services =
+                                        context.getObjectFactory()
+                                                .newInstance(DeclarativeServices.class);
+                                DeclarativeLibraryExtension extension =
+                                        (DeclarativeLibraryExtension)
+                                                Objects.requireNonNull(services)
+                                                        .getProject()
+                                                        .getExtensions()
+                                                        .getByName("android");
+
+                                DslBindingUtils.copyProperties(definition, extension);
+                            })
+                    .withUnsafeDefinitionImplementationType(LibraryDeclarativeDefinitionImpl.class)
+                    .withUnsafeApplyAction();
+        }
+    }
 
     @Inject
     public LibraryPlugin(

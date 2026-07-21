@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.build.api.variant
+package com.android.sdklib.devices
 
-import org.gradle.features.binding.BuildModel
-
-abstract class AndroidApplicationModuleModel : BuildModel
+/** Represents the environment dimensions for a device, typically used for displayless devices like AI glasses. */
+data class Environment(var width: Int = 0, var height: Int = 0) {
+  fun deepCopy(): Environment = copy()
+}

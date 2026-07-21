@@ -36,7 +36,6 @@ import com.android.build.gradle.internal.computeAbiFromArchitecture
 import com.android.build.gradle.internal.computeAvdName
 import com.android.build.gradle.internal.dsl.ManagedVirtualDevice
 import com.android.build.gradle.internal.initialize
-import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.InternalMultipleArtifactType
 import com.android.build.gradle.internal.services.getBuildService
@@ -403,7 +402,7 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
               .getFinalArtifacts(ScopedArtifact.POST_COMPILATION_CLASSES)
           )
           creationConfig.sourceContainers.forEach { sourceContainer ->
-            fileCollection.from(sourceContainer.suiteSourceClasspath.getRuntimeClasspathArtifacts(AndroidArtifacts.ArtifactType.CLASSES_JAR))
+            fileCollection.from(sourceContainer.suiteSourceClasspath.runtimeClasspath)
             fileCollection.from(
               sourceContainer.artifacts.forScope(ScopedArtifacts.Scope.PROJECT).getFinalArtifacts(ScopedArtifact.POST_COMPILATION_CLASSES)
             )
@@ -608,9 +607,12 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
       // as NO-SOURCE. For Android instrumentation tests, discovery occurs dynamically
       // on the device via 'am instrument' at execution time, which is opaque to Gradle.
       //
-      // We use the test APK directory as a stable, flavor-agnostic "trigger" to ensure
-      // task execution while letting AndroidTestEngine handle the actual test orchestration.
-      task.testDefinitionDirs.from(creationConfig.artifacts.get(SingleArtifact.APK))
+      // We use the output of the AndroidTestDiscoveryTask as a trigger to ensure
+      // task execution only when tests are discovered host-side, while letting
+      // AndroidTestEngine handle the actual test orchestration on-device.
+      task.testDefinitionDirs.from(
+        creationConfig.artifacts.get(com.android.build.gradle.internal.scope.InternalArtifactType.ANDROID_TEST_DISCOVERY_LIST)
+      )
 
       val androidTestEngineVersion = if (Version.IS_AGP_RELEASE_BRANCH) "0.1.0" else "0.1.0-dev"
 
@@ -658,6 +660,7 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
         "android-test.uninstall-after-tests",
         (!globalConfig.services.projectOptions.get(BooleanOption.ANDROID_TEST_LEAVE_APKS_INSTALLED_AFTER_RUN)).toString(),
       )
+      task.engineInputProperties.put("android-test.force-aot-compilation", creationConfig.isForceAotCompilation.toString())
 
       val variantName = creationConfig.mainVariant.name
       var buildTarget: String

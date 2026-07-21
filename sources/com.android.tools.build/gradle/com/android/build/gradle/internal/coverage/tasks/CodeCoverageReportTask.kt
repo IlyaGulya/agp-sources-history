@@ -15,6 +15,7 @@
 
 package com.android.build.gradle.internal.coverage.tasks
 
+import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.coverage.renderer.CodeCoverageReportOrchestrator
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.InternalMultipleArtifactType
@@ -52,6 +53,12 @@ abstract class CodeCoverageReportTask : NonIncrementalGlobalTask() {
   @get:Internal abstract val rootProjectDir: RegularFileProperty
 
   override fun doTaskAction() {
+    if (coverageXmlReports.get().isEmpty()) {
+      LoggerWrapper.getLogger(CodeCoverageReportTask::class.java)
+        .warning("Report aggregation feature is disabled. Task execution is skipped.")
+      return
+    }
+
     val inputDirectories: List<File> = coverageXmlReports.get().map { it.asFile }
 
     val successfulReportGeneration: Boolean =
@@ -67,8 +74,8 @@ abstract class CodeCoverageReportTask : NonIncrementalGlobalTask() {
     }
   }
 
-  class AggregatedCoverageReportCreationAction(creationConfig: GlobalTaskCreationConfig) :
-    BaseCoverageReportCreationAction(creationConfig) {
+  class AggregatedCoverageReportCreationAction(creationConfig: GlobalTaskCreationConfig, isReportAggregationEnabled: Boolean) :
+    BaseCoverageReportCreationAction(creationConfig, isReportAggregationEnabled) {
     override val name = "createAggregatedCoverageReport"
     override val artifactType = InternalMultipleArtifactType.AGGREGATED_CODE_COVERAGE_DATA
 
@@ -87,7 +94,8 @@ abstract class CodeCoverageReportTask : NonIncrementalGlobalTask() {
     }
   }
 
-  class CoverageReportCreationAction(creationConfig: GlobalTaskCreationConfig) : BaseCoverageReportCreationAction(creationConfig) {
+  class CoverageReportCreationAction(creationConfig: GlobalTaskCreationConfig, isReportAggregationEnabled: Boolean) :
+    BaseCoverageReportCreationAction(creationConfig, isReportAggregationEnabled) {
     override val name = "createCoverageReport"
     override val artifactType = InternalMultipleArtifactType.CODE_COVERAGE_DATA
 
@@ -105,7 +113,7 @@ abstract class CodeCoverageReportTask : NonIncrementalGlobalTask() {
     }
   }
 
-  abstract class BaseCoverageReportCreationAction(val creationConfig: GlobalTaskCreationConfig) :
+  abstract class BaseCoverageReportCreationAction(val creationConfig: GlobalTaskCreationConfig, val isReportAggregationEnabled: Boolean) :
     GlobalTaskCreationAction<CodeCoverageReportTask>() {
 
     abstract val artifactType: InternalMultipleArtifactType<Directory>
@@ -114,7 +122,9 @@ abstract class CodeCoverageReportTask : NonIncrementalGlobalTask() {
     override fun configure(task: CodeCoverageReportTask) {
       super.configure(task)
 
-      task.coverageXmlReports.set(creationConfig.globalArtifacts.getAll(artifactType))
+      if (isReportAggregationEnabled) {
+        task.coverageXmlReports.set(creationConfig.globalArtifacts.getAll(artifactType))
+      }
       task.rootProjectName.set(creationConfig.services.projectInfo.rootProjectName)
       task.rootProjectDir.set(creationConfig.services.projectInfo.rootDir)
     }
