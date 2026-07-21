@@ -209,7 +209,6 @@ private fun getDexArchiveBuilder(
                 desugarClasspath =
                 DexArchiveBuilderTaskDelegate.sharedState.getService(dexSpec.dexParams.desugarClasspath).service,
                 coreLibDesugarConfig = dexSpec.dexParams.coreLibDesugarConfig,
-                enableApiModeling = dexSpec.dexParams.enableApiModeling,
                 messageReceiver = messageReceiver
             )
         )

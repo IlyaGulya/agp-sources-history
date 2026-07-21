@@ -85,8 +85,6 @@ abstract class BaseDexingTransform<T : BaseDexingTransform.Parameters> : Transfo
         val libConfiguration: Property<String>
         @get:Input
         val enableGlobalSynthetics: Property<Boolean>
-        @get:Input
-        val enableApiModeling: Property<Boolean>
     }
 
     @get:Inject
@@ -266,7 +264,6 @@ abstract class BaseDexingTransform<T : BaseDexingTransform.Parameters> : Transfo
                     )
                         .also { closer.register(it) },
                     coreLibDesugarConfig = parameters.libConfiguration.orNull,
-                    enableApiModeling = parameters.enableApiModeling.get(),
                     messageReceiver = MessageReceiverImpl(
                         parameters.errorFormat.get(),
                         LoggerFactory.getLogger(BaseDexingTransform::class.java)
@@ -382,8 +379,7 @@ fun getDexingArtifactConfiguration(creationConfig: ApkCreationConfig): DexingArt
                 null
             },
         useJacocoTransformInstrumentation = creationConfig.useJacocoTransformInstrumentation,
-        enableGlobalSynthetics = creationConfig.enableGlobalSynthetics,
-        enableApiModeling = creationConfig.enableApiModeling
+        enableGlobalSynthetics = creationConfig.services.projectOptions[BooleanOption.ENABLE_GLOBAL_SYNTHETICS]
     )
 }
 
@@ -395,7 +391,6 @@ data class DexingArtifactConfiguration(
     private val asmTransformedVariant: String?,
     private val useJacocoTransformInstrumentation: Boolean,
     private val enableGlobalSynthetics: Boolean,
-    private val enableApiModeling: Boolean,
 ) {
 
     // If we want to do desugaring and our minSdk (or the API level of the device we're deploying
@@ -425,7 +420,6 @@ data class DexingArtifactConfiguration(
                     parameters.libConfiguration.set(libConfiguration)
                 }
                 parameters.enableGlobalSynthetics.set(enableGlobalSynthetics)
-                parameters.enableApiModeling.set(enableApiModeling)
             }
             // There are 2 transform flows for DEX:
             //   1. (JACOCO_)CLASSES_DIR -> (JACOCO_)CLASSES -> DEX

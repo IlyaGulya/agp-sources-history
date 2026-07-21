@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:JvmName("AttrNameSplitter")
+package com.android.xml
 
-package com.android.build.gradle.internal.dsl
+/**
+ * Returns the prefix for the qualified name, for example for "android:wrap_content" returns
+ * "android".
+ */
+fun findPrefix(qualifiedName: String) = qualifiedName.substringBefore(':', "")
 
-import com.android.build.api.dsl.LibraryAndroidResources
-import com.android.build.gradle.internal.services.DslServices
-import javax.inject.Inject
-
-abstract class LibraryAndroidResourcesImpl @Inject constructor(dslServices: DslServices) :
-        LibraryAndroidResources, AaptOptions(dslServices) {
-
-}
+/**
+ * Returns the local name for the qualified name, for example for "android:wrap_content" returns
+ * "wrap_content".
+ */
+fun findLocalName(qualifiedName: String) = qualifiedName.substringAfter(':')

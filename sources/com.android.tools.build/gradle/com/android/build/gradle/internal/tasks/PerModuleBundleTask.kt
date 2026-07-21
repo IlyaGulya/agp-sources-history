@@ -335,7 +335,7 @@ abstract class PerModuleBundleTask: NonIncrementalTask() {
                     artifacts.get(InternalArtifactType.DESUGAR_LIB_DEX)
                 )
             }
-            if (creationConfig.enableGlobalSynthetics
+            if (creationConfig.services.projectOptions[BooleanOption.ENABLE_GLOBAL_SYNTHETICS]
                 && creationConfig.dexingCreationConfig.dexingType == DexingType.NATIVE_MULTIDEX
                 && !creationConfig.optimizationCreationConfig.minifiedEnabled) {
                 task.dexFiles.from(

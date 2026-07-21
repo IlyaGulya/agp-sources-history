@@ -58,8 +58,4 @@ interface ApkCreationConfig: ConsumableCreationConfig {
     val packageJacocoRuntime: Boolean
 
     val dexingCreationConfig: DexingCreationConfig
-
-    val enableApiModeling: Boolean
-
-    val enableGlobalSynthetics: Boolean
 }

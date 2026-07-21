@@ -1466,7 +1466,10 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
             //   2. R8 is used and global synthetics are not generated
             //   3. In mono dex and legacy multidex where global synthetics are already merged into
             //      dex files in dex merging tasks
-            if (!creationConfig.getEnableGlobalSynthetics()
+            if (!creationConfig
+                            .getServices()
+                            .getProjectOptions()
+                            .get(BooleanOption.ENABLE_GLOBAL_SYNTHETICS)
                     || creationConfig.getDexingCreationConfig().getDexingType()
                             != DexingType.NATIVE_MULTIDEX
                     || creationConfig.getOptimizationCreationConfig().getMinifiedEnabled()) {

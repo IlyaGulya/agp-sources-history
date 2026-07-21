@@ -17,7 +17,6 @@
 package com.android.build.gradle.tasks
 
 import com.android.build.api.artifact.SingleArtifact
-import com.android.build.api.variant.FilterConfiguration
 import com.android.build.api.variant.VariantOutputConfiguration
 import com.android.build.api.variant.impl.BuiltArtifactsLoaderImpl
 import com.android.build.gradle.internal.component.UnitTestCreationConfig
@@ -31,7 +30,6 @@ import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.buildanalyzer.common.TaskCategory
 import com.google.common.annotations.VisibleForTesting
-import com.google.common.collect.Iterables
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
@@ -153,25 +151,19 @@ abstract class GenerateTestConfig @Inject constructor(objectFactory: ObjectFacto
         @get:Input
         val buildDirectoryPath: String
 
-        @get:Optional
-        @get:Input
-        val targetConfiguration: Collection<FilterConfiguration>?
-
         @get:Input
         val packageNameOfFinalRClass: Provider<String>
 
         init {
             resourceApk = creationConfig.artifacts.get(APK_FOR_LOCAL_TEST)
-
             mergedAssets = creationConfig.mainVariant.artifacts.get(SingleArtifact.ASSETS)
-
-            targetConfiguration = creationConfig.paths.targetFilterConfigurations
             mergedManifest = if (creationConfig.mainVariant.componentType.isApk) {
                 // for application
                 creationConfig.mainVariant.artifacts.get(PACKAGED_MANIFESTS)
             } else {
                 creationConfig.artifacts.get(PACKAGED_MANIFESTS)
             }
+
             packageNameOfFinalRClass = creationConfig.mainVariant.namespace
             buildDirectoryPath =
                     creationConfig.services.projectInfo.buildDirectory.get().asFile.toRelativeString(
@@ -179,14 +171,15 @@ abstract class GenerateTestConfig @Inject constructor(objectFactory: ObjectFacto
         }
 
         fun computeProperties(projectDir: File): TestConfigProperties {
-            val manifestsOutputs = BuiltArtifactsLoaderImpl().load(mergedManifest)
-                    ?: error("Unable to find manifest output")
-            val manifestFile = manifestsOutputs.getMainSplit(targetConfiguration).outputFile
+            val manifestOutput =
+                BuiltArtifactsLoaderImpl().load(mergedManifest)?.getBuiltArtifact(
+                    VariantOutputConfiguration.OutputType.SINGLE
+                ) ?: error("Unable to find manifest output")
 
             return TestConfigProperties(
                 resourceApk?.get()?.asFile?.relativeTo(projectDir)?.toString(),
                 mergedAssets.get().asFile.relativeTo(projectDir).toString(),
-                File(manifestFile).relativeTo(projectDir).toString(),
+                File(manifestOutput.outputFile).relativeTo(projectDir).toString(),
                 packageNameOfFinalRClass.get()
             )
         }

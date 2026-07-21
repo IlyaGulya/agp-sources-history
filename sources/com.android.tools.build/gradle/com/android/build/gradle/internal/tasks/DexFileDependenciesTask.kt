@@ -80,9 +80,6 @@ abstract class DexFileDependenciesTask: NonIncrementalTask() {
     @get:Input
     abstract val libConfiguration: Property<String>
 
-    @get:Input
-    abstract val enableApiModeling: Property<Boolean>
-
     private lateinit var errorFormatMode: SyncOptions.ErrorFormatMode
 
     // TODO: make incremental
@@ -102,7 +99,6 @@ abstract class DexFileDependenciesTask: NonIncrementalTask() {
                 it.outputFile.set(outputDirectory.dir("${index}_${input.name}"))
                 it.errorFormatMode.set(errorFormatMode)
                 it.libConfiguration.set(libConfiguration)
-                it.enableApiModeling.set(enableApiModeling)
                 it.outputGlobalSynthetics.set(outputGlobalSynthetics.dir("${index}_${input.name}"))
             }
         }
@@ -117,7 +113,6 @@ abstract class DexFileDependenciesTask: NonIncrementalTask() {
         abstract val outputFile: DirectoryProperty
         abstract val errorFormatMode: Property<SyncOptions.ErrorFormatMode>
         abstract val libConfiguration: Property<String>
-        abstract val enableApiModeling: Property<Boolean>
         abstract val outputGlobalSynthetics: DirectoryProperty
     }
 
@@ -140,7 +135,6 @@ abstract class DexFileDependenciesTask: NonIncrementalTask() {
                             closer.register(it)
                         },
                         coreLibDesugarConfig = parameters.libConfiguration.orNull,
-                        enableApiModeling = parameters.enableApiModeling.get(),
                         messageReceiver = MessageReceiverImpl(
                             errorFormatMode = parameters.errorFormatMode.get(),
                             logger = Logging.getLogger(DexFileDependenciesWorkerAction::class.java)
@@ -180,7 +174,7 @@ abstract class DexFileDependenciesTask: NonIncrementalTask() {
                 DexFileDependenciesTask::outputDirectory
             ).on(InternalArtifactType.EXTERNAL_FILE_LIB_DEX_ARCHIVES)
 
-            if (creationConfig.enableGlobalSynthetics) {
+            if (creationConfig.services.projectOptions[BooleanOption.ENABLE_GLOBAL_SYNTHETICS]) {
                 creationConfig.artifacts
                     .setInitialProvider(taskProvider, DexFileDependenciesTask::outputGlobalSynthetics)
                     .on(InternalArtifactType.GLOBAL_SYNTHETICS_FILE_LIB)
@@ -242,7 +236,6 @@ abstract class DexFileDependenciesTask: NonIncrementalTask() {
                 // bootclasspath is required by d8 to do API conversion for library desugaring
                 task.bootClasspath.from(creationConfig.global.bootClasspath)
             }
-            task.enableApiModeling.set(creationConfig.enableApiModeling)
 
             task.classpath.disallowChanges()
             task.bootClasspath.disallowChanges()

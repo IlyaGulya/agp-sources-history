@@ -27,7 +27,6 @@ import com.android.build.gradle.internal.errors.DeprecationReporter.DeprecationT
 import com.android.build.gradle.internal.errors.DeprecationReporter.DeprecationTarget.VERSION_9_0
 import com.android.build.gradle.options.Version.VERSION_7_2
 import com.android.build.gradle.options.Version.VERSION_7_3
-import com.android.build.gradle.options.Version.VERSION_8_1
 import com.android.build.gradle.options.Version.VERSION_BEFORE_4_0
 import com.android.builder.model.AndroidProject
 import com.android.builder.model.AndroidProject.PROPERTY_BUILD_MODEL_ONLY
@@ -209,7 +208,7 @@ enum class BooleanOption(
             FeatureStage.Experimental
     ),
 
-
+    PRIVACY_SANDBOX_SDK_SUPPORT("android.experimental.privacysandboxsdk.enable", false, FeatureStage.Experimental),
     PRIVACY_SANDBOX_SDK_REQUIRE_SERVICES(
             "android.experimental.privacysandboxsdk.requireServices", true, FeatureStage.Experimental),
 
@@ -225,6 +224,8 @@ enum class BooleanOption(
         false,
         FeatureStage.Experimental
     ),
+
+    FUSED_LIBRARY_SUPPORT("android.experimental.fusedLibrarySupport", false, FeatureStage.Experimental),
 
     /* ------------------------
      * SOFTLY-ENFORCED FEATURES
@@ -667,15 +668,6 @@ enum class BooleanOption(
             false,
             FeatureStage.Removed(VERSION_7_0, "Desugar tool has been removed from AGP.")
     ),
-
-    PRIVACY_SANDBOX_SDK_SUPPORT(
-        "android.experimental.privacysandboxsdk.enable",
-        false,
-        FeatureStage.Removed(
-            Version.VERSION_8_1,
-            "Privacy Sandbox SDKs are not supported in Android Gradle plugin 8.1.x.\n\n" +
-                    "To build or consume privacy sandbox SDKs, please use Android Gradle plugin 8.2.0-alpha01 or later.")),
-
     ; // end of enums
 
     override val status = stage.status

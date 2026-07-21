@@ -16,11 +16,16 @@
 
 package com.android.build.gradle.internal.dsl
 
-import com.android.build.api.dsl.TestAndroidResources
-import com.android.build.gradle.internal.services.DslServices
-import javax.inject.Inject
+import java.io.File
 
-abstract class TestAndroidResourcesImpl @Inject constructor(dslServices: DslServices) :
-        TestAndroidResources, AaptOptions(dslServices) {
-
+/**
+ * A container for a collection of files that has the capability to add a single existing file
+ * or a group of existing files to the collection
+ *
+ * TODO(b/267309622): Move to gradle-api
+ */
+interface ConfigurableFiles {
+    val files: MutableList<File>
+    fun file(file: Any)
+    fun files(vararg files: Any)
 }

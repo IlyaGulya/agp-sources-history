@@ -20,7 +20,6 @@ import com.android.build.api.variant.SourceDirectories
 import com.android.build.gradle.internal.services.VariantServices
 import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.file.Directory
-import org.gradle.api.file.FileCollection
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.util.PatternFilterable
 import java.io.File
@@ -102,29 +101,24 @@ class FlatSourceDirectoriesImpl(
     /*
      * Internal API that can only be used by the model.
      */
-    override fun variantSourcesForModel(filter: (DirectoryEntry) -> Boolean ): List<File> =
-        variantSourcesFileCollectionForModel(filter).files.toList()
-
-    internal fun variantSourcesFileCollectionForModel(
-        filter: (DirectoryEntry) -> Boolean
-    ): FileCollection {
-        val fileCollection = variantServices.fileCollection()
+    override fun variantSourcesForModel(filter: (DirectoryEntry) -> Boolean ): List<File> {
+        val files = mutableListOf<File>()
         variantSources.get()
             .filter { filter.invoke(it) }
             .forEach {
                 if (it is TaskProviderBasedDirectoryEntryImpl) {
-                    fileCollection.from(it.directoryProvider)
+                    files.add(it.directoryProvider.get().asFile)
                 } else {
-                    fileCollection.from(
-                        it.asFiles(
-                            variantServices.provider {
-                                variantServices.projectInfo.projectDirectory
-                            }
-                        )
+                    val asDirectoryProperties = it.asFiles(
+                      variantServices.provider {
+                          variantServices.projectInfo.projectDirectory
+                      }
                     )
+                    asDirectoryProperties.get().forEach { directory ->
+                        files.add(directory.asFile)
+                    }
                 }
             }
-        fileCollection.disallowChanges()
-        return fileCollection
+        return files
     }
 }

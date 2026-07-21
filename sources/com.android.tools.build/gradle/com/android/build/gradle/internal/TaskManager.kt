@@ -1263,7 +1263,7 @@ abstract class TaskManager(
             separateFileDependenciesDexingTask
         )
 
-        if (creationConfig.enableGlobalSynthetics) {
+        if (creationConfig.services.projectOptions[BooleanOption.ENABLE_GLOBAL_SYNTHETICS]) {
             if (dexingType == DexingType.NATIVE_MULTIDEX) {
                 taskFactory.register(
                     GlobalSyntheticsMergeTask.CreationAction(

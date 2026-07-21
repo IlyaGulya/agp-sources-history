@@ -296,7 +296,7 @@ abstract class DexArchiveBuilderTask : NewIncrementalTask() {
                 taskProvider,
                 DexArchiveBuilderTask::previousRunNumberOfBucketsFile
             ).withName("out").on(InternalArtifactType.DEX_NUMBER_OF_BUCKETS_FILE)
-            if (creationConfig.enableGlobalSynthetics) {
+            if (creationConfig.services.projectOptions[BooleanOption.ENABLE_GLOBAL_SYNTHETICS]) {
                 creationConfig.artifacts.setInitialProvider(
                     taskProvider
                 ) { it.projectOutputs.globalSynthetics }
@@ -373,9 +373,6 @@ abstract class DexArchiveBuilderTask : NewIncrementalTask() {
                 task.dexParams.coreLibDesugarConfig.set(getDesugarLibConfig(creationConfig.services))
             }
 
-            task.dexParams.enableApiModeling.set(creationConfig.enableApiModeling)
-            task.dexParams.enableGlobalSynthetics.set(creationConfig.enableGlobalSynthetics)
-
             if (dexExternalLibsInArtifactTransform) {
                 task.externalLibDexFiles.from(getDexForExternalLibs(task, "jar"))
                 task.externalLibDexFiles.from(getDexForExternalLibs(task, "dir"))
@@ -400,8 +397,8 @@ abstract class DexArchiveBuilderTask : NewIncrementalTask() {
                     this.errorFormat.set(task.dexParams.errorFormatMode)
                     this.enableDesugaring.set(task.dexParams.withDesugaring)
                     this.libConfiguration.set(task.dexParams.coreLibDesugarConfig)
-                    this.enableGlobalSynthetics.set(task.dexParams.enableGlobalSynthetics)
-                    this.enableApiModeling.set(task.dexParams.enableApiModeling)
+                    this.enableGlobalSynthetics.set(
+                        services.projectOptions[BooleanOption.ENABLE_GLOBAL_SYNTHETICS])
                 }
 
                 // Until Gradle provides a better way to run artifact transforms for arbitrary
@@ -493,12 +490,6 @@ abstract class DexParameterInputs {
     abstract val coreLibDesugarConfig: Property<String>
 
     @get:Input
-    abstract val enableGlobalSynthetics: Property<Boolean>
-
-    @get:Input
-    abstract val enableApiModeling: Property<Boolean>
-
-    @get:Input
     abstract val errorFormatMode: Property<SyncOptions.ErrorFormatMode>
 
     fun toDexParameters(): DexParameters {
@@ -509,7 +500,6 @@ abstract class DexParameterInputs {
             desugarBootclasspath = desugarBootclasspath.files.toList(),
             desugarClasspath = desugarClasspath.files.toList(),
             coreLibDesugarConfig = coreLibDesugarConfig.orNull,
-            enableApiModeling = enableApiModeling.get(),
             errorFormatMode = errorFormatMode.get(),
         )
     }

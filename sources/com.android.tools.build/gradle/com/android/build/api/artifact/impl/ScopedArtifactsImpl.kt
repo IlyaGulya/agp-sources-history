@@ -34,14 +34,15 @@ import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
 import java.util.concurrent.atomic.AtomicBoolean
 
 class ScopedArtifactsImpl(
-    private val scopeName: String,
-    private val variantIdentifier: String,
-    private val projectLayout: ProjectLayout,
-    private val fileCollectionCreator: () -> ConfigurableFileCollection,
+    val scopeName: String,
+    val variantIdentifier: String,
+    val projectLayout: ProjectLayout,
+    val fileCollectionCreator: () -> ConfigurableFileCollection,
 ): ScopedArtifacts {
 
     /**
@@ -105,7 +106,7 @@ class ScopedArtifactsImpl(
 
         val artifactsAltered = AtomicBoolean(false)
 
-        private val listOfProviders = mutableListOf(initialScopedContent)
+        val listOfProviders = mutableListOf(initialScopedContent)
         /**
          * Reset the current provider of the artifact the new file collection and make sure the
          * final version points to the new content.
@@ -168,10 +169,10 @@ class ScopedArtifactsImpl(
         getScopedArtifactsContainer(type).finalScopedContent
 
     class ScopedArtifactsOperationImpl<T: Task>(
-        private val scopedArtifacts: ScopedArtifactsImpl,
-        private val taskProvider: TaskProvider<T>,
-        private val projectLayout: ProjectLayout,
-        private val fileCollectionCreator: () -> ConfigurableFileCollection,
+        val scopedArtifacts: ScopedArtifactsImpl,
+        val taskProvider: TaskProvider<T>,
+        val projectLayout: ProjectLayout,
+        val fileCollectionCreator: () -> ConfigurableFileCollection,
     ): ScopedArtifactsOperation<T> {
 
         override fun toAppend(to: ScopedArtifact, with: (T) -> Property<out FileSystemLocation>) {
@@ -181,8 +182,8 @@ class ScopedArtifactsImpl(
             // and sets the output path.
             taskProvider.configure {
                 when (val provider = with(it)) {
-                    is RegularFileProperty -> setContentPath(to, provider, taskProvider.name)
-                    is DirectoryProperty -> setContentPath(to, provider, taskProvider.name)
+                    is RegularFileProperty -> setContentPath(to, provider)
+                    is DirectoryProperty -> setContentPath(to, provider)
                     else -> throw RuntimeException("Only RegularFileProperty or DirectoryProperty" +
                             " instances are supported, got ${provider.javaClass}")
                 }
@@ -218,7 +219,7 @@ class ScopedArtifactsImpl(
                 inputDirectories(task).set(
                     currentScopedContent.getDirectories(projectLayout.projectDirectory)
                 )
-                setContentPath(type, into(task), taskProvider.name)
+                setContentPath(type, into(task))
             }
             resetContentProvider(type, into)
         }
@@ -295,21 +296,21 @@ class ScopedArtifactsImpl(
 
         override fun toReplace(type: ScopedArtifact, into: (T) -> RegularFileProperty) {
             taskProvider.configure { task ->
-                setContentPath(type, into(task), taskProvider.name)
+                setContentPath(type, into(task))
             }
             resetContentProvider(type, into)
+
         }
 
         private fun setContentPath(
             type: ScopedArtifact,
             into: RegularFileProperty,
-            vararg paths: String,
         ) {
             into.set(
                 type.getIntermediateOutputPath(
                     buildDirectory = projectLayout.buildDirectory,
                     variantIdentifier = scopedArtifacts.variantIdentifier,
-                    paths = arrayOf(scopedArtifacts.scopeName, *paths) ,
+                    paths = arrayOf(scopedArtifacts.scopeName) ,
                     forceFilename = type.name().lowercase().plus(".jar")
                 )
             )

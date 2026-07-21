@@ -29,7 +29,6 @@ import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.services.TaskCreationServices
 import com.android.build.gradle.internal.services.getBuildService
-import com.android.build.gradle.internal.services.getLintParallelBuildService
 import com.android.build.gradle.internal.tasks.BuildAnalyzer
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
@@ -147,9 +146,6 @@ abstract class AndroidLintTask : NonIncrementalTask() {
 
     @get:Internal
     abstract val lintFixBuildService: Property<LintFixBuildService>
-
-    @get:Input
-    abstract val checkDependencies: Property<Boolean>
 
     @get:Input
     abstract val checkOnly: ListProperty<String>
@@ -395,11 +391,6 @@ abstract class AndroidLintTask : NonIncrementalTask() {
 
         models.remove(lintModelWriterTaskOutputPath.get())
 
-        check(checkDependencies.get()
-                || models.size == 1 + dynamicFeatureLintModels.files.size) {
-            "Library dependency models should not be an input unless check dependencies is being used."
-        }
-
         arguments += "--lint-model"
         arguments += models.asLintPaths()
 
@@ -461,10 +452,6 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         override val autoFix: Boolean get() = false
         override val lintMode: LintMode get() = LintMode.REPORTING
         override val description: String get() = "Run lint on the ${creationConfig.name} variant"
-        override val checkDependencies: Boolean
-            get() =
-                creationConfig.global.lintOptions.checkDependencies
-                        && !variant.main.componentType.isDynamicFeature
 
         override fun handleProvider(taskProvider: TaskProvider<AndroidLintTask>) {
             registerLintIntermediateArtifacts(
@@ -518,10 +505,6 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         override val autoFix: Boolean get() = true
         override val lintMode: LintMode get() = LintMode.REPORTING
         override val description: String get() = "Fix lint on the ${creationConfig.name} variant"
-        override val checkDependencies: Boolean
-            get() =
-                creationConfig.global.lintOptions.checkDependencies
-                        && !variant.main.componentType.isDynamicFeature
 
         override fun configureOutputSettings(task: AndroidLintTask) {
             task.textReportToStdOut.setDisallowChanges(true)
@@ -541,8 +524,6 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         override val autoFix: Boolean get() = false
         override val lintMode: LintMode get() = LintMode.REPORTING
         override val description: String get() = "Run lint with only the fatal issues enabled on the ${creationConfig.name} variant"
-        override val checkDependencies: Boolean
-            get() = false
 
         override fun handleProvider(taskProvider: TaskProvider<AndroidLintTask>) {
             registerLintIntermediateArtifacts(
@@ -566,10 +547,6 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         override val lintMode: LintMode get() = LintMode.UPDATE_BASELINE
         override val description: String
             get() = "Update the lint baseline using the ${creationConfig.name} variant"
-        override val checkDependencies: Boolean
-            get() =
-                creationConfig.global.lintOptions.checkDependencies
-                        && !variant.main.componentType.isDynamicFeature
 
         override fun configureOutputSettings(task: AndroidLintTask) {
             // do nothing
@@ -583,7 +560,6 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         abstract val fatalOnly: Boolean
         abstract val autoFix: Boolean
         abstract val description: String
-        abstract val checkDependencies: Boolean
         abstract val lintMode: LintMode
 
         final override fun configure(task: AndroidLintTask) {
@@ -625,7 +601,6 @@ abstract class AndroidLintTask : NonIncrementalTask() {
                 task.lintFixBuildService.set(getBuildService(creationConfig.services.buildServiceRegistry))
             }
             task.lintFixBuildService.disallowChanges()
-            task.checkDependencies.setDisallowChanges(checkDependencies)
             task.checkOnly.setDisallowChanges(creationConfig.services.provider {
                 creationConfig.global.lintOptions.checkOnly
             })
@@ -640,7 +615,7 @@ abstract class AndroidLintTask : NonIncrementalTask() {
             val hasDynamicFeatures = creationConfig.global.hasDynamicFeatures
             task.variantInputs.initialize(
                 variant,
-                checkDependencies,
+                checkDependencies = true,
                 warnIfProjectTreatedAsExternalDependency = true,
                 lintMode
             )
@@ -650,93 +625,95 @@ abstract class AndroidLintTask : NonIncrementalTask() {
                 creationConfig.artifacts.get(InternalArtifactType.LINT_PARTIAL_RESULTS)
             }
             task.partialResults.setDisallowChanges(partialResults)
+            val lintModelArtifactType =
+                if (fatalOnly) {
+                    AndroidArtifacts.ArtifactType.LINT_VITAL_LINT_MODEL
+                } else {
+                    AndroidArtifacts.ArtifactType.LINT_MODEL
+                }
+            val lintPartialResultsArtifactType =
+                if (fatalOnly) {
+                    AndroidArtifacts.ArtifactType.LINT_VITAL_PARTIAL_RESULTS
+                } else {
+                    AndroidArtifacts.ArtifactType.LINT_PARTIAL_RESULTS
+                }
             if (hasDynamicFeatures) {
                 task.dynamicFeatureLintModels.from(
                     creationConfig.variantDependencies.getArtifactFileCollection(
                         AndroidArtifacts.ConsumedConfigType.REVERSE_METADATA_VALUES,
                         AndroidArtifacts.ArtifactScope.PROJECT,
-                        if (fatalOnly) {
-                            AndroidArtifacts.ArtifactType.LINT_VITAL_LINT_MODEL
-                        } else {
-                            AndroidArtifacts.ArtifactType.LINT_MODEL
-                        }
+                        lintModelArtifactType
                     )
                 )
                 task.dependencyPartialResults.from(
                     creationConfig.variantDependencies.getArtifactFileCollection(
                         AndroidArtifacts.ConsumedConfigType.REVERSE_METADATA_VALUES,
                         AndroidArtifacts.ArtifactScope.PROJECT,
-                        if (fatalOnly) {
-                            AndroidArtifacts.ArtifactType.LINT_VITAL_PARTIAL_RESULTS
-                        } else {
-                            AndroidArtifacts.ArtifactType.LINT_PARTIAL_RESULTS
-                        }
+                        lintPartialResultsArtifactType
                     )
                 )
             }
             task.dynamicFeatureLintModels.disallowChanges()
-            if (checkDependencies) {
-                task.mainDependencyLintModels.from(
-                    creationConfig.variantDependencies.getArtifactFileCollection(
+            task.mainDependencyLintModels.from(
+                creationConfig.variantDependencies.getArtifactFileCollection(
+                    AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
+                    AndroidArtifacts.ArtifactScope.PROJECT,
+                    lintModelArtifactType
+                )
+            )
+            task.mainDependencyLintModels.from(
+                creationConfig.variantDependencies.getArtifactFileCollection(
+                    AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH,
+                    AndroidArtifacts.ArtifactScope.PROJECT,
+                    lintModelArtifactType
+                )
+            )
+            variant.androidTest?.let {
+                task.androidTestDependencyLintModels.from(
+                    it.variantDependencies.getArtifactFileCollection(
                         AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
                         AndroidArtifacts.ArtifactScope.PROJECT,
-                        AndroidArtifacts.ArtifactType.LINT_MODEL
+                        lintModelArtifactType
                     )
                 )
-                task.mainDependencyLintModels.from(
-                    creationConfig.variantDependencies.getArtifactFileCollection(
+                task.androidTestDependencyLintModels.from(
+                    it.variantDependencies.getArtifactFileCollection(
                         AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH,
                         AndroidArtifacts.ArtifactScope.PROJECT,
-                        AndroidArtifacts.ArtifactType.LINT_MODEL
-                    )
-                )
-                variant.androidTest?.let {
-                    task.androidTestDependencyLintModels.from(
-                        it.variantDependencies.getArtifactFileCollection(
-                            AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
-                            AndroidArtifacts.ArtifactScope.PROJECT,
-                            AndroidArtifacts.ArtifactType.LINT_MODEL
-                        )
-                    )
-                    task.androidTestDependencyLintModels.from(
-                        it.variantDependencies.getArtifactFileCollection(
-                            AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH,
-                            AndroidArtifacts.ArtifactScope.PROJECT,
-                            AndroidArtifacts.ArtifactType.LINT_MODEL
-                        )
-                    )
-                }
-                variant.unitTest?.let {
-                    task.unitTestDependencyLintModels.from(
-                        it.variantDependencies.getArtifactFileCollection(
-                            AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
-                            AndroidArtifacts.ArtifactScope.PROJECT,
-                            AndroidArtifacts.ArtifactType.LINT_MODEL
-                        )
-                    )
-                    task.unitTestDependencyLintModels.from(
-                        it.variantDependencies.getArtifactFileCollection(
-                            AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH,
-                            AndroidArtifacts.ArtifactScope.PROJECT,
-                            AndroidArtifacts.ArtifactType.LINT_MODEL
-                        )
-                    )
-                }
-                task.dependencyPartialResults.from(
-                    creationConfig.variantDependencies.getArtifactFileCollection(
-                        AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
-                        AndroidArtifacts.ArtifactScope.PROJECT,
-                        AndroidArtifacts.ArtifactType.LINT_PARTIAL_RESULTS
-                    )
-                )
-                task.dependencyPartialResults.from(
-                    creationConfig.variantDependencies.getArtifactFileCollection(
-                        AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH,
-                        AndroidArtifacts.ArtifactScope.PROJECT,
-                        AndroidArtifacts.ArtifactType.LINT_PARTIAL_RESULTS
+                        lintModelArtifactType
                     )
                 )
             }
+            variant.unitTest?.let {
+                task.unitTestDependencyLintModels.from(
+                    it.variantDependencies.getArtifactFileCollection(
+                        AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
+                        AndroidArtifacts.ArtifactScope.PROJECT,
+                        lintModelArtifactType
+                    )
+                )
+                task.unitTestDependencyLintModels.from(
+                    it.variantDependencies.getArtifactFileCollection(
+                        AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH,
+                        AndroidArtifacts.ArtifactScope.PROJECT,
+                        lintModelArtifactType
+                    )
+                )
+            }
+            task.dependencyPartialResults.from(
+                creationConfig.variantDependencies.getArtifactFileCollection(
+                    AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
+                    AndroidArtifacts.ArtifactScope.PROJECT,
+                    lintPartialResultsArtifactType
+                )
+            )
+            task.dependencyPartialResults.from(
+                creationConfig.variantDependencies.getArtifactFileCollection(
+                    AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH,
+                    AndroidArtifacts.ArtifactScope.PROJECT,
+                    lintPartialResultsArtifactType
+                )
+            )
             task.mainDependencyLintModels.disallowChanges()
             task.androidTestDependencyLintModels.disallowChanges()
             task.unitTestDependencyLintModels.disallowChanges()
@@ -851,9 +828,6 @@ abstract class AndroidLintTask : NonIncrementalTask() {
         }
         systemPropertyInputs.initialize(project.providers, lintMode)
         environmentVariableInputs.initialize(project.providers, lintMode)
-        this.usesService(
-            services.buildServiceRegistry.getLintParallelBuildService(services.projectOptions)
-        )
     }
 
     fun configureForStandalone(
@@ -885,7 +859,6 @@ abstract class AndroidLintTask : NonIncrementalTask() {
             this.lintFixBuildService.set(getBuildService(taskCreationServices.buildServiceRegistry))
         }
         this.lintFixBuildService.disallowChanges()
-        this.checkDependencies.setDisallowChanges(false)
         this.checkOnly.setDisallowChanges(lintOptions.checkOnly)
         this.lintTool.initialize(taskCreationServices)
         this.projectInputs
@@ -906,7 +879,7 @@ abstract class AndroidLintTask : NonIncrementalTask() {
                 javaPluginExtension,
                 taskCreationServices.projectOptions,
                 fatalOnly,
-                checkDependencies = false,
+                checkDependencies = true,
                 lintMode
             )
         this.lintRuleJars.fromDisallowChanges(customLintChecksConfig)

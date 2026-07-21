@@ -74,7 +74,11 @@ class ClassesClasspathUtils(
             mixedScopeClasses = creationConfig.services.fileCollection()
             dexExternalLibsInArtifactTransform = false
         } else if (enableDexingArtifactTransform) {
-            subProjectsClasses = creationConfig.services.fileCollection()
+            subProjectsClasses =
+                creationConfig
+                    .artifacts
+                    .forScope(InternalScopedArtifacts.InternalScope.SUB_PROJECTS)
+                    .getFinalArtifacts(ScopedArtifact.CLASSES)
             externalLibraryClasses = creationConfig.services.fileCollection()
             mixedScopeClasses = creationConfig.services.fileCollection()
             dexExternalLibsInArtifactTransform = false

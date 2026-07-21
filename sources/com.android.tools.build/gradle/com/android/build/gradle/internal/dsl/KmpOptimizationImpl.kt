@@ -16,11 +16,9 @@
 
 package com.android.build.gradle.internal.dsl
 
-import com.android.build.api.dsl.DynamicFeatureAndroidResources
 import com.android.build.gradle.internal.services.DslServices
 import javax.inject.Inject
 
-abstract class DynamicFeatureAndroidResourcesImpl @Inject constructor(dslServices: DslServices) :
-        DynamicFeatureAndroidResources, AaptOptions(dslServices) {
-
-}
+abstract class KmpOptimizationImpl @Inject constructor(
+    dslService: DslServices
+) : KmpOptimization, OptimizationImpl(dslService)
