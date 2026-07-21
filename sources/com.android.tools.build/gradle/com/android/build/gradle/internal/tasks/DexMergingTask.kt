@@ -272,7 +272,7 @@ abstract class DexMergingTask : NewIncrementalTask() {
             // Shared parameters
             task.sharedParams.dexingType.setDisallowChanges(dexingType)
             task.sharedParams.minSdkVersion.setDisallowChanges(
-                creationConfig.minSdkVersion.getFeatureLevel()
+                creationConfig.minSdkVersionForDexing.getFeatureLevel()
             )
             task.sharedParams.debuggable.setDisallowChanges(creationConfig.debuggable)
             task.sharedParams.errorFormatMode.setDisallowChanges(
@@ -306,7 +306,7 @@ abstract class DexMergingTask : NewIncrementalTask() {
                         ) && libraryScopes.intersect(scopes).isNotEmpty()
                     }
 
-                val bootClasspath = creationConfig.variantScope.bootClasspath
+                val bootClasspath = creationConfig.sdkComponents.bootClasspath
                 task.sharedParams.mainDexListConfig.libraryClasses
                     .from(bootClasspath, libraryClasses).disallowChanges()
             }
@@ -450,18 +450,9 @@ abstract class DexMergingTask : NewIncrementalTask() {
 
                     // Deploy API is either the minSdkVersion or if deploying from the IDE, the API level of
                     // the device we're deploying too.
-                    val targetDeployApi = creationConfig.targetDeployApi.getFeatureLevel()
-
-                    val overrideMinSdkVersion =
-                        if (creationConfig.variantType.isDynamicFeature
-                                && targetDeployApi < AndroidVersion.VersionCodes.LOLLIPOP) {
-                            // Dynamic features can always be built in native multidex mode
-                            // even with minSdkVersion < 21, so for the following
-                            // computation, we consider it to be 21.
-                            21
-                        } else {
-                            targetDeployApi
-                        }
+                    val targetDeployApi = creationConfig.minSdkVersionForDexing.getFeatureLevel()
+                    // We can be in native multidex mode while using 20- value for dexing
+                    val overrideMinSdkVersion = max(21, targetDeployApi)
                     getNumberOfBuckets(minSdkVersion = overrideMinSdkVersion)
                 }
             }

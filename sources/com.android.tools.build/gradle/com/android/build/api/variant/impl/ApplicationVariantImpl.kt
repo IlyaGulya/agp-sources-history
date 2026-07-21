@@ -17,12 +17,11 @@ package com.android.build.api.variant.impl
 
 import com.android.build.api.artifact.MultipleArtifact
 import com.android.build.api.artifact.impl.ArtifactsImpl
-import com.android.build.api.component.Component
-import com.android.build.api.component.TestFixtures
 import com.android.build.api.component.analytics.AnalyticsEnabledApplicationVariant
 import com.android.build.api.component.impl.ApkCreationConfigImpl
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.SdkComponents
 import com.android.build.api.extension.impl.VariantApiOperationsRegistrar
 import com.android.build.api.variant.*
 import com.android.build.gradle.internal.component.ApplicationCreationConfig
@@ -62,6 +61,7 @@ open class ApplicationVariantImpl @Inject constructor(
         transformManager: TransformManager,
         internalServices: VariantPropertiesApiServices,
         taskCreationServices: TaskCreationServices,
+        sdkComponents: SdkComponents,
         globalScope: GlobalScope
 ) : VariantImpl(
     variantBuilder,
@@ -76,6 +76,7 @@ open class ApplicationVariantImpl @Inject constructor(
     transformManager,
     internalServices,
     taskCreationServices,
+    sdkComponents,
     globalScope
 ), ApplicationVariant, ApplicationCreationConfig, HasAndroidTest, HasTestFixtures {
 
@@ -235,8 +236,8 @@ open class ApplicationVariantImpl @Inject constructor(
             ) as T
         }
 
-    override val targetDeployApi: AndroidVersion
-        get() = delegate.targetDeployApi
+    override val minSdkVersionForDexing: AndroidVersion
+        get() = delegate.minSdkVersionForDexing
 
     override fun getNeedsMergedJavaResStream(): Boolean = delegate.getNeedsMergedJavaResStream()
 
