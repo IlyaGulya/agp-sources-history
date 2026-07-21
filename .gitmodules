@@ -1,0 +1,3 @@
+[submodule "generated/protos"]
+	path = generated/protos
+	url = https://github.com/IlyaGulya/agp-proto-sources-history.git
