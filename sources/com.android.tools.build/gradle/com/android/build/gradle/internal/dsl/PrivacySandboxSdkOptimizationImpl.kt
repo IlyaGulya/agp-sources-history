@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.build.api.variant.impl
+package com.android.build.gradle.internal.dsl
 
-import com.android.build.api.component.impl.AndroidTestImpl
+import com.android.build.api.dsl.PrivacySandboxKeepRules
+import com.android.build.api.dsl.PrivacySandboxSdkOptimization
+import com.android.build.gradle.internal.services.DslServices
+import javax.inject.Inject
 
-/**
- * Internal marker interface for [VariantImpl] that potentially has associated device tests,
- * e.g. the androidTest component.
- */
-interface HasDeviceTests {
-    var androidTest: AndroidTestImpl?
-}
+abstract class PrivacySandboxSdkOptimizationImpl: PrivacySandboxSdkOptimization
+
+abstract class PrivacySandboxKeepRulesImpl @Inject constructor(
+    dslService: DslServices
+): PrivacySandboxKeepRules, ConfigurableFilesImpl(dslService)
