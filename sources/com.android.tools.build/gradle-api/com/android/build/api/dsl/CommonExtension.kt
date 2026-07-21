@@ -496,6 +496,7 @@ interface CommonExtension<
      *
      * For more information about the properties you can configure in this block, see [TestOptions].
      */
+    @get:Incubating
     val testOptions: TestOptions
 
     /**
@@ -503,6 +504,7 @@ interface CommonExtension<
      *
      * For more information about the properties you can configure in this block, see [TestOptions].
      */
+    @Incubating
     fun testOptions(action: TestOptions.() -> Unit)
 
     /**

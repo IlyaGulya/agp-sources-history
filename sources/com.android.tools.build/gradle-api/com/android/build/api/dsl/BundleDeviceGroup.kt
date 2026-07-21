@@ -14,9 +14,27 @@
  * limitations under the License.
  */
 
-package com.android.build.api.variant
+package com.android.build.api.dsl
+
+import org.gradle.api.Incubating
 
 /**
- * Configuration-time properties [ComponentBuilder] that produce Test APKs.
+ * DSL object for configuring the App Bundle Device Group options
+ *
+ * This is accessed via [Bundle.deviceGroup]
  */
-interface GeneratesTestApkBuilder: GeneratesApkBuilder { }
+@Incubating
+interface BundleDeviceGroup {
+    @get:Incubating
+    @set:Incubating
+    var enableSplit: Boolean?
+
+    /**
+     * Specifies the default device group name for the bundle. Used for local-testing and generating
+     * universal APKs.
+     *
+     */
+    @get:Incubating
+    @set:Incubating
+    var defaultGroup: String?
+}

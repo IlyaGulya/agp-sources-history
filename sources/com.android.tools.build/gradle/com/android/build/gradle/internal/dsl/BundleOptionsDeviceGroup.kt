@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.build.api.variant
+package com.android.build.gradle.internal.dsl
 
-/**
- * Configuration-time properties [ComponentBuilder] that produce Test APKs.
- */
-interface GeneratesTestApkBuilder: GeneratesApkBuilder { }
+import com.android.build.api.dsl.BundleDeviceGroup
+
+abstract class BundleOptionsDeviceGroup: BundleDeviceGroup
