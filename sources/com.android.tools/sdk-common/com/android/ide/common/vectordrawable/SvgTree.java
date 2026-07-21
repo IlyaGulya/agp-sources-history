@@ -389,7 +389,10 @@ class SvgTree {
         mStyleClassAttributeMap.put(className, attributes);
     }
 
-    @Nullable
+    public boolean containsStyleClass(@NonNull String classname) {
+        return mStyleClassAttributeMap.containsKey(classname);
+    }
+
     public String getStyleClassAttr(@NonNull String classname) {
         return mStyleClassAttributeMap.get(classname);
     }

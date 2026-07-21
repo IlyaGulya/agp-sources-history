@@ -18,6 +18,7 @@ package com.android.builder.profile;
 
 import com.android.annotations.NonNull;
 import com.android.tools.build.gradle.internal.profile.GradleTaskExecutionType;
+import com.android.tools.build.gradle.internal.profile.GradleTransformExecutionType;
 import com.android.utils.PathUtils;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
@@ -317,7 +318,7 @@ public class ChromeTracingProfileConverter {
 
     @NonNull
     private static String transformName(@NonNull GradleBuildProfileSpan span) {
-        return span.getTransform().getTransformClassName();
+        return pretty(GradleTransformExecutionType.forNumber(span.getTransform().getType()));
     }
 
     private static String pretty(Enum theEnum) {

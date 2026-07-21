@@ -17,7 +17,6 @@ package com.android.ide.common.vectordrawable;
 
 import static com.android.ide.common.vectordrawable.VdUtil.parseColorValue;
 import static com.android.utils.DecimalUtils.trimInsignificantZeros;
-import static com.android.utils.XmlUtils.formatFloatValue;
 
 import com.android.SdkConstants;
 import com.android.annotations.NonNull;
@@ -230,9 +229,6 @@ class VdPath extends VdElement {
                     break;
 
                 case 'M':
-                    currentSegmentStartX = mParams[0];
-                    currentSegmentStartY = mParams[1];
-                    //noinspection fallthrough
                 case 'L':
                 case 'T':
                 case 'C':
@@ -240,6 +236,10 @@ class VdPath extends VdElement {
                 case 'Q':
                     currentX = mParams[paramsLen - 2];
                     currentY = mParams[paramsLen - 1];
+                    if (mType == 'M') {
+                        currentSegmentStartX = currentX;
+                        currentSegmentStartY = currentY;
+                    }
 
                     totalTransform.transform(mParams, 0, mParams, 0, paramsLen / 2);
                     break;
@@ -442,23 +442,15 @@ class VdPath extends VdElement {
                 coordinates[i + offset] = (float) doubleArray[i];
             }
         }
-
-        @Override
-        @NonNull
-        public String toString() {
-            StringBuilder result = new StringBuilder();
-            result.append(mType);
-            int i = 0;
-            for (float param : this.mParams) {
-                result.append(i++ % 2 == 0 ? ' ' : ',');
-                result.append(formatFloatValue(param));
-            }
-            return result.toString();
-        }
     }
 
     private void setNameValue(@NonNull String name, @NonNull String value) {
-        if (value.startsWith("@")) {
+        if (value.startsWith(SdkConstants.PREFIX_RESOURCE_REF) && PATH_FILL.equals(name)) {
+            // Ignore the android resource in "android:fillColor" present in the new material icons.
+            value = "#000000";
+        }
+
+        if (value.startsWith(SdkConstants.PREFIX_RESOURCE_REF)) {
             throw new ResourcesNotSupportedException(name, value);
         }
 
