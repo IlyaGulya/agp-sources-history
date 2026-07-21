@@ -31,11 +31,12 @@ import static com.android.build.gradle.internal.publishing.AndroidArtifacts.Arti
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH;
 import static com.android.build.gradle.internal.scope.ArtifactPublishingUtil.publishArtifactToConfiguration;
+import static com.android.build.gradle.internal.scope.CodeShrinker.PROGUARD;
 import static com.android.build.gradle.internal.scope.CodeShrinker.R8;
 import static com.android.build.gradle.options.BooleanOption.ENABLE_D8;
 import static com.android.build.gradle.options.BooleanOption.ENABLE_D8_DESUGARING;
-import static com.android.build.gradle.options.BooleanOption.ENABLE_R8;
 import static com.android.build.gradle.options.BooleanOption.ENABLE_R8_DESUGARING;
+import static com.android.build.gradle.options.OptionalBooleanOption.ENABLE_R8;
 import static com.android.builder.model.AndroidProject.FD_GENERATED;
 import static com.android.builder.model.AndroidProject.FD_OUTPUTS;
 
@@ -350,9 +351,10 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
                     .reportError(
                             Type.GENERIC,
                             new EvalIssueException(
-                                    "Removing unused resources requires unused code shrinking to be turned on. See "
-                                            + "http://d.android.com/r/tools/shrink-resources.html "
-                                            + "for more information."));
+                                    "Removing unused resources requires unused code shrinking to"
+                                        + " be turned on. See "
+                                        + "http://d.android.com/r/tools/shrink-resources.html for"
+                                        + " more information."));
 
             return false;
         }
@@ -395,6 +397,10 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
     @Nullable
     @Override
     public CodeShrinker getCodeShrinker() {
+        if (instantRunBuildContext.isInInstantRunMode()) {
+            return null;
+        }
+
         boolean isTestComponent = getType().isTestComponent();
 
         //noinspection ConstantConditions - getType() will not return null for a testing variant.
@@ -405,9 +411,15 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
         }
 
         CodeShrinker codeShrinker = postProcessingOptions.getCodeShrinker();
-
-        if (codeShrinker != null && globalScope.getProjectOptions().get(ENABLE_R8)) {
-            return CodeShrinker.R8;
+        if (codeShrinker != null) {
+            Boolean enableR8 = globalScope.getProjectOptions().get(ENABLE_R8);
+            if (enableR8 == null) {
+                return codeShrinker;
+            } else if (enableR8) {
+                return R8;
+            } else {
+                return PROGUARD;
+            }
         }
 
         return codeShrinker;

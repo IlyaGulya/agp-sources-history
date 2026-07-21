@@ -3231,22 +3231,12 @@ public abstract class TaskManager {
      * only used by test-only modules. Returns a type of the {@link CodeShrinker} shrinker that was
      * created, or {@code null} if none was created.
      */
-    @Nullable
+    @NonNull
     protected final CodeShrinker doCreateJavaCodeShrinkerTransform(
             @NonNull final VariantScope variantScope,
             @NonNull CodeShrinker codeShrinker,
             @Nullable FileCollection mappingFileCollection) {
         Optional<TaskProvider<TransformTask>> transformTask;
-        if (variantScope.getInstantRunBuildContext().isInInstantRunMode()) {
-            logger.warn(
-                    "{} is disabled for variant {} because it is not compatible with Instant Run. "
-                            + "See http://d.android.com/r/studio-ui/shrink-code-with-ir.html "
-                            + "for details on how to enable a code shrinker that's compatible with "
-                            + "Instant Run.",
-                    codeShrinker.name(),
-                    variantScope.getVariantConfiguration().getFullName());
-            return null;
-        }
 
         CodeShrinker createdShrinker = codeShrinker;
         switch (codeShrinker) {
