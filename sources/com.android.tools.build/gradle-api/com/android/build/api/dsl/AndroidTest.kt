@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,14 @@
 
 package com.android.build.api.dsl
 
+import org.gradle.api.Incubating
+
 /**
- * Packaging options for Dex (Android Dalvik Executable) files in the Android DSL
- *
- * ```
- * android {
- *     packaging {
- *         dex {
- *             useLegacyPackaging = ...
- *         }
- *     }
- * }
- * ```
- *
+ * DSL object on library build type for configurations of the android test component.
  */
-interface DexPackaging {
-    /**
-     * Whether to use the legacy convention of compressing all dex files in the APK. If null, dex
-     * files will be uncompressed when minSdk >= 28.
-     *
-     * This property does not affect dex file compression in APKs produced from app bundles.
-     */
-    var useLegacyPackaging: Boolean?
+@Incubating
+interface AndroidTest {
+
+    /** Enable minification for the android test component */
+    var enableMinification: Boolean
 }
