@@ -155,6 +155,9 @@ public final class SdkConstants {
     public static final String FN_GRADLE_WRAPPER_JAR = "gradle-wrapper.jar"; //$NON-NLS-1$
     /** Name of the framework library, i.e. "android.jar" */
     public static final String FN_FRAMEWORK_LIBRARY = "android.jar"; //$NON-NLS-1$
+    /** Name of the library containing the packages that should be included in the system modules */
+    public static final String FN_CORE_FOR_SYSTEM_MODULES =
+            "core-for-system-modules.jar"; //$NON-NLS-1$
     /** Name of the framework library, i.e. "uiautomator.jar" */
     public static final String FN_UI_AUTOMATOR_LIBRARY = "uiautomator.jar"; //$NON-NLS-1$
     /** Name of the layout attributes, i.e. "attrs.xml" */
@@ -270,6 +273,10 @@ public final class SdkConstants {
     /** adb executable (with extension for the current OS) */
     public static final String FN_ADB =
             "adb" + ext(".exe", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+    /** sqlite3 executable (with extension for the current OS) */
+    public static final String FN_SQLITE3 =
+            "sqlite3" + ext(".exe", ""); // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
     /** emulator executable for the current OS */
     public static final String FN_EMULATOR =
@@ -540,6 +547,13 @@ public final class SdkConstants {
     public static final String FD_SOURCE_GEN = "source";
     /** Name of the generated R.class source folder */
     public static final String FD_RES_CLASS = "r";
+    /** Name of folder where merged XML files are placed before processing by resource compiler. */
+    public static final String FD_MERGED_DOT_DIR = "merged.dir";
+    /**
+     * Name of folder where data-binding stripped merged layout XML files are placed before
+     * processing by resource compiler.
+     */
+    public static final String FD_STRIPPED_DOT_DIR = "stripped.dir";
 
     /** Name of the cache folder in the $HOME/.android. */
     public static final String FD_CACHE = "cache"; //$NON-NLS-1$
@@ -927,9 +941,13 @@ public final class SdkConstants {
 
     /* Compose constants */
     public static final String CLASS_COMPOSE = "androidx.compose.Compose";
+    /** Name of the Compose interoperability view that can be injected in regular XML layouts. */
+    public static final String CLASS_COMPOSE_VIEW = "androidx.compose.ui.platform.ComposeView";
+
     public static final String CLASS_COMPOSE_VIEW_ADAPTER =
-            "androidx.ui.tooling.preview.ComposeViewAdapter";
-    public static final String CLASS_COMPOSE_INSPECTABLE = "androidx.ui.tooling.InspectableKt";
+            "androidx.compose.ui.tooling.preview.ComposeViewAdapter";
+
+    public static final String ATTR_COMPOSABLE_NAME = "composableName";
 
     /**
      * Returns the appropriate name for the 'mksdcard' command, which is 'mksdcard.exe' for Windows
@@ -2785,8 +2803,6 @@ public final class SdkConstants {
 
     public static final String GRADLE_PLUGIN_MINIMUM_VERSION = "1.0.0";
     public static final String GRADLE_PLUGIN_RECOMMENDED_VERSION = "3.3.2";
-    // Temporary - can be removed once the recommended version supports AIA (with splits).
-    public static final String GRADLE_PLUGIN_LATEST_VERSION = GRADLE_PLUGIN_RECOMMENDED_VERSION;
 
     /** use api or implementation */
     @Deprecated public static final String GRADLE_COMPILE_CONFIGURATION = "compile";
