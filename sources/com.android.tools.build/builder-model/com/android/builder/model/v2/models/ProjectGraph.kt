@@ -14,19 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.builder.dexing
+package com.android.builder.model.v2.models
 
-import com.android.ide.common.blame.MessageReceiver
+import com.android.builder.model.v2.AndroidModel
 
-/** Parameters required for dexing (with D8). */
-class DexParameters(
-    val minSdkVersion: Int,
-    val debuggable: Boolean,
-    val dexPerClass: Boolean,
-    val withDesugaring: Boolean,
-    val desugarBootclasspath: com.android.builder.dexing.r8.ClassFileProviderFactory,
-    val desugarClasspath: com.android.builder.dexing.r8.ClassFileProviderFactory,
-    val coreLibDesugarConfig: String?,
-    val enableApiModeling: Boolean,
-    val messageReceiver: MessageReceiver
-)
+interface ProjectGraph : AndroidModel {
+    // Project path -> variant, will contain all reachable projects from the given root and their resolved variants
+    val resolvedVariants: Map<String, String>
+}
