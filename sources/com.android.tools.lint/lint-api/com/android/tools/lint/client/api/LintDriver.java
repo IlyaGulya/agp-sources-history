@@ -2304,7 +2304,8 @@ public class LintDriver {
 
             Configuration configuration = context.getConfiguration();
             if (!configuration.isEnabled(issue)) {
-                if (issue != IssueRegistry.PARSER_ERROR && issue != IssueRegistry.LINT_ERROR) {
+                if (issue != IssueRegistry.PARSER_ERROR && issue != IssueRegistry.LINT_ERROR &&
+                        issue != IssueRegistry.BASELINE) {
                     mDelegate.log(null, "Incorrect detector reported disabled issue %1$s",
                             issue.toString());
                 }
@@ -2481,10 +2482,17 @@ public class LintDriver {
             return mDelegate.findResource(relativePath);
         }
 
+        @SuppressWarnings("deprecation") // forwarding required API
         @Override
         @Nullable
         public File getCacheDir(boolean create) {
             return mDelegate.getCacheDir(create);
+        }
+
+        @Nullable
+        @Override
+        public File getCacheDir(@Nullable String name, boolean create) {
+            return mDelegate.getCacheDir(name, create);
         }
 
         @Override
@@ -2649,6 +2657,12 @@ public class LintDriver {
         @Override
         public URLConnection openConnection(@NonNull URL url) throws IOException {
             return mDelegate.openConnection(url);
+        }
+
+        @Nullable
+        @Override
+        public URLConnection openConnection(@NonNull URL url, int timeout) throws IOException {
+            return mDelegate.openConnection(url, timeout);
         }
 
         @Override
