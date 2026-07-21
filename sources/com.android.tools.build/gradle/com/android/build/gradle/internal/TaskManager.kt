@@ -125,6 +125,8 @@ import com.android.build.gradle.internal.tasks.VerifyLibraryClassesTask
 import com.android.build.gradle.internal.tasks.checkIfR8VersionMatches
 import com.android.build.gradle.internal.tasks.creationconfig.ProceedTestManifestCreationConfig
 import com.android.build.gradle.internal.tasks.creationconfig.ProcessJavaResCreationConfig
+import com.android.build.gradle.internal.tasks.creationconfig.createJavaCompileConfig
+import com.android.build.gradle.internal.tasks.creationconfig.createJavaPreCompileConfig
 import com.android.build.gradle.internal.tasks.databinding.DataBindingCompilerArguments.Companion.createArguments
 import com.android.build.gradle.internal.tasks.databinding.DataBindingGenBaseClassesTask
 import com.android.build.gradle.internal.tasks.databinding.DataBindingMergeDependencyArtifactsTask
@@ -142,6 +144,7 @@ import com.android.build.gradle.internal.tasks.runResourceShrinking
 import com.android.build.gradle.internal.test.AbstractTestDataImpl
 import com.android.build.gradle.internal.transforms.ShrinkAppBundleResourcesTask
 import com.android.build.gradle.internal.transforms.ShrinkResourcesNewShrinkerTask
+import com.android.build.gradle.internal.utils.ANDROID_BUILT_IN_KAPT_PLUGIN_ID
 import com.android.build.gradle.internal.utils.COMPOSE_COMPILER_PLUGIN_ID
 import com.android.build.gradle.internal.utils.KOTLIN_KAPT_PLUGIN_ID
 import com.android.build.gradle.internal.utils.KgpVersion
@@ -958,16 +961,19 @@ abstract class TaskManager(
     protected fun createJavacTask(
             creationConfig: ComponentCreationConfig
     ): TaskProvider<out JavaCompile> {
-        val usingKapt = isKotlinKaptPluginApplied(project)
+        val usingKapt = isKotlinKaptPluginApplied(project) ||
+            project.pluginManager.hasPlugin(ANDROID_BUILT_IN_KAPT_PLUGIN_ID)
         val usingKsp = isKspPluginApplied(project)
-        taskFactory.register(JavaPreCompileTask.CreationAction(creationConfig, usingKapt, usingKsp))
+        val javaPreCompileTaskCreationConfig =
+            createJavaPreCompileConfig(creationConfig, usingKapt, usingKsp)
+        taskFactory.register(JavaPreCompileTask.CreationAction(javaPreCompileTaskCreationConfig))
+        val javaCompileConfig = createJavaCompileConfig(
+            creationConfig,
+            usingKapt
+        )
         val javacTask: TaskProvider<out JavaCompile> =
             taskFactory.register(
-                JavaCompileCreationAction(
-                    creationConfig,
-                    project.objects,
-                    usingKapt
-                )
+                JavaCompileCreationAction(javaCompileConfig)
             )
         creationConfig.attachRegisteredActionsToJavaCompileTask(javacTask)
         postJavacCreation(creationConfig)
