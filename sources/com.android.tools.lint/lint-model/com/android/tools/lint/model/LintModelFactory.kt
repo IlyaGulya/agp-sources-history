@@ -18,7 +18,6 @@ package com.android.tools.lint.model
 
 import com.android.AndroidProjectTypes
 import com.android.builder.model.AaptOptions
-import com.android.builder.model.AndroidArtifact
 import com.android.builder.model.AndroidBundle
 import com.android.builder.model.AndroidLibrary
 import com.android.builder.model.AndroidProject
@@ -26,7 +25,6 @@ import com.android.builder.model.ApiVersion
 import com.android.builder.model.BaseArtifact
 import com.android.builder.model.BuildType
 import com.android.builder.model.ClassField
-import com.android.builder.model.JavaArtifact
 import com.android.builder.model.JavaLibrary
 import com.android.builder.model.Library
 import com.android.builder.model.LintOptions
@@ -38,9 +36,13 @@ import com.android.builder.model.Variant
 import com.android.builder.model.level2.DependencyGraphs
 import com.android.builder.model.level2.GlobalLibraryMap
 import com.android.builder.model.level2.GraphItem
+import com.android.ide.common.gradle.model.IdeAndroidArtifact
 import com.android.ide.common.gradle.model.IdeAndroidProject
+import com.android.ide.common.gradle.model.IdeBaseArtifact
+import com.android.ide.common.gradle.model.IdeJavaArtifact
 import com.android.ide.common.gradle.model.IdeLintOptions
 import com.android.ide.common.gradle.model.IdeMavenCoordinates
+import com.android.ide.common.gradle.model.IdeVariant
 import com.android.ide.common.repository.GradleVersion
 import com.android.sdklib.AndroidVersion
 import com.android.utils.FileUtils
@@ -341,7 +343,7 @@ class LintModelFactory : LintModelModuleLoader {
     }
 
     private fun getDependencies(
-        artifact: BaseArtifact
+        artifact: IdeBaseArtifact
     ): LintModelDependencies {
         val compileItems = ArrayList<LintModelDependency>()
         val packagedItems = ArrayList<LintModelDependency>()
@@ -465,7 +467,7 @@ class LintModelFactory : LintModelModuleLoader {
         }
 
     private fun getArtifact(
-        artifact: AndroidArtifact
+        artifact: IdeAndroidArtifact
     ): LintModelAndroidArtifact {
         return DefaultLintModelAndroidArtifact(
             applicationId = artifact.applicationId,
@@ -477,7 +479,7 @@ class LintModelFactory : LintModelModuleLoader {
     }
 
     private fun getArtifact(
-        artifact: JavaArtifact
+        artifact: IdeJavaArtifact
     ): LintModelJavaArtifact {
         return DefaultLintModelJavaArtifact(
             dependencies = getDependencies(artifact),
@@ -504,7 +506,7 @@ class LintModelFactory : LintModelModuleLoader {
     private fun getVariant(
         module: LintModelModule,
         project: IdeAndroidProject,
-        variant: Variant
+        variant: IdeVariant
     ): LintModelVariant {
         val buildType = getBuildType(project, variant)
         return DefaultLintModelVariant(
@@ -552,14 +554,14 @@ class LintModelFactory : LintModelModuleLoader {
         return variant.mergedFlavor.resourceConfigurations
     }
 
-    private fun getAndroidTestArtifact(variant: Variant): LintModelAndroidArtifact? {
+    private fun getAndroidTestArtifact(variant: IdeVariant): LintModelAndroidArtifact? {
         val artifact = variant.extraAndroidArtifacts.firstOrNull {
             it.name == AndroidProject.ARTIFACT_ANDROID_TEST
         } ?: return null
         return getArtifact(artifact)
     }
 
-    private fun getTestArtifact(variant: Variant): LintModelJavaArtifact? {
+    private fun getTestArtifact(variant: IdeVariant): LintModelJavaArtifact? {
         val artifact = variant.extraJavaArtifacts.firstOrNull {
             it.name == AndroidProject.ARTIFACT_UNIT_TEST
         } ?: return null
@@ -990,7 +992,7 @@ class LintModelFactory : LintModelModuleLoader {
     inner class LazyLintModelVariant(
         override val module: LintModelModule,
         private val project: IdeAndroidProject,
-        private val variant: Variant,
+        private val variant: IdeVariant,
         override val libraryResolver: LintModelLibraryResolver
     ) : LintModelVariant {
         private val buildType = getBuildType(project, variant)

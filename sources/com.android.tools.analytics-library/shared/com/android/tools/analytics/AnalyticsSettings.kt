@@ -448,10 +448,7 @@ class AnalyticsSettingsData {
             channel.truncate(0)
             val outputStream = Channels.newOutputStream(channel)
             val writer = OutputStreamWriter(outputStream)
-
-            // Write out using pre-Java9 date format to let older releases read the file correctly.
-            val datePatternJava8 = "MMM d, y h:mm:ss a"
-            GsonBuilder().setDateFormat(datePatternJava8).create().toJson(this, writer)
+            gson.toJson(this, writer)
             writer.flush()
             outputStream.flush()
           }
