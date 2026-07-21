@@ -38,6 +38,7 @@ import com.android.build.gradle.internal.aapt.AaptGeneration;
 import com.android.build.gradle.internal.aapt.AaptGradleFactory;
 import com.android.build.gradle.internal.core.GradleVariantConfiguration;
 import com.android.build.gradle.internal.dsl.AaptOptions;
+import com.android.build.gradle.internal.dsl.DslAdaptersKt;
 import com.android.build.gradle.internal.incremental.InstantRunBuildContext;
 import com.android.build.gradle.internal.scope.BuildOutput;
 import com.android.build.gradle.internal.scope.BuildOutputs;
@@ -63,8 +64,10 @@ import com.android.builder.internal.aapt.AaptPackageConfig;
 import com.android.builder.internal.aapt.AaptPackageConfig.LibraryInfo;
 import com.android.builder.symbols.IdProvider;
 import com.android.builder.symbols.ResourceDirectoryParser;
+import com.android.builder.symbols.SymbolIo;
 import com.android.builder.symbols.SymbolTable;
 import com.android.builder.symbols.SymbolUtils;
+import com.android.builder.utils.FileCache;
 import com.android.ide.common.blame.MergingLog;
 import com.android.ide.common.blame.MergingLogRewriter;
 import com.android.ide.common.blame.ParsingProcessOutputHandler;
@@ -92,6 +95,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -110,12 +114,10 @@ import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
-import org.gradle.api.tasks.ParallelizableTask;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.tooling.BuildException;
 
-@ParallelizableTask
 @CacheableTask
 public class ProcessAndroidResources extends IncrementalTask {
 
@@ -143,11 +145,9 @@ public class ProcessAndroidResources extends IncrementalTask {
 
     private SplitHandlingPolicy splitHandlingPolicy;
 
-    private boolean enforceUniquePackageName;
-
     private VariantType type;
 
-    @NonNull private AaptGeneration aaptGeneration;
+    private AaptGeneration aaptGeneration;
 
     private boolean debuggable;
 
@@ -172,6 +172,8 @@ public class ProcessAndroidResources extends IncrementalTask {
     private String projectBaseName;
 
     private TaskOutputHolder.TaskOutputType taskInputType;
+
+    @Nullable private FileCache fileCache;
 
     @Input
     public TaskOutputHolder.TaskOutputType getTaskInputType() {
@@ -209,58 +211,21 @@ public class ProcessAndroidResources extends IncrementalTask {
 
     private SplitFactory splitFactory;
 
-    private boolean enableNewResourceProcessing;
+    private boolean bypassAapt;
+    private boolean disableResMergeInLib;
+
+    private FileCollection platformAttrRTxt;
 
     private boolean enableAapt2;
 
     // FIX-ME : make me incremental !
     @Override
-    protected void doFullTaskAction() throws IOException {
+    protected void doFullTaskAction() throws IOException, ExecutionException {
 
         WaitableExecutor executor = WaitableExecutor.useGlobalSharedThreadPool();
 
-        if (buildTargetAbi != null
-                && supportedAbis != null
-                && !supportedAbis.isEmpty()
-                && !supportedAbis.contains(buildTargetAbi)) {
-            getLogger()
-                    .debug(
-                            "Cannot build for "
-                                    + buildTargetAbi
-                                    + " when supportedAbis are "
-                                    + Joiner.on(",").join(supportedAbis));
-            return;
-        }
-
-        // FIX ME : the code below should move to the SplitsDiscoveryTask that should persist
-        // the list of splits and their enabled/disabled state.
-
-        // comply when the IDE restricts the full splits we should produce
-        Density density = Density.getEnum(buildTargetDensity);
-
         List<ApkData> splitsToGenerate =
-                buildTargetAbi == null
-                        ? splitScope.getApkDatas()
-                        : SplitOutputMatcher.computeBestOutput(
-                                splitScope.getApkDatas(),
-                                supportedAbis,
-                                density == null ? -1 : density.getDpiValue(),
-                                Arrays.asList(Strings.nullToEmpty(buildTargetAbi).split(",")));
-
-        if (splitsToGenerate.isEmpty()) {
-            throw new RuntimeException(
-                    "Cannot build for ABI \'"
-                            + buildTargetAbi
-                            + "\'"
-                            + ", no suitable splits configured : "
-                            + Joiner.on(", ")
-                                    .join(
-                                            splitScope
-                                                    .getApkDatas()
-                                                    .stream()
-                                                    .map(ApkData::getFilterName)
-                                                    .collect(Collectors.toList())));
-        }
+                getSplitsToGenerate(splitScope, supportedAbis, buildTargetAbi, buildTargetDensity);
 
         for (ApkData apkData : splitScope.getApkDatas()) {
             if (!splitsToGenerate.contains(apkData)) {
@@ -284,7 +249,7 @@ public class ProcessAndroidResources extends IncrementalTask {
 
         final Set<File> featureResourcePackages = this.featureResourcePackages.getFiles();
 
-        SplitList splitList = SplitList.load(splitListInput);
+        SplitList splitList = isLibrary ? SplitList.EMPTY : SplitList.load(splitListInput);
 
         // do a first pass at the list so we generate the code synchronously since it's required
         // by the full splits asynchronous processing below.
@@ -492,30 +457,40 @@ public class ProcessAndroidResources extends IncrementalTask {
         try {
             // If the new resources flag is enabled and if we are dealing with a library process
             // resources through the new parsers
-            if (enableNewResourceProcessing && this.type.equals(VariantType.LIBRARY)) {
+            if (bypassAapt) {
+                // Load the platform attr symbols
+                File androidJar = platformAttrRTxt.getSingleFile();
+                SymbolTable androidAttrSymbol =
+                        (androidJar != null && androidJar.exists())
+                                ? SymbolIo.read(androidJar, "android")
+                                : SymbolTable.builder().tablePackage("android").build();
 
                 // Get symbol table of resources of the library
+                // FIXME: move to the package res task.
                 SymbolTable symbolTable =
                         ResourceDirectoryParser.parseDirectory(
-                                getInputResourcesDir().getSingleFile(), IdProvider.sequential());
+                                getInputResourcesDir().getSingleFile(),
+                                IdProvider.sequential(),
+                                androidAttrSymbol);
 
                 SymbolUtils.processLibraryMainSymbolTable(
                         symbolTable,
                         generateCode ? getLibraryInfoList() : ImmutableList.of(),
-                        generateCode && getEnforceUniquePackageName(),
                         packageForR,
                         manifestFile,
-                        srcOut,
-                        symbolOutputDir,
+                        Preconditions.checkNotNull(srcOut),
+                        Preconditions.checkNotNull(symbolOutputDir),
                         proguardOutputFile,
-                        getInputResourcesDir().getSingleFile());
+                        getInputResourcesDir().getSingleFile(),
+                        androidAttrSymbol,
+                        disableResMergeInLib);
             } else {
-
                 Aapt aapt =
                         AaptGradleFactory.make(
                                 aaptGeneration,
                                 builder,
                                 processOutputHandler,
+                                fileCache,
                                 true,
                                 FileUtils.mkdirs(new File(getIncrementalFolder(), "aapt-temp")),
                                 aaptOptions.getCruncherProcesses());
@@ -523,7 +498,7 @@ public class ProcessAndroidResources extends IncrementalTask {
                 AaptPackageConfig.Builder config =
                         new AaptPackageConfig.Builder()
                                 .setManifestFile(manifestFile)
-                                .setOptions(getAaptOptions())
+                                .setOptions(DslAdaptersKt.convert(aaptOptions))
                                 .setResourceDir(getInputResourcesDir().getSingleFile())
                                 .setLibraries(
                                         generateCode ? getLibraryInfoList() : ImmutableList.of())
@@ -544,8 +519,7 @@ public class ProcessAndroidResources extends IncrementalTask {
                                 .setDependentFeatures(featurePackagesBuilder.build())
                                 .setListResourceFiles(aaptGeneration == AaptGeneration.AAPT_V2);
 
-                builder.processResources(aapt, config,
-                        generateCode && getEnforceUniquePackageName());
+                builder.processResources(aapt, config);
                 if (LOG.isInfoEnabled()) {
                     LOG.info("Aapt output file {}", resOutBaseNameFile.getAbsolutePath());
                 }
@@ -639,14 +613,7 @@ public class ProcessAndroidResources extends IncrementalTask {
     }
 
     @NonNull
-    public static List<LibraryInfo> computeLibraryInfoList(@NonNull VariantScope variantScope) {
-        return computeLibraryInfoList(
-                variantScope.getArtifactCollection(RUNTIME_CLASSPATH, ALL, SYMBOL_LIST),
-                variantScope.getArtifactCollection(RUNTIME_CLASSPATH, ALL, MANIFEST));
-    }
-
-    @NonNull
-    private static List<LibraryInfo> computeLibraryInfoList(
+    public static List<LibraryInfo> computeLibraryInfoList(
             @NonNull ArtifactCollection symbolFiles, @NonNull ArtifactCollection manifests) {
         // first build a map for the optional symbols.
         Map<ComponentIdentifier, File> symbolMap = new HashMap<>();
@@ -668,6 +635,53 @@ public class ProcessAndroidResources extends IncrementalTask {
         return libraryInfoList;
     }
 
+    @NonNull
+    public static List<ApkData> getSplitsToGenerate(
+            @NonNull SplitScope splitScope,
+            @Nullable Set<String> supportedAbis,
+            @Nullable String buildTargetAbi,
+            @Nullable String buildTargetDensity) {
+        // FIX ME : the code below should move to the SplitsDiscoveryTask that should persist
+        // the list of splits and their enabled/disabled state.
+
+        // comply when the IDE restricts the full splits we should produce
+        Density density = Density.getEnum(buildTargetDensity);
+
+        List<ApkData> splitsToGenerate =
+                buildTargetAbi == null
+                        ? splitScope.getApkDatas()
+                        : SplitOutputMatcher.computeBestOutput(
+                                splitScope.getApkDatas(),
+                                supportedAbis,
+                                density == null ? -1 : density.getDpiValue(),
+                                Arrays.asList(Strings.nullToEmpty(buildTargetAbi).split(",")));
+
+        if (splitsToGenerate.isEmpty()) {
+            Preconditions.checkNotNull(
+                    buildTargetAbi,
+                    "buildTargetAbi should not be null when no splits are computed");
+            Preconditions.checkNotNull(
+                    supportedAbis, "supportedAbis should not be null when no splits are computed");
+            List<String> splits =
+                    splitScope
+                            .getApkDatas()
+                            .stream()
+                            .map(ApkData::getFilterName)
+                            .collect(Collectors.toList());
+            throw new RuntimeException(
+                    String.format(
+                            "Cannot build for ABI: %1$s; no suitable splits configured: %2$s;"
+                                    + " supported ABIs are: %3$s",
+                            buildTargetAbi,
+                            splits.isEmpty() ? "none" : Joiner.on(", ").join(splits),
+                            supportedAbis.isEmpty()
+                                    ? "none"
+                                    : Joiner.on(", ").join(supportedAbis)));
+        }
+
+        return splitsToGenerate;
+    }
+
     public static class ConfigAction implements TaskConfigAction<ProcessAndroidResources> {
         protected final VariantScope variantScope;
         protected final Supplier<File> symbolLocation;
@@ -675,6 +689,7 @@ public class ProcessAndroidResources extends IncrementalTask {
         private final boolean generateLegacyMultidexMainDexProguardRules;
         private final TaskManager.MergeType sourceTaskOutputType;
         private final String baseName;
+        private final boolean isLibrary;
 
         public ConfigAction(
                 @NonNull VariantScope scope,
@@ -682,7 +697,8 @@ public class ProcessAndroidResources extends IncrementalTask {
                 @NonNull File resPackageOutputFolder,
                 boolean generateLegacyMultidexMainDexProguardRules,
                 @NonNull TaskManager.MergeType sourceTaskOutputType,
-                @NonNull String baseName) {
+                @NonNull String baseName,
+                boolean isLibrary) {
             this.variantScope = scope;
             this.symbolLocation = symbolLocation;
             this.resPackageOutputFolder = resPackageOutputFolder;
@@ -690,6 +706,7 @@ public class ProcessAndroidResources extends IncrementalTask {
                     = generateLegacyMultidexMainDexProguardRules;
             this.baseName = baseName;
             this.sourceTaskOutputType = sourceTaskOutputType;
+            this.isLibrary = isLibrary;
         }
 
         @NonNull
@@ -708,39 +725,46 @@ public class ProcessAndroidResources extends IncrementalTask {
         public void execute(@NonNull ProcessAndroidResources processResources) {
             final BaseVariantData variantData = variantScope.getVariantData();
 
+            final ProjectOptions projectOptions = variantScope.getGlobalScope().getProjectOptions();
+
             variantData.addTask(TaskContainer.TaskKind.PROCESS_ANDROID_RESOURCES, processResources);
 
             final GradleVariantConfiguration config = variantData.getVariantConfiguration();
 
             processResources.setAndroidBuilder(variantScope.getGlobalScope().getAndroidBuilder());
+            processResources.fileCache = variantScope.getGlobalScope().getBuildCache();
             processResources.setVariantName(config.getFullName());
             processResources.resPackageOutputFolder = resPackageOutputFolder;
-            processResources.aaptGeneration =
-                    AaptGeneration.fromProjectOptions(
-                            variantScope.getGlobalScope().getProjectOptions());
+            processResources.aaptGeneration = AaptGeneration.fromProjectOptions(projectOptions);
 
-            processResources.setEnableNewResourceProcessing(
-                    variantScope
-                            .getGlobalScope()
-                            .getProjectOptions()
-                            .get(ENABLE_NEW_RESOURCE_PROCESSING));
-            processResources.setEnableAapt2(
-                    variantScope
-                            .getGlobalScope()
-                            .getProjectOptions()
-                            .get(BooleanOption.ENABLE_AAPT2));
+            if (projectOptions.get(ENABLE_NEW_RESOURCE_PROCESSING)
+                    && variantData.getType() == VariantType.LIBRARY) {
+                processResources.bypassAapt = true;
+                processResources.disableResMergeInLib =
+                        sourceTaskOutputType == TaskManager.MergeType.PACKAGE;
+                processResources.platformAttrRTxt =
+                        variantScope
+                                .getGlobalScope()
+                                .getOutput(TaskOutputHolder.TaskOutputType.PLATFORM_R_TXT);
+            } else {
+                Preconditions.checkState(
+                        sourceTaskOutputType == TaskManager.MergeType.MERGE,
+                        "source output type should be MERGE",
+                        sourceTaskOutputType);
+            }
+
+            processResources.setEnableAapt2(projectOptions.get(BooleanOption.ENABLE_AAPT2));
 
             // per exec
             processResources.setIncrementalFolder(variantScope.getIncrementalDir(getName()));
 
-            processResources.splitListInput =
-                    variantScope.getOutput(TaskOutputHolder.TaskOutputType.SPLIT_LIST);
+            if (!isLibrary) {
+                processResources.splitListInput =
+                        variantScope.getOutput(TaskOutputHolder.TaskOutputType.SPLIT_LIST);
+            }
 
             processResources.splitHandlingPolicy =
                     variantData.getSplitScope().getSplitHandlingPolicy();
-
-            processResources.enforceUniquePackageName =
-                    variantScope.getGlobalScope().getExtension().getEnforceUniquePackageName();
 
                 processResources.manifests = variantScope.getArtifactCollection(
                         RUNTIME_CLASSPATH, ALL, MANIFEST);
@@ -792,9 +816,6 @@ public class ProcessAndroidResources extends IncrementalTask {
             processResources.setManifestFiles(
                     variantScope.getOutput(processResources.taskInputType));
 
-            Preconditions.checkState(
-                    sourceTaskOutputType == TaskManager.MergeType.MERGE,
-                    "Support for not merging resources in libraries not implemented yet.");
             processResources.inputResourcesDir =
                     variantScope.getOutput(sourceTaskOutputType.getOutputType());
 
@@ -805,7 +826,6 @@ public class ProcessAndroidResources extends IncrementalTask {
             processResources
                     .setPseudoLocalesEnabled(config.getBuildType().isPseudoLocalesEnabled());
 
-            ProjectOptions projectOptions = variantScope.getGlobalScope().getProjectOptions();
             processResources.buildTargetDensity =
                     projectOptions.get(StringOption.IDE_BUILD_TARGET_DENSITY);
 
@@ -830,6 +850,7 @@ public class ProcessAndroidResources extends IncrementalTask {
                             ? projectOptions.get(StringOption.IDE_BUILD_TARGET_ABI)
                             : null;
             processResources.supportedAbis = config.getSupportedAbis();
+            processResources.isLibrary = isLibrary;
         }
     }
 
@@ -848,7 +869,8 @@ public class ProcessAndroidResources extends IncrementalTask {
                     resPackageOutputFolder,
                     generateLegacyMultidexMainDexProguardRules,
                     mergeType,
-                    baseName);
+                    baseName,
+                    false);
         }
 
         @Override
@@ -976,15 +998,6 @@ public class ProcessAndroidResources extends IncrementalTask {
     }
 
     @Input
-    public boolean getEnforceUniquePackageName() {
-        return enforceUniquePackageName;
-    }
-
-    public void setEnforceUniquePackageName(boolean enforceUniquePackageName) {
-        this.enforceUniquePackageName = enforceUniquePackageName;
-    }
-
-    @Input
     public String getTypeAsString() {
         return type.name();
     }
@@ -1058,6 +1071,7 @@ public class ProcessAndroidResources extends IncrementalTask {
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
+    @Optional
     FileCollection getSplitListInput() {
         return splitListInput;
     }
@@ -1075,12 +1089,20 @@ public class ProcessAndroidResources extends IncrementalTask {
     }
 
     @Input
-    public boolean isEnabledNewResourceProcessing() {
-        return enableNewResourceProcessing;
+    public boolean bypassAapt() {
+        return bypassAapt;
     }
 
-    public void setEnableNewResourceProcessing(boolean enableNewResourceProcessing) {
-        this.enableNewResourceProcessing = enableNewResourceProcessing;
+    @Input
+    public boolean isDisableResMergeInLib() {
+        return disableResMergeInLib;
+    }
+
+    @InputFiles
+    @PathSensitive(PathSensitivity.NAME_ONLY)
+    @Optional
+    FileCollection getPlatformAttrRTxt() {
+        return platformAttrRTxt;
     }
 
     @Input
@@ -1090,5 +1112,12 @@ public class ProcessAndroidResources extends IncrementalTask {
 
     public void setEnableAapt2(boolean enableAapt2) {
         this.enableAapt2 = enableAapt2;
+    }
+
+    boolean isLibrary;
+
+    @Input
+    boolean isLibrary() {
+        return isLibrary;
     }
 }

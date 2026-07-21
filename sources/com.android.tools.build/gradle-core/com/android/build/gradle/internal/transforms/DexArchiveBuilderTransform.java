@@ -37,8 +37,8 @@ import com.android.build.gradle.internal.pipeline.TransformManager;
 import com.android.builder.core.DefaultDexOptions;
 import com.android.builder.core.DexOptions;
 import com.android.builder.core.ErrorReporter;
+import com.android.builder.dexing.DexerTool;
 import com.android.builder.utils.FileCache;
-import com.android.dx.Version;
 import com.android.ide.common.blame.Message;
 import com.android.ide.common.blame.ParsingProcessOutputHandler;
 import com.android.ide.common.blame.parser.DexParser;
@@ -79,21 +79,21 @@ public class DexArchiveBuilderTransform extends Transform {
     @NonNull private final DexOptions dexOptions;
     @NonNull private final ErrorReporter errorReporter;
     @Nullable private final FileCache userLevelCache;
-    @Nullable private final FileCache projectLevelCache;
     @NonNull private final WaitableExecutor executor;
     private final int minSdkVersion;
+    @NonNull private final DexerTool dexer;
 
     public DexArchiveBuilderTransform(
             @NonNull DexOptions dexOptions,
             @NonNull ErrorReporter errorReporter,
             @Nullable FileCache userLevelCache,
-            @Nullable FileCache projectLevelCache,
-            int minSdkVersion) {
+            int minSdkVersion,
+            @NonNull DexerTool dexer) {
         this.dexOptions = dexOptions;
         this.errorReporter = errorReporter;
         this.userLevelCache = userLevelCache;
-        this.projectLevelCache = projectLevelCache;
         this.minSdkVersion = minSdkVersion;
+        this.dexer = dexer;
         this.executor = WaitableExecutor.useGlobalSharedThreadPool();
     }
 
@@ -128,8 +128,8 @@ public class DexArchiveBuilderTransform extends Transform {
             Map<String, Object> params = Maps.newHashMapWithExpectedSize(4);
             params.put("optimize", !dexOptions.getAdditionalParameters().contains("--no-optimize"));
             params.put("jumbo", dexOptions.getJumboMode());
-            params.put("dx-version", Version.VERSION);
             params.put("min-sdk-version", minSdkVersion);
+            params.put("dex-builder-tool", dexer.name());
 
             return params;
         } catch (Exception e) {
@@ -294,8 +294,6 @@ public class DexArchiveBuilderTransform extends Transform {
         FileCache userCache =
                 PreDexTransform.getBuildCache(
                         input.getFile(), isExternalLib(input), userLevelCache);
-        // use only for jars
-        FileCache projectCache = input.getFile().isFile() ? projectLevelCache : null;
 
         DexArchiveBuilderTransformCallable converter =
                 new DexArchiveBuilderTransformCallable(
@@ -306,9 +304,9 @@ public class DexArchiveBuilderTransform extends Transform {
                         hashes,
                         processOutput,
                         userCache,
-                        projectCache,
                         dexOptions,
-                        minSdkVersion);
+                        minSdkVersion,
+                        dexer);
         executor.execute(converter);
     }
 

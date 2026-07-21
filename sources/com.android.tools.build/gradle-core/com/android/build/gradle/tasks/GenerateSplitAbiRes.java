@@ -22,16 +22,20 @@ import com.android.build.gradle.internal.aapt.AaptGeneration;
 import com.android.build.gradle.internal.aapt.AaptGradleFactory;
 import com.android.build.gradle.internal.dsl.AaptOptions;
 import com.android.build.gradle.internal.dsl.AbiSplitOptions;
+import com.android.build.gradle.internal.dsl.DslAdaptersKt;
 import com.android.build.gradle.internal.scope.SplitFactory;
 import com.android.build.gradle.internal.scope.SplitScope;
 import com.android.build.gradle.internal.scope.TaskConfigAction;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.BaseTask;
+import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.VariantConfiguration;
 import com.android.builder.core.VariantType;
 import com.android.builder.internal.aapt.Aapt;
 import com.android.builder.internal.aapt.AaptPackageConfig;
+import com.android.builder.utils.FileCache;
 import com.android.ide.common.build.ApkData;
+import com.android.ide.common.process.LoggedProcessOutputHandler;
 import com.android.ide.common.process.ProcessException;
 import com.android.utils.FileUtils;
 import com.google.common.base.CharMatcher;
@@ -44,13 +48,11 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectory;
-import org.gradle.api.tasks.ParallelizableTask;
 import org.gradle.api.tasks.TaskAction;
 
 /**
  * Generates all metadata (like AndroidManifest.xml) necessary for a ABI dimension split APK.
  */
-@ParallelizableTask
 public class GenerateSplitAbiRes extends BaseTask {
 
     private String applicationId;
@@ -72,6 +74,7 @@ public class GenerateSplitAbiRes extends BaseTask {
     private SplitFactory splitFactory;
     private VariantType variantType;
     private VariantScope variantScope;
+    private FileCache fileCache;
 
     @Input
     public String getApplicationId() {
@@ -118,7 +121,6 @@ public class GenerateSplitAbiRes extends BaseTask {
     public AaptOptions getAaptOptions() {
         return aaptOptions;
     }
-
 
     @TaskAction
     protected void doFullTaskAction() throws IOException, InterruptedException, ProcessException {
@@ -179,27 +181,33 @@ public class GenerateSplitAbiRes extends BaseTask {
                 fileWriter.flush();
             }
 
+            AndroidBuilder builder = getBuilder();
             Aapt aapt =
                     AaptGradleFactory.make(
                             aaptGeneration,
-                            getBuilder(),
-                            variantScope,
+                            builder,
+                            new LoggedProcessOutputHandler(
+                                    new AaptGradleFactory.FilteringLogger(builder.getLogger())),
+                            fileCache,
+                            true,
                             FileUtils.mkdirs(
                                     new File(
                                             variantScope.getIncrementalDir(getName()),
-                                            "aapt-temp")));
+                                            "aapt-temp")),
+                            variantScope
+                                    .getGlobalScope()
+                                    .getExtension()
+                                    .getAaptOptions()
+                                    .getCruncherProcesses());
             AaptPackageConfig.Builder aaptConfig = new AaptPackageConfig.Builder();
             aaptConfig
                     .setManifestFile(tmpFile)
-                    .setOptions(aaptOptions)
+                    .setOptions(DslAdaptersKt.convert(aaptOptions))
                     .setDebuggable(debuggable)
                     .setResourceOutputApk(resPackageFile)
                     .setVariantType(variantType);
 
-            getBuilder().processResources(
-                    aapt,
-                    aaptConfig,
-                    false /* enforceUniquePackageName */);
+            getBuilder().processResources(aapt, aaptConfig);
             splitScope.addOutputForSplit(
                     VariantScope.TaskOutputType.ABI_PROCESSED_SPLIT_RES,
                     abiApkData,
@@ -250,6 +258,7 @@ public class GenerateSplitAbiRes extends BaseTask {
             generateSplitAbiRes.versionName = config.getVersionName();
             generateSplitAbiRes.aaptGeneration =
                     AaptGeneration.fromProjectOptions(scope.getGlobalScope().getProjectOptions());
+            generateSplitAbiRes.fileCache = scope.getGlobalScope().getBuildCache();
 
             generateSplitAbiRes.variantScope = scope;
             generateSplitAbiRes.variantType = config.getType();

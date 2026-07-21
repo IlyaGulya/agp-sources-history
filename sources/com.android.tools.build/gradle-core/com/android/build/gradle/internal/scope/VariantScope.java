@@ -20,7 +20,7 @@ import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.gradle.external.gson.NativeBuildConfigValue;
 import com.android.build.gradle.internal.InstantRunTaskManager;
-import com.android.build.gradle.internal.PostprocessingActions;
+import com.android.build.gradle.internal.PostprocessingFeatures;
 import com.android.build.gradle.internal.core.Abi;
 import com.android.build.gradle.internal.core.GradleVariantConfiguration;
 import com.android.build.gradle.internal.dependency.VariantDependencies;
@@ -44,6 +44,8 @@ import com.android.build.gradle.tasks.MergeResources;
 import com.android.build.gradle.tasks.MergeSourceSetFolders;
 import com.android.build.gradle.tasks.ProcessAndroidResources;
 import com.android.build.gradle.tasks.RenderscriptCompile;
+import com.android.builder.dexing.DexMergerTool;
+import com.android.builder.dexing.DexerTool;
 import com.android.builder.dexing.DexingType;
 import com.android.sdklib.AndroidVersion;
 import java.io.File;
@@ -91,9 +93,11 @@ public interface VariantScope extends TransformVariantScope, InstantRunVariantSc
     List<File> getConsumerProguardFiles();
 
     @Nullable
-    PostprocessingActions getPostprocessingActions();
+    PostprocessingFeatures getPostprocessingFeatures();
 
     boolean useResourceShrinker();
+
+    boolean isCrunchPngs();
 
     @Nullable
     File getResourceShrinkerInputFolder();
@@ -217,6 +221,9 @@ public interface VariantScope extends TransformVariantScope, InstantRunVariantSc
     File getMergeResourcesOutputDir();
 
     void setMergeResourceOutputDir(@Nullable File mergeResourceOutputDir);
+
+    @NonNull
+    File getCompiledResourcesOutputDir();
 
     @NonNull
     File getResourceBlameLogDir();
@@ -345,7 +352,7 @@ public interface VariantScope extends TransformVariantScope, InstantRunVariantSc
     File getBaseBundleDir();
 
     @NonNull
-    File getOutputBundleFile();
+    File getAarLocation();
 
     @NonNull
     File getAnnotationProcessorOutputDir();
@@ -483,6 +490,12 @@ public interface VariantScope extends TransformVariantScope, InstantRunVariantSc
 
     @NonNull
     Java8LangSupport getJava8LangSupportType();
+
+    @NonNull
+    DexerTool getDexer();
+
+    @NonNull
+    DexMergerTool getDexMerger();
 
     @NonNull
     ConfigurableFileCollection getTryWithResourceRuntimeSupportJar();

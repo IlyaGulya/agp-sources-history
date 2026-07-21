@@ -16,6 +16,7 @@
 
 package com.android.build.gradle.internal.scope;
 
+import static com.android.SdkConstants.FD_COMPILED;
 import static com.android.SdkConstants.FD_MERGED;
 import static com.android.SdkConstants.FD_RES;
 import static com.android.SdkConstants.FN_ANDROID_MANIFEST_XML;
@@ -41,7 +42,7 @@ import com.android.build.gradle.ProguardFiles;
 import com.android.build.gradle.external.gson.NativeBuildConfigValue;
 import com.android.build.gradle.internal.InstantRunTaskManager;
 import com.android.build.gradle.internal.LoggerWrapper;
-import com.android.build.gradle.internal.PostprocessingActions;
+import com.android.build.gradle.internal.PostprocessingFeatures;
 import com.android.build.gradle.internal.SdkHandler;
 import com.android.build.gradle.internal.core.Abi;
 import com.android.build.gradle.internal.core.GradleVariantConfiguration;
@@ -93,6 +94,8 @@ import com.android.builder.core.BootClasspathBuilder;
 import com.android.builder.core.BuilderConstants;
 import com.android.builder.core.ErrorReporter;
 import com.android.builder.core.VariantType;
+import com.android.builder.dexing.DexMergerTool;
+import com.android.builder.dexing.DexerTool;
 import com.android.builder.dexing.DexingType;
 import com.android.builder.model.BaseConfig;
 import com.android.builder.model.SyncIssue;
@@ -106,7 +109,6 @@ import com.android.utils.FileUtils;
 import com.android.utils.ILogger;
 import com.android.utils.StringHelper;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -197,6 +199,8 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
     private final List<NativeBuildConfigValue> externalNativeBuildConfigValues =
             Lists.newArrayList();
 
+    @Nullable private CodeShrinker defaultCodeShrinker;
+
     /**
      * This is an instance of {@link JacocoReportTask} in android test variants, an umbrella
      * {@link Task} in app and lib variants and null in unit test variants.
@@ -209,6 +213,7 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     private ConfigurableFileCollection desugarTryWithResourcesRuntimeJar;
     private AndroidTask<DataBindingExportBuildInfoTask> dataBindingExportBuildInfoTask;
+
 
     public VariantScopeImpl(
             @NonNull GlobalScope globalScope,
@@ -267,7 +272,7 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     @Override
     public ConfigurableFileCollection addTaskOutput(
-            @NonNull TaskOutputType outputType, @NonNull File file, @Nullable String taskName) {
+            @NonNull TaskOutputType outputType, @NonNull Object file, @Nullable String taskName) {
         ConfigurableFileCollection fileCollection;
         try {
             fileCollection = super.addTaskOutput(outputType, file, taskName);
@@ -303,7 +308,7 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
     }
 
     private void publishIntermediateArtifact(
-            @NonNull File file,
+            @NonNull Object file,
             @NonNull String builtBy,
             @NonNull ArtifactType artifactType,
             @NonNull Collection<PublishedConfigType> configTypes) {
@@ -333,7 +338,7 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     private void publishArtifactToConfiguration(
             @NonNull Configuration configuration,
-            @NonNull File file,
+            @NonNull Object file,
             @NonNull String builtBy,
             @NonNull ArtifactType artifactType) {
         final Project project = getGlobalScope().getProject();
@@ -420,15 +425,25 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
             return false;
         }
 
-        if (getInstantRunBuildContext().isInInstantRunMode()) {
-            LOGGER.warning(
-                    "Instant Run: Resource shrinker automatically disabled for %s.",
-                    getVariantConfiguration().getFullName());
-
-            return false;
-        }
-
         return true;
+    }
+
+    @Override
+    public boolean isCrunchPngs() {
+        // If set for this build type, respect that.
+        Boolean buildTypeOverride = getVariantConfiguration().getBuildType().isCrunchPngs();
+        if (buildTypeOverride != null) {
+            return buildTypeOverride;
+        }
+        // Otherwise, if set globally, respect that.
+        Boolean globalOverride =
+                globalScope.getExtension().getAaptOptions().getCruncherEnabledOverride();
+        if (globalOverride != null) {
+            return globalOverride;
+        }
+        // If not overridden, use the default from the build type.
+        //noinspection deprecation TODO: Remove once the global cruncher enabled flag goes away.
+        return getVariantConfiguration().getBuildType().isCrunchPngsDefault();
     }
 
     @Nullable
@@ -473,9 +488,10 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
             }
         } else {
-            CodeShrinker chosenShrinker =
-                    MoreObjects.firstNonNull(
-                            postprocessingOptions.getCodeShrinkerEnum(), getDefaultCodeShrinker());
+            CodeShrinker chosenShrinker = postprocessingOptions.getCodeShrinkerEnum();
+            if (chosenShrinker == null) {
+                chosenShrinker = getDefaultCodeShrinker();
+            }
 
             switch (chosenShrinker) {
                 case PROGUARD:
@@ -551,11 +567,11 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     @Override
     @Nullable
-    public PostprocessingActions getPostprocessingActions() {
+    public PostprocessingFeatures getPostprocessingFeatures() {
         // If the new DSL block is not used, all these flags need to be in the config files.
         PostprocessingOptions postprocessingOptions = getPostprocessingOptionsIfUsed();
         if (postprocessingOptions != null) {
-            return PostprocessingActions.create(
+            return PostprocessingFeatures.create(
                     postprocessingOptions.isRemoveUnusedCode(),
                     postprocessingOptions.isObfuscate(),
                     postprocessingOptions.isOptimizeCode());
@@ -566,7 +582,22 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     @NonNull
     private CodeShrinker getDefaultCodeShrinker() {
-        return getInstantRunBuildContext().isInInstantRunMode() ? ANDROID_GRADLE : PROGUARD;
+        if (defaultCodeShrinker == null) {
+            if (getInstantRunBuildContext().isInInstantRunMode()) {
+                String message = "Using the built-in class shrinker for an Instant Run build.";
+                PostprocessingFeatures postprocessingFeatures = getPostprocessingFeatures();
+                if (postprocessingFeatures == null || postprocessingFeatures.isObfuscate()) {
+                    message += " Build won't be obfuscated.";
+                }
+                LOGGER.warning(message);
+
+                defaultCodeShrinker = ANDROID_GRADLE;
+            } else {
+                defaultCodeShrinker = PROGUARD;
+            }
+        }
+
+        return defaultCodeShrinker;
     }
 
     /**
@@ -1051,7 +1082,7 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
     @Override
     @NonNull
     public File getFinalResourcesDir() {
-        return Objects.firstNonNull(resourceOutputDir, getDefaultMergeResourcesOutputDir());
+        return MoreObjects.firstNonNull(resourceOutputDir, getDefaultMergeResourcesOutputDir());
     }
 
     @Override
@@ -1081,6 +1112,16 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
     @Override
     public void setMergeResourceOutputDir(@Nullable File mergeResourceOutputDir) {
         this.mergeResourceOutputDir = mergeResourceOutputDir;
+    }
+
+    @Override
+    @NonNull
+    public File getCompiledResourcesOutputDir() {
+        return FileUtils.join(
+                getGlobalScope().getIntermediatesDir(),
+                FD_RES,
+                FD_COMPILED,
+                getVariantConfiguration().getDirName());
     }
 
     @NonNull
@@ -1415,14 +1456,12 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
         switch (getVariantConfiguration().getType()) {
             case DEFAULT:
             case FEATURE:
+            case LIBRARY:
                 return FileUtils.join(
                         getGlobalScope().getIntermediatesDir(),
                         "manifests",
                         "full",
                         getVariantConfiguration().getDirName());
-            case LIBRARY:
-                // FIXME: this does not seem right.
-                return getBaseBundleDir();
             case ANDROID_TEST:
                 return FileUtils.join(
                         getGlobalScope().getIntermediatesDir(),
@@ -1430,7 +1469,7 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
                         getVariantConfiguration().getDirName());
             default:
                 throw new RuntimeException(
-                        "getManifestOutputFile called for an unexpected variant.");
+                        "getManifestOutputDirectory called for an unexpected variant.");
         }
     }
 
@@ -1494,15 +1533,8 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
 
     @NonNull
     @Override
-    public File getOutputBundleFile() {
-        return FileUtils.join(
-                globalScope.getOutputsDir(),
-                BuilderConstants.EXT_LIB_ARCHIVE,
-                globalScope.getProjectBaseName()
-                        + "-"
-                        + getVariantConfiguration().getBaseName()
-                        + "."
-                        + BuilderConstants.EXT_LIB_ARCHIVE);
+    public File getAarLocation() {
+        return FileUtils.join(globalScope.getOutputsDir(), BuilderConstants.EXT_LIB_ARCHIVE);
     }
 
     @NonNull
@@ -1789,7 +1821,7 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
         return AndroidSdkHandler.getInstance(sdkLocation)
                 .getAndroidTargetManager(progressIndicator)
                 .getTargetFromHashString(targetHash, progressIndicator);
-}
+    }
 
     @Override
     public void setExternalNativeBuildTask(
@@ -2040,5 +2072,17 @@ public class VariantScopeImpl extends GenericVariantScopeImpl implements Variant
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this).addValue(getFullVariantName()).toString();
+    }
+
+    @NonNull
+    @Override
+    public DexerTool getDexer() {
+        return DexerTool.DX;
+    }
+
+    @NonNull
+    @Override
+    public DexMergerTool getDexMerger() {
+        return DexMergerTool.DX;
     }
 }

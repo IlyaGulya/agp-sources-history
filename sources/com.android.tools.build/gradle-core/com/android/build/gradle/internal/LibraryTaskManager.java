@@ -54,12 +54,15 @@ import com.android.build.gradle.internal.transforms.LibraryBaseTransform;
 import com.android.build.gradle.internal.transforms.LibraryIntermediateJarsTransform;
 import com.android.build.gradle.internal.transforms.LibraryJniLibsTransform;
 import com.android.build.gradle.internal.variant.LibraryVariantData;
+import com.android.build.gradle.internal.variant.TaskContainer;
 import com.android.build.gradle.internal.variant.VariantHelper;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.tasks.AidlCompile;
+import com.android.build.gradle.tasks.AndroidZip;
 import com.android.build.gradle.tasks.ExtractAnnotations;
 import com.android.build.gradle.tasks.MergeResources;
+import com.android.build.gradle.tasks.VerifyLibraryResourcesTask;
 import com.android.build.gradle.tasks.ZipMergingTask;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.BuilderConstants;
@@ -67,6 +70,7 @@ import com.android.builder.model.SyncIssue;
 import com.android.builder.profile.Recorder;
 import com.android.utils.FileUtils;
 import com.android.utils.StringHelper;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.google.wireless.android.sdk.stats.GradleBuildProfileSpan.ExecutionType;
 import java.io.File;
@@ -74,12 +78,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.Sync;
-import org.gradle.api.tasks.bundling.Zip;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.tooling.BuildException;
 import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
@@ -195,10 +199,19 @@ public class LibraryTaskManager extends TaskManager {
                             variantScope,
                             () -> variantBundleDir,
                             variantScope.getProcessResourcePackageOutputDirectory(),
-                            // TODO: Switch to package where possible so we stop merging resources
-                            // in libraries.
-                            MergeType.MERGE,
+                            // Switch to package where possible so we stop merging resources in
+                            // libraries
+                            projectOptions.get(BooleanOption.ENABLE_NEW_RESOURCE_PROCESSING)
+                                            && projectOptions.get(
+                                                    BooleanOption.DISABLE_RES_MERGE_IN_LIBRARY)
+                                    ? MergeType.PACKAGE
+                                    : MergeType.MERGE,
                             globalScope.getProjectBaseName());
+
+                    // Only verify resources if in Release.
+                    if (!variantScope.getVariantConfiguration().getBuildType().isDebuggable()) {
+                        createVerifyLibraryResTask(tasks, variantScope, MergeType.MERGE);
+                    }
 
                     // process java resources only, the merge is setup after
                     // the task to generate intermediate jars for project to project publishing.
@@ -313,8 +326,9 @@ public class LibraryTaskManager extends TaskManager {
                 FileUtils.join(variantBundleDir, FD_RES),
                 copyLintTask.getName());
 
-        final Zip bundle = project.getTasks().create(variantScope.getTaskName("bundle"), Zip.class);
-
+        final AndroidZip bundle =
+                project.getTasks().create(variantScope.getTaskName("bundle"), AndroidZip.class);
+        libVariantData.addTask(TaskContainer.TaskKind.PACKAGE_ANDROID_ARTIFACT, bundle);
 
         AndroidTask<ExtractAnnotations> extractAnnotationsTask;
         // Some versions of retrolambda remove the actions from the extract annotations task.
@@ -537,15 +551,17 @@ public class LibraryTaskManager extends TaskManager {
                 // generateSources depends on them. When generateSourcesOnly is injected they are
                 // needed explicitly, as bundle no longer depends on compileJava
                 variantScope.getAidlCompileTask().getName(),
-                variantScope.getMergeAssetsTask().getName(),
-                variantScope.getManifestProcessorTask().getName());
+                variantScope.getMergeAssetsTask().getName());
         bundle.dependsOn(variantScope.getNdkBuildable());
 
+        Preconditions.checkNotNull(variantScope.getSplitScope().getMainSplit());
         bundle.setDescription("Assembles a bundle containing the library in " +
                 variantConfig.getFullName() + ".");
-        bundle.setDestinationDir(variantScope.getOutputBundleFile().getParentFile());
-        bundle.setArchiveName(variantScope.getOutputBundleFile().getName());
+        bundle.setDestinationDir(variantScope.getAarLocation());
+        bundle.setArchiveNameSupplier(
+                () -> variantScope.getSplitScope().getMainSplit().getOutputFileName());
         bundle.setExtension(BuilderConstants.EXT_LIB_ARCHIVE);
+        bundle.from(variantScope.getOutput(TaskOutputType.LIBRARY_MANIFEST));
         bundle.from(variantBundleDir);
         bundle.from(
                 FileUtils.join(
@@ -553,7 +569,16 @@ public class LibraryTaskManager extends TaskManager {
                         StringHelper.toStrings(ANNOTATIONS, variantDirectorySegments)));
 
         variantScope.addTaskOutput(
-                TaskOutputType.AAR, variantScope.getOutputBundleFile(), bundle.getName());
+                TaskOutputType.AAR,
+                (Callable<File>)
+                        () ->
+                                new File(
+                                        variantScope.getAarLocation(),
+                                        variantScope
+                                                .getSplitScope()
+                                                .getMainSplit()
+                                                .getOutputFileName()),
+                bundle.getName());
 
         libVariantData.packageLibTask = bundle;
 
@@ -693,10 +718,26 @@ public class LibraryTaskManager extends TaskManager {
         return TransformManager.PROJECT_ONLY;
     }
 
+    @Override
+    protected boolean isLibrary() {
+        return true;
+    }
+
     private Task getAssembleDefault() {
         if (assembleDefault == null) {
             assembleDefault = project.getTasks().findByName("assembleDefault");
         }
         return assembleDefault;
     }
+
+    public void createVerifyLibraryResTask(
+            @NonNull TaskFactory tasks, @NonNull VariantScope scope, @NonNull MergeType mergeType) {
+        AndroidTask<VerifyLibraryResourcesTask> verifyLibraryResources =
+                androidTasks.create(
+                        tasks, new VerifyLibraryResourcesTask.ConfigAction(scope, mergeType));
+
+        verifyLibraryResources.dependsOn(tasks, scope.getMergeResourcesTask());
+        scope.getAssembleTask().dependsOn(tasks, verifyLibraryResources);
+    }
+
 }

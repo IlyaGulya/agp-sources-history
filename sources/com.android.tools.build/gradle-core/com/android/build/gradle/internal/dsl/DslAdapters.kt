@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal;
+package com.android.build.gradle.internal.dsl
 
-import com.google.auto.value.AutoValue;
+import com.android.builder.internal.aapt.AaptOptions
 
-/** Describes actions that we should do at bytecode postprocessing time. */
-@AutoValue
-public abstract class PostprocessingActions {
-
-    public static PostprocessingActions create(
-            boolean removeUnusedCode, boolean obfuscate, boolean optimize) {
-        return new AutoValue_PostprocessingActions(removeUnusedCode, obfuscate, optimize);
-    }
-
-    public abstract boolean isRemoveUnusedCode();
-
-    public abstract boolean isObfuscate();
-
-    public abstract boolean isOptimize();
+fun convert(aaptOptions: com.android.build.gradle.internal.dsl.AaptOptions): AaptOptions {
+    return AaptOptions(
+            aaptOptions.noCompress,
+            aaptOptions.failOnMissingConfigEntry,
+            aaptOptions.additionalParameters)
 }

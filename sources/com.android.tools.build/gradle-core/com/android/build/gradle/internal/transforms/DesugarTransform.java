@@ -67,8 +67,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import org.gradle.api.file.FileCollection;
+import org.gradle.workers.WorkerExecutor;
 
 /** Desugar all Java 8 bytecode. */
 public class DesugarTransform extends Transform {
@@ -137,12 +140,12 @@ public class DesugarTransform extends Transform {
     @NonNull private final Supplier<List<File>> androidJarClasspath;
     @NonNull private final List<Path> compilationBootclasspath;
     @Nullable private final FileCache userCache;
-    @Nullable private final FileCache projectCache;
     private final int minSdk;
     @NonNull private final JavaProcessExecutor executor;
     @NonNull private FileCollection java8LangSupportJar;
     @NonNull private final WaitableExecutor waitableExecutor;
     private boolean verbose;
+    private final boolean enableGradleWorkers;
 
     @NonNull private Set<InputEntry> cacheMisses = Sets.newConcurrentHashSet();
 
@@ -150,20 +153,20 @@ public class DesugarTransform extends Transform {
             @NonNull Supplier<List<File>> androidJarClasspath,
             @NonNull String compilationBootclasspath,
             @Nullable FileCache userCache,
-            @Nullable FileCache projectCache,
             int minSdk,
             @NonNull JavaProcessExecutor executor,
             @NonNull FileCollection java8LangSupportJar,
-            boolean verbose) {
+            boolean verbose,
+            boolean enableGradleWorkers) {
         this.androidJarClasspath = androidJarClasspath;
         this.compilationBootclasspath = splitBootclasspath(compilationBootclasspath);
         this.userCache = userCache;
-        this.projectCache = projectCache;
         this.minSdk = minSdk;
         this.executor = executor;
         this.java8LangSupportJar = java8LangSupportJar;
         this.waitableExecutor = WaitableExecutor.useGlobalSharedThreadPool();
         this.verbose = verbose;
+        this.enableGradleWorkers = enableGradleWorkers;
     }
 
     @NonNull
@@ -222,8 +225,14 @@ public class DesugarTransform extends Transform {
             processInputs(transformInvocation);
             waitableExecutor.waitForTasksWithQuickFail(true);
 
-            processNonCachedOnes(getClasspath(transformInvocation));
-            waitableExecutor.waitForTasksWithQuickFail(true);
+            if (enableGradleWorkers) {
+                processNonCachedOnesWithGradleExecutor(
+                        transformInvocation.getContext().getWorkerExecutor(),
+                        getClasspath(transformInvocation));
+            } else {
+                processNonCachedOnes(getClasspath(transformInvocation));
+                waitableExecutor.waitForTasksWithQuickFail(true);
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new TransformException(e);
@@ -284,6 +293,7 @@ public class DesugarTransform extends Transform {
             index++;
         }
 
+        List<Path> desugarBootclasspath = getBootclasspath();
         for (Integer bucketId : procBuckets.keySet()) {
             Callable<Void> callable =
                     () -> {
@@ -298,7 +308,7 @@ public class DesugarTransform extends Transform {
                                         verbose,
                                         inToOut,
                                         classpath,
-                                        this.compilationBootclasspath,
+                                        desugarBootclasspath,
                                         minSdk);
                         executor.execute(
                                         processBuilder.build(),
@@ -322,6 +332,36 @@ public class DesugarTransform extends Transform {
         }
     }
 
+    private void processNonCachedOnesWithGradleExecutor(
+            WorkerExecutor workerExecutor, List<Path> classpath)
+            throws IOException, ProcessException, ExecutionException {
+        List<Path> desugarBootclasspath = getBootclasspath();
+        for (InputEntry pathPathEntry : cacheMisses) {
+            DesugarWorkerItem workerItem =
+                    new DesugarWorkerItem(
+                            java8LangSupportJar.getSingleFile().toPath(),
+                            Files.createTempDirectory("gradle_lambdas"),
+                            true,
+                            pathPathEntry.getInputPath(),
+                            pathPathEntry.getOutputPath(),
+                            classpath,
+                            desugarBootclasspath,
+                            minSdk);
+
+            workerExecutor.submit(DesugarWorkerItem.DesugarAction.class, workerItem::configure);
+        }
+
+        workerExecutor.await();
+
+        for (InputEntry e : cacheMisses) {
+            if (e.getCache() != null && e.getInputs() != null) {
+                e.getCache()
+                        .createFileInCacheIfAbsent(
+                                e.getInputs(), in -> Files.copy(e.getOutputPath(), in.toPath()));
+            }
+        }
+    }
+
     @NonNull
     private List<Path> getClasspath(@NonNull TransformInvocation transformInvocation)
             throws IOException {
@@ -339,9 +379,16 @@ public class DesugarTransform extends Transform {
                         .map(File::toPath)
                         .iterator());
 
-        classpathEntries.addAll(androidJarClasspath.get().stream().map(File::toPath).iterator());
-
         return classpathEntries.build();
+    }
+
+    @NonNull
+    private List<Path> getBootclasspath() throws IOException {
+        List<Path> desugarBootclasspath =
+                androidJarClasspath.get().stream().map(File::toPath).collect(Collectors.toList());
+        desugarBootclasspath.addAll(compilationBootclasspath);
+
+        return desugarBootclasspath;
     }
 
     private void processSingle(
@@ -356,15 +403,10 @@ public class DesugarTransform extends Transform {
                     }
 
                     FileCache cacheToUse;
-                    if (Files.isDirectory(input)) {
-                        cacheToUse = null;
-                    } else if (Objects.equals(
-                            scopes, Collections.singleton(Scope.EXTERNAL_LIBRARIES))) {
+                    if (Files.isRegularFile(input)
+                            && Objects.equals(
+                                    scopes, Collections.singleton(Scope.EXTERNAL_LIBRARIES))) {
                         cacheToUse = userCache;
-                    } else if (scopes.equals(Collections.singleton(Scope.PROJECT_LOCAL_DEPS))
-                            || scopes.equals(
-                                    Collections.singleton(Scope.SUB_PROJECTS_LOCAL_DEPS))) {
-                        cacheToUse = projectCache;
                     } else {
                         cacheToUse = null;
                     }

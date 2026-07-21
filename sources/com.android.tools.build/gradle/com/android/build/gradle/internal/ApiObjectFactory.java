@@ -17,6 +17,7 @@
 package com.android.build.gradle.internal;
 
 import static com.android.builder.core.VariantType.ANDROID_TEST;
+import static com.android.builder.core.VariantType.LIBRARY;
 import static com.android.builder.core.VariantType.UNIT_TEST;
 
 import com.android.annotations.NonNull;
@@ -25,6 +26,7 @@ import com.android.build.gradle.BaseExtension;
 import com.android.build.gradle.TestedAndroidConfig;
 import com.android.build.gradle.internal.api.ApkVariantOutputImpl;
 import com.android.build.gradle.internal.api.BaseVariantImpl;
+import com.android.build.gradle.internal.api.LibraryVariantOutputImpl;
 import com.android.build.gradle.internal.api.ReadOnlyObjectProvider;
 import com.android.build.gradle.internal.api.TestVariantImpl;
 import com.android.build.gradle.internal.api.TestedVariant;
@@ -35,20 +37,19 @@ import com.android.build.gradle.internal.variant.TestVariantData;
 import com.android.build.gradle.internal.variant.TestedVariantData;
 import com.android.build.gradle.internal.variant.VariantFactory;
 import com.android.builder.core.AndroidBuilder;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.internal.reflect.Instantiator;
 
 /**
  * Factory to create ApiObject from VariantData.
  */
 public class ApiObjectFactory {
-    @NonNull
-    private final AndroidBuilder androidBuilder;
-    @NonNull
-    private final BaseExtension extension;
-    @NonNull
-    private final VariantFactory variantFactory;
-    @NonNull
-    private final Instantiator instantiator;
+    @NonNull private final AndroidBuilder androidBuilder;
+    @NonNull private final BaseExtension extension;
+    @NonNull private final VariantFactory variantFactory;
+    @NonNull private final Instantiator instantiator;
+    @NonNull private final ObjectFactory objectFactory;
+
     @NonNull
     private final ReadOnlyObjectProvider readOnlyObjectProvider = new ReadOnlyObjectProvider();
 
@@ -56,11 +57,13 @@ public class ApiObjectFactory {
             @NonNull AndroidBuilder androidBuilder,
             @NonNull BaseExtension extension,
             @NonNull VariantFactory variantFactory,
-            @NonNull Instantiator instantiator) {
+            @NonNull Instantiator instantiator,
+            @NonNull ObjectFactory objectFactory) {
         this.androidBuilder = androidBuilder;
         this.extension = extension;
         this.variantFactory = variantFactory;
         this.instantiator = instantiator;
+        this.objectFactory = objectFactory;
     }
 
     public BaseVariantImpl create(BaseVariantData variantData) {
@@ -72,7 +75,11 @@ public class ApiObjectFactory {
 
         BaseVariantImpl variantApi =
                 variantFactory.createVariantApi(
-                        instantiator, androidBuilder, variantData, readOnlyObjectProvider);
+                        instantiator,
+                        objectFactory,
+                        androidBuilder,
+                        variantData,
+                        readOnlyObjectProvider);
         if (variantApi == null) {
             return null;
         }
@@ -87,6 +94,7 @@ public class ApiObjectFactory {
                                 TestVariantImpl.class,
                                 androidTestVariantData,
                                 variantApi,
+                                objectFactory,
                                 androidBuilder,
                                 readOnlyObjectProvider,
                                 variantData
@@ -108,6 +116,7 @@ public class ApiObjectFactory {
                                 UnitTestVariantImpl.class,
                                 unitTestVariantData,
                                 variantApi,
+                                objectFactory,
                                 androidBuilder,
                                 readOnlyObjectProvider,
                                 variantData
@@ -133,7 +142,9 @@ public class ApiObjectFactory {
     private void createVariantOutput(BaseVariantData variantData, BaseVariantImpl variantApi) {
         variantData.variantOutputFactory =
                 new VariantOutputFactory(
-                        ApkVariantOutputImpl.class,
+                        (variantData.getType() == LIBRARY)
+                                ? LibraryVariantOutputImpl.class
+                                : ApkVariantOutputImpl.class,
                         instantiator,
                         extension,
                         variantApi,

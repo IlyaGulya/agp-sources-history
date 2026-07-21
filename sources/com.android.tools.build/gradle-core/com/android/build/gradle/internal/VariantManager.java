@@ -35,6 +35,7 @@ import com.android.build.gradle.internal.dependency.AarTransform;
 import com.android.build.gradle.internal.dependency.AndroidTypeAttr;
 import com.android.build.gradle.internal.dependency.ExtractAarTransform;
 import com.android.build.gradle.internal.dependency.JarTransform;
+import com.android.build.gradle.internal.dependency.ProductFlavorAttr;
 import com.android.build.gradle.internal.dependency.VariantDependencies;
 import com.android.build.gradle.internal.dsl.CoreBuildType;
 import com.android.build.gradle.internal.dsl.CoreProductFlavor;
@@ -68,6 +69,7 @@ import com.android.builder.profile.Recorder;
 import com.android.utils.StringHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -80,13 +82,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.Named;
 import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
+import org.gradle.api.attributes.Attribute;
 import org.gradle.api.attributes.AttributeCompatibilityRule;
 import org.gradle.api.attributes.AttributeDisambiguationRule;
 import org.gradle.api.attributes.AttributeMatchingStrategy;
@@ -94,6 +99,7 @@ import org.gradle.api.attributes.AttributesSchema;
 import org.gradle.api.attributes.CompatibilityCheckDetails;
 import org.gradle.api.attributes.MultipleCandidatesDetails;
 import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.model.ObjectFactory;
 
 /**
  * Class to create, manage variants.
@@ -490,7 +496,7 @@ public class VariantManager implements VariantModel {
                                             testedVariantData.getVariantConfiguration().getType()))
                             .setTestedVariantType(testedVariantType)
                             .addSourceSets(testVariantSourceSets)
-                            .setFlavorSelection(extension.getFlavorSelection())
+                            .setFlavorSelection(getFlavorSelection(variantConfig))
                             .setBaseSplit(
                                     variantType == VariantType.FEATURE
                                             && extension.getBaseFeature());
@@ -521,18 +527,31 @@ public class VariantManager implements VariantModel {
     }
 
     @NonNull
+    private Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> getFlavorSelection(
+            @NonNull GradleVariantConfiguration config) {
+        ObjectFactory factory = project.getObjects();
+        return config.getFlavorSelections()
+                .entrySet()
+                .stream()
+                .collect(
+                        Collectors.toMap(
+                                entry -> Attribute.of(entry.getKey(), ProductFlavorAttr.class),
+                                entry -> factory.named(ProductFlavorAttr.class, entry.getValue())));
+    }
+
+    @NonNull
     private AndroidTypeAttr getConsumeType(@NonNull VariantType type) {
         switch (type) {
             case DEFAULT:
                 if (variantFactory instanceof TestVariantFactory) {
-                    return AndroidTypeAttr.TYPE_APK;
+                    return project.getObjects().named(AndroidTypeAttr.class, AndroidTypeAttr.APK);
                 }
-                return AndroidTypeAttr.TYPE_AAR;
+                return project.getObjects().named(AndroidTypeAttr.class, AndroidTypeAttr.AAR);
             case LIBRARY:
-                return AndroidTypeAttr.TYPE_AAR;
+                return project.getObjects().named(AndroidTypeAttr.class, AndroidTypeAttr.AAR);
             case FEATURE:
             case INSTANTAPP:
-                return AndroidTypeAttr.TYPE_FEATURE;
+                return project.getObjects().named(AndroidTypeAttr.class, AndroidTypeAttr.FEATURE);
             case ANDROID_TEST:
             case UNIT_TEST:
                 throw new IllegalStateException(
@@ -543,15 +562,15 @@ public class VariantManager implements VariantModel {
     }
 
     @NonNull
-    private static AndroidTypeAttr getPublishingType(@NonNull VariantType type) {
+    private AndroidTypeAttr getPublishingType(@NonNull VariantType type) {
         switch (type) {
             case DEFAULT:
-                return AndroidTypeAttr.TYPE_APK;
+                return project.getObjects().named(AndroidTypeAttr.class, AndroidTypeAttr.APK);
             case LIBRARY:
-                return AndroidTypeAttr.TYPE_AAR;
+                return project.getObjects().named(AndroidTypeAttr.class, AndroidTypeAttr.AAR);
             case FEATURE:
             case INSTANTAPP:
-                return AndroidTypeAttr.TYPE_FEATURE;
+                return project.getObjects().named(AndroidTypeAttr.class, AndroidTypeAttr.FEATURE);
             case ANDROID_TEST:
             case UNIT_TEST:
                 throw new IllegalStateException(
@@ -603,6 +622,9 @@ public class VariantManager implements VariantModel {
     private static final class AndroidTypeAttrCompatRule
             implements AttributeCompatibilityRule<AndroidTypeAttr> {
 
+        private static final Set<String> FEATURE_OR_APK =
+                ImmutableSet.of(AndroidTypeAttr.FEATURE, AndroidTypeAttr.APK);
+
         @Inject
         public AndroidTypeAttrCompatRule() {}
 
@@ -613,11 +635,10 @@ public class VariantManager implements VariantModel {
             if (producerValue.equals(consumerValue)) {
                 details.compatible();
             } else {
-                // 1. Feature and aar are compatible for splits that depend on an AAR only.
+                // 1. Feature and aar are compatible for features that depend on an AAR only.
                 // 2. APK and aar are compatible for test-app that consumes APK. They need access to the aar dependencies of the tested app.
-                if (AndroidTypeAttr.TYPE_AAR.equals(producerValue)
-                        && (AndroidTypeAttr.TYPE_FEATURE.equals(consumerValue)
-                                || AndroidTypeAttr.TYPE_APK.equals(consumerValue))) {
+                if (AndroidTypeAttr.AAR.equals(producerValue.getName())
+                        && FEATURE_OR_APK.contains(consumerValue.getName())) {
                     details.compatible();
                 }
             }
@@ -627,17 +648,25 @@ public class VariantManager implements VariantModel {
     private static final class AndroidTypeAttrDisambRule
             implements AttributeDisambiguationRule<AndroidTypeAttr> {
 
+        public static final Set<String> FEATURE_AND_AAR =
+                ImmutableSet.of(AndroidTypeAttr.FEATURE, AndroidTypeAttr.AAR);
+
         @Inject
         public AndroidTypeAttrDisambRule() {}
 
         @Override
         public void execute(MultipleCandidatesDetails<AndroidTypeAttr> details) {
-            // we should only get here, with both split and aar.
+            // we should only get here, with both feature and aar.
             Set<AndroidTypeAttr> values = details.getCandidateValues();
-            if (values.size() == 2
-                    && values.contains(AndroidTypeAttr.TYPE_AAR)
-                    && values.contains(AndroidTypeAttr.TYPE_FEATURE)) {
-                details.closestMatch(AndroidTypeAttr.TYPE_FEATURE);
+
+            if (values.size() == 2) {
+                // get the 2 names and make sure these are the names we want:
+                Map<String, AndroidTypeAttr> valueMap =
+                        values.stream().collect(Collectors.toMap(Named::getName, value -> value));
+
+                if (valueMap.keySet().equals(FEATURE_AND_AAR)) {
+                    details.closestMatch(valueMap.get(AndroidTypeAttr.FEATURE));
+                }
             }
         }
     }
@@ -794,7 +823,7 @@ public class VariantManager implements VariantModel {
                                 getConsumeType(variantData.getVariantConfiguration().getType()))
                         .setPublishType(
                                 getPublishingType(variantData.getVariantConfiguration().getType()))
-                        .setFlavorSelection(extension.getFlavorSelection())
+                        .setFlavorSelection(getFlavorSelection(variantConfig))
                         .addSourceSets(variantSourceSets)
                         .setBaseSplit(
                                 variantType == VariantType.FEATURE && extension.getBaseFeature());
@@ -1041,7 +1070,7 @@ public class VariantManager implements VariantModel {
                                         project.getPath(), variantData.getName())
                                 .setIsDebug(variantConfig.getBuildType().isDebuggable())
                                 .setMinSdkVersion(
-                                        AnalyticsUtil.convert(variantConfig.getMinSdkVersion()))
+                                        AnalyticsUtil.toProto(variantConfig.getMinSdkVersion()))
                                 .setMinifyEnabled(variantScope.getCodeShrinker() != null)
                                 .setUseMultidex(variantConfig.isMultiDexEnabled())
                                 .setUseLegacyMultidex(variantConfig.isLegacyMultiDexMode())
@@ -1049,7 +1078,7 @@ public class VariantManager implements VariantModel {
 
                 if (variantConfig.getTargetSdkVersion().getApiLevel() > 0) {
                     profileBuilder.setTargetSdkVersion(
-                            AnalyticsUtil.convert(variantConfig.getTargetSdkVersion()));
+                            AnalyticsUtil.toProto(variantConfig.getTargetSdkVersion()));
                 }
                 if (variantConfig.getMergedFlavor().getMaxSdkVersion() != null) {
                     profileBuilder.setMaxSdkVersion(

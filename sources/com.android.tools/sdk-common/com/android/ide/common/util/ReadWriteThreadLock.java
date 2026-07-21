@@ -19,7 +19,6 @@ package com.android.ide.common.util;
 import com.android.annotations.NonNull;
 import com.android.annotations.concurrency.Immutable;
 import com.google.common.base.Preconditions;
-import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 import java.io.File;
 import java.nio.file.LinkOption;
@@ -98,18 +97,18 @@ public final class ReadWriteThreadLock {
     private final ReadWriteThreadLock.Lock writeLock = new ReadWriteThreadLock.WriteLock();
 
     /**
-     * JVM-wide map from a lock object to a {@link ReentrantReadWriteLock}, used to make sure that
-     * there is only one instance of {@code ReentrantReadWriteLock} per lock object within the
-     * current JVM.
+     * Map from a lock object to a {@link ReentrantReadWriteLock}, used to make sure that there is
+     * only one instance of {@code ReentrantReadWriteLock} per lock object within the current JVM
+     * within the current build.
      */
     @NonNull
-    private static final JvmWideVariable<ConcurrentMap<Object, ReentrantReadWriteLock>>
+    private static final BuildSessionVariable<ConcurrentMap<Object, ReentrantReadWriteLock>>
             lockMap =
-            new JvmWideVariable<>(
-                    ReadWriteThreadLock.class.getName(),
-                    "lockMap",
-                    concurrentMapToken(Object.class, ReentrantReadWriteLock.class),
-                    new ConcurrentHashMap<>());
+                    new BuildSessionVariable<>(
+                            ReadWriteThreadLock.class.getName(),
+                            "lockMap",
+                            new TypeToken<ConcurrentMap<Object, ReentrantReadWriteLock>>() {},
+                            ConcurrentHashMap::new);
 
     /**
      * The unique {@link ReentrantReadWriteLock} instance corresponding to the given lock object.
@@ -118,7 +117,7 @@ public final class ReadWriteThreadLock {
     private final ReentrantReadWriteLock lock;
 
     /**
-     * Creates a {@link ReadWriteThreadLock} instance for the given lock object. Threads will be
+     * Creates a {@code ReadWriteThreadLock} instance for the given lock object. Threads will be
      * synchronized on the same lock object (two lock objects are the same if one equals() the
      * other).
      *
@@ -143,7 +142,7 @@ public final class ReadWriteThreadLock {
 
         ConcurrentMap<Object, ReentrantReadWriteLock> map = lockMap.get();
         Preconditions.checkNotNull(map);
-        this.lock = map.computeIfAbsent(lockObject, (Object) -> new ReentrantReadWriteLock());
+        this.lock = map.computeIfAbsent(lockObject, (any) -> new ReentrantReadWriteLock());
     }
 
     /** Returns the lock used for reading. */
@@ -189,16 +188,5 @@ public final class ReadWriteThreadLock {
         public void unlock() {
             lock.writeLock().unlock();
         }
-    }
-
-    /**
-     * Returns the {@link TypeToken} for a {@link ConcurrentMap}.
-     */
-    @NonNull
-    private static <K, V> TypeToken<ConcurrentMap<K, V>> concurrentMapToken(
-            @NonNull Class<K> keyClass, @NonNull Class<V> valueClass) {
-        return new TypeToken<ConcurrentMap<K, V>>() {}
-                .where(new TypeParameter<K>() {}, TypeToken.of(keyClass))
-                .where(new TypeParameter<V>() {}, TypeToken.of(valueClass));
     }
 }

@@ -17,6 +17,9 @@
 package com.android.builder.symbols;
 
 
+import static com.android.SdkConstants.ANDROID_NS_NAME_PREFIX;
+import static com.android.SdkConstants.ANDROID_NS_NAME_PREFIX_LEN;
+
 import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.resources.ResourceType;
@@ -137,16 +140,20 @@ public final class ResourceValuesXmlParser {
     /**
      * Constructs a {@link SymbolTable} from the given parsed XML document. The values for the
      * resource are drawn from the given provider. For testing purposes, this method guarantees that
-     * IDs are assigned in the order the resources are provided in the XML document. However,
-     * this guarantee is only to make testing simpler and non-test code should not rely on this
+     * IDs are assigned in the order the resources are provided in the XML document. However, this
+     * guarantee is only to make testing simpler and non-test code should not rely on this
      * assumption as it may change, along with the required refactoring of the test code.
      *
      * @param xmlDocument the parsed XML document
      * @param idProvider the provider for IDs to assign to the resources
+     * @param platformAttrSymbols the platform attr symbols
      * @return the symbols for all resources in the document
      */
     @NonNull
-    public static SymbolTable parse(@NonNull Document xmlDocument, @NonNull IdProvider idProvider) {
+    public static SymbolTable parse(
+            @NonNull Document xmlDocument,
+            @NonNull IdProvider idProvider,
+            SymbolTable platformAttrSymbols) {
         Element root = xmlDocument.getDocumentElement();
         if (root == null) {
             throw new ResourceValuesXmlParseException("XML document does not have a root element.");
@@ -166,7 +173,8 @@ public final class ResourceValuesXmlParser {
         Node current = root.getFirstChild();
         while (current != null) {
             if (current.getNodeType() == Node.ELEMENT_NODE) {
-                parseChild((Element) current, builder, idProvider, enumSymbols);
+                parseChild(
+                        (Element) current, builder, idProvider, enumSymbols, platformAttrSymbols);
             }
             current = current.getNextSibling();
         }
@@ -185,12 +193,15 @@ public final class ResourceValuesXmlParser {
      * @param child the element to be parsed
      * @param builder the builder for the SymbolTable
      * @param idProvider the provider for IDs to assign to the resources
+     * @param enumSymbols out list of enum symbols discovered in declare-styleable
+     * @param platformAttrSymbols the platform attr symbols
      */
     private static void parseChild(
             @NonNull Element child,
             @NonNull SymbolTable.Builder builder,
             @NonNull IdProvider idProvider,
-            @NonNull List<Symbol> enumSymbols) {
+            @NonNull List<Symbol> enumSymbols,
+            @NonNull SymbolTable platformAttrSymbols) {
 
         String type = child.getTagName();
         if (type.equals(SdkConstants.TAG_ITEM)) {
@@ -247,7 +258,8 @@ public final class ResourceValuesXmlParser {
                 break;
             case DECLARE_STYLEABLE:
                 // We also need to find all the attributes declared under declare styleable.
-                parseDeclareStyleable(child, idProvider, name, builder, enumSymbols);
+                parseDeclareStyleable(
+                        child, idProvider, name, builder, enumSymbols, platformAttrSymbols);
                 break;
             case ATTR:
                 // We also need to find all the enums declared under attr (if there are any).
@@ -271,6 +283,8 @@ public final class ResourceValuesXmlParser {
      * @param idProvider the provider for IDs to assign to the resources
      * @param name name of the declare styleable element
      * @param builder the builder for the SymbolTable
+     * @param enumSymbols out list of enum symbols discovered in declare-styleable
+     * @param platformAttrSymbols the platform attr symbols
      * @throws ResourceValuesXmlParseException if there is an illegal type under declare-styleable
      */
     private static void parseDeclareStyleable(
@@ -278,10 +292,13 @@ public final class ResourceValuesXmlParser {
             @NonNull IdProvider idProvider,
             @NonNull String name,
             @NonNull SymbolTable.Builder builder,
-            @NonNull List<Symbol> enumSymbols) {
+            @NonNull List<Symbol> enumSymbols,
+            @NonNull SymbolTable platformAttrSymbols) {
         List<String> attrValues = new ArrayList<>();
+        List<String> attrNames = new ArrayList<>();
 
         Node attrNode = declareStyleable.getFirstChild();
+        int index = 0;
         while (attrNode != null) {
             if (attrNode.getNodeType() != Node.ELEMENT_NODE) {
                 attrNode = attrNode.getNextSibling();
@@ -303,23 +320,29 @@ public final class ResourceValuesXmlParser {
                                 tagName));
             }
 
-            String attrName =
-                    SymbolUtils.canonicalizeValueResourceName(
-                            getMandatoryAttr(attrElement, "name"));
+            String attrName = getMandatoryAttr(attrElement, "name");
 
-            parseAttr(attrElement, idProvider, attrName, builder, enumSymbols);
+            if (attrName.startsWith(ANDROID_NS_NAME_PREFIX)) {
+                // this is an android attr.
+                String realAttrName = attrName.substring(ANDROID_NS_NAME_PREFIX_LEN);
 
-            String attrValue = idProvider.next(ResourceType.STYLEABLE);
+                final Symbol attrSymbol =
+                        platformAttrSymbols
+                                .getSymbols()
+                                .get(SymbolTable.key(ResourceType.ATTR, realAttrName));
 
-            Symbol newStyleable =
-                    Symbol.createSymbol(
-                            ResourceType.STYLEABLE,
-                            name + "_" + attrName,
-                            SymbolJavaType.INT,
-                            attrValue);
+                if (attrSymbol != null) {
+                    attrValues.add(attrSymbol.getValue());
+                } else {
+                    throw new ResourceValuesXmlParseException(
+                            String.format("Unknown android attribute '%s'", name));
+                }
+            } else {
+                attrName = SymbolUtils.canonicalizeValueResourceName(attrName);
+                attrValues.add(parseAttr(attrElement, idProvider, attrName, builder, enumSymbols));
+            }
 
-            builder.add(newStyleable);
-            attrValues.add(attrValue);
+            attrNames.add(attrName);
 
             attrNode = attrNode.getNextSibling();
         }
@@ -328,7 +351,8 @@ public final class ResourceValuesXmlParser {
                         ResourceType.STYLEABLE,
                         name,
                         SymbolJavaType.INT_LIST,
-                        "{" + Joiner.on(',').join(attrValues) + "}"));
+                        "{ " + Joiner.on(", ").join(attrValues) + " }",
+                        attrNames));
     }
 
     /**
@@ -339,15 +363,15 @@ public final class ResourceValuesXmlParser {
      * @param idProvider the provider for IDs to assign to the resources
      * @param name name of the attr element
      * @param builder the builder for the SymbolTable
+     * @return the symbol value of the parsed attribute
      * @throws ResourceValuesXmlParseException if there is an illegal type under attr
      */
-    private static void parseAttr(
+    private static String parseAttr(
             @NonNull Element attr,
             @NonNull IdProvider idProvider,
             @NonNull String name,
             @NonNull SymbolTable.Builder builder,
             @NonNull List<Symbol> enumSymbols) {
-
         Node enumNode = attr.getFirstChild();
         while (enumNode != null) {
             if (enumNode.getNodeType() != Node.ELEMENT_NODE) {
@@ -379,16 +403,16 @@ public final class ResourceValuesXmlParser {
             enumNode = enumNode.getNextSibling();
         }
 
-        Symbol newAttr =
-                Symbol.createSymbol(
-                        ResourceType.ATTR,
-                        name,
-                        SymbolJavaType.INT,
-                        idProvider.next(ResourceType.ATTR));
+        final String value = idProvider.next(ResourceType.ATTR);
+        Symbol newAttr = Symbol.createSymbol(ResourceType.ATTR, name, SymbolJavaType.INT, value);
 
         if (!builder.contains(newAttr)) {
             builder.add(newAttr);
+            return value;
         }
+
+        //noinspection ConstantConditions
+        return builder.get(newAttr).getValue();
     }
 
     /**

@@ -29,4 +29,9 @@ public interface CoreCmakeOptions {
     @Nullable
     File getPath();
     void setPath(@NonNull File path);
+
+    @Nullable
+    File getBuildStagingDirectory();
+
+    void setBuildStagingDirectory(@NonNull File buildStagingDirectory);
 }

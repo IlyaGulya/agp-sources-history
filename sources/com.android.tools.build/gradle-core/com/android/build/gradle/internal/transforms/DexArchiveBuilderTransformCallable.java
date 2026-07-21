@@ -28,9 +28,9 @@ import com.android.builder.dexing.DexArchiveBuilder;
 import com.android.builder.dexing.DexArchiveBuilderConfig;
 import com.android.builder.dexing.DexArchiveEntry;
 import com.android.builder.dexing.DexArchives;
+import com.android.builder.dexing.DexerTool;
 import com.android.builder.utils.ExceptionRunnable;
 import com.android.builder.utils.FileCache;
-import com.android.builder.utils.PerformanceUtils;
 import com.android.dx.Version;
 import com.android.dx.command.dexer.DxContext;
 import com.android.ide.common.process.ProcessOutput;
@@ -80,8 +80,16 @@ class DexArchiveBuilderTransformCallable implements Callable<Void> {
         JUMBO_MODE,
 
         /** Whether optimize is enabled. */
-        OPTIMIZE
+        OPTIMIZE,
+
+        /** Tool used to produce the dex archive. */
+        DEXER_TOOL,
+
+        /** Version of the cache key. */
+        CACHE_KEY_VERSION,
     }
+
+    private static final int CACHE_KEY_VERSION = 1;
 
     private static final LoggerWrapper logger =
             LoggerWrapper.getLogger(DexArchiveBuilderTransformCallable.class);
@@ -93,9 +101,9 @@ class DexArchiveBuilderTransformCallable implements Callable<Void> {
     @NonNull private final Set<String> hashes;
     @NonNull private final ProcessOutput processOutput;
     @Nullable private final FileCache userLevelCache;
-    @Nullable private final FileCache projectLevelCache;
     @NonNull private final DexOptions dexOptions;
     private final int minSdkVersion;
+    @NonNull private final DexerTool dexerTool;
 
     public DexArchiveBuilderTransformCallable(
             @NonNull Path rootPath,
@@ -105,9 +113,9 @@ class DexArchiveBuilderTransformCallable implements Callable<Void> {
             @NonNull Set<String> hashes,
             @NonNull ProcessOutput processOutput,
             @Nullable FileCache userLevelCache,
-            @Nullable FileCache projectLevelCache,
             @NonNull DexOptions dexOptions,
-            int minSdkVersion) {
+            int minSdkVersion,
+            @NonNull DexerTool dexer) {
         this.rootPath = rootPath;
         this.toProcess = toProcess;
         this.toRemove = toRemove;
@@ -115,9 +123,9 @@ class DexArchiveBuilderTransformCallable implements Callable<Void> {
         this.hashes = hashes;
         this.processOutput = processOutput;
         this.userLevelCache = userLevelCache;
-        this.projectLevelCache = projectLevelCache;
         this.dexOptions = dexOptions;
         this.minSdkVersion = minSdkVersion;
+        this.dexerTool = dexer;
     }
 
     @Override
@@ -137,15 +145,9 @@ class DexArchiveBuilderTransformCallable implements Callable<Void> {
 
         ExceptionRunnable cacheMissAction = cacheMissAction();
 
-        FileCache cache = cacheToUse();
-        if (cache != null) {
+        if (userLevelCache != null) {
             FileCache.Inputs buildCacheInputs = getBuildCacheInputs(rootPath.toFile(), dexOptions);
-            String actionableMessage =
-                    userLevelCache == cache
-                            ? BuildCacheUtils.BUILD_CACHE_TROUBLESHOOTING_MESSAGE
-                            : "";
-            getFromCacheAndCreateIfMissing(
-                    cache, buildCacheInputs, cacheMissAction, actionableMessage);
+            getFromCacheAndCreateIfMissing(userLevelCache, buildCacheInputs, cacheMissAction);
         } else {
             cacheMissAction.run();
         }
@@ -163,23 +165,10 @@ class DexArchiveBuilderTransformCallable implements Callable<Void> {
         return null;
     }
 
-    /** Returns cache to be used, or {@code null} if none should be used. */
-    @Nullable
-    private FileCache cacheToUse() {
-        if (userLevelCache != null) {
-            return userLevelCache;
-        } else if (projectLevelCache != null) {
-            return projectLevelCache;
-        } else {
-            return null;
-        }
-    }
-
     private void getFromCacheAndCreateIfMissing(
             @NonNull FileCache cache,
             @NonNull FileCache.Inputs key,
-            @NonNull ExceptionRunnable cacheMissAction,
-            @NonNull String actionableMessage) {
+            @NonNull ExceptionRunnable cacheMissAction) {
         FileCache.QueryResult result;
         try {
             result = cache.createFile(to, key, cacheMissAction);
@@ -200,7 +189,7 @@ class DexArchiveBuilderTransformCallable implements Callable<Void> {
                             rootPath.toString(),
                             to.getAbsolutePath(),
                             cache.getCacheDirectory().getAbsolutePath(),
-                            actionableMessage));
+                            BuildCacheUtils.BUILD_CACHE_TROUBLESHOOTING_MESSAGE));
             throw new RuntimeException(exception);
         }
         if (result.getQueryEvent().equals(FileCache.QueryEvent.CORRUPTED)) {
@@ -212,7 +201,7 @@ class DexArchiveBuilderTransformCallable implements Callable<Void> {
                             + "%3$s",
                     cache.getCacheDirectory().getAbsolutePath(),
                     Throwables.getStackTraceAsString(result.getCauseOfCorruption()),
-                    actionableMessage);
+                    BuildCacheUtils.BUILD_CACHE_TROUBLESHOOTING_MESSAGE);
         }
     }
 
@@ -221,19 +210,31 @@ class DexArchiveBuilderTransformCallable implements Callable<Void> {
         return () -> {
             try (ClassFileInput input = ClassFileInputs.fromPath(rootPath, toProcess);
                     DexArchive outputArchive = DexArchives.fromInput(to.toPath())) {
-                boolean optimizedDex =
-                        !dexOptions.getAdditionalParameters().contains("--no-optimize");
-                DxContext dxContext =
-                        new DxContext(
-                                processOutput.getStandardOutput(), processOutput.getErrorOutput());
-                DexArchiveBuilderConfig config =
-                        new DexArchiveBuilderConfig(
-                                dxContext,
-                                optimizedDex,
-                                minSdkVersion);
+                DexArchiveBuilder builder;
+                switch (dexerTool) {
+                    case DX:
+                        {
+                            boolean optimizedDex =
+                                    !dexOptions.getAdditionalParameters().contains("--no-optimize");
+                            DxContext dxContext =
+                                    new DxContext(
+                                            processOutput.getStandardOutput(),
+                                            processOutput.getErrorOutput());
+                            DexArchiveBuilderConfig config =
+                                    new DexArchiveBuilderConfig(
+                                            dxContext,
+                                            optimizedDex,
+                                            minSdkVersion,
+                                            dexerTool,
+                                            isJumboModeEnabledForDx());
 
-                DexArchiveBuilder converter = new DexArchiveBuilder(config);
-                converter.convert(input, outputArchive);
+                            builder = DexArchiveBuilder.createDxDexBuilder(config);
+                            break;
+                        }
+                    default:
+                        throw new AssertionError("Unknown dexer tool " + dexerTool.name());
+                }
+                builder.convert(input, outputArchive);
             }
         };
     }
@@ -277,10 +278,12 @@ class DexArchiveBuilderTransformCallable implements Callable<Void> {
         buildCacheInputs
                 .putFileHash(FileCacheInputParams.FILE_HASH.name(), inputFile)
                 .putString(FileCacheInputParams.DX_VERSION.name(), Version.VERSION)
-                .putBoolean(FileCacheInputParams.JUMBO_MODE.name(), dexOptions.getJumboMode())
+                .putBoolean(FileCacheInputParams.JUMBO_MODE.name(), isJumboModeEnabledForDx())
                 .putBoolean(
                         FileCacheInputParams.OPTIMIZE.name(),
-                        !dexOptions.getAdditionalParameters().contains("--no-optimize"));
+                        !dexOptions.getAdditionalParameters().contains("--no-optimize"))
+                .putString(FileCacheInputParams.DEXER_TOOL.name(), dexerTool.name())
+                .putLong(FileCacheInputParams.CACHE_KEY_VERSION.name(), CACHE_KEY_VERSION);
 
         return buildCacheInputs.build();
     }
@@ -304,5 +307,10 @@ class DexArchiveBuilderTransformCallable implements Callable<Void> {
         }
 
         return hashCode.toString();
+    }
+
+    /** Jumbo mode is always enabled for dex archives - see http://b.android.com/321744 */
+    private static boolean isJumboModeEnabledForDx() {
+        return true;
     }
 }

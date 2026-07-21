@@ -24,10 +24,12 @@ import static com.android.build.gradle.internal.publishing.AndroidArtifacts.Arti
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.METADATA_VALUES;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH;
+import static com.android.build.gradle.options.BooleanOption.BUILD_ONLY_TARGET_ABI;
 
 import com.android.SdkConstants;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.build.gradle.internal.core.GradleVariantConfiguration;
 import com.android.build.gradle.internal.dependency.ArtifactCollectionWithExtraArtifact.ExtraComponentIdentifier;
 import com.android.build.gradle.internal.dsl.CoreBuildType;
 import com.android.build.gradle.internal.dsl.CoreProductFlavor;
@@ -41,6 +43,8 @@ import com.android.build.gradle.internal.tasks.ApplicationId;
 import com.android.build.gradle.internal.tasks.TaskInputHelper;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.internal.variant.TaskContainer;
+import com.android.build.gradle.options.ProjectOptions;
+import com.android.build.gradle.options.StringOption;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.VariantConfiguration;
 import com.android.builder.model.ApiVersion;
@@ -51,7 +55,6 @@ import com.android.manifmerger.ManifestProvider;
 import com.android.manifmerger.MergingReport;
 import com.android.manifmerger.XmlDocument;
 import com.android.utils.FileUtils;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -77,13 +80,11 @@ import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
-import org.gradle.api.tasks.ParallelizableTask;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.internal.component.local.model.OpaqueComponentArtifactIdentifier;
 
 /** A task that processes the manifest */
-@ParallelizableTask
 @CacheableTask
 public class MergeManifests extends ManifestProcessorTask {
 
@@ -100,6 +101,10 @@ public class MergeManifests extends ManifestProcessorTask {
     private FileCollection packageManifest;
     private List<Feature> optionalFeatures;
     private SplitScope splitScope;
+
+    private Set<String> supportedAbis;
+    private String buildTargetAbi;
+    private String buildTargetDensity;
 
     @Override
     protected void doFullTaskAction() throws IOException {
@@ -118,8 +123,13 @@ public class MergeManifests extends ManifestProcessorTask {
         }
 
         @Nullable BuildOutput compatibleScreenManifestForSplit;
+
+        List<ApkData> splitsToGenerate =
+                ProcessAndroidResources.getSplitsToGenerate(
+                        splitScope, supportedAbis, buildTargetAbi, buildTargetDensity);
+
         // FIX ME : multi threading.
-        for (ApkData apkData : splitScope.getApkDatas()) {
+        for (ApkData apkData : splitsToGenerate) {
             compatibleScreenManifestForSplit =
                     SplitScope.getOutput(
                             compatibleScreenManifests,
@@ -183,28 +193,6 @@ public class MergeManifests extends ManifestProcessorTask {
         splitScope.save(
                 ImmutableList.of(VariantScope.TaskOutputType.INSTANT_RUN_MERGED_MANIFESTS),
                 getInstantRunManifestOutputDirectory());
-    }
-
-    @NonNull
-    @Override
-    @Internal
-    public File getManifestOutputFile() {
-        Preconditions.checkNotNull(splitScope.getMainSplit());
-        return FileUtils.join(
-                getManifestOutputDirectory(),
-                splitScope.getMainSplit().getDirName(),
-                SdkConstants.ANDROID_MANIFEST_XML);
-    }
-
-    @Nullable
-    @Override
-    @Internal
-    public File getInstantRunManifestOutputFile() {
-        Preconditions.checkNotNull(splitScope.getMainSplit());
-        return FileUtils.join(
-                getInstantRunManifestOutputDirectory(),
-                splitScope.getMainSplit().getDirName(),
-                SdkConstants.ANDROID_MANIFEST_XML);
     }
 
     @Nullable
@@ -434,6 +422,24 @@ public class MergeManifests extends ManifestProcessorTask {
         return packageManifest;
     }
 
+    @Input
+    @Optional
+    public Set<String> getSupportedAbis() {
+        return supportedAbis;
+    }
+
+    @Input
+    @Optional
+    public String getBuildTargetAbi() {
+        return buildTargetAbi;
+    }
+
+    @Input
+    @Optional
+    public String getBuildTargetDensity() {
+        return buildTargetDensity;
+    }
+
     public static class ConfigAction implements TaskConfigAction<MergeManifests> {
 
         protected final VariantScope variantScope;
@@ -459,10 +465,10 @@ public class MergeManifests extends ManifestProcessorTask {
         @Override
         public void execute(@NonNull MergeManifests processManifestTask) {
             final BaseVariantData variantData = variantScope.getVariantData();
-            final VariantConfiguration<CoreBuildType, CoreProductFlavor, CoreProductFlavor> config =
-                    variantData.getVariantConfiguration();
+            final GradleVariantConfiguration config = variantData.getVariantConfiguration();
             GlobalScope globalScope = variantScope.getGlobalScope();
             AndroidBuilder androidBuilder = globalScope.getAndroidBuilder();
+            ProjectOptions projectOptions = variantScope.getGlobalScope().getProjectOptions();
 
             processManifestTask.setAndroidBuilder(androidBuilder);
             processManifestTask.setVariantName(config.getFullName());
@@ -511,6 +517,21 @@ public class MergeManifests extends ManifestProcessorTask {
 
             processManifestTask.setReportFile(variantScope.getManifestReportFile());
             processManifestTask.optionalFeatures = optionalFeatures;
+
+            processManifestTask.supportedAbis =
+                    variantData.getVariantConfiguration().getSupportedAbis();
+            processManifestTask.buildTargetAbi =
+                    projectOptions.get(BUILD_ONLY_TARGET_ABI)
+                                    || variantScope
+                                            .getGlobalScope()
+                                            .getExtension()
+                                            .getSplits()
+                                            .getAbi()
+                                            .isEnable()
+                            ? projectOptions.get(StringOption.IDE_BUILD_TARGET_ABI)
+                            : null;
+            processManifestTask.buildTargetDensity =
+                    projectOptions.get(StringOption.IDE_BUILD_TARGET_DENSITY);
 
             variantScope
                     .getVariantData()

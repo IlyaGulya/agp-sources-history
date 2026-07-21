@@ -47,10 +47,8 @@ import com.android.build.gradle.internal.transforms.InstantRunSliceSplitApkBuild
 import com.android.build.gradle.internal.variant.ApplicationVariantData;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.internal.variant.SplitHandlingPolicy;
-import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.OptionalBooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
-import com.android.build.gradle.tasks.AndroidJarTask;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.model.SyncIssue;
 import com.android.builder.profile.Recorder;
@@ -306,7 +304,6 @@ public class ApplicationTaskManager extends TaskManager {
 
         addJavacClassesStream(variantScope);
         setJavaCompilerTask(javacTask, tasks, variantScope);
-        getAndroidTasks().create(tasks, new AndroidJarTask.JarClassesConfigAction(variantScope));
         createPostCompilationTasks(tasks, variantScope);
     }
 
@@ -340,6 +337,7 @@ public class ApplicationTaskManager extends TaskManager {
                             project,
                             variantScope.getInstantRunBuildContext(),
                             variantScope.getGlobalScope().getAndroidBuilder(),
+                            variantScope.getGlobalScope().getBuildCache(),
                             packagingScope,
                             packagingScope.getSigningConfig(),
                             AaptGeneration.fromProjectOptions(projectOptions),
@@ -362,13 +360,16 @@ public class ApplicationTaskManager extends TaskManager {
                             project,
                             variantScope.getInstantRunBuildContext(),
                             variantScope.getGlobalScope().getAndroidBuilder(),
+                            variantScope.getGlobalScope().getBuildCache(),
                             packagingScope,
                             packagingScope.getSigningConfig(),
                             AaptGeneration.fromProjectOptions(projectOptions),
                             packagingScope.getAaptOptions(),
                             new File(packagingScope.getInstantRunSplitApkOutputFolder(), "slices"),
                             packagingScope.getInstantRunSupportDir(),
-                            globalScope.getProjectOptions().get(OptionalBooleanOption.SERIAL_AAPT2));
+                            globalScope
+                                    .getProjectOptions()
+                                    .get(OptionalBooleanOption.SERIAL_AAPT2));
 
             Optional<AndroidTask<TransformTask>> transformTaskAndroidTask = variantScope
                     .getTransformManager().addTransform(tasks, variantScope, slicesApkBuilder);

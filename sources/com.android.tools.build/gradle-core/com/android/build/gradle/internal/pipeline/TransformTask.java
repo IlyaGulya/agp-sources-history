@@ -19,6 +19,7 @@ package com.android.build.gradle.internal.pipeline;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.api.transform.Context;
+import com.android.build.api.transform.QualifiedContent;
 import com.android.build.api.transform.SecondaryFile;
 import com.android.build.api.transform.SecondaryInput;
 import com.android.build.api.transform.Status;
@@ -46,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.logging.Logger;
@@ -56,14 +58,14 @@ import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputDirectories;
 import org.gradle.api.tasks.OutputFiles;
-import org.gradle.api.tasks.ParallelizableTask;
 import org.gradle.api.tasks.PathSensitive;
 import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.incremental.IncrementalTaskInputs;
+import org.gradle.internal.impldep.org.jetbrains.annotations.NotNull;
+import org.gradle.workers.WorkerExecutor;
 
 /** A task running a transform. */
-@ParallelizableTask
 @CacheableTask
 public class TransformTask extends StreamBasedTask implements Context {
 
@@ -71,9 +73,15 @@ public class TransformTask extends StreamBasedTask implements Context {
     private Recorder recorder;
     Collection<SecondaryFile> secondaryFiles = null;
     List<FileCollection> secondaryInputFiles = null;
+    @NotNull private final WorkerExecutor workerExecutor;
 
     public Transform getTransform() {
         return transform;
+    }
+
+    @Inject
+    public TransformTask(@NotNull WorkerExecutor workerExecutor) {
+        this.workerExecutor = workerExecutor;
     }
 
     @InputFiles
@@ -363,6 +371,10 @@ public class TransformTask extends StreamBasedTask implements Context {
 
         Splitter splitter = Splitter.on(File.separatorChar);
 
+        final Sets.SetView<? super QualifiedContent.Scope> scopes =
+                Sets.union(transform.getScopes(), transform.getReferencedScopes());
+        final Set<QualifiedContent.ContentType> inputTypes = transform.getInputTypes();
+
         // start with the removed files as they carry the risk of removing incremental mode.
         // If we detect such a case, we stop immediately.
         for (File removedFile : removedFiles) {
@@ -375,16 +387,9 @@ public class TransformTask extends StreamBasedTask implements Context {
             boolean found = false;
             while (iterator.hasNext()) {
                 IncrementalTransformInput next = iterator.next();
-                if (next.checkRemovedJarFile(
-                        Sets.union(transform.getScopes(), transform.getReferencedScopes()),
-                        transform.getInputTypes(),
-                        removedFile,
-                        removedFileSegments)
+                if (next.checkRemovedJarFile(scopes, inputTypes, removedFile, removedFileSegments)
                         || next.checkRemovedFolderFile(
-                                Sets.union(transform.getScopes(), transform.getReferencedScopes()),
-                                transform.getInputTypes(),
-                                removedFile,
-                                removedFileSegments)) {
+                                scopes, inputTypes, removedFile, removedFileSegments)) {
                     found = true;
                     break;
                 }
@@ -457,6 +462,12 @@ public class TransformTask extends StreamBasedTask implements Context {
 
     public  interface  ConfigActionCallback<T extends Transform> {
         void callback(@NonNull T transform, @NonNull TransformTask task);
+    }
+
+    @NonNull
+    @Override
+    public WorkerExecutor getWorkerExecutor() {
+        return workerExecutor;
     }
 
     public static class ConfigAction<T extends Transform> implements TaskConfigAction<TransformTask> {

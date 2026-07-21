@@ -54,6 +54,7 @@ import com.android.build.gradle.internal.ndk.NdkHandler;
 import com.android.build.gradle.internal.pipeline.TransformTask;
 import com.android.build.gradle.internal.process.GradleJavaProcessExecutor;
 import com.android.build.gradle.internal.process.GradleProcessExecutor;
+import com.android.build.gradle.internal.profile.AnalyticsUtil;
 import com.android.build.gradle.internal.profile.ProfilerInitializer;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.VariantScope;
@@ -101,7 +102,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.function.Supplier;
 import org.gradle.BuildListener;
 import org.gradle.BuildResult;
 import org.gradle.api.Action;
@@ -234,8 +234,8 @@ public abstract class BasePlugin implements ToolingRegistryProvider {
     }
 
     protected void apply(@NonNull Project project) {
-        checkPluginVersion();
         project.getPluginManager().apply(AndroidBasePlugin.class);
+        checkPluginVersion();
 
         TaskInputHelper.enableBypass();
 
@@ -423,10 +423,6 @@ public abstract class BasePlugin implements ToolingRegistryProvider {
         @Nullable
         FileCache buildCache = BuildCacheUtils.createBuildCacheIfEnabled(project, projectOptions);
 
-        // This needs to be lazy, because rootProject.buildDir may be changed after the plugin is applied.
-        Supplier<FileCache> projectLevelCache =
-                () -> BuildCacheUtils.createProjectLevelCache(project);
-
         GlobalScope globalScope =
                 new GlobalScope(
                         project,
@@ -436,8 +432,7 @@ public abstract class BasePlugin implements ToolingRegistryProvider {
                         sdkHandler,
                         ndkHandler,
                         registry,
-                        buildCache,
-                        projectLevelCache);
+                        buildCache);
 
         variantFactory = createVariantFactory(globalScope, instantiator, androidBuilder, extension);
 
@@ -605,7 +600,8 @@ public abstract class BasePlugin implements ToolingRegistryProvider {
 
         ProcessProfileWriter.getProject(project.getPath())
                 .setCompileSdk(extension.getCompileSdkVersion())
-                .setBuildToolsVersion(extension.getBuildToolsRevision().toString());
+                .setBuildToolsVersion(extension.getBuildToolsRevision().toString())
+                .setSplits(AnalyticsUtil.toProto(extension.getSplits()));
 
         // setup SDK repositories.
         sdkHandler.addLocalRepositories(project);
@@ -619,7 +615,11 @@ public abstract class BasePlugin implements ToolingRegistryProvider {
                     variantManager.createAndroidTasks();
                     ApiObjectFactory apiObjectFactory =
                             new ApiObjectFactory(
-                                    androidBuilder, extension, variantFactory, instantiator);
+                                    androidBuilder,
+                                    extension,
+                                    variantFactory,
+                                    instantiator,
+                                    project.getObjects());
                     for (VariantScope variantScope : variantManager.getVariantScopes()) {
                         BaseVariantData variantData = variantScope.getVariantData();
                         apiObjectFactory.create(variantData);

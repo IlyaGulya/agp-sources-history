@@ -41,7 +41,6 @@ import com.android.ide.common.build.ApkData;
 import com.android.manifmerger.ManifestProvider;
 import com.android.utils.FileUtils;
 import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +56,6 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Optional;
-import org.gradle.api.tasks.ParallelizableTask;
 
 /**
  * A task that processes the manifest for test modules and tests in androidTest.
@@ -70,7 +68,6 @@ import org.gradle.api.tasks.ParallelizableTask;
  * the published intermediate manifest with type {@link AndroidArtifacts#TYPE_METADATA}
  * of the tested app.</p>
  */
-@ParallelizableTask
 public class ProcessTestManifest extends ManifestProcessorTask {
 
     @Nullable
@@ -162,22 +159,6 @@ public class ProcessTestManifest extends ManifestProcessorTask {
         splitScope.addOutputForSplit(
                 VariantScope.TaskOutputType.MERGED_MANIFESTS, mainApkData, manifestOutputFile);
         splitScope.save(VariantScope.TaskOutputType.MERGED_MANIFESTS, getManifestOutputDirectory());
-    }
-
-    @NonNull
-    @Override
-    public File getManifestOutputFile() {
-        Preconditions.checkState(!splitScope.getApkDatas().isEmpty());
-        return FileUtils.join(
-                getManifestOutputDirectory(),
-                splitScope.getApkDatas().get(0).getDirName(),
-                SdkConstants.ANDROID_MANIFEST_XML);
-    }
-
-    @Nullable
-    @Override
-    public File getInstantRunManifestOutputFile() {
-        return null;
     }
 
     @Nullable

@@ -86,9 +86,6 @@ public interface AndroidConfig {
     /** Whether to generate pure splits or multi apk. */
     boolean getGeneratePureSplits();
 
-    @Deprecated
-    boolean getEnforceUniquePackageName();
-
     /** Default config, shared by all flavors. */
     CoreProductFlavor getDefaultConfig();
 
@@ -164,9 +161,6 @@ public interface AndroidConfig {
 
     /** Whether the feature module is the base feature. */
     Boolean getBaseFeature();
-
-    @NonNull
-    Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> getFlavorSelection();
 
     final class DeprecatedConfigurationAction implements Action<Dependency> {
 

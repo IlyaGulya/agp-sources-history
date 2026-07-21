@@ -29,7 +29,6 @@ import com.android.build.gradle.internal.LoggingUtil;
 import com.android.build.gradle.internal.SdkHandler;
 import com.android.build.gradle.internal.SourceSetSourceProviderWrapper;
 import com.android.build.gradle.internal.coverage.JacocoOptions;
-import com.android.build.gradle.internal.dependency.ProductFlavorAttr;
 import com.android.build.gradle.internal.dsl.AaptOptions;
 import com.android.build.gradle.internal.dsl.AdbOptions;
 import com.android.build.gradle.internal.dsl.AndroidSourceSetFactory;
@@ -55,15 +54,12 @@ import com.android.builder.testing.api.TestServer;
 import com.android.repository.Revision;
 import com.android.resources.Density;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
@@ -71,7 +67,6 @@ import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ConfigurationContainer;
-import org.gradle.api.attributes.Attribute;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.SourceSet;
@@ -153,7 +148,6 @@ public abstract class BaseExtension implements AndroidConfig {
     private ExtraModelInfo extraModelInfo;
 
     private String defaultPublishConfig = "release";
-    private Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> flavorSelection;
 
     private Action<VariantFilter> variantFilter;
 
@@ -342,7 +336,6 @@ public abstract class BaseExtension implements AndroidConfig {
 
         // Create the "special" configuration for test buddy APKs. It will be resolved by the test
         // running task, so that we can install all the found APKs before running tests.
-        // TODO: resolve it in ModelBuilder and put the files in the model.
         createConfiguration(
                 project.getConfigurations(),
                 SdkConstants.TEST_HELPERS_CONFIGURATION,
@@ -754,24 +747,12 @@ public abstract class BaseExtension implements AndroidConfig {
         logger.warn("publishNonDefault is deprecated and has no effect anymore. All variants are now published.");
     }
 
+    // FIXME bug #62356943
     public void flavorSelection(String name, String value) {
-        if (flavorSelection == null) {
-            flavorSelection = Maps.newHashMap();
-        }
-
-        flavorSelection.put(
-                Attribute.of(name, ProductFlavorAttr.class), ProductFlavorAttr.of(value));
-    }
-
-    /** Map of (flavor dimension, flavor value) for flavor matching strategy. */
-    @Override
-    @NonNull
-    public Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> getFlavorSelection() {
-        if (flavorSelection == null) {
-            return ImmutableMap.of();
-        }
-
-        return flavorSelection;
+        extraModelInfo.handleSyncError(
+                "",
+                SyncIssue.TYPE_GENERIC,
+                "flavorSelection is now replaced with defaultConfig.flavorSelection. It's also available on product flavors, build types and variant.");
     }
 
     public void variantFilter(Action<VariantFilter> filter) {
@@ -959,24 +940,6 @@ public abstract class BaseExtension implements AndroidConfig {
             logger.warn("Pure splits are not supported by PlayStore yet.");
         }
         this.generatePureSplits = flag;
-    }
-
-    private boolean enforceUniquePackageName = true;
-
-    public void enforceUniquePackageName(boolean value) {
-        if (!value) {
-            LoggingUtil.displayDeprecationWarning(logger, project, "Support for libraries with same package name is deprecated and will be removed in a future release.");
-        }
-        enforceUniquePackageName = value;
-    }
-
-    public void setEnforceUniquePackageName(boolean value) {
-        enforceUniquePackageName(value);
-    }
-
-    @Override
-    public boolean getEnforceUniquePackageName() {
-        return enforceUniquePackageName;
     }
 
     /** {@inheritDoc} */

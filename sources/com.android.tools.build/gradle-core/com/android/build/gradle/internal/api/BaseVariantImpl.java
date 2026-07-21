@@ -22,6 +22,8 @@ import com.android.build.gradle.api.BaseVariant;
 import com.android.build.gradle.api.BaseVariantOutput;
 import com.android.build.gradle.api.JavaCompileOptions;
 import com.android.build.gradle.api.SourceKind;
+import com.android.build.gradle.internal.dependency.ProductFlavorAttr;
+import com.android.build.gradle.internal.dependency.VariantDependencies;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
 import com.android.build.gradle.internal.scope.TaskOutputHolder;
 import com.android.build.gradle.internal.scope.VariantScope;
@@ -48,8 +50,10 @@ import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.ArtifactCollection;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.attributes.Attribute;
 import org.gradle.api.file.ConfigurableFileTree;
 import org.gradle.api.file.FileCollection;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.tasks.Sync;
 import org.gradle.api.tasks.compile.JavaCompile;
 
@@ -61,6 +65,7 @@ import org.gradle.api.tasks.compile.JavaCompile;
  */
 public abstract class BaseVariantImpl implements BaseVariant {
 
+    @NonNull private final ObjectFactory objectFactory;
     @NonNull protected final AndroidBuilder androidBuilder;
 
     @NonNull protected final ReadOnlyObjectProvider readOnlyObjectProvider;
@@ -68,9 +73,11 @@ public abstract class BaseVariantImpl implements BaseVariant {
     @NonNull protected final NamedDomainObjectContainer<BaseVariantOutput> outputs;
 
     BaseVariantImpl(
+            @NonNull ObjectFactory objectFactory,
             @NonNull AndroidBuilder androidBuilder,
             @NonNull ReadOnlyObjectProvider readOnlyObjectProvider,
             @NonNull NamedDomainObjectContainer<BaseVariantOutput> outputs) {
+        this.objectFactory = objectFactory;
         this.androidBuilder = androidBuilder;
         this.readOnlyObjectProvider = readOnlyObjectProvider;
         this.outputs = outputs;
@@ -385,6 +392,22 @@ public abstract class BaseVariantImpl implements BaseVariant {
     @Override
     public void resValue(@NonNull String type, @NonNull String name, @NonNull String value) {
         getVariantData().getVariantConfiguration().addResValue(type, name, value);
+    }
+
+    @Override
+    public void flavorSelection(@NonNull String dimension, @NonNull String name) {
+        VariantDependencies dependencies = getVariantData().getScope().getVariantDependencies();
+
+        final Attribute<ProductFlavorAttr> attributeKey =
+                Attribute.of(dimension, ProductFlavorAttr.class);
+        final ProductFlavorAttr attributeValue = objectFactory.named(ProductFlavorAttr.class, name);
+
+        dependencies.getCompileClasspath().getAttributes().attribute(attributeKey, attributeValue);
+        dependencies.getRuntimeClasspath().getAttributes().attribute(attributeKey, attributeValue);
+        dependencies
+                .getAnnotationProcessorConfiguration()
+                .getAttributes()
+                .attribute(attributeKey, attributeValue);
     }
 
     @Override
