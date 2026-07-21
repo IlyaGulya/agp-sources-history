@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle
+package com.android.build.gradle.internal.privaysandboxsdk
 
-import org.gradle.api.Incubating
-import org.gradle.api.Plugin
-import org.gradle.api.initialization.Settings
-
-/**
- * Android ecosystem plugin for Declarative Gradle support
- *
- * @suppress Do not use from production code. Only exposed for prototype.
- */
-@Incubating
-class AndroidEcosystemPlugin : Plugin<Settings> {
-
-    override fun apply(target: Settings) {
-        target.apply(INTERNAL_PLUGIN_ID)
-    }
-
-    private val INTERNAL_PLUGIN_ID = mapOf("plugin" to "com.android.internal.ecosystem")
+object PrivacySandboxSdkConstants {
+    /**
+     * Privacy sandbox doesn't have variants. However, some tasks e.g. lint may be required a variant
+     * name to be provided. In this case, we have a default name to be used when this is required.
+     */
+    const val DEFAULT_VARIANT_NAME = "main"
 }

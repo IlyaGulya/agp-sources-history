@@ -14,19 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.plugins
+package com.android.builder.merge;
 
-import org.gradle.api.Incubating
-import org.gradle.api.Plugin
-import org.gradle.api.initialization.Settings
-import org.gradle.api.internal.plugins.software.RegistersSoftwareTypes
+import java.io.InputStream;
 
-@Incubating
-@RegistersSoftwareTypes(AppPlugin::class, LibraryPlugin::class)
-class AndroidEcosystemPlugin : Plugin<Settings> {
-
-    override fun apply(target: Settings) {
-        target.dependencyResolutionManagement.repositories.mavenCentral();
-        target.dependencyResolutionManagement.repositories.google()
-    }
-}
+data class MergeInput(val stream: InputStream, val name: String)
