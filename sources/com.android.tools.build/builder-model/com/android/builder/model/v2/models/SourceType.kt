@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.builder.model.v2.ide
-
-import com.android.builder.model.v2.AndroidModel
+package com.android.builder.model.v2.models
 
 /**
- * Artifact for a test suite in a variant.
+ * Types of source associated to the test suite with its own set of dependencies
+ *
+ * TODO: Consider moving to variant API once we make it public
  */
-interface TestSuiteArtifact: AbstractArtifact, AndroidModel {
-
-    /**
-     * The test info for this test suite.
-     */
-    val testInfo: TestSuiteTestInfo
-}
+enum class SourceType { ASSETS, HOST_JAR, TEST_APK }
