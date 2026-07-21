@@ -102,6 +102,7 @@ public class Main {
     private static final String ARG_SOURCES    = "--sources";
     private static final String ARG_RESOURCES  = "--resources";
     private static final String ARG_LIBRARIES  = "--libraries";
+    private static final String ARG_BUILD_API  = "--compile-sdk-version";
     private static final String ARG_BASELINE   = "--baseline";
     private static final String ARG_REMOVE_FIXED = "--remove-fixed";
 
@@ -113,7 +114,7 @@ public class Main {
 
     private static final String PROP_WORK_DIR = "com.android.tools.lint.workdir";
     private final LintCliFlags flags = new LintCliFlags();
-    private IssueRegistry mGg;
+    private IssueRegistry globalIssueRegistry;
     @Nullable private File sdkHome;
 
     /** Creates a CLI driver */
@@ -747,6 +748,13 @@ public class Main {
                     }
                     libraries.add(input);
                 }
+            } else if (arg.equals(ARG_BUILD_API)) {
+                if (index == args.length - 1) {
+                    System.err.println("Missing compileSdkVersion");
+                    exit(ERRNO_INVALID_ARGS);
+                }
+                String version = args[++index];
+                flags.setCompileSdkVersionOverride(version);
             } else if (arg.equals(ARG_PROJECT)) {
                 if (index == args.length - 1) {
                     System.err.println("Missing project description file");
@@ -860,7 +868,7 @@ public class Main {
         }
 
         try {
-            // Not using mGg; LintClient will do its own registry merging
+            // Not using globalIssueRegistry; LintClient will do its own registry merging
             // also including project rules.
             int exitCode = client.run(new BuiltinIssueRegistry(), files);
             exit(exitCode);
@@ -871,11 +879,11 @@ public class Main {
     }
 
     private IssueRegistry getGlobalRegistry(LintCliClient client) {
-        if (mGg == null) {
-            mGg = client.addCustomLintRules(new BuiltinIssueRegistry());
+        if (globalIssueRegistry == null) {
+            globalIssueRegistry = client.addCustomLintRules(new BuiltinIssueRegistry());
         }
 
-        return mGg;
+        return globalIssueRegistry;
     }
 
     /**
@@ -1214,7 +1222,9 @@ public class Main {
             ARG_CLASSES + " <dir>", "Add the given folder (or jar file, or path) as a class " +
                 "directory for the project. Only valid when running lint on a single project.",
             ARG_LIBRARIES + " <dir>", "Add the given folder (or jar file, or path) as a class " +
-                    "library for the project. Only valid when running lint on a single project.",
+                "library for the project. Only valid when running lint on a single project.",
+            ARG_BUILD_API + " <version>", "Use the given compileSdkVersion to pick an SDK " +
+                "target to resolve Android API call to",
             ARG_SDK_HOME + " <dir>", "Use the given SDK instead of attempting to find it " +
                 "relative to the lint installation or via $ANDROID_HOME",
 

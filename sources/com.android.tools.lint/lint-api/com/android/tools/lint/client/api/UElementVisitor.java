@@ -205,7 +205,12 @@ public class UElementVisitor {
 
     void visitFile(@NonNull final JavaContext context) {
         try {
-            UFile uFile = context.getUastParser().parse(context);
+            UastParser uastParser = context.getUastParser();
+            if (uastParser == null) {
+                return;
+            }
+
+            UFile uFile = uastParser.parse(context);
             if (uFile == null) {
                 // No need to log this; the parser should be reporting
                 // a full warning (such as IssueRegistry#PARSER_ERROR)
@@ -269,7 +274,7 @@ public class UElementVisitor {
         } catch (RuntimeException e) {
             // Don't allow lint bugs to take down the whole build. TRY to log this as a
             // lint error instead!
-            LintDriver.handleDetectorError(context, e);
+            LintDriver.handleDetectorError(context, context.getDriver(), e);
         }
     }
 
