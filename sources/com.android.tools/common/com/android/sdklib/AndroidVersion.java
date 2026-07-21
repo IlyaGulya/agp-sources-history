@@ -136,10 +136,13 @@ public final class AndroidVersion implements Comparable<AndroidVersion>, Seriali
     public static final int MIN_4K_TV_API = 31;
 
     /** First version to support Resizable device */
-    public static final int MIN_RESIZABLE_DEVICE_API = 32;
+    public static final int MIN_RESIZABLE_DEVICE_API = 33;
 
     /** Last version of Android with supported 32-bit system images. */
     public static final int MAX_32_BIT_API = 30;
+
+    /** First version to support rectangular Wear display */
+    public static final int MIN_RECTANGULAR_WEAR_API = 28;
 
     /**
      * Thrown when an {@link AndroidVersion} object could not be created.

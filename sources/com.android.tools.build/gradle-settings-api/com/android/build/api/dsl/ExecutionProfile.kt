@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.build.api.variant
+package com.android.build.api.dsl
 
-import org.gradle.api.Incubating
+import org.gradle.api.Action
+import org.gradle.api.Named
 
-@Incubating
-interface MinifyableVariant {
-    /**
-     * Variant value for BuildType isMinifyEnabled
-     */
-    val codeMinification: Boolean
+interface ExecutionProfile: Named {
+    /** Specify R8 execution options. */
+    val r8: ToolOptions
+
+    /** Specify R8 execution options. */
+    fun r8(action: Action<ToolOptions>)
+
+    /** Specify R8 execution options. */
+    fun r8(action: ToolOptions.() -> Unit)
 }
