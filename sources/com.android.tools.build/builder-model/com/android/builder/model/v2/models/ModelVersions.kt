@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.dsl.decorator
+package com.android.builder.model.v2.models
 
-/** The list of all the supported property types for the production AGP */
-val AGP_SUPPORTED_PROPERTY_TYPES: List<SupportedPropertyType> = listOf(
-    SupportedPropertyType.Var.String,
-    SupportedPropertyType.Val.List,
-)
+import com.android.builder.model.v2.AndroidModel
+
+/**
+ * Basic model providing version information about the actual model.
+ *
+ * This model is meant to be very stable and never change, so that Studio can safely query it.
+ */
+interface ModelVersions: AndroidModel {
+    interface Version {
+        val major: Int
+        val minor: Int
+    }
+
+    val androidProject: Version
+    val variantDependencies: Version
+    val nativeModule: Version
+}
