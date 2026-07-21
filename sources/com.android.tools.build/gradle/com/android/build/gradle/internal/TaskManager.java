@@ -1920,6 +1920,8 @@ public abstract class TaskManager {
                                                         .get(),
                                         extension.getAdbOptions().getTimeOutInMs(),
                                         new LoggerWrapper(logger)),
+                                DeviceProviderInstrumentTestTask.CreationAction.Type
+                                        .INTERNAL_CONNECTED_DEVICE_PROVIDER,
                                 testData,
                                 project.files() /* testTargetMetadata */));
 
@@ -1956,6 +1958,8 @@ public abstract class TaskManager {
                             new DeviceProviderInstrumentTestTask.CreationAction(
                                     testVariantData.getScope(),
                                     deviceProvider,
+                                    DeviceProviderInstrumentTestTask.CreationAction.Type
+                                            .CUSTOM_DEVICE_PROVIDER,
                                     testData,
                                     project.files() /* testTargetMetadata */));
 
@@ -2224,7 +2228,11 @@ public abstract class TaskManager {
                                 SyncOptions.getErrorFormatMode(
                                         variantScope.getGlobalScope().getProjectOptions()))
                         .setUserLevelCache(userLevelCache)
-                        .setMinSdkVersion(variantScope.getMinSdkVersion().getFeatureLevel())
+                        .setMinSdkVersion(
+                                variantScope
+                                        .getVariantConfiguration()
+                                        .getMinSdkVersionWithTargetDeviceApi()
+                                        .getFeatureLevel())
                         .setDexer(variantScope.getDexer())
                         .setUseGradleWorkers(
                                 projectOptions.get(BooleanOption.ENABLE_GRADLE_WORKERS))

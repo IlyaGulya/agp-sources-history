@@ -61,12 +61,15 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.workers.WorkerExecutor
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.File
 import java.io.Serializable
 import java.nio.file.Files
 import java.util.Collections
 import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.TimeUnit
+import java.util.zip.ZipFile
 import javax.inject.Inject
 
 /**
@@ -207,7 +210,7 @@ open class DexMergingTask @Inject constructor(workerExecutor: WorkerExecutor) :
             task.errorFormatMode =
                 SyncOptions.getErrorFormatMode(variantScope.globalScope.projectOptions)
             task.dexMerger = variantScope.dexMerger
-            task.minSdkVersion = variantScope.minSdkVersion.featureLevel
+            task.minSdkVersion = variantScope.variantConfiguration.minSdkVersionWithTargetDeviceApi.featureLevel
             task.isDebuggable = variantScope.variantConfiguration.buildType.isDebuggable
             if (variantScope.globalScope.projectOptions[BooleanOption.ENABLE_DUPLICATE_CLASSES_CHECK]) {
                 task.duplicateClassesCheck = variantScope.artifacts.getFinalArtifactFiles(
@@ -326,7 +329,7 @@ open class DexMergingTask @Inject constructor(workerExecutor: WorkerExecutor) :
             return when (action) {
                 DexMergingAction.MERGE_LIBRARY_PROJECTS ->
                     when {
-                        variantScope.minSdkVersion.featureLevel < 23 -> {
+                        variantScope.variantConfiguration.minSdkVersionWithTargetDeviceApi.featureLevel < 23 -> {
                             task.outputs.cacheIf { getAllRegularFiles(task.dexFiles.files).size < LIBRARIES_MERGING_THRESHOLD }
                             LIBRARIES_MERGING_THRESHOLD
                         }
@@ -433,8 +436,25 @@ class DexMergingTaskRunnable @Inject constructor(
                     params.isDebuggable
                 ).call()
             } else {
-                for (file in getAllRegularFiles(dexFiles).withIndex()) {
-                    file.value.copyTo(params.outputDir.resolve("classes_${file.index}.${SdkConstants.EXT_DEX}"))
+                val outputPath =
+                    { id: Int -> params.outputDir.resolve("classes_$id.${SdkConstants.EXT_DEX}") }
+                var index = 0
+                for (file in getAllRegularFiles(dexFiles)) {
+                    if (file.extension == SdkConstants.EXT_JAR) {
+                        // Dex files can also come from jars when dexing is not done in artifact
+                        // transforms. See b/130965921 for details.
+                        ZipFile(file).use {
+                            for (entry in it.entries()) {
+                                BufferedInputStream(it.getInputStream(entry)).use { inputStream ->
+                                    BufferedOutputStream(outputPath(index++).outputStream()).use { outputStream ->
+                                        inputStream.copyTo(outputStream)
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        file.copyTo(outputPath(index++))
+                    }
                 }
             }
         } catch (e: Exception) {
