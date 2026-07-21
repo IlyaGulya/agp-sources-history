@@ -18,22 +18,8 @@ package com.android.build.gradle.internal.cxx.settings
 
 import com.android.build.gradle.internal.cxx.logging.errorln
 import com.android.build.gradle.internal.cxx.model.CxxAbiModel
-import com.android.build.gradle.internal.cxx.settings.Macro.ABI
-import com.android.build.gradle.internal.cxx.settings.Macro.PLATFORM_SYSTEM_VERSION
-
-
-/**
- * Get the named [CMakeSettingsConfiguration] with all macro values expanded to be literal.
- */
-fun CxxAbiModel.getCMakeSettingsConfiguration(configurationName: String)
-        : CMakeSettingsConfiguration? {
-    val allSettings = gatherCMakeSettingsFromAllLocations()
-        .expandInheritEnvironmentMacros(this)
-    val configuration = allSettings.configurations
-        .firstOrNull { it.name == configurationName } ?: return null
-    val resolver = CMakeSettingsNameResolver(allSettings.environments)
-    return reifyRequestedConfiguration(resolver, configuration)
-}
+import com.android.build.gradle.internal.cxx.settings.Macro.*
+import com.android.build.gradle.internal.cxx.settings.PropertyValue.*
 
 /**
  * Expand ${ndk.abi} and ${abi.systemVersion} in environment names.
@@ -43,8 +29,8 @@ fun CMakeSettings.expandInheritEnvironmentMacros(abi: CxxAbiModel) : CMakeSettin
         configuration.copy(
             inheritEnvironments = configuration.inheritEnvironments.map { environment ->
                 val result = environment
-                    .replace(ABI.ref, abi.abi.tag)
-                    .replace(PLATFORM_SYSTEM_VERSION.ref, abi.abiPlatformVersion.toString()
+                    .replace(NDK_ABI.ref, abi.abi.tag)
+                    .replace(NDK_SYSTEM_VERSION.ref, abi.abiPlatformVersion.toString()
                     )
                 result
             }
@@ -62,7 +48,13 @@ fun reifyRequestedConfiguration(
         : CMakeSettingsConfiguration? {
 
     fun String?.reify() = reifyString(this) { tokenMacro ->
-        resolver.resolve(tokenMacro, configuration.inheritEnvironments)
+        when(tokenMacro) {
+            // Exclude properties that shouldn't be evaluated before the configuration hash.
+            NDK_ABI.qualifiedName -> StringPropertyValue(NDK_ABI.ref)
+            NDK_CONFIGURATION_HASH.qualifiedName -> StringPropertyValue(NDK_CONFIGURATION_HASH.ref)
+            NDK_FULL_CONFIGURATION_HASH.qualifiedName -> StringPropertyValue(NDK_FULL_CONFIGURATION_HASH.ref)
+            else -> resolver.resolve(tokenMacro, configuration.inheritEnvironments)
+        }
     }
 
     return configuration.copy(
@@ -97,17 +89,18 @@ fun reifyString(value : String?, reifier : (String) -> PropertyValue?) : String?
             when (token) {
                 is Token.LiteralToken -> sb.append(token.literal)
                 is Token.MacroToken -> {
-                    replaced = true
                     val tokenMacro = token.macro
                     if (seen.contains(tokenMacro)) {
                         errorln("CMakeSettings.json value '$value' has recursive macro expansion \${$tokenMacro}")
                         recursionError = true
                     } else {
-                        seen += tokenMacro
                         val resolved = reifier(tokenMacro)
-                        if (resolved != null) {
-                            sb.append(resolved.get())
+                        val value = resolved?.get() ?: ""
+                        if (value != "\${$tokenMacro}") {
+                            seen += tokenMacro
+                            replaced = true
                         }
+                        sb.append(value)
                     }
                 }
             }

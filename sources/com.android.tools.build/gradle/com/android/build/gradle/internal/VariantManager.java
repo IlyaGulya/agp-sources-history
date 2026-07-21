@@ -41,8 +41,8 @@ import com.android.build.gradle.internal.api.VariantFilter;
 import com.android.build.gradle.internal.api.artifact.BuildArtifactSpec;
 import com.android.build.gradle.internal.core.GradleVariantConfiguration;
 import com.android.build.gradle.internal.crash.ExternalApiUsageException;
-import com.android.build.gradle.internal.dependency.AarCompileClassesTransform;
 import com.android.build.gradle.internal.dependency.AarResourcesCompilerTransform;
+import com.android.build.gradle.internal.dependency.AarToClassTransform;
 import com.android.build.gradle.internal.dependency.AarTransform;
 import com.android.build.gradle.internal.dependency.AlternateCompatibilityRule;
 import com.android.build.gradle.internal.dependency.AlternateDisambiguationRule;
@@ -67,7 +67,7 @@ import com.android.build.gradle.internal.dsl.BuildType;
 import com.android.build.gradle.internal.dsl.CoreBuildType;
 import com.android.build.gradle.internal.dsl.CoreProductFlavor;
 import com.android.build.gradle.internal.dsl.CoreSigningConfig;
-import com.android.build.gradle.internal.ide.SyncIssueImpl;
+import com.android.build.gradle.internal.errors.SyncIssueHandler;
 import com.android.build.gradle.internal.profile.AnalyticsUtil;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType;
@@ -97,7 +97,6 @@ import com.android.builder.errors.EvalIssueException;
 import com.android.builder.errors.EvalIssueReporter;
 import com.android.builder.model.ProductFlavor;
 import com.android.builder.model.SigningConfig;
-import com.android.builder.model.SyncIssue;
 import com.android.builder.profile.ProcessProfileWriter;
 import com.android.builder.profile.Recorder;
 import com.android.utils.StringHelper;
@@ -119,7 +118,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import kotlin.Pair;
@@ -531,10 +529,6 @@ public class VariantManager implements VariantModel {
                                 buildArtifactType.name()));
             }
 
-            if (buildArtifactsHolder.hasArtifact(buildArtifactType)) {
-                throw new RuntimeException(buildArtifactType + " is still using old APIs.");
-            }
-
             if (buildArtifactsHolder.hasFinalProduct(buildArtifactType)) {
                 Pair<Provider<String>, Provider<FileSystemLocation>> finalProduct =
                         buildArtifactsHolder.getFinalProductWithTaskName(buildArtifactType);
@@ -722,34 +716,44 @@ public class VariantManager implements VariantModel {
                     });
         }
 
-        // API jar(s)
+        // API Jar: Produce a single API jar that can also contain the library R class from the AAR
         Usage apiUsage = project.getObjects().named(Usage.class, Usage.JAVA_API);
         dependencies.registerTransform(
+                AarToClassTransform.class,
                 reg -> {
-                    reg.getFrom().attribute(ARTIFACT_FORMAT, EXPLODED_AAR.getType());
+                    reg.getFrom().attribute(ARTIFACT_FORMAT, TYPE_PROCESSED_AAR);
                     reg.getFrom().attribute(Usage.USAGE_ATTRIBUTE, apiUsage);
                     reg.getTo().attribute(ARTIFACT_FORMAT, ArtifactType.CLASSES.getType());
                     reg.getTo().attribute(Usage.USAGE_ATTRIBUTE, apiUsage);
-                    reg.artifactTransform(
-                            AarCompileClassesTransform.class,
-                            config -> config.params(autoNamespaceDependencies));
+                    reg.parameters(
+                            params -> {
+                                params.getForCompileUse().set(true);
+                                params.getAutoNamespaceDependencies()
+                                        .set(autoNamespaceDependencies);
+                                params.getGenerateRClassJar()
+                                        .set(
+                                                projectOptions.get(
+                                                        BooleanOption
+                                                                .COMPILE_CLASSPATH_LIBRARY_R_CLASSES));
+                            });
                 });
 
-        // Runtime jars
+        // Produce a single runtime jar from the AAR.
         Usage runtimeUsage = project.getObjects().named(Usage.class, Usage.JAVA_RUNTIME);
         dependencies.registerTransform(
+                AarToClassTransform.class,
                 reg -> {
-                    reg.getFrom().attribute(ARTIFACT_FORMAT, EXPLODED_AAR.getType());
+                    reg.getFrom().attribute(ARTIFACT_FORMAT, TYPE_PROCESSED_AAR);
                     reg.getFrom().attribute(Usage.USAGE_ATTRIBUTE, runtimeUsage);
                     reg.getTo().attribute(ARTIFACT_FORMAT, ArtifactType.CLASSES.getType());
                     reg.getTo().attribute(Usage.USAGE_ATTRIBUTE, runtimeUsage);
-                    reg.artifactTransform(
-                            AarTransform.class,
-                            config ->
-                                    config.params(
-                                            ArtifactType.CLASSES,
-                                            sharedLibSupport,
-                                            autoNamespaceDependencies));
+                    reg.parameters(
+                            params -> {
+                                params.getForCompileUse().set(false);
+                                params.getAutoNamespaceDependencies()
+                                        .set(autoNamespaceDependencies);
+                                params.getGenerateRClassJar().set(false);
+                            });
                 });
 
         if (globalScope.getProjectOptions().get(BooleanOption.ENABLE_PROGUARD_RULES_EXTRACTION)) {
@@ -1522,12 +1526,12 @@ public class VariantManager implements VariantModel {
      *   <li>The alphabetically sorted default product flavors, left to right
      * </ol>
      *
-     * @param syncIssueConsumer any arising user configuration issues will be reported here.
+     * @param syncIssueHandler any arising user configuration issues will be reported here.
      * @return the name of a variant that exists under the presence of the variant filter. Only
      *     returns null if all variants are removed.
      */
     @Nullable
-    public String getDefaultVariant(@NonNull Consumer<SyncIssue> syncIssueConsumer) {
+    public String getDefaultVariant(@NonNull SyncIssueHandler syncIssueHandler) {
         // Finalize the DSL we are about to read.
         finalizeDefaultVariantDsl();
 
@@ -1539,9 +1543,8 @@ public class VariantManager implements VariantModel {
         // Otherwise get the 'best' build type, respecting the user's preferences first.
 
         @Nullable
-        String chosenBuildType = getBuildAuthorSpecifiedDefaultBuildType(syncIssueConsumer);
-        Map<String, String> chosenFlavors =
-                getBuildAuthorSpecifiedDefaultFlavors(syncIssueConsumer);
+        String chosenBuildType = getBuildAuthorSpecifiedDefaultBuildType(syncIssueHandler);
+        Map<String, String> chosenFlavors = getBuildAuthorSpecifiedDefaultFlavors(syncIssueHandler);
 
         Comparator<VariantScope> preferredDefaultVariantScopeComparator =
                 new BuildAuthorSpecifiedDefaultBuildTypeComparator(chosenBuildType)
@@ -1689,13 +1692,13 @@ public class VariantManager implements VariantModel {
     /**
      * Computes explicit build-author default build type.
      *
-     * @param issueConsumer any configuration issues will be added here, e.g. if multiple build
+     * @param syncIssueHandler any configuration issues will be added here, e.g. if multiple build
      *     types are marked as default.
      * @return user specified default build type, null if none set.
      */
     @Nullable
     private String getBuildAuthorSpecifiedDefaultBuildType(
-            @NonNull Consumer<SyncIssue> issueConsumer) {
+            @NonNull SyncIssueHandler syncIssueHandler) {
         // First look for the user setting
         List<String> buildTypesMarkedAsDefault = new ArrayList<>(1);
         for (BuildTypeData buildType : buildTypes.values()) {
@@ -1706,15 +1709,14 @@ public class VariantManager implements VariantModel {
         Collections.sort(buildTypesMarkedAsDefault);
 
         if (buildTypesMarkedAsDefault.size() > 1) {
-            issueConsumer.accept(
-                    new SyncIssueImpl(
-                            EvalIssueReporter.Type.AMBIGUOUS_BUILD_TYPE_DEFAULT,
-                            EvalIssueReporter.Severity.WARNING,
-                            Joiner.on(',').join(buildTypesMarkedAsDefault),
-                            "Ambiguous default build type: '"
-                                    + Joiner.on("', '").join(buildTypesMarkedAsDefault)
-                                    + "'.\n"
-                                    + "Please only set `isDefault = true` for one build type."));
+            syncIssueHandler.reportIssue(
+                    EvalIssueReporter.Type.AMBIGUOUS_BUILD_TYPE_DEFAULT,
+                    EvalIssueReporter.Severity.WARNING,
+                    "Ambiguous default build type: '"
+                            + Joiner.on("', '").join(buildTypesMarkedAsDefault)
+                            + "'.\n"
+                            + "Please only set `isDefault = true` for one build type.",
+                    Joiner.on(',').join(buildTypesMarkedAsDefault));
         }
 
         if (buildTypesMarkedAsDefault.isEmpty()) {
@@ -1728,14 +1730,14 @@ public class VariantManager implements VariantModel {
     /**
      * Computes explicit user set default product flavors for each dimension.
      *
-     * @param issueConsumer any configuration issues will be added here, e.g. if multiple flavors in
-     *     one dimension are marked as default.
+     * @param syncIssueHandler any configuration issues will be added here, e.g. if multiple flavors
+     *     in one dimension are marked as default.
      * @return map from flavor dimension to the user-specified default flavor for that dimension,
      *     with entries missing for flavors without user-specified defaults.
      */
     @NonNull
     private Map<String, String> getBuildAuthorSpecifiedDefaultFlavors(
-            @NonNull Consumer<SyncIssue> issueConsumer) {
+            @NonNull SyncIssueHandler syncIssueHandler) {
         // Using ArrayListMultiMap to preserve sorting of flavor names.
         ArrayListMultimap<String, String> userDefaults = ArrayListMultimap.create();
 
@@ -1760,19 +1762,18 @@ public class VariantManager implements VariantModel {
             }
             if (userDefault.size() > 1) {
                 // Report the ambiguous default setting.
-                issueConsumer.accept(
-                        new SyncIssueImpl(
-                                EvalIssueReporter.Type.AMBIGUOUS_PRODUCT_FLAVOR_DEFAULT,
-                                EvalIssueReporter.Severity.WARNING,
-                                dimension,
-                                "Ambiguous default product flavors for flavor dimension '"
-                                        + dimension
-                                        + "': '"
-                                        + Joiner.on("', '").join(userDefault)
-                                        + "'.\n"
-                                        + "Please only set `isDefault = true` "
-                                        + "for one product flavor "
-                                        + "in each flavor dimension."));
+                syncIssueHandler.reportIssue(
+                        EvalIssueReporter.Type.AMBIGUOUS_PRODUCT_FLAVOR_DEFAULT,
+                        EvalIssueReporter.Severity.WARNING,
+                        "Ambiguous default product flavors for flavor dimension '"
+                                + dimension
+                                + "': '"
+                                + Joiner.on("', '").join(userDefault)
+                                + "'.\n"
+                                + "Please only set `isDefault = true` "
+                                + "for one product flavor "
+                                + "in each flavor dimension.",
+                        dimension);
             }
         }
 

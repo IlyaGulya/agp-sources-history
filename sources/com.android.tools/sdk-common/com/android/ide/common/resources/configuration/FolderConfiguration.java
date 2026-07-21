@@ -26,7 +26,14 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Streams;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -423,7 +430,6 @@ public final class FolderConfiguration implements Comparable<FolderConfiguration
 
         return false;
     }
-
 
     /**
      * Creates a {@link FolderConfiguration} matching the given folder name.
@@ -897,7 +903,7 @@ public final class FolderConfiguration implements Comparable<FolderConfiguration
         return (ScreenDimensionQualifier)mQualifiers[INDEX_SCREEN_DIMENSION];
     }
 
-    public void setVersionQualifier(VersionQualifier qualifier) {
+    public void setVersionQualifier(@Nullable VersionQualifier qualifier) {
         mQualifiers[INDEX_VERSION] = qualifier == null ? NULL_QUALIFIERS[INDEX_VERSION]
                 : qualifier;
         mQualifierString = null;
@@ -905,13 +911,15 @@ public final class FolderConfiguration implements Comparable<FolderConfiguration
 
     @Nullable
     public VersionQualifier getVersionQualifier() {
-        return (VersionQualifier)mQualifiers[INDEX_VERSION];
+        return (VersionQualifier) mQualifiers[INDEX_VERSION];
     }
 
     /**
-     * Normalize a folder configuration based on the API level of its qualifiers.
+     * Normalizes this folder configuration by adding a version qualifier corresponding to the API
+     * level implied by other qualifiers. See also
+     * {@link #normalizeByRemovingRedundantVersionQualifier()}.
      */
-    public void normalize() {
+    public void normalizeByAddingImpliedVersionQualifier() {
         int minSdk = 1;
         for (int i = 0; i < mQualifiers.length; i++) {
             ResourceQualifier qualifier = mQualifiers[i];
@@ -927,10 +935,37 @@ public final class FolderConfiguration implements Comparable<FolderConfiguration
             return;
         }
 
-        if (mQualifiers[INDEX_VERSION] == NULL_QUALIFIERS[INDEX_VERSION] ||
-                ((VersionQualifier)mQualifiers[INDEX_VERSION]).getVersion() < minSdk) {
-            mQualifiers[INDEX_VERSION] = new VersionQualifier(minSdk);
-            mQualifierString = null;
+        if (mQualifiers[INDEX_VERSION] == NULL_QUALIFIERS[INDEX_VERSION]
+                || ((VersionQualifier) mQualifiers[INDEX_VERSION]).getVersion() < minSdk) {
+            setVersionQualifier(new VersionQualifier(minSdk));
+        }
+    }
+
+    /**
+     * Normalizes this folder configuration by removing a redundant version qualifier. A version
+     * qualifier is redundant if it is implied by other qualifiers. See also
+     * {@link #normalizeByAddingImpliedVersionQualifier()}.
+     */
+    public void normalizeByRemovingRedundantVersionQualifier() {
+        VersionQualifier versionQualifier = getVersionQualifier();
+        if (versionQualifier == NULL_QUALIFIERS[INDEX_VERSION]) {
+            return;
+        }
+
+        int version = versionQualifier.getVersion();
+        if (version == 1) {
+            setVersionQualifier(null);
+            return;
+        }
+
+        for (int i = 0; i < mQualifiers.length; i++) {
+            if (i != INDEX_VERSION) {
+                ResourceQualifier qualifier = mQualifiers[i];
+                if (qualifier != NULL_QUALIFIERS[i] && qualifier.since() >= version) {
+                    setVersionQualifier(null);
+                    break;
+                }
+            }
         }
     }
 
@@ -1392,5 +1427,15 @@ public final class FolderConfiguration implements Comparable<FolderConfiguration
         }
 
         return array;
+    }
+
+    /**
+     * Returns qualifier of a folder name, e.g. "zh-rHK-watch" for "values-zh-rHK-watch" or an empty
+     * string for "drawable".
+     */
+    @NonNull
+    public static String getQualifier(@NonNull String folderName) {
+        int dashPos = folderName.indexOf('-');
+        return dashPos < 0 ? "" : folderName.substring(dashPos + 1);
     }
 }

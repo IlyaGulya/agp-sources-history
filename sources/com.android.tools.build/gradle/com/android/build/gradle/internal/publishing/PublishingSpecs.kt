@@ -27,7 +27,6 @@ import com.android.build.gradle.internal.scope.InternalArtifactType.APK_MAPPING
 import com.android.build.gradle.internal.scope.InternalArtifactType.APP_CLASSES
 import com.android.build.gradle.internal.scope.InternalArtifactType.AAPT_PROGUARD_FILE
 import com.android.build.gradle.internal.scope.InternalArtifactType.BUNDLE
-import com.android.build.gradle.internal.scope.InternalArtifactType.BUNDLE_MANIFEST
 import com.android.build.gradle.internal.scope.InternalArtifactType.COMPILE_ONLY_NAMESPACED_R_CLASS_JAR
 import com.android.build.gradle.internal.scope.InternalArtifactType.CONSUMER_PROGUARD_FILE
 import com.android.build.gradle.internal.scope.InternalArtifactType.DATA_BINDING_ARTIFACT
@@ -37,7 +36,7 @@ import com.android.build.gradle.internal.scope.InternalArtifactType.METADATA_BAS
 import com.android.build.gradle.internal.scope.InternalArtifactType.MODULE_AND_RUNTIME_DEPS_CLASSES
 import com.android.build.gradle.internal.scope.InternalArtifactType.FEATURE_SET_METADATA
 import com.android.build.gradle.internal.scope.InternalArtifactType.FEATURE_RESOURCE_PKG
-import com.android.build.gradle.internal.scope.InternalArtifactType.FEATURE_TRANSITIVE_DEPS
+import com.android.build.gradle.internal.scope.InternalArtifactType.PACKAGED_DEPENDENCIES
 import com.android.build.gradle.internal.scope.InternalArtifactType.FULL_JAR
 import com.android.build.gradle.internal.scope.InternalArtifactType.JAVA_RES
 import com.android.build.gradle.internal.scope.InternalArtifactType.LIBRARY_ASSETS
@@ -137,11 +136,10 @@ class PublishingSpecs {
 
                 runtime(APK, ArtifactType.APK)
                 runtime(InternalArtifactType.APKS_FROM_BUNDLE, ArtifactType.APKS_FROM_BUNDLE)
-                runtime(FEATURE_TRANSITIVE_DEPS, ArtifactType.FEATURE_TRANSITIVE_DEPS)
+                runtime(PACKAGED_DEPENDENCIES, ArtifactType.PACKAGED_DEPENDENCIES)
 
                 metadata(METADATA_INSTALLED_BASE_DECLARATION, ArtifactType.METADATA_BASE_MODULE_DECLARATION)
 
-                metadata(BUNDLE_MANIFEST, ArtifactType.BUNDLE_MANIFEST)
                 runtime(NAVIGATION_JSON, ArtifactType.NAVIGATION_JSON)
 
                 // output of bundle-tool
@@ -187,11 +185,10 @@ class PublishingSpecs {
                 // FIXME: need data binding artifacts as well for Dynamic apps.
 
                 runtime(APK, ArtifactType.APK)
-                runtime(FEATURE_TRANSITIVE_DEPS, ArtifactType.FEATURE_TRANSITIVE_DEPS)
+                runtime(PACKAGED_DEPENDENCIES, ArtifactType.PACKAGED_DEPENDENCIES)
 
                 // The intermediate bundle containing only this module. Input for bundle-tool
                 metadata(MODULE_BUNDLE, ArtifactType.MODULE_BUNDLE)
-                metadata(BUNDLE_MANIFEST, ArtifactType.BUNDLE_MANIFEST)
                 metadata(METADATA_LIBRARY_DEPENDENCIES_REPORT, ArtifactType.LIB_DEPENDENCIES)
 
                 // this is only for non-base modules.
@@ -201,7 +198,7 @@ class PublishingSpecs {
                 metadata(MERGED_JAVA_RES, ArtifactType.METADATA_JAVA_RES)
                 metadata(CONSUMER_PROGUARD_FILE, ArtifactType.CONSUMER_PROGUARD_RULES)
                 metadata(AAPT_PROGUARD_FILE, ArtifactType.AAPT_PROGUARD_RULES)
-                metadata(FEATURE_TRANSITIVE_DEPS, ArtifactType.FEATURE_TRANSITIVE_DEPS)
+                metadata(PACKAGED_DEPENDENCIES, ArtifactType.PACKAGED_DEPENDENCIES)
                 runtime(NAVIGATION_JSON, ArtifactType.NAVIGATION_JSON)
 
                 // ----
@@ -238,13 +235,15 @@ class PublishingSpecs {
                 output(DATA_BINDING_BASE_CLASS_LOG_ARTIFACT,
                         ArtifactType.DATA_BINDING_BASE_CLASS_LOG_ARTIFACT)
                 output(FULL_JAR, ArtifactType.JAR)
+                /** Published to both api and runtime as consumption behavior depends on
+                 * [com.android.build.gradle.options.BooleanOption.COMPILE_CLASSPATH_LIBRARY_R_CLASSES] */
+                output(SYMBOL_LIST_WITH_PACKAGE_NAME, ArtifactType.SYMBOL_LIST_WITH_PACKAGE_NAME)
 
                 runtime(RUNTIME_LIBRARY_CLASSES, ArtifactType.CLASSES)
                 runtime(LIBRARY_ASSETS, ArtifactType.ASSETS)
                 runtime(PACKAGED_RES, ArtifactType.ANDROID_RES)
                 runtime(PUBLIC_RES, ArtifactType.PUBLIC_RES)
                 runtime(SYMBOL_LIST, ArtifactType.SYMBOL_LIST)
-                runtime(SYMBOL_LIST_WITH_PACKAGE_NAME, ArtifactType.SYMBOL_LIST_WITH_PACKAGE_NAME)
                 runtime(DEFINED_ONLY_SYMBOL_LIST, ArtifactType.DEFINED_ONLY_SYMBOL_LIST)
                 runtime(LIBRARY_JAVA_RES, ArtifactType.JAVA_RES)
                 runtime(CONSUMER_PROGUARD_FILE, ArtifactType.CONSUMER_PROGUARD_RULES)
@@ -271,7 +270,7 @@ class PublishingSpecs {
                 api(COMPILE_ONLY_NAMESPACED_R_CLASS_JAR,
                         ArtifactType.COMPILE_ONLY_NAMESPACED_R_CLASS_JAR)
 
-                runtime(FEATURE_TRANSITIVE_DEPS, ArtifactType.FEATURE_TRANSITIVE_DEPS)
+                runtime(PACKAGED_DEPENDENCIES, ArtifactType.PACKAGED_DEPENDENCIES)
                 runtime(APK, ArtifactType.APK)
 
                 api(DATA_BINDING_ARTIFACT, ArtifactType.DATA_BINDING_ARTIFACT)
@@ -289,7 +288,7 @@ class PublishingSpecs {
                 metadata(MERGED_JAVA_RES, ArtifactType.METADATA_JAVA_RES)
                 metadata(CONSUMER_PROGUARD_FILE, ArtifactType.CONSUMER_PROGUARD_RULES)
                 metadata(AAPT_PROGUARD_FILE, ArtifactType.AAPT_PROGUARD_RULES)
-                metadata(FEATURE_TRANSITIVE_DEPS, ArtifactType.FEATURE_TRANSITIVE_DEPS)
+                metadata(PACKAGED_DEPENDENCIES, ArtifactType.PACKAGED_DEPENDENCIES)
                 metadata(MODULE_BUNDLE, ArtifactType.MODULE_BUNDLE)
                 metadata(METADATA_LIBRARY_DEPENDENCIES_REPORT, ArtifactType.LIB_DEPENDENCIES)
 
@@ -299,7 +298,7 @@ class PublishingSpecs {
                 api(COMPILE_ONLY_NAMESPACED_R_CLASS_JAR,
                     ArtifactType.COMPILE_ONLY_NAMESPACED_R_CLASS_JAR)
 
-                runtime(FEATURE_TRANSITIVE_DEPS, ArtifactType.FEATURE_TRANSITIVE_DEPS)
+                runtime(PACKAGED_DEPENDENCIES, ArtifactType.PACKAGED_DEPENDENCIES)
                 runtime(APK, ArtifactType.APK)
 
                 api(DATA_BINDING_ARTIFACT, ArtifactType.DATA_BINDING_ARTIFACT)

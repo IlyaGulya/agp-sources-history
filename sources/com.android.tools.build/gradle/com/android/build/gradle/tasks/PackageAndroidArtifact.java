@@ -34,6 +34,7 @@ import com.android.build.gradle.internal.packaging.IncrementalPackagerBuilder;
 import com.android.build.gradle.internal.pipeline.StreamFilter;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
 import com.android.build.gradle.internal.scope.ApkData;
+import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
 import com.android.build.gradle.internal.scope.BuildElements;
 import com.android.build.gradle.internal.scope.BuildElementsTransformParams;
 import com.android.build.gradle.internal.scope.BuildElementsTransformRunnable;
@@ -45,7 +46,7 @@ import com.android.build.gradle.internal.scope.OutputScope;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.NewIncrementalTask;
 import com.android.build.gradle.internal.tasks.PerModuleBundleTaskKt;
-import com.android.build.gradle.internal.tasks.SigningConfigMetadata;
+import com.android.build.gradle.internal.tasks.SigningConfigUtils;
 import com.android.build.gradle.internal.tasks.TaskInputHelper;
 import com.android.build.gradle.internal.tasks.Workers;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
@@ -62,6 +63,7 @@ import com.android.builder.files.IncrementalRelativeFileSets;
 import com.android.builder.files.RelativeFile;
 import com.android.builder.files.SerializableChange;
 import com.android.builder.files.ZipCentralDirectory;
+import com.android.builder.internal.packaging.ApkCreatorType;
 import com.android.builder.internal.packaging.IncrementalPackager;
 import com.android.builder.packaging.PackagingUtils;
 import com.android.builder.utils.FileCache;
@@ -395,6 +397,14 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
         return new BuildOutput(expectedOutputType, apkInfo, outputFile);
     }
 
+    protected ApkCreatorType apkCreatorType;
+
+    @NonNull
+    @Input
+    public ApkCreatorType getApkCreatorType() {
+        return apkCreatorType;
+    }
+
     @Internal
     protected abstract InternalArtifactType getInternalArtifactType();
 
@@ -421,7 +431,8 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
                                         inputFile,
                                         changedResourceFiles.contains(inputFile),
                                         changes,
-                                        this))
+                                        this,
+                                        apkCreatorType))
                 .into(getInternalArtifactType(), getOutputDirectory().get().getAsFile());
     }
 
@@ -499,17 +510,20 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
         protected final boolean keepTimestampsInApk;
         @Nullable protected final Integer targetApi;
         @NonNull protected final IncrementalPackagerBuilder.BuildType packagerMode;
+        @NonNull protected final ApkCreatorType apkCreatorType;
 
         SplitterParams(
                 @NonNull ApkData apkInfo,
                 @NonNull File androidResourcesFile,
                 boolean androidResourcesChanged,
                 @NonNull InputChanges changes,
-                @NonNull PackageAndroidArtifact task) {
+                @NonNull PackageAndroidArtifact task,
+                @NonNull ApkCreatorType apkCreatorType) {
             this.apkInfo = apkInfo;
             this.androidResourcesFile = androidResourcesFile;
             this.androidResourcesChanged = androidResourcesChanged;
             this.projectPath = task.getProject().getPath();
+            this.apkCreatorType = apkCreatorType;
 
             outputFile =
                     computeBuildOutputFile(
@@ -530,7 +544,7 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
             } else {
                 // We reach this code if we're in a feature module and minification is enabled in the
                 // base module. In this case, we want to use the classes.dex file from the base
-                // module's DexSplitterTransform.
+                // module's DexSplitterTask.
                 dexFiles =
                         IncrementalChangesUtils.getChangesInSerializableForm(
                                 changes, task.getFeatureDexFolder());
@@ -544,7 +558,7 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
 
             manifestType = task.manifestType;
             apkFormat = task.apkFormat;
-            signingConfig = SigningConfigMetadata.Companion.getOutputFile(task.signingConfig);
+            signingConfig = SigningConfigUtils.Companion.getOutputFile(task.signingConfig);
             abiFilters = task.abiFilters;
             manifestDirectory = task.getManifests().get().getAsFile();
             aaptOptionsNoCompress = task.aaptOptionsNoCompress;
@@ -663,7 +677,7 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
                 new IncrementalPackagerBuilder(params.apkFormat, params.packagerMode)
                         .withOutputFile(outputFile)
                         .withSigning(
-                                SigningConfigMetadata.Companion.load(params.signingConfig),
+                                SigningConfigUtils.Companion.load(params.signingConfig),
                                 params.minSdkVersion,
                                 params.targetApi)
                         .withCreatedBy(params.createdBy)
@@ -681,12 +695,14 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
                         .withAcceptedAbis(
                                 filter == null ? params.abiFilters : ImmutableSet.of(filter))
                         .withJniDebuggableBuild(params.isJniDebuggableBuild)
+                        .withApkCreatorType(params.apkCreatorType)
+                        .withChangedDexFiles(changedDex)
+                        .withChangedJavaResources(changedJavaResources)
+                        .withChangedAssets(changedAssets)
+                        .withChangedAndroidResources(changedAndroidResources)
+                        .withChangedNativeLibs(changedNLibs)
                         .build()) {
-            packager.updateDex(changedDex);
-            packager.updateJavaResources(changedJavaResources);
-            packager.updateAssets(changedAssets);
-            packager.updateAndroidResources(changedAndroidResources);
-            packager.updateNativeLibraries(changedNLibs);
+            packager.updateFiles();
         }
 
         /*
@@ -867,7 +883,10 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
 
             packageAndroidArtifact
                     .getResourceFiles()
-                    .from(variantScope.getArtifacts().getFinalProduct(inputResourceFilesType));
+                    .from(
+                            variantScope
+                                    .getArtifacts()
+                                    .getFinalProductAsFileCollection(inputResourceFilesType));
             packageAndroidArtifact
                     .getIncrementalFolder()
                     .set(
@@ -935,6 +954,9 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
 
             packageAndroidArtifact.targetApi =
                     projectOptions.get(IntegerOption.IDE_TARGET_DEVICE_API);
+
+            packageAndroidArtifact.apkCreatorType = variantScope.getApkCreatorType();
+
             packageAndroidArtifact.getCreatedBy().set(globalScope.getCreatedBy());
             finalConfigure(packageAndroidArtifact);
         }
@@ -972,6 +994,13 @@ public abstract class PackageAndroidArtifact extends NewIncrementalTask {
 
         @NonNull
         public FileCollection getDexFolders() {
+            BuildArtifactsHolder artifacts = getVariantScope().getArtifacts();
+
+            if (artifacts.hasFinalProduct(InternalArtifactType.BASE_DEX)) {
+                return artifacts
+                        .getFinalProductAsFileCollection(InternalArtifactType.BASE_DEX)
+                        .get();
+            }
             return getVariantScope()
                     .getTransformManager()
                     .getPipelineOutputAsFileCollection(StreamFilter.DEX);

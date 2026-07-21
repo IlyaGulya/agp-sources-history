@@ -33,17 +33,16 @@ import com.android.ide.common.workers.WorkerExecutorFacade
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileVisitDetails
-import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.file.ReproducibleFileVisitor
+import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.workers.WorkerExecutor
 import java.io.File
+import java.util.zip.Deflater
 import javax.inject.Inject
 
 /**
@@ -61,22 +60,22 @@ abstract class BundleAllClasses @Inject constructor(workerExecutor: WorkerExecut
     @get:OutputFile
     abstract val outputJar: RegularFileProperty
 
-    @get:InputFiles
+    @get:Classpath
     abstract val javacClasses: DirectoryProperty
 
-    @get:InputFiles
+    @get:Classpath
     lateinit var preJavacClasses: FileCollection
         private set
 
-    @get:InputFiles
+    @get:Classpath
     lateinit var postJavacClasses: FileCollection
         private set
 
-    @get:InputFile
+    @get:Classpath
     @get:Optional
     abstract val thisRClassClasses: RegularFileProperty
 
-    @get:InputFiles
+    @get:Classpath
     @get:Optional
     var dependencyRClassClasses: FileCollection? = null
         private set
@@ -109,11 +108,14 @@ abstract class BundleAllClasses @Inject constructor(workerExecutor: WorkerExecut
 
         workers.use {
             it.submit(
+                // Don't compress because compressing takes extra time, and this jar doesn't go
+                // into any APKs or AARs.
                 JarWorkerRunnable::class.java, JarRequest(
                     toFile = outputJar.get().asFile,
                     jarCreatorType = jarCreatorType,
                     fromJars = dependencyRClassClasses?.files?.toList() ?: listOf(),
-                    fromFiles = files
+                    fromFiles = files,
+                    compressionLevel = Deflater.NO_COMPRESSION
                 )
             )
         }
@@ -159,14 +161,13 @@ abstract class BundleAllClasses @Inject constructor(workerExecutor: WorkerExecut
                 // thisRClassClasses expects *.class files as an input while this is *.jar. Thus,
                 // put it to dependencyRClassClasses and it will be processed properly.
                 task.dependencyRClassClasses =
-                    variantScope.globalScope.project.files(
                         variantScope
                             .artifacts
-                            .getFinalProduct<RegularFile>(
+                            .getFinalProductAsFileCollection(
                                 InternalArtifactType
                                     .COMPILE_AND_RUNTIME_NOT_NAMESPACED_R_CLASS_JAR
-                            )
-                    )
+                            ).get()
+
 
             }
         }

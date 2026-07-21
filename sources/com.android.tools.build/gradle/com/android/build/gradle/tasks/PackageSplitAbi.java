@@ -32,18 +32,16 @@ import com.android.build.gradle.internal.scope.MutableTaskContainer;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.NonIncrementalTask;
 import com.android.build.gradle.internal.tasks.PerModuleBundleTaskKt;
-import com.android.build.gradle.internal.tasks.SigningConfigMetadata;
+import com.android.build.gradle.internal.tasks.SigningConfigUtils;
 import com.android.build.gradle.internal.tasks.Workers;
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.builder.files.IncrementalRelativeFileSets;
-import com.android.builder.files.RelativeFile;
+import com.android.builder.internal.packaging.ApkCreatorType;
 import com.android.builder.internal.packaging.IncrementalPackager;
-import com.android.ide.common.resources.FileStatus;
 import com.android.ide.common.workers.WorkerExecutorFacade;
 import com.android.sdklib.AndroidVersion;
 import com.android.utils.FileUtils;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.io.IOException;
@@ -56,6 +54,8 @@ import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.tooling.BuildException;
 import org.gradle.workers.WorkerExecutor;
@@ -105,6 +105,7 @@ public abstract class PackageSplitAbi extends NonIncrementalTask {
     }
 
     @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
     public FileCollection getSigningConfig() {
         return signingConfig;
     }
@@ -164,7 +165,7 @@ public abstract class PackageSplitAbi extends NonIncrementalTask {
                     new IncrementalPackagerBuilder(IncrementalPackagerBuilder.ApkFormat.FILE)
                             .withOutputFile(params.getOutput())
                             .withSigning(
-                                    SigningConfigMetadata.Companion.load(params.signingConfigFile),
+                                    SigningConfigUtils.Companion.load(params.signingConfigFile),
                                     params.minSdkVersion)
                             .withCreatedBy(params.createdBy)
                             // .withManifest(manifest)
@@ -174,16 +175,14 @@ public abstract class PackageSplitAbi extends NonIncrementalTask {
                             .withDebuggableBuild(params.isJniDebuggable)
                             .withJniDebuggableBuild(params.isJniDebuggable)
                             .withAcceptedAbis(ImmutableSet.of(params.apkInfo.getFilterName()))
+                            .withApkCreatorType(ApkCreatorType.APK_Z_FILE_CREATOR)
+                            .withChangedNativeLibs(
+                                    IncrementalRelativeFileSets.fromZipsAndDirectories(
+                                            params.jniFolders))
+                            .withChangedAndroidResources(
+                                    IncrementalRelativeFileSets.fromZip(params.input))
                             .build()) {
-
-                ImmutableMap<RelativeFile, FileStatus> nativeLibs =
-                        IncrementalRelativeFileSets.fromZipsAndDirectories(params.jniFolders);
-
-                pkg.updateNativeLibraries(nativeLibs);
-
-                ImmutableMap<RelativeFile, FileStatus> androidResources =
-                        IncrementalRelativeFileSets.fromZip(params.input);
-                pkg.updateAndroidResources(androidResources);
+                pkg.updateFiles();
             } catch (IOException e) {
                 throw new BuildException(e.getMessage(), e);
             }
@@ -217,7 +216,7 @@ public abstract class PackageSplitAbi extends NonIncrementalTask {
                                                     .get("archivesBaseName"),
                                     task.signingConfig != null));
             incrementalDir = task.incrementalDir;
-            signingConfigFile = SigningConfigMetadata.Companion.getOutputFile(task.signingConfig);
+            signingConfigFile = SigningConfigUtils.Companion.getOutputFile(task.signingConfig);
             createdBy = task.getCreatedBy();
             aaptOptionsNoCompress = task.aaptOptionsNoCompress;
             jniFolders = task.getJniFolders().getFiles();

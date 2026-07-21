@@ -15,12 +15,10 @@
  */
 package com.android.build.gradle.internal
 
-import com.android.SdkConstants.FD_RES_LAYOUT
 import com.android.SdkConstants.FD_RES_VALUES
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.ANDROID_RES
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH
 
-import com.android.build.api.artifact.BuildableArtifact
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.EXTERNAL
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.PROJECT
 import com.android.build.gradle.internal.scope.VariantScope
@@ -29,12 +27,8 @@ import com.android.build.gradle.tasks.ProcessApplicationManifest
 import com.android.builder.core.BuilderConstants
 import com.android.ide.common.rendering.api.ResourceNamespace
 import com.android.ide.common.resources.ResourceSet
-import com.android.resources.ResourceFolderType
-import com.android.resources.ResourceType
-import com.android.utils.ILogger
 import com.google.common.annotations.VisibleForTesting
 import com.google.common.collect.ImmutableList
-import com.google.common.collect.Sets
 import org.gradle.api.artifacts.ArtifactCollection
 import org.gradle.api.file.FileCollection
 import java.io.File
@@ -74,11 +68,10 @@ class DependencyResourcesComputer {
         libraries?.let {
             val libArtifacts = it.artifacts
 
-            // Layout resources can have databinding values so they need to go through the merging
-            // step, same thing for values resources as we impose stricter rules for them different
-            // from aapt.
+            // For values resources we impose stricter rules different from aapt so they need to go
+            // through the merging step.
             val folderFilter = { folder: File ->
-                folder.name.startsWith(FD_RES_LAYOUT) || folder.name.startsWith(FD_RES_VALUES)
+                folder.name.startsWith(FD_RES_VALUES)
             }
 
             // the order of the artifact is descending order, so we need to reverse it.
