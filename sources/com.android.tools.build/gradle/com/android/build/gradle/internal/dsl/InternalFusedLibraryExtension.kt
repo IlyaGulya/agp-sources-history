@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.api
+package com.android.build.gradle.internal.dsl
 
-import org.gradle.api.Plugin
-import org.gradle.api.Project
+import com.android.build.api.dsl.FusedLibraryExtension
+import com.android.build.api.dsl.MinSdkSpec
+import org.gradle.api.Action
 
-/**
- * The plugin applied with 'com.android.fused-library'
- *
- * @suppress Do not use from production code. Only exposed for prototype.
+/*
+ * Options that are not exposed in the public extension.
  */
-class FusedLibraryPlugin: Plugin<Project> {
-    override fun apply(project: Project) {
-        project.apply(mapOf("plugin" to "com.android.internal.fused-library"))
-    }
+interface InternalFusedLibraryExtension : FusedLibraryExtension {
+    val minSdkApiLevel: Int?
+    fun minSdk(action: Action<MinSdkSpec>)
 }
