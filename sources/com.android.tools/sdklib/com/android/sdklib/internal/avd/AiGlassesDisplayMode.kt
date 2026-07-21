@@ -13,21 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.sdklib.internal.avd
 
-package com.android.builder.dexing
+/** Describes the display mode settings for AI Glasses. */
+enum class AiGlassesDisplayMode(val settingValue: String, val displayName: String) : ConfigEnum {
+  MONOCULAR_RIGHT("monocular_right", "Monocular Right"),
+  NONE("none", "None");
 
-import com.android.ide.common.blame.MessageReceiver
-
-/** Parameters required for dexing (with D8). */
-class DexParameters(
-  val minSdkVersion: Int,
-  val debuggable: Boolean,
-  val dexPerClass: Boolean,
-  val withDesugaring: Boolean,
-  val desugarBootclasspath: com.android.builder.dexing.r8.ClassFileProviderFactory,
-  val desugarClasspath: com.android.builder.dexing.r8.ClassFileProviderFactory,
-  val coreLibDesugarConfig: String?,
-  val enableApiModeling: Boolean,
-  val messageReceiver: MessageReceiver,
-  val useNoOpGlobalSyntheticsConsumer: Boolean = false,
-)
+  override fun getAsParameter(): String = settingValue
+}
