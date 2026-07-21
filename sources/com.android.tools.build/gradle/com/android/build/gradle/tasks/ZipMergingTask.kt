@@ -17,15 +17,18 @@
 package com.android.build.gradle.tasks
 
 import com.android.SdkConstants.FN_INTERMEDIATE_FULL_JAR
+import com.android.build.gradle.internal.packaging.JarCreatorFactory
+import com.android.build.gradle.internal.packaging.JarCreatorType
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
-import com.android.builder.packaging.JarMerger
 import com.android.utils.FileUtils
+import com.google.common.annotations.VisibleForTesting
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
@@ -50,6 +53,11 @@ abstract class ZipMergingTask : NonIncrementalTask() {
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
 
+    @VisibleForTesting
+    @get:Input
+    lateinit var jarCreatorType: JarCreatorType
+        internal set
+
     public override fun doTaskAction() {
         val destinationFile = outputFile.get().asFile
         FileUtils.cleanOutputDir(destinationFile.parentFile)
@@ -61,7 +69,11 @@ abstract class ZipMergingTask : NonIncrementalTask() {
             }
         }
 
-        JarMerger(destinationFile.toPath(), usedNamesPredicate).use {
+        JarCreatorFactory.make(
+            destinationFile.toPath(),
+            usedNamesPredicate,
+            jarCreatorType
+        ).use {
             val lib = libraryInputFile.get().asFile
             if (lib.exists()) {
                 it.addJar(lib.toPath())
@@ -100,6 +112,7 @@ abstract class ZipMergingTask : NonIncrementalTask() {
                 InternalArtifactType.LIBRARY_JAVA_RES,
                 task.javaResInputFile
             )
+            task.jarCreatorType = variantScope.jarCreatorType
         }
     }
 }

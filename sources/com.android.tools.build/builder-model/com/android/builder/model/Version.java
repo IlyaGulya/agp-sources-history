@@ -22,7 +22,12 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Properties;
 
-/** Version strings for this builder-model artifact. */
+/**
+ * @deprecated use com.android.Version instead
+ *     <p>TODO: remove (along with the associated version.properties) once it's no longer used by
+ *     the gradle build scan plugin
+ */
+@Deprecated
 public final class Version {
     public static final String ANDROID_GRADLE_PLUGIN_VERSION;
     public static final String ANDROID_TOOLS_BASE_VERSION;

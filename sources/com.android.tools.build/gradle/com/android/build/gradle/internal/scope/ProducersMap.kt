@@ -17,7 +17,6 @@
 package com.android.build.gradle.internal.scope
 
 import com.android.build.api.artifact.ArtifactType
-import com.android.utils.FileUtils
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemLocation
@@ -29,12 +28,13 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Map of all the producers registered in this context.
  *
  * @param buildDirectory the project buildDirectory [DirectoryProperty]
- * @param identifier a function to uniquely indentify this context when creating files and folders.
+ * @param identifier a function to uniquely identify this context when creating files and folders.
  */
 class ProducersMap<T: FileSystemLocation>(
     val objectFactory: ObjectFactory,
@@ -55,22 +55,20 @@ class ProducersMap<T: FileSystemLocation>(
      * [ArtifactType]
      *
      * @param artifactType the artifact type for looked up producers.
-     * @param buildDirectory intended location for the artifact or not provided if using the default.
+     * @param buildLocation intended location for the artifact or not provided if using the default.
      * @return a [Producers] instance for that [ArtifactType]
      */
-    internal fun getProducers(artifactType: ArtifactType, buildDirectory: Provider<Directory> = this.buildDirectory): Producers<T> {
+    internal fun getProducers(artifactType: ArtifactType, buildLocation: String? = null): Producers<T> {
 
         val outputLocationResolver: (Producers<T>, Producer<T>) -> Provider<T> =
-            if (buildDirectory != this.buildDirectory) {
-                { _, producer -> producer.resolve(buildDirectory.get().asFile) }
+            if (buildLocation != null) {
+                { _, producer -> producer.resolve(buildDirectory.dir(buildLocation).get().asFile) }
             } else {
                 { producers, producer ->
-                    val outputLocation = FileUtils.join(
-                        artifactType.getOutputDir(buildDirectory.get().asFile),
+                    val outputLocation = artifactType.getOutputDirectory(
+                        buildDirectory,
                         identifier(),
-                        if (producers.hasMultipleProducers()) producer.taskName else ""
-                    )
-
+                        if (producers.hasMultipleProducers()) producer.taskName else "")
                     producer.resolve(outputLocation) }
             }
 
@@ -78,7 +76,6 @@ class ProducersMap<T: FileSystemLocation>(
             Producers(
                 artifactType,
                 identifier,
-                buildDirectory,
                 outputLocationResolver,
                 when (artifactType.kind()) {
                     ArtifactType.Kind.DIRECTORY -> this.buildDirectory.dir("__EMPTY_DIR__$artifactType")
@@ -104,7 +101,7 @@ class ProducersMap<T: FileSystemLocation>(
      * under.
      */
     fun republish(from: ArtifactType, to: ArtifactType) {
-        producersMap[to] = getProducers(from, buildDirectory)
+        producersMap[to] = getProducers(from)
     }
 
     /**
@@ -117,6 +114,8 @@ class ProducersMap<T: FileSystemLocation>(
         producersMap[artifactType] = source as Producers<T>
     }
 
+    fun entrySet() = producersMap.entries
+
     /**
      * possibly empty list of all the [org.gradle.api.Task]s (and decoration) producing this
      * artifact type.
@@ -124,7 +123,6 @@ class ProducersMap<T: FileSystemLocation>(
     class Producers<T : FileSystemLocation>(
         val artifactType: ArtifactType,
         val identifier: () -> String,
-        val buildDirectory: Provider<Directory>,
         val resolver: (Producers<T>, Producer<T>) -> Provider<T>,
         private val emptyProvider: Provider<T>,
         private val listProperty: ListProperty<T>,
@@ -144,6 +142,12 @@ class ProducersMap<T: FileSystemLocation>(
         val lastProducerTaskName: Provider<String> =
             injectable.map { _ -> get(size - 1).taskName }
 
+        // keep count of all producers. Even if a producer is replaced, we still need to remember
+        // its existence so we do not have overlapping output with different task.
+        // For instance Task1 outputs in O1, and Task2 comes around and want to replace the artifact
+        // with output at O2, we must make sure that O1 and O2 do not overlap.
+        private val producerCount = AtomicInteger(0)
+
         private fun resolveAll(): List<Provider<T>> {
             return synchronized(this) {
                 map {
@@ -154,10 +158,13 @@ class ProducersMap<T: FileSystemLocation>(
 
         fun resolveAllAndReturnLast(): Provider<T>? = resolveAll().lastOrNull()
 
-        fun add(settableProperty: Property<T>,
+        fun add(
+            settableProperty: Property<T>,
             originalProperty: Provider<Property<T>>,
             taskName: String,
-            fileName: String) {
+            fileName: String
+        ) {
+            producerCount.incrementAndGet()
             listProperty.add(originalProperty.map { it.get() })
             dependencies.add(originalProperty)
             add(Producer(settableProperty, originalProperty, taskName, fileName))
@@ -177,17 +184,23 @@ class ProducersMap<T: FileSystemLocation>(
             return listProperty
         }
 
-        fun resolve(producer: Producer<T>)=
+        fun resolve(producer: Producer<T>) =
             resolver(this, producer)
 
-        fun hasMultipleProducers() = size > 1
+        // even if we currently have only one, but more than one was registered, return true so
+        // we do not have overlapping tasks output.
+        fun hasMultipleProducers() = producerCount.get() > 1
+
+        fun toProducersData() = BuildArtifactsHolder.ProducersData(
+            map { producer -> producer.toProducerData() }
+        )
     }
 
     /**
      * A registered producer of an artifact. The artifact is produced by a Task identified by its
      * name and a requested file name.
      */
-    class Producer<T>(
+    class Producer<T: FileSystemLocation>(
         private val settableLocation: Property<T>,
         private val originalProperty: Provider<Property<T>>,
         val taskName: String,
@@ -204,6 +217,14 @@ class ProducersMap<T: FileSystemLocation>(
                     "Property.get() is not a correct instance type : ${settableLocation.javaClass.name}")
             }
             return originalProperty.get()
+        }
+
+        fun toProducerData(): BuildArtifactsHolder.ProducerData {
+            return if (originalProperty.isPresent && originalProperty.get().isPresent) {
+                BuildArtifactsHolder.ProducerData(listOf(originalProperty.get().get().asFile.path), taskName)
+            } else {
+                BuildArtifactsHolder.ProducerData(listOf(), taskName)
+            }
         }
     }
 }

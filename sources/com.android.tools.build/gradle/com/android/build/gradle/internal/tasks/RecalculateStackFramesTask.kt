@@ -29,8 +29,8 @@ import com.android.ide.common.workers.WorkerExecutorFacade
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
+import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskProvider
@@ -130,21 +130,25 @@ constructor(workerExecutor: WorkerExecutor) : IncrementalTask() {
                         variantScope.artifacts.getFinalProduct<Directory>(
                             InternalArtifactType.JACOCO_INSTRUMENTED_JARS)).asFileTree)
             } else {
-                referencedClasses.from(
-                    variantScope.artifacts.getFinalArtifactFiles(AnchorOutputType.ALL_CLASSES))
+                referencedClasses.from(variantScope.artifacts.getAllClasses())
             }
 
             variantScope.testedVariantData?.let {
                 val testedVariantScope = it.scope
 
                 referencedClasses.from(
-                    variantScope.artifacts.getFinalArtifactFiles(
-                        InternalArtifactType.TESTED_CODE_CLASSES))
+                    variantScope.artifacts.getFinalProduct<FileSystemLocation>(
+                        InternalArtifactType.TESTED_CODE_CLASSES
+                    )
+                )
 
-                referencedClasses.from(testedVariantScope.getArtifactCollection(
+                referencedClasses.from(
+                    testedVariantScope.getArtifactCollection(
                         AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
                         AndroidArtifacts.ArtifactScope.ALL,
-                        AndroidArtifacts.ArtifactType.CLASSES))
+                        AndroidArtifacts.ArtifactType.CLASSES
+                    ).artifactFiles
+                )
             }
 
             task.classesToFix = classesToFix

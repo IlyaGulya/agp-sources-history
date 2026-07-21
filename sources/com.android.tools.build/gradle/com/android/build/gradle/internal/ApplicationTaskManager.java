@@ -25,12 +25,11 @@ import android.databinding.tool.DataBindingBuilder;
 import com.android.annotations.NonNull;
 import com.android.build.api.transform.QualifiedContent;
 import com.android.build.api.transform.QualifiedContent.ScopeType;
-import com.android.build.gradle.AndroidConfig;
+import com.android.build.gradle.BaseExtension;
 import com.android.build.gradle.internal.core.GradleVariantConfiguration;
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension;
 import com.android.build.gradle.internal.feature.BundleAllClasses;
 import com.android.build.gradle.internal.pipeline.TransformManager;
-import com.android.build.gradle.internal.scope.AnchorOutputType;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.AppClasspathCheckTask;
@@ -57,6 +56,7 @@ import com.android.build.gradle.internal.tasks.factory.TaskFactoryUtils;
 import com.android.build.gradle.internal.tasks.featuresplit.FeatureSetMetadataWriterTask;
 import com.android.build.gradle.internal.tasks.featuresplit.FeatureSplitDeclarationWriterTask;
 import com.android.build.gradle.internal.tasks.featuresplit.FeatureSplitTransitiveDepsWriterTask;
+import com.android.build.gradle.internal.variant.ApkVariantData;
 import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.internal.variant.MultiOutputPolicy;
 import com.android.build.gradle.internal.variant.VariantFactory;
@@ -69,6 +69,7 @@ import com.android.builder.core.VariantType;
 import com.android.builder.profile.Recorder;
 import com.google.common.collect.Sets;
 import java.io.File;
+import java.util.List;
 import java.util.Set;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
@@ -93,7 +94,7 @@ public class ApplicationTaskManager extends TaskManager {
             @NonNull Project project,
             @NonNull ProjectOptions projectOptions,
             @NonNull DataBindingBuilder dataBindingBuilder,
-            @NonNull AndroidConfig extension,
+            @NonNull BaseExtension extension,
             @NonNull VariantFactory variantFactory,
             @NonNull ToolingModelBuilderRegistry toolingRegistry,
             @NonNull Recorder recorder) {
@@ -109,7 +110,9 @@ public class ApplicationTaskManager extends TaskManager {
     }
 
     @Override
-    public void createTasksForVariantScope(@NonNull final VariantScope variantScope) {
+    public void createTasksForVariantScope(
+            @NonNull final VariantScope variantScope,
+            @NonNull List<VariantScope> variantScopesForLint) {
         createAnchorTasks(variantScope);
 
         taskFactory.register(new ExtractDeepLinksTask.CreationAction(variantScope));
@@ -221,8 +224,11 @@ public class ApplicationTaskManager extends TaskManager {
 
         createPackagingTask(variantScope);
 
+        maybeCreateLintVitalTask(
+                (ApkVariantData) variantScope.getVariantData(), variantScopesForLint);
+
         // Create the lint tasks, if enabled
-        createLintTasks(variantScope);
+        createLintTasks(variantScope, variantScopesForLint);
 
         taskFactory.register(new FeatureSplitTransitiveDepsWriterTask.CreationAction(variantScope));
 
@@ -269,7 +275,7 @@ public class ApplicationTaskManager extends TaskManager {
                 scope.getGlobalScope()
                         .getProject()
                         .files(javacOutput, preJavacGeneratedBytecode, postJavacGeneratedBytecode);
-        scope.getArtifacts().appendArtifact(AnchorOutputType.ALL_CLASSES, files);
+        scope.getArtifacts().appendToAllClasses(files);
     }
 
     @Override

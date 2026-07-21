@@ -16,20 +16,21 @@
 
 package com.android.build.gradle.internal.transforms
 
-import com.android.build.api.artifact.BuildableArtifact
 import com.android.build.api.transform.Format
 import com.android.build.api.transform.QualifiedContent
 import com.android.build.api.transform.SecondaryFile
 import com.android.build.api.transform.Transform
 import com.android.build.api.transform.TransformException
 import com.android.build.api.transform.TransformInvocation
-import com.android.build.gradle.internal.api.artifact.singleFile
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.build.gradle.internal.pipeline.TransformManager.CONTENT_DEX
 import com.android.builder.dexing.DexSplitterTool
 import com.android.utils.FileUtils
+import org.gradle.api.file.Directory
 import org.gradle.api.file.FileCollection
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import java.io.File
 import java.nio.file.Files
@@ -38,13 +39,14 @@ import java.nio.file.Files
  * Transform that splits dex files depending on their feature sources
  */
 class DexSplitterTransform(
-        private val outputDir: File,
         private val featureJars: FileCollection,
-        private val baseJars: BuildableArtifact,
-        private val mappingFileSrc: BuildableArtifact?,
+        private val baseJars: Provider<RegularFile>,
+        private val mappingFileSrc: Provider<RegularFile>?,
         private val mainDexList: Provider<RegularFile>?
 ) :
         Transform() {
+
+    private lateinit var outputDirectoryProperty: Property<Directory>
 
     override fun getName(): String = "dexSplitter"
 
@@ -60,23 +62,23 @@ class DexSplitterTransform(
     override fun getSecondaryFiles(): MutableCollection<SecondaryFile> {
         val secondaryFiles: MutableCollection<SecondaryFile> = mutableListOf()
         secondaryFiles.add(SecondaryFile.nonIncremental(featureJars))
-        secondaryFiles.add(SecondaryFile.nonIncremental(baseJars))
-        mappingFileSrc?.let { secondaryFiles.add(SecondaryFile.nonIncremental(it)) }
+        secondaryFiles.add(SecondaryFile.nonIncremental(baseJars.get().asFile))
+        mappingFileSrc?.let { secondaryFiles.add(SecondaryFile.nonIncremental(it.get().asFile)) }
         mainDexList?.let { secondaryFiles.add(SecondaryFile.nonIncremental(it.get().asFile)) }
         return secondaryFiles
     }
 
     override fun getSecondaryDirectoryOutputs(): MutableCollection<File> {
-        return mutableListOf(outputDir)
+        return mutableListOf(outputDirectoryProperty.get().asFile)
     }
 
     override fun transform(transformInvocation: TransformInvocation) {
 
         try {
             val mappingFile =
-                if (mappingFileSrc?.singleFile()?.exists() == true
-                    && !mappingFileSrc.singleFile().isDirectory) {
-                mappingFileSrc.singleFile()
+                if (mappingFileSrc?.orNull?.asFile?.exists() == true
+                    && mappingFileSrc.orNull?.asFile?.isFile == true) {
+                mappingFileSrc.orNull?.asFile
             } else {
                 null
             }
@@ -86,6 +88,7 @@ class DexSplitterTransform(
                 { "No output provider set" }
             )
             outputProvider.deleteAll()
+            val outputDir = outputDirectoryProperty.get().asFile
             FileUtils.deleteRecursivelyIfExists(outputDir)
 
             val builder = DexSplitterTool.Builder(
@@ -101,7 +104,7 @@ class DexSplitterTransform(
                 Files.createDirectories(File(outputDir, file.nameWithoutExtension).toPath())
             }
 
-            baseJars.files.forEach { builder.addBaseJar(it.toPath()) }
+            builder.addBaseJar(baseJars.get().asFile.toPath())
 
             builder.build().run()
 
@@ -118,5 +121,9 @@ class DexSplitterTransform(
         } catch (e: Exception) {
             throw TransformException(e)
         }
+    }
+
+    override fun setOutputDirectory(directory: Property<Directory>) {
+        outputDirectoryProperty= directory
     }
 }

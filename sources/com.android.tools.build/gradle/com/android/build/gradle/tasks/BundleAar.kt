@@ -18,7 +18,6 @@ package com.android.build.gradle.tasks
 
 import android.databinding.tool.DataBindingBuilder
 import com.android.SdkConstants
-import com.android.build.gradle.AndroidConfig
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.InternalArtifactType.LIBRARY_AND_LOCAL_JARS_JNI
@@ -43,7 +42,6 @@ abstract class BundleAar : Zip(), VariantAwareTask {
     override lateinit var variantName: String
 
     class CreationAction(
-        private val extension: AndroidConfig,
         variantScope: VariantScope
     ) : VariantTaskCreationAction<BundleAar>(variantScope) {
 
@@ -59,8 +57,7 @@ abstract class BundleAar : Zip(), VariantAwareTask {
                 BuildArtifactsHolder.OperationType.INITIAL,
                 taskProvider,
                 BundleAar::getDestinationDirectory,
-                variantScope.globalScope.project.layout.buildDirectory.dir(
-                    variantScope.aarLocation.absolutePath),
+                variantScope.aarLocation.absolutePath,
                 "")
         }
 
@@ -91,10 +88,10 @@ abstract class BundleAar : Zip(), VariantAwareTask {
             )
             task.from(artifacts.getFinalProduct<RegularFile>(
                 InternalArtifactType.CONSUMER_PROGUARD_FILE))
-            if (extension.dataBinding.isEnabled) {
+            if (variantScope.globalScope.extension.dataBinding.isEnabled) {
                 task.from(
                     variantScope.globalScope.project.provider {
-                        variantScope.artifacts.getFinalArtifactFiles(
+                        variantScope.artifacts.getFinalProduct<Directory>(
                             InternalArtifactType.DATA_BINDING_ARTIFACT) },
                     prependToCopyPath(DataBindingBuilder.DATA_BINDING_ROOT_FOLDER_IN_AAR)
                 )
@@ -109,7 +106,7 @@ abstract class BundleAar : Zip(), VariantAwareTask {
 
             if (!variantScope.globalScope.extension.aaptOptions.namespaced) {
                 // TODO: this should be unconditional b/69358522
-                task.from(artifacts.getFinalArtifactFiles(InternalArtifactType.SYMBOL_LIST))
+                task.from(artifacts.getFinalProduct<RegularFile>(InternalArtifactType.SYMBOL_LIST))
                 task.from(
                     artifacts.getFinalProduct<Directory>(InternalArtifactType.PACKAGED_RES),
                     prependToCopyPath(SdkConstants.FD_RES)

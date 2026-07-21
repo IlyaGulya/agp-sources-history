@@ -30,10 +30,9 @@ import static org.gradle.api.internal.artifacts.ArtifactAttributes.ARTIFACT_FORM
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
-import com.android.build.api.artifact.BuildableArtifact;
 import com.android.build.api.attributes.BuildTypeAttr;
 import com.android.build.api.attributes.ProductFlavorAttr;
-import com.android.build.gradle.AndroidConfig;
+import com.android.build.gradle.BaseExtension;
 import com.android.build.gradle.TestedAndroidConfig;
 import com.android.build.gradle.api.AndroidSourceSet;
 import com.android.build.gradle.internal.api.DefaultAndroidSourceSet;
@@ -74,6 +73,7 @@ import com.android.build.gradle.internal.publishing.AndroidArtifacts;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType;
 import com.android.build.gradle.internal.publishing.PublishingSpecs;
 import com.android.build.gradle.internal.res.Aapt2MavenUtils;
+import com.android.build.gradle.internal.scope.AnchorOutputType;
 import com.android.build.gradle.internal.scope.BuildArtifactsHolder;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.TransformVariantScope;
@@ -162,7 +162,7 @@ public class VariantManager implements VariantModel {
 
     @NonNull private final Project project;
     @NonNull private final ProjectOptions projectOptions;
-    @NonNull private final AndroidConfig extension;
+    @NonNull private final BaseExtension extension;
     @NonNull private final VariantFactory variantFactory;
     @NonNull private final TaskManager taskManager;
     @NonNull private final SourceSetManager sourceSetManager;
@@ -184,7 +184,7 @@ public class VariantManager implements VariantModel {
             @NonNull GlobalScope globalScope,
             @NonNull Project project,
             @NonNull ProjectOptions projectOptions,
-            @NonNull AndroidConfig extension,
+            @NonNull BaseExtension extension,
             @NonNull VariantFactory variantFactory,
             @NonNull TaskManager taskManager,
             @NonNull SourceSetManager sourceSetManager,
@@ -382,8 +382,6 @@ public class VariantManager implements VariantModel {
             createTasksForVariantData(variantScope);
         }
 
-        taskManager.createSourceSetArtifactReportTask(globalScope);
-
         taskManager.createReportTasks(variantScopes);
 
         return variantScopes;
@@ -494,13 +492,23 @@ public class VariantManager implements VariantModel {
                                     multiDexInstrumentationDep);
                 }
 
-                taskManager.createAndroidTestVariantTasks((TestVariantData) variantData);
+                taskManager.createAndroidTestVariantTasks(
+                        (TestVariantData) variantData,
+                        variantScopes
+                                .stream()
+                                .filter(TaskManager::isLintVariant)
+                                .collect(Collectors.toList()));
             } else { // UNIT_TEST
                 taskManager.createUnitTestVariantTasks((TestVariantData) variantData);
             }
 
         } else {
-            taskManager.createTasksForVariantScope(variantScope);
+            taskManager.createTasksForVariantScope(
+                    variantScope,
+                    variantScopes
+                            .stream()
+                            .filter(TaskManager::isLintVariant)
+                            .collect(Collectors.toList()));
         }
     }
 
@@ -524,21 +532,21 @@ public class VariantManager implements VariantModel {
             }
 
             if (buildArtifactsHolder.hasArtifact(buildArtifactType)) {
-                BuildableArtifact artifact =
-                        buildArtifactsHolder.getFinalArtifactFiles(buildArtifactType);
-                variantScope.publishIntermediateArtifact(
-                        artifact,
-                        outputSpec.getArtifactType(),
-                        outputSpec.getPublishedConfigTypes());
+                throw new RuntimeException(buildArtifactType + " is still using old APIs.");
             }
 
             if (buildArtifactsHolder.hasFinalProduct(buildArtifactType)) {
                 Pair<Provider<String>, Provider<FileSystemLocation>> finalProduct =
                         buildArtifactsHolder.getFinalProductWithTaskName(buildArtifactType);
-                if (finalProduct.getSecond().isPresent()) {
+                variantScope.publishIntermediateArtifact(
+                        finalProduct.getSecond(),
+                        finalProduct.getFirst(),
+                        outputSpec.getArtifactType(),
+                        outputSpec.getPublishedConfigTypes());
+            } else {
+                if (buildArtifactType == AnchorOutputType.ALL_CLASSES) {
                     variantScope.publishIntermediateArtifact(
-                            finalProduct.getSecond(),
-                            finalProduct.getFirst(),
+                            buildArtifactsHolder.getFinalProductAsFileCollection(buildArtifactType),
                             outputSpec.getArtifactType(),
                             outputSpec.getPublishedConfigTypes());
                 }
@@ -985,8 +993,8 @@ public class VariantManager implements VariantModel {
                         .reportError(
                                 EvalIssueReporter.Type.UNNAMED_FLAVOR_DIMENSION,
                                 new EvalIssueException(
-                                        "All flavors must now belong to a named flavor dimension. "
-                                                + "Learn more at "
+                                        "All flavors must now belong to a named flavor dimension."
+                                                + " Learn more at "
                                                 + "https://d.android.com/r/tools/flavorDimensions-missing-error-message.html"));
             } else if (flavorDimensionList.size() == 1) {
                 // if there's only one dimension, auto-assign the dimension to all the flavors.
@@ -1250,7 +1258,6 @@ public class VariantManager implements VariantModel {
         TestVariantData testVariantData =
                 new TestVariantData(
                         globalScope,
-                        extension,
                         taskManager,
                         testVariantConfig,
                         (TestedVariantData) testedVariantData,
@@ -1284,8 +1291,10 @@ public class VariantManager implements VariantModel {
 
             testBuildTypeData = buildTypes.get(testedExtension.getTestBuildType());
             if (testBuildTypeData == null) {
-                throw new RuntimeException(String.format(
-                        "Test Build Type '%1$s' does not exist.", testedExtension.getTestBuildType()));
+                throw new RuntimeException(
+                        String.format(
+                                "Test Build Type '%1$s' does not" + " exist.",
+                                testedExtension.getTestBuildType()));
             }
         }
 
@@ -1357,7 +1366,10 @@ public class VariantManager implements VariantModel {
                                     EvalIssueReporter.Type.GENERIC,
                                     String.format(
                                             Locale.US,
-                                            "minSdkVersion (%d) is greater than targetSdkVersion (%d) for variant \"%s\". Please change the values such that minSdkVersion is less than or equal to targetSdkVersion.",
+                                            "minSdkVersion (%d) is greater than targetSdkVersion"
+                                                    + " (%d) for variant \"%s\". Please change the"
+                                                    + " values such that minSdkVersion is less than or"
+                                                    + " equal to targetSdkVersion.",
                                             minSdkVersion,
                                             targetSdkVersion,
                                             variantData.getName()));

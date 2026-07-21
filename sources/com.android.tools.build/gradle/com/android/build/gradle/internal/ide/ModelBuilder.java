@@ -24,11 +24,12 @@ import static com.android.builder.model.AndroidProject.PROJECT_TYPE_APP;
 import static com.android.builder.model.AndroidProject.PROJECT_TYPE_DYNAMIC_FEATURE;
 
 import com.android.SdkConstants;
+import com.android.Version;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.VariantOutput;
 import com.android.build.api.artifact.ArtifactType;
-import com.android.build.gradle.AndroidConfig;
+import com.android.build.gradle.BaseExtension;
 import com.android.build.gradle.FeaturePlugin;
 import com.android.build.gradle.TestAndroidConfig;
 import com.android.build.gradle.internal.BuildTypeData;
@@ -62,7 +63,6 @@ import com.android.build.gradle.internal.variant.TestedVariantData;
 import com.android.build.gradle.options.BooleanOption;
 import com.android.build.gradle.options.ProjectOptions;
 import com.android.build.gradle.options.SyncOptions;
-import com.android.build.gradle.tasks.ExternalNativeJsonGenerator;
 import com.android.builder.core.DefaultManifestParser;
 import com.android.builder.core.ManifestAttributeSupplier;
 import com.android.builder.core.VariantType;
@@ -91,7 +91,7 @@ import com.android.builder.model.TestVariantBuildOutput;
 import com.android.builder.model.TestedTargetVariant;
 import com.android.builder.model.Variant;
 import com.android.builder.model.VariantBuildOutput;
-import com.android.builder.model.Version;
+import com.android.builder.model.ViewBindingOptions;
 import com.android.builder.model.level2.DependencyGraphs;
 import com.android.builder.model.level2.GlobalLibraryMap;
 import com.android.utils.Pair;
@@ -131,11 +131,10 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.component.BuildIdentifier;
 import org.gradle.api.artifacts.result.ResolvedArtifactResult;
 import org.gradle.api.file.FileCollection;
-import org.gradle.api.provider.Provider;
 import org.gradle.tooling.provider.model.ParameterizedToolingModelBuilder;
 
 /** Builder for the custom Android model. */
-public class ModelBuilder<Extension extends AndroidConfig>
+public class ModelBuilder<Extension extends BaseExtension>
         implements ParameterizedToolingModelBuilder<ModelBuilderParameter> {
 
     @NonNull protected final GlobalScope globalScope;
@@ -368,23 +367,8 @@ public class ModelBuilder<Extension extends AndroidConfig>
 
         AaptOptions aaptOptions = AaptOptionsImpl.create(extension.getAaptOptions());
 
-        // For modules that have C/C++, construct the JSON generators to get sync errors.
-        // This doesn't do the slow work of actually generating the JSON.
-        for (VariantScope variantScope : variantManager.getVariantScopes()) {
-            if (!variantScope.getVariantData().getType().isTestComponent()) {
-                if (shouldBuildVariant) {
-                    Provider<ExternalNativeJsonGenerator> provider =
-                            variantScope.getTaskContainer().getExternalNativeJsonGenerator();
-                    if (provider != null) {
-                        // This path will only execute if the module has native code.
-                        // It will cause ExternalNativeJsonGenerator#create to be invoked.
-                        // This function does work, like trying to located the NDK, that
-                        // can trigger sync messages.
-                        provider.get().build(false);
-                    }
-                }
-            }
-        }
+        ViewBindingOptions viewBindingOptions =
+                ViewBindingOptionsImpl.create(extension.getViewBinding());
 
         syncIssues.addAll(extraModelInfo.getSyncIssueHandler().getSyncIssues());
 
@@ -425,8 +409,12 @@ public class ModelBuilder<Extension extends AndroidConfig>
             }
         }
 
+        // get groupId/artifactId for project
+        String groupId = project.getGroup().toString();
+
         return new DefaultAndroidProject(
                 project.getName(),
+                groupId,
                 defaultConfig,
                 flavorDimensionList,
                 buildTypes,
@@ -450,7 +438,8 @@ public class ModelBuilder<Extension extends AndroidConfig>
                 projectType,
                 Version.BUILDER_MODEL_API_VERSION,
                 isBaseSplit(),
-                getDynamicFeatures());
+                getDynamicFeatures(),
+                viewBindingOptions);
     }
 
     protected boolean isBaseSplit() {
@@ -816,12 +805,13 @@ public class ModelBuilder<Extension extends AndroidConfig>
             // can't use ProjectOptions as this is likely to change from the initialization of
             // ProjectOptions due to how lint dynamically add/remove this property.
             boolean downloadSources =
-                    !project.hasProperty(AndroidProject.PROPERTY_BUILD_MODEL_DISABLE_SRC_DOWNLOAD)
-                            || !Boolean.TRUE.equals(
-                                    project.getProperties()
-                                            .get(
-                                                    AndroidProject
-                                                            .PROPERTY_BUILD_MODEL_DISABLE_SRC_DOWNLOAD));
+                    !Boolean.parseBoolean(
+                            String.valueOf(
+                                            project.getProperties()
+                                                    .get(
+                                                            AndroidProject
+                                                                    .PROPERTY_BUILD_MODEL_DISABLE_SRC_DOWNLOAD))
+                                    .trim());
 
             if (modelLevel >= AndroidProject.MODEL_LEVEL_4_NEW_DEP_MODEL) {
                 result =
@@ -1093,7 +1083,8 @@ public class ModelBuilder<Extension extends AndroidConfig>
                                             variantData.getVariantConfiguration().getVersionCode(),
                                             variantScope
                                                     .getArtifacts()
-                                                    .getFinalArtifactFiles(testedOutputType)
+                                                    .getFinalProductAsFileCollection(
+                                                            testedOutputType)
                                                     // We used to call .getSingleFile() but Kotlin
                                                     // projects currently have 2 output dirs
                                                     // specified for test classes. This supplier is
@@ -1192,14 +1183,16 @@ public class ModelBuilder<Extension extends AndroidConfig>
         BuildArtifactsHolder artifacts = scope.getArtifacts();
         GlobalScope globalScope = variantData.getScope().getGlobalScope();
 
-        boolean addDataBindingSources =
-                globalScope.getExtension().getDataBinding().isEnabled()
+        boolean isDataBindingEnabled = globalScope.getExtension().getDataBinding().isEnabled();
+        boolean isViewBindingEnabled = globalScope.getExtension().getViewBinding().isEnabled();
+        boolean addBindingSources =
+                (isDataBindingEnabled || isViewBindingEnabled)
                         && artifacts.hasFinalProduct(DATA_BINDING_BASE_CLASS_SOURCE_OUT);
         List<File> extraFolders = getGeneratedSourceFoldersForUnitTests(variantData);
 
         // Set this to the number of folders you expect to add explicitly in the code below.
         int additionalFolders = 4;
-        if (addDataBindingSources) {
+        if (addBindingSources) {
             additionalFolders += 1;
         }
         List<File> folders =
@@ -1220,7 +1213,7 @@ public class ModelBuilder<Extension extends AndroidConfig>
                             .get()
                             .getAsFile());
         }
-        if (addDataBindingSources) {
+        if (addBindingSources) {
             folders.add(
                     scope.getArtifacts()
                             .getFinalProduct(DATA_BINDING_BASE_CLASS_SOURCE_OUT)

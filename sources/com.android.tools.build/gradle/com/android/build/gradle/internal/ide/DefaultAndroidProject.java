@@ -16,6 +16,7 @@
 
 package com.android.build.gradle.internal.ide;
 
+import com.android.Version;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.gradle.internal.CompileOptions;
@@ -30,7 +31,7 @@ import com.android.builder.model.ProductFlavorContainer;
 import com.android.builder.model.SigningConfig;
 import com.android.builder.model.SyncIssue;
 import com.android.builder.model.Variant;
-import com.android.builder.model.Version;
+import com.android.builder.model.ViewBindingOptions;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.io.Serializable;
@@ -45,6 +46,7 @@ final class DefaultAndroidProject implements AndroidProject, Serializable {
 
     @NonNull
     private final String name;
+    @Nullable private final String groupId;
     @NonNull
     private final String compileTarget;
     @NonNull
@@ -90,8 +92,11 @@ final class DefaultAndroidProject implements AndroidProject, Serializable {
     @NonNull
     private final Collection<String> flavorDimensions;
 
+    @NonNull private final ViewBindingOptions viewBindingOptions;
+
     DefaultAndroidProject(
             @NonNull String name,
+            @Nullable String groupId,
             @NonNull ProductFlavorContainer defaultConfig,
             @NonNull Collection<String> flavorDimensions,
             @NonNull Collection<BuildTypeContainer> buildTypes,
@@ -115,8 +120,10 @@ final class DefaultAndroidProject implements AndroidProject, Serializable {
             int projectType,
             int apiVersion,
             boolean baseSplit,
-            @NonNull Collection<String> dynamicFeatures) {
+            @NonNull Collection<String> dynamicFeatures,
+            @NonNull ViewBindingOptions viewBindingOptions) {
         this.name = name;
+        this.groupId = groupId;
         this.defaultConfig = defaultConfig;
         this.flavorDimensions = flavorDimensions;
         this.buildTypes = buildTypes;
@@ -141,6 +148,7 @@ final class DefaultAndroidProject implements AndroidProject, Serializable {
         this.buildToolsVersion = buildToolsVersion;
         this.baseSplit = baseSplit;
         this.dynamicFeatures = ImmutableList.copyOf(dynamicFeatures);
+        this.viewBindingOptions = viewBindingOptions;
     }
 
     @Override
@@ -158,6 +166,12 @@ final class DefaultAndroidProject implements AndroidProject, Serializable {
     @NonNull
     public String getName() {
         return name;
+    }
+
+    @Nullable
+    @Override
+    public String getGroupId() {
+        return groupId;
     }
 
     @Override
@@ -312,6 +326,12 @@ final class DefaultAndroidProject implements AndroidProject, Serializable {
         return dynamicFeatures;
     }
 
+    @NonNull
+    @Override
+    public ViewBindingOptions getViewBindingOptions() {
+        return viewBindingOptions;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -324,6 +344,7 @@ final class DefaultAndroidProject implements AndroidProject, Serializable {
         return projectType == that.projectType
                 && apiVersion == that.apiVersion
                 && Objects.equals(name, that.name)
+                && Objects.equals(groupId, that.groupId)
                 && Objects.equals(compileTarget, that.compileTarget)
                 && Objects.equals(bootClasspath, that.bootClasspath)
                 && Objects.equals(frameworkSource, that.frameworkSource)
@@ -345,13 +366,15 @@ final class DefaultAndroidProject implements AndroidProject, Serializable {
                 && Objects.equals(defaultConfig, that.defaultConfig)
                 && Objects.equals(flavorDimensions, that.flavorDimensions)
                 && Objects.equals(baseSplit, that.baseSplit)
-                && Objects.equals(dynamicFeatures, that.dynamicFeatures);
+                && Objects.equals(dynamicFeatures, that.dynamicFeatures)
+                && Objects.equals(viewBindingOptions, that.viewBindingOptions);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(
                 name,
+                groupId,
                 compileTarget,
                 bootClasspath,
                 frameworkSource,
@@ -375,6 +398,7 @@ final class DefaultAndroidProject implements AndroidProject, Serializable {
                 defaultConfig,
                 flavorDimensions,
                 baseSplit,
-                dynamicFeatures);
+                dynamicFeatures,
+                viewBindingOptions);
     }
 }

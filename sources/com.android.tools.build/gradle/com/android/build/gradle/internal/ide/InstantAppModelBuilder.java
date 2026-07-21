@@ -20,11 +20,12 @@ import static com.android.builder.model.AndroidProject.ARTIFACT_MAIN;
 import static com.android.builder.model.AndroidProject.PROJECT_TYPE_INSTANTAPP;
 
 import com.android.SdkConstants;
+import com.android.Version;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.build.OutputFile;
 import com.android.build.VariantOutput;
-import com.android.build.gradle.AndroidConfig;
+import com.android.build.gradle.BaseExtension;
 import com.android.build.gradle.internal.BuildTypeData;
 import com.android.build.gradle.internal.CompileOptions;
 import com.android.build.gradle.internal.ExtraModelInfo;
@@ -54,7 +55,6 @@ import com.android.builder.model.ProductFlavor;
 import com.android.builder.model.ProductFlavorContainer;
 import com.android.builder.model.SyncIssue;
 import com.android.builder.model.Variant;
-import com.android.builder.model.Version;
 import com.android.builder.model.level2.DependencyGraphs;
 import com.android.sdklib.SdkVersionInfo;
 import com.android.utils.Pair;
@@ -79,7 +79,7 @@ public class InstantAppModelBuilder
         implements ParameterizedToolingModelBuilder<ModelBuilderParameter> {
     private int modelLevel = AndroidProject.MODEL_LEVEL_0_ORIGINAL;
 
-    @NonNull private final AndroidConfig config;
+    @NonNull private final BaseExtension extension;
     @NonNull private final ExtraModelInfo extraModelInfo;
     @NonNull private final VariantManager variantManager;
     private boolean modelWithFullDependency = false;
@@ -87,9 +87,9 @@ public class InstantAppModelBuilder
 
     public InstantAppModelBuilder(
             @NonNull VariantManager variantManager,
-            @NonNull AndroidConfig config,
+            @NonNull BaseExtension extension,
             @NonNull ExtraModelInfo extraModelInfo) {
-        this.config = config;
+        this.extension = extension;
         this.extraModelInfo = extraModelInfo;
         this.variantManager = variantManager;
     }
@@ -172,8 +172,8 @@ public class InstantAppModelBuilder
         syncIssues.addAll(extraModelInfo.getSyncIssueHandler().getSyncIssues());
 
         List<String> flavorDimensionList =
-                config.getFlavorDimensionList() != null
-                        ? config.getFlavorDimensionList()
+                extension.getFlavorDimensionList() != null
+                        ? extension.getFlavorDimensionList()
                         : Lists.newArrayList();
 
         Collection<BuildTypeContainer> buildTypes = Lists.newArrayList();
@@ -208,6 +208,7 @@ public class InstantAppModelBuilder
 
         return new DefaultAndroidProject(
                 project.getName(),
+                null,
                 defaultConfig,
                 flavorDimensionList,
                 buildTypes,
@@ -231,7 +232,8 @@ public class InstantAppModelBuilder
                 PROJECT_TYPE_INSTANTAPP,
                 Version.BUILDER_MODEL_API_VERSION,
                 false,
-                ImmutableList.of());
+                ImmutableList.of(),
+                ViewBindingOptionsImpl.createDummy());
     }
 
     private Object buildMinimalisticModel() {

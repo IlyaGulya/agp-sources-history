@@ -16,6 +16,7 @@
 
 package com.android.build.gradle.internal.feature
 
+import com.android.build.gradle.internal.packaging.JarCreatorType
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.ALL
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.COMPILE_ONLY_NAMESPACED_R_CLASS_JAR
@@ -27,6 +28,7 @@ import com.android.build.gradle.internal.scope.VariantScope
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.Workers
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
+import com.android.build.gradle.options.BooleanOption
 import com.android.ide.common.workers.WorkerExecutorFacade
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
@@ -83,6 +85,10 @@ abstract class BundleAllClasses @Inject constructor(workerExecutor: WorkerExecut
     lateinit var modulePath: String
         private set
 
+    @get:Input
+    lateinit var jarCreatorType: JarCreatorType
+        private set
+
     public override fun doTaskAction() {
         val files = HashMap<String, File>()
         val collector = object: ReproducibleFileVisitor {
@@ -103,9 +109,12 @@ abstract class BundleAllClasses @Inject constructor(workerExecutor: WorkerExecut
 
         workers.use {
             it.submit(
-                JarWorkerRunnable::class.java, JarRequest(toFile = outputJar.get().asFile,
+                JarWorkerRunnable::class.java, JarRequest(
+                    toFile = outputJar.get().asFile,
+                    jarCreatorType = jarCreatorType,
                     fromJars = dependencyRClassClasses?.files?.toList() ?: listOf(),
-                    fromFiles = files)
+                    fromFiles = files
+                )
             )
         }
     }
@@ -136,6 +145,7 @@ abstract class BundleAllClasses @Inject constructor(workerExecutor: WorkerExecut
             task.postJavacClasses = variantScope.variantData.allPostJavacGeneratedBytecode
             val globalScope = variantScope.globalScope
             task.modulePath = globalScope.project.path
+            task.jarCreatorType = variantScope.jarCreatorType
             if (globalScope.extension.aaptOptions.namespaced) {
                 variantScope.artifacts.setTaskInputToFinalProduct(
                     InternalArtifactType.COMPILE_ONLY_NAMESPACED_R_CLASS_JAR,
@@ -144,7 +154,7 @@ abstract class BundleAllClasses @Inject constructor(workerExecutor: WorkerExecut
                         AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH,
                         ALL,
                         COMPILE_ONLY_NAMESPACED_R_CLASS_JAR)
-            } else {
+            } else if (!globalScope.projectOptions.get(BooleanOption.GENERATE_R_JAVA)) {
                 // This is actually thisRClassClasses and dependencyRClassClasses altogether. But
                 // thisRClassClasses expects *.class files as an input while this is *.jar. Thus,
                 // put it to dependencyRClassClasses and it will be processed properly.
@@ -154,7 +164,9 @@ abstract class BundleAllClasses @Inject constructor(workerExecutor: WorkerExecut
                             .artifacts
                             .getFinalProduct<RegularFile>(
                                 InternalArtifactType
-                                    .COMPILE_AND_RUNTIME_NOT_NAMESPACED_R_CLASS_JAR))
+                                    .COMPILE_AND_RUNTIME_NOT_NAMESPACED_R_CLASS_JAR
+                            )
+                    )
 
             }
         }

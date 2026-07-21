@@ -19,7 +19,7 @@ package com.android.build.gradle.internal;
 
 import android.databinding.tool.DataBindingBuilder;
 import com.android.annotations.NonNull;
-import com.android.build.gradle.AndroidConfig;
+import com.android.build.gradle.BaseExtension;
 import com.android.build.gradle.internal.feature.BundleAllClasses;
 import com.android.build.gradle.internal.scope.GlobalScope;
 import com.android.build.gradle.internal.scope.VariantScope;
@@ -31,6 +31,7 @@ import com.android.builder.errors.EvalIssueReporter.Type;
 import com.android.builder.profile.Recorder;
 import com.android.sdklib.AndroidTargetHash;
 import com.android.sdklib.AndroidVersion;
+import java.util.List;
 import org.gradle.api.Project;
 import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 
@@ -42,7 +43,7 @@ public class FeatureTaskManager extends ApplicationTaskManager {
             @NonNull Project project,
             @NonNull ProjectOptions projectOptions,
             @NonNull DataBindingBuilder dataBindingBuilder,
-            @NonNull AndroidConfig extension,
+            @NonNull BaseExtension extension,
             @NonNull VariantFactory variantFactory,
             @NonNull ToolingModelBuilderRegistry toolingRegistry,
             @NonNull Recorder recorder) {
@@ -58,8 +59,10 @@ public class FeatureTaskManager extends ApplicationTaskManager {
     }
 
     @Override
-    public void createTasksForVariantScope(@NonNull final VariantScope variantScope) {
-        super.createTasksForVariantScope(variantScope);
+    public void createTasksForVariantScope(
+            @NonNull final VariantScope variantScope,
+            @NonNull List<VariantScope> variantScopesForLint) {
+        super.createTasksForVariantScope(variantScope, variantScopesForLint);
         // Ensure the compile SDK is at least 26 (O).
         final AndroidVersion androidVersion =
                 AndroidTargetHash.getVersionFromHash(

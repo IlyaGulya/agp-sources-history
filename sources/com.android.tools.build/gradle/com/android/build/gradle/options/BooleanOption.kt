@@ -64,7 +64,6 @@ enum class BooleanOption(
     DISABLE_RESOURCE_VALIDATION("android.disableResourceValidation"),
     CONSUME_DEPENDENCIES_AS_SHARED_LIBRARIES("android.consumeDependenciesAsSharedLibraries"),
     KEEP_TIMESTAMPS_IN_APK("android.keepTimestampsInApk"),
-    ENABLE_NEW_DSL_AND_API("android.enableNewDsl"),
     ENABLE_EXPERIMENTAL_FEATURE_DATABINDING("android.enableExperimentalFeatureDatabinding", false),
     ENABLE_JETIFIER("android.enableJetifier", false, status = Option.Status.STABLE),
     USE_ANDROID_X("android.useAndroidX", false, status = Option.Status.STABLE),
@@ -83,6 +82,7 @@ enum class BooleanOption(
     PRECOMPILE_REMOTE_RESOURCES("android.precompileRemoteResources", true),
     // Flag added to work around b/130596259.
     FORCE_JACOCO_OUT_OF_PROCESS("android.forceJacocoOutOfProcess", false, status = Option.Status.STABLE),
+    USE_ZIPFLINGER_FOR_JAR_MERGING("android.useZipflingerForJarMerging", false),
 
     // ---------------
     // Lifecycle flags: Stable stage, Enabled by default, can be disabled
