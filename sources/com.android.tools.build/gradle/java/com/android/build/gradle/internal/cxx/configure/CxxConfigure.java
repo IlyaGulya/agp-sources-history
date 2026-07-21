@@ -54,6 +54,16 @@ public final class CxxConfigure {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_EncodedCreateCxxModel_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_FingerPrintFileWritten_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_FingerPrintFileWritten_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_EncodedFingerPrintFileWritten_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_EncodedFingerPrintFileWritten_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -118,11 +128,14 @@ public final class CxxConfigure {
       "\n\016CreateCxxModel\022\023\n\013gradle_path\030\001 \001(\t\022\024\n" +
       "\014variant_name\030\002 \001(\t\"B\n\025EncodedCreateCxxM" +
       "odel\022\023\n\013gradle_path\030\001 \001(\005\022\024\n\014variant_nam" +
-      "e\030\002 \001(\005*e\n\rConfigureType\022\032\n\026UNKNOWN_CONF" +
-      "IGURE_TYPE\020\000\022\020\n\014NO_CONFIGURE\020\001\022\022\n\016SOFT_C" +
-      "ONFIGURE\020\002\022\022\n\016HARD_CONFIGURE\020\003B3\n/com.an" +
-      "droid.build.gradle.internal.cxx.configur" +
-      "eP\001b\006proto3"
+      "e\030\002 \001(\005\"3\n\026FingerPrintFileWritten\022\031\n\021fin" +
+      "ger_print_file\030\001 \001(\t\":\n\035EncodedFingerPri" +
+      "ntFileWritten\022\031\n\021finger_print_file\030\001 \001(\005" +
+      "*e\n\rConfigureType\022\032\n\026UNKNOWN_CONFIGURE_T" +
+      "YPE\020\000\022\020\n\014NO_CONFIGURE\020\001\022\022\n\016SOFT_CONFIGUR" +
+      "E\020\002\022\022\n\016HARD_CONFIGURE\020\003B3\n/com.android.b" +
+      "uild.gradle.internal.cxx.configureP\001b\006pr" +
+      "oto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -176,6 +189,18 @@ public final class CxxConfigure {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_EncodedCreateCxxModel_descriptor,
         new java.lang.String[] { "GradlePath", "VariantName", });
+    internal_static_FingerPrintFileWritten_descriptor =
+      getDescriptor().getMessageTypes().get(8);
+    internal_static_FingerPrintFileWritten_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_FingerPrintFileWritten_descriptor,
+        new java.lang.String[] { "FingerPrintFile", });
+    internal_static_EncodedFingerPrintFileWritten_descriptor =
+      getDescriptor().getMessageTypes().get(9);
+    internal_static_EncodedFingerPrintFileWritten_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_EncodedFingerPrintFileWritten_descriptor,
+        new java.lang.String[] { "FingerPrintFile", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
