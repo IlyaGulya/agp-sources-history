@@ -89,8 +89,7 @@ abstract class IssueReporter {
         REMOVED_API(SyncIssue.TYPE_REMOVED_API),
         EMPTY_FLAVOR_DIMENSION(SyncIssue.TYPE_EMPTY_FLAVOR_DIMENSION),
         EXCEPTION(SyncIssue.TYPE_EXCEPTION),
-        NAMESPACE_NOT_SET(SyncIssue.TYPE_NAMESPACE_NOT_SET),
-        INCONSISTENT_BUILD_FEATURE_SETTING(SyncIssue.TYPE_INCONSISTENT_BUILD_FEATURE_SETTING)
+        NAMESPACE_NOT_SET(SyncIssue.TYPE_NAMESPACE_NOT_SET)
     }
 
     protected abstract fun reportIssue(type: Type, severity: Severity, exception: EvalIssueException)
