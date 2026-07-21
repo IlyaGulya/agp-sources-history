@@ -105,8 +105,7 @@ abstract class ZipMergingTask : NonIncrementalTask() {
             creationConfig.artifacts.setInitialProvider(
                 taskProvider,
                 ZipMergingTask::outputFile
-            ).withName(creationConfig.getArtifactName(FN_INTERMEDIATE_FULL_JAR))
-             .on(InternalArtifactType.FULL_JAR)
+            ).withName(FN_INTERMEDIATE_FULL_JAR).on(InternalArtifactType.FULL_JAR)
         }
 
         override fun configure(

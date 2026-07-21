@@ -19,7 +19,6 @@ package com.android.build.gradle.internal.tasks
 import com.android.build.gradle.internal.component.ComponentCreationConfig
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
-import com.android.build.gradle.internal.tasks.featuresplit.removeVariantNameFromId
 import com.android.utils.FileUtils
 import com.google.common.io.Files
 import org.apache.commons.io.Charsets
@@ -133,12 +132,12 @@ abstract class CheckMultiApkLibrariesTask : NonIncrementalTask() {
     ): Boolean {
         var found = false
         for (library in Files.readLines(file, Charsets.UTF_8)) {
-            val key = removeVariantNameFromId(library)
-            if (map.containsKey(key)) {
+            val libraryWithoutVariant = library.substringBeforeLast("::")
+            if (map.containsKey(libraryWithoutVariant)) {
                 found = true
-                map[key]?.add(projectPath)
+                map[libraryWithoutVariant]?.add(projectPath)
             } else {
-                map[key] = mutableListOf(projectPath)
+                map[libraryWithoutVariant] = mutableListOf(projectPath)
             }
         }
         return found

@@ -100,8 +100,7 @@ abstract class BundleLibraryJavaRes : NonIncrementalTask() {
             creationConfig.artifacts.setInitialProvider(
                 taskProvider,
                 BundleLibraryJavaRes::output
-            ).withName(creationConfig.getArtifactName(FN_INTERMEDIATE_RES_JAR))
-             .on(InternalArtifactType.LIBRARY_JAVA_RES)
+            ).withName(FN_INTERMEDIATE_RES_JAR).on(InternalArtifactType.LIBRARY_JAVA_RES)
         }
 
         override fun configure(

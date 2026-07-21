@@ -40,10 +40,11 @@ import com.android.build.api.attributes.AgpVersionAttr;
 import com.android.build.api.attributes.BuildTypeAttr;
 import com.android.build.api.attributes.ProductFlavorAttr;
 import com.android.build.api.dsl.ProductFlavor;
-import com.android.build.api.variant.impl.VariantImpl;
 import com.android.build.gradle.internal.api.DefaultAndroidSourceSet;
 import com.android.build.gradle.internal.attributes.VariantAttr;
-import com.android.build.gradle.internal.core.VariantDslInfo;
+import com.android.build.gradle.internal.component.VariantCreationConfig;
+import com.android.build.gradle.internal.core.dsl.ComponentDslInfo;
+import com.android.build.gradle.internal.core.dsl.PublishableVariantDslInfo;
 import com.android.build.gradle.internal.dsl.AbstractPublishing;
 import com.android.build.gradle.internal.dsl.ModulePropertyKeys;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
@@ -96,15 +97,14 @@ public class VariantDependenciesBuilder {
             @NonNull Project project,
             @NonNull ProjectOptions projectOptions,
             @NonNull IssueReporter errorReporter,
-            @NonNull VariantDslInfo variantDslInfo) {
-        return new VariantDependenciesBuilder(
-                project, projectOptions, errorReporter, variantDslInfo);
+            @NonNull ComponentDslInfo dslInfo) {
+        return new VariantDependenciesBuilder(project, projectOptions, errorReporter, dslInfo);
     }
 
     @NonNull private final Project project;
     @NonNull private final ProjectOptions projectOptions;
     @NonNull private final IssueReporter issueReporter;
-    @NonNull private final VariantDslInfo variantDslInfo;
+    @NonNull private final ComponentDslInfo dslInfo;
     private Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> flavorSelection;
 
     // default size should be enough. It's going to be rare for a variant to include
@@ -118,8 +118,7 @@ public class VariantDependenciesBuilder {
     private final Set<Configuration> runtimeClasspaths = Sets.newLinkedHashSet();
     private final Set<Configuration> annotationConfigs = Sets.newLinkedHashSet();
     private final Set<Configuration> wearAppConfigs = Sets.newLinkedHashSet();
-    private VariantImpl mainVariant;
-    private VariantImpl testedVariant;
+    private VariantCreationConfig testedVariant;
     private String overrideVariantNameAttribute = null;
     private boolean testFixturesEnabled;
 
@@ -129,11 +128,11 @@ public class VariantDependenciesBuilder {
             @NonNull Project project,
             @NonNull ProjectOptions projectOptions,
             @NonNull IssueReporter issueReporter,
-            @NonNull VariantDslInfo variantDslInfo) {
+            @NonNull ComponentDslInfo dslInfo) {
         this.project = project;
         this.projectOptions = projectOptions;
         this.issueReporter = issueReporter;
-        this.variantDslInfo = variantDslInfo;
+        this.dslInfo = dslInfo;
     }
 
     public VariantDependenciesBuilder addSourceSets(
@@ -162,13 +161,9 @@ public class VariantDependenciesBuilder {
         return this;
     }
 
-    public VariantDependenciesBuilder setTestedVariant(@NonNull VariantImpl testedVariant) {
+    public VariantDependenciesBuilder setTestedVariant(
+            @NonNull VariantCreationConfig testedVariant) {
         this.testedVariant = testedVariant;
-        return this;
-    }
-
-    public VariantDependenciesBuilder setMainVariant(@NonNull VariantImpl mainVariant) {
-        this.mainVariant = mainVariant;
         return this;
     }
 
@@ -221,9 +216,9 @@ public class VariantDependenciesBuilder {
         final AgpVersionAttr agpVersion =
                 factory.named(AgpVersionAttr.class, Version.ANDROID_GRADLE_PLUGIN_VERSION);
 
-        String variantName = variantDslInfo.getComponentIdentity().getName();
-        ComponentType componentType = variantDslInfo.getComponentType();
-        String buildType = variantDslInfo.getComponentIdentity().getBuildType();
+        String variantName = dslInfo.getComponentIdentity().getName();
+        ComponentType componentType = dslInfo.getComponentType();
+        String buildType = dslInfo.getComponentIdentity().getBuildType();
         Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> consumptionFlavorMap =
                 getConsumptionFlavorAttributes(flavorSelection);
 
@@ -252,18 +247,10 @@ public class VariantDependenciesBuilder {
         }
 
         if (componentType.isTestFixturesComponent()) {
-            if (mainVariant.getComponentType().isAar()) {
-                // equivalent to dependencies { testFixturesApi project("$currentProject") }
-                apiClasspaths.forEach(
-                        apiConfiguration ->
-                                apiConfiguration
-                                        .getDependencies()
-                                        .add(dependencies.create(project)));
-            } else {
-                // In the case of an app project, testFixtures won't have a runtime dependency on
-                // the main app project.
-                compileClasspath.getDependencies().add(dependencies.create(project));
-            }
+            // equivalent to dependencies { testFixturesApi project("$currentProject") }
+            apiClasspaths.forEach(
+                    apiConfiguration ->
+                            apiConfiguration.getDependencies().add(dependencies.create(project)));
         }
         compileClasspath.setCanBeConsumed(false);
         compileClasspath
@@ -299,8 +286,7 @@ public class VariantDependenciesBuilder {
             if (testFixturesEnabled) {
                 dependencies.add(runtimeClasspath.getName(), dependencies.testFixtures(project));
             }
-            if (testedVariant.getComponentType().isAar()
-                    || !variantDslInfo.getComponentType().isApk()) {
+            if (testedVariant.getComponentType().isAar() || !dslInfo.getComponentType().isApk()) {
                 runtimeClasspath.getDependencies().add(dependencies.create(project));
             }
         }
@@ -423,7 +409,8 @@ public class VariantDependenciesBuilder {
         }
 
         if (componentType.getPublishToRepository()) {
-            VariantPublishingInfo variantPublish = variantDslInfo.getPublishInfo();
+            VariantPublishingInfo variantPublish =
+                    ((PublishableVariantDslInfo) dslInfo).getPublishInfo();
             if (variantPublish != null) {
                 // if the variant is a library, we need to make both a runtime and an API
                 // configurations, and they both must contain transitive dependencies
@@ -675,10 +662,10 @@ public class VariantDependenciesBuilder {
 
         boolean isSelfInstrumenting =
                 ModulePropertyKeys.SELF_INSTRUMENTING.getValueAsBoolean(
-                        variantDslInfo.getExperimentalProperties());
+                        dslInfo.getExperimentalProperties());
         return new VariantDependencies(
                 variantName,
-                variantDslInfo.getComponentType(),
+                dslInfo.getComponentType(),
                 compileClasspath,
                 runtimeClasspath,
                 runtimeClasspaths,
@@ -805,7 +792,7 @@ public class VariantDependenciesBuilder {
     private Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> getFlavorAttributes(
             @Nullable Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> flavorSelection,
             boolean addCompatibilityUnprefixedFlavorDimensionAttributes) {
-        List<ProductFlavor> productFlavors = variantDslInfo.getProductFlavorList();
+        List<ProductFlavor> productFlavors = dslInfo.getProductFlavorList();
         Map<Attribute<ProductFlavorAttr>, ProductFlavorAttr> map =
                 Maps.newHashMapWithExpectedSize(productFlavors.size());
 

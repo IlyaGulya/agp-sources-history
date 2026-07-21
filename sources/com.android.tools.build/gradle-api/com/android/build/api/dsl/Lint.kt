@@ -240,15 +240,8 @@ interface Lint {
     var lintConfig: File?
 
     /**
-     * Whether lint should write a text report.
-     *
-     * With the default setting ([textReport]`=false`),
-     * the lint task will print a summary to `stdout` if there are any lint warnings or errors
-     * including a link to the full text report.
-     *
-     * When [textReport]`=true` and [textOutput] is unset, the full report will be printed by the
-     * lint task, rather than just a summary. When [textOutput] is set, the full text report
-     * will be copied to the specified location.
+     * Whether we should write a text report. Default is false. The location can be controlled by
+     * [textOutput].
      */
     @get:Incubating
     @set:Incubating
@@ -279,9 +272,8 @@ interface Lint {
     var xmlReport: Boolean
 
     /**
-     * The optional path to where a text report should be written.
-     *
-     * To output the lint report to `stdout` set [textReport]`=true`, and leave [textOutput] unset.
+     * The optional path to where a text report should be written. The special value "stdout" can be
+     * used to point to standard output. Setting this property will also turn on [textReport].
      */
     @get:Incubating
     @set:Incubating

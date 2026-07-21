@@ -54,7 +54,6 @@ import org.gradle.api.artifacts.ArtifactCollection;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
 import org.gradle.api.artifacts.result.ResolvedArtifactResult;
-import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.EmptyFileVisitor;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileSystemLocation;
@@ -110,6 +109,8 @@ public abstract class ExtractAnnotations extends NonIncrementalTask {
     private final List<Object> sources = new ArrayList<>();
     private FileTree sourcesFileTree;
 
+    private FileCollection classpath;
+
     @Nested
     public abstract LintTool getLintTool();
 
@@ -122,7 +123,9 @@ public abstract class ExtractAnnotations extends NonIncrementalTask {
     }
 
     @CompileClasspath
-    public abstract ConfigurableFileCollection getClasspath();
+    public FileCollection getClasspath() {
+        return classpath;
+    }
 
     /** Used by the variant API */
     public void source(Object source) {
@@ -366,7 +369,7 @@ public abstract class ExtractAnnotations extends NonIncrementalTask {
 
             task.source(creationConfig.getSources().getJava().getAll());
             task.setEncoding(creationConfig.getGlobal().getCompileOptions().getEncoding());
-            task.getClasspath().from(creationConfig.getCompileClasspath()).disallowChanges();
+            task.classpath = creationConfig.getJavaClasspath(COMPILE_CLASSPATH, CLASSES_JAR, null);
 
             task.libraries =
                     creationConfig

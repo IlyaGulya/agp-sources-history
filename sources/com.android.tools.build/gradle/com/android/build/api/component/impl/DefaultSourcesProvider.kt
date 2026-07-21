@@ -16,12 +16,8 @@
 
 package com.android.build.api.component.impl
 
-import com.android.build.api.variant.impl.AssetSourceDirectoriesImpl
 import com.android.build.api.variant.impl.DirectoryEntries
 import com.android.build.api.variant.impl.DirectoryEntry
-import com.android.build.api.variant.impl.FlatSourceDirectoriesImpl
-import com.android.build.api.variant.impl.LayeredSourceDirectoriesImpl
-import com.android.build.api.variant.impl.ResSourceDirectoriesImpl
 
 /**
  * Interface to calculate the default list of sources [DirectoryEntry] per source type.
@@ -31,12 +27,12 @@ interface DefaultSourcesProvider {
     /**
      * the list of sources [DirectoryEntry] for java
      */
-    fun getJava(lateAdditionsDelegate: FlatSourceDirectoriesImpl): List<DirectoryEntry>
+    val java: List<DirectoryEntry>
 
     /**
      * the list of sources [DirectoryEntry] for kotlin
      */
-    fun getKotlin(lateAdditionsDelegate: FlatSourceDirectoriesImpl): List<DirectoryEntry>
+    val kotlin: List<DirectoryEntry>
 
     /**
      * the list of sources [DirectoryEntries] for android resources.
@@ -44,7 +40,7 @@ interface DefaultSourcesProvider {
      * The [List] is ordered in ascending order of importance, meaning the first set is meant to be
      * overridden by the 2nd one and so on.
      */
-    fun getRes(lateAdditionsDelegate: LayeredSourceDirectoriesImpl): List<DirectoryEntries>
+    val res: List<DirectoryEntries>
 
     /**
      * the list of [DirectoryEntries] for assets.
@@ -52,7 +48,7 @@ interface DefaultSourcesProvider {
      * The [List] is ordered in ascending order of importance, meaning the first set is meant to be
      * overridden by the 2nd one and so on.
      */
-    fun getAssets(lateAdditionsDelegate: LayeredSourceDirectoriesImpl): List<DirectoryEntries>
+    val assets: List<DirectoryEntries>
 
     /**
      * the list of [DirectoryEntries] for jni libraries.
@@ -60,7 +56,7 @@ interface DefaultSourcesProvider {
      * The [List] is ordered in ascending order of importance, meaning the first set is meant to be
      * overridden by the 2nd one and so on.
      */
-    fun getJniLibs(lateAdditionsDelegate: LayeredSourceDirectoriesImpl): List<DirectoryEntries>
+    val jniLibs: List<DirectoryEntries>
 
     /**
      * the list of [DirectoryEntries] for shaders or null if the feature is disabled.
@@ -68,12 +64,12 @@ interface DefaultSourcesProvider {
      * The [List] is ordered in ascending order of importance, meaning the first set is meant to be
      * overridden by the 2nd one and so on.
      */
-    fun getShaders(lateAdditionsDelegate: LayeredSourceDirectoriesImpl): List<DirectoryEntries>?
+    val shaders: List<DirectoryEntries>?
 
     /**
      * the list of sources [DirectoryEntry] for AIDL or null if the feature is disabled.
      */
-    fun getAidl(lateAdditionsDelegate: FlatSourceDirectoriesImpl): List<DirectoryEntry>?
+    val aidl: List<DirectoryEntry>?
 
     /**
      * the list of [DirectoryEntries] for machine learning models.
@@ -81,10 +77,10 @@ interface DefaultSourcesProvider {
      * The [List] is ordered in ascending order of importance, meaning the first set is meant to be
      * overridden by the 2nd one and so on.
      */
-    fun getMlModels(lateAdditionsDelegate: LayeredSourceDirectoriesImpl): List<DirectoryEntries>
+    val mlModels: List<DirectoryEntries>
 
     /**
      * the list of sources [DirectoryEntry] for renderscript or null if the feature is disabled.
      */
-    fun getRenderscript(lateAdditionsDelegate: FlatSourceDirectoriesImpl): List<DirectoryEntry>?
+    val renderscript: List<DirectoryEntry>?
 }

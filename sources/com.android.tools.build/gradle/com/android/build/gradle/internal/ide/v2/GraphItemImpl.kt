@@ -25,20 +25,11 @@ import java.io.Serializable
 data class GraphItemImpl(
     override val key: String,
     override val requestedCoordinates: String?,
-) : GraphItem, Serializable {
-
-    private val _dependencies = mutableListOf<GraphItem>()
-
     override val dependencies: List<GraphItem>
-        get() = _dependencies
-
-    internal fun addDependency(dependency: GraphItem) {
-        _dependencies.add(dependency)
-    }
-
+) : GraphItem, Serializable {
     companion object {
         @JvmStatic
-        private val serialVersionUID: Long = 2L
+        private val serialVersionUID: Long = 1L
     }
 
 }

@@ -52,7 +52,8 @@ class SourcesImpl(
             variantServices,
             variantSourceSet?.java?.filter
         ).also { sourceDirectoriesImpl ->
-            defaultSourceProvider.getJava(sourceDirectoriesImpl).run {
+
+            defaultSourceProvider.java.run {
                 sourceDirectoriesImpl.addSources(this)
             }
             resetVariantSourceSet(sourceDirectoriesImpl, variantSourceSet?.java)
@@ -65,7 +66,7 @@ class SourcesImpl(
             null,
         ).also { sourceDirectoriesImpl ->
 
-            defaultSourceProvider.getKotlin(sourceDirectoriesImpl).run {
+            defaultSourceProvider.kotlin.run {
                 sourceDirectoriesImpl.addSources(this)
             }
             resetVariantSourceSet(
@@ -79,7 +80,7 @@ class SourcesImpl(
             variantServices,
             variantSourceSet?.res?.filter
         ).also { sourceDirectoriesImpl ->
-            defaultSourceProvider.getRes(sourceDirectoriesImpl).run {
+            defaultSourceProvider.res.run {
                 forEach {
                     sourceDirectoriesImpl.addSources(it)
                 }
@@ -94,7 +95,7 @@ class SourcesImpl(
             variantSourceSet?.assets?.filter
         ).also { sourceDirectoriesImpl ->
 
-            defaultSourceProvider.getAssets(sourceDirectoriesImpl).run {
+            defaultSourceProvider.assets.run {
                 forEach {
                     sourceDirectoriesImpl.addSources(it)
                 }
@@ -109,7 +110,7 @@ class SourcesImpl(
             variantSourceSet?.jniLibs?.filter
         ).also { sourceDirectoriesImpl ->
 
-            defaultSourceProvider.getJniLibs(sourceDirectoriesImpl).run {
+            defaultSourceProvider.jniLibs.run {
                 forEach {
                     sourceDirectoriesImpl.addSources(it)
                 }
@@ -118,12 +119,12 @@ class SourcesImpl(
         }
 
     override val shaders: AssetSourceDirectoriesImpl? =
+        defaultSourceProvider.shaders?.let { listOfDirectoryEntries ->
             AssetSourceDirectoriesImpl(
                 SourceType.SHADERS.name,
                 variantServices,
                 variantSourceSet?.shaders?.filter
-            ).let { sourceDirectoriesImpl ->
-                val listOfDirectoryEntries = defaultSourceProvider.getShaders(sourceDirectoriesImpl) ?: return@let null
+            ).also { sourceDirectoriesImpl ->
 
                 listOfDirectoryEntries.run {
                     forEach {
@@ -131,8 +132,8 @@ class SourcesImpl(
                     }
                 }
                 resetVariantSourceSet(sourceDirectoriesImpl, variantSourceSet?.shaders)
-                return@let sourceDirectoriesImpl
             }
+        }
 
     override val mlModels: AssetSourceDirectoriesImpl =
         AssetSourceDirectoriesImpl(
@@ -140,7 +141,7 @@ class SourcesImpl(
             variantServices,
             variantSourceSet?.mlModels?.filter
         ).also { sourceDirectoriesImpl ->
-            defaultSourceProvider.getMlModels(sourceDirectoriesImpl).run {
+            defaultSourceProvider.mlModels.run {
                 forEach {
                     sourceDirectoriesImpl.addSources(it)
                 }
@@ -148,38 +149,33 @@ class SourcesImpl(
             resetVariantSourceSet(sourceDirectoriesImpl, variantSourceSet?.mlModels)
         }
 
-
-    override val aidl: SourceDirectories.Flat? by lazy(LazyThreadSafetyMode.NONE) {
-        FlatSourceDirectoriesImpl(
+    override val aidl: SourceDirectories.Flat? by lazy {
+        defaultSourceProvider.aidl?.let { defaultAidlDirectories ->
+            FlatSourceDirectoriesImpl(
                 SourceType.AIDL.name,
                 variantServices,
                 variantSourceSet?.aidl?.filter
-        ).let { sourceDirectoriesImpl ->
-            val defaultAidlDirectories =
-                    defaultSourceProvider.getAidl(sourceDirectoriesImpl) ?: return@let null
-            sourceDirectoriesImpl.addSources(defaultAidlDirectories)
-            resetVariantSourceSet(sourceDirectoriesImpl, variantSourceSet?.aidl)
-            return@let sourceDirectoriesImpl
+            ).also { sourceDirectoriesImpl ->
+                sourceDirectoriesImpl.addSources(defaultAidlDirectories)
+                resetVariantSourceSet(sourceDirectoriesImpl, variantSourceSet?.aidl)
+            }
         }
     }
 
-    @Deprecated("renderscript is deprecated and will be removed in a future release.")
-    override val renderscript: SourceDirectories.Flat? by lazy(LazyThreadSafetyMode.NONE) {
-        FlatSourceDirectoriesImpl(
+    override val renderscript: SourceDirectories.Flat? by lazy {
+        defaultSourceProvider.renderscript?.let { defaultRenderscriptDirectories ->
+            FlatSourceDirectoriesImpl(
                 SourceType.RENDERSCRIPT.name,
                 variantServices,
                 variantSourceSet?.renderscript?.filter
-        ).let { sourceDirectoriesImpl ->
-            val defaultRenderscriptDirectories =
-                    defaultSourceProvider.getRenderscript(sourceDirectoriesImpl) ?: return@let null
-
-            sourceDirectoriesImpl.addSources(defaultRenderscriptDirectories)
-            resetVariantSourceSet(sourceDirectoriesImpl, variantSourceSet?.renderscript)
-            return@let sourceDirectoriesImpl
+            ).also { sourceDirectoriesImpl ->
+                sourceDirectoriesImpl.addSources(defaultRenderscriptDirectories)
+                resetVariantSourceSet(sourceDirectoriesImpl, variantSourceSet?.renderscript)
+            }
         }
     }
 
-    internal val extras: NamedDomainObjectContainer<FlatSourceDirectoriesImpl> by lazy(LazyThreadSafetyMode.NONE) {
+    internal val extras: NamedDomainObjectContainer<FlatSourceDirectoriesImpl> by lazy {
         variantServices.domainObjectContainer(
             FlatSourceDirectoriesImpl::class.java,
             SourceProviderFactory(
@@ -216,7 +212,6 @@ class SourcesImpl(
         sourceSet: AndroidSourceDirectorySet?,
     ) {
         if (sourceSet != null) {
-            (sourceSet as DefaultAndroidSourceDirectorySet).addLateAdditionDelegate(target)
             for (srcDir in sourceSet.srcDirs) {
                 target.addSource(
                     FileBasedDirectoryEntryImpl(

@@ -82,7 +82,7 @@ class FullDependencyGraphBuilder(
 
         for (artifact in unvisitedArtifacts) {
             val library = libraryService.getLibrary(artifact)
-            items.add(GraphItemImpl(library.key, null))
+            items.add(GraphItemImpl(library.key, null, listOf()))
         }
 
         return items.toList()
@@ -136,19 +136,14 @@ class FullDependencyGraphBuilder(
         val library = if (artifact == null) {
             val owner = variant.owner
 
-            // There are 4 (currently known) reasons this can happen:
+            // There are 3 (currently known) reasons this can happen:
             // 1. when an artifact is relocated via Gradle's module "available-at" feature.
             // 2. when resolving a test graph, as one of the roots will be the same module and this
-            //    is not included in the other artifact-based API.
-            // 3. when an external dependency is without artifact file, but with transitive
-            //    dependencies
-            // 4. when resolving a dynamic-feature dependency graph; e.g., the app module does not
-            //    publish an ArtifactType.JAR artifact to runtimeElements
+            //   is not included in the other artifact-based API.
+            // 3. when dependency is without artifact file, but with transitive dependencies
             //
-            // In cases 1, 2, and 3, there are still dependencies, so we need to create a library
-            // object, and traverse the dependencies.
-            //
-            // In case 4, we want to ignore the app dependency and any transitive dependencies.
+            // In all cases, there are still dependencies, so we need to create a library object,
+            // and traverse the dependencies.
             if (variant.externalVariant.isPresent) {
                 // Scenario 1
                 libraryService.getLibrary(
@@ -188,7 +183,7 @@ class FullDependencyGraphBuilder(
                         buildMapping = inputs.buildMapping
                     )
                 )
-            } else if (owner !is ProjectComponentIdentifier && variantDependencies.isNotEmpty()) {
+            } else if (variantDependencies.isNotEmpty()) {
                 // Scenario 3
                 libraryService.getLibrary(
                     ResolvedArtifact(
@@ -205,7 +200,6 @@ class FullDependencyGraphBuilder(
                     )
                 )
             } else {
-                // Scenario 4 or other unknown scenario
                 null
             }
         } else {
@@ -214,22 +208,17 @@ class FullDependencyGraphBuilder(
         }
 
         if (library != null) {
-            // Create GraphItem for the library first and add it to cache in order to avoid cycles.
-            // See http://b/232075280.
-            val libraryGraphItem = GraphItemImpl(
+            // create the GraphItem for the library, starting by recursively computing the children
+            val children =
+                variantDependencies.mapNotNull { handleDependency(it, visited, artifactMap) }
+
+            return GraphItemImpl(
                 library.key,
-                null
+                null,
+                children
             ).also {
                 visited[variant] = it
             }
-
-            // Now visit children, and add them as dependencies
-            variantDependencies.forEach {
-                handleDependency(it, visited, artifactMap)?.let { childGraphItem ->
-                    libraryGraphItem.addDependency(childGraphItem)
-                }
-            }
-            return libraryGraphItem
         }
 
         return null

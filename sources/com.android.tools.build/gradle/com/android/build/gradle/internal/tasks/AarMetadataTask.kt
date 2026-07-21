@@ -106,7 +106,7 @@ abstract class AarMetadataTask : NonIncrementalTask() {
 
             creationConfig.artifacts
                 .setInitialProvider(taskProvider, AarMetadataTask::output)
-                .withName(creationConfig.getArtifactName(AAR_METADATA_FILE_NAME))
+                .withName(AAR_METADATA_FILE_NAME)
                 .on(InternalArtifactType.AAR_METADATA)
         }
 
