@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.core.dsl
+package com.android.build.gradle.internal.component.features
 
-import com.android.build.api.dsl.TestFixtures
+import org.gradle.api.provider.MapProperty
 
 /**
- * Contains the final dsl info computed from the DSL object model (extension, default config,
- * build type, flavors) that are needed by tested components.
+ * Creation config for components that support manifest placeholders.
  */
-interface TestedComponentDslInfo: VariantDslInfo {
-    val testFixtures: TestFixtures
+interface ManifestPlaceholdersCreationConfig {
+    val placeholders: MapProperty<String, String>
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.core.dsl
+package com.android.build.gradle.internal.ide.v2
 
-import com.android.build.gradle.internal.publishing.VariantPublishingInfo
+import com.android.builder.model.v2.ide.PrivacySandboxSdkInfo
+import java.io.File
+import java.io.Serializable
 
 /**
- * Contains the final dsl info computed from the DSL object model (extension, default config,
- * build type, flavors) that are needed by publishable components.
+ * Implementation of [PrivacySandboxSdkInfo] for serialization via the Tooling API.
  */
-interface PublishableVariantDslInfo {
-    // TODO: Remove nullability when implementation is split up
-    val publishInfo: VariantPublishingInfo?
+data class PrivacySandboxSdkInfoImpl(
+        override val task: String,
+        override val outputListingFile: File,
+) : PrivacySandboxSdkInfo, Serializable {
+
+    companion object {
+        @JvmStatic
+        private val serialVersionUID: Long = 1L
+    }
 }

@@ -18,8 +18,8 @@ package com.android.build.api.component.impl
 import com.android.build.api.variant.AndroidVersion
 import com.android.build.api.variant.impl.getFeatureLevel
 import com.android.build.gradle.internal.component.ConsumableCreationConfig
+import com.android.build.gradle.internal.component.DynamicFeatureCreationConfig
 import com.android.build.gradle.internal.core.dsl.ConsumableComponentDslInfo
-import com.android.build.gradle.internal.core.dsl.DynamicFeatureVariantDslInfo
 import com.android.build.gradle.internal.scope.Java8LangSupport
 import com.android.builder.dexing.DexingType
 import com.android.builder.errors.IssueReporter
@@ -32,7 +32,7 @@ import com.android.builder.errors.IssueReporter
  * repeating implementation in various disparate VariantImpl sub-classes.
  *
  * Instead [com.android.build.api.variant.impl.VariantImpl] will delegate
- * to these objects for methods which are cross cutting across the VariantProperties
+ * to these objects for methods which are cross cutting across the Variant
  * implementation hierarchy.
  */
 
@@ -40,9 +40,8 @@ import com.android.builder.errors.IssueReporter
  * Constructor for [ConsumableCreationConfigImpl].
  *
  * @param config configuration object that will be delegating calls to this
- * object, and will also provide access to other VariantProperties configuration data
- * @param globalScope pointer to the global scope to access project wide options.
- * @param variantDslInfo variant configuration coming from the DSL.
+ * object, and will also provide access to other Variant configuration data
+ * @param dslInfo variant configuration coming from the DSL.
  */
 open class ConsumableCreationConfigImpl<T: ConsumableCreationConfig>(
     protected val config: T,
@@ -50,17 +49,20 @@ open class ConsumableCreationConfigImpl<T: ConsumableCreationConfig>(
 ) {
 
     val dexingType: DexingType
-        get() = (dslInfo as? DynamicFeatureVariantDslInfo)?.dexingType ?:
-        if (config.isMultiDexEnabled) {
-            if (config.minSdkVersion.getFeatureLevel() >= 21 ||
-                dslInfo.targetDeployApiFromIDE?.let { it >= 21 } == true
-            ) {
-                // if minSdkVersion is 21+ or we are deploying to 21+ device, use native multidex
+        get() =
+            if (config is DynamicFeatureCreationConfig) {
+                // dynamic features can always be build in native multidex mode
                 DexingType.NATIVE_MULTIDEX
-            } else DexingType.LEGACY_MULTIDEX
-        } else {
-            DexingType.MONO_DEX
-        }
+            } else if (config.isMultiDexEnabled) {
+                if (config.minSdkVersion.getFeatureLevel() >= 21 ||
+                    dslInfo.targetDeployApiFromIDE?.let { it >= 21 } == true
+                ) {
+                    // if minSdkVersion is 21+ or we are deploying to 21+ device, use native multidex
+                    DexingType.NATIVE_MULTIDEX
+                } else DexingType.LEGACY_MULTIDEX
+            } else {
+                DexingType.MONO_DEX
+            }
 
     fun getNeedsMergedJavaResStream(): Boolean {
         // We need to create a stream from the merged java resources if we're in a library module,

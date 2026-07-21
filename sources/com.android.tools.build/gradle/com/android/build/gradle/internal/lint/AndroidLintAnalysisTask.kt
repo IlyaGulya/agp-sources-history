@@ -26,6 +26,7 @@ import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.services.TaskCreationServices
 import com.android.build.gradle.internal.services.getBuildService
+import com.android.build.gradle.internal.services.getLintParallelBuildService
 import com.android.build.gradle.internal.tasks.BuildAnalyzer
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
@@ -37,7 +38,6 @@ import com.android.ide.common.repository.GradleVersion
 import com.android.tools.lint.model.LintModelSerialization
 import com.android.utils.FileUtils
 import com.google.common.annotations.VisibleForTesting
-import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
@@ -324,7 +324,7 @@ abstract class AndroidLintAnalysisTask : NonIncrementalTask() {
         val buildServiceRegistry = services.buildServiceRegistry
         this.androidGradlePluginVersion.setDisallowChanges(Version.ANDROID_GRADLE_PLUGIN_VERSION)
         val sdkComponentsBuildService =
-            getBuildService<SdkComponentsBuildService>(buildServiceRegistry)
+            getBuildService(buildServiceRegistry, SdkComponentsBuildService::class.java)
 
         this.android.setDisallowChanges(isAndroid)
         if(isAndroid) {
@@ -355,6 +355,9 @@ abstract class AndroidLintAnalysisTask : NonIncrementalTask() {
         }
         systemPropertyInputs.initialize(project.providers, LintMode.ANALYSIS)
         environmentVariableInputs.initialize(project.providers, LintMode.ANALYSIS)
+        this.usesService(
+            services.buildServiceRegistry.getLintParallelBuildService(services.projectOptions)
+        )
     }
 
     fun configureForStandalone(
