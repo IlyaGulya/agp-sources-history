@@ -96,10 +96,7 @@ public final class ProjectOptions {
 
                     for (String eachArgKey : allTestRunnerArgs.keySet()) {
                         if (!standardArgKeys.contains(eachArgKey)) {
-                            // use short key to replace original full key
-                            allArgs.put(
-                                    eachArgKey.substring(TEST_RUNNER_ARGS_PREFIX.length()),
-                                    allTestRunnerArgs.get(eachArgKey));
+                            allArgs.put(eachArgKey, allTestRunnerArgs.get(eachArgKey));
                         }
                     }
 

@@ -123,7 +123,6 @@ import com.android.build.gradle.internal.tasks.ValidateResourcesTask
 import com.android.build.gradle.internal.tasks.ValidateSigningTask
 import com.android.build.gradle.internal.tasks.VerifyLibraryClassesTask
 import com.android.build.gradle.internal.tasks.checkIfR8VersionMatches
-import com.android.build.gradle.internal.tasks.creationconfig.ProceedTestManifestCreationConfig
 import com.android.build.gradle.internal.tasks.creationconfig.ProcessJavaResCreationConfig
 import com.android.build.gradle.internal.tasks.creationconfig.createJavaCompileConfig
 import com.android.build.gradle.internal.tasks.creationconfig.createJavaPreCompileConfig
@@ -144,7 +143,6 @@ import com.android.build.gradle.internal.tasks.runResourceShrinking
 import com.android.build.gradle.internal.test.AbstractTestDataImpl
 import com.android.build.gradle.internal.transforms.ShrinkAppBundleResourcesTask
 import com.android.build.gradle.internal.transforms.ShrinkResourcesNewShrinkerTask
-import com.android.build.gradle.internal.utils.ANDROID_BUILT_IN_KAPT_PLUGIN_ID
 import com.android.build.gradle.internal.utils.COMPOSE_COMPILER_PLUGIN_ID
 import com.android.build.gradle.internal.utils.KOTLIN_KAPT_PLUGIN_ID
 import com.android.build.gradle.internal.utils.KgpVersion
@@ -961,8 +959,7 @@ abstract class TaskManager(
     protected fun createJavacTask(
             creationConfig: ComponentCreationConfig
     ): TaskProvider<out JavaCompile> {
-        val usingKapt = isKotlinKaptPluginApplied(project) ||
-            project.pluginManager.hasPlugin(ANDROID_BUILT_IN_KAPT_PLUGIN_ID)
+        val usingKapt = isKotlinKaptPluginApplied(project)
         val usingKsp = isKspPluginApplied(project)
         val javaPreCompileTaskCreationConfig =
             createJavaPreCompileConfig(creationConfig, usingKapt, usingKsp)
