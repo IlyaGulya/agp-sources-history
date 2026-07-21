@@ -144,6 +144,12 @@ public final class IdeModuleLibrary extends IdeModel implements Library {
 
     @Override
     @NonNull
+    public String getCompileJarFile() {
+        throw unsupportedMethodForModuleLibrary("getCompileJarFile");
+    }
+
+    @Override
+    @NonNull
     public String getResFolder() {
         throw unsupportedMethodForModuleLibrary("getResFolder");
     }
