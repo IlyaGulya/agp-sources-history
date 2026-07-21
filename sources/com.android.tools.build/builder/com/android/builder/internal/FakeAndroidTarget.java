@@ -48,18 +48,15 @@ public class FakeAndroidTarget implements IAndroidTarget {
                     "/out/target/common/obj/JAVA_LIBRARIES/core_intermediates/classes.jar");
 
             // pre-build the path to the platform components
-            mPaths.put(
-                    ANDROID_JAR,
-                    mSdkLocation
-                            + "/prebuilts/sdk/current/public/"
-                            + SdkConstants.FN_FRAMEWORK_LIBRARY);
+            mPaths.put(ANDROID_JAR, mSdkLocation + "/prebuilts/sdk/current/" +
+                    SdkConstants.FN_FRAMEWORK_LIBRARY);
             mPaths.put(ANDROID_AIDL, mSdkLocation + "/prebuilts/sdk/renderscript/" +
                     SdkConstants.FN_FRAMEWORK_AIDL);
         } else {
             String apiPrebuilts;
 
             if ("current".equals(target)) {
-                apiPrebuilts = mSdkLocation + "/prebuilts/sdk/current/public";
+                apiPrebuilts = mSdkLocation + "/prebuilts/sdk/current/";
             } else {
                 apiPrebuilts = mSdkLocation + "/prebuilts/sdk/" + Integer.toString(mApiLevel) + "/";
             }

@@ -28,9 +28,9 @@ import com.android.build.gradle.internal.dsl.Splits;
 import com.android.build.gradle.internal.dsl.VariantOutputFactory;
 import com.android.build.gradle.internal.pipeline.TransformManager;
 import com.android.build.gradle.internal.scope.GlobalScope;
+import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.scope.OutputFactory;
 import com.android.build.gradle.internal.scope.OutputScope;
-import com.android.build.gradle.internal.scope.TaskOutputHolder;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.scope.VariantScopeImpl;
 import com.android.build.gradle.internal.tasks.CheckManifest;
@@ -172,12 +172,6 @@ public abstract class BaseVariantData implements TaskContainer {
         this.variantConfiguration = variantConfiguration;
         this.taskManager = taskManager;
 
-        final Splits splits = androidConfig.getSplits();
-        boolean splitsEnabled =
-                splits.getDensity().isEnable()
-                        || splits.getAbi().isEnable()
-                        || splits.getLanguage().isEnable();
-
         // eventually, this will require a more open ended comparison.
         multiOutputPolicy =
                 (androidConfig.getGeneratePureSplits()
@@ -186,9 +180,8 @@ public abstract class BaseVariantData implements TaskContainer {
                         ? MultiOutputPolicy.SPLITS
                         : MultiOutputPolicy.MULTI_APK;
 
-        // warn the user if we are forced to ignore the generatePureSplits flag.
-        if (splitsEnabled
-                && androidConfig.getGeneratePureSplits()
+        // warn the user in case we are forced to ignore the generatePureSplits flag.
+        if (androidConfig.getGeneratePureSplits()
                 && multiOutputPolicy != MultiOutputPolicy.SPLITS) {
             Logging.getLogger(BaseVariantData.class).warn(
                     String.format("Variant %s, MinSdkVersion %s is too low (<21) "
@@ -665,10 +658,9 @@ public abstract class BaseVariantData implements TaskContainer {
             }
 
             // then all the generated src folders.
-            if (scope.hasOutput(TaskOutputHolder.TaskOutputType.NOT_NAMESPACED_R_CLASS_SOURCES)) {
+            if (scope.hasOutput(InternalArtifactType.NOT_NAMESPACED_R_CLASS_SOURCES)) {
                 FileCollection rClassSource =
-                        scope.getOutput(
-                                TaskOutputHolder.TaskOutputType.NOT_NAMESPACED_R_CLASS_SOURCES);
+                        scope.getOutput(InternalArtifactType.NOT_NAMESPACED_R_CLASS_SOURCES);
                 sourceSets.add(
                         project.fileTree(rClassSource.getSingleFile()).builtBy(rClassSource));
             }
@@ -692,8 +684,7 @@ public abstract class BaseVariantData implements TaskContainer {
                         project.fileTree(scope.getClassOutputForDataBinding())
                                 .builtBy(scope.getDataBindingExportBuildInfoTask().getName()));
                 FileCollection baseClassSource =
-                        scope.getOutput(
-                                TaskOutputHolder.TaskOutputType.DATA_BINDING_BASE_CLASS_SOURCE_OUT);
+                        scope.getOutput(InternalArtifactType.DATA_BINDING_BASE_CLASS_SOURCE_OUT);
                 sourceSets.add(
                         project.fileTree(baseClassSource.getSingleFile()).builtBy(baseClassSource));
             }

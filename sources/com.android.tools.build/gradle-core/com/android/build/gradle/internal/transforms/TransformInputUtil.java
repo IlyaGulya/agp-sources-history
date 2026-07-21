@@ -34,12 +34,10 @@ import java.util.stream.Collectors;
  */
 public class TransformInputUtil {
 
-    /** Return existing jars and directories from the inputs. Deleted ones are omitted. */
     public static Collection<File> getAllFiles(Iterable<TransformInput> transformInputs) {
         return getAllFiles(transformInputs, true, true);
     }
 
-    /** Return existing directories from the inputs. Deleted ones are omitted. */
     public static Collection<File> getDirectories(Iterable<TransformInput> transformInputs) {
         return getAllFiles(transformInputs, true, false);
     }
@@ -52,16 +50,12 @@ public class TransformInputUtil {
         for (TransformInput input : transformInputs) {
             if (includeDirectoryInput) {
                 for (DirectoryInput directoryInput : input.getDirectoryInputs()) {
-                    if (directoryInput.getFile().isDirectory()) {
-                        inputFiles.add(directoryInput.getFile());
-                    }
+                    inputFiles.add(directoryInput.getFile());
                 }
             }
             if (includeJarInput) {
                 for (JarInput jarInput : input.getJarInputs()) {
-                    if (jarInput.getFile().isFile()) {
-                        inputFiles.add(jarInput.getFile());
-                    }
+                    inputFiles.add(jarInput.getFile());
                 }
             }
         }

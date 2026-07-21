@@ -28,7 +28,7 @@ import com.android.build.gradle.internal.pipeline.TransformManager;
 import com.android.build.gradle.internal.pipeline.TransformTask;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts;
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType;
-import com.android.build.gradle.internal.publishing.VariantPublishingSpec;
+import com.android.build.gradle.internal.publishing.PublishingSpecs;
 import com.android.build.gradle.internal.tasks.CheckManifest;
 import com.android.build.gradle.internal.tasks.GenerateApkDataTask;
 import com.android.build.gradle.internal.tasks.databinding.DataBindingExportBuildInfoTask;
@@ -48,6 +48,7 @@ import com.android.sdklib.AndroidVersion;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Supplier;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Task;
 import org.gradle.api.artifacts.ArtifactCollection;
@@ -70,7 +71,7 @@ public interface VariantScope extends TransformVariantScope, InstantRunVariantSc
     GradleVariantConfiguration getVariantConfiguration();
 
     @NonNull
-    VariantPublishingSpec getPublishingSpec();
+    PublishingSpecs.VariantSpec getPublishingSpec();
 
     @NonNull
     BaseVariantData getVariantData();
@@ -178,7 +179,7 @@ public interface VariantScope extends TransformVariantScope, InstantRunVariantSc
             @NonNull ArtifactType artifactType);
 
     @NonNull
-    FileCollection getLocalPackagedJars();
+    Supplier<Collection<File>> getLocalPackagedJars();
 
     @NonNull
     FileCollection getProvidedOnlyClasspath();
@@ -467,7 +468,7 @@ public interface VariantScope extends TransformVariantScope, InstantRunVariantSc
     File getInstantRunResourceApkFolder();
 
     @NonNull
-    File getIntermediateDir(@NonNull TaskOutputType taskOutputType);
+    File getIntermediateDir(@NonNull InternalArtifactType taskOutputType);
 
     enum Java8LangSupport {
         INVALID,

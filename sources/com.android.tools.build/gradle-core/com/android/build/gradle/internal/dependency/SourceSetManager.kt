@@ -30,8 +30,6 @@ import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 
-val dependencyUrl = "http://d.android.com/r/tools/update-dependency-configurations.html"
-
 class SourceSetManager(
         project: Project,
         private val publishPackage: Boolean,
@@ -61,7 +59,6 @@ class SourceSetManager(
 
     private fun createConfigurationsForSourceSet(
             sourceSet: AndroidSourceSet, isForTesting: Boolean) {
-        val apiName = sourceSet.apiConfigurationName
         val implementationName = sourceSet.implementationConfigurationName
         val runtimeOnlyName = sourceSet.runtimeOnlyConfigurationName
         val compileOnlyName = sourceSet.compileOnlyConfigurationName
@@ -78,10 +75,9 @@ class SourceSetManager(
         compile.allDependencies
                 .whenObjectAdded(
                         DeprecatedConfigurationAction(
-                                "$implementationName' and '$apiName",
+                                implementationName,
                                 compileName,
                                 deprecationReporter,
-                                dependencyUrl,
                                 DeprecationReporter.DeprecationTarget.CONFIG_NAME))
 
         val packageConfigDescription: String
@@ -103,7 +99,6 @@ class SourceSetManager(
                                 runtimeOnlyName,
                                 apkName,
                                 deprecationReporter,
-                                dependencyUrl,
                                 DeprecationReporter.DeprecationTarget.CONFIG_NAME))
 
         val providedName = sourceSet.providedConfigurationName
@@ -116,10 +111,10 @@ class SourceSetManager(
                                 compileOnlyName,
                                 providedName,
                                 deprecationReporter,
-                                dependencyUrl,
                                 DeprecationReporter.DeprecationTarget.CONFIG_NAME))
 
         // then the new configurations.
+        val apiName = sourceSet.apiConfigurationName
         val api = createConfiguration(apiName, getConfigDesc("API", sourceSet.name))
         api.extendsFrom(compile)
         if (isForTesting) {
@@ -129,7 +124,6 @@ class SourceSetManager(
                                     implementationName,
                                     apiName,
                                     deprecationReporter,
-                                    dependencyUrl,
                                     DeprecationReporter.DeprecationTarget.CONFIG_NAME))
         }
 

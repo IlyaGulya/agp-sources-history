@@ -16,7 +16,6 @@
 
 package com.android.build.gradle.internal.transforms;
 
-import static com.android.build.gradle.internal.cxx.stripping.SymbolStripExecutableFinderKt.createSymbolStripExecutableFinder;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -36,7 +35,6 @@ import com.android.build.api.transform.TransformInvocation;
 import com.android.build.api.transform.TransformOutputProvider;
 import com.android.build.gradle.internal.LoggerWrapper;
 import com.android.build.gradle.internal.core.Abi;
-import com.android.build.gradle.internal.cxx.stripping.SymbolStripExecutableFinder;
 import com.android.build.gradle.internal.ndk.NdkHandler;
 import com.android.build.gradle.internal.pipeline.ExtendedContentType;
 import com.android.build.gradle.internal.pipeline.TransformManager;
@@ -48,6 +46,7 @@ import com.android.utils.FileUtils;
 import com.android.utils.ILogger;
 import com.android.utils.ImmutableCollectors;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystem;
@@ -67,7 +66,8 @@ public class StripDebugSymbolTransform extends Transform {
     @NonNull
     private final Project project;
 
-    @NonNull private final SymbolStripExecutableFinder stripToolFinder;
+    @NonNull
+    private final Map<Abi, File> stripExecutables = Maps.newHashMap();
 
     @NonNull
     private final Set<PathMatcher> excludeMatchers;
@@ -84,7 +84,10 @@ public class StripDebugSymbolTransform extends Transform {
                 .collect(ImmutableCollectors.toImmutableSet());
         this.isLibrary = isLibrary;
         checkArgument(ndkHandler.isConfigured());
-        stripToolFinder = createSymbolStripExecutableFinder(ndkHandler);
+
+        for (Abi abi : ndkHandler.getSupportedAbis()) {
+            stripExecutables.put(abi, ndkHandler.getStripExecutable(abi));
+        }
         this.project = project;
     }
 
@@ -122,9 +125,7 @@ public class StripDebugSymbolTransform extends Transform {
     @NonNull
     @Override
     public Collection<SecondaryFile> getSecondaryFiles() {
-        return stripToolFinder
-                .executables()
-                .stream()
+        return stripExecutables.values().stream()
                 .map(SecondaryFile::nonIncremental)
                 .collect(Collectors.toList());
     }
@@ -223,20 +224,12 @@ public class StripDebugSymbolTransform extends Transform {
     private void stripFile(@NonNull File input, @NonNull File output, @Nullable Abi abi)
             throws IOException {
         FileUtils.mkdirs(output.getParentFile());
-        ILogger logger = new LoggerWrapper(project.getLogger());
-        File exe =
-                stripToolFinder.stripToolExecutableFile(
-                        input,
-                        abi,
-                        msg -> {
-                            logger.warning(msg + " Packaging it as is.");
-                            return null;
-                        });
-
-        if (exe == null) {
-            // The strip executable couldn't be found and a message about the failure was reported
-            // in getPathToStripExecutable.
-            // Fall back to copying the file to the output location
+        if (abi == null) {
+            FileUtils.copyFile(input, output);
+            return;
+        }
+        File exe = stripExecutables.get(abi);
+        if (exe == null || !exe.isFile()) {
             FileUtils.copyFile(input, output);
             return;
         }
@@ -247,14 +240,13 @@ public class StripDebugSymbolTransform extends Transform {
         builder.addArgs("-o");
         builder.addArgs(output.toString());
         builder.addArgs(input.toString());
+        ILogger logger = new LoggerWrapper(project.getLogger());
         ProcessResult result = new GradleProcessExecutor(project).execute(
                 builder.createProcess(),
                 new LoggedProcessOutputHandler(logger));
         if (result.getExitValue() != 0) {
-            logger.warning(
-                    "Unable to strip library '%s' due to error %s returned "
-                            + "from '%s', packaging it as is.",
-                    result.getExitValue(), exe, input.getAbsolutePath());
+            logger.warning("Unable to strip library '%s', packaging it as is.",
+                    input.getAbsolutePath());
             FileUtils.copyFile(input, output);
         }
     }

@@ -23,9 +23,9 @@ import com.android.build.gradle.internal.core.VariantConfiguration;
 import com.android.build.gradle.internal.dsl.CoreBuildType;
 import com.android.build.gradle.internal.dsl.CoreProductFlavor;
 import com.android.build.gradle.internal.scope.BuildOutput;
+import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.scope.OutputScope;
 import com.android.build.gradle.internal.scope.TaskConfigAction;
-import com.android.build.gradle.internal.scope.TaskOutputHolder;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.TaskInputHelper;
 import com.android.build.gradle.internal.variant.TaskContainer;
@@ -104,14 +104,14 @@ public class ProcessManifest extends ManifestProcessorTask {
 
         try {
             new BuildOutput(
-                            TaskOutputHolder.TaskOutputType.MERGED_MANIFESTS,
+                            InternalArtifactType.MERGED_MANIFESTS,
                             outputScope.getMainSplit(),
                             manifestOutputFile,
                             properties)
                     .save(getManifestOutputDirectory());
 
             new BuildOutput(
-                            TaskOutputHolder.TaskOutputType.AAPT_FRIENDLY_MERGED_MANIFESTS,
+                            InternalArtifactType.AAPT_FRIENDLY_MERGED_MANIFESTS,
                             outputScope.getMainSplit(),
                             aaptFriendlyManifestOutputFile,
                             properties)
@@ -206,13 +206,6 @@ public class ProcessManifest extends ManifestProcessorTask {
     @Optional
     public String getManifestPlaceholders() {
         return serializeMap(variantConfiguration.getManifestPlaceholders());
-    }
-
-    @Input
-    public String getMainSplitFullName() {
-        // This information is written to the build output's metadata file, so it needs to be
-        // annotated as @Input
-        return outputScope.getMainSplit().getFullName();
     }
 
     public static class ConfigAction implements TaskConfigAction<ProcessManifest> {

@@ -22,12 +22,11 @@ import com.android.annotations.VisibleForTesting;
 import com.android.build.gradle.internal.dsl.CoreSigningConfig;
 import com.android.build.gradle.internal.incremental.FileType;
 import com.android.build.gradle.internal.incremental.InstantRunBuildContext;
-import com.android.build.gradle.internal.incremental.InstantRunPatchingPolicy;
 import com.android.build.gradle.internal.packaging.ApkCreatorFactories;
 import com.android.build.gradle.internal.scope.BuildElements;
 import com.android.build.gradle.internal.scope.ExistingBuildElements;
+import com.android.build.gradle.internal.scope.InternalArtifactType;
 import com.android.build.gradle.internal.scope.TaskConfigAction;
-import com.android.build.gradle.internal.scope.TaskOutputHolder;
 import com.android.build.gradle.internal.scope.VariantScope;
 import com.android.build.gradle.internal.tasks.AndroidBuilderTask;
 import com.android.builder.core.AndroidBuilder;
@@ -66,7 +65,7 @@ public class InstantRunResourcesApkBuilder extends AndroidBuilderTask {
 
     private FileCollection resources;
 
-    private TaskOutputHolder.TaskOutputType resInputType;
+    private InternalArtifactType resInputType;
 
     @Nested
     @Optional
@@ -77,11 +76,6 @@ public class InstantRunResourcesApkBuilder extends AndroidBuilderTask {
     @Input
     String getResInputType() {
         return resInputType.name();
-    }
-
-    @Input
-    public String getPatchingPolicy() {
-        return instantRunBuildContext.getPatchingPolicy().name();
     }
 
     @InputFiles
@@ -97,28 +91,6 @@ public class InstantRunResourcesApkBuilder extends AndroidBuilderTask {
     @TaskAction
     protected void doFullTaskAction() {
 
-        if (instantRunBuildContext.getPatchingPolicy()
-                != InstantRunPatchingPolicy.MULTI_APK_SEPARATE_RESOURCES) {
-            // when not packaging resources in a separate APK, delete the output APK file so
-            // that if we switch back to this mode later on, we ensure that the APK is rebuilt
-            // and re-added to the build context and therefore the build-info.xml
-            getResInputBuildArtifacts()
-                    .forEach(
-                            buildOutput -> {
-                                ApkInfo apkInfo = buildOutput.getApkInfo();
-                                final File outputFile =
-                                        new File(
-                                                outputDirectory,
-                                                mangleApkName(apkInfo)
-                                                        + SdkConstants.DOT_ANDROID_PACKAGE);
-                                try {
-                                    FileUtils.deleteIfExists(outputFile);
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            });
-            return;
-        }
         getResInputBuildArtifacts()
                 .transform(
                         (apkData, input) -> {
@@ -160,9 +132,7 @@ public class InstantRunResourcesApkBuilder extends AndroidBuilderTask {
                                         "Exception while creating resources split APK", e);
                             }
                         })
-                .into(
-                        TaskOutputHolder.TaskOutputType.INSTANT_RUN_PACKAGED_RESOURCES,
-                        outputDirectory);
+                .into(InternalArtifactType.INSTANT_RUN_PACKAGED_RESOURCES, outputDirectory);
     }
 
     @VisibleForTesting
@@ -178,10 +148,10 @@ public class InstantRunResourcesApkBuilder extends AndroidBuilderTask {
 
         protected final VariantScope variantScope;
         private final FileCollection resources;
-        private final TaskOutputHolder.TaskOutputType resInputType;
+        private final InternalArtifactType resInputType;
 
         public ConfigAction(
-                @NonNull TaskOutputHolder.TaskOutputType resInputType,
+                @NonNull InternalArtifactType resInputType,
                 @NonNull FileCollection resources,
                 @NonNull VariantScope scope) {
             this.resInputType = resInputType;
