@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.dsl
+package com.android.build.gradle.internal.core.dsl.features
 
-import org.gradle.api.Incubating
-import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.MapProperty
+import com.android.build.api.variant.AndroidVersion
 
-@Incubating
-interface DependencyVariantSelection {
-    val buildTypes: ListProperty<String>
-    val productFlavors: MapProperty<String, List<String>>
+interface TestOptionsDslInfo {
+    val targetSdkVersion: AndroidVersion?
 }
