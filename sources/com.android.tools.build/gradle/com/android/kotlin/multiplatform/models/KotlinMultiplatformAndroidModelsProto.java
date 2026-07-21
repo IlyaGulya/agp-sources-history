@@ -74,7 +74,7 @@ public final class KotlinMultiplatformAndroidModelsProto {
   static {
     java.lang.String[] descriptorData = {
       "\n)kotlin_multiplatform_android_models.pr" +
-      "oto\032\020ide_models.proto\"\314\005\n\rAndroidTarget\022" +
+      "oto\032\020ide_models.proto\"\244\005\n\rAndroidTarget\022" +
       "\030\n\013agp_version\030\001 \001(\tH\000\210\001\001\022\031\n\014project_pat" +
       "h\030\002 \001(\tH\001\210\001\001\022\035\n\tbuild_dir\030\003 \001(\0132\005.FileH\002" +
       "\210\001\001\022\035\n\016boot_classpath\030\004 \003(\0132\005.File\022!\n\tte" +
@@ -85,13 +85,12 @@ public final class KotlinMultiplatformAndroidModelsProto {
       "H\005\210\001\001\022!\n\022desugar_lib_config\030\t \003(\0132\005.File" +
       "\022\025\n\010group_id\030\n \001(\tH\006\210\001\001\022 \n\023build_tools_v" +
       "ersion\030\013 \001(\tH\007\210\001\001\022&\n\027desugared_methods_f" +
-      "iles\030\014 \003(\0132\005.File\022\027\n\nbuild_name\030\r \001(\tH\010\210" +
-      "\001\001\022!\n\rroot_build_id\030\016 \001(\0132\005.FileH\t\210\001\001\022\034\n" +
-      "\010build_id\030\017 \001(\0132\005.FileH\n\210\001\001B\016\n\014_agp_vers" +
-      "ionB\017\n\r_project_pathB\014\n\n_build_dirB\014\n\n_t" +
-      "est_infoB\010\n\006_flagsB%\n#_is_core_library_d" +
-      "esugaring_enabledB\013\n\t_group_idB\026\n\024_build" +
-      "_tools_versionB\r\n\013_build_nameB\020\n\016_root_b" +
+      "iles\030\014 \003(\0132\005.File\022!\n\rroot_build_id\030\016 \001(\013" +
+      "2\005.FileH\010\210\001\001\022\034\n\010build_id\030\017 \001(\0132\005.FileH\t\210" +
+      "\001\001B\016\n\014_agp_versionB\017\n\r_project_pathB\014\n\n_" +
+      "build_dirB\014\n\n_test_infoB\010\n\006_flagsB%\n#_is" +
+      "_core_library_desugaring_enabledB\013\n\t_gro" +
+      "up_idB\026\n\024_build_tools_versionB\020\n\016_root_b" +
       "uild_idB\013\n\t_build_id\"E\n\016SourceProvider\022!" +
       "\n\rmanifest_file\030\001 \001(\0132\005.FileH\000\210\001\001B\020\n\016_ma" +
       "nifest_file\"1\n\020GeneratedSources\022\035\n\016sourc" +
@@ -152,7 +151,7 @@ public final class KotlinMultiplatformAndroidModelsProto {
     internal_static_AndroidTarget_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_AndroidTarget_descriptor,
-        new java.lang.String[] { "AgpVersion", "ProjectPath", "BuildDir", "BootClasspath", "TestInfo", "Flags", "LintChecksJars", "IsCoreLibraryDesugaringEnabled", "DesugarLibConfig", "GroupId", "BuildToolsVersion", "DesugaredMethodsFiles", "BuildName", "RootBuildId", "BuildId", "AgpVersion", "ProjectPath", "BuildDir", "TestInfo", "Flags", "IsCoreLibraryDesugaringEnabled", "GroupId", "BuildToolsVersion", "BuildName", "RootBuildId", "BuildId", });
+        new java.lang.String[] { "AgpVersion", "ProjectPath", "BuildDir", "BootClasspath", "TestInfo", "Flags", "LintChecksJars", "IsCoreLibraryDesugaringEnabled", "DesugarLibConfig", "GroupId", "BuildToolsVersion", "DesugaredMethodsFiles", "RootBuildId", "BuildId", "AgpVersion", "ProjectPath", "BuildDir", "TestInfo", "Flags", "IsCoreLibraryDesugaringEnabled", "GroupId", "BuildToolsVersion", "RootBuildId", "BuildId", });
     internal_static_SourceProvider_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_SourceProvider_fieldAccessorTable = new
