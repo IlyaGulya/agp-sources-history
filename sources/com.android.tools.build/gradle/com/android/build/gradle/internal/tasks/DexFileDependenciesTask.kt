@@ -55,7 +55,7 @@ abstract class DexFileDependenciesTask: NonIncrementalTask() {
     abstract val outputDirectory: DirectoryProperty
 
     @get:Optional
-    @get:OutputDirectory
+    @get:OutputFile
     abstract val outputKeepRules: DirectoryProperty
 
     @get:Classpath

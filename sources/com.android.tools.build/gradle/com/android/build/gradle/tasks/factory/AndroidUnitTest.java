@@ -53,7 +53,7 @@ import org.gradle.api.artifacts.ArtifactCollection;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.plugins.JavaBasePlugin;
-import org.gradle.api.reporting.DirectoryReport;
+import org.gradle.api.reporting.ConfigurableReport;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Internal;
@@ -62,7 +62,6 @@ import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskProvider;
-import org.gradle.api.tasks.testing.JUnitXmlReport;
 import org.gradle.api.tasks.testing.Test;
 import org.gradle.api.tasks.testing.TestTaskReports;
 import org.gradle.testing.jacoco.plugins.JacocoPlugin;
@@ -146,7 +145,7 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
         @Override
         public void handleProvider(@NotNull TaskProvider<AndroidUnitTest> taskProvider) {
             super.handleProvider(taskProvider);
-            if (unitTestCreationConfig.isTestCoverageEnabled()) {
+            if (unitTestCreationConfig.isUnitTestCoverageEnabled()) {
                 unitTestCreationConfig
                         .getArtifacts()
                         .setInitialProvider(taskProvider,
@@ -161,7 +160,7 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
             super.configure(task);
             unitTestCreationConfig.onTestedVariant(
                     testedConfig -> {
-                        if (unitTestCreationConfig.isTestCoverageEnabled()) {
+                        if (unitTestCreationConfig.isUnitTestCoverageEnabled()) {
                             task.getProject()
                                     .getPlugins()
                                     .withType(
@@ -223,27 +222,17 @@ public abstract class AndroidUnitTest extends Test implements VariantAwareTask {
             // yet configured.  We get a hardcoded value matching Gradle's default. This will
             // eventually be replaced with the new Java plugin.
             TestTaskReports testTaskReports = task.getReports();
-            JUnitXmlReport xmlReport = testTaskReports.getJunitXml();
-            xmlReport
-                    .getOutputLocation()
-                    .set(
-                            new File(
-                                    creationConfig
-                                            .getServices()
-                                            .getProjectInfo()
-                                            .getTestResultsFolder(),
-                                    task.getName()));
+            ConfigurableReport xmlReport = testTaskReports.getJunitXml();
+            xmlReport.setDestination(
+                    new File(
+                            creationConfig.getServices().getProjectInfo().getTestResultsFolder(),
+                            task.getName()));
 
-            DirectoryReport htmlReport = testTaskReports.getHtml();
-            htmlReport
-                    .getOutputLocation()
-                    .set(
-                            new File(
-                                    creationConfig
-                                            .getServices()
-                                            .getProjectInfo()
-                                            .getTestReportFolder(),
-                                    task.getName()));
+            ConfigurableReport htmlReport = testTaskReports.getHtml();
+            htmlReport.setDestination(
+                    new File(
+                            creationConfig.getServices().getProjectInfo().getTestReportFolder(),
+                            task.getName()));
 
             ((UnitTestOptions) testOptions.getUnitTests()).applyConfiguration(task);
 

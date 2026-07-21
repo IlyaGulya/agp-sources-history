@@ -109,18 +109,14 @@ public abstract class BaseVariantFactory<
                         taskCreationServices,
                         globalConfig);
         // create default output
-        String outputFileNameSuffix =
-                "-"
+        String name =
+                testFixturesComponent.getServices().getProjectInfo().getProjectBaseName()
+                        + "-"
                         + testFixturesComponent.getBaseName()
                         + "-testFixtures."
                         + BuilderConstants.EXT_LIB_ARCHIVE;
         testFixturesComponent.addVariantOutput(
-                new VariantOutputConfigurationImpl(false, ImmutableList.of()),
-                testFixturesComponent
-                        .getServices()
-                        .getProjectInfo()
-                        .getProjectBaseName()
-                        .map(it -> it + outputFileNameSuffix));
+                new VariantOutputConfigurationImpl(false, ImmutableList.of()), name);
         return testFixturesComponent;
     }
 

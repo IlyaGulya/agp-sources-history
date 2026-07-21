@@ -20,7 +20,6 @@ import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.BuildType
 import com.android.build.api.dsl.ProductFlavor
 import com.android.build.api.variant.ComponentIdentity
-import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.core.dsl.TestProjectVariantDslInfo
 import com.android.build.gradle.internal.dsl.DefaultConfig
 import com.android.build.gradle.internal.dsl.InternalTestExtension
@@ -47,7 +46,6 @@ internal class TestProjectVariantDslInfoImpl(
     services: VariantServices,
     buildDirectory: DirectoryProperty,
     private val signingConfigOverride: SigningConfig?,
-    oldExtension: BaseExtension?,
     extension: InternalTestExtension
 ) : VariantDslInfoImpl(
     componentIdentity,
@@ -58,7 +56,6 @@ internal class TestProjectVariantDslInfoImpl(
     dataProvider,
     services,
     buildDirectory,
-    oldExtension,
     extension
 ), TestProjectVariantDslInfo {
 
@@ -107,8 +104,11 @@ internal class TestProjectVariantDslInfoImpl(
     override val applicationId: Property<String> =
         services.newPropertyBackingDeprecatedApi(
             String::class.java,
-            initTestApplicationId(defaultConfig, services)
+            initTestApplicationId(productFlavorList, defaultConfig, services)
         )
+
+    override val isAndroidTestCoverageEnabled: Boolean
+        get() = instrumentedTestDelegate.isAndroidTestCoverageEnabled
 
     // TODO: Test project doesn't have isDebuggable dsl in the build type, we should only have
     //  `debug` variants be debuggable
@@ -134,6 +134,7 @@ internal class TestProjectVariantDslInfoImpl(
 
     private val instrumentedTestDelegate by lazy {
         InstrumentedTestDslInfoImpl(
+            buildTypeObj,
             productFlavorList,
             defaultConfig,
             dataProvider,

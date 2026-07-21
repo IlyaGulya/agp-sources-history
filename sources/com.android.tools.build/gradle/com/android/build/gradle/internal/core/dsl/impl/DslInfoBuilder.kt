@@ -21,7 +21,6 @@ import com.android.build.api.dsl.BuildType
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.ProductFlavor
 import com.android.build.api.variant.ComponentIdentity
-import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.api.DefaultAndroidSourceSet
 import com.android.build.gradle.internal.core.VariantSources
 import com.android.build.gradle.internal.core.dsl.AndroidTestComponentDslInfo
@@ -71,7 +70,6 @@ class DslInfoBuilder<CommonExtensionT: CommonExtension<*, *, *, *>, DslInfoT: Co
     private val signingConfigOverride: SigningConfig?,
     private val manifestDataProvider: ManifestDataProvider,
     private val variantServices: VariantServices,
-    private val oldExtension: BaseExtension?,
     private val extension: CommonExtensionT,
     private val buildDirectory: DirectoryProperty,
 ) {
@@ -91,7 +89,6 @@ class DslInfoBuilder<CommonExtensionT: CommonExtension<*, *, *, *>, DslInfoT: Co
             signingConfigOverride: SigningConfig?,
             manifestDataProvider: ManifestDataProvider,
             variantServices: VariantServices,
-            oldExtension: BaseExtension?,
             extension: CommonExtensionT,
             buildDirectory: DirectoryProperty,
             dslServices: DslServices
@@ -114,7 +111,6 @@ class DslInfoBuilder<CommonExtensionT: CommonExtension<*, *, *, *>, DslInfoT: Co
                 },
                 manifestDataProvider,
                 variantServices,
-                oldExtension,
                 extension,
                 buildDirectory,
             )
@@ -178,13 +174,11 @@ class DslInfoBuilder<CommonExtensionT: CommonExtension<*, *, *, *>, DslInfoT: Co
             buildDirectory = buildDirectory,
             publishInfo = createPublishingInfoForApp(
                 (extension as InternalApplicationExtension).publishing as ApplicationPublishingImpl,
-                variantServices.projectOptions,
                 name,
                 extension.dynamicFeatures.isNotEmpty(),
                 variantServices.issueReporter
             ),
             signingConfigOverride = signingConfigOverride,
-            oldExtension = oldExtension,
             extension = extension
         )
     }
@@ -201,7 +195,6 @@ class DslInfoBuilder<CommonExtensionT: CommonExtension<*, *, *, *>, DslInfoT: Co
             buildDirectory = buildDirectory,
             publishInfo = createPublishingInfoForLibrary(
                 (extension as InternalLibraryExtension).publishing as LibraryPublishingImpl,
-                variantServices.projectOptions,
                 name,
                 buildType,
                 flavors.map { it.first },
@@ -209,7 +202,6 @@ class DslInfoBuilder<CommonExtensionT: CommonExtension<*, *, *, *>, DslInfoT: Co
                 extension.productFlavors,
                 variantServices.issueReporter
             ),
-            oldExtension = oldExtension,
             extension = extension
         )
     }
@@ -224,7 +216,6 @@ class DslInfoBuilder<CommonExtensionT: CommonExtension<*, *, *, *>, DslInfoT: Co
             dataProvider = manifestDataProvider,
             services = variantServices,
             buildDirectory = buildDirectory,
-            oldExtension = oldExtension,
             extension = extension as InternalDynamicFeatureExtension
         )
     }
@@ -240,7 +231,6 @@ class DslInfoBuilder<CommonExtensionT: CommonExtension<*, *, *, *>, DslInfoT: Co
             services = variantServices,
             buildDirectory = buildDirectory,
             signingConfigOverride = signingConfigOverride,
-            oldExtension = oldExtension,
             extension = extension as InternalTestExtension
         )
     }
@@ -255,7 +245,6 @@ class DslInfoBuilder<CommonExtensionT: CommonExtension<*, *, *, *>, DslInfoT: Co
             mainVariantDslInfo = productionVariant!!,
             services = variantServices,
             buildDirectory = buildDirectory,
-            oldExtension = oldExtension,
             extension = extension
         )
     }
@@ -270,8 +259,7 @@ class DslInfoBuilder<CommonExtensionT: CommonExtension<*, *, *, *>, DslInfoT: Co
             dataProvider = manifestDataProvider,
             services = variantServices,
             buildDirectory = buildDirectory,
-            testedVariantDslInfo = productionVariant!!,
-            oldExtension = oldExtension,
+            mainVariantDslInfo = productionVariant!!,
             extension = extension as InternalTestedExtension<*, *, *, *>
         )
     }
@@ -286,10 +274,9 @@ class DslInfoBuilder<CommonExtensionT: CommonExtension<*, *, *, *>, DslInfoT: Co
             dataProvider = manifestDataProvider,
             services = variantServices,
             buildDirectory = buildDirectory,
-            testedVariantDslInfo = productionVariant!!,
+            mainVariantDslInfo = productionVariant!!,
             inconsistentTestAppId = inconsistentTestAppId,
             signingConfigOverride = signingConfigOverride,
-            oldExtension = oldExtension,
             extension = extension as InternalTestedExtension<*, *, *, *>
         )
     }

@@ -16,6 +16,7 @@
 package com.android.build.gradle.internal
 
 import com.android.SdkConstants.FD_RES_VALUES
+import com.android.build.api.variant.impl.DirectoryEntry
 import com.android.build.gradle.internal.component.ComponentCreationConfig
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.utils.fromDisallowChanges
@@ -57,24 +58,11 @@ abstract class DependencyResourcesComputer {
      * fingerprinting.
     */
     abstract class ResourceSourceSetInput {
-        @get:Internal
-        abstract val relative: Property<Boolean>
-
-        @get:Internal
-        val sourceDirectories: ConfigurableFileCollection
-            get() = if(relative.get()) sourceDirectoriesRelative else sourceDirectoriesAbsolute
-
         @get:InputFiles
         @get:PathSensitive(PathSensitivity.RELATIVE)
         @get:Incremental
         @get:IgnoreEmptyDirectories
-        abstract val sourceDirectoriesRelative: ConfigurableFileCollection
-
-        @get:InputFiles
-        @get:PathSensitive(PathSensitivity.ABSOLUTE)
-        @get:Incremental
-        @get:IgnoreEmptyDirectories
-        abstract val sourceDirectoriesAbsolute: ConfigurableFileCollection
+        abstract val sourceDirectories: ConfigurableFileCollection
     }
 
     /** Local resources from within this project */
@@ -224,7 +212,7 @@ abstract class DependencyResourcesComputer {
         this.librarySourceSets.disallowChanges()
 
         addResourceSets(
-            creationConfig.sources.res.getLocalSources(),
+            creationConfig.sources.res.getLocalSourcesAsFileCollection().get(),
             relativeLocalResources
         ) {
             services.newInstance(ResourceSourceSetInput::class.java)
@@ -233,17 +221,15 @@ abstract class DependencyResourcesComputer {
 
         // Add the user added generated directories to the extraGeneratedResFolders.
         // this should be cleaned up once the old variant API is removed.
-        creationConfig.sources.res.getVariantSources().forEach { directoryEntries ->
-            directoryEntries.getEntries()
+        creationConfig.sources.res.getVariantSources().get().forEach { directoryEntries ->
+            directoryEntries.directoryEntries
                 .filter {
                     it.isUserAdded && it.isGenerated
                 }
                 .forEach {
                     extraGeneratedResFolders.from(
                         it.asFiles(
-                          creationConfig.services.provider {
-                              creationConfig.services.projectInfo.projectDirectory
-                          }
+                            creationConfig.services::directoryProperty
                         )
                     )
                 }
@@ -266,15 +252,10 @@ abstract class DependencyResourcesComputer {
     }
 
     @VisibleForTesting
-    fun addResourceSets(
-        resourcesMap: Map<String, Provider<out Collection<Directory>>>,
-        relative: Boolean,
-        blockFactory: () -> ResourceSourceSetInput
-    ) {
-        resourcesMap.forEach{(name, providerOfDirectories) ->
+    fun addResourceSets(resourcesMap: Map<String, FileCollection>, relative: Boolean, blockFactory: () -> ResourceSourceSetInput) {
+        resourcesMap.forEach{(name, fileCollection) ->
             resources.put(name, blockFactory().also {
-                it.relative.set(relative)
-                it.sourceDirectories.fromDisallowChanges(providerOfDirectories)
+                it.sourceDirectories.fromDisallowChanges(fileCollection)
             })
         }
     }

@@ -34,7 +34,6 @@ interface OldVariantApiLegacySupport {
     val oldVariantApiJavaCompileOptions: JavaCompileOptions
     val variantData: BaseVariantData
     val dslSigningConfig: com.android.build.gradle.internal.dsl.SigningConfig?
-    val manifestPlaceholders: Map<String, String>
 
     fun getJavaClasspathArtifacts(
         configType: AndroidArtifacts.ConsumedConfigType,

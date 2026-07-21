@@ -44,7 +44,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.configuration.ShowStacktrace
 import org.gradle.api.plugins.JavaBasePlugin
-import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -362,7 +362,7 @@ abstract class AndroidLintAnalysisTask : NonIncrementalTask() {
 
     fun configureForStandalone(
         taskCreationServices: TaskCreationServices,
-        javaPluginExtension: JavaPluginExtension,
+        javaPluginConvention: JavaPluginConvention,
         customLintChecksConfig: FileCollection,
         lintOptions: Lint,
         fatalOnly: Boolean = false
@@ -380,14 +380,14 @@ abstract class AndroidLintAnalysisTask : NonIncrementalTask() {
         this.projectInputs
             .initializeForStandalone(
                 project,
-                javaPluginExtension,
+                javaPluginConvention,
                 lintOptions,
                 LintMode.ANALYSIS
             )
         this.variantInputs
             .initializeForStandalone(
                 project,
-                javaPluginExtension,
+                javaPluginConvention,
                 taskCreationServices.projectOptions,
                 fatalOnly,
                 checkDependencies = false,

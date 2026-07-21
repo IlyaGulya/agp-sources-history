@@ -20,6 +20,7 @@ import com.android.SdkConstants
 import com.android.build.gradle.internal.services.VariantServices
 import com.android.builder.core.BuilderConstants
 import com.android.ide.common.resources.AssetSet
+import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.util.PatternFilterable
 
@@ -40,29 +41,23 @@ class AssetSourceDirectoriesImpl(
      * asset merger
      *
      * @param aaptEnv the value of "ANDROID_AAPT_IGNORE" environment variable.
-     * @return a [Provider] of a [List] of [Provider] of ][AssetSet].
+     * @return a [Provider] of a [List] of [AssetSet].
      */
     fun getAscendingOrderAssetSets(
         aaptEnv: Provider<String>
-    ): Provider<List<Provider<AssetSet>>> {
+    ): Provider<List<AssetSet>> {
 
-        return variantSources.map { allDirectories ->
+        return super.variantSources.map { allDirectories ->
             allDirectories.map { directoryEntries ->
                 val assetName = if (directoryEntries.name == SdkConstants.FD_MAIN)
                     BuilderConstants.MAIN else directoryEntries.name
 
-                directoryEntries.getEntries().map { directoryEntry ->
-                    directoryEntry.asFiles(
-                      variantServices.provider {
-                          variantServices.projectInfo.projectDirectory
-                      }
-                    ).map {
-                        AssetSet(assetName, aaptEnv.orNull).also {assetSet ->
-                            assetSet.addSources(it.map { it.asFile })
-                        }
-                    }
+                AssetSet(assetName, aaptEnv.orNull).also {
+                    it.addSources(directoryEntries.directoryEntries.map { directoryEntry ->
+                        directoryEntry.asFiles(variantServices::directoryProperty).get().asFile
+                    })
                 }
-            }.flatten()
+            }
         }
     }
 }

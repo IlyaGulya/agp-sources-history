@@ -51,7 +51,7 @@ class NamespacedResourcesTaskManager(
      */
     fun createNamespacedResourceTasks(
             packageOutputType: Artifact.Single<Directory>?,
-            baseName: Provider<String>,
+            baseName: String,
             useAaptToGenerateLegacyMultidexMainDexProguardRules: Boolean) {
 
         // Compile
@@ -89,7 +89,7 @@ class NamespacedResourcesTaskManager(
 
     private fun createNamespacedAppProcessTask(
             packageOutputType: Artifact.Single<Directory>?,
-            baseName: Provider<String>,
+            baseName: String,
             useAaptToGenerateLegacyMultidexMainDexProguardRules: Boolean) {
         // TODO fix by using the right type for field componentProperties
        taskFactory.register(
@@ -116,16 +116,13 @@ class NamespacedResourcesTaskManager(
         // By the time this is called, the list of potential source files is known since the
         // variant API has run. Eventually, it could be better to not do a get() here and instead
         // create a unique Task that uses workers for parallelization.
-        creationConfig.sources.res.getVariantSources().forEach { dimensionSources ->
+        creationConfig.sources.res.getVariantSources().get().forEach { dimensionSources ->
 
-            val artifacts = creationConfig.services.fileCollection().also { fileCollection ->
-                    fileCollection.from( dimensionSources.getEntries()
+            val providerList: List<Provider<Directory>> = dimensionSources.directoryEntries
                 .filter { !it.isGenerated }
-                .map { it.asFiles(creationConfig.services.provider {
- creationConfig.services.projectInfo.projectDirectory
-            }) }
-                    )
-                }
+                .map { it.asFiles(creationConfig.services::directoryProperty) }
+
+            val artifacts = creationConfig.services.fileCollection().from(providerList)
 
             val sourceSetName = dimensionSources.name
 

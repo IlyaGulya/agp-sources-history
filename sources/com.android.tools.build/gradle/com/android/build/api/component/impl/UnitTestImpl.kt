@@ -20,6 +20,7 @@ import com.android.build.api.artifact.impl.ArtifactsImpl
 import com.android.build.api.component.UnitTest
 import com.android.build.api.component.analytics.AnalyticsEnabledUnitTest
 import com.android.build.api.component.impl.features.AndroidResourcesCreationConfigImpl
+import com.android.build.api.component.impl.features.ManifestPlaceholdersCreationConfigImpl
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.extension.impl.VariantApiOperationsRegistrar
 import com.android.build.api.variant.AndroidVersion
@@ -120,7 +121,7 @@ open class UnitTestImpl @Inject constructor(
 
     // these would normally be public but not for unit-test. They are there to feed the
     // manifest but aren't actually used.
-    override val isTestCoverageEnabled: Boolean
+    override val isUnitTestCoverageEnabled: Boolean
         get() = dslInfo.isUnitTestCoverageEnabled
 
     override val androidResourcesCreationConfig: AndroidResourcesCreationConfig? by lazy(LazyThreadSafetyMode.NONE) {
@@ -131,6 +132,7 @@ open class UnitTestImpl @Inject constructor(
             AndroidResourcesCreationConfigImpl(
                 this,
                 dslInfo,
+                dslInfo.androidResourcesDsl!!,
                 internalServices,
             )
         } else {
@@ -139,7 +141,10 @@ open class UnitTestImpl @Inject constructor(
     }
 
     override val manifestPlaceholdersCreationConfig: ManifestPlaceholdersCreationConfig by lazy(LazyThreadSafetyMode.NONE) {
-        createManifestPlaceholdersCreationConfig(dslInfo.testedVariantDslInfo.manifestPlaceholders)
+        ManifestPlaceholdersCreationConfigImpl(
+            dslInfo.mainVariantDslInfo,
+            internalServices
+        )
     }
 
     override fun <T : Component> createUserVisibleVariantObject(
@@ -161,8 +166,4 @@ open class UnitTestImpl @Inject constructor(
      * There is no build config fields for unit tests.
      */
     override val buildConfigCreationConfig: BuildConfigCreationConfig? = null
-
-    // TODO: Remove
-    override val isUnitTestCoverageEnabled: Boolean
-        get() = dslInfo.isUnitTestCoverageEnabled
 }

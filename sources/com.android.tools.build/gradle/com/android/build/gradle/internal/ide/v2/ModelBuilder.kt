@@ -270,16 +270,9 @@ class ModelBuilder<
             val buildTypeName = buildType.buildType.name
 
             if (variantDimensionInfo.buildTypes.contains(buildTypeName)) {
-                // Mixin works only when there are no flavours.
-                // When a flavour is there source provider will be initialized
-                // with variant sources.
-                val mixinVariantSources: VariantCreationConfig? =
-                    if (variantInputs.productFlavors.values.isEmpty()) {
-                        variants.find { it.name == buildTypeName }
-                    } else null
                 buildTypes.add(
                     SourceSetContainerImpl(
-                        sourceProvider = buildType.sourceSet.convert(buildFeatures, mixinVariantSources),
+                        sourceProvider = buildType.sourceSet.convert(buildFeatures),
                         androidTestSourceProvider = buildType.getTestSourceSet(ComponentTypeImpl.ANDROID_TEST)
                             ?.takeIf { androidTests.buildTypes.contains(buildTypeName) }
                             ?.convert(buildFeatures),
@@ -380,16 +373,13 @@ class ModelBuilder<
             namespace = namespace ?: "",
             androidTestNamespace = androidTestNamespace,
             testFixturesNamespace = testFixturesNamespace,
-
             variants = variantList,
-
             javaCompileOptions = extension.compileOptions.convert(),
             resourcePrefix = extension.resourcePrefix,
             dynamicFeatures = (extension as? ApplicationExtension)?.dynamicFeatures?.toImmutableSet(),
             viewBindingOptions = ViewBindingOptionsImpl(
                 variantModel.variants.any { it.buildFeatures.viewBinding }
             ),
-
             flags = getFlags(),
             lintChecksJars = getLocalCustomLintChecksForModel(project, variantModel.syncIssueReporter),
             modelSyncFiles = modelSyncFiles,
@@ -595,7 +585,7 @@ class ModelBuilder<
     private fun createVariant(
         variant: VariantCreationConfig,
         instantAppResultMap: MutableMap<File, Boolean>
-    ): com.android.build.gradle.internal.ide.v2.VariantImpl {
+    ): VariantImpl {
         return VariantImpl(
             name = variant.name,
             displayName = variant.baseName,
@@ -614,7 +604,7 @@ class ModelBuilder<
             desugaredMethods = getDesugaredMethods(
                 variant.services,
                 variant.isCoreLibraryDesugaringEnabled,
-                variant.minSdkVersionForDexing,
+                variant.minSdkVersion,
                 variant.global.compileSdkHashString,
                 variant.global.bootClasspath
             ).files.toList(),
@@ -702,6 +692,9 @@ class ModelBuilder<
             listOf()
         }
 
+        val coreLibDesugaring = (component as? ConsumableCreationConfig)?.isCoreLibraryDesugaringEnabled
+                ?: false
+
         return AndroidArtifactImpl(
             minSdkVersion = minSdkVersion,
             targetSdkVersionOverride = targetSdkVersionOverride,
@@ -733,7 +726,14 @@ class ModelBuilder<
             else
                 null,
             modelSyncFiles = modelSyncFiles,
-            privacySandboxSdkInfo = createPrivacySandboxSdkInfo(component)
+            privacySandboxSdkInfo = createPrivacySandboxSdkInfo(component),
+            desugaredMethodsFiles = getDesugaredMethods(
+                component.services,
+                coreLibDesugaring,
+                component.minSdkVersion,
+                component.global.compileSdkHashString,
+                component.global.bootClasspath
+            ).files.toList()
         )
     }
 

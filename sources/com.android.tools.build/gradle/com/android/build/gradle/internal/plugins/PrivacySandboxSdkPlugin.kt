@@ -16,7 +16,6 @@
 
 package com.android.build.gradle.internal.plugins
 
-import com.android.Version
 import com.android.build.api.artifact.Artifact
 import com.android.build.api.artifact.impl.ArtifactsImpl
 import com.android.build.api.attributes.BuildTypeAttr
@@ -48,6 +47,7 @@ import com.android.build.gradle.tasks.FusedLibraryMergeClasses
 import com.android.build.gradle.tasks.GeneratePrivacySandboxAsar
 import com.android.build.gradle.tasks.PackagePrivacySandboxSdkBundle
 import com.android.build.gradle.tasks.PrivacySandboxSdkDexTask
+import com.android.build.gradle.tasks.PrivacySandboxSdkGenerateJarStubsTask
 import com.android.build.gradle.tasks.PrivacySandboxSdkManifestGeneratorTask
 import com.android.build.gradle.tasks.PrivacySandboxSdkManifestMergerTask
 import com.android.build.gradle.tasks.PrivacySandboxSdkMergeDexTask
@@ -129,8 +129,10 @@ class PrivacySandboxSdkPlugin @Inject constructor(
         super.basePluginApply(project)
         if (!projectServices.projectOptions[BooleanOption.PRIVACY_SANDBOX_SDK_SUPPORT]) {
             throw GradleException(
-                    "Privacy Sandbox SDKs are not supported in Android Gradle plugin 7.4.x.\n" +
-                            "To build privacy sandbox SDKs, please use Android Gradle plugin 8.0.0-alpha01 or later."
+                    "Privacy Sandbox SDK support is experimental, and must be explicitly enabled.\n" +
+                            "To enable support, add\n" +
+                            "    ${BooleanOption.PRIVACY_SANDBOX_SDK_SUPPORT.propertyName}=true\n" +
+                            "to your project's gradle.properties file."
             )
         }
 
@@ -302,6 +304,7 @@ class PrivacySandboxSdkPlugin @Inject constructor(
                         FusedLibraryMergeClasses.PrivacySandboxSdkCreationAction(variantScope),
                         GeneratePrivacySandboxAsar.CreationAction(variantScope),
                         MergeJavaResourceTask.PrivacySandboxSdkCreationAction(variantScope),
+                        PrivacySandboxSdkGenerateJarStubsTask.CreationAction(variantScope),
                         PrivacySandboxSdkMergeResourcesTask.CreationAction(variantScope),
                         PrivacySandboxSdkManifestGeneratorTask.CreationAction(variantScope),
                         PrivacySandboxSdkManifestMergerTask.CreationAction(variantScope),

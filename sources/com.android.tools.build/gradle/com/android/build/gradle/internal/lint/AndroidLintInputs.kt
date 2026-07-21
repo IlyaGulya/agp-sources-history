@@ -20,6 +20,7 @@ package com.android.build.gradle.internal.lint
 import com.android.SdkConstants
 import com.android.Version
 import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.component.impl.AndroidTestImpl
 import com.android.build.api.dsl.Lint
 import com.android.build.api.variant.ResValue
 import com.android.build.gradle.internal.component.ApkCreationConfig
@@ -46,6 +47,7 @@ import com.android.build.gradle.internal.services.LintParallelBuildService
 import com.android.build.gradle.internal.services.TaskCreationServices
 import com.android.build.gradle.internal.services.getBuildService
 import com.android.build.gradle.internal.utils.fromDisallowChanges
+import com.android.build.gradle.internal.utils.getDesugaredMethods
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.options.ProjectOptions
@@ -89,7 +91,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
@@ -359,7 +361,7 @@ abstract class ProjectInputs {
 
     internal fun initializeForStandalone(
         project: Project,
-        javaExtension: JavaPluginExtension,
+        javaConvention: JavaPluginConvention,
         dslLintOptions: Lint,
         lintMode: LintMode
     ) {
@@ -368,13 +370,13 @@ abstract class ProjectInputs {
         lintOptions.initialize(dslLintOptions, lintMode)
         resourcePrefix.setDisallowChanges("")
         dynamicFeatures.setDisallowChanges(setOf())
-        val mainSourceSet = javaExtension.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+        val mainSourceSet = javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
         val javaCompileTask = project.tasks.named(
             mainSourceSet.compileJavaTaskName,
             JavaCompile::class.java
         )
         bootClasspath.fromDisallowChanges(javaCompileTask.map { it.options.bootstrapClasspath ?: project.files() })
-        javaSourceLevel.setDisallowChanges(javaExtension.sourceCompatibility)
+        javaSourceLevel.setDisallowChanges(javaConvention.sourceCompatibility)
         compileTarget.setDisallowChanges("")
         neverShrinking.setDisallowChanges(true)
     }
@@ -883,7 +885,8 @@ abstract class VariantInputs {
                         // analyzing test generated sources is expensive, without much benefit
                         includeGeneratedSourceFolders = false
                     )
-        })
+            }
+        )
 
         testFixturesArtifact.setDisallowChanges(
             variantWithTests.testFixtures?.let { testFixtures ->
@@ -928,7 +931,7 @@ abstract class VariantInputs {
             creationConfig.androidResourcesCreationConfig?.resourceConfigurations ?: emptyList()
         )
 
-        sourceProviders.setDisallowChanges(creationConfig.variantSources.sortedSourceProviders.map { sourceProvider ->
+        sourceProviders.setDisallowChanges(creationConfig.variantSources.getSortedSourceProviders().map { sourceProvider ->
             creationConfig.services
                 .newInstance(SourceProviderInput::class.java)
                 .initialize(sourceProvider, lintMode)
@@ -946,7 +949,7 @@ abstract class VariantInputs {
         val testSourceProviderList: MutableList<SourceProviderInput> = mutableListOf()
         variantWithTests.unitTest?.let { unitTestCreationConfig ->
             testSourceProviderList.addAll(
-                unitTestCreationConfig.variantSources.sortedSourceProviders.map { sourceProvider ->
+                unitTestCreationConfig.variantSources.getSortedSourceProviders().map { sourceProvider ->
                     creationConfig.services
                         .newInstance(SourceProviderInput::class.java)
                         .initialize(sourceProvider, lintMode, unitTestOnly = true)
@@ -955,7 +958,7 @@ abstract class VariantInputs {
         }
         variantWithTests.androidTest?.let { androidTestCreationConfig ->
             testSourceProviderList.addAll(
-                androidTestCreationConfig.variantSources.sortedSourceProviders.map { sourceProvider ->
+                androidTestCreationConfig.variantSources.getSortedSourceProviders().map { sourceProvider ->
                     creationConfig.services
                         .newInstance(SourceProviderInput::class.java)
                         .initialize(sourceProvider, lintMode, instrumentationTestOnly = true)
@@ -964,7 +967,7 @@ abstract class VariantInputs {
         }
         variantWithTests.testFixtures?.let { testFixturesCreationConfig ->
             testFixturesSourceProviders.setDisallowChanges(
-                testFixturesCreationConfig.variantSources.sortedSourceProviders.map { sourceProvider ->
+                testFixturesCreationConfig.variantSources.getSortedSourceProviders().map { sourceProvider ->
                     creationConfig.services
                         .newInstance(SourceProviderInput::class.java)
                         .initialize(
@@ -986,14 +989,14 @@ abstract class VariantInputs {
 
     internal fun initializeForStandalone(
         project: Project,
-        javaExtension: JavaPluginExtension,
+        javaConvention: JavaPluginConvention,
         projectOptions: ProjectOptions,
         fatalOnly: Boolean,
         checkDependencies: Boolean,
         lintMode: LintMode
     ) {
-        val mainSourceSet = javaExtension.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
-        val testSourceSet = javaExtension.sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME)
+        val mainSourceSet = javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+        val testSourceSet = javaConvention.sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME)
 
         name.setDisallowChanges(mainSourceSet.name)
         this.checkDependencies.setDisallowChanges(checkDependencies)
@@ -1340,6 +1343,11 @@ abstract class AndroidArtifactInput : ArtifactInput() {
     @get:Input
     abstract val useSupportLibraryVectorDrawables: Property<Boolean>
 
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.NONE)
+    @get:Optional
+    abstract val desugaredMethodsFiles: ConfigurableFileCollection
+
     fun initialize(
         creationConfig: ComponentCreationConfig,
         checkDependencies: Boolean,
@@ -1415,6 +1423,19 @@ abstract class AndroidArtifactInput : ArtifactInput() {
                 buildMapping = creationConfig.services.projectInfo.computeBuildMapping(),
             )
         )
+
+        val coreLibDesugaring = (creationConfig as? ConsumableCreationConfig)?.isCoreLibraryDesugaringEnabled
+                ?: false
+        desugaredMethodsFiles.from(
+                getDesugaredMethods(
+                        creationConfig.services,
+                        coreLibDesugaring,
+                        creationConfig.minSdkVersion,
+                        creationConfig.global.compileSdkHashString,
+                        creationConfig.global.bootClasspath
+                )
+        ).disallowChanges()
+
         return this
     }
 
@@ -1422,6 +1443,7 @@ abstract class AndroidArtifactInput : ArtifactInput() {
         applicationId.setDisallowChanges("")
         generatedSourceFolders.disallowChanges()
         generatedResourceFolders.disallowChanges()
+        desugaredMethodsFiles.disallowChanges()
         classesOutputDirectories.fromDisallowChanges(sourceSet.output.classesDirs)
         warnIfProjectTreatedAsExternalDependency.setDisallowChanges(false)
         shrinkable.setDisallowChanges(false)
@@ -1460,6 +1482,7 @@ abstract class AndroidArtifactInput : ArtifactInput() {
             applicationId.get(),
             generatedResourceFolders.toList(),
             generatedSourceFolders.toList(),
+            desugaredMethodsFiles.toList(),
             classesOutputDirectories.files.toList(),
             computeDependencies(dependencyCaches)
         )

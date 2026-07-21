@@ -230,8 +230,8 @@ public final class SdkConstants {
     public static final String FN_ART_PROFILE = "baseline-prof.txt";
 
     public static final String FN_BINART_ART_PROFILE_FOLDER_IN_APK = "assets/dexopt";
-    // Temporary workaround for b/261981611, was "com.android.tools.build.profiles"
-    public static final String FN_BINART_ART_PROFILE_FOLDER_IN_AAB = "assets.dexopt";
+    public static final String FN_BINART_ART_PROFILE_FOLDER_IN_AAB =
+            "com.android.tools.build.profiles";
     public static final String FN_BINARY_ART_PROFILE = "baseline.prof";
     public static final String FN_BINARY_ART_PROFILE_METADATA = "baseline.profm";
 
@@ -2105,6 +2105,8 @@ public final class SdkConstants {
     public static final String EXT_ASAR = "asar";
     /** Extension for Android Privacy Sandbox Sdk bundles */
     public static final String EXT_ASB = "asb";
+    /** Extension for APKs file containing multiple APKs */
+    public static final String EXT_APKS = "apks";
     /** Extension for Android atom files. */
     public static final String EXT_ATOM = "atom";
     /** Extension of java files, i.e. "java" */
@@ -2166,6 +2168,8 @@ public final class SdkConstants {
     public static final String DOT_ASAR = DOT + EXT_ASAR;
     /** Extension for Android Privacy Sandbox Sdk bundles */
     public static final String DOT_ASB = DOT + EXT_ASB;
+    /** Extension for APKs file containing multiple APKs */
+    public static final String DOT_APKS = DOT + EXT_APKS;
     /** Dot-Extension of zip files, i.e. ".zip" */
     public static final String DOT_ZIP = DOT + EXT_ZIP;
     /** Dot-Extension of aidl files, i.e. ".aidl" */

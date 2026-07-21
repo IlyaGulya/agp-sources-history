@@ -110,12 +110,9 @@ class LibraryVariantFactory(
                 )
 
         // create default output
+        val name = "${libVariant.services.projectInfo.getProjectBaseName()}-${libVariant.baseName}.${BuilderConstants.EXT_LIB_ARCHIVE}"
         libVariant.addVariantOutput(
-            VariantOutputConfigurationImpl(false, ImmutableList.of()),
-            libVariant.services.projectInfo.getProjectBaseName().map {
-                "${it}-${libVariant.baseName}.${BuilderConstants.EXT_LIB_ARCHIVE}"
-            }
-        )
+                VariantOutputConfigurationImpl(false, ImmutableList.of()), name)
         return libVariant
     }
 

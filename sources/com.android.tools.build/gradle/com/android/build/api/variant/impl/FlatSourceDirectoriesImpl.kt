@@ -58,40 +58,19 @@ class FlatSourceDirectoriesImpl(
 
     override fun addSource(directoryEntry: DirectoryEntry) {
         variantSources.add(directoryEntry)
-        directories.addAll(
-            directoryEntry.asFiles(
-                variantServices.provider {
-                    variantServices.projectInfo.projectDirectory
-                }
-            )
-        )
+        directories.add(directoryEntry.asFiles(variantServices::directoryProperty))
     }
 
 
-    internal fun getAsFileTrees(): Provider<List<Provider<List<ConfigurableFileTree>>>> =
+    internal fun getAsFileTrees(): Provider<List<ConfigurableFileTree>> =
             variantSources.map { entries: MutableList<DirectoryEntry> ->
                 entries.map { sourceDirectory ->
-                    sourceDirectory.asFileTree(variantServices::fileTree)
+                    sourceDirectory.asFileTree(
+                        variantServices::fileTree,
+                        variantServices::directoryProperty
+                    )
                 }
             }
-
-    /**
-     * version of the [getAsFileTrees] for consumers that are resolving the content during
-     * configuration time, see b/259343260
-     *
-     * New code MUST NOT call this method.
-     *
-     */
-    internal fun getAsFileTreesForOldVariantAPI(): Provider<List<ConfigurableFileTree>> =
-        variantSources.map { entries: MutableList<DirectoryEntry> ->
-            entries.map { sourceDirectory ->
-                sourceDirectory.asFileTreeWithoutTaskDependency(
-                        variantServices::fileTree
-                )
-            }.flatten()
-        }
-
-    internal fun getVariantSources(): List<DirectoryEntry> = variantSources.get()
 
     internal fun addSources(sourceDirectories: Iterable<DirectoryEntry>) {
         sourceDirectories.forEach(::addSource)
@@ -105,17 +84,9 @@ class FlatSourceDirectoriesImpl(
         variantSources.get()
             .filter { filter.invoke(it) }
             .forEach {
-                if (it is TaskProviderBasedDirectoryEntryImpl) {
-                    files.add(it.directoryProvider.get().asFile)
-                } else {
-                    val asDirectoryProperties = it.asFiles(
-                        variantServices.provider {
-                            variantServices.projectInfo.projectDirectory
-                        }
-                    )
-                    asDirectoryProperties.get().forEach { directory ->
-                        files.add(directory.asFile)
-                    }
+                val asDirectoryProperty = it.asFiles(variantServices::directoryProperty)
+                if (asDirectoryProperty.isPresent) {
+                    files.add(asDirectoryProperty.get().asFile)
                 }
             }
         return files

@@ -33,7 +33,7 @@ import com.android.tools.lint.model.LintModelModule
 import com.android.tools.lint.model.LintModelSerialization
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.JavaBasePlugin
-import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
@@ -92,7 +92,7 @@ abstract class LintModelWriterTask : NonIncrementalTask() {
 
     internal fun configureForStandalone(
         taskCreationServices: TaskCreationServices,
-        javaExtension: JavaPluginExtension,
+        javaConvention: JavaPluginConvention,
         lintOptions: Lint,
         partialResultsDir: File
     ) {
@@ -102,12 +102,12 @@ abstract class LintModelWriterTask : NonIncrementalTask() {
             getBuildService(taskCreationServices.buildServiceRegistry)
         )
         this.projectInputs
-            .initializeForStandalone(project, javaExtension, lintOptions, LintMode.MODEL_WRITING)
+            .initializeForStandalone(project, javaConvention, lintOptions, LintMode.MODEL_WRITING)
         // The artifact produced is only used by lint tasks with checkDependencies=true
         this.variantInputs
             .initializeForStandalone(
                 project,
-                javaExtension,
+                javaConvention,
                 taskCreationServices.projectOptions,
                 fatalOnly = false,
                 checkDependencies = true,

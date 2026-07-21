@@ -21,7 +21,6 @@ import com.android.build.api.dsl.BuildType
 import com.android.build.api.dsl.ProductFlavor
 import com.android.build.api.variant.AnnotationProcessor
 import com.android.build.api.variant.BuildConfigField
-import com.android.build.api.variant.impl.TaskProviderBasedDirectoryEntryImpl
 import com.android.build.gradle.api.AnnotationProcessorOptions
 import com.android.build.gradle.api.JavaCompileOptions
 import com.android.build.gradle.internal.DependencyConfigurator
@@ -32,13 +31,14 @@ import com.android.build.gradle.internal.component.legacy.OldVariantApiLegacySup
 import com.android.build.gradle.internal.core.MergedFlavor
 import com.android.build.gradle.internal.core.dsl.ApkProducingComponentDslInfo
 import com.android.build.gradle.internal.core.dsl.ComponentDslInfo
+import com.android.build.gradle.internal.core.dsl.MultiVariantComponentDslInfo
 import com.android.build.gradle.internal.core.dsl.impl.ComponentDslInfoImpl
-import com.android.build.gradle.internal.core.dsl.impl.getManifestPlaceholders
 import com.android.build.gradle.internal.dependency.ArtifactCollectionWithExtraArtifact
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.publishing.PublishingSpecs.Companion.getVariantPublishingSpec
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.services.BaseServices
+import com.android.build.gradle.internal.services.VariantServices
 import com.android.build.gradle.internal.variant.BaseVariantData
 import com.android.build.gradle.options.BooleanOption
 import com.android.builder.errors.IssueReporter
@@ -59,15 +59,11 @@ class OldVariantApiLegacySupportImpl(
     override val buildTypeObj: BuildType
         get() = (dslInfo as ComponentDslInfoImpl).buildTypeObj
     override val productFlavorList: List<ProductFlavor>
-        get() = dslInfo.productFlavorList
+        get() = (dslInfo as MultiVariantComponentDslInfo).productFlavorList
     override val mergedFlavor: MergedFlavor
         get() = (dslInfo as ComponentDslInfoImpl).mergedFlavor
     override val dslSigningConfig: com.android.build.gradle.internal.dsl.SigningConfig? =
         (dslInfo as? ApkProducingComponentDslInfo)?.signingConfig
-
-    override val manifestPlaceholders: Map<String, String> by lazy(LazyThreadSafetyMode.NONE) {
-        getManifestPlaceholders(mergedFlavor, buildTypeObj)
-    }
 
     /**
      * The old variant API runs after the new variant API, yet we need to make sure that whatever
@@ -226,18 +222,10 @@ class OldVariantApiLegacySupportImpl(
             allRawAndroidResources!!.from(component.artifacts.get(InternalArtifactType.MICRO_APK_RES))
         }
 
-        allRawAndroidResources!!.from(component.sources.res.getVariantSources().map {  directoryEntries ->
-                directoryEntries.getEntries()
-                    .map {
-                        if (it is TaskProviderBasedDirectoryEntryImpl) {
-                            it.directoryProvider
-                        } else {
-                            it.asFiles(
-                              component.services.provider {
-                                  component.services.projectInfo.projectDirectory
-                              })
-
-                    }
+        allRawAndroidResources!!.from(component.sources.res.getVariantSources().map { allRes ->
+            allRes.map { directoryEntries ->
+                directoryEntries.directoryEntries
+                    .map { it.asFiles(component.services::directoryProperty) }
             }
         })
         return allRawAndroidResources!!

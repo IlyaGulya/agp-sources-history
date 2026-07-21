@@ -145,13 +145,11 @@ interface ComponentCreationConfig : ComponentIdentity {
 
     val providedOnlyClasspath: FileCollection
 
-    val packageJacocoRuntime: Boolean
-
     val javaCompilation: JavaCompilation
 
     fun addVariantOutput(
         variantOutputConfiguration: VariantOutputConfiguration,
-        outputFileName: Provider<String>? = null
+        outputFileName: String? = null
     )
 
     fun computeLocalFileDependencies(filePredicate: Predicate<File>): FileCollection
@@ -162,15 +160,6 @@ interface ComponentCreationConfig : ComponentIdentity {
      * Returns the artifact name modified depending on the component type.
      */
     fun getArtifactName(name: String): String
-
-    val needsJavaResStreams: Boolean
-
-    // ---------------------------------------------------------------------------------------------
-    // VARIANT DSL INFO REPLACEMENTS
-    // ---------------------------------------------------------------------------------------------
-    // TODO: Figure out if we should be exposing any of the below
-
-    val isAndroidTestCoverageEnabled: Boolean
 
     /** Publish intermediate artifacts in the BuildArtifactsHolder based on PublishingSpecs.  */
     fun publishBuildArtifacts()
@@ -190,20 +179,4 @@ interface ComponentCreationConfig : ComponentIdentity {
 
     @Deprecated("DO NOT USE, this is just for old variant API legacy support")
     val oldVariantApiLegacySupport: OldVariantApiLegacySupport?
-
-    /**
-     * Notification that the old variant API ran successfully.
-     */
-    fun oldVariantApiCompleted()
-
-    /**
-     * Registers an action to run once the old variant API has completed.
-     * The action will run in an undetermined thread.
-     *
-     * Note that if the variant API has already completed, the action will run
-     * immediately in the calling thread.
-     *
-     * @param action lambda to run once old variant API completed.
-     */
-    fun registerPostOldVariantApiAction(action: () -> Unit)
 }

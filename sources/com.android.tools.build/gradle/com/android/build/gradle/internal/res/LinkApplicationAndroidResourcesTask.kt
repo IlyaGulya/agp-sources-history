@@ -207,7 +207,8 @@ abstract class LinkApplicationAndroidResourcesTask @Inject constructor(objects: 
     abstract val resPackageOutputFolder: DirectoryProperty
 
     @get:Input
-    abstract val projectBaseName: Property<String>
+    lateinit var projectBaseName: String
+        private set
 
     @get:Input
     lateinit var taskInputType: InternalArtifactType<Directory>
@@ -448,7 +449,7 @@ abstract class LinkApplicationAndroidResourcesTask @Inject constructor(objects: 
     abstract class BaseCreationAction(
         creationConfig: ComponentCreationConfig,
         private val generateLegacyMultidexMainDexProguardRules: Boolean,
-        private val baseName: Provider<String>,
+        private val baseName: String?,
         private val isLibrary: Boolean
     ) : VariantTaskCreationAction<LinkApplicationAndroidResourcesTask, ComponentCreationConfig>(
         creationConfig
@@ -560,15 +561,11 @@ abstract class LinkApplicationAndroidResourcesTask @Inject constructor(objects: 
             )
             val componentType = creationConfig.componentType
 
-            if (projectOptions[BooleanOption.ENABLE_SOURCE_SET_PATHS_MAP]) {
-                val sourceSetMap =
-                        creationConfig.artifacts.get(InternalArtifactType.SOURCE_SET_PATH_MAP)
-                task.sourceSetMaps.fromDisallowChanges(
-                        creationConfig.services.fileCollection(sourceSetMap))
-                task.dependsOn(sourceSetMap)
-            } else {
-                task.sourceSetMaps.disallowChanges()
-            }
+            val sourceSetMap =
+                    creationConfig.artifacts.get(InternalArtifactType.SOURCE_SET_PATH_MAP)
+            task.sourceSetMaps.fromDisallowChanges(
+                    creationConfig.services.fileCollection(sourceSetMap))
+            task.dependsOn(sourceSetMap)
 
             // Tests should not have feature dependencies, however because they include the
             // tested production component in their dependency graph, we see the tested feature
@@ -588,7 +585,7 @@ abstract class LinkApplicationAndroidResourcesTask @Inject constructor(objects: 
                 task.resOffset.disallowChanges()
             }
 
-            task.projectBaseName.setDisallowChanges(baseName)
+            task.projectBaseName = baseName!!
             task.isLibrary = isLibrary
 
             task.useFinalIds = !projectOptions.get(BooleanOption.USE_NON_FINAL_RES_IDS)
@@ -614,7 +611,7 @@ abstract class LinkApplicationAndroidResourcesTask @Inject constructor(objects: 
         creationConfig: ComponentCreationConfig,
         generateLegacyMultidexMainDexProguardRules: Boolean,
         private val sourceArtifactType: TaskManager.MergeType,
-        baseName: Provider<String>,
+        baseName: String,
         isLibrary: Boolean
     ) : BaseCreationAction(
         creationConfig,
@@ -706,7 +703,7 @@ abstract class LinkApplicationAndroidResourcesTask @Inject constructor(objects: 
     class NamespacedCreationAction(
         creationConfig: ApkCreationConfig,
         generateLegacyMultidexMainDexProguardRules: Boolean,
-        baseName: Provider<String>
+        baseName: String?
     ) : BaseCreationAction(
         creationConfig,
         generateLegacyMultidexMainDexProguardRules,

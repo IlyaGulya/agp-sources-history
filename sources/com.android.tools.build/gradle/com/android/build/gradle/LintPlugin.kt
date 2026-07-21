@@ -70,7 +70,7 @@ import org.gradle.api.component.ConfigurationVariantDetails
 import org.gradle.api.component.SoftwareComponent
 import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaBasePlugin
-import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.build.event.BuildEventsListenerRegistry
 import javax.inject.Inject
@@ -102,12 +102,12 @@ abstract class LintPlugin : Plugin<Project> {
         withJavaPlugin(project) { registerTasks(project, dslOperationsRegistrar) }
     }
     private fun registerTasks(project: Project, dslOperationsRegistrar: DslLifecycleComponentsOperationsRegistrar<Lint>) {
-        val javaExtension: JavaPluginExtension = getJavaPluginExtension(project) ?: return
+        val javaConvention: JavaPluginConvention = getJavaPluginConvention(project) ?: return
         val customLintChecksConfig = BasePlugin.createCustomLintChecksConfig(project)
         val customLintChecks = getLocalCustomLintChecks(customLintChecksConfig)
         registerTasks(
             project,
-            javaExtension,
+            javaConvention,
             customLintChecks,
             dslOperationsRegistrar,
         )
@@ -116,7 +116,7 @@ abstract class LintPlugin : Plugin<Project> {
 
     private fun registerTasks(
         project: Project,
-        javaExtension: JavaPluginExtension,
+        javaConvention: JavaPluginConvention,
         customLintChecks: FileCollection,
         dslOperationsRegistrar: DslLifecycleComponentsOperationsRegistrar<Lint>,
     ) {
@@ -140,7 +140,7 @@ abstract class LintPlugin : Plugin<Project> {
                     task.description = "Updates the lint baseline for project `${project.name}`."
                     task.configureForStandalone(
                         taskCreationServices,
-                        javaExtension,
+                        javaConvention,
                         customLintChecks,
                         lintOptions!!,
                         artifacts.get(InternalArtifactType.LINT_PARTIAL_RESULTS),
@@ -152,7 +152,7 @@ abstract class LintPlugin : Plugin<Project> {
                 task.description = "Generates the lint report for project `${project.name}`"
                 task.configureForStandalone(
                     taskCreationServices,
-                    javaExtension,
+                    javaConvention,
                     customLintChecks,
                     lintOptions!!,
                     artifacts.get(InternalArtifactType.LINT_PARTIAL_RESULTS),
@@ -186,7 +186,7 @@ abstract class LintPlugin : Plugin<Project> {
                     "Generates the lint report for just the fatal issues for project  `${project.name}`"
                 task.configureForStandalone(
                     taskCreationServices,
-                    javaExtension,
+                    javaConvention,
                     customLintChecks,
                     lintOptions!!,
                     artifacts.get(InternalArtifactType.LINT_VITAL_PARTIAL_RESULTS),
@@ -207,7 +207,7 @@ abstract class LintPlugin : Plugin<Project> {
                 task.description = "Generates the lint report for project `${project.name}` and applies any safe suggestions to the source code."
                 task.configureForStandalone(
                     taskCreationServices,
-                    javaExtension,
+                    javaConvention,
                     customLintChecks,
                     lintOptions!!,
                     artifacts.get(InternalArtifactType.LINT_PARTIAL_RESULTS),
@@ -222,7 +222,7 @@ abstract class LintPlugin : Plugin<Project> {
                 task.description = "Runs lint analysis for project `${project.name}`"
                 task.configureForStandalone(
                     taskCreationServices,
-                    javaExtension,
+                    javaConvention,
                     customLintChecks,
                     lintOptions!!
                 )
@@ -237,7 +237,7 @@ abstract class LintPlugin : Plugin<Project> {
                     "Runs lint analysis on just the fatal issues for project `${project.name}`"
                 task.configureForStandalone(
                     taskCreationServices,
-                    javaExtension,
+                    javaConvention,
                     customLintChecks,
                     lintOptions!!,
                     fatalOnly = true
@@ -251,7 +251,7 @@ abstract class LintPlugin : Plugin<Project> {
             val lintModelWriterTask = project.tasks.register("generateLintModel", LintModelWriterTask::class.java) { task ->
                 task.configureForStandalone(
                     taskCreationServices,
-                    javaExtension,
+                    javaConvention,
                     lintOptions!!,
                     artifacts.getOutputPath(
                         InternalArtifactType.LINT_PARTIAL_RESULTS,
@@ -278,7 +278,7 @@ abstract class LintPlugin : Plugin<Project> {
             }
         }
 
-        javaExtension.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME) { mainSourceSet ->
+        javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME) { mainSourceSet ->
             listOf(
                 mainSourceSet.runtimeElementsConfigurationName,
                 mainSourceSet.apiElementsConfigurationName
@@ -346,13 +346,15 @@ abstract class LintPlugin : Plugin<Project> {
         project.plugins.withType(JavaBasePlugin::class.java, action)
     }
 
-    private fun getJavaPluginExtension(project: Project): JavaPluginExtension? {
-        val javaExtension = project.extensions.findByType(JavaPluginExtension::class.java)
-        if (javaExtension == null) {
+    private fun getJavaPluginConvention(project: Project): JavaPluginConvention? {
+        val convention = project.convention
+        val javaConvention = convention.findPlugin(JavaPluginConvention::class.java)
+        if (javaConvention == null) {
             project.logger.warn("Cannot apply lint if the java or kotlin Gradle plugins " +
-                "have not also been applied")
+                "have also been applied")
+            return null
         }
-        return javaExtension
+        return javaConvention
     }
 
     // See BasePlugin

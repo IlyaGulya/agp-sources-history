@@ -75,6 +75,8 @@ class MutableListBackedUpWithListProperty<E>(
     }
 
     private fun _get(): MutableList<E> {
+        logger.warning("Values of variant API $propertyName are queried and may return non final values, " +
+                               "this is unsupported")
         return propertyList.get()
     }
 }

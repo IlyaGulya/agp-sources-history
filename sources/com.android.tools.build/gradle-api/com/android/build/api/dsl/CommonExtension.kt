@@ -424,7 +424,6 @@ interface CommonExtension<
      *
      * @see [ApkSigningConfig]
      */
-    @get:Incubating
     val signingConfigs: NamedDomainObjectContainer<out ApkSigningConfig>
 
     /**
@@ -434,7 +433,6 @@ interface CommonExtension<
      * For more information about the properties you can configure in this block,
      * see [ApkSigningConfig].
      */
-    @Incubating
     fun signingConfigs(action: NamedDomainObjectContainer<out ApkSigningConfig>.() -> Unit)
 
     /**
@@ -500,7 +498,6 @@ interface CommonExtension<
      *
      * For more information about the properties you can configure in this block, see [Splits].
      */
-    @get:Incubating
     val splits: Splits
 
     /**
@@ -510,13 +507,10 @@ interface CommonExtension<
      *
      * For more information about the properties you can configure in this block, see [Splits].
      */
-    @Incubating
     fun splits(action: Splits.() -> Unit)
 
-    @get:Incubating
     val composeOptions: ComposeOptions
 
-    @Incubating
     fun composeOptions(action: ComposeOptions.() -> Unit)
 
     /**

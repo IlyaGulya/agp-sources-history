@@ -21,7 +21,6 @@ import com.android.build.api.artifact.impl.ArtifactsImpl
 import com.android.build.api.component.impl.features.AndroidResourcesCreationConfigImpl
 import com.android.build.api.component.impl.features.AssetsCreationConfigImpl
 import com.android.build.api.component.impl.features.InstrumentationCreationConfigImpl
-import com.android.build.api.component.impl.features.ManifestPlaceholdersCreationConfigImpl
 import com.android.build.api.component.impl.features.ResValuesCreationConfigImpl
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.FramesComputationMode
@@ -43,7 +42,6 @@ import com.android.build.gradle.internal.component.ComponentCreationConfig
 import com.android.build.gradle.internal.component.features.AndroidResourcesCreationConfig
 import com.android.build.gradle.internal.component.features.AssetsCreationConfig
 import com.android.build.gradle.internal.component.features.InstrumentationCreationConfig
-import com.android.build.gradle.internal.component.features.ManifestPlaceholdersCreationConfig
 import com.android.build.gradle.internal.component.features.ResValuesCreationConfig
 import com.android.build.gradle.internal.component.legacy.OldVariantApiLegacySupport
 import com.android.build.gradle.internal.core.ProductFlavor
@@ -90,7 +88,6 @@ import org.gradle.api.provider.Provider
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.Callable
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.function.Predicate
 import java.util.stream.Collectors
 
@@ -199,8 +196,8 @@ abstract class ComponentImpl<DslInfoT: ComponentDslInfo>(
     override val baseName: String
         get() = paths.baseName
 
-    override val productFlavorList: List<ProductFlavor> = dslInfo.productFlavorList.map {
-        ProductFlavor(it)
+    override val productFlavorList: List<ProductFlavor> = dslInfo.componentIdentity.productFlavors.map {
+        ProductFlavor(it.first, it.second)
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -211,7 +208,7 @@ abstract class ComponentImpl<DslInfoT: ComponentDslInfo>(
 
     override fun addVariantOutput(
         variantOutputConfiguration: VariantOutputConfiguration,
-        outputFileName: Provider<String>?
+        outputFileName: String?
     ) {
         variantOutputs.add(
             VariantOutputImpl(
@@ -224,9 +221,10 @@ abstract class ComponentImpl<DslInfoT: ComponentDslInfo>(
                 internalServices.newPropertyBackingDeprecatedApi(
                     String::class.java,
                     outputFileName
-                        ?: internalServices.projectInfo.getProjectBaseName().map {
-                            paths.getOutputFileName(it, variantOutputConfiguration.baseName(this))
-                        }
+                        ?: paths.getOutputFileName(
+                            internalServices.projectInfo.getProjectBaseName(),
+                            variantOutputConfiguration.baseName(this)
+                        ),
                 )
             )
         )
@@ -362,12 +360,6 @@ abstract class ComponentImpl<DslInfoT: ComponentDslInfo>(
         }
     }
 
-    override val packageJacocoRuntime: Boolean
-        get() = false
-
-    override val isAndroidTestCoverageEnabled: Boolean
-        get() = dslInfo.isAndroidTestCoverageEnabled
-
     override val modelV1LegacySupport = ModelV1LegacySupportImpl(dslInfo)
 
     override val oldVariantApiLegacySupport: OldVariantApiLegacySupport? by lazy {
@@ -380,7 +372,7 @@ abstract class ComponentImpl<DslInfoT: ComponentDslInfo>(
 
     override val assetsCreationConfig: AssetsCreationConfig by lazy {
         AssetsCreationConfigImpl(
-            dslInfo,
+            dslInfo.androidResourcesDsl!!,
             internalServices
         ) { androidResourcesCreationConfig }
     }
@@ -390,6 +382,7 @@ abstract class ComponentImpl<DslInfoT: ComponentDslInfo>(
             AndroidResourcesCreationConfigImpl(
                 this,
                 dslInfo,
+                dslInfo.androidResourcesDsl!!,
                 internalServices,
             )
         } else {
@@ -400,7 +393,7 @@ abstract class ComponentImpl<DslInfoT: ComponentDslInfo>(
     override val resValuesCreationConfig: ResValuesCreationConfig? by lazy {
         if (buildFeatures.resValues) {
             ResValuesCreationConfigImpl(
-                dslInfo,
+                dslInfo.androidResourcesDsl!!,
                 internalServices
             )
         } else {
@@ -473,24 +466,6 @@ abstract class ComponentImpl<DslInfoT: ComponentDslInfo>(
 
     override fun getArtifactName(name: String) = name
 
-    override val needsJavaResStreams: Boolean
-        get() {
-            // We need to create original java resource stream only if we're in a library module with
-            // custom transforms.
-            return componentType.isAar && dslInfo.transforms.isNotEmpty()
-        }
-
-    protected fun createManifestPlaceholdersCreationConfig(
-            placeholders: Map<String, String>?): ManifestPlaceholdersCreationConfig {
-        val legacyApiManifestPlaceholders = oldVariantApiLegacySupport?.manifestPlaceholders
-                ?: mapOf()
-        val allPlaceholders = (placeholders ?: mapOf()) + legacyApiManifestPlaceholders
-        return ManifestPlaceholdersCreationConfigImpl(
-                allPlaceholders,
-                internalServices
-        )
-    }
-
     /**
      * Publish an intermediate artifact.
      *
@@ -539,29 +514,6 @@ abstract class ComponentImpl<DslInfoT: ComponentDslInfo>(
                         AndroidAttributes(null, libraryElements)
                     )
                 }
-            }
-        }
-    }
-
-    // registrar for all post old variant API actions.
-    private val postOldVariantActions = mutableListOf<() -> Unit>()
-
-    private val oldVariantAPICompleted = AtomicBoolean(false)
-
-    override fun oldVariantApiCompleted() {
-        synchronized(postOldVariantActions) {
-            oldVariantAPICompleted.set(true)
-            postOldVariantActions.forEach { action -> action() }
-            postOldVariantActions.clear()
-        }
-    }
-
-    override fun registerPostOldVariantApiAction(action: () -> Unit) {
-        synchronized(postOldVariantActions) {
-            if (oldVariantAPICompleted.get()) {
-                action()
-            } else {
-                postOldVariantActions.add(action)
             }
         }
     }

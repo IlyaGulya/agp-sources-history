@@ -21,6 +21,7 @@ import com.android.build.api.artifact.impl.ArtifactsImpl
 import com.android.build.api.component.analytics.AnalyticsEnabledAndroidTest
 import com.android.build.api.component.impl.features.AndroidResourcesCreationConfigImpl
 import com.android.build.api.component.impl.features.BuildConfigCreationConfigImpl
+import com.android.build.api.component.impl.features.ManifestPlaceholdersCreationConfigImpl
 import com.android.build.api.component.impl.features.RenderscriptCreationConfigImpl
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.extension.impl.VariantApiOperationsRegistrar
@@ -61,6 +62,7 @@ import com.android.build.gradle.internal.services.VariantServices
 import com.android.build.gradle.internal.tasks.factory.GlobalTaskCreationConfig
 import com.android.build.gradle.internal.variant.BaseVariantData
 import com.android.build.gradle.internal.variant.VariantPathHelper
+import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.options.IntegerOption
 import com.android.builder.dexing.DexingType
 import com.google.wireless.android.sdk.stats.GradleBuildVariant
@@ -148,7 +150,7 @@ open class AndroidTestImpl @Inject constructor(
 
     override val packaging: ApkPackaging by lazy {
         ApkPackagingImpl(
-            dslInfo.testedVariantDslInfo.packaging,
+            dslInfo.mainVariantDslInfo.packaging,
             variantServices,
             minSdkVersion.apiLevel
         )
@@ -242,14 +244,13 @@ open class AndroidTestImpl @Inject constructor(
                 value = internalServices.mapPropertyOf(
                     ResValue.Key::class.java,
                     ResValue::class.java,
-                    dslInfo.getResValues()
+                    dslInfo.androidResourcesDsl!!.getResValues()
                 )
             )
     }
 
     override val manifestPlaceholders: MapProperty<String, String>
         get() = manifestPlaceholdersCreationConfig.placeholders
-
 
     // ---------------------------------------------------------------------------------------------
     // INTERNAL API
@@ -261,6 +262,7 @@ open class AndroidTestImpl @Inject constructor(
         AndroidResourcesCreationConfigImpl(
             this,
             dslInfo,
+            dslInfo.androidResourcesDsl!!,
             internalServices,
         )
     }
@@ -277,10 +279,6 @@ open class AndroidTestImpl @Inject constructor(
         }
     }
 
-    override val manifestPlaceholdersCreationConfig: ManifestPlaceholdersCreationConfig by lazy(LazyThreadSafetyMode.NONE) {
-        createManifestPlaceholdersCreationConfig(dslInfo.manifestPlaceholders)
-    }
-
     override val renderscriptCreationConfig: RenderscriptCreationConfig? by lazy(LazyThreadSafetyMode.NONE) {
         if (buildFeatures.renderScript) {
             RenderscriptCreationConfigImpl(
@@ -291,6 +289,13 @@ open class AndroidTestImpl @Inject constructor(
         } else {
             null
         }
+    }
+
+    override val manifestPlaceholdersCreationConfig: ManifestPlaceholdersCreationConfig by lazy(LazyThreadSafetyMode.NONE) {
+        ManifestPlaceholdersCreationConfigImpl(
+            dslInfo,
+            internalServices
+        )
     }
 
     override val targetSdkVersionOverride: AndroidVersion?
@@ -316,9 +321,6 @@ open class AndroidTestImpl @Inject constructor(
     override val instrumentationRunnerArguments: Map<String, String>
         get() = dslInfo.instrumentationRunnerArguments
 
-    override val isTestCoverageEnabled: Boolean
-        get() = dslInfo.isAndroidTestCoverageEnabled
-
     /**
      * Package desugar_lib DEX for base feature androidTest only if the base packages shrunk
      * desugar_lib. This should be fixed properly by analyzing the test code when generating L8
@@ -332,6 +334,13 @@ open class AndroidTestImpl @Inject constructor(
             else -> mainVariant.componentType.isBaseModule && needsShrinkDesugarLibrary
         }
 
+    override val isCoreLibraryDesugaringEnabled: Boolean
+        get() = libraryTestDesugarEnabled() || delegate.isCoreLibraryDesugaringEnabled
+
+    private fun libraryTestDesugarEnabled(): Boolean {
+        return services.projectOptions.get(BooleanOption.ENABLE_INSTRUMENTATION_TEST_DESUGARING)
+    }
+
     override val minSdkVersionForDexing: AndroidVersion =
         mainVariant.minSdkVersionForDexing
 
@@ -340,9 +349,6 @@ open class AndroidTestImpl @Inject constructor(
 
     override val needsShrinkDesugarLibrary: Boolean
         get() = delegate.needsShrinkDesugarLibrary
-
-    override val isCoreLibraryDesugaringEnabled: Boolean
-        get() = delegate.isCoreLibraryDesugaringEnabled
 
     override val dexingType: DexingType
         get() = delegate.dexingType
@@ -388,9 +394,17 @@ open class AndroidTestImpl @Inject constructor(
     override val ignoreAllLibraryKeepRules: Boolean
         get() = dslInfo.ignoreAllLibraryKeepRules
 
+    override val isAndroidTestCoverageEnabled: Boolean
+        get() = dslInfo.isAndroidTestCoverageEnabled
+
     // Only instrument library androidTests. In app modules, the main classes are instrumented.
     override val useJacocoTransformInstrumentation: Boolean
-        get() = isTestCoverageEnabled && mainVariant.componentType.isAar
+        get() = dslInfo.isAndroidTestCoverageEnabled && mainVariant.componentType.isAar
+
+    // Only include the jacoco agent if coverage is enabled in library test components
+    // as in apps it will have already been included in the tested application.
+    override val packageJacocoRuntime: Boolean
+        get() = dslInfo.isAndroidTestCoverageEnabled && mainVariant.componentType.isAar
 
     override val postProcessingFeatures: PostprocessingFeatures?
         get() = dslInfo.postProcessingOptions.getPostprocessingFeatures()

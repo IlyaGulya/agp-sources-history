@@ -22,8 +22,6 @@ import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.ProductFlavor
 import com.android.build.api.variant.BuildConfigField
 import com.android.build.api.variant.ComponentIdentity
-import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.internal.core.MergedFlavor
 import com.android.build.gradle.internal.core.MergedOptimization
 import com.android.build.gradle.internal.core.dsl.ConsumableComponentDslInfo
 import com.android.build.gradle.internal.dsl.DefaultConfig
@@ -47,7 +45,6 @@ internal abstract class ConsumableComponentDslInfoImpl internal constructor(
     productFlavorList: List<ProductFlavor>,
     services: VariantServices,
     buildDirectory: DirectoryProperty,
-    oldExtension: BaseExtension?,
     extension: CommonExtension<*, *, *, *>
 ) : ComponentDslInfoImpl(
     componentIdentity,
@@ -57,7 +54,6 @@ internal abstract class ConsumableComponentDslInfoImpl internal constructor(
     productFlavorList,
     services,
     buildDirectory,
-    oldExtension,
     extension
 ), ConsumableComponentDslInfo {
 
@@ -97,8 +93,16 @@ internal abstract class ConsumableComponentDslInfoImpl internal constructor(
     override val renderscriptNdkModeEnabled: Boolean
         get() = mergedFlavor.renderscriptNdkModeEnabled ?: false
 
-    override val manifestPlaceholders: Map<String, String> by lazy(LazyThreadSafetyMode.NONE) {
-        getManifestPlaceholders(mergedFlavor, buildTypeObj)
+    override val manifestPlaceholders: Map<String, String> by lazy {
+        val mergedFlavorsPlaceholders: MutableMap<String, String> = mutableMapOf()
+        mergedFlavor.manifestPlaceholders.forEach { (key, value) ->
+            mergedFlavorsPlaceholders[key] = value.toString()
+        }
+        // so far, blindly override the build type placeholders
+        buildTypeObj.manifestPlaceholders.forEach { (key, value) ->
+            mergedFlavorsPlaceholders[key] = value.toString()
+        }
+        mergedFlavorsPlaceholders
     }
 
     // build type delegates
@@ -256,19 +260,4 @@ internal abstract class ConsumableComponentDslInfoImpl internal constructor(
             fullOption
         } else fullOption.substring(0, pos)
     }
-}
-
-fun getManifestPlaceholders(
-    mergedFlavor: MergedFlavor,
-    buildTypeObj: BuildType
-): Map<String, String> {
-    val mergedFlavorsPlaceholders: MutableMap<String, String> = mutableMapOf()
-    mergedFlavor.manifestPlaceholders.forEach { (key, value) ->
-        mergedFlavorsPlaceholders[key] = value.toString()
-    }
-    // so far, blindly override the build type placeholders
-    buildTypeObj.manifestPlaceholders.forEach { (key, value) ->
-        mergedFlavorsPlaceholders[key] = value.toString()
-    }
-    return mergedFlavorsPlaceholders.toMap()
 }

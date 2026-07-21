@@ -203,7 +203,10 @@ abstract class VariantImpl<DslInfoT: VariantDslInfo>(
     }
 
     override val manifestPlaceholdersCreationConfig: ManifestPlaceholdersCreationConfig by lazy(LazyThreadSafetyMode.NONE) {
-        createManifestPlaceholdersCreationConfig(dslInfo.manifestPlaceholders)
+        ManifestPlaceholdersCreationConfigImpl(
+            dslInfo,
+            internalServices
+        )
     }
 
     override val testComponents = mutableMapOf<ComponentType, TestComponentCreationConfig>()
@@ -224,7 +227,7 @@ abstract class VariantImpl<DslInfoT: VariantDslInfo>(
                 value = internalServices.mapPropertyOf(
                     ResValue.Key::class.java,
                     ResValue::class.java,
-                    dslInfo.getResValues()
+                    dslInfo.androidResourcesDsl!!.getResValues()
                 )
             )
     }
@@ -251,7 +254,7 @@ abstract class VariantImpl<DslInfoT: VariantDslInfo>(
                 apiName = "pseudoLocalesEnabled",
                 value = internalServices.newPropertyBackingDeprecatedApi(
                     Boolean::class.java,
-                    dslInfo.isPseudoLocalesEnabled
+                    dslInfo.androidResourcesDsl!!.isPseudoLocalesEnabled
                 )
             )
     }
@@ -314,4 +317,7 @@ abstract class VariantImpl<DslInfoT: VariantDslInfo>(
     }
     override val manifestPlaceholders: MapProperty<String, String>
         get() = manifestPlaceholdersCreationConfig.placeholders
+
+    override val isAndroidTestCoverageEnabled: Boolean
+        get() = (this as? HasAndroidTest)?.androidTest?.isAndroidTestCoverageEnabled == true
 }

@@ -32,6 +32,7 @@ import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.build.gradle.options.StringOption
 import com.android.builder.internal.packaging.AabFlinger
+import com.android.build.gradle.internal.tasks.TaskCategory
 import com.android.ide.common.signing.KeystoreHelper
 import com.android.tools.build.bundletool.commands.AddTransparencyCommand
 import com.android.utils.FileUtils
@@ -211,12 +212,11 @@ abstract class FinalizeBundleTask : NonIncrementalTask() {
         ) {
             super.handleProvider(taskProvider)
 
-            val bundleNameProvider =
-                projectServices.projectInfo.getProjectBaseName().map { "$it.aab" }
+            val bundleName = "${projectServices.projectInfo.getProjectBaseName()}.aab"
             val location = SingleArtifact.BUNDLE.getOutputPath(artifacts.buildDirectory, "")
             artifacts.setInitialProvider(taskProvider, FinalizeBundleTask::finalBundleFile)
                 .atLocation(location.absolutePath)
-                .withName(bundleNameProvider)
+                .withName(bundleName)
                 .on(SingleArtifact.BUNDLE)
         }
 
@@ -262,17 +262,15 @@ abstract class FinalizeBundleTask : NonIncrementalTask() {
         ) {
             super.handleProvider(taskProvider)
 
-            val bundleNameProvider =
-                creationConfig.services.projectInfo.getProjectBaseName().map {
-                    "$it-${creationConfig.baseName}.aab"
-                }
+            val bundleName =
+                "${creationConfig.services.projectInfo.getProjectBaseName()}-${creationConfig.baseName}.aab"
             val apkLocationOverride =
                 creationConfig.services.projectOptions.get(StringOption.IDE_APK_LOCATION)
             if (apkLocationOverride == null) {
                 creationConfig.artifacts.setInitialProvider(
                     taskProvider,
                     FinalizeBundleTask::finalBundleFile
-                ).withName(bundleNameProvider).on(SingleArtifact.BUNDLE)
+                ).withName(bundleName).on(SingleArtifact.BUNDLE)
             } else {
                 creationConfig.artifacts.setInitialProvider(
                     taskProvider,
@@ -284,7 +282,7 @@ abstract class FinalizeBundleTask : NonIncrementalTask() {
                             creationConfig.dirName
                         ).absolutePath
                     )
-                    .withName(bundleNameProvider)
+                    .withName(bundleName)
                     .on(SingleArtifact.BUNDLE)
             }
         }

@@ -26,7 +26,6 @@ import com.android.build.gradle.options.Version.VERSION_7_0
 import com.android.build.gradle.internal.errors.DeprecationReporter.DeprecationTarget.VERSION_8_0
 import com.android.build.gradle.options.Version.VERSION_7_2
 import com.android.build.gradle.options.Version.VERSION_7_3
-import com.android.build.gradle.options.Version.VERSION_7_4
 import com.android.build.gradle.options.Version.VERSION_BEFORE_4_0
 import com.android.builder.model.AndroidProject
 import com.android.builder.model.AndroidProject.PROPERTY_BUILD_MODEL_ONLY
@@ -111,7 +110,7 @@ enum class BooleanOption(
 
     // FIXME switch to false once we know we don't use these getters internally.
     ENABLE_LEGACY_API("android.compatibility.enableLegacyApi", true, FeatureStage.Supported),
-    FULL_R8("android.enableR8.fullMode", false, FeatureStage.Supported),
+    FULL_R8("android.enableR8.fullMode", true, FeatureStage.Supported),
 
     /* ---------------------
      * EXPERIMENTAL FEATURES
@@ -135,7 +134,7 @@ enum class BooleanOption(
     ENABLE_NEW_RESOURCE_SHRINKER_PRECISE("android.experimental.enableNewResourceShrinker.preciseShrinking", false, FeatureStage.Experimental),
     ENABLE_LOCAL_TESTING("android.bundletool.enableLocalTesting", false, FeatureStage.Experimental),
     DISABLE_MINSDKLIBRARY_CHECK("android.unsafe.disable.minSdkLibraryCheck", false, FeatureStage.Experimental),
-
+    ENABLE_INSTRUMENTATION_TEST_DESUGARING("android.experimental.library.desugarAndroidTest", false, FeatureStage.Experimental),
     /**
      * When enabled, incompatible APKs installed on a testing device will be uninstalled automatically
      * during an instrumentation test run (e.g. When INSTALL_FAILED_UPDATE_INCOMPATIBLE error happens
@@ -203,6 +202,8 @@ enum class BooleanOption(
             FeatureStage.Experimental
     ),
 
+    PRIVACY_SANDBOX_SDK_SUPPORT("android.experimental.privacysandboxsdk.enable", false, FeatureStage.Experimental),
+
     BUILD_ANALYZER_TASK_LABELS("android.experimental.buildanalyzer.tasklabels.enable", false, FeatureStage.Experimental),
     /* ------------------------
      * SOFTLY-ENFORCED FEATURES
@@ -235,16 +236,6 @@ enum class BooleanOption(
         FeatureStage.SoftlyEnforced(
             DeprecationReporter.DeprecationTarget.ENABLE_UNCOMPRESSED_NATIVE_LIBS_IN_BUNDLE
         )
-    ),
-    ENABLE_SOURCE_SET_PATHS_MAP(
-        "android.enableSourceSetPathsMap",
-        true,
-        FeatureStage.SoftlyEnforced(VERSION_8_0)
-    ),
-    RELATIVE_COMPILE_LIB_RESOURCES(
-        "android.cacheCompileLibResources",
-        true,
-        FeatureStage.SoftlyEnforced(VERSION_8_0)
     ),
 
     COMPILE_CLASSPATH_LIBRARY_R_CLASSES("android.useCompileClasspathLibraryRClasses", true, FeatureStage.SoftlyEnforced(VERSION_8_0)),
@@ -488,6 +479,20 @@ enum class BooleanOption(
         FeatureStage.Enforced(VERSION_7_3)
     ),
 
+    @Suppress("unused")
+    ENABLE_SOURCE_SET_PATHS_MAP(
+            "android.enableSourceSetPathsMap",
+            true,
+            FeatureStage.Enforced(Version.VERSION_8_0)
+    ),
+
+    @Suppress("unused")
+    RELATIVE_COMPILE_LIB_RESOURCES(
+            "android.cacheCompileLibResources",
+            true,
+            FeatureStage.Enforced(Version.VERSION_8_0)
+    ),
+
     /* ----------------
      * REMOVED FEATURES
      */
@@ -585,15 +590,6 @@ enum class BooleanOption(
             false,
             FeatureStage.Removed(VERSION_7_0, "Desugar tool has been removed from AGP.")
     ),
-
-    PRIVACY_SANDBOX_SDK_SUPPORT(
-        "android.experimental.privacysandboxsdk.enable",
-        false,
-        FeatureStage.Removed(
-            VERSION_7_4,
-            "Privacy Sandbox SDKs are not supported in Android Gradle plugin 7.4.x.\n\n" +
-                    "To build or consume privacy sandbox SDKs, please use Android Gradle plugin 8.0.0-alpha01 or later.")),
-
     ; // end of enums
 
     override val status = stage.status

@@ -70,7 +70,6 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.UncheckedIOException
 import java.util.Locale
-import org.gradle.api.provider.Provider
 
 /**
  * For generating unit test coverage reports using jacoco. Provides separate CreateActions for
@@ -102,7 +101,7 @@ abstract class JacocoReportTask : NonIncrementalTask() {
 
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val javaSources: ListProperty<Provider<List<ConfigurableFileTree>>>
+    abstract val javaSources: ListProperty<ConfigurableFileTree>
 
     @get:Internal
     abstract val tabWidth: Property<Int>
@@ -131,9 +130,7 @@ abstract class JacocoReportTask : NonIncrementalTask() {
 
         // Jacoco requires source set directory roots rather than source files to produce
         // source code highlighting in reports.
-        val sourceFolders: List<File> = javaSources.get().map {
-            it.get().map(ConfigurableFileTree::getDir)
-        }.flatten()
+        val sourceFolders = javaSources.get().map(ConfigurableFileTree::getDir)
 
         workerExecutor
             .classLoaderIsolation { classpath: ClassLoaderWorkerSpec ->
