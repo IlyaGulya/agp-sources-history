@@ -37,84 +37,84 @@ public interface AndroidCompilationOrBuilder extends
 
   /**
    * <pre>
-   * The dsl info of the main variant, will be available iff compilation type is MAIN.
+   * The info of the main variant, will be available iff compilation type is MAIN.
    * </pre>
    *
-   * <code>optional .MainVariantDslInfo main_dsl_info = 2;</code>
-   * @return Whether the mainDslInfo field is set.
+   * <code>optional .MainVariantInfo main_info = 2;</code>
+   * @return Whether the mainInfo field is set.
    */
-  boolean hasMainDslInfo();
+  boolean hasMainInfo();
   /**
    * <pre>
-   * The dsl info of the main variant, will be available iff compilation type is MAIN.
+   * The info of the main variant, will be available iff compilation type is MAIN.
    * </pre>
    *
-   * <code>optional .MainVariantDslInfo main_dsl_info = 2;</code>
-   * @return The mainDslInfo.
+   * <code>optional .MainVariantInfo main_info = 2;</code>
+   * @return The mainInfo.
    */
-  com.android.kotlin.multiplatform.models.MainVariantDslInfo getMainDslInfo();
+  com.android.kotlin.multiplatform.models.MainVariantInfo getMainInfo();
   /**
    * <pre>
-   * The dsl info of the main variant, will be available iff compilation type is MAIN.
+   * The info of the main variant, will be available iff compilation type is MAIN.
    * </pre>
    *
-   * <code>optional .MainVariantDslInfo main_dsl_info = 2;</code>
+   * <code>optional .MainVariantInfo main_info = 2;</code>
    */
-  com.android.kotlin.multiplatform.models.MainVariantDslInfoOrBuilder getMainDslInfoOrBuilder();
+  com.android.kotlin.multiplatform.models.MainVariantInfoOrBuilder getMainInfoOrBuilder();
 
   /**
    * <pre>
-   * The dsl info of the unit test component, will be available iff compilation type is UNIT_TEST.
+   * The info of the unit test component, will be available iff compilation type is UNIT_TEST.
    * </pre>
    *
-   * <code>optional .UnitTestDslInfo unit_test_dsl_info = 3;</code>
-   * @return Whether the unitTestDslInfo field is set.
+   * <code>optional .UnitTestInfo unit_test_info = 3;</code>
+   * @return Whether the unitTestInfo field is set.
    */
-  boolean hasUnitTestDslInfo();
+  boolean hasUnitTestInfo();
   /**
    * <pre>
-   * The dsl info of the unit test component, will be available iff compilation type is UNIT_TEST.
+   * The info of the unit test component, will be available iff compilation type is UNIT_TEST.
    * </pre>
    *
-   * <code>optional .UnitTestDslInfo unit_test_dsl_info = 3;</code>
-   * @return The unitTestDslInfo.
+   * <code>optional .UnitTestInfo unit_test_info = 3;</code>
+   * @return The unitTestInfo.
    */
-  com.android.kotlin.multiplatform.models.UnitTestDslInfo getUnitTestDslInfo();
+  com.android.kotlin.multiplatform.models.UnitTestInfo getUnitTestInfo();
   /**
    * <pre>
-   * The dsl info of the unit test component, will be available iff compilation type is UNIT_TEST.
+   * The info of the unit test component, will be available iff compilation type is UNIT_TEST.
    * </pre>
    *
-   * <code>optional .UnitTestDslInfo unit_test_dsl_info = 3;</code>
+   * <code>optional .UnitTestInfo unit_test_info = 3;</code>
    */
-  com.android.kotlin.multiplatform.models.UnitTestDslInfoOrBuilder getUnitTestDslInfoOrBuilder();
+  com.android.kotlin.multiplatform.models.UnitTestInfoOrBuilder getUnitTestInfoOrBuilder();
 
   /**
    * <pre>
-   * The dsl info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
+   * The info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
    * </pre>
    *
-   * <code>optional .InstrumentedTestDslInfo instrumented_test_dsl_info = 4;</code>
-   * @return Whether the instrumentedTestDslInfo field is set.
+   * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
+   * @return Whether the instrumentedTestInfo field is set.
    */
-  boolean hasInstrumentedTestDslInfo();
+  boolean hasInstrumentedTestInfo();
   /**
    * <pre>
-   * The dsl info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
+   * The info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
    * </pre>
    *
-   * <code>optional .InstrumentedTestDslInfo instrumented_test_dsl_info = 4;</code>
-   * @return The instrumentedTestDslInfo.
+   * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
+   * @return The instrumentedTestInfo.
    */
-  com.android.kotlin.multiplatform.models.InstrumentedTestDslInfo getInstrumentedTestDslInfo();
+  com.android.kotlin.multiplatform.models.InstrumentedTestInfo getInstrumentedTestInfo();
   /**
    * <pre>
-   * The dsl info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
+   * The info of the instrumented test component, will be available iff compilation type is INSTRUMENTED_TEST.
    * </pre>
    *
-   * <code>optional .InstrumentedTestDslInfo instrumented_test_dsl_info = 4;</code>
+   * <code>optional .InstrumentedTestInfo instrumented_test_info = 4;</code>
    */
-  com.android.kotlin.multiplatform.models.InstrumentedTestDslInfoOrBuilder getInstrumentedTestDslInfoOrBuilder();
+  com.android.kotlin.multiplatform.models.InstrumentedTestInfoOrBuilder getInstrumentedTestInfoOrBuilder();
 
   /**
    * <pre>
@@ -173,4 +173,33 @@ public interface AndroidCompilationOrBuilder extends
    */
   com.google.protobuf.ByteString
       getAssembleTaskNameBytes();
+
+  /**
+   * <pre>
+   * The kotlin gradle compilation task name.
+   * </pre>
+   *
+   * <code>optional string kotlin_compile_task_name = 7;</code>
+   * @return Whether the kotlinCompileTaskName field is set.
+   */
+  boolean hasKotlinCompileTaskName();
+  /**
+   * <pre>
+   * The kotlin gradle compilation task name.
+   * </pre>
+   *
+   * <code>optional string kotlin_compile_task_name = 7;</code>
+   * @return The kotlinCompileTaskName.
+   */
+  java.lang.String getKotlinCompileTaskName();
+  /**
+   * <pre>
+   * The kotlin gradle compilation task name.
+   * </pre>
+   *
+   * <code>optional string kotlin_compile_task_name = 7;</code>
+   * @return The bytes for kotlinCompileTaskName.
+   */
+  com.google.protobuf.ByteString
+      getKotlinCompileTaskNameBytes();
 }

@@ -5,21 +5,21 @@ package com.android.kotlin.multiplatform.models;
 
 /**
  * <pre>
- * The dsl info of the main variant of the android kotlin multiplatform target.
+ * The info of the main variant of the android kotlin multiplatform target.
  * </pre>
  *
- * Protobuf type {@code MainVariantDslInfo}
+ * Protobuf type {@code MainVariantInfo}
  */
-public final class MainVariantDslInfo extends
+public final class MainVariantInfo extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:MainVariantDslInfo)
-    MainVariantDslInfoOrBuilder {
+    // @@protoc_insertion_point(message_implements:MainVariantInfo)
+    MainVariantInfoOrBuilder {
 private static final long serialVersionUID = 0L;
-  // Use MainVariantDslInfo.newBuilder() to construct.
-  private MainVariantDslInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+  // Use MainVariantInfo.newBuilder() to construct.
+  private MainVariantInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
   }
-  private MainVariantDslInfo() {
+  private MainVariantInfo() {
     namespace_ = "";
     compileSdkTarget_ = "";
     proguardFiles_ = java.util.Collections.emptyList();
@@ -30,7 +30,7 @@ private static final long serialVersionUID = 0L;
   @SuppressWarnings({"unused"})
   protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
-    return new MainVariantDslInfo();
+    return new MainVariantInfo();
   }
 
   @java.lang.Override
@@ -38,7 +38,7 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private MainVariantDslInfo(
+  private MainVariantInfo(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
@@ -105,6 +105,11 @@ private static final long serialVersionUID = 0L;
                 input.readMessage(com.android.builder.model.proto.ide.File.parser(), extensionRegistry));
             break;
           }
+          case 56: {
+            bitField0_ |= 0x00000010;
+            minificationEnabled_ = input.readBool();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -132,15 +137,15 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_MainVariantDslInfo_descriptor;
+    return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_MainVariantInfo_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_MainVariantDslInfo_fieldAccessorTable
+    return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_MainVariantInfo_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            com.android.kotlin.multiplatform.models.MainVariantDslInfo.class, com.android.kotlin.multiplatform.models.MainVariantDslInfo.Builder.class);
+            com.android.kotlin.multiplatform.models.MainVariantInfo.class, com.android.kotlin.multiplatform.models.MainVariantInfo.Builder.class);
   }
 
   private int bitField0_;
@@ -463,6 +468,33 @@ private static final long serialVersionUID = 0L;
     return consumerProguardFiles_.get(index);
   }
 
+  public static final int MINIFICATION_ENABLED_FIELD_NUMBER = 7;
+  private boolean minificationEnabled_;
+  /**
+   * <pre>
+   * Whether code shrinking is enabled.
+   * </pre>
+   *
+   * <code>optional bool minification_enabled = 7;</code>
+   * @return Whether the minificationEnabled field is set.
+   */
+  @java.lang.Override
+  public boolean hasMinificationEnabled() {
+    return ((bitField0_ & 0x00000010) != 0);
+  }
+  /**
+   * <pre>
+   * Whether code shrinking is enabled.
+   * </pre>
+   *
+   * <code>optional bool minification_enabled = 7;</code>
+   * @return The minificationEnabled.
+   */
+  @java.lang.Override
+  public boolean getMinificationEnabled() {
+    return minificationEnabled_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -495,6 +527,9 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < consumerProguardFiles_.size(); i++) {
       output.writeMessage(6, consumerProguardFiles_.get(i));
     }
+    if (((bitField0_ & 0x00000010) != 0)) {
+      output.writeBool(7, minificationEnabled_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -526,6 +561,10 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(6, consumerProguardFiles_.get(i));
     }
+    if (((bitField0_ & 0x00000010) != 0)) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(7, minificationEnabled_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -536,10 +575,10 @@ private static final long serialVersionUID = 0L;
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof com.android.kotlin.multiplatform.models.MainVariantDslInfo)) {
+    if (!(obj instanceof com.android.kotlin.multiplatform.models.MainVariantInfo)) {
       return super.equals(obj);
     }
-    com.android.kotlin.multiplatform.models.MainVariantDslInfo other = (com.android.kotlin.multiplatform.models.MainVariantDslInfo) obj;
+    com.android.kotlin.multiplatform.models.MainVariantInfo other = (com.android.kotlin.multiplatform.models.MainVariantInfo) obj;
 
     if (hasNamespace() != other.hasNamespace()) return false;
     if (hasNamespace()) {
@@ -565,6 +604,11 @@ private static final long serialVersionUID = 0L;
         .equals(other.getProguardFilesList())) return false;
     if (!getConsumerProguardFilesList()
         .equals(other.getConsumerProguardFilesList())) return false;
+    if (hasMinificationEnabled() != other.hasMinificationEnabled()) return false;
+    if (hasMinificationEnabled()) {
+      if (getMinificationEnabled()
+          != other.getMinificationEnabled()) return false;
+    }
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -600,74 +644,79 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + CONSUMER_PROGUARD_FILES_FIELD_NUMBER;
       hash = (53 * hash) + getConsumerProguardFilesList().hashCode();
     }
+    if (hasMinificationEnabled()) {
+      hash = (37 * hash) + MINIFICATION_ENABLED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getMinificationEnabled());
+    }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
   }
 
-  public static com.android.kotlin.multiplatform.models.MainVariantDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.MainVariantInfo parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.android.kotlin.multiplatform.models.MainVariantDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.MainVariantInfo parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.android.kotlin.multiplatform.models.MainVariantDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.MainVariantInfo parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.android.kotlin.multiplatform.models.MainVariantDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.MainVariantInfo parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.android.kotlin.multiplatform.models.MainVariantDslInfo parseFrom(byte[] data)
+  public static com.android.kotlin.multiplatform.models.MainVariantInfo parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static com.android.kotlin.multiplatform.models.MainVariantDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.MainVariantInfo parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static com.android.kotlin.multiplatform.models.MainVariantDslInfo parseFrom(java.io.InputStream input)
+  public static com.android.kotlin.multiplatform.models.MainVariantInfo parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static com.android.kotlin.multiplatform.models.MainVariantDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.MainVariantInfo parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static com.android.kotlin.multiplatform.models.MainVariantDslInfo parseDelimitedFrom(java.io.InputStream input)
+  public static com.android.kotlin.multiplatform.models.MainVariantInfo parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static com.android.kotlin.multiplatform.models.MainVariantDslInfo parseDelimitedFrom(
+  public static com.android.kotlin.multiplatform.models.MainVariantInfo parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static com.android.kotlin.multiplatform.models.MainVariantDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.MainVariantInfo parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static com.android.kotlin.multiplatform.models.MainVariantDslInfo parseFrom(
+  public static com.android.kotlin.multiplatform.models.MainVariantInfo parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -680,7 +729,7 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(com.android.kotlin.multiplatform.models.MainVariantDslInfo prototype) {
+  public static Builder newBuilder(com.android.kotlin.multiplatform.models.MainVariantInfo prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
   @java.lang.Override
@@ -697,29 +746,29 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <pre>
-   * The dsl info of the main variant of the android kotlin multiplatform target.
+   * The info of the main variant of the android kotlin multiplatform target.
    * </pre>
    *
-   * Protobuf type {@code MainVariantDslInfo}
+   * Protobuf type {@code MainVariantInfo}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:MainVariantDslInfo)
-      com.android.kotlin.multiplatform.models.MainVariantDslInfoOrBuilder {
+      // @@protoc_insertion_point(builder_implements:MainVariantInfo)
+      com.android.kotlin.multiplatform.models.MainVariantInfoOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_MainVariantDslInfo_descriptor;
+      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_MainVariantInfo_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_MainVariantDslInfo_fieldAccessorTable
+      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_MainVariantInfo_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.android.kotlin.multiplatform.models.MainVariantDslInfo.class, com.android.kotlin.multiplatform.models.MainVariantDslInfo.Builder.class);
+              com.android.kotlin.multiplatform.models.MainVariantInfo.class, com.android.kotlin.multiplatform.models.MainVariantInfo.Builder.class);
     }
 
-    // Construct using com.android.kotlin.multiplatform.models.MainVariantDslInfo.newBuilder()
+    // Construct using com.android.kotlin.multiplatform.models.MainVariantInfo.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }
@@ -764,23 +813,25 @@ private static final long serialVersionUID = 0L;
       } else {
         consumerProguardFilesBuilder_.clear();
       }
+      minificationEnabled_ = false;
+      bitField0_ = (bitField0_ & ~0x00000040);
       return this;
     }
 
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_MainVariantDslInfo_descriptor;
+      return com.android.kotlin.multiplatform.models.KotlinMultiplatformAndroidModelsProto.internal_static_MainVariantInfo_descriptor;
     }
 
     @java.lang.Override
-    public com.android.kotlin.multiplatform.models.MainVariantDslInfo getDefaultInstanceForType() {
-      return com.android.kotlin.multiplatform.models.MainVariantDslInfo.getDefaultInstance();
+    public com.android.kotlin.multiplatform.models.MainVariantInfo getDefaultInstanceForType() {
+      return com.android.kotlin.multiplatform.models.MainVariantInfo.getDefaultInstance();
     }
 
     @java.lang.Override
-    public com.android.kotlin.multiplatform.models.MainVariantDslInfo build() {
-      com.android.kotlin.multiplatform.models.MainVariantDslInfo result = buildPartial();
+    public com.android.kotlin.multiplatform.models.MainVariantInfo build() {
+      com.android.kotlin.multiplatform.models.MainVariantInfo result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
@@ -788,8 +839,8 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public com.android.kotlin.multiplatform.models.MainVariantDslInfo buildPartial() {
-      com.android.kotlin.multiplatform.models.MainVariantDslInfo result = new com.android.kotlin.multiplatform.models.MainVariantDslInfo(this);
+    public com.android.kotlin.multiplatform.models.MainVariantInfo buildPartial() {
+      com.android.kotlin.multiplatform.models.MainVariantInfo result = new com.android.kotlin.multiplatform.models.MainVariantInfo(this);
       int from_bitField0_ = bitField0_;
       int to_bitField0_ = 0;
       if (((from_bitField0_ & 0x00000001) != 0)) {
@@ -830,6 +881,10 @@ private static final long serialVersionUID = 0L;
       } else {
         result.consumerProguardFiles_ = consumerProguardFilesBuilder_.build();
       }
+      if (((from_bitField0_ & 0x00000040) != 0)) {
+        result.minificationEnabled_ = minificationEnabled_;
+        to_bitField0_ |= 0x00000010;
+      }
       result.bitField0_ = to_bitField0_;
       onBuilt();
       return result;
@@ -869,16 +924,16 @@ private static final long serialVersionUID = 0L;
     }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof com.android.kotlin.multiplatform.models.MainVariantDslInfo) {
-        return mergeFrom((com.android.kotlin.multiplatform.models.MainVariantDslInfo)other);
+      if (other instanceof com.android.kotlin.multiplatform.models.MainVariantInfo) {
+        return mergeFrom((com.android.kotlin.multiplatform.models.MainVariantInfo)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(com.android.kotlin.multiplatform.models.MainVariantDslInfo other) {
-      if (other == com.android.kotlin.multiplatform.models.MainVariantDslInfo.getDefaultInstance()) return this;
+    public Builder mergeFrom(com.android.kotlin.multiplatform.models.MainVariantInfo other) {
+      if (other == com.android.kotlin.multiplatform.models.MainVariantInfo.getDefaultInstance()) return this;
       if (other.hasNamespace()) {
         bitField0_ |= 0x00000001;
         namespace_ = other.namespace_;
@@ -947,6 +1002,9 @@ private static final long serialVersionUID = 0L;
           }
         }
       }
+      if (other.hasMinificationEnabled()) {
+        setMinificationEnabled(other.getMinificationEnabled());
+      }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -962,11 +1020,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      com.android.kotlin.multiplatform.models.MainVariantDslInfo parsedMessage = null;
+      com.android.kotlin.multiplatform.models.MainVariantInfo parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (com.android.kotlin.multiplatform.models.MainVariantDslInfo) e.getUnfinishedMessage();
+        parsedMessage = (com.android.kotlin.multiplatform.models.MainVariantInfo) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -2109,6 +2167,61 @@ private static final long serialVersionUID = 0L;
       }
       return consumerProguardFilesBuilder_;
     }
+
+    private boolean minificationEnabled_ ;
+    /**
+     * <pre>
+     * Whether code shrinking is enabled.
+     * </pre>
+     *
+     * <code>optional bool minification_enabled = 7;</code>
+     * @return Whether the minificationEnabled field is set.
+     */
+    @java.lang.Override
+    public boolean hasMinificationEnabled() {
+      return ((bitField0_ & 0x00000040) != 0);
+    }
+    /**
+     * <pre>
+     * Whether code shrinking is enabled.
+     * </pre>
+     *
+     * <code>optional bool minification_enabled = 7;</code>
+     * @return The minificationEnabled.
+     */
+    @java.lang.Override
+    public boolean getMinificationEnabled() {
+      return minificationEnabled_;
+    }
+    /**
+     * <pre>
+     * Whether code shrinking is enabled.
+     * </pre>
+     *
+     * <code>optional bool minification_enabled = 7;</code>
+     * @param value The minificationEnabled to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMinificationEnabled(boolean value) {
+      bitField0_ |= 0x00000040;
+      minificationEnabled_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Whether code shrinking is enabled.
+     * </pre>
+     *
+     * <code>optional bool minification_enabled = 7;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMinificationEnabled() {
+      bitField0_ = (bitField0_ & ~0x00000040);
+      minificationEnabled_ = false;
+      onChanged();
+      return this;
+    }
     @java.lang.Override
     public final Builder setUnknownFields(
         final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -2122,41 +2235,41 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:MainVariantDslInfo)
+    // @@protoc_insertion_point(builder_scope:MainVariantInfo)
   }
 
-  // @@protoc_insertion_point(class_scope:MainVariantDslInfo)
-  private static final com.android.kotlin.multiplatform.models.MainVariantDslInfo DEFAULT_INSTANCE;
+  // @@protoc_insertion_point(class_scope:MainVariantInfo)
+  private static final com.android.kotlin.multiplatform.models.MainVariantInfo DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new com.android.kotlin.multiplatform.models.MainVariantDslInfo();
+    DEFAULT_INSTANCE = new com.android.kotlin.multiplatform.models.MainVariantInfo();
   }
 
-  public static com.android.kotlin.multiplatform.models.MainVariantDslInfo getDefaultInstance() {
+  public static com.android.kotlin.multiplatform.models.MainVariantInfo getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
-  private static final com.google.protobuf.Parser<MainVariantDslInfo>
-      PARSER = new com.google.protobuf.AbstractParser<MainVariantDslInfo>() {
+  private static final com.google.protobuf.Parser<MainVariantInfo>
+      PARSER = new com.google.protobuf.AbstractParser<MainVariantInfo>() {
     @java.lang.Override
-    public MainVariantDslInfo parsePartialFrom(
+    public MainVariantInfo parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new MainVariantDslInfo(input, extensionRegistry);
+      return new MainVariantInfo(input, extensionRegistry);
     }
   };
 
-  public static com.google.protobuf.Parser<MainVariantDslInfo> parser() {
+  public static com.google.protobuf.Parser<MainVariantInfo> parser() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.google.protobuf.Parser<MainVariantDslInfo> getParserForType() {
+  public com.google.protobuf.Parser<MainVariantInfo> getParserForType() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.android.kotlin.multiplatform.models.MainVariantDslInfo getDefaultInstanceForType() {
+  public com.android.kotlin.multiplatform.models.MainVariantInfo getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

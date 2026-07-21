@@ -3,8 +3,8 @@
 
 package com.android.kotlin.multiplatform.models;
 
-public interface MainVariantDslInfoOrBuilder extends
-    // @@protoc_insertion_point(interface_extends:MainVariantDslInfo)
+public interface MainVariantInfoOrBuilder extends
+    // @@protoc_insertion_point(interface_extends:MainVariantInfo)
     com.google.protobuf.MessageOrBuilder {
 
   /**
@@ -216,4 +216,23 @@ public interface MainVariantDslInfoOrBuilder extends
    */
   com.android.builder.model.proto.ide.FileOrBuilder getConsumerProguardFilesOrBuilder(
       int index);
+
+  /**
+   * <pre>
+   * Whether code shrinking is enabled.
+   * </pre>
+   *
+   * <code>optional bool minification_enabled = 7;</code>
+   * @return Whether the minificationEnabled field is set.
+   */
+  boolean hasMinificationEnabled();
+  /**
+   * <pre>
+   * Whether code shrinking is enabled.
+   * </pre>
+   *
+   * <code>optional bool minification_enabled = 7;</code>
+   * @return The minificationEnabled.
+   */
+  boolean getMinificationEnabled();
 }

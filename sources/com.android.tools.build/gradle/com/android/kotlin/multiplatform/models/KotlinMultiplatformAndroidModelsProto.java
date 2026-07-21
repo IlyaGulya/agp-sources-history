@@ -30,25 +30,25 @@ public final class KotlinMultiplatformAndroidModelsProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_GeneratedSources_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_MainVariantDslInfo_descriptor;
+    internal_static_MainVariantInfo_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_MainVariantDslInfo_fieldAccessorTable;
+      internal_static_MainVariantInfo_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_UnitTestDslInfo_descriptor;
+    internal_static_UnitTestInfo_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_UnitTestDslInfo_fieldAccessorTable;
+      internal_static_UnitTestInfo_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_InstrumentedTestDslInfo_descriptor;
+    internal_static_InstrumentedTestInfo_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_InstrumentedTestDslInfo_fieldAccessorTable;
+      internal_static_InstrumentedTestInfo_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_InstrumentedTestDslInfo_TestInstrumentationRunnerArgumentsEntry_descriptor;
+    internal_static_InstrumentedTestInfo_TestInstrumentationRunnerArgumentsEntry_descriptor;
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_InstrumentedTestDslInfo_TestInstrumentationRunnerArgumentsEntry_fieldAccessorTable;
+      internal_static_InstrumentedTestInfo_TestInstrumentationRunnerArgumentsEntry_fieldAccessorTable;
   static final com.google.protobuf.Descriptors.Descriptor
     internal_static_AndroidCompilation_descriptor;
   static final 
@@ -59,6 +59,11 @@ public final class KotlinMultiplatformAndroidModelsProto {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_AndroidSourceSet_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_DependencyInfo_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_DependencyInfo_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -69,7 +74,7 @@ public final class KotlinMultiplatformAndroidModelsProto {
   static {
     java.lang.String[] descriptorData = {
       "\n)kotlin_multiplatform_android_models.pr" +
-      "oto\032\020ide_models.proto\"\304\004\n\rAndroidTarget\022" +
+      "oto\032\020ide_models.proto\"\314\005\n\rAndroidTarget\022" +
       "\030\n\013agp_version\030\001 \001(\tH\000\210\001\001\022\031\n\014project_pat" +
       "h\030\002 \001(\tH\001\210\001\001\022\035\n\tbuild_dir\030\003 \001(\0132\005.FileH\002" +
       "\210\001\001\022\035\n\016boot_classpath\030\004 \003(\0132\005.File\022!\n\tte" +
@@ -80,50 +85,61 @@ public final class KotlinMultiplatformAndroidModelsProto {
       "H\005\210\001\001\022!\n\022desugar_lib_config\030\t \003(\0132\005.File" +
       "\022\025\n\010group_id\030\n \001(\tH\006\210\001\001\022 \n\023build_tools_v" +
       "ersion\030\013 \001(\tH\007\210\001\001\022&\n\027desugared_methods_f" +
-      "iles\030\014 \003(\0132\005.FileB\016\n\014_agp_versionB\017\n\r_pr" +
-      "oject_pathB\014\n\n_build_dirB\014\n\n_test_infoB\010" +
-      "\n\006_flagsB%\n#_is_core_library_desugaring_" +
-      "enabledB\013\n\t_group_idB\026\n\024_build_tools_ver" +
-      "sion\"E\n\016SourceProvider\022!\n\rmanifest_file\030" +
-      "\001 \001(\0132\005.FileH\000\210\001\001B\020\n\016_manifest_file\"1\n\020G" +
-      "eneratedSources\022\035\n\016source_folders\030\001 \003(\0132" +
-      "\005.File\"\256\002\n\022MainVariantDslInfo\022\026\n\tnamespa" +
-      "ce\030\001 \001(\tH\000\210\001\001\022\037\n\022compile_sdk_target\030\002 \001(" +
-      "\tH\001\210\001\001\022-\n\017min_sdk_version\030\003 \001(\0132\017.Androi" +
-      "dVersionH\002\210\001\001\022\034\n\017max_sdk_version\030\004 \001(\005H\003" +
-      "\210\001\001\022\035\n\016proguard_files\030\005 \003(\0132\005.File\022&\n\027co" +
-      "nsumer_proguard_files\030\006 \003(\0132\005.FileB\014\n\n_n" +
-      "amespaceB\025\n\023_compile_sdk_targetB\022\n\020_min_" +
-      "sdk_versionB\022\n\020_max_sdk_version\"7\n\017UnitT" +
-      "estDslInfo\022\026\n\tnamespace\030\001 \001(\tH\000\210\001\001B\014\n\n_n" +
-      "amespace\"\205\003\n\027InstrumentedTestDslInfo\022\026\n\t" +
-      "namespace\030\001 \001(\tH\000\210\001\001\022(\n\033test_instrumenta" +
-      "tion_runner\030\002 \001(\tH\001\210\001\001\022o\n%test_instrumen" +
-      "tation_runner_arguments\030\003 \003(\0132@.Instrume" +
-      "ntedTestDslInfo.TestInstrumentationRunne" +
-      "rArgumentsEntry\022+\n\016signing_config\030\004 \001(\0132" +
-      "\016.SigningConfigH\002\210\001\001\032I\n\'TestInstrumentat" +
-      "ionRunnerArgumentsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005" +
-      "value\030\002 \001(\t:\0028\001B\014\n\n_namespaceB\036\n\034_test_i" +
-      "nstrumentation_runnerB\021\n\017_signing_config" +
-      "\"\201\004\n\022AndroidCompilation\0226\n\004type\030\001 \001(\0162#." +
-      "AndroidCompilation.CompilationTypeH\000\210\001\001\022" +
-      "/\n\rmain_dsl_info\030\002 \001(\0132\023.MainVariantDslI" +
-      "nfoH\001\210\001\001\0221\n\022unit_test_dsl_info\030\003 \001(\0132\020.U" +
-      "nitTestDslInfoH\002\210\001\001\022A\n\032instrumented_test" +
-      "_dsl_info\030\004 \001(\0132\030.InstrumentedTestDslInf" +
-      "oH\003\210\001\001\022$\n\027default_source_set_name\030\005 \001(\tH" +
-      "\004\210\001\001\022\037\n\022assemble_task_name\030\006 \001(\tH\005\210\001\001\"A\n" +
-      "\017CompilationType\022\010\n\004MAIN\020\000\022\r\n\tUNIT_TEST\020" +
-      "\001\022\025\n\021INSTRUMENTED_TEST\020\002B\007\n\005_typeB\020\n\016_ma" +
-      "in_dsl_infoB\025\n\023_unit_test_dsl_infoB\035\n\033_i" +
-      "nstrumented_test_dsl_infoB\032\n\030_default_so" +
-      "urce_set_nameB\025\n\023_assemble_task_name\"U\n\020" +
-      "AndroidSourceSet\022-\n\017source_provider\030\001 \001(" +
-      "\0132\017.SourceProviderH\000\210\001\001B\022\n\020_source_provi" +
-      "derBR\n\'com.android.kotlin.multiplatform." +
-      "modelsB%KotlinMultiplatformAndroidModels" +
-      "ProtoP\001b\006proto3"
+      "iles\030\014 \003(\0132\005.File\022\027\n\nbuild_name\030\r \001(\tH\010\210" +
+      "\001\001\022!\n\rroot_build_id\030\016 \001(\0132\005.FileH\t\210\001\001\022\034\n" +
+      "\010build_id\030\017 \001(\0132\005.FileH\n\210\001\001B\016\n\014_agp_vers" +
+      "ionB\017\n\r_project_pathB\014\n\n_build_dirB\014\n\n_t" +
+      "est_infoB\010\n\006_flagsB%\n#_is_core_library_d" +
+      "esugaring_enabledB\013\n\t_group_idB\026\n\024_build" +
+      "_tools_versionB\r\n\013_build_nameB\020\n\016_root_b" +
+      "uild_idB\013\n\t_build_id\"E\n\016SourceProvider\022!" +
+      "\n\rmanifest_file\030\001 \001(\0132\005.FileH\000\210\001\001B\020\n\016_ma" +
+      "nifest_file\"1\n\020GeneratedSources\022\035\n\016sourc" +
+      "e_folders\030\001 \003(\0132\005.File\"\347\002\n\017MainVariantIn" +
+      "fo\022\026\n\tnamespace\030\001 \001(\tH\000\210\001\001\022\037\n\022compile_sd" +
+      "k_target\030\002 \001(\tH\001\210\001\001\022-\n\017min_sdk_version\030\003" +
+      " \001(\0132\017.AndroidVersionH\002\210\001\001\022\034\n\017max_sdk_ve" +
+      "rsion\030\004 \001(\005H\003\210\001\001\022\035\n\016proguard_files\030\005 \003(\013" +
+      "2\005.File\022&\n\027consumer_proguard_files\030\006 \003(\013" +
+      "2\005.File\022!\n\024minification_enabled\030\007 \001(\010H\004\210" +
+      "\001\001B\014\n\n_namespaceB\025\n\023_compile_sdk_targetB" +
+      "\022\n\020_min_sdk_versionB\022\n\020_max_sdk_versionB" +
+      "\027\n\025_minification_enabled\"y\n\014UnitTestInfo" +
+      "\022\026\n\tnamespace\030\001 \001(\tH\000\210\001\001\022)\n\025mockable_pla" +
+      "tform_jar\030\002 \001(\0132\005.FileH\001\210\001\001B\014\n\n_namespac" +
+      "eB\030\n\026_mockable_platform_jar\"\334\003\n\024Instrume" +
+      "ntedTestInfo\022\026\n\tnamespace\030\001 \001(\tH\000\210\001\001\022(\n\033" +
+      "test_instrumentation_runner\030\002 \001(\tH\001\210\001\001\022l" +
+      "\n%test_instrumentation_runner_arguments\030" +
+      "\003 \003(\0132=.InstrumentedTestInfo.TestInstrum" +
+      "entationRunnerArgumentsEntry\022+\n\016signing_" +
+      "config\030\004 \001(\0132\016.SigningConfigH\002\210\001\001\0225\n!ass" +
+      "emble_task_output_listing_file\030\005 \001(\0132\005.F" +
+      "ileH\003\210\001\001\032I\n\'TestInstrumentationRunnerArg" +
+      "umentsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:" +
+      "\0028\001B\014\n\n_namespaceB\036\n\034_test_instrumentati" +
+      "on_runnerB\021\n\017_signing_configB$\n\"_assembl" +
+      "e_task_output_listing_file\"\244\004\n\022AndroidCo" +
+      "mpilation\0226\n\004type\030\001 \001(\0162#.AndroidCompila" +
+      "tion.CompilationTypeH\000\210\001\001\022(\n\tmain_info\030\002" +
+      " \001(\0132\020.MainVariantInfoH\001\210\001\001\022*\n\016unit_test" +
+      "_info\030\003 \001(\0132\r.UnitTestInfoH\002\210\001\001\022:\n\026instr" +
+      "umented_test_info\030\004 \001(\0132\025.InstrumentedTe" +
+      "stInfoH\003\210\001\001\022$\n\027default_source_set_name\030\005" +
+      " \001(\tH\004\210\001\001\022\037\n\022assemble_task_name\030\006 \001(\tH\005\210" +
+      "\001\001\022%\n\030kotlin_compile_task_name\030\007 \001(\tH\006\210\001" +
+      "\001\"A\n\017CompilationType\022\010\n\004MAIN\020\000\022\r\n\tUNIT_T" +
+      "EST\020\001\022\025\n\021INSTRUMENTED_TEST\020\002B\007\n\005_typeB\014\n" +
+      "\n_main_infoB\021\n\017_unit_test_infoB\031\n\027_instr" +
+      "umented_test_infoB\032\n\030_default_source_set" +
+      "_nameB\025\n\023_assemble_task_nameB\033\n\031_kotlin_" +
+      "compile_task_name\"U\n\020AndroidSourceSet\022-\n" +
+      "\017source_provider\030\001 \001(\0132\017.SourceProviderH" +
+      "\000\210\001\001B\022\n\020_source_provider\"<\n\016DependencyIn" +
+      "fo\022\036\n\007library\030\001 \001(\0132\010.LibraryH\000\210\001\001B\n\n\010_l" +
+      "ibraryBR\n\'com.android.kotlin.multiplatfo" +
+      "rm.modelsB%KotlinMultiplatformAndroidMod" +
+      "elsProtoP\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -135,7 +151,7 @@ public final class KotlinMultiplatformAndroidModelsProto {
     internal_static_AndroidTarget_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_AndroidTarget_descriptor,
-        new java.lang.String[] { "AgpVersion", "ProjectPath", "BuildDir", "BootClasspath", "TestInfo", "Flags", "LintChecksJars", "IsCoreLibraryDesugaringEnabled", "DesugarLibConfig", "GroupId", "BuildToolsVersion", "DesugaredMethodsFiles", "AgpVersion", "ProjectPath", "BuildDir", "TestInfo", "Flags", "IsCoreLibraryDesugaringEnabled", "GroupId", "BuildToolsVersion", });
+        new java.lang.String[] { "AgpVersion", "ProjectPath", "BuildDir", "BootClasspath", "TestInfo", "Flags", "LintChecksJars", "IsCoreLibraryDesugaringEnabled", "DesugarLibConfig", "GroupId", "BuildToolsVersion", "DesugaredMethodsFiles", "BuildName", "RootBuildId", "BuildId", "AgpVersion", "ProjectPath", "BuildDir", "TestInfo", "Flags", "IsCoreLibraryDesugaringEnabled", "GroupId", "BuildToolsVersion", "BuildName", "RootBuildId", "BuildId", });
     internal_static_SourceProvider_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_SourceProvider_fieldAccessorTable = new
@@ -148,42 +164,48 @@ public final class KotlinMultiplatformAndroidModelsProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_GeneratedSources_descriptor,
         new java.lang.String[] { "SourceFolders", });
-    internal_static_MainVariantDslInfo_descriptor =
+    internal_static_MainVariantInfo_descriptor =
       getDescriptor().getMessageTypes().get(3);
-    internal_static_MainVariantDslInfo_fieldAccessorTable = new
+    internal_static_MainVariantInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_MainVariantDslInfo_descriptor,
-        new java.lang.String[] { "Namespace", "CompileSdkTarget", "MinSdkVersion", "MaxSdkVersion", "ProguardFiles", "ConsumerProguardFiles", "Namespace", "CompileSdkTarget", "MinSdkVersion", "MaxSdkVersion", });
-    internal_static_UnitTestDslInfo_descriptor =
+        internal_static_MainVariantInfo_descriptor,
+        new java.lang.String[] { "Namespace", "CompileSdkTarget", "MinSdkVersion", "MaxSdkVersion", "ProguardFiles", "ConsumerProguardFiles", "MinificationEnabled", "Namespace", "CompileSdkTarget", "MinSdkVersion", "MaxSdkVersion", "MinificationEnabled", });
+    internal_static_UnitTestInfo_descriptor =
       getDescriptor().getMessageTypes().get(4);
-    internal_static_UnitTestDslInfo_fieldAccessorTable = new
+    internal_static_UnitTestInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_UnitTestDslInfo_descriptor,
-        new java.lang.String[] { "Namespace", "Namespace", });
-    internal_static_InstrumentedTestDslInfo_descriptor =
+        internal_static_UnitTestInfo_descriptor,
+        new java.lang.String[] { "Namespace", "MockablePlatformJar", "Namespace", "MockablePlatformJar", });
+    internal_static_InstrumentedTestInfo_descriptor =
       getDescriptor().getMessageTypes().get(5);
-    internal_static_InstrumentedTestDslInfo_fieldAccessorTable = new
+    internal_static_InstrumentedTestInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_InstrumentedTestDslInfo_descriptor,
-        new java.lang.String[] { "Namespace", "TestInstrumentationRunner", "TestInstrumentationRunnerArguments", "SigningConfig", "Namespace", "TestInstrumentationRunner", "SigningConfig", });
-    internal_static_InstrumentedTestDslInfo_TestInstrumentationRunnerArgumentsEntry_descriptor =
-      internal_static_InstrumentedTestDslInfo_descriptor.getNestedTypes().get(0);
-    internal_static_InstrumentedTestDslInfo_TestInstrumentationRunnerArgumentsEntry_fieldAccessorTable = new
+        internal_static_InstrumentedTestInfo_descriptor,
+        new java.lang.String[] { "Namespace", "TestInstrumentationRunner", "TestInstrumentationRunnerArguments", "SigningConfig", "AssembleTaskOutputListingFile", "Namespace", "TestInstrumentationRunner", "SigningConfig", "AssembleTaskOutputListingFile", });
+    internal_static_InstrumentedTestInfo_TestInstrumentationRunnerArgumentsEntry_descriptor =
+      internal_static_InstrumentedTestInfo_descriptor.getNestedTypes().get(0);
+    internal_static_InstrumentedTestInfo_TestInstrumentationRunnerArgumentsEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_InstrumentedTestDslInfo_TestInstrumentationRunnerArgumentsEntry_descriptor,
+        internal_static_InstrumentedTestInfo_TestInstrumentationRunnerArgumentsEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
     internal_static_AndroidCompilation_descriptor =
       getDescriptor().getMessageTypes().get(6);
     internal_static_AndroidCompilation_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_AndroidCompilation_descriptor,
-        new java.lang.String[] { "Type", "MainDslInfo", "UnitTestDslInfo", "InstrumentedTestDslInfo", "DefaultSourceSetName", "AssembleTaskName", "Type", "MainDslInfo", "UnitTestDslInfo", "InstrumentedTestDslInfo", "DefaultSourceSetName", "AssembleTaskName", });
+        new java.lang.String[] { "Type", "MainInfo", "UnitTestInfo", "InstrumentedTestInfo", "DefaultSourceSetName", "AssembleTaskName", "KotlinCompileTaskName", "Type", "MainInfo", "UnitTestInfo", "InstrumentedTestInfo", "DefaultSourceSetName", "AssembleTaskName", "KotlinCompileTaskName", });
     internal_static_AndroidSourceSet_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_AndroidSourceSet_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_AndroidSourceSet_descriptor,
         new java.lang.String[] { "SourceProvider", "SourceProvider", });
+    internal_static_DependencyInfo_descriptor =
+      getDescriptor().getMessageTypes().get(8);
+    internal_static_DependencyInfo_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_DependencyInfo_descriptor,
+        new java.lang.String[] { "Library", "Library", });
     com.android.builder.model.proto.ide.IdeModelsProto.getDescriptor();
   }
 
