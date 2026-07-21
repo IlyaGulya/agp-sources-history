@@ -59,8 +59,8 @@ import org.w3c.dom.NodeList;
 @Immutable
 public class ManifestMerger2 {
 
-    static final String BOOTSTRAP_INSTANT_RUN_CONTENT_PROVIDER
-            = "com.android.tools.fd.runtime.InstantRunContentProvider";
+    static final String BOOTSTRAP_INSTANT_RUN_CONTENT_PROVIDER =
+            "com.android.tools.ir.server.InstantRunContentProvider";
 
     @NonNull
     private final File mManifestFile;
@@ -126,7 +126,7 @@ public class ManifestMerger2 {
     @NonNull
     private MergingReport merge() throws MergeFailureException {
         // initiate a new merging report
-        MergingReport.Builder mergingReportBuilder = new MergingReport.Builder(mLogger);
+        MergingReport.Builder mergingReportBuilder = new MergingReport.Builder(mLogger, this);
 
         SelectorResolver selectors = new SelectorResolver();
         // load all the libraries xml files up front to have a list of all possible node:selector
@@ -319,6 +319,11 @@ public class ManifestMerger2 {
         }
 
         return mergingReport;
+    }
+
+    /** Returns whether the given feature is enabled for this merger */
+    public boolean hasFeature(@NonNull Invoker.Feature feature) {
+        return mOptionalFeatures.contains(feature);
     }
 
     /**
@@ -559,8 +564,8 @@ public class ManifestMerger2 {
 
     /**
      * Adds a provider element as a child of the document's application element, as shown here:
-     * <provider android:name="com.android.tools.fd.runtime.InstantRunContentProvider"
-     * android:authorities="com.android.tools.fd.runtime.InstantRunContentProvider"
+     * <provider android:name="com.android.tools.ir.server.InstantRunContentProvider"
+     * android:authorities="com.android.tools.ir.server.InstantRunContentProvider"
      * android:multiprocess="true" />
      *
      * @param document the document to add the provider element to
@@ -768,15 +773,16 @@ public class ManifestMerger2 {
         }
 
         String originalPackageName = xmlDocument.getPackageName();
-        MergingReport.Builder builder = manifestInfo.getType() == XmlDocument.Type.MAIN
-                ? mergingReportBuilder
-                : new MergingReport.Builder(mergingReportBuilder.getLogger());
+        MergingReport.Builder builder =
+                manifestInfo.getType() == XmlDocument.Type.MAIN
+                        ? mergingReportBuilder
+                        : new MergingReport.Builder(mergingReportBuilder.getLogger(), this);
 
         // perform place holder substitution, this is necessary to do so early in case placeholders
         // are used in key attributes.
         performPlaceHolderSubstitution(manifestInfo, xmlDocument, builder, mMergeType);
 
-        builder.getActionRecorder().recordDefaultNodeAction(xmlDocument.getRootNode());
+        builder.getActionRecorder().recordAddedNodeAction(xmlDocument.getRootNode(), false);
 
         return new LoadedManifestInfo(manifestInfo,
                 Optional.fromNullable(originalPackageName), xmlDocument);
@@ -841,14 +847,23 @@ public class ManifestMerger2 {
                     "Validation failed, exiting");
             return Optional.absent();
         }
+
         Optional<XmlDocument> result;
         if (xmlDocument.isPresent()) {
             result = xmlDocument.get().merge(
                     lowerPriorityDocument.getXmlDocument(), mergingReportBuilder,
                     !mOptionalFeatures.contains(Invoker.Feature.NO_IMPLICIT_PERMISSION_ADDITION));
         } else {
-            mergingReportBuilder.getActionRecorder().recordDefaultNodeAction(
-                    lowerPriorityDocument.getXmlDocument().getRootNode());
+            // exhaustiveSearch is true in recordAddedNodeAction() below because some of this
+            // manifest's nodes might have already been recorded from the loading of
+            // the main manifest, but we want to record any unrecorded descendants.
+            // e.g., if the main manifest did not contain any meta-data nodes below its
+            // application node, we still want to record the addition of any such
+            // meta-data nodes this manifest contains.
+            mergingReportBuilder
+                    .getActionRecorder()
+                    .recordAddedNodeAction(
+                            lowerPriorityDocument.getXmlDocument().getRootNode(), true);
             result = Optional.of(lowerPriorityDocument.getXmlDocument());
         }
 
@@ -894,8 +909,9 @@ public class ManifestMerger2 {
             // perform placeholder substitution, this is useful when the library is using
             // a placeholder in a key element, we however do not need to record these
             // substitutions so feed it with a fake merging report.
-            MergingReport.Builder builder = new MergingReport.Builder(mergingReportBuilder.getLogger());
-            builder.getActionRecorder().recordDefaultNodeAction(libraryDocument.getRootNode());
+            MergingReport.Builder builder =
+                    new MergingReport.Builder(mergingReportBuilder.getLogger(), this);
+            builder.getActionRecorder().recordAddedNodeAction(libraryDocument.getRootNode(), false);
             performPlaceHolderSubstitution(
                     manifestInfo, libraryDocument, builder, MergeType.LIBRARY);
             if (builder.hasErrors()) {
@@ -1163,7 +1179,18 @@ public class ManifestMerger2 {
             DEBUGGABLE,
 
             /** Set the android:targetSandboxVersion attribute. */
-            TARGET_SANDBOX_VERSION
+            TARGET_SANDBOX_VERSION,
+
+            /**
+             * When there are attribute value conflicts, automatically pick the higher priority
+             * value.
+             *
+             * <p>This is for example used in the IDE when we need to merge a new manifest template
+             * into an existing one and we don't want to abort the merge.
+             *
+             * <p>(This will log a warning.)
+             */
+            HANDLE_VALUE_CONFLICTS_AUTOMATICALLY
         }
 
         /**

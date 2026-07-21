@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.dsl;
+package com.android.apksig.internal.pkcs7;
 
-import com.google.common.base.CaseFormat;
-import com.google.common.base.Converter;
-import com.google.common.base.Enums;
+/**
+ * Indicates that an error was encountered while decoding a PKCS #7 structure.
+ */
+public class Pkcs7DecodingException extends Exception {
+    private static final long serialVersionUID = 1L;
 
-/** Utility for using enums in the DSL. */
-public final class StringToEnumConverters {
-    private StringToEnumConverters() {}
+    public Pkcs7DecodingException(String message) {
+        super(message);
+    }
 
-    public static <T extends Enum<T>> Converter<String, T> forClass(Class<T> klass) {
-        return CaseFormat.LOWER_UNDERSCORE
-                .converterTo(CaseFormat.UPPER_UNDERSCORE)
-                .andThen(Enums.stringConverter(klass));
+    public Pkcs7DecodingException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.tasks.fd;
+package com.android.build.gradle.tasks.ir;
 
 import static com.android.SdkConstants.ATTR_PACKAGE;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
@@ -67,6 +67,8 @@ import org.xml.sax.SAXException;
  * application classes (if any).
  */
 public class GenerateInstantRunAppInfoTask extends BaseTask {
+
+    private static final String SERVER_PACKAGE = "com/android/tools/ir/server";
 
     private File outputFile;
     private FileCollection mergedManifests;
@@ -147,7 +149,7 @@ public class GenerateInstantRunAppInfoTask extends BaseTask {
         FieldVisitor fv;
         MethodVisitor mv;
 
-        String appInfoOwner = "com/android/tools/fd/runtime/AppInfo";
+        String appInfoOwner = SERVER_PACKAGE + "/AppInfo";
         cw.visit(V1_6, ACC_PUBLIC + ACC_SUPER, appInfoOwner, null, "java/lang/Object", null);
 
         fv = cw.visitField(ACC_PUBLIC + ACC_STATIC, "applicationId", "Ljava/lang/String;", null, null);
@@ -186,7 +188,7 @@ public class GenerateInstantRunAppInfoTask extends BaseTask {
 
         try (JarOutputStream outputStream = new JarOutputStream(
                 new BufferedOutputStream(new FileOutputStream(getOutputFile())))) {
-            outputStream.putNextEntry(new ZipEntry("com/android/tools/fd/runtime/AppInfo.class"));
+            outputStream.putNextEntry(new ZipEntry(SERVER_PACKAGE + "/AppInfo.class"));
             outputStream.write(bytes);
             outputStream.closeEntry();
         }
