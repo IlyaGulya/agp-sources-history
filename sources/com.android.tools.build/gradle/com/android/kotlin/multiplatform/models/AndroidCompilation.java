@@ -20,6 +20,7 @@ private static final long serialVersionUID = 0L;
     defaultSourceSetName_ = "";
     assembleTaskName_ = "";
     kotlinCompileTaskName_ = "";
+    extraClassesFolders_ = java.util.Collections.emptyList();
   }
 
   @java.lang.Override
@@ -488,6 +489,67 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int EXTRA_CLASSES_FOLDERS_FIELD_NUMBER = 8;
+  @SuppressWarnings("serial")
+  private java.util.List<com.android.builder.model.proto.ide.File> extraClassesFolders_;
+  /**
+   * <pre>
+   * Extra compiled bytecode output folders (for example javac output when java enabled)
+   * </pre>
+   *
+   * <code>repeated .File extra_classes_folders = 8;</code>
+   */
+  @java.lang.Override
+  public java.util.List<com.android.builder.model.proto.ide.File> getExtraClassesFoldersList() {
+    return extraClassesFolders_;
+  }
+  /**
+   * <pre>
+   * Extra compiled bytecode output folders (for example javac output when java enabled)
+   * </pre>
+   *
+   * <code>repeated .File extra_classes_folders = 8;</code>
+   */
+  @java.lang.Override
+  public java.util.List<? extends com.android.builder.model.proto.ide.FileOrBuilder> 
+      getExtraClassesFoldersOrBuilderList() {
+    return extraClassesFolders_;
+  }
+  /**
+   * <pre>
+   * Extra compiled bytecode output folders (for example javac output when java enabled)
+   * </pre>
+   *
+   * <code>repeated .File extra_classes_folders = 8;</code>
+   */
+  @java.lang.Override
+  public int getExtraClassesFoldersCount() {
+    return extraClassesFolders_.size();
+  }
+  /**
+   * <pre>
+   * Extra compiled bytecode output folders (for example javac output when java enabled)
+   * </pre>
+   *
+   * <code>repeated .File extra_classes_folders = 8;</code>
+   */
+  @java.lang.Override
+  public com.android.builder.model.proto.ide.File getExtraClassesFolders(int index) {
+    return extraClassesFolders_.get(index);
+  }
+  /**
+   * <pre>
+   * Extra compiled bytecode output folders (for example javac output when java enabled)
+   * </pre>
+   *
+   * <code>repeated .File extra_classes_folders = 8;</code>
+   */
+  @java.lang.Override
+  public com.android.builder.model.proto.ide.FileOrBuilder getExtraClassesFoldersOrBuilder(
+      int index) {
+    return extraClassesFolders_.get(index);
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -523,6 +585,9 @@ private static final long serialVersionUID = 0L;
     if (((bitField0_ & 0x00000040) != 0)) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 7, kotlinCompileTaskName_);
     }
+    for (int i = 0; i < extraClassesFolders_.size(); i++) {
+      output.writeMessage(8, extraClassesFolders_.get(i));
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -556,6 +621,10 @@ private static final long serialVersionUID = 0L;
     }
     if (((bitField0_ & 0x00000040) != 0)) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, kotlinCompileTaskName_);
+    }
+    for (int i = 0; i < extraClassesFolders_.size(); i++) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeMessageSize(8, extraClassesFolders_.get(i));
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -606,6 +675,8 @@ private static final long serialVersionUID = 0L;
       if (!getKotlinCompileTaskName()
           .equals(other.getKotlinCompileTaskName())) return false;
     }
+    if (!getExtraClassesFoldersList()
+        .equals(other.getExtraClassesFoldersList())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -644,6 +715,10 @@ private static final long serialVersionUID = 0L;
     if (hasKotlinCompileTaskName()) {
       hash = (37 * hash) + KOTLIN_COMPILE_TASK_NAME_FIELD_NUMBER;
       hash = (53 * hash) + getKotlinCompileTaskName().hashCode();
+    }
+    if (getExtraClassesFoldersCount() > 0) {
+      hash = (37 * hash) + EXTRA_CLASSES_FOLDERS_FIELD_NUMBER;
+      hash = (53 * hash) + getExtraClassesFoldersList().hashCode();
     }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
@@ -776,6 +851,7 @@ private static final long serialVersionUID = 0L;
         getMainInfoFieldBuilder();
         getUnitTestInfoFieldBuilder();
         getInstrumentedTestInfoFieldBuilder();
+        getExtraClassesFoldersFieldBuilder();
       }
     }
     @java.lang.Override
@@ -801,6 +877,13 @@ private static final long serialVersionUID = 0L;
       defaultSourceSetName_ = "";
       assembleTaskName_ = "";
       kotlinCompileTaskName_ = "";
+      if (extraClassesFoldersBuilder_ == null) {
+        extraClassesFolders_ = java.util.Collections.emptyList();
+      } else {
+        extraClassesFolders_ = null;
+        extraClassesFoldersBuilder_.clear();
+      }
+      bitField0_ = (bitField0_ & ~0x00000080);
       return this;
     }
 
@@ -827,9 +910,22 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.android.kotlin.multiplatform.models.AndroidCompilation buildPartial() {
       com.android.kotlin.multiplatform.models.AndroidCompilation result = new com.android.kotlin.multiplatform.models.AndroidCompilation(this);
+      buildPartialRepeatedFields(result);
       if (bitField0_ != 0) { buildPartial0(result); }
       onBuilt();
       return result;
+    }
+
+    private void buildPartialRepeatedFields(com.android.kotlin.multiplatform.models.AndroidCompilation result) {
+      if (extraClassesFoldersBuilder_ == null) {
+        if (((bitField0_ & 0x00000080) != 0)) {
+          extraClassesFolders_ = java.util.Collections.unmodifiableList(extraClassesFolders_);
+          bitField0_ = (bitField0_ & ~0x00000080);
+        }
+        result.extraClassesFolders_ = extraClassesFolders_;
+      } else {
+        result.extraClassesFolders_ = extraClassesFoldersBuilder_.build();
+      }
     }
 
     private void buildPartial0(com.android.kotlin.multiplatform.models.AndroidCompilation result) {
@@ -911,6 +1007,32 @@ private static final long serialVersionUID = 0L;
         bitField0_ |= 0x00000040;
         onChanged();
       }
+      if (extraClassesFoldersBuilder_ == null) {
+        if (!other.extraClassesFolders_.isEmpty()) {
+          if (extraClassesFolders_.isEmpty()) {
+            extraClassesFolders_ = other.extraClassesFolders_;
+            bitField0_ = (bitField0_ & ~0x00000080);
+          } else {
+            ensureExtraClassesFoldersIsMutable();
+            extraClassesFolders_.addAll(other.extraClassesFolders_);
+          }
+          onChanged();
+        }
+      } else {
+        if (!other.extraClassesFolders_.isEmpty()) {
+          if (extraClassesFoldersBuilder_.isEmpty()) {
+            extraClassesFoldersBuilder_.dispose();
+            extraClassesFoldersBuilder_ = null;
+            extraClassesFolders_ = other.extraClassesFolders_;
+            bitField0_ = (bitField0_ & ~0x00000080);
+            extraClassesFoldersBuilder_ = 
+              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                 getExtraClassesFoldersFieldBuilder() : null;
+          } else {
+            extraClassesFoldersBuilder_.addAllMessages(other.extraClassesFolders_);
+          }
+        }
+      }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
@@ -978,6 +1100,19 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000040;
               break;
             } // case 58
+            case 66: {
+              com.android.builder.model.proto.ide.File m =
+                  input.readMessage(
+                      com.android.builder.model.proto.ide.File.parser(),
+                      extensionRegistry);
+              if (extraClassesFoldersBuilder_ == null) {
+                ensureExtraClassesFoldersIsMutable();
+                extraClassesFolders_.add(m);
+              } else {
+                extraClassesFoldersBuilder_.addMessage(m);
+              }
+              break;
+            } // case 66
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -1851,6 +1986,318 @@ private static final long serialVersionUID = 0L;
       bitField0_ |= 0x00000040;
       onChanged();
       return this;
+    }
+
+    private java.util.List<com.android.builder.model.proto.ide.File> extraClassesFolders_ =
+      java.util.Collections.emptyList();
+    private void ensureExtraClassesFoldersIsMutable() {
+      if (!((bitField0_ & 0x00000080) != 0)) {
+        extraClassesFolders_ = new java.util.ArrayList<com.android.builder.model.proto.ide.File>(extraClassesFolders_);
+        bitField0_ |= 0x00000080;
+       }
+    }
+
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        com.android.builder.model.proto.ide.File, com.android.builder.model.proto.ide.File.Builder, com.android.builder.model.proto.ide.FileOrBuilder> extraClassesFoldersBuilder_;
+
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public java.util.List<com.android.builder.model.proto.ide.File> getExtraClassesFoldersList() {
+      if (extraClassesFoldersBuilder_ == null) {
+        return java.util.Collections.unmodifiableList(extraClassesFolders_);
+      } else {
+        return extraClassesFoldersBuilder_.getMessageList();
+      }
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public int getExtraClassesFoldersCount() {
+      if (extraClassesFoldersBuilder_ == null) {
+        return extraClassesFolders_.size();
+      } else {
+        return extraClassesFoldersBuilder_.getCount();
+      }
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public com.android.builder.model.proto.ide.File getExtraClassesFolders(int index) {
+      if (extraClassesFoldersBuilder_ == null) {
+        return extraClassesFolders_.get(index);
+      } else {
+        return extraClassesFoldersBuilder_.getMessage(index);
+      }
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public Builder setExtraClassesFolders(
+        int index, com.android.builder.model.proto.ide.File value) {
+      if (extraClassesFoldersBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureExtraClassesFoldersIsMutable();
+        extraClassesFolders_.set(index, value);
+        onChanged();
+      } else {
+        extraClassesFoldersBuilder_.setMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public Builder setExtraClassesFolders(
+        int index, com.android.builder.model.proto.ide.File.Builder builderForValue) {
+      if (extraClassesFoldersBuilder_ == null) {
+        ensureExtraClassesFoldersIsMutable();
+        extraClassesFolders_.set(index, builderForValue.build());
+        onChanged();
+      } else {
+        extraClassesFoldersBuilder_.setMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public Builder addExtraClassesFolders(com.android.builder.model.proto.ide.File value) {
+      if (extraClassesFoldersBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureExtraClassesFoldersIsMutable();
+        extraClassesFolders_.add(value);
+        onChanged();
+      } else {
+        extraClassesFoldersBuilder_.addMessage(value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public Builder addExtraClassesFolders(
+        int index, com.android.builder.model.proto.ide.File value) {
+      if (extraClassesFoldersBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureExtraClassesFoldersIsMutable();
+        extraClassesFolders_.add(index, value);
+        onChanged();
+      } else {
+        extraClassesFoldersBuilder_.addMessage(index, value);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public Builder addExtraClassesFolders(
+        com.android.builder.model.proto.ide.File.Builder builderForValue) {
+      if (extraClassesFoldersBuilder_ == null) {
+        ensureExtraClassesFoldersIsMutable();
+        extraClassesFolders_.add(builderForValue.build());
+        onChanged();
+      } else {
+        extraClassesFoldersBuilder_.addMessage(builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public Builder addExtraClassesFolders(
+        int index, com.android.builder.model.proto.ide.File.Builder builderForValue) {
+      if (extraClassesFoldersBuilder_ == null) {
+        ensureExtraClassesFoldersIsMutable();
+        extraClassesFolders_.add(index, builderForValue.build());
+        onChanged();
+      } else {
+        extraClassesFoldersBuilder_.addMessage(index, builderForValue.build());
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public Builder addAllExtraClassesFolders(
+        java.lang.Iterable<? extends com.android.builder.model.proto.ide.File> values) {
+      if (extraClassesFoldersBuilder_ == null) {
+        ensureExtraClassesFoldersIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, extraClassesFolders_);
+        onChanged();
+      } else {
+        extraClassesFoldersBuilder_.addAllMessages(values);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public Builder clearExtraClassesFolders() {
+      if (extraClassesFoldersBuilder_ == null) {
+        extraClassesFolders_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000080);
+        onChanged();
+      } else {
+        extraClassesFoldersBuilder_.clear();
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public Builder removeExtraClassesFolders(int index) {
+      if (extraClassesFoldersBuilder_ == null) {
+        ensureExtraClassesFoldersIsMutable();
+        extraClassesFolders_.remove(index);
+        onChanged();
+      } else {
+        extraClassesFoldersBuilder_.remove(index);
+      }
+      return this;
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public com.android.builder.model.proto.ide.File.Builder getExtraClassesFoldersBuilder(
+        int index) {
+      return getExtraClassesFoldersFieldBuilder().getBuilder(index);
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public com.android.builder.model.proto.ide.FileOrBuilder getExtraClassesFoldersOrBuilder(
+        int index) {
+      if (extraClassesFoldersBuilder_ == null) {
+        return extraClassesFolders_.get(index);  } else {
+        return extraClassesFoldersBuilder_.getMessageOrBuilder(index);
+      }
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public java.util.List<? extends com.android.builder.model.proto.ide.FileOrBuilder> 
+         getExtraClassesFoldersOrBuilderList() {
+      if (extraClassesFoldersBuilder_ != null) {
+        return extraClassesFoldersBuilder_.getMessageOrBuilderList();
+      } else {
+        return java.util.Collections.unmodifiableList(extraClassesFolders_);
+      }
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public com.android.builder.model.proto.ide.File.Builder addExtraClassesFoldersBuilder() {
+      return getExtraClassesFoldersFieldBuilder().addBuilder(
+          com.android.builder.model.proto.ide.File.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public com.android.builder.model.proto.ide.File.Builder addExtraClassesFoldersBuilder(
+        int index) {
+      return getExtraClassesFoldersFieldBuilder().addBuilder(
+          index, com.android.builder.model.proto.ide.File.getDefaultInstance());
+    }
+    /**
+     * <pre>
+     * Extra compiled bytecode output folders (for example javac output when java enabled)
+     * </pre>
+     *
+     * <code>repeated .File extra_classes_folders = 8;</code>
+     */
+    public java.util.List<com.android.builder.model.proto.ide.File.Builder> 
+         getExtraClassesFoldersBuilderList() {
+      return getExtraClassesFoldersFieldBuilder().getBuilderList();
+    }
+    private com.google.protobuf.RepeatedFieldBuilderV3<
+        com.android.builder.model.proto.ide.File, com.android.builder.model.proto.ide.File.Builder, com.android.builder.model.proto.ide.FileOrBuilder> 
+        getExtraClassesFoldersFieldBuilder() {
+      if (extraClassesFoldersBuilder_ == null) {
+        extraClassesFoldersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+            com.android.builder.model.proto.ide.File, com.android.builder.model.proto.ide.File.Builder, com.android.builder.model.proto.ide.FileOrBuilder>(
+                extraClassesFolders_,
+                ((bitField0_ & 0x00000080) != 0),
+                getParentForChildren(),
+                isClean());
+        extraClassesFolders_ = null;
+      }
+      return extraClassesFoldersBuilder_;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

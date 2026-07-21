@@ -202,4 +202,48 @@ public interface AndroidCompilationOrBuilder extends
    */
   com.google.protobuf.ByteString
       getKotlinCompileTaskNameBytes();
+
+  /**
+   * <pre>
+   * Extra compiled bytecode output folders (for example javac output when java enabled)
+   * </pre>
+   *
+   * <code>repeated .File extra_classes_folders = 8;</code>
+   */
+  java.util.List<com.android.builder.model.proto.ide.File> 
+      getExtraClassesFoldersList();
+  /**
+   * <pre>
+   * Extra compiled bytecode output folders (for example javac output when java enabled)
+   * </pre>
+   *
+   * <code>repeated .File extra_classes_folders = 8;</code>
+   */
+  com.android.builder.model.proto.ide.File getExtraClassesFolders(int index);
+  /**
+   * <pre>
+   * Extra compiled bytecode output folders (for example javac output when java enabled)
+   * </pre>
+   *
+   * <code>repeated .File extra_classes_folders = 8;</code>
+   */
+  int getExtraClassesFoldersCount();
+  /**
+   * <pre>
+   * Extra compiled bytecode output folders (for example javac output when java enabled)
+   * </pre>
+   *
+   * <code>repeated .File extra_classes_folders = 8;</code>
+   */
+  java.util.List<? extends com.android.builder.model.proto.ide.FileOrBuilder> 
+      getExtraClassesFoldersOrBuilderList();
+  /**
+   * <pre>
+   * Extra compiled bytecode output folders (for example javac output when java enabled)
+   * </pre>
+   *
+   * <code>repeated .File extra_classes_folders = 8;</code>
+   */
+  com.android.builder.model.proto.ide.FileOrBuilder getExtraClassesFoldersOrBuilder(
+      int index);
 }
