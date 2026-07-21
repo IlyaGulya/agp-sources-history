@@ -15,7 +15,7 @@ concurrency:
 jobs:
   import:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 360
 
     steps:
       - name: Check out repository
@@ -46,14 +46,15 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           for version in $VERSIONS; do
-            ./gradlew --no-daemon dumpSources -PagpVersion="$version"
+            ./gradlew dumpSources -PagpVersion="$version"
             mkdir -p sources
             rsync -a --delete build/agp-sources/ sources/
             printf '%s\n' "$version" > .agp-version
 
             git add --all sources .agp-version
             git commit -m "AGP $version"
-            git tag -a "agp-$version" -m "Android Gradle Plugin $version sources"
+            git tag -f -a "agp-$version" -m "Android Gradle Plugin $version sources"
           done
 
-          git push origin HEAD:master --follow-tags
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push origin --force --tags

@@ -14,19 +14,29 @@ METADATA_URL = (
     "https://dl.google.com/dl/android/maven2/"
     "com/android/tools/build/gradle/maven-metadata.xml"
 )
-STABLE_VERSION = re.compile(r"^\d+\.\d+\.\d+$")
+AGP_VERSION = re.compile(
+    r"^(\d+)\.(\d+)\.(\d+)(?:-(alpha|beta|rc)(\d+))?$"
+)
+QUALIFIER_ORDER = {"alpha": 0, "beta": 1, "rc": 2, None: 3}
 
 
-def version_key(version: str) -> tuple[int, int, int]:
-    parts = tuple(int(part) for part in version.split("."))
-    if len(parts) != 3:
+def version_key(version: str) -> tuple[int, int, int, int, int]:
+    match = AGP_VERSION.fullmatch(version)
+    if not match:
         raise ValueError(f"Invalid AGP version: {version}")
-    return parts
+    major, minor, patch, qualifier, qualifier_number = match.groups()
+    return (
+        int(major),
+        int(minor),
+        int(patch),
+        QUALIFIER_ORDER[qualifier],
+        int(qualifier_number or 0),
+    )
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--baseline", default="9.1.0")
+    parser.add_argument("--baseline", default="3.0.0-alpha1")
     parser.add_argument("--state-file", default=".agp-version")
     args = parser.parse_args()
 
@@ -40,7 +50,7 @@ def main() -> int:
     versions = {
         node.text
         for node in root.findall("./versioning/versions/version")
-        if node.text and STABLE_VERSION.fullmatch(node.text)
+        if node.text and AGP_VERSION.fullmatch(node.text)
     }
     pending = sorted(
         (
