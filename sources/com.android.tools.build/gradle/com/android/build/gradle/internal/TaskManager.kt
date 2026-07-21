@@ -114,7 +114,6 @@ import com.android.build.gradle.internal.tasks.DexArchiveBuilderTask
 import com.android.build.gradle.internal.tasks.DexFileDependenciesTask
 import com.android.build.gradle.internal.tasks.DexMergingAction
 import com.android.build.gradle.internal.tasks.DexMergingTask
-import com.android.build.gradle.internal.tasks.DexSplitterTask
 import com.android.build.gradle.internal.tasks.ExtractProguardFiles
 import com.android.build.gradle.internal.tasks.FeatureDexMergeTask
 import com.android.build.gradle.internal.tasks.GenerateLibraryProguardRulesTask
@@ -1205,10 +1204,11 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                             GenerateLibraryProguardRulesTask.CreationAction(creationConfig))
                 }
                 val nonTransitiveRClassInApp = projectOptions[BooleanOption.NON_TRANSITIVE_R_CLASS]
+                val compileTimeRClassInApp = projectOptions[BooleanOption.ENABLE_APP_COMPILE_TIME_R_CLASS]
                 // Generate the R class for a library using both local symbols and symbols
                 // from dependencies.
                 // TODO: double check this (what about dynamic features?)
-                if (!nonTransitiveRClassInApp || creationConfig.variantType.isAar) {
+                if (!nonTransitiveRClassInApp || compileTimeRClassInApp || creationConfig.variantType.isAar) {
                     taskFactory.register(GenerateLibraryRFileTask.CreationAction(
                         creationConfig,
                         creationConfig.variantType.isAar
@@ -2042,7 +2042,6 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
             taskFactory.register(FeatureDexMergeTask.CreationAction(creationConfig))
         }
         createDexTasks(creationConfig, creationConfig.dexingType, registeredLegacyTransform)
-        maybeCreateDexSplitterTask(creationConfig)
     }
 
     /**
@@ -2610,20 +2609,6 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         }
         return taskFactory.register(
                 R8Task.CreationAction(creationConfig, isTestApplication, addCompileRClass))
-    }
-
-    private fun maybeCreateDexSplitterTask(creationConfig: ApkCreationConfig) {
-        if (!creationConfig.variantScope.consumesFeatureJars()) {
-            return
-        }
-        taskFactory.register(DexSplitterTask.CreationAction(creationConfig))
-        if (creationConfig is ApplicationCreationConfig) {
-            publishArtifactsToDynamicFeatures(
-                    creationConfig,
-                    FEATURE_DEX,
-                    AndroidArtifacts.ArtifactType.FEATURE_DEX,
-                    null)
-        }
     }
 
     /**
