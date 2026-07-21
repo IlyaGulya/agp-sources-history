@@ -28,9 +28,11 @@ agpVersions.eachWithIndex { agpVersion, index ->
     def componentIds = agpConfiguration
       .incoming
       .resolutionResult
-      .allDependencies
-      .findAll { it.selected.id.group.startsWith("com.android.tools") }
-      .collect { it.selected.id }
+      .allComponents
+      .collect { it.id }
+      .findAll {
+        it instanceof ModuleComponentIdentifier && it.group.startsWith("com.android.tools")
+      }
       .toSet()
 
     dependencies.createArtifactResolutionQuery()
@@ -140,9 +142,11 @@ tasks.register("importHistory") {
       def componentIds = configuration
         .incoming
         .resolutionResult
-        .allDependencies
-        .findAll { it.selected.id.group.startsWith("com.android.tools") }
-        .collect { it.selected.id }
+        .allComponents
+        .collect { it.id }
+        .findAll {
+          it instanceof ModuleComponentIdentifier && it.group.startsWith("com.android.tools")
+        }
         .toSet()
       def artifacts = dependencies.createArtifactResolutionQuery()
         .forComponents(componentIds)
