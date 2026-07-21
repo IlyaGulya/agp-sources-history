@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle;
+package com.android.build.gradle.internal.plugins;
 
 import com.android.annotations.NonNull;
+import com.android.build.gradle.AppExtension;
+import com.android.build.gradle.BaseExtension;
 import com.android.build.gradle.internal.AppModelBuilder;
 import com.android.build.gradle.internal.ExtraModelInfo;
 import com.android.build.gradle.internal.VariantManager;
@@ -27,13 +29,15 @@ import javax.inject.Inject;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.component.SoftwareComponentFactory;
 import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 
 /** Gradle plugin class for 'application' projects, applied on the base application module */
 public class AppPlugin extends AbstractAppPlugin {
     @Inject
-    public AppPlugin(ToolingModelBuilderRegistry registry) {
-        super(registry, true /*isBaseApplication*/);
+    public AppPlugin(
+            ToolingModelBuilderRegistry registry, SoftwareComponentFactory componentFactory) {
+        super(registry, componentFactory, true /*isBaseApplication*/);
     }
 
     @Override

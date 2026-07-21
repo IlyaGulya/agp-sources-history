@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.tasks;
+package com.android.build.gradle
 
-import com.android.annotations.NonNull;
-import com.android.build.FilterData;
+import org.gradle.api.Project
 
 /**
- * Specialization of the {@link FileSupplier} interface for split APKs.
+ * The plugin applied with 'com.android.library'
  */
-public interface SplitFileSupplier extends FileSupplier {
+@Suppress("DEPRECATION")
+class LibraryPlugin: BasePlugin() {
+    override fun apply(project: Project) {
+        super.apply(project)
 
-    @NonNull
-    FilterData getFilterData();
+        project.apply(INTERNAL_PLUGIN_ID)
+    }
 }
+
+private val INTERNAL_PLUGIN_ID = mapOf("plugin" to "com.android.internal.library")

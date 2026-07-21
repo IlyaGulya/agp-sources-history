@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.tasks;
+package com.android.build.gradle
 
-import com.android.annotations.NonNull;
-import com.google.common.base.Supplier;
-import java.io.File;
-import org.gradle.api.Task;
+import org.gradle.api.Project
 
 /**
- * Denotes a supplier of a file. The supplier also provides a link to the task generating the file.
+ * The plugin applied with `com.android.application'
  */
-public interface FileSupplier extends Supplier<File> {
+@Suppress("DEPRECATION")
+class AppPlugin: BasePlugin() {
+    override fun apply(project: Project) {
+        super.apply(project)
 
-    /**
-     * Returns the task generating the file.
-     */
-    @NonNull
-    Task getTask();
+        project.apply(INTERNAL_PLUGIN_ID)
+    }
 }
+
+private val INTERNAL_PLUGIN_ID = mapOf("plugin" to "com.android.internal.application")

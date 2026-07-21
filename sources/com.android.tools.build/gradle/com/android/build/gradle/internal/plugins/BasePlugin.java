@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle;
+package com.android.build.gradle.internal.plugins;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.io.File.separator;
@@ -24,6 +24,8 @@ import com.android.SdkConstants;
 import com.android.Version;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.build.gradle.BaseExtension;
+import com.android.build.gradle.FeaturePlugin;
 import com.android.build.gradle.api.AndroidBasePlugin;
 import com.android.build.gradle.api.BaseVariantOutput;
 import com.android.build.gradle.internal.ApiObjectFactory;
@@ -106,6 +108,7 @@ import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.component.SoftwareComponentFactory;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.invocation.Gradle;
 import org.gradle.api.model.ObjectFactory;
@@ -117,10 +120,6 @@ import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 /** Base class for all Android plugins */
 public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProvider {
 
-    @VisibleForTesting
-    public static final GradleVersion GRADLE_MIN_VERSION =
-            GradleVersion.parse(SdkConstants.GRADLE_MINIMUM_VERSION);
-
     private BaseExtension extension;
 
     private VariantManager variantManager;
@@ -131,7 +130,7 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
 
     protected ProjectOptions projectOptions;
 
-    private GlobalScope globalScope;
+    GlobalScope globalScope;
 
     private DataBindingBuilder dataBindingBuilder;
 
@@ -139,7 +138,8 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
 
     private SourceSetManager sourceSetManager;
 
-    private ToolingModelBuilderRegistry registry;
+    @NonNull private final ToolingModelBuilderRegistry registry;
+    @NonNull private final SoftwareComponentFactory componentFactory;
 
     private LoggerWrapper loggerWrapper;
 
@@ -151,9 +151,12 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
 
     private boolean hasCreatedTasks = false;
 
-    BasePlugin(@NonNull ToolingModelBuilderRegistry registry) {
+    public BasePlugin(
+            @NonNull ToolingModelBuilderRegistry registry,
+            @NonNull SoftwareComponentFactory componentFactory) {
         ClasspathVerifier.checkClasspathSanity();
         this.registry = registry;
+        this.componentFactory = componentFactory;
         creator = "Android Gradle " + Version.ANDROID_GRADLE_PLUGIN_VERSION;
         NonFinalPluginExpiry.verifyRetirementAge();
     }
@@ -221,7 +224,6 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
 
         this.project = project;
         this.projectOptions = new ProjectOptions(project);
-        checkGradleVersion(project, getLogger(), projectOptions);
         DependencyResolutionChecks.registerDependencyCheck(project, projectOptions);
 
         project.getPluginManager().apply(AndroidBasePlugin.class);
@@ -327,7 +329,8 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
                         sdkComponents,
                         registry,
                         buildCache,
-                        extraModelInfo.getMessageReceiver());
+                        extraModelInfo.getMessageReceiver(),
+                        componentFactory);
 
         project.getTasks()
                 .named("assemble")
@@ -567,34 +570,6 @@ public abstract class BasePlugin implements Plugin<Project>, ToolingRegistryProv
                                     null,
                                     this::createAndroidTasks);
                         }));
-    }
-
-    static void checkGradleVersion(
-            @NonNull Project project,
-            @NonNull ILogger logger,
-            @NonNull ProjectOptions projectOptions) {
-        String currentVersion = project.getGradle().getGradleVersion();
-        if (GRADLE_MIN_VERSION.compareTo(currentVersion) > 0) {
-            File file = new File("gradle" + separator + "wrapper" + separator +
-                    "gradle-wrapper.properties");
-            String errorMessage =
-                    String.format(
-                            "Minimum supported Gradle version is %s. Current version is %s. "
-                                    + "If using the gradle wrapper, try editing the distributionUrl in %s "
-                                    + "to gradle-%s-all.zip",
-                            GRADLE_MIN_VERSION,
-                            currentVersion,
-                            file.getAbsolutePath(),
-                            GRADLE_MIN_VERSION);
-            if (projectOptions.get(BooleanOption.VERSION_CHECK_OVERRIDE_PROPERTY)) {
-                logger.warning(errorMessage);
-                logger.warning(
-                        "As %s is set, continuing anyway.",
-                        BooleanOption.VERSION_CHECK_OVERRIDE_PROPERTY.getPropertyName());
-            } else {
-                throw new RuntimeException(errorMessage);
-            }
-        }
     }
 
     @VisibleForTesting
