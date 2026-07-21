@@ -429,7 +429,7 @@ public interface AndroidTargetOrBuilder extends
    * The build ID (directory containing the settings file) of the root build of this project.
    * </pre>
    *
-   * <code>optional .File root_build_id = 14;</code>
+   * <code>optional .File root_build_id = 13;</code>
    * @return Whether the rootBuildId field is set.
    */
   boolean hasRootBuildId();
@@ -438,7 +438,7 @@ public interface AndroidTargetOrBuilder extends
    * The build ID (directory containing the settings file) of the root build of this project.
    * </pre>
    *
-   * <code>optional .File root_build_id = 14;</code>
+   * <code>optional .File root_build_id = 13;</code>
    * @return The rootBuildId.
    */
   com.android.builder.model.proto.ide.File getRootBuildId();
@@ -447,7 +447,7 @@ public interface AndroidTargetOrBuilder extends
    * The build ID (directory containing the settings file) of the root build of this project.
    * </pre>
    *
-   * <code>optional .File root_build_id = 14;</code>
+   * <code>optional .File root_build_id = 13;</code>
    */
   com.android.builder.model.proto.ide.FileOrBuilder getRootBuildIdOrBuilder();
 
@@ -457,7 +457,7 @@ public interface AndroidTargetOrBuilder extends
    * project.
    * </pre>
    *
-   * <code>optional .File build_id = 15;</code>
+   * <code>optional .File build_id = 14;</code>
    * @return Whether the buildId field is set.
    */
   boolean hasBuildId();
@@ -467,7 +467,7 @@ public interface AndroidTargetOrBuilder extends
    * project.
    * </pre>
    *
-   * <code>optional .File build_id = 15;</code>
+   * <code>optional .File build_id = 14;</code>
    * @return The buildId.
    */
   com.android.builder.model.proto.ide.File getBuildId();
@@ -477,7 +477,26 @@ public interface AndroidTargetOrBuilder extends
    * project.
    * </pre>
    *
-   * <code>optional .File build_id = 15;</code>
+   * <code>optional .File build_id = 14;</code>
    */
   com.android.builder.model.proto.ide.FileOrBuilder getBuildIdOrBuilder();
+
+  /**
+   * <pre>
+   * Whether java compilation is enabled.
+   * </pre>
+   *
+   * <code>optional bool with_java = 15;</code>
+   * @return Whether the withJava field is set.
+   */
+  boolean hasWithJava();
+  /**
+   * <pre>
+   * Whether java compilation is enabled.
+   * </pre>
+   *
+   * <code>optional bool with_java = 15;</code>
+   * @return The withJava.
+   */
+  boolean getWithJava();
 }
