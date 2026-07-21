@@ -94,8 +94,6 @@ interface SettingsExtension {
      *
      * See [uses-sdk element documentation](http://developer.android.com/guide/topics/manifest/uses-sdk-element.html).
      */
-    @get:Incubating
-    @set:Incubating
     var targetSdk: Int?
 
     /**
@@ -105,9 +103,7 @@ interface SettingsExtension {
      *
      * See [uses-sdk element documentation](http://developer.android.com/guide/topics/manifest/uses-sdk-element.html).
      */
-    @get:Incubating
-    @set:Incubating
-    var targetSdkPreview: String?
+     var targetSdkPreview: String?
 
 
     /** Set execution profiles and options for tools. */
