@@ -106,7 +106,7 @@ fun canCompileResourceInJvm(file: File, requirePngCrunching: Boolean): Boolean {
  * See [canCompileResourceInJvm] to see what is supported.
  */
 fun compileResource(
-  file: File, outputDirectory: File, options: ResourceCompilerOptions, logger: BlameLogger) {
+  file: File, outputDirectory: File, options: ResourceCompilerOptions, logger: BlameLogger? = null) {
 
   // Skip hidden files.
   if (file.isHidden) {
@@ -123,15 +123,14 @@ fun compileResource(
     compileFunction(pathData, outputDirectory, options, logger)
   } catch (e: Exception) {
     logger?.info("Failed to compile file", blameSource(pathData.source))
-      val message =
-          "Resource compilation failed (${e.message}. Cause: ${e.cause}). " +
-                  "Check logs for more details."
-      throw ResourceCompilationException(message, e)
+    throw ResourceCompilationException("Resource compilation failed. Check logs for details.",
+      e
+    )
   }
 }
 
-private fun getCompileMethod(pathData: ResourcePathData, logger: BlameLogger):
-    (ResourcePathData, File, ResourceCompilerOptions, BlameLogger) -> Unit {
+private fun getCompileMethod(pathData: ResourcePathData, logger: BlameLogger?):
+    (ResourcePathData, File, ResourceCompilerOptions, BlameLogger?) -> Unit {
   if (pathData.resourceDirectory == VALUES_DIRECTORY_PREFIX &&
       pathData.extension == XML_EXTENSION) {
     pathData.extension = RESOURCE_TABLE_EXTENSION
@@ -170,7 +169,7 @@ private fun compileTable(
     pathData: ResourcePathData,
     outputDirectory: File,
     options: ResourceCompilerOptions,
-    logger: BlameLogger) {
+    logger: BlameLogger?) {
   val outputFile = File(outputDirectory, pathData.getIntermediateContainerFilename())
   logger?.info("Compiling XML table ${pathData.file.absolutePath} to $outputFile")
 
@@ -184,15 +183,12 @@ private fun compileTable(
     TableExtractor(table, pathData.source, pathData.config, extractorOptions, logger)
 
   pathData.file.inputStream().use {
-      try {
-          tableExtractor.extract(it)
-      } catch (e: Exception) {
-          // For merged values there's no need to re-write as we don't know which line failed. The
-          // actual error will be raised by the table extractor.
-          throw ResourceCompilationException(
-              "Failed to compile values resource file ${pathData.file}", e
-          )
-      }
+    if (!tableExtractor.extract(it)) {
+      // For merged values there's no need to re-write as we don't know which line failed. The
+      // actual error will be raised by the table extractor.
+      logger?.info("Failed to extract resources for ${pathData.file.absolutePath}")
+      error("Failed to compile values file.")
+    }
 
     // Adds the fake locales: en-XA and ar-XB for each default-defined string resource. This is used
     // for debugging apps with long text (en-XA) or rtl (ar-XB) language support.
@@ -322,15 +318,10 @@ private fun compileXml(
 
   pathData.file.inputStream().use {
     val xmlProcessor = XmlProcessor(source = pathData.source, logger = logger)
-      try {
-          xmlProcessor.process(fileToProcess, it)
-      } catch (e: Exception) {
-          throw ResourceCompilationException(
-              "Failed to compile resource file: " +
-                      logger?.getOutputSource(blameSource(pathData.source)),
-              e
-          )
-      }
+    if (!xmlProcessor.process(fileToProcess, it)) {
+      logger?.warning("Failure to compile the resource file.", blameSource(pathData.source))
+      error("Failed to compile resource file.")
+    }
 
     val container =
       Container(outputFile.outputStream(), xmlProcessor.xmlResources.size)

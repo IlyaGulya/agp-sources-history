@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.ddmlib.internal.commands
 
-package com.android.builder.utils
-
-import com.android.Version
-
-/** The version used on developer.android.com */
-val agpReferenceDocsVersion = Version.ANDROID_GRADLE_PLUGIN_VERSION.substringBeforeLast('.')
-
-private val agpReferenceDocsSitePrefix = "https://developer.android.com/reference/tools/gradle-api/$agpReferenceDocsVersion/"
-
-fun agpReferenceDocsUrl(path: String): String {
-    return agpReferenceDocsSitePrefix + path
+data class CommandResult(val success:Boolean, val message:String) {
+    constructor() : this(true, "")
+    constructor(message: String) : this(false, message)
 }
