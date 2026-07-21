@@ -17,10 +17,7 @@ package com.android.projectmodel
 
 import java.io.File
 import java.net.URI
-import java.nio.file.FileSystemNotFoundException
-import java.nio.file.FileSystems
-import java.nio.file.Path
-import java.nio.file.ProviderNotFoundException
+import java.nio.file.*
 import java.util.ArrayDeque
 import java.util.ArrayList
 
@@ -106,7 +103,7 @@ class PathString private constructor(
      */
     override fun toString(): String {
         var schemeString = filesystemUri.toString()
-        if (schemeString.endsWith("/")) {
+        if (schemeString.endsWith("///")) {
             schemeString = schemeString.substring(0, schemeString.length - 1)
         }
         return schemeString + rawPath
@@ -133,7 +130,7 @@ class PathString private constructor(
      */
     fun toPath(): Path? {
         return try {
-            FileSystems.getFileSystem(filesystemUri).getPath(rawPath)
+            Paths.get(filesystemUri).fileSystem.getPath(rawPath)
         } catch (e: FileSystemNotFoundException) {
             null
         } catch (e: IllegalArgumentException) {
@@ -454,9 +451,8 @@ class PathString private constructor(
         return driveName(root1.rawPath) == driveName(root2.rawPath)
     }
 
-    private fun driveName(rawPath: String): String {
-        return rawPath.substring(0, rawPath.countUntil(':')).toUpperCase()
-    }
+    private fun driveName(rawPath: String): String =
+            rawPath.substring(0, rawPath.countUntil(':')).toUpperCase()
 
     private fun subRangeOrNull(index: Int,
             length: Int = 1): PathString? {
@@ -617,6 +613,4 @@ private fun detectSeparator(path: String): Char {
     return '/'
 }
 
-private fun String.withSeparator(sep: Char): String {
-    return replace('/', sep).replace('\\', sep)
-}
+private fun String.withSeparator(sep: Char): String = replace('/', sep).replace('\\', sep)
