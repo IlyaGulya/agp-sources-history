@@ -87,7 +87,7 @@ public class SdkVersionInfo {
      * Build.VERSION_CODES.CUR_DEVELOPMENT; set for platforms in
      * development before preview
      */
-    public static final int CUR_DEVELOPMENT = 10000;
+    public static final int CUR_DEVELOPMENT = 1000;
 
     /**
      * Returns the Android version and code name of the given API level
@@ -151,8 +151,7 @@ public class SdkVersionInfo {
             case 28: return "9.0";
             case 29: return "10.0";
             case 30: return "11.0";
-            case 31:
-                return "12.0";
+            case 31: return "12 Preview";
             // If you add more versions here, also update #getBuildCodes and
             // #HIGHEST_KNOWN_API
 
