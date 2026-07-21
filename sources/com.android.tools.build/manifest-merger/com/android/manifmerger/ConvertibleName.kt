@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.build.gradle.internal.dsl
+package com.android.manifmerger
 
-import com.android.build.api.dsl.LibraryAndroidResources
-import com.android.build.gradle.internal.services.DslServices
-import javax.inject.Inject
+/** Defines conversion routines for named types that can be converted into Xml name or Camel case names. */
+interface ConvertibleName {
 
-abstract class LibraryAndroidResourcesImpl @Inject constructor(dslServices: DslServices, defaultEnable: Boolean) :
-  LibraryAndroidResources, AaptOptions(dslServices) {
+  /** Returns a xml lower-hyphen separated name of itself. */
+  fun toXmlName(): String
 
-  override var enable: Boolean = defaultEnable
-
-  override var resourcePrefix: String = ""
+  /** Returns a camel case version of itself. */
+  fun toCamelCaseName(): String
 }

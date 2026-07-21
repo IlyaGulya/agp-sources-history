@@ -499,4 +499,33 @@ public interface AndroidTargetOrBuilder extends
    * @return The withJava.
    */
   boolean getWithJava();
+
+  /**
+   * <pre>
+   * The prefix to be used by Android Studio for editor features to avoid resource name collisions
+   * </pre>
+   *
+   * <code>optional string resource_prefix = 16;</code>
+   * @return Whether the resourcePrefix field is set.
+   */
+  boolean hasResourcePrefix();
+  /**
+   * <pre>
+   * The prefix to be used by Android Studio for editor features to avoid resource name collisions
+   * </pre>
+   *
+   * <code>optional string resource_prefix = 16;</code>
+   * @return The resourcePrefix.
+   */
+  java.lang.String getResourcePrefix();
+  /**
+   * <pre>
+   * The prefix to be used by Android Studio for editor features to avoid resource name collisions
+   * </pre>
+   *
+   * <code>optional string resource_prefix = 16;</code>
+   * @return The bytes for resourcePrefix.
+   */
+  com.google.protobuf.ByteString
+      getResourcePrefixBytes();
 }

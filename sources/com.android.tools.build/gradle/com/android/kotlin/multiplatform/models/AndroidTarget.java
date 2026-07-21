@@ -24,6 +24,7 @@ private static final long serialVersionUID = 0L;
     groupId_ = "";
     buildToolsVersion_ = "";
     desugaredMethodsFiles_ = java.util.Collections.emptyList();
+    resourcePrefix_ = "";
   }
 
   @java.lang.Override
@@ -799,6 +800,65 @@ private static final long serialVersionUID = 0L;
     return withJava_;
   }
 
+  public static final int RESOURCE_PREFIX_FIELD_NUMBER = 16;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object resourcePrefix_ = "";
+  /**
+   * <pre>
+   * The prefix to be used by Android Studio for editor features to avoid resource name collisions
+   * </pre>
+   *
+   * <code>optional string resource_prefix = 16;</code>
+   * @return Whether the resourcePrefix field is set.
+   */
+  @java.lang.Override
+  public boolean hasResourcePrefix() {
+    return ((bitField0_ & 0x00000800) != 0);
+  }
+  /**
+   * <pre>
+   * The prefix to be used by Android Studio for editor features to avoid resource name collisions
+   * </pre>
+   *
+   * <code>optional string resource_prefix = 16;</code>
+   * @return The resourcePrefix.
+   */
+  @java.lang.Override
+  public java.lang.String getResourcePrefix() {
+    java.lang.Object ref = resourcePrefix_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      resourcePrefix_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * The prefix to be used by Android Studio for editor features to avoid resource name collisions
+   * </pre>
+   *
+   * <code>optional string resource_prefix = 16;</code>
+   * @return The bytes for resourcePrefix.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getResourcePrefixBytes() {
+    java.lang.Object ref = resourcePrefix_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      resourcePrefix_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -857,6 +917,9 @@ private static final long serialVersionUID = 0L;
     }
     if (((bitField0_ & 0x00000400) != 0)) {
       output.writeBool(15, withJava_);
+    }
+    if (((bitField0_ & 0x00000800) != 0)) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 16, resourcePrefix_);
     }
     getUnknownFields().writeTo(output);
   }
@@ -922,6 +985,9 @@ private static final long serialVersionUID = 0L;
     if (((bitField0_ & 0x00000400) != 0)) {
       size += com.google.protobuf.CodedOutputStream
         .computeBoolSize(15, withJava_);
+    }
+    if (((bitField0_ & 0x00000800) != 0)) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(16, resourcePrefix_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -1001,6 +1067,11 @@ private static final long serialVersionUID = 0L;
       if (getWithJava()
           != other.getWithJava()) return false;
     }
+    if (hasResourcePrefix() != other.hasResourcePrefix()) return false;
+    if (hasResourcePrefix()) {
+      if (!getResourcePrefix()
+          .equals(other.getResourcePrefix())) return false;
+    }
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -1073,6 +1144,10 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + WITH_JAVA_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getWithJava());
+    }
+    if (hasResourcePrefix()) {
+      hash = (37 * hash) + RESOURCE_PREFIX_FIELD_NUMBER;
+      hash = (53 * hash) + getResourcePrefix().hashCode();
     }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
@@ -1276,6 +1351,7 @@ private static final long serialVersionUID = 0L;
         buildIdBuilder_ = null;
       }
       withJava_ = false;
+      resourcePrefix_ = "";
       return this;
     }
 
@@ -1403,6 +1479,10 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00004000) != 0)) {
         result.withJava_ = withJava_;
         to_bitField0_ |= 0x00000400;
+      }
+      if (((from_bitField0_ & 0x00008000) != 0)) {
+        result.resourcePrefix_ = resourcePrefix_;
+        to_bitField0_ |= 0x00000800;
       }
       result.bitField0_ |= to_bitField0_;
     }
@@ -1564,6 +1644,11 @@ private static final long serialVersionUID = 0L;
       if (other.hasWithJava()) {
         setWithJava(other.getWithJava());
       }
+      if (other.hasResourcePrefix()) {
+        resourcePrefix_ = other.resourcePrefix_;
+        bitField0_ |= 0x00008000;
+        onChanged();
+      }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
@@ -1707,6 +1792,11 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00004000;
               break;
             } // case 120
+            case 130: {
+              resourcePrefix_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00008000;
+              break;
+            } // case 130
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -4366,6 +4456,109 @@ private static final long serialVersionUID = 0L;
     public Builder clearWithJava() {
       bitField0_ = (bitField0_ & ~0x00004000);
       withJava_ = false;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object resourcePrefix_ = "";
+    /**
+     * <pre>
+     * The prefix to be used by Android Studio for editor features to avoid resource name collisions
+     * </pre>
+     *
+     * <code>optional string resource_prefix = 16;</code>
+     * @return Whether the resourcePrefix field is set.
+     */
+    public boolean hasResourcePrefix() {
+      return ((bitField0_ & 0x00008000) != 0);
+    }
+    /**
+     * <pre>
+     * The prefix to be used by Android Studio for editor features to avoid resource name collisions
+     * </pre>
+     *
+     * <code>optional string resource_prefix = 16;</code>
+     * @return The resourcePrefix.
+     */
+    public java.lang.String getResourcePrefix() {
+      java.lang.Object ref = resourcePrefix_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        resourcePrefix_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * The prefix to be used by Android Studio for editor features to avoid resource name collisions
+     * </pre>
+     *
+     * <code>optional string resource_prefix = 16;</code>
+     * @return The bytes for resourcePrefix.
+     */
+    public com.google.protobuf.ByteString
+        getResourcePrefixBytes() {
+      java.lang.Object ref = resourcePrefix_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        resourcePrefix_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * The prefix to be used by Android Studio for editor features to avoid resource name collisions
+     * </pre>
+     *
+     * <code>optional string resource_prefix = 16;</code>
+     * @param value The resourcePrefix to set.
+     * @return This builder for chaining.
+     */
+    public Builder setResourcePrefix(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      resourcePrefix_ = value;
+      bitField0_ |= 0x00008000;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The prefix to be used by Android Studio for editor features to avoid resource name collisions
+     * </pre>
+     *
+     * <code>optional string resource_prefix = 16;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearResourcePrefix() {
+      resourcePrefix_ = getDefaultInstance().getResourcePrefix();
+      bitField0_ = (bitField0_ & ~0x00008000);
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * The prefix to be used by Android Studio for editor features to avoid resource name collisions
+     * </pre>
+     *
+     * <code>optional string resource_prefix = 16;</code>
+     * @param value The bytes for resourcePrefix to set.
+     * @return This builder for chaining.
+     */
+    public Builder setResourcePrefixBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      resourcePrefix_ = value;
+      bitField0_ |= 0x00008000;
       onChanged();
       return this;
     }
