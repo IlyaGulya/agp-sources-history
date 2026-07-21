@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,9 @@
 
 package com.android.build.gradle.internal.tasks
 
-import org.gradle.api.tasks.Internal
+import com.android.build.gradle.internal.caching.DisabledCachingReason
 import org.gradle.work.DisableCachingByDefault
 
-/**
- * Base Android task with a variant name and support for analytics
- *
- * DO NOT EXTEND THIS METHOD DIRECTLY. Instead extend:
- * - [NewIncrementalTask]
- * - [NonIncrementalTask]
- *
- */
-@DisableCachingByDefault
-abstract class AndroidVariantTask : BaseTask(), VariantTask {
-
-    @Internal("No influence on output, this is for our build stats reporting mechanism")
-    override lateinit var variantName: String
-}
+/** Global (non-variant) task. */
+@DisableCachingByDefault(because = DisabledCachingReason.BASE_TASK)
+abstract class AndroidGlobalTask : BaseTask(), GlobalTask
