@@ -108,6 +108,17 @@ public final class AndroidTestCoverageConfigProto {
     com.google.protobuf.ByteString
         getOutputDirectoryOnHostBytes();
 
+    /**
+     * <pre>
+     * Use the test storage service provided by the 'androidx.test.services'
+     * package.
+     * </pre>
+     *
+     * <code>bool use_test_storage_service = 5;</code>
+     * @return The useTestStorageService.
+     */
+    boolean getUseTestStorageService();
+
     public com.android.tools.utp.plugins.host.coverage.proto.AndroidTestCoverageConfigProto.AndroidTestCoverageConfig.TestCoveragePathOnDeviceCase getTestCoveragePathOnDeviceCase();
   }
   /**
@@ -183,6 +194,11 @@ public final class AndroidTestCoverageConfigProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               outputDirectoryOnHost_ = s;
+              break;
+            }
+            case 40: {
+
+              useTestStorageService_ = input.readBool();
               break;
             }
             default: {
@@ -462,6 +478,21 @@ public final class AndroidTestCoverageConfigProto {
       }
     }
 
+    public static final int USE_TEST_STORAGE_SERVICE_FIELD_NUMBER = 5;
+    private boolean useTestStorageService_;
+    /**
+     * <pre>
+     * Use the test storage service provided by the 'androidx.test.services'
+     * package.
+     * </pre>
+     *
+     * <code>bool use_test_storage_service = 5;</code>
+     * @return The useTestStorageService.
+     */
+    public boolean getUseTestStorageService() {
+      return useTestStorageService_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -488,6 +519,9 @@ public final class AndroidTestCoverageConfigProto {
       if (!getOutputDirectoryOnHostBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, outputDirectoryOnHost_);
       }
+      if (useTestStorageService_ != false) {
+        output.writeBool(5, useTestStorageService_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -509,6 +543,10 @@ public final class AndroidTestCoverageConfigProto {
       if (!getOutputDirectoryOnHostBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, outputDirectoryOnHost_);
       }
+      if (useTestStorageService_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, useTestStorageService_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -528,6 +566,8 @@ public final class AndroidTestCoverageConfigProto {
           .equals(other.getRunAsPackageName())) return false;
       if (!getOutputDirectoryOnHost()
           .equals(other.getOutputDirectoryOnHost())) return false;
+      if (getUseTestStorageService()
+          != other.getUseTestStorageService()) return false;
       if (!getTestCoveragePathOnDeviceCase().equals(other.getTestCoveragePathOnDeviceCase())) return false;
       switch (testCoveragePathOnDeviceCase_) {
         case 1:
@@ -556,6 +596,9 @@ public final class AndroidTestCoverageConfigProto {
       hash = (53 * hash) + getRunAsPackageName().hashCode();
       hash = (37 * hash) + OUTPUT_DIRECTORY_ON_HOST_FIELD_NUMBER;
       hash = (53 * hash) + getOutputDirectoryOnHost().hashCode();
+      hash = (37 * hash) + USE_TEST_STORAGE_SERVICE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getUseTestStorageService());
       switch (testCoveragePathOnDeviceCase_) {
         case 1:
           hash = (37 * hash) + SINGLE_COVERAGE_FILE_FIELD_NUMBER;
@@ -709,6 +752,8 @@ public final class AndroidTestCoverageConfigProto {
 
         outputDirectoryOnHost_ = "";
 
+        useTestStorageService_ = false;
+
         testCoveragePathOnDeviceCase_ = 0;
         testCoveragePathOnDevice_ = null;
         return this;
@@ -745,6 +790,7 @@ public final class AndroidTestCoverageConfigProto {
         }
         result.runAsPackageName_ = runAsPackageName_;
         result.outputDirectoryOnHost_ = outputDirectoryOnHost_;
+        result.useTestStorageService_ = useTestStorageService_;
         result.testCoveragePathOnDeviceCase_ = testCoveragePathOnDeviceCase_;
         onBuilt();
         return result;
@@ -801,6 +847,9 @@ public final class AndroidTestCoverageConfigProto {
         if (!other.getOutputDirectoryOnHost().isEmpty()) {
           outputDirectoryOnHost_ = other.outputDirectoryOnHost_;
           onChanged();
+        }
+        if (other.getUseTestStorageService() != false) {
+          setUseTestStorageService(other.getUseTestStorageService());
         }
         switch (other.getTestCoveragePathOnDeviceCase()) {
           case SINGLE_COVERAGE_FILE: {
@@ -1293,6 +1342,51 @@ public final class AndroidTestCoverageConfigProto {
         onChanged();
         return this;
       }
+
+      private boolean useTestStorageService_ ;
+      /**
+       * <pre>
+       * Use the test storage service provided by the 'androidx.test.services'
+       * package.
+       * </pre>
+       *
+       * <code>bool use_test_storage_service = 5;</code>
+       * @return The useTestStorageService.
+       */
+      public boolean getUseTestStorageService() {
+        return useTestStorageService_;
+      }
+      /**
+       * <pre>
+       * Use the test storage service provided by the 'androidx.test.services'
+       * package.
+       * </pre>
+       *
+       * <code>bool use_test_storage_service = 5;</code>
+       * @param value The useTestStorageService to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUseTestStorageService(boolean value) {
+        
+        useTestStorageService_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Use the test storage service provided by the 'androidx.test.services'
+       * package.
+       * </pre>
+       *
+       * <code>bool use_test_storage_service = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUseTestStorageService() {
+        
+        useTestStorageService_ = false;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -1362,14 +1456,15 @@ public final class AndroidTestCoverageConfigProto {
     java.lang.String[] descriptorData = {
       "\n\"android_test_coverage_config.proto\0221co" +
       "m.android.tools.utp.plugins.host.coverag" +
-      "e.proto\"\312\001\n\031AndroidTestCoverageConfig\022\036\n" +
+      "e.proto\"\354\001\n\031AndroidTestCoverageConfig\022\036\n" +
       "\024single_coverage_file\030\001 \001(\tH\000\022.\n$multipl" +
       "e_coverage_files_in_directory\030\002 \001(\tH\000\022\033\n" +
       "\023run_as_package_name\030\003 \001(\t\022 \n\030output_dir" +
-      "ectory_on_host\030\004 \001(\tB\036\n\034test_coverage_pa" +
-      "th_on_deviceBS\n1com.android.tools.utp.pl" +
-      "ugins.host.coverage.protoB\036AndroidTestCo" +
-      "verageConfigProtob\006proto3"
+      "ectory_on_host\030\004 \001(\t\022 \n\030use_test_storage" +
+      "_service\030\005 \001(\010B\036\n\034test_coverage_path_on_" +
+      "deviceBS\n1com.android.tools.utp.plugins." +
+      "host.coverage.protoB\036AndroidTestCoverage" +
+      "ConfigProtob\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -1380,7 +1475,7 @@ public final class AndroidTestCoverageConfigProto {
     internal_static_com_android_tools_utp_plugins_host_coverage_proto_AndroidTestCoverageConfig_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_android_tools_utp_plugins_host_coverage_proto_AndroidTestCoverageConfig_descriptor,
-        new java.lang.String[] { "SingleCoverageFile", "MultipleCoverageFilesInDirectory", "RunAsPackageName", "OutputDirectoryOnHost", "TestCoveragePathOnDevice", });
+        new java.lang.String[] { "SingleCoverageFile", "MultipleCoverageFilesInDirectory", "RunAsPackageName", "OutputDirectoryOnHost", "UseTestStorageService", "TestCoveragePathOnDevice", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
