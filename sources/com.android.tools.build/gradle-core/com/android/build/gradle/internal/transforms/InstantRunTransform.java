@@ -34,7 +34,6 @@ import com.android.build.api.transform.TransformException;
 import com.android.build.api.transform.TransformInput;
 import com.android.build.api.transform.TransformInvocation;
 import com.android.build.api.transform.TransformOutputProvider;
-import com.android.build.gradle.AndroidGradleOptions;
 import com.android.build.gradle.internal.LoggerWrapper;
 import com.android.build.gradle.internal.incremental.IncrementalChangeVisitor;
 import com.android.build.gradle.internal.incremental.IncrementalSupportVisitor;
@@ -45,10 +44,13 @@ import com.android.build.gradle.internal.incremental.InstantRunVerifierStatus;
 import com.android.build.gradle.internal.pipeline.ExtendedContentType;
 import com.android.build.gradle.internal.pipeline.TransformManager;
 import com.android.build.gradle.internal.scope.InstantRunVariantScope;
+import com.android.build.gradle.options.DeploymentDevice;
 import com.android.ide.common.internal.WaitableExecutor;
 import com.android.sdklib.AndroidVersion;
 import com.android.utils.FileUtils;
 import com.android.utils.ILogger;
+import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -88,8 +90,8 @@ public class InstantRunTransform extends Transform {
         this.transformScope = transformScope;
         this.executor = executor;
         this.targetPlatformApi =
-                AndroidGradleOptions.getTargetAndroidVersion(
-                        transformScope.getGlobalScope().getProject());
+                DeploymentDevice.getDeploymentDeviceAndroidVersion(
+                        transformScope.getGlobalScope().getProjectOptions());
     }
 
     @NonNull
@@ -135,7 +137,7 @@ public class InstantRunTransform extends Transform {
     public Map<String, Object> getParameterInputs() {
         // Force the instant run transform to re-run when the dex patching policy changes,
         // as the slicer will re-run.
-        return transformScope.getInstantRunBuildContext().getPatchingPolicy() != null
+        return transformScope.getInstantRunBuildContext().isInInstantRunMode()
                 ? ImmutableMap.of(
                         "dex patching policy",
                         transformScope
@@ -162,6 +164,9 @@ public class InstantRunTransform extends Transform {
     @Override
     public void transform(@NonNull TransformInvocation invocation)
             throws IOException, TransformException, InterruptedException {
+        Collection<File> jarFiles = TransformInputUtil.getJarFiles(invocation.getInputs());
+        Preconditions.checkState(
+                jarFiles.isEmpty(), "Unexpected inputs: " + Joiner.on(", ").join(jarFiles));
         InstantRunBuildContext buildContext = transformScope.getInstantRunBuildContext();
         buildContext.startRecording(InstantRunBuildContext.TaskType.INSTANT_RUN_TRANSFORM);
         try {

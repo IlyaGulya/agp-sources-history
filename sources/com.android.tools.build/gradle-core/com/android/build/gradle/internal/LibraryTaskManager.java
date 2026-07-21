@@ -194,7 +194,9 @@ public class LibraryTaskManager extends TaskManager {
                             variantScope,
                             () -> variantBundleDir,
                             variantScope.getProcessResourcePackageOutputDirectory(),
-                            MergeType.PACKAGE,
+                            // TODO: Switch to package where possible so we stop merging resources
+                            // in libraries.
+                            MergeType.MERGE,
                             globalScope.getProjectBaseName());
 
                     // process java resources only, the merge is setup after
@@ -546,9 +548,6 @@ public class LibraryTaskManager extends TaskManager {
         libVariantData.packageLibTask = bundle;
 
         variantScope.getAssembleTask().dependsOn(tasks, bundle);
-
-        // FIXME remove this once we have a better API to build the model.
-        variantScope.addTaskOutput(TaskOutputType.EXPLODED_AAR, variantBundleDir, bundle.getName());
 
         // if the variant is the default published, then publish the aar
         // FIXME: only generate the tasks if this is the default published variant?

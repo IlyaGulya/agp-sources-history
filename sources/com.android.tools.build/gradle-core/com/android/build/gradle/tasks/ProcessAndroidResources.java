@@ -104,7 +104,6 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Nested;
@@ -120,8 +119,6 @@ import org.gradle.tooling.BuildException;
 public class ProcessAndroidResources extends IncrementalTask {
 
     private static final Logger LOG = Logging.getLogger(ProcessAndroidResources.class);
-
-    private File resDir;
 
     private String buildTargetAbi;
     private Set<String> supportedAbis;
@@ -186,13 +183,6 @@ public class ProcessAndroidResources extends IncrementalTask {
     }
 
     private VariantScope variantScope;
-
-    @NonNull
-    @InputDirectory
-    @PathSensitive(PathSensitivity.RELATIVE)
-    public File getResDir() {
-        return resDir;
-    }
 
     @Input
     @Optional
@@ -364,7 +354,9 @@ public class ProcessAndroidResources extends IncrementalTask {
                                 filterValue -> {
                                     ApkData configurationApkData =
                                             splitFactory.addConfigurationSplit(
-                                                    filterType, filterValue);
+                                                    filterType,
+                                                    filterValue,
+                                                    "" /* replaced later */);
                                     configurationApkData.setVersionCode(
                                             variantScope
                                                     .getVariantConfiguration()
@@ -387,6 +379,8 @@ public class ProcessAndroidResources extends IncrementalTask {
                                             findPackagedResForSplit(
                                                     resPackageOutputFolder, configurationApkData);
                                     if (packagedResForSplit != null) {
+                                        configurationApkData.setOutputFileName(
+                                                packagedResForSplit.getName());
                                         splitScope.addOutputForSplit(
                                                 VariantScope.TaskOutputType
                                                         .DENSITY_OR_LANGUAGE_SPLIT_PROCESSED_RES,
@@ -498,8 +492,8 @@ public class ProcessAndroidResources extends IncrementalTask {
 
                 // Get symbol table of resources of the library
                 SymbolTable symbolTable =
-                        ResourceDirectoryParser
-                                .parseDirectory(getResDir(), IdProvider.sequential());
+                        ResourceDirectoryParser.parseDirectory(
+                                getInputResourcesDir().getSingleFile(), IdProvider.sequential());
 
                 SymbolUtils.processLibraryMainSymbolTable(
                         symbolTable,
@@ -509,7 +503,8 @@ public class ProcessAndroidResources extends IncrementalTask {
                         manifestFile,
                         srcOut,
                         symbolOutputDir,
-                        proguardOutputFile);
+                        proguardOutputFile,
+                        getInputResourcesDir().getSingleFile());
             } else {
 
                 Aapt aapt =
@@ -525,7 +520,7 @@ public class ProcessAndroidResources extends IncrementalTask {
                         new AaptPackageConfig.Builder()
                                 .setManifestFile(manifestFile)
                                 .setOptions(getAaptOptions())
-                                .setResourceDir(getResDir())
+                                .setResourceDir(getInputResourcesDir().getSingleFile())
                                 .setLibraries(
                                         generateCode ? getLibraryInfoList() : ImmutableList.of())
                                 .setCustomPackageForR(packageForR)
@@ -793,11 +788,11 @@ public class ProcessAndroidResources extends IncrementalTask {
             processResources.setManifestFiles(
                     variantScope.getOutput(processResources.taskInputType));
 
-            // FIX ME : we should not have both a file collection and a resDir plus, we should
-            // express the dependency on the databinding task through a file collection.
-            processResources.mergedResources =
+            Preconditions.checkState(
+                    sourceTaskOutputType == TaskManager.MergeType.MERGE,
+                    "Support for not merging resources in libraries not implemented yet.");
+            processResources.inputResourcesDir =
                     variantScope.getOutput(sourceTaskOutputType.getOutputType());
-            processResources.resDir = variantScope.getMergeResourcesOutputDir();
 
             processResources.setType(config.getType());
             processResources.setDebuggable(config.getBuildType().isDebuggable());
@@ -808,7 +803,7 @@ public class ProcessAndroidResources extends IncrementalTask {
 
             ProjectOptions projectOptions = variantScope.getGlobalScope().getProjectOptions();
             processResources.buildTargetDensity =
-                    projectOptions.get(StringOption.IDE_BUILD_TARGET_DENISTY);
+                    projectOptions.get(StringOption.IDE_BUILD_TARGET_DENSITY);
 
             processResources.setMergeBlameLogFolder(
                     variantScope.getResourceBlameLogDir());
@@ -901,13 +896,13 @@ public class ProcessAndroidResources extends IncrementalTask {
         return this.buildContext.isInInstantRunMode();
     }
 
-    private FileCollection mergedResources;
+    private FileCollection inputResourcesDir;
 
     @NonNull
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
-    public FileCollection getMergedResources() {
-        return mergedResources;
+    public FileCollection getInputResourcesDir() {
+        return inputResourcesDir;
     }
 
     @OutputDirectory

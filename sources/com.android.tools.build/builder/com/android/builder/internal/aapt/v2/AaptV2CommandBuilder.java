@@ -156,7 +156,13 @@ public final class AaptV2CommandBuilder {
         builder.add("-o", resourceOutputApk);
 
         if (config.getProguardOutputFile() != null) {
-            //builder.add("--proguard", config.getProguardOutputFile().getAbsolutePath());
+            builder.add("--proguard", config.getProguardOutputFile().getAbsolutePath());
+        }
+
+        if (config.getMainDexListProguardOutputFile() != null) {
+            builder.add(
+                    "--proguard-main-dex",
+                    config.getMainDexListProguardOutputFile().getAbsolutePath());
         }
 
         if (config.getSplits() != null) {
@@ -261,12 +267,6 @@ public final class AaptV2CommandBuilder {
         }
 
         builder.add("--no-version-vectors");
-
-        if (config.getBaseFeature() != null) {
-            throw new AaptException(
-                    "Feature-splits are not supported in AAPT2 yet. "
-                            + "Use -Pandroid.enableAapt2=false flag to use AAPT1 instead.");
-        }
 
         return builder.build();
     }

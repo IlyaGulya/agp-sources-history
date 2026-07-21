@@ -20,6 +20,7 @@ import static com.android.SdkConstants.FD_ASSETS;
 import static com.android.SdkConstants.FN_ANDROID_MANIFEST_XML;
 import static com.android.SdkConstants.FN_RESOURCE_TEXT;
 import static com.android.SdkConstants.FN_SPLIT_LIST;
+import static com.android.build.gradle.internal.coverage.JacocoPlugin.AGENT_CONFIGURATION_NAME;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.ALL;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.EXTERNAL;
 import static com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactScope.MODULE;
@@ -53,7 +54,6 @@ import com.android.build.api.transform.QualifiedContent.DefaultContentType;
 import com.android.build.api.transform.QualifiedContent.Scope;
 import com.android.build.api.transform.Transform;
 import com.android.build.gradle.AndroidConfig;
-import com.android.build.gradle.AndroidGradleOptions;
 import com.android.build.gradle.ProguardFiles;
 import com.android.build.gradle.api.AnnotationProcessorOptions;
 import com.android.build.gradle.api.JavaCompileOptions;
@@ -166,7 +166,6 @@ import com.android.build.gradle.tasks.RenderscriptCompile;
 import com.android.build.gradle.tasks.ShaderCompile;
 import com.android.build.gradle.tasks.SplitsDiscovery;
 import com.android.build.gradle.tasks.factory.AndroidUnitTest;
-import com.android.build.gradle.tasks.factory.JacocoAgentConfigAction;
 import com.android.build.gradle.tasks.factory.JavaCompileConfigAction;
 import com.android.build.gradle.tasks.factory.ProcessJavaResConfigAction;
 import com.android.build.gradle.tasks.factory.TestServerTaskConfigAction;
@@ -190,6 +189,7 @@ import com.android.utils.FileUtils;
 import com.android.utils.StringHelper;
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -484,7 +484,9 @@ public abstract class TaskManager {
     protected void createDependencyStreams(
             @NonNull TaskFactory tasks,
             @NonNull final VariantScope variantScope) {
-        BaseVariantData variantData = variantScope.getVariantData();
+        // Since it's going to chance the configurations, we need to do it before
+        // we start doing queries to fill the streams.
+        handleJacocoDependencies(variantScope);
 
         TransformManager transformManager = variantScope.getTransformManager();
 
@@ -599,8 +601,6 @@ public abstract class TaskManager {
                                             RUNTIME_CLASSPATH, ALL, CLASSES))
                             .build());
         }
-
-        handleJacocoDependencies(tasks, variantScope);
     }
 
     public void createMergeApkManifestsTask(
@@ -629,7 +629,7 @@ public abstract class TaskManager {
             optionalFeatures.add(ManifestMerger2.Invoker.Feature.DEBUGGABLE);
         }
 
-        if (AndroidGradleOptions.getAdvancedProfilingTransforms(project).length > 0
+        if (!getAdvancedProfilingTransforms(projectOptions).isEmpty()
                 && variantScope.getVariantConfiguration().getBuildType().isDebuggable()) {
             optionalFeatures.add(ManifestMerger2.Invoker.Feature.ADVANCED_PROFILING);
         }
@@ -655,6 +655,15 @@ public abstract class TaskManager {
         if (variantScope.getMicroApkTask() != null) {
             processManifestTask.dependsOn(tasks, variantScope.getMicroApkTask());
         }
+    }
+
+    @NonNull
+    private static List<String> getAdvancedProfilingTransforms(@NonNull ProjectOptions options) {
+        String string = options.get(StringOption.IDE_ANDROID_CUSTOM_CLASS_TRANSFORMS);
+        if (string == null) {
+            return ImmutableList.of();
+        }
+        return Splitter.on(',').splitToList(string);
     }
 
     /** Creates the merge manifests task. */
@@ -1974,7 +1983,7 @@ public abstract class TaskManager {
         }
 
         // ----- Android studio profiling transforms
-        for (String jar : AndroidGradleOptions.getAdvancedProfilingTransforms(project)) {
+        for (String jar : getAdvancedProfilingTransforms(projectOptions)) {
             if (variantScope.getVariantConfiguration().getBuildType().isDebuggable()
                     && variantData.getType().equals(VariantType.DEFAULT)
                     && jar != null) {
@@ -1995,8 +2004,8 @@ public abstract class TaskManager {
             AndroidTask<DefaultTask> allActionsAnchorTask =
                     createInstantRunAllActionsTasks(tasks, variantScope);
             assert variantScope.getInstantRunTaskManager() != null;
-            preColdSwapTask = variantScope.getInstantRunTaskManager()
-                    .createPreColdswapTask(project);
+            preColdSwapTask =
+                    variantScope.getInstantRunTaskManager().createPreColdswapTask(projectOptions);
             preColdSwapTask.dependsOn(tasks, allActionsAnchorTask);
 
             if (InstantRunPatchingPolicy.PRE_LOLLIPOP
@@ -2114,7 +2123,7 @@ public abstract class TaskManager {
                 transformManager.addStream(
                         OriginalStream.builder(project, "runtime-deps-try-with-resources")
                                 .addContentTypes(TransformManager.CONTENT_CLASS)
-                                .addScope(Scope.PROJECT)
+                                .addScope(Scope.EXTERNAL_LIBRARIES)
                                 .setFileCollection(
                                         variantScope.getTryWithResourceRuntimeSupportJar())
                                 .build());
@@ -2359,9 +2368,7 @@ public abstract class TaskManager {
         return allActionAnchorTask;
     }
 
-    protected void handleJacocoDependencies(
-            @NonNull TaskFactory tasks,
-            @NonNull VariantScope variantScope) {
+    protected void handleJacocoDependencies(@NonNull VariantScope variantScope) {
         GradleVariantConfiguration config = variantScope.getVariantConfiguration();
         // we add the jacoco jar if coverage is enabled, but we don't add it
         // for test apps as it's already part of the tested app.
@@ -2375,18 +2382,13 @@ public abstract class TaskManager {
                                         && config.getTestedConfig().getType()
                                                 == VariantType.LIBRARY));
         if (isTestCoverageEnabled) {
-            AndroidTask<Copy> agentTask = getJacocoAgentTask(tasks);
+            final Configuration agentConfiguration =
+                    project.getConfigurations().getByName(AGENT_CONFIGURATION_NAME);
 
-            // also add a new stream for the jacoco agent Jar
             variantScope
-                    .getTransformManager()
-                    .addStream(
-                            OriginalStream.builder(project, "jacoco-agent")
-                                    .addContentTypes(TransformManager.CONTENT_JARS)
-                                    .addScope(Scope.EXTERNAL_LIBRARIES)
-                                    .setJar(globalScope.getJacocoAgent())
-                                    .setDependency(agentTask.getName())
-                                    .build());
+                    .getVariantDependencies()
+                    .getRuntimeClasspath()
+                    .extendsFrom(agentConfiguration);
         }
     }
 
@@ -2394,14 +2396,9 @@ public abstract class TaskManager {
             @NonNull TaskFactory taskFactory,
             @NonNull final VariantScope variantScope) {
 
-        JacocoTransform jacocoTransform = new JacocoTransform(variantScope.getGlobalScope().getJacocoAgent());
-        Optional<AndroidTask<TransformTask>> task =
-                variantScope
-                        .getTransformManager()
-                        .addTransform(taskFactory, variantScope, jacocoTransform);
+        JacocoTransform jacocoTransform = new JacocoTransform();
 
-        AndroidTask<Copy> agentTask = getJacocoAgentTask(taskFactory);
-        task.ifPresent(t -> t.dependsOn(taskFactory, agentTask));
+        variantScope.getTransformManager().addTransform(taskFactory, variantScope, jacocoTransform);
     }
 
     /**
@@ -2750,13 +2747,6 @@ public abstract class TaskManager {
                     assembleTask.setDescription("Assembles all " + sourceSetName + " builds.");
                     assembleTask.setGroup(BasePlugin.BUILD_GROUP);
                 });
-    }
-
-    public AndroidTask<Copy> getJacocoAgentTask(TaskFactory tasks) {
-        if (jacocoAgentTask == null) {
-            jacocoAgentTask = androidTasks.create(tasks, new JacocoAgentConfigAction(globalScope));
-        }
-        return jacocoAgentTask;
     }
 
     protected void maybeCreateJavaCodeShrinkerTransform(

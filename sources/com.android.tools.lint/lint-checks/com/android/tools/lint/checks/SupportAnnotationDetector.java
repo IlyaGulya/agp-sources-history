@@ -174,7 +174,6 @@ import org.w3c.dom.NodeList;
  * express, e.g. for {@code @CheckReturn} it makes sure the return value is used,
  * for {@code ColorInt} it ensures that a proper color integer is passed in, etc.
  */
-@SuppressWarnings("WeakerAccess")
 public class SupportAnnotationDetector extends Detector implements UastScanner {
 
     public static final Implementation IMPLEMENTATION
@@ -2308,20 +2307,30 @@ public class SupportAnnotationDetector extends Detector implements UastScanner {
 
             UCallExpression initializerExpression = (UCallExpression) allowed;
             List<UExpression> initializers = initializerExpression.getValueArguments();
+            PsiElement psiValue = null;
+            if (value instanceof PsiElement) {
+                psiValue = (PsiElement)value;
+            }
+
             for (UExpression expression : initializers) {
                 if (expression instanceof ULiteralExpression) {
                     if (value.equals(((ULiteralExpression)expression).getValue())) {
                         return;
                     }
+                } else if (psiValue == null) {
+                    // We're checking here such that we can assume psiValue is not null
+                    // below
+                    //noinspection UnnecessaryContinue
+                    continue;
                 } else if (expression instanceof ExternalReferenceExpression) {
                     PsiElement resolved = UastLintUtils.resolve(
                             (ExternalReferenceExpression) expression, argument);
-                    if (resolved != null && resolved.equals(value)) {
+                    if (resolved != null && resolved.isEquivalentTo(psiValue)) {
                         return;
                     }
                 } else if (expression instanceof UReferenceExpression) {
                     PsiElement resolved = ((UReferenceExpression) expression).resolve();
-                    if (resolved != null && resolved.equals(value)) {
+                    if (resolved != null && resolved.isEquivalentTo(psiValue)) {
                         return;
                     }
                 }

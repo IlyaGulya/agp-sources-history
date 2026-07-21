@@ -203,7 +203,9 @@ public abstract class BaseVariantData implements TaskContainer {
                                 recorder),
                         this);
         splitScope = new SplitScope(splitHandlingPolicy);
-        splitFactory = new SplitFactory(variantConfiguration, splitScope);
+        splitFactory =
+                new SplitFactory(
+                        globalScope.getProjectBaseName(), variantConfiguration, splitScope);
 
         taskManager.configureScopeForNdk(scope);
 
@@ -329,6 +331,7 @@ public abstract class BaseVariantData implements TaskContainer {
         return allPreJavacGeneratedBytecode;
     }
 
+    @NonNull
     public FileCollection getAllPostJavacGeneratedBytecode() {
         return allPostJavacGeneratedBytecode;
     }

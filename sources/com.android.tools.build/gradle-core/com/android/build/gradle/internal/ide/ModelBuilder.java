@@ -25,7 +25,6 @@ import com.android.annotations.Nullable;
 import com.android.annotations.VisibleForTesting;
 import com.android.build.VariantOutput;
 import com.android.build.gradle.AndroidConfig;
-import com.android.build.gradle.AndroidGradleOptions;
 import com.android.build.gradle.TestAndroidConfig;
 import com.android.build.gradle.internal.BuildTypeData;
 import com.android.build.gradle.internal.ExtraModelInfo;
@@ -48,6 +47,9 @@ import com.android.build.gradle.internal.variant.BaseVariantData;
 import com.android.build.gradle.internal.variant.TaskContainer;
 import com.android.build.gradle.internal.variant.TestVariantData;
 import com.android.build.gradle.internal.variant.TestedVariantData;
+import com.android.build.gradle.options.BooleanOption;
+import com.android.build.gradle.options.ProjectOptions;
+import com.android.build.gradle.options.SyncOptions;
 import com.android.builder.Version;
 import com.android.builder.core.AndroidBuilder;
 import com.android.builder.core.VariantType;
@@ -87,6 +89,7 @@ import com.google.common.collect.Sets;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -109,7 +112,6 @@ public class ModelBuilder implements ToolingModelBuilder {
             new DependenciesImpl(ImmutableList.of(), ImmutableList.of(), ImmutableList.of());
 
     @NonNull static final DependencyGraphs EMPTY_DEPENDENCY_GRAPH = new EmptyDependencyGraphs();
-
     @NonNull private final GlobalScope globalScope;
     @NonNull private final AndroidBuilder androidBuilder;
     @NonNull private final AndroidConfig config;
@@ -236,7 +238,10 @@ public class ModelBuilder implements ToolingModelBuilder {
     }
 
     private Object buildAndroidProject(Project project) {
-        Integer modelLevelInt = AndroidGradleOptions.buildModelOnlyVersion(project);
+        // Cannot be injected, as the project might not be the same as the project used to construct
+        // the model builder e.g. when lint explicitly builds the model.
+        ProjectOptions projectOptions = new ProjectOptions(project);
+        Integer modelLevelInt = SyncOptions.buildModelOnlyVersion(projectOptions);
         if (modelLevelInt != null) {
             modelLevel = modelLevelInt;
         }
@@ -245,7 +250,8 @@ public class ModelBuilder implements ToolingModelBuilder {
             throw new RuntimeException("This Gradle plugin requires Studio 3.0 minimum");
         }
 
-        modelWithFullDependency = AndroidGradleOptions.buildModelWithFullDependencies(project);
+        modelWithFullDependency =
+                projectOptions.get(BooleanOption.IDE_BUILD_MODEL_FEATURE_FULL_DEPENDENCIES);
 
         // Get the boot classpath. This will ensure the target is configured.
         List<String> bootClasspath = androidBuilder.getBootClasspathAsStrings(false);
@@ -448,6 +454,10 @@ public class ModelBuilder implements ToolingModelBuilder {
 
         Pair<Dependencies, DependencyGraphs> result = getDependencies(scope);
 
+        Set<File> additionalTestClasses = new HashSet<>();
+        additionalTestClasses.addAll(variantData.getAllPreJavacGeneratedBytecode().getFiles());
+        additionalTestClasses.addAll(variantData.getAllPostJavacGeneratedBytecode().getFiles());
+
         return new JavaArtifactImpl(
                 variantType.getArtifactName(),
                 scope.getAssembleTask().getName(),
@@ -459,6 +469,7 @@ public class ModelBuilder implements ToolingModelBuilder {
                 (variantData.javacTask != null)
                         ? variantData.javacTask.getDestinationDir()
                         : scope.getJavaOutputDir(),
+                additionalTestClasses,
                 variantData.getJavaResourcesForUnitTesting(),
                 globalScope.getMockableAndroidJarFile(),
                 result.getFirst(),
@@ -575,6 +586,10 @@ public class ModelBuilder implements ToolingModelBuilder {
 
         Pair<Dependencies, DependencyGraphs> dependencies = getDependencies(scope);
 
+        Set<File> additionalTestClasses = new HashSet<>();
+        additionalTestClasses.addAll(variantData.getAllPreJavacGeneratedBytecode().getFiles());
+        additionalTestClasses.addAll(variantData.getAllPostJavacGeneratedBytecode().getFiles());
+
         return new AndroidArtifactImpl(
                 name,
                 scope.getGlobalScope().getProjectBaseName()
@@ -599,6 +614,7 @@ public class ModelBuilder implements ToolingModelBuilder {
                 (variantData.javacTask != null)
                         ? variantData.javacTask.getDestinationDir()
                         : scope.getJavaOutputDir(),
+                additionalTestClasses,
                 scope.getVariantData().getJavaResourcesForUnitTesting(),
                 dependencies.getFirst(),
                 dependencies.getSecond(),
