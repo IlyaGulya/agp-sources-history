@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.manifmerger
 
-package com.android.tools.lint.model
+import com.google.common.collect.ImmutableList
+import org.w3c.dom.Element
 
-enum class LintModelNamespacingMode {
-  /**
-   * Resources are not namespaced.
-   *
-   * They are merged at the application level, as was the behavior with AAPT1.
-   */
-  DISABLED,
+internal class CombinedNodeKeyResolver(
+    private val resolvers: List<NodeKeyResolver>,
+) : NodeKeyResolver {
 
-  /**
-   * Resources must be namespaced.
-   *
-   * Each library is compiled in to an AAPT2 static library with its own namespace.
-   *
-   * Projects using this *cannot* consume non-namespaced dependencies.
-   */
-  REQUIRED,
+    override val keyAttributesNames: ImmutableList<String> = ImmutableList.copyOf(resolvers.flatMap { it.keyAttributesNames }.distinct())
+
+    override fun getKey(element: Element): String {
+        return resolvers.map { it.getKey(element) }.joinToString("+")
+    }
 }
