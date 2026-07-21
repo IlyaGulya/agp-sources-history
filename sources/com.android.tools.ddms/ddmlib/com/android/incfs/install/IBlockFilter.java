@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.incfs.install;
 
-package com.android.ide.common.gradle.model.impl
+import com.android.annotations.NonNull;
 
-import com.android.ide.common.gradle.model.IdeAndroidLibrary
-import com.android.ide.common.gradle.model.IdeJavaLibrary
-import com.android.ide.common.gradle.model.IdeModuleLibrary
+/** Controls whether a block of data that must be delivered to the device should be served. */
+public interface IBlockFilter {
 
-open class IdeAndroidLibraryDelegate(private val delegate: IdeAndroidLibrary): IdeAndroidLibrary by delegate
-open class IdeJavaLibraryDelegate(private val delegate: IdeJavaLibrary): IdeJavaLibrary by delegate
-open class IdeModuleLibraryDelegate(private val delegate: IdeModuleLibrary): IdeModuleLibrary by delegate
+    /**
+     * Callback invoked by the associated {@link IncrementalInstallSession} to determine whether a
+     * block of data requested by the device should be served to the device.
+     *
+     * @return true if the block of data should be served; otherwise, false.
+     */
+    boolean shouldServeBlock(@NonNull PendingBlock block);
+}
