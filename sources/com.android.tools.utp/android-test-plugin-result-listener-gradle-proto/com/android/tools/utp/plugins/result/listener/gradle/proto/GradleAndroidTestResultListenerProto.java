@@ -126,6 +126,26 @@ public final class GradleAndroidTestResultListenerProto {
      */
     com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteFinishedOrBuilder getTestSuiteFinishedOrBuilder();
 
+    /**
+     * <pre>
+     * A device ID of which the test has executed on.
+     * </pre>
+     *
+     * <code>string deviceId = 5;</code>
+     * @return The deviceId.
+     */
+    java.lang.String getDeviceId();
+    /**
+     * <pre>
+     * A device ID of which the test has executed on.
+     * </pre>
+     *
+     * <code>string deviceId = 5;</code>
+     * @return The bytes for deviceId.
+     */
+    com.google.protobuf.ByteString
+        getDeviceIdBytes();
+
     public com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.StateCase getStateCase();
   }
   /**
@@ -145,6 +165,7 @@ public final class GradleAndroidTestResultListenerProto {
       super(builder);
     }
     private TestResultEvent() {
+      deviceId_ = "";
     }
 
     @java.lang.Override
@@ -231,6 +252,12 @@ public final class GradleAndroidTestResultListenerProto {
                 state_ = subBuilder.buildPartial();
               }
               stateCase_ = 4;
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              deviceId_ = s;
               break;
             }
             default: {
@@ -2954,6 +2981,50 @@ public final class GradleAndroidTestResultListenerProto {
       return com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteFinished.getDefaultInstance();
     }
 
+    public static final int DEVICEID_FIELD_NUMBER = 5;
+    private volatile java.lang.Object deviceId_;
+    /**
+     * <pre>
+     * A device ID of which the test has executed on.
+     * </pre>
+     *
+     * <code>string deviceId = 5;</code>
+     * @return The deviceId.
+     */
+    public java.lang.String getDeviceId() {
+      java.lang.Object ref = deviceId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        deviceId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * A device ID of which the test has executed on.
+     * </pre>
+     *
+     * <code>string deviceId = 5;</code>
+     * @return The bytes for deviceId.
+     */
+    public com.google.protobuf.ByteString
+        getDeviceIdBytes() {
+      java.lang.Object ref = deviceId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        deviceId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -2980,6 +3051,9 @@ public final class GradleAndroidTestResultListenerProto {
       if (stateCase_ == 4) {
         output.writeMessage(4, (com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteFinished) state_);
       }
+      if (!getDeviceIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, deviceId_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -3005,6 +3079,9 @@ public final class GradleAndroidTestResultListenerProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, (com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.TestSuiteFinished) state_);
       }
+      if (!getDeviceIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, deviceId_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -3020,6 +3097,8 @@ public final class GradleAndroidTestResultListenerProto {
       }
       com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent other = (com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent) obj;
 
+      if (!getDeviceId()
+          .equals(other.getDeviceId())) return false;
       if (!getStateCase().equals(other.getStateCase())) return false;
       switch (stateCase_) {
         case 1:
@@ -3052,6 +3131,8 @@ public final class GradleAndroidTestResultListenerProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + DEVICEID_FIELD_NUMBER;
+      hash = (53 * hash) + getDeviceId().hashCode();
       switch (stateCase_) {
         case 1:
           hash = (37 * hash) + TEST_SUITE_STARTED_FIELD_NUMBER;
@@ -3209,6 +3290,8 @@ public final class GradleAndroidTestResultListenerProto {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        deviceId_ = "";
+
         stateCase_ = 0;
         state_ = null;
         return this;
@@ -3265,6 +3348,7 @@ public final class GradleAndroidTestResultListenerProto {
             result.state_ = testSuiteFinishedBuilder_.build();
           }
         }
+        result.deviceId_ = deviceId_;
         result.stateCase_ = stateCase_;
         onBuilt();
         return result;
@@ -3314,6 +3398,10 @@ public final class GradleAndroidTestResultListenerProto {
 
       public Builder mergeFrom(com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent other) {
         if (other == com.android.tools.utp.plugins.result.listener.gradle.proto.GradleAndroidTestResultListenerProto.TestResultEvent.getDefaultInstance()) return this;
+        if (!other.getDeviceId().isEmpty()) {
+          deviceId_ = other.deviceId_;
+          onChanged();
+        }
         switch (other.getStateCase()) {
           case TEST_SUITE_STARTED: {
             mergeTestSuiteStarted(other.getTestSuiteStarted());
@@ -4074,6 +4162,102 @@ public final class GradleAndroidTestResultListenerProto {
         onChanged();;
         return testSuiteFinishedBuilder_;
       }
+
+      private java.lang.Object deviceId_ = "";
+      /**
+       * <pre>
+       * A device ID of which the test has executed on.
+       * </pre>
+       *
+       * <code>string deviceId = 5;</code>
+       * @return The deviceId.
+       */
+      public java.lang.String getDeviceId() {
+        java.lang.Object ref = deviceId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          deviceId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A device ID of which the test has executed on.
+       * </pre>
+       *
+       * <code>string deviceId = 5;</code>
+       * @return The bytes for deviceId.
+       */
+      public com.google.protobuf.ByteString
+          getDeviceIdBytes() {
+        java.lang.Object ref = deviceId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          deviceId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A device ID of which the test has executed on.
+       * </pre>
+       *
+       * <code>string deviceId = 5;</code>
+       * @param value The deviceId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDeviceId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        deviceId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A device ID of which the test has executed on.
+       * </pre>
+       *
+       * <code>string deviceId = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDeviceId() {
+        
+        deviceId_ = getDefaultInstance().getDeviceId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A device ID of which the test has executed on.
+       * </pre>
+       *
+       * <code>string deviceId = 5;</code>
+       * @param value The bytes for deviceId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDeviceIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        deviceId_ = value;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -4595,7 +4779,7 @@ public final class GradleAndroidTestResultListenerProto {
       "\n)gradle_android_test_result_listener.pr" +
       "oto\022:com.android.tools.utp.plugins.resul" +
       "t.listener.gradle.proto\032\031google/protobuf" +
-      "/any.proto\"\344\005\n\017TestResultEvent\022z\n\022test_s" +
+      "/any.proto\"\366\005\n\017TestResultEvent\022z\n\022test_s" +
       "uite_started\030\001 \001(\0132\\.com.android.tools.u" +
       "tp.plugins.result.listener.gradle.proto." +
       "TestResultEvent.TestSuiteStartedH\000\022x\n\021te" +
@@ -4608,22 +4792,22 @@ public final class GradleAndroidTestResultListenerProto {
       "\022|\n\023test_suite_finished\030\004 \001(\0132].com.andr" +
       "oid.tools.utp.plugins.result.listener.gr" +
       "adle.proto.TestResultEvent.TestSuiteFini" +
-      "shedH\000\032\022\n\020TestSuiteStarted\032:\n\017TestCaseSt" +
-      "arted\022\'\n\ttest_case\030\001 \001(\0132\024.google.protob" +
-      "uf.Any\032B\n\020TestCaseFinished\022.\n\020test_case_" +
-      "result\030\001 \001(\0132\024.google.protobuf.Any\032D\n\021Te" +
-      "stSuiteFinished\022/\n\021test_suite_result\030\001 \001" +
-      "(\0132\024.google.protobuf.AnyB\007\n\005State\"\037\n\035Rec" +
-      "ordTestResultEventResponse2\354\001\n&GradleAnd" +
-      "roidTestResultListenerService\022\301\001\n\025Record" +
-      "TestResultEvent\022K.com.android.tools.utp." +
-      "plugins.result.listener.gradle.proto.Tes" +
-      "tResultEvent\032Y.com.android.tools.utp.plu" +
-      "gins.result.listener.gradle.proto.Record" +
-      "TestResultEventResponse(\001Bb\n:com.android" +
-      ".tools.utp.plugins.result.listener.gradl" +
-      "e.protoB$GradleAndroidTestResultListener" +
-      "Protob\006proto3"
+      "shedH\000\022\020\n\010deviceId\030\005 \001(\t\032\022\n\020TestSuiteSta" +
+      "rted\032:\n\017TestCaseStarted\022\'\n\ttest_case\030\001 \001" +
+      "(\0132\024.google.protobuf.Any\032B\n\020TestCaseFini" +
+      "shed\022.\n\020test_case_result\030\001 \001(\0132\024.google." +
+      "protobuf.Any\032D\n\021TestSuiteFinished\022/\n\021tes" +
+      "t_suite_result\030\001 \001(\0132\024.google.protobuf.A" +
+      "nyB\007\n\005State\"\037\n\035RecordTestResultEventResp" +
+      "onse2\354\001\n&GradleAndroidTestResultListener" +
+      "Service\022\301\001\n\025RecordTestResultEvent\022K.com." +
+      "android.tools.utp.plugins.result.listene" +
+      "r.gradle.proto.TestResultEvent\032Y.com.and" +
+      "roid.tools.utp.plugins.result.listener.g" +
+      "radle.proto.RecordTestResultEventRespons" +
+      "e(\001Bb\n:com.android.tools.utp.plugins.res" +
+      "ult.listener.gradle.protoB$GradleAndroid" +
+      "TestResultListenerProtob\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -4635,7 +4819,7 @@ public final class GradleAndroidTestResultListenerProto {
     internal_static_com_android_tools_utp_plugins_result_listener_gradle_proto_TestResultEvent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_com_android_tools_utp_plugins_result_listener_gradle_proto_TestResultEvent_descriptor,
-        new java.lang.String[] { "TestSuiteStarted", "TestCaseStarted", "TestCaseFinished", "TestSuiteFinished", "State", });
+        new java.lang.String[] { "TestSuiteStarted", "TestCaseStarted", "TestCaseFinished", "TestSuiteFinished", "DeviceId", "State", });
     internal_static_com_android_tools_utp_plugins_result_listener_gradle_proto_TestResultEvent_TestSuiteStarted_descriptor =
       internal_static_com_android_tools_utp_plugins_result_listener_gradle_proto_TestResultEvent_descriptor.getNestedTypes().get(0);
     internal_static_com_android_tools_utp_plugins_result_listener_gradle_proto_TestResultEvent_TestSuiteStarted_fieldAccessorTable = new
