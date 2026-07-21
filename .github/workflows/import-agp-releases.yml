@@ -55,6 +55,7 @@ jobs:
             for version in "${batch[@]}"; do
               mkdir -p sources
               rsync -a --delete "build/agp-sources/$version/" sources/
+              find sources -type f -exec chmod 0644 {} +
               printf '%s\n' "$version" > .agp-version
 
               git add --all sources .agp-version
