@@ -57,7 +57,7 @@ abstract class AbstractProductFlavor(
 
     override var applicationId: String? = null
 
-    open fun setApplicationId(applicationId: String?): ProductFlavor {
+    fun setApplicationId(applicationId: String?): ProductFlavor {
         this.applicationId = applicationId
         return this
     }
@@ -498,6 +498,7 @@ abstract class AbstractProductFlavor(
         _versionCode = chooseNotNull(overlay.versionCode, versionCode)
         _versionName = chooseNotNull(overlay.versionName, versionName)
         versionNameSuffix = mergeVersionNameSuffix(overlay.versionNameSuffix, versionNameSuffix)
+        applicationId = chooseNotNull(overlay.applicationId, applicationId)
         applicationIdSuffix = mergeApplicationIdSuffix(
                 overlay.applicationIdSuffix, applicationIdSuffix)
         testApplicationId = chooseNotNull(overlay.testApplicationId,
@@ -560,6 +561,7 @@ abstract class AbstractProductFlavor(
             _versionCode = thatProductFlavor.versionCode
             _versionName = thatProductFlavor.versionName
             versionNameSuffix = thatProductFlavor.versionNameSuffix
+            applicationId = thatProductFlavor.applicationId
             testApplicationId = thatProductFlavor.testApplicationId
             testInstrumentationRunner = thatProductFlavor.testInstrumentationRunner
             testInstrumentationRunnerArguments.clear()

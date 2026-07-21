@@ -15,24 +15,27 @@
  */
 package com.android.ide.common.gradle.model.level2;
 
+import static com.android.ide.common.gradle.model.level2.IdeLibraryFactory.defaultValueIfNotPresent;
+
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.builder.model.AndroidLibrary;
+import com.android.builder.model.JavaLibrary;
 import com.android.builder.model.level2.Library;
 import com.android.ide.common.gradle.model.IdeModel;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.File;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
 
 /** Creates a deep copy of {@link Library} of type LIBRARY_MODULE. */
-public final class IdeModuleLibrary implements Library, Serializable {
-    // Increase the value when adding/removing fields or when changing the serialization/deserialization mechanism.
-    private static final long serialVersionUID = 5L;
-
+public final class IdeModuleLibrary implements IdeLibrary {
     @NonNull private final String myArtifactAddress;
     @Nullable private final String myBuildId;
     @Nullable private final String myProjectPath;
     @Nullable private final String myVariant;
+
+    private final boolean myIsProvided;
     private final int myType;
     private final int myHashCode;
 
@@ -43,43 +46,34 @@ public final class IdeModuleLibrary implements Library, Serializable {
         myBuildId = null;
         myProjectPath = null;
         myVariant = null;
+        myIsProvided = false;
         myType = 0;
 
         myHashCode = 0;
     }
 
-    IdeModuleLibrary(@NonNull Library library, @NonNull String artifactAddress) {
-        myType = LIBRARY_MODULE;
-        myArtifactAddress = artifactAddress;
-        myBuildId = IdeModel.copyNewProperty(library::getBuildId, null);
-        myProjectPath = IdeModel.copyNewProperty(library::getProjectPath, null);
-        myVariant = IdeModel.copyNewProperty(library::getVariant, null);
-        myHashCode = calculateHashCode();
-    }
-
-    IdeModuleLibrary(
-            @NonNull com.android.builder.model.AndroidLibrary library,
-            @NonNull String artifactAddress) {
+    public IdeModuleLibrary(@NonNull AndroidLibrary library, @NonNull String artifactAddress) {
         myType = LIBRARY_MODULE;
         myArtifactAddress = artifactAddress;
         myBuildId = IdeModel.copyNewProperty(library::getBuildId, null);
         myProjectPath = IdeModel.copyNewProperty(library::getProject, null);
         myVariant = IdeModel.copyNewProperty(library::getProjectVariant, null);
+        myIsProvided = defaultValueIfNotPresent(() -> library.isProvided(), false);
         myHashCode = calculateHashCode();
     }
 
-    IdeModuleLibrary(
-            @NonNull com.android.builder.model.JavaLibrary library,
-            @NonNull String artifactAddress) {
+    IdeModuleLibrary(@NonNull JavaLibrary library, @NonNull String artifactAddress) {
         myType = LIBRARY_MODULE;
         myArtifactAddress = artifactAddress;
         myBuildId = IdeModel.copyNewProperty(library::getBuildId, null);
         myProjectPath = IdeModel.copyNewProperty(library::getProject, null);
+        myIsProvided = defaultValueIfNotPresent(() -> library.isProvided(), false);
         myVariant = null;
         myHashCode = calculateHashCode();
     }
 
-    IdeModuleLibrary(
+    @VisibleForTesting
+    public IdeModuleLibrary(
             @NonNull String projectPath,
             @NonNull String artifactAddress,
             @Nullable String buildId) {
@@ -88,6 +82,7 @@ public final class IdeModuleLibrary implements Library, Serializable {
         myBuildId = buildId;
         myProjectPath = projectPath;
         myVariant = null;
+        myIsProvided = false;
         myHashCode = calculateHashCode();
     }
 
@@ -222,6 +217,11 @@ public final class IdeModuleLibrary implements Library, Serializable {
         throw unsupportedMethodForModuleLibrary("getSymbolFile");
     }
 
+    @Override
+    public boolean isProvided() {
+        return myIsProvided;
+    }
+
     @NonNull
     private static UnsupportedOperationException unsupportedMethodForModuleLibrary(
             @NonNull String methodName) {
@@ -242,7 +242,8 @@ public final class IdeModuleLibrary implements Library, Serializable {
                 && Objects.equals(myArtifactAddress, that.myArtifactAddress)
                 && Objects.equals(myProjectPath, that.myProjectPath)
                 && Objects.equals(myBuildId, that.myBuildId)
-                && Objects.equals(myVariant, that.myVariant);
+                && Objects.equals(myVariant, that.myVariant)
+                && Objects.equals(myIsProvided, that.myIsProvided);
     }
 
     @Override
@@ -251,7 +252,8 @@ public final class IdeModuleLibrary implements Library, Serializable {
     }
 
     private int calculateHashCode() {
-        return Objects.hash(myType, myArtifactAddress, myBuildId, myProjectPath, myVariant);
+        return Objects.hash(
+                myType, myArtifactAddress, myBuildId, myProjectPath, myVariant, myIsProvided);
     }
 
     @Override
@@ -270,6 +272,9 @@ public final class IdeModuleLibrary implements Library, Serializable {
                 + '\''
                 + ", myVariant='"
                 + myVariant
+                + '\''
+                + ", myIsProvided='"
+                + myIsProvided
                 + '\''
                 + '}';
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.builder.internal
+package com.android.builder.model.v2;
 
-/**
- * A service that can cache strings so that there are no duplicate.
- *
- * Should be used in place of [String.intern] which has performance issues
- */
-interface StringCachingService {
+/** Options for view binding */
+public interface ViewBindingOptions {
 
-    /**
-     * Returns a cached version of the string.
-     */
-    fun cacheString(string: String): String
+    /** Whether to enable view binding. */
+    boolean isEnabled();
 }

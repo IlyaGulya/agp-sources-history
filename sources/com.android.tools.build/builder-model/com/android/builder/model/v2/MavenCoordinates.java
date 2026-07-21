@@ -13,41 +13,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.builder.model
+
+package com.android.builder.model.v2;
+
+import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
 
 /**
  * Coordinates that uniquely identifies a project in a Maven repository.
  */
-interface MavenCoordinates {
+public interface MavenCoordinates {
     /**
      * Returns the name of the project's group, similar to the Java packaging structure.
      */
-    val groupId: String
+    @NonNull
+    String getGroupId();
 
     /**
      * Returns the name that the project is known by.
      */
-    val artifactId: String
+    @NonNull
+    String getArtifactId();
 
     /**
      * Returns the version of the project.
      */
-    val version: String
+    @NonNull
+    String getVersion();
 
     /**
      * Returns the project's artifact type. It defaults to "jar" if not explicitly set.
      */
-    val packaging: String
+    @NonNull
+    String getPackaging();
 
     /**
      * Returns the project's classifier. The classifier allows to distinguish artifacts that were
      * built from the same POM but differ in their content.
      */
-    val classifier: String?
+    @Nullable
+    String getClassifier();
 
     /**
      * Returns this coordinates Id without the version attribute.
      * Since 2.3
      */
-    val versionlessId: String
+    String getVersionlessId();
 }
