@@ -50,14 +50,13 @@ class UtpTestRunner @JvmOverloads constructor(
         private val installApkTimeout: Int?,
         private val targetIsSplitApk: Boolean,
         private val uninstallApksAfterTest: Boolean,
-        private val utpRunProfileManager: UtpRunProfileManager,
         private val configFactory: UtpConfigFactory = UtpConfigFactory(),
         private val runUtpTestSuiteAndWaitFunc: (
             List<UtpRunnerConfig>, String, String, File, ILogger
         ) -> List<UtpTestRunResult> = { runnerConfigs, projectName, variantName, resultsDir, logger ->
             runUtpTestSuiteAndWait(
-                runnerConfigs, workerExecutor, projectName, variantName, resultsDir, logger,
-                utpTestResultListener, utpDependencies)
+                runnerConfigs, workerExecutor, utpJvmExecutable, projectName, variantName,
+                resultsDir, logger, utpTestResultListener, utpDependencies, utpLoggingLevel)
         },
 )
     : BaseTestRunner(processExecutor, executor) {
@@ -120,17 +119,11 @@ class UtpTestRunner @JvmOverloads constructor(
                 )
             }
             UtpRunnerConfig(
-                utpJvmExecutable,
                 deviceConnector.name,
                 deviceConnector.serialNumber,
                 utpOutputDir,
                 runnerConfig,
-                configFactory.createServerConfigProto(),
-                utpRunProfile = utpRunProfileManager.createTestRunProfile(
-                    utpOutputDir,
-                    deviceConnector.getDeviceType(),
-                    deviceConnector.serialNumber),
-                utpLoggingLevel = utpLoggingLevel)
+            )
         }.toList()
 
         val testSuiteResults = runUtpTestSuiteAndWaitFunc(
