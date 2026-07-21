@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.build.api.component.impl
 
-import com.android.build.gradle.internal.component.TestVariantCreationConfig
-import com.android.build.gradle.internal.core.dsl.TestProjectVariantDslInfo
+package com.android.apksig.internal.apk.v2;
 
-class TestVariantCreationConfigImpl(
-    config: TestVariantCreationConfig,
-    dslInfo: TestProjectVariantDslInfo,
-) : ApkCreationConfigImpl<TestVariantCreationConfig>(config, dslInfo)
+/** Constants used by the V2 Signature Scheme signing and verification. */
+public class V2SchemeConstants {
+    private V2SchemeConstants() {}
+
+    public static final int APK_SIGNATURE_SCHEME_V2_BLOCK_ID = 0x7109871a;
+    public static final int STRIPPING_PROTECTION_ATTR_ID = 0xbeeff00d;
+}
