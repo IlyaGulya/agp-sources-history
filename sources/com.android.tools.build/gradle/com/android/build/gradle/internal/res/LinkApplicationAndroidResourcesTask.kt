@@ -58,6 +58,7 @@ import com.android.builder.internal.aapt.AaptPackageConfig
 import com.android.builder.internal.aapt.v2.Aapt2
 import com.android.ide.common.process.ProcessException
 import com.android.ide.common.resources.FileStatus
+import com.android.ide.common.resources.mergeIdentifiedSourceSetFiles
 import com.android.ide.common.symbols.SymbolIo
 import com.android.utils.FileUtils
 import com.google.common.base.Preconditions
@@ -175,7 +176,7 @@ abstract class LinkApplicationAndroidResourcesTask @Inject constructor(objects: 
     abstract val featureResourcePackages: ConfigurableFileCollection
 
     @get:Input
-    abstract val packageName: Property<String>
+    abstract val namespace: Property<String>
 
     @get:Input
     @get:Optional
@@ -299,9 +300,10 @@ abstract class LinkApplicationAndroidResourcesTask @Inject constructor(objects: 
             parameters.mergeBlameDirectory.set(mergeBlameLogFolder)
             parameters.namespaced.set(isNamespaced)
             parameters.packageId.set(resOffset)
-            parameters.packageName.set(packageName)
+            parameters.namespace.set(namespace)
             parameters.resourceConfigs.set(resourceConfigs)
             parameters.sharedLibraryDependencies.from(sharedLibraryDependencies)
+            parameters.sourceSetMaps.from(sourceSetMaps)
             parameters.useConditionalKeepRules.set(useConditionalKeepRules)
             parameters.useFinalIds.set(useFinalIds)
             parameters.useMinimalKeepRules.set(useMinimalKeepRules)
@@ -344,7 +346,7 @@ abstract class LinkApplicationAndroidResourcesTask @Inject constructor(objects: 
         abstract val mergeBlameDirectory: DirectoryProperty
         abstract val namespaced: Property<Boolean>
         abstract val packageId: Property<Int>
-        abstract val packageName: Property<String>
+        abstract val namespace: Property<String>
         abstract val resourceConfigs: SetProperty<String>
         abstract val sharedLibraryDependencies: ConfigurableFileCollection
         abstract val sourceSetMaps: ConfigurableFileCollection
@@ -501,7 +503,7 @@ abstract class LinkApplicationAndroidResourcesTask @Inject constructor(objects: 
             )
 
             task.mainSplit = creationConfig.outputs.getMainSplitOrNull()
-            task.packageName.setDisallowChanges(creationConfig.namespace)
+            task.namespace.setDisallowChanges(creationConfig.namespace)
 
             task.taskInputType = creationConfig.manifestArtifactType
             creationConfig.artifacts.setTaskInputToFinalProduct(
@@ -539,8 +541,7 @@ abstract class LinkApplicationAndroidResourcesTask @Inject constructor(objects: 
                 val sourceSetMap =
                         creationConfig.artifacts.get(InternalArtifactType.SOURCE_SET_PATH_MAP)
                 task.sourceSetMaps.fromDisallowChanges(
-                        creationConfig.services.fileCollection(sourceSetMap)
-                )
+                        creationConfig.services.fileCollection(sourceSetMap))
                 task.dependsOn(sourceSetMap)
             } else {
                 task.sourceSetMaps.disallowChanges()
@@ -814,11 +815,10 @@ abstract class LinkApplicationAndroidResourcesTask @Inject constructor(objects: 
                 packageForR = if (parameters.variantType.get().isForTesting) {
                     // Workaround for b/162244493: Use application ID in the test variant to match
                     // previous behaviour.
-                    // TODO(170945282): migrate everything to use the actual package name in AGP
-                    //  7.0.
+                    // TODO(170945282): migrate everything to use the actual namespace in AGP 7.0.
                     parameters.applicationId.get()
                 } else {
-                    parameters.packageName.get()
+                    parameters.namespace.get()
                 }
 
                 // we have to clean the source folder output in case the package name changed.
@@ -889,13 +889,18 @@ abstract class LinkApplicationAndroidResourcesTask @Inject constructor(objects: 
 
                     val logger = Logging.getLogger(LinkApplicationAndroidResourcesTask::class.java)
 
+                    configBuilder.setIdentifiedSourceSetMap(
+                            mergeIdentifiedSourceSetFiles(
+                                    parameters.sourceSetMaps.files.filterNotNull())
+                    )
+
                     processResources(
                         aapt = aapt2,
                         aaptConfig = configBuilder.build(),
                         rJar = if (generateRClass) parameters.rClassOutputJar.orNull?.asFile else null,
                         logger = logger,
                         errorFormatMode = parameters.aapt2.get().getErrorFormatMode(),
-                        symbolTableLoader = parameters.symbolTableBuildService.get()::loadClasspath
+                        symbolTableLoader = parameters.symbolTableBuildService.get()::loadClasspath,
                     )
 
                     if (LOG.isInfoEnabled) {

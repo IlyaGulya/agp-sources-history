@@ -22,13 +22,14 @@ import com.android.build.api.variant.impl.ApplicationVariantBuilderImpl
 import com.android.build.api.variant.impl.ApplicationVariantImpl
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.AbstractAppTaskManager
+import com.android.build.gradle.internal.component.AndroidTestCreationConfig
 import com.android.build.gradle.internal.component.ApkCreationConfig
 import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.PublishedConfigType
 import com.android.build.gradle.internal.scope.GlobalScope
 import com.android.build.gradle.internal.scope.InternalArtifactType
-import com.android.build.gradle.internal.tasks.databinding.DataBindingExportFeatureApplicationIdsTask
+import com.android.build.gradle.internal.tasks.databinding.DataBindingExportFeatureNamespacesTask
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 import com.android.build.gradle.internal.tasks.featuresplit.FeatureSetMetadataWriterTask
 import com.android.build.gradle.internal.variant.ComponentInfo
@@ -83,13 +84,13 @@ class ApplicationTaskManager(
 
         if (variant.buildFeatures.dataBinding
                 && variant.globalScope.hasDynamicFeatures()) {
-            // Create a task that will package the manifest ids(the R file packages) of all
-            // features into a file. This file's path is passed into the Data Binding annotation
-            // processor which uses it to known about all available features.
+            // Create a task that will write the namespaces of all features into a file. This file's
+            // path is passed into the Data Binding annotation processor which uses it to know about
+            // all available features.
             //
-            // <p>see: {@link TaskManager#setDataBindingAnnotationProcessorParams(VariantScope)}
+            // <p>see: {@link TaskManager#setDataBindingAnnotationProcessorParams(ComponentCreationConfig)}
             taskFactory.register(
-                DataBindingExportFeatureApplicationIdsTask.CreationAction(variant)
+                DataBindingExportFeatureNamespacesTask.CreationAction(variant)
             )
         }
 
@@ -296,7 +297,9 @@ class ApplicationTaskManager(
     }
 
     override fun createInstallTask(creationConfig: ApkCreationConfig) {
-        if (extension is BaseAppModuleExtension && extension.dynamicFeatures.isEmpty()) {
+        if ((extension is BaseAppModuleExtension && extension.dynamicFeatures.isEmpty()) ||
+            creationConfig is AndroidTestCreationConfig
+        ) {
             // no dynamic features means we can just use the standard install task
             super.createInstallTask(creationConfig)
         } else {

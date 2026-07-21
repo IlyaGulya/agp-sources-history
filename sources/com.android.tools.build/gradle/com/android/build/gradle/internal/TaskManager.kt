@@ -162,7 +162,6 @@ import com.android.build.gradle.internal.variant.VariantModel
 import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.tasks.AidlCompile
 import com.android.build.gradle.tasks.AnalyzeDependenciesTask
-import com.android.build.gradle.tasks.CleanBuildCache
 import com.android.build.gradle.tasks.CompatibleScreensManifest
 import com.android.build.gradle.tasks.GenerateBuildConfig
 import com.android.build.gradle.tasks.GenerateManifestJarTask
@@ -458,21 +457,10 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         }
 
         // any override coming from the DSL.
-        val kotlinCompilerVersionInDsl = globalScope.extension.composeOptions.kotlinCompilerVersion
         val kotlinCompilerExtensionVersionInDsl =
                 globalScope.extension.composeOptions.kotlinCompilerExtensionVersion
-        val kotlinCompilerDependency = ("org.jetbrains.kotlin:kotlin-compiler-embeddable:"
-                + (kotlinCompilerVersionInDsl ?: COMPOSE_KOTLIN_COMPILER_VERSION))
 
         val useLiveLiterals = globalScope.extension.composeOptions.useLiveLiterals
-
-        project.configurations
-                .maybeCreate(KOTLIN_COMPILER_CLASSPATH_CONFIGURATION_NAME)
-                .withDependencies { configuration: DependencySet ->
-                    configuration.add(
-                            project.dependencies.create(kotlinCompilerDependency))
-                }
-                .resolutionStrategy.force(kotlinCompilerDependency)
 
         // record in our metrics that compose is enabled.
         getBuildService(
@@ -722,11 +710,12 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         val alsoOutputNotCompiledResources = (creationConfig.variantType.isApk
                 && !creationConfig.variantType.isForTesting
                 && creationConfig.useResourceShrinker())
+        val includeDependencies = true
         val mergeResourcesTask = basicCreateMergeResourcesTask(
                 creationConfig,
                 MergeType.MERGE,
                 null /*outputLocation*/,
-                true /*includeDependencies*/,
+                includeDependencies,
                 processResources,
                 alsoOutputNotCompiledResources,
                 flags,
@@ -735,7 +724,11 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
                         .services
                         .projectOptions[BooleanOption.ENABLE_SOURCE_SET_PATHS_MAP]) {
             taskFactory.register(
-                    MapSourceSetPathsTask.CreateAction(creationConfig, mergeResourcesTask))
+                    MapSourceSetPathsTask.CreateAction(
+                        creationConfig,
+                        mergeResourcesTask,
+                        includeDependencies
+                    ))
         }
     }
 
@@ -1597,6 +1590,8 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         val testData: AbstractTestDataImpl
         testData = if (testedVariant.variantType.isDynamicFeature) {
             BundleTestDataImpl(
+                    project.providers,
+                    androidTestProperties,
                     androidTestProperties,
                     androidTestProperties.artifacts.get(ArtifactType.APK),
                     getFeatureName(globalScope.project.path),
@@ -1609,6 +1604,8 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
             val testedApkFileCollection =
                     project.files(testedVariant.artifacts.get(ArtifactType.APK))
             TestDataImpl(
+                    project.providers,
+                    androidTestProperties,
                     androidTestProperties,
                     androidTestProperties.artifacts.get(ArtifactType.APK),
                     if (isLibrary) null else testedApkFileCollection)
@@ -2898,7 +2895,6 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
         // Temporary static variables for Kotlin+Compose configuration
         const val KOTLIN_COMPILER_CLASSPATH_CONFIGURATION_NAME = "kotlinCompilerClasspath"
         const val COMPOSE_KOTLIN_COMPILER_EXTENSION_VERSION = "1.0.0-alpha08"
-        const val COMPOSE_KOTLIN_COMPILER_VERSION = "1.4.21"
         const val CREATE_MOCKABLE_JAR_TASK_NAME = "createMockableJar"
 
         /**
@@ -2960,7 +2956,6 @@ abstract class TaskManager<VariantBuilderT : VariantBuilderImpl, VariantT : Vari
             globalScope.setLintChecks(createCustomLintChecksConfig(project))
             globalScope.setLintPublish(createCustomLintPublishConfig(project))
             globalScope.setAndroidJarConfig(createAndroidJarConfig(project))
-            taskFactory.register(CleanBuildCache.CreationAction(globalScope))
 
             // for testing only.
             taskFactory.register(

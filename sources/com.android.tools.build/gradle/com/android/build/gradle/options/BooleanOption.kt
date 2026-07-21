@@ -159,6 +159,9 @@ enum class BooleanOption(
     ENABLE_BUILD_CONFIG_AS_BYTECODE("android.enableBuildConfigAsBytecode", false, FeatureStage.Experimental),
     ENABLE_SOURCE_SET_PATHS_MAP("android.experimental.enableSourceSetPathsMap", false, FeatureStage.Experimental),
 
+    /** Whether lint should be run in process; the default is a separate process. Primarily useful for debugging lint issues related to AGP. */
+    RUN_LINT_IN_PROCESS("android.experimental.runLintInProcess", false, FeatureStage.Experimental),
+
     // Options related to new Variant API
     USE_SAFE_PROPERTIES("android.variant.safe.properties", false, FeatureStage.Experimental),
 
@@ -167,8 +170,6 @@ enum class BooleanOption(
     /* ------------------------
      * SOFTLY-ENFORCED FEATURES
      */
-
-    USE_NEW_LINT_MODEL("android.experimental.useNewLintModel", true,  FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.VERSION_7_0)),
 
     /** Whether Jetifier will skip libraries that already support AndroidX. */
     JETIFIER_SKIP_IF_POSSIBLE("android.jetifier.skipIfPossible", true, FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.VERSION_7_0)),
@@ -186,7 +187,7 @@ enum class BooleanOption(
     ENABLE_RESOURCE_OPTIMIZATIONS("android.enableResourceOptimizations", true, FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.VERSION_7_0)),
 
     PREFER_CMAKE_FILE_API("android.preferCmakeFileApi", true, FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.VERSION_7_0)),
-    ENABLE_NATIVE_CONFIGURATION_FOLDING("android.enableNativeConfigurationFolding", false, FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.VERSION_7_0)),
+    ENABLE_NATIVE_CONFIGURATION_FOLDING("android.enableNativeConfigurationFolding", true, FeatureStage.SoftlyEnforced(DeprecationReporter.DeprecationTarget.VERSION_7_0)),
 
     /* -------------------
      * DEPRECATED FEATURES
@@ -363,6 +364,8 @@ enum class BooleanOption(
         )
     ),
 
+    USE_NEW_LINT_MODEL("android.experimental.useNewLintModel", true, FeatureStage.Enforced(VERSION_7_0)),
+
     /* ----------------
      * REMOVED FEATURES
      */
@@ -444,14 +447,14 @@ enum class BooleanOption(
     ENABLE_BUILD_CACHE(
         "android.enableBuildCache",
         false,
-        FeatureStage.Removed(VERSION_7_0, "The Android-specific build caches are superseded by the Gradle build cache https://docs.gradle.org/current/userguide/build_cache.html")
+        FeatureStage.Removed(VERSION_7_0, "The Android-specific build caches were superseded by the Gradle build cache (https://docs.gradle.org/current/userguide/build_cache.html).")
     ),
 
     @Suppress("unused")
     ENABLE_INTERMEDIATE_ARTIFACTS_CACHE(
         "android.enableIntermediateArtifactsCache",
         false,
-        FeatureStage.Removed(VERSION_7_0, "The Android-specific build caches are superseded by the Gradle build cache https://docs.gradle.org/current/userguide/build_cache.html")
+        FeatureStage.Removed(VERSION_7_0, "The Android-specific build caches were superseded by the Gradle build cache (https://docs.gradle.org/current/userguide/build_cache.html).")
     ),
 
     @Suppress("unused")

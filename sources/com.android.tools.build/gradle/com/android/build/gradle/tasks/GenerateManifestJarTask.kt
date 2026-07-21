@@ -24,6 +24,7 @@ import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.tasks.NonIncrementalTask
 import com.android.build.gradle.internal.tasks.factory.VariantTaskCreationAction
 import com.android.build.gradle.internal.utils.setDisallowChanges
+import com.android.builder.packaging.JarFlinger
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
@@ -47,7 +48,7 @@ abstract class GenerateManifestJarTask : NonIncrementalTask() {
     abstract val mergedManifests: RegularFileProperty
 
     @get:Input
-    abstract val packageName: Property<String>
+    abstract val namespace: Property<String>
 
     @get:OutputFile
     abstract val outputJar: RegularFileProperty
@@ -57,12 +58,15 @@ abstract class GenerateManifestJarTask : NonIncrementalTask() {
         ManifestClassGenerator(
                 ManifestClassData(
                         manifestFile = mergedManifests.get().asFile,
-                        manifestPackage = packageName.get(),
+                        namespace = namespace.get(),
                         outputFilePath = outputJar.get().asFile
                 )
         ).apply {
             if (customPermissions.any()) {
                 generate()
+            } else {
+                // create an empty jar
+                JarFlinger(outputJar.get().asFile.toPath()).close()
             }
         }
     }
@@ -92,7 +96,7 @@ abstract class GenerateManifestJarTask : NonIncrementalTask() {
                             ArtifactType.MERGED_MANIFEST,
                             task.mergedManifests
                     )
-            task.packageName.setDisallowChanges(creationConfig.namespace)
+            task.namespace.setDisallowChanges(creationConfig.namespace)
         }
     }
 }

@@ -62,11 +62,13 @@ abstract class MergeNativeLibsTask
     @get:SkipWhenEmpty
     abstract val projectNativeLibs: ConfigurableFileCollection
 
-    @get:Classpath
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:SkipWhenEmpty
     abstract val subProjectNativeLibs: ConfigurableFileCollection
 
-    @get:Classpath
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:SkipWhenEmpty
     abstract val externalLibNativeLibs: ConfigurableFileCollection
 
@@ -107,12 +109,15 @@ abstract class MergeNativeLibsTask
     }
 
     override fun doIncrementalTaskAction(changedInputs: Map<File, FileStatus>) {
-        val canRunIncrementally = incrementalStateFile.isFile
+        // Run non-incrementally if changedInputs.size > 20. Temporary workaround for
+        // https://issuetracker.google.com/175337498
+        val canRunIncrementally =
+            incrementalStateFile.isFile && changedInputs.size <= 20
         doProcessing(canRunIncrementally, changedInputs)
     }
 
     private fun doProcessing(isIncremental: Boolean, changedInputs: Map<File, FileStatus>) {
-        val allProfilerNativeLibs = profilerNativeLibs.orNull?.asFile?.listFiles()?.toSet() ?: emptySet()
+        val allProfilerNativeLibs = profilerNativeLibs.orNull?.asFile ?: emptySet<File>()
         workerExecutor.noIsolation().submit(MergeJavaResWorkAction::class.java) {
             it.initializeFromAndroidVariantTask(this)
             it.projectJavaRes.from(unfilteredProjectNativeLibs)
@@ -197,7 +202,8 @@ abstract class MergeNativeLibsTask
 
         // predicate logic must match patternSet logic below
         val predicate = Predicate<String> { fileName ->
-            fileName.endsWith(includedFileSuffix) || includedFileNames.any { it == fileName }
+            fileName.endsWith(includedFileSuffix, ignoreCase = true)
+                    || includedFileNames.any { it.equals(fileName, ignoreCase = true) }
         }
 
         // patternSet logic must match predicate logic above
@@ -254,42 +260,22 @@ fun getProjectNativeLibs(creationConfig: VariantCreationConfig): FileCollection 
     return nativeLibs
 }
 
-fun getSubProjectNativeLibs(creationConfig: VariantCreationConfig): FileCollection {
-    val nativeLibs = creationConfig.services.fileCollection()
-    // TODO (bug 154984238) extract native libs from java res jar before this task
-    nativeLibs.from(
-        creationConfig.variantDependencies.getArtifactFileCollection(
-            AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
-            AndroidArtifacts.ArtifactScope.PROJECT,
-            AndroidArtifacts.ArtifactType.JAVA_RES
-        )
-    )
-    nativeLibs.from(
-        creationConfig.variantDependencies.getArtifactFileCollection(
-            AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
-            AndroidArtifacts.ArtifactScope.PROJECT,
-            AndroidArtifacts.ArtifactType.JNI
-        )
-    )
-    return nativeLibs
-}
+fun getSubProjectNativeLibs(creationConfig: VariantCreationConfig): FileCollection =
+    creationConfig.variantDependencies.getArtifactFileCollection(
+        AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
+        AndroidArtifacts.ArtifactScope.PROJECT,
+        AndroidArtifacts.ArtifactType.JNI
+    ).filter { file ->
+        // Filter out directories without any file descendants so @SkipWhenEmpty works as desired.
+        file.walk().any { it.isFile }
+    }
 
-fun getExternalNativeLibs(creationConfig: VariantCreationConfig): FileCollection {
-    val nativeLibs = creationConfig.services.fileCollection()
-    // TODO (bug 154984238) extract native libs from java res jar before this task
-    nativeLibs.from(
-        creationConfig.variantDependencies.getArtifactFileCollection(
-            AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
-            AndroidArtifacts.ArtifactScope.EXTERNAL,
-            AndroidArtifacts.ArtifactType.JAVA_RES
-        )
-    )
-    nativeLibs.from(
-        creationConfig.variantDependencies.getArtifactFileCollection(
-            AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
-            AndroidArtifacts.ArtifactScope.EXTERNAL,
-            AndroidArtifacts.ArtifactType.JNI
-        )
-    )
-    return nativeLibs
-}
+fun getExternalNativeLibs(creationConfig: VariantCreationConfig): FileCollection =
+    creationConfig.variantDependencies.getArtifactFileCollection(
+        AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH,
+        AndroidArtifacts.ArtifactScope.EXTERNAL,
+        AndroidArtifacts.ArtifactType.JNI
+    ).filter { file ->
+        // Filter out directories without any file descendants so @SkipWhenEmpty works as desired.
+        file.walk().any { it.isFile }
+    }

@@ -27,7 +27,7 @@ import java.io.File
 abstract class MapSourceSetPathsTask : NonIncrementalTask() {
 
     @get:Input
-    abstract val packageName: Property<String>
+    abstract val namespace: Property<String>
 
     @get:Input
     @get:Optional
@@ -42,13 +42,13 @@ abstract class MapSourceSetPathsTask : NonIncrementalTask() {
     abstract val incrementalMergedDir: Property<String>
 
     @get:Internal
-    abstract val aaptEnv: Property<String>
-
-    @get:Internal
     lateinit var resourceComputer: DependencyResourcesComputer
 
     @get:Input
     abstract val resourcePaths: ListProperty<String>
+
+    @get:Internal
+    abstract val aaptEnv: Property<String>
 
     @get:OutputFile
     abstract val filepathMappingFile : RegularFileProperty
@@ -60,14 +60,16 @@ abstract class MapSourceSetPathsTask : NonIncrementalTask() {
         val uncreatedSourceSets = listOfNotNull(
                 generatedPngsOutputDir.orNull,
                 mergeResourcesOutputDir.orNull,
-                getPathIfPresentOrNull(incrementalMergedDir, listOf("merged.dir")),
-                getPathIfPresentOrNull(incrementalMergedDir, listOf("stripped.dir"))
+                getPathIfPresentOrNull(
+                        incrementalMergedDir, listOf(SdkConstants.FD_MERGED_DOT_DIR)),
+                getPathIfPresentOrNull(
+                        incrementalMergedDir, listOf(SdkConstants.FD_STRIPPED_DOT_DIR))
         )
         val resourceSourceSetFolders: List<File> =
                 resourcePaths.getOrElse(emptyList()).map(::File) + uncreatedSourceSets.map(::File)
         writeIdentifiedSourceSetsFile(
                 resourceSourceSets = resourceSourceSetFolders,
-                packageName = packageName.get(),
+                namespace = namespace.get(),
                 projectName = projectName,
                 output = filepathMappingFile.get().asFile
         )
@@ -75,7 +77,8 @@ abstract class MapSourceSetPathsTask : NonIncrementalTask() {
 
     internal class CreateAction(
             creationConfig: ComponentCreationConfig,
-            val mergeResourcesTask: TaskProvider<MergeResources>) :
+            val mergeResourcesTask: TaskProvider<MergeResources>,
+            val includeDependencies: Boolean) :
             VariantTaskCreationAction<MapSourceSetPathsTask, ComponentCreationConfig>(creationConfig) {
         override val name: String = computeTaskName("map", "SourceSetPaths")
 
@@ -99,14 +102,14 @@ abstract class MapSourceSetPathsTask : NonIncrementalTask() {
                     .getEnvVariable(ANDROID_AAPT_IGNORE)
             task.aaptEnv.setDisallowChanges(aapt)
             task.resourceComputer = DependencyResourcesComputer()
-            task.resourceComputer.initFromVariantScope(creationConfig, false)
+            task.resourceComputer.initFromVariantScope(creationConfig, includeDependencies)
             val resourceSourceSets = task.computedResourceSourceSetPaths(
                     task.resourceComputer,
                     true,
                     aapt.forUseAtConfigurationTime().orNull)
             task.dependsOn(creationConfig.services.fileCollection(resourceSourceSets))
             task.resourcePaths.setDisallowChanges(resourceSourceSets.map(File::getAbsolutePath))
-            task.packageName.setDisallowChanges(creationConfig.namespace)
+            task.namespace.setDisallowChanges(creationConfig.namespace)
             if (mergeResourcesTask.isPresent) {
                 val mergeResources = mergeResourcesTask.get()
                 if (mergeResources.outputDir.isPresent) {
