@@ -16,15 +16,25 @@
 
 package com.android.builder.merge
 
-import com.android.zipflinger.ZipSource
+import java.io.File
+import java.io.InputStream
+import kotlin.io.inputStream
 
-interface FileMergerInputNonIncremental : FileMergerInput {
+class FileMapInput(private val name: String, private val fileMap: Map<String, File>) : FileMergerInput {
 
-  /**
-   * Opens a path as a ZipFlinger source. Open must be called first.
-   *
-   * @param path the path
-   * @return the [com.android.zipflinger.Source] or [com.android.zipflinger.ZipSource] as resolved by the path
-   */
-  fun openAsZipSource(path: String): ZipSource
+  val streamMap = mutableMapOf<String, InputStream>()
+
+  override fun getAllPaths(): Set<String> = fileMap.keys
+
+  override fun getName(): String = name
+
+  override fun open() {}
+
+  override fun close() {
+    streamMap.forEach { (_, stream) -> stream.close() }
+    streamMap.clear()
+  }
+
+  override fun openPath(path: String): InputStream =
+    streamMap.computeIfAbsent(path) { (fileMap[path] ?: error("File not found: $path")).inputStream() }
 }
