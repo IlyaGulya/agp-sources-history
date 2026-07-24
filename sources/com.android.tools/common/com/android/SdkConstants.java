@@ -789,6 +789,9 @@ public final class SdkConstants {
 
     public static final String CLASS_TILE_SERVICE = "androidx.wear.tiles.TileService";
 
+    public static final String CLASS_GLANCE_WEAR_WIDGET_SERVICE =
+            "androidx.glance.wear.GlanceWearWidgetService";
+
     public static final String CLASS_COMPLICATION_SERVICE_ANDROIDX =
             "androidx.wear.watchface.complications.datasource.ComplicationDataSourceService";
 
@@ -2918,7 +2921,7 @@ public final class SdkConstants {
      * Studio product. It need not actually be the latest version of Gradle, but it will most likely
      * be fairly recent.
      */
-    public static final String GRADLE_LATEST_VERSION = "9.5.0";
+    public static final String GRADLE_LATEST_VERSION = "9.6.0";
 
     /**
      * The minimum released version of the Android Gradle Plugin for which Studio will attempt a
@@ -2926,13 +2929,13 @@ public final class SdkConstants {
      * display a diagnostic informing the user that this project's version AGP is unsupported, but
      * at some point that might fail.
      */
-    public static final String GRADLE_PLUGIN_MINIMUM_FORCED_UPGRADE_VERSION = "7.0.0";
+    public static final String GRADLE_PLUGIN_MINIMUM_FORCED_UPGRADE_VERSION = "7.1.0";
 
     /**
      * The minimum released version of the Android Gradle Plugin that this version of Studio will
      * support. (Support of the development series leading up to it is unknown.)
      */
-    public static final String GRADLE_PLUGIN_MINIMUM_VERSION = "7.1.0";
+    public static final String GRADLE_PLUGIN_MINIMUM_VERSION = "7.2.0";
 
     /**
      * The minimum released version of the Android Gradle Plugin that the next version of Studio

@@ -16,4 +16,25 @@
 
 package com.android.builder.merge
 
-open class DelegateFileMergerInputNonIncremental(val delegate: FileMergerInputNonIncremental) : FileMergerInputNonIncremental by delegate
+import java.io.File
+import java.io.InputStream
+import kotlin.io.inputStream
+
+class FileMapInput(private val name: String, private val fileMap: Map<String, File>) : FileMergerInput {
+
+  val streamMap = mutableMapOf<String, InputStream>()
+
+  override fun getAllPaths(): Set<String> = fileMap.keys
+
+  override fun getName(): String = name
+
+  override fun open() {}
+
+  override fun close() {
+    streamMap.forEach { (_, stream) -> stream.close() }
+    streamMap.clear()
+  }
+
+  override fun openPath(path: String): InputStream =
+    streamMap.computeIfAbsent(path) { (fileMap[path] ?: error("File not found: $path")).inputStream() }
+}

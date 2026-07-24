@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.builder.merge
+package com.android.build.api.variant
 
-import com.android.zipflinger.ZipSource
+import org.gradle.api.Incubating
 
-interface FileMergerInputNonIncremental : FileMergerInput {
-
-  /**
-   * Opens a path as a ZipFlinger source. Open must be called first.
-   *
-   * @param path the path
-   * @return the [com.android.zipflinger.Source] or [com.android.zipflinger.ZipSource] as resolved by the path
-   */
-  fun openAsZipSource(path: String): ZipSource
+/**
+ * Build-time configuration for lint.
+ *
+ * This object is accessible on [VariantBuilder] via [VariantBuilder.lint].
+ */
+@Incubating
+interface LintBuilder {
+  /** Access to lint reports configuration. */
+  @get:Incubating val reports: LintReportsBuilder
 }
