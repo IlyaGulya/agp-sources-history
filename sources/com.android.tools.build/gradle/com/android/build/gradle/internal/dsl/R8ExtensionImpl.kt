@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.sdklib.internal.avd
 
-/** Describes the display mode settings for AI Glasses. */
-enum class AiGlassesDisplayMode(val settingValue: String, val displayName: String) : ConfigEnum {
-  MONOCULAR_RIGHT("monocular_right", "Monocular Right"),
-  NONE("none", "None");
+package com.android.build.gradle.internal.dsl
 
-  override fun getAsParameter(): String = settingValue
-}
+import com.android.build.api.dsl.R8Extension
+import com.android.build.gradle.internal.services.DslServices
+import javax.inject.Inject
+
+abstract class R8ExtensionImpl @Inject constructor(dslServices: DslServices) : R8Extension
