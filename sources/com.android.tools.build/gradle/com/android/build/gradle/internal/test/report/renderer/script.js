@@ -628,7 +628,7 @@ const TestReportApp = {
         for (const c of (p.classes || [])) {
           itemsProcessed++;
           for (const tc of (c.testCases || [])) {
-            const entry = { testCase: tc, moduleName: m.name, packageName: p.name, className: c.name };
+            const entry = { testCase: tc, moduleName: m.name, packageName: p.name, className: c.name, classNode: c };
             this.testCaseIndex.set(`${m.name}:${p.name}:${c.name}:${tc.name}`, entry);
             const nameKey = (tc.name || '').toLowerCase();
             if (!this.testCaseIndex.has(nameKey)) {
@@ -1673,8 +1673,8 @@ const TestReportApp = {
       const uniqueId = `${parentId}-${node.name}`.replace(/[^a-zA-Z0-9-_]/g, '');
 
       let nameContent = `<span class="font-medium">${UIUtils.escapeHTML(node.name)}</span>`;
-      if (type === 'class' && this.isScreenshotClass(node)) {
-        nameContent += `<span style="background-color: #f3e8ff; color: #6b21a8; font-size: 0.65rem; font-weight: 700; border-radius: 4px; padding: 0.15rem 0.35rem; margin-left: 0.5rem; text-transform: uppercase;">Screenshot</span>`;
+      if (type === 'class') {
+        nameContent += this.getClassSuiteBadges(node);
       } else if (type === 'testCase' && this.isTestCaseClickable(node)) {
         nameContent = `<span class="font-medium text-blue-700 hover-underline cursor-pointer stack-trace-trigger" data-module="${UIUtils.escapeHTML(currentContext.moduleName || '')}" data-package="${UIUtils.escapeHTML(currentContext.packageName || '')}" data-class="${UIUtils.escapeHTML(currentContext.className || '')}" data-test-case="${UIUtils.escapeHTML(node.name || '')}" tabindex="0" role="button" aria-label="View details for ${UIUtils.escapeHTML(node.name)}">${UIUtils.escapeHTML(node.name)}</span>`;
       }
@@ -1718,10 +1718,8 @@ const TestReportApp = {
     this.elements.resultsData.innerHTML = items.map(item => {
       let nameTd = `<td class="py-3 px-6 sticky-name font-medium" title="${UIUtils.escapeHTML(item.name)}">${UIUtils.escapeHTML(item.name)}</td>`;
       if (item.type !== 'testCase') {
-        const screenshotBadge = (item.type === 'class' && this.isScreenshotClass(item))
-          ? `<span style="background-color: #f3e8ff; color: #6b21a8; font-size: 0.65rem; font-weight: 700; border-radius: 4px; padding: 0.15rem 0.35rem; margin-left: 0.5rem; text-transform: uppercase;">Screenshot</span>`
-          : '';
-        nameTd = `<td class="py-3 px-6 sticky-name font-medium text-blue-700 hover-underline cursor-pointer" tabindex="0" role="link" title="${UIUtils.escapeHTML(item.name)}" data-name="${UIUtils.escapeHTML(item.name)}" data-type="${item.type}" data-module-name="${UIUtils.escapeHTML(item.moduleName || '')}" data-package-name="${UIUtils.escapeHTML(item.packageName || '')}" data-interactive="flat">${UIUtils.escapeHTML(item.name)}${screenshotBadge}</td>`;
+        const suiteBadges = (item.type === 'class') ? this.getClassSuiteBadges(item) : '';
+        nameTd = `<td class="py-3 px-6 sticky-name font-medium text-blue-700 hover-underline cursor-pointer" tabindex="0" role="link" title="${UIUtils.escapeHTML(item.name)}" data-name="${UIUtils.escapeHTML(item.name)}" data-type="${item.type}" data-module-name="${UIUtils.escapeHTML(item.moduleName || '')}" data-package-name="${UIUtils.escapeHTML(item.packageName || '')}" data-interactive="flat">${UIUtils.escapeHTML(item.name)}${suiteBadges}</td>`;
       } else if (this.isTestCaseClickable(item)) {
         nameTd = `<td class="py-3 px-6 sticky-name font-medium text-blue-700 hover-underline cursor-pointer stack-trace-trigger" data-module="${UIUtils.escapeHTML(item.moduleName || '')}" data-package="${UIUtils.escapeHTML(item.packageName || '')}" data-class="${UIUtils.escapeHTML(item.className || '')}" data-test-case="${UIUtils.escapeHTML(item.name || '')}" tabindex="0" role="button" aria-label="View details for ${UIUtils.escapeHTML(item.name)}">${UIUtils.escapeHTML(item.name)}</td>`;
       } else {
@@ -1846,19 +1844,29 @@ const TestReportApp = {
     return this.hasVisibleFailures(node);
   },
 
-  isScreenshotClass(node) {
-    if (!node) return false;
-    if (node._isScreenshot !== undefined) return node._isScreenshot;
+  getClassSuiteBadges(node) {
+    if (!node) return '';
+    if (node._suiteBadges !== undefined) return node._suiteBadges;
 
     const summaries = (node.targets && node.targets[0]) ? node.targets[0].testSuiteSummaries : node.testSuiteSummaries;
-    if (summaries && summaries.length > 0) {
-      node._isScreenshot = summaries.some(ts => ts.name === 'screenshotTest' || (ts.name && ts.name.toLowerCase().includes('screenshot')));
-      return node._isScreenshot;
+    if (!summaries || summaries.length === 0) {
+      node._suiteBadges = '';
+      return '';
     }
 
-    const firstTc = node.testCases && node.testCases[0];
-    node._isScreenshot = firstTc ? (this.getScreenshotData(firstTc).length > 0) : false;
-    return node._isScreenshot;
+    const suiteNames = summaries
+      .map(ts => ts.name)
+      .filter(name => name && name !== 'Aggregated');
+
+    if (suiteNames.length === 0) {
+      node._suiteBadges = '';
+      return '';
+    }
+
+    node._suiteBadges = suiteNames
+      .map(name => `<span style="background-color: #f3e8ff; color: #6b21a8; font-size: 0.65rem; font-weight: 700; border-radius: 4px; padding: 0.15rem 0.35rem; margin-left: 0.5rem;">${UIUtils.escapeHTML(name)}</span>`)
+      .join('');
+    return node._suiteBadges;
   },
 
   _renderStatusCell(node, context = {}) {
@@ -1979,12 +1987,12 @@ const TestReportApp = {
     if (this.elements.viewSegments) this.elements.viewSegments.classList.add('hidden');
     if (this.elements.densitySegments) this.elements.densitySegments.classList.add('hidden');
 
-    this.renderStackTraceGrid(testCase);
+    this.renderStackTraceGrid(testCase, context);
     this.renderStackTraceBreadcrumbs(context);
     window.scrollTo(0, 0);
   },
 
-  renderStackTraceGrid(testCase) {
+  renderStackTraceGrid(testCase, context = {}) {
     const grid = this.elements.stackTraceGrid;
     grid.innerHTML = "";
 
@@ -1993,7 +2001,7 @@ const TestReportApp = {
 
     const screenshotItems = this.getScreenshotData(testCase);
     if (screenshotItems.length > 0) {
-      this.renderScreenshotTestView(grid, testCase, screenshotItems);
+      this.renderScreenshotTestView(grid, testCase, screenshotItems, context);
       return;
     }
 
@@ -2097,7 +2105,7 @@ const TestReportApp = {
         const variantResults = suiteResult.variantResults || {};
 
         for (const [variantName, res] of Object.entries(variantResults)) {
-          if (res.refImagePath || res.newImagePath || res.diffImagePath || suiteName === "screenshotTest" || res.previewName) {
+          if (res.refImagePath || res.newImagePath || res.diffImagePath || res.previewName) {
             let stackTrace = "";
             const commonStackTraces = target.commonStackTraces || testCase.commonStackTraces || [];
             if (res.stackTraceId) {
@@ -2146,10 +2154,223 @@ const TestReportApp = {
     return lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.webp') || lower.endsWith('.svg');
   },
 
-  renderScreenshotTestView(container, testCase, screenshotItems) {
+  /**
+   * Resolves the parent class node and module/package metadata for a given test case.
+   *
+   * Frequency & Performance Rationale:
+   * - This method is NOT called during bulk report table rendering, so it will NOT hang page rendering.
+   * - It is only called on-demand when a user clicks to view/switch stack traces or screenshot details.
+   * - It uses `this.testCaseIndex` (an O(1) Map built asynchronously on load) as the primary lookup path.
+   * - The linear scan below is purely a fallback in case the index is still populating in the background.
+   */
+  getClassForTestCase(testCase, context = {}) {
+    if (!testCase) return null;
+    const { moduleName, packageName, className } = context;
+
+    // 1. Primary Path: Fast O(1) Map lookup
+    if (this.testCaseIndex && testCase.name) {
+      const exactKey = `${moduleName}:${packageName}:${className}:${testCase.name}`;
+      let res = this.testCaseIndex.get(exactKey);
+      if (!res) {
+        res = this.testCaseIndex.get((testCase.name || '').toLowerCase());
+        if (res) {
+          if (moduleName && res.moduleName !== moduleName) res = null;
+          if (packageName && res.packageName !== packageName) res = null;
+          if (className && res.className !== className) res = null;
+        }
+      }
+      if (res?.classNode) {
+        return { moduleName: res.moduleName, packageName: res.packageName, className: res.className, classNode: res.classNode };
+      }
+    }
+
+    if (!this.processedData?.modules) return null;
+
+    // 2. Fallback Path: Linear scan used only if background index is still building or missing entry
+    for (const m of this.processedData.modules) {
+      if (moduleName && m.name !== moduleName) continue;
+      for (const p of (m.packages || [])) {
+        if (packageName && p.name !== packageName) continue;
+        for (const c of (p.classes || [])) {
+          if (className && c.name !== className) continue;
+          if ((c.testCases || []).some(tc => tc.name === testCase.name || tc === testCase)) {
+            return { moduleName: m.name, packageName: p.name, className: c.name, classNode: c };
+          }
+        }
+      }
+    }
+    return null;
+  },
+
+  /**
+   * Finds a test case entry by module, package, class, and test case name.
+   *
+   * Frequency & Performance Rationale:
+   * - Only invoked on single-item user click events (e.g. sidebar switching).
+   * - Uses `this.testCaseIndex` Map for O(1) lookup.
+   * - Linear scan is only a fallback for when background indexing is incomplete.
+   */
+  findTestCase(moduleName, packageName, className, testCaseName) {
+    // 1. Primary Path: Fast O(1) Map lookup
+    if (this.testCaseIndex) {
+      const exactKey = `${moduleName}:${packageName}:${className}:${testCaseName}`;
+      const res = this.testCaseIndex.get(exactKey);
+      if (res) return res;
+    }
+    // 2. Fallback Path: Linear scan used only if background index is still building
+    if (this.processedData?.modules) {
+      for (const m of this.processedData.modules) {
+        if (!moduleName || m.name === moduleName) {
+          for (const p of (m.packages || [])) {
+            if (!packageName || p.name === packageName) {
+              for (const c of (p.classes || [])) {
+                if (!className || c.name === className) {
+                  const tc = (c.testCases || []).find(t => t.name === testCaseName);
+                  if (tc) return { testCase: tc, moduleName: m.name, packageName: p.name, className: c.name };
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
+  },
+
+  getTestCaseOverallStatus(testCase) {
+    if (!testCase) return 'pass';
+    const targets = testCase.targets || [testCase];
+    let hasFail = false;
+    let hasPass = false;
+
+    targets.forEach(t => {
+      const results = t.testSuiteResults || [];
+      results.forEach(sr => {
+        for (const res of Object.values(sr.variantResults || {})) {
+          if (res.status === 'fail') hasFail = true;
+          if (res.status === 'pass') hasPass = true;
+        }
+      });
+    });
+
+    if (hasFail) return 'fail';
+    if (hasPass) return 'pass';
+    return 'skipped';
+  },
+
+  filterSidebarTestCases(inputElement) {
+    const query = (inputElement.value || '').toLowerCase();
+    const list = inputElement.closest('.screenshot-sidebar').querySelectorAll('.sidebar-test-item');
+    list.forEach(item => {
+      const name = (item.dataset.testCase || '').toLowerCase();
+      item.style.display = name.includes(query) ? 'flex' : 'none';
+    });
+  },
+
+  switchScreenshotTestCase(clickedElement) {
+    const { module, package: pkg, class: clz, testCase: tcName } = clickedElement.dataset;
+    if (!tcName) return;
+
+    const sidebar = clickedElement.closest('.screenshot-sidebar');
+    if (sidebar) {
+      sidebar.querySelectorAll('.sidebar-test-item').forEach(el => el.classList.remove('active'));
+      clickedElement.classList.add('active');
+    }
+
+    const testCaseEntry = this.findTestCase(module, pkg, clz, tcName);
+    if (!testCaseEntry) return;
+
+    const mainContent = clickedElement.closest('.screenshot-layout').querySelector('.screenshot-main-content');
+    if (mainContent) {
+      const activeVariants = this.state.filters.variants || [];
+      const screenshotItems = this.getScreenshotData(testCaseEntry.testCase);
+      let item = screenshotItems.find(i => activeVariants.includes(i.variantName)) || screenshotItems[0];
+      if (item) {
+        this.renderScreenshotMainContent(mainContent, testCaseEntry.testCase, item);
+      }
+    }
+
+    const updatedContext = {
+      moduleName: testCaseEntry.moduleName || module || '',
+      packageName: testCaseEntry.packageName || pkg || '',
+      className: testCaseEntry.className || clz || '',
+      testCaseName: testCaseEntry.testCase?.name || tcName
+    };
+
+    this.state.currentTestCase = testCaseEntry.testCase;
+    this.state.currentStackTraceContext = updatedContext;
+    this.renderStackTraceBreadcrumbs(updatedContext);
+    this.announce(`Showing screenshot test case: ${updatedContext.testCaseName}`);
+    document.title = `Stack Trace: ${updatedContext.testCaseName} - ${this.baseTitle}`;
+  },
+
+  renderScreenshotTestView(container, testCase, screenshotItems, context = {}) {
     const activeVariants = this.state.filters.variants || [];
     let item = screenshotItems.find(i => activeVariants.includes(i.variantName)) || screenshotItems[0];
 
+    const classInfo = this.getClassForTestCase(testCase, context) || {};
+    const moduleName = context.moduleName || classInfo.moduleName || '';
+    const packageName = context.packageName || classInfo.packageName || '';
+    const className = context.className || classInfo.className || 'Test Suite';
+    const classNode = classInfo.classNode;
+    const classTestCases = classNode ? (classNode.testCases || []) : [testCase];
+
+    container.innerHTML = '';
+
+    const layout = document.createElement('div');
+    layout.className = 'screenshot-layout';
+
+    // 1. Left Sidebar: List of all tests in the class file
+    const sidebar = document.createElement('aside');
+    sidebar.className = 'screenshot-sidebar';
+
+    const testListHtml = classTestCases.map(tc => {
+      const isSelected = tc.name === testCase.name;
+      const tcStatus = this.getTestCaseOverallStatus(tc);
+      const symbolMap = { pass: '✓', fail: '✕', skipped: '⊝' };
+      const symbol = symbolMap[tcStatus] || '✓';
+
+      return `
+        <li class="sidebar-test-item ${isSelected ? 'active' : ''}" data-module="${UIUtils.escapeHTML(moduleName)}" data-package="${UIUtils.escapeHTML(packageName)}" data-class="${UIUtils.escapeHTML(className)}" data-test-case="${UIUtils.escapeHTML(tc.name)}" onclick="TestReportApp.switchScreenshotTestCase(this)">
+          <span class="tc-status-icon ${tcStatus}">${symbol}</span>
+          <span class="tc-name truncate" title="${UIUtils.escapeHTML(tc.name)}">${UIUtils.escapeHTML(tc.name)}</span>
+        </li>
+      `;
+    }).join('');
+
+    sidebar.innerHTML = `
+      <div class="sidebar-header">
+        <div class="sidebar-class-name">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          <span class="truncate font-bold" title="${UIUtils.escapeHTML(className)}">${UIUtils.escapeHTML(className)}</span>
+        </div>
+        <span class="sidebar-count-badge">${classTestCases.length} test${classTestCases.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div class="sidebar-search-box">
+        <input type="text" class="sidebar-search-input" placeholder="Search tests in file..." oninput="TestReportApp.filterSidebarTestCases(this)">
+      </div>
+      <ul class="sidebar-test-list">
+        ${testListHtml}
+      </ul>
+    `;
+
+    layout.appendChild(sidebar);
+
+    // 2. Right Main Content Panel
+    const mainContent = document.createElement('main');
+    mainContent.className = 'screenshot-main-content';
+    layout.appendChild(mainContent);
+
+    container.appendChild(layout);
+
+    this.renderScreenshotMainContent(mainContent, testCase, item);
+  },
+
+  renderScreenshotMainContent(mainContent, testCase, item) {
+    mainContent.innerHTML = '';
     const isPassed = item.status === 'pass';
     const isFailed = item.status === 'fail';
     const statusClass = isPassed ? 'pass' : (isFailed ? 'fail' : 'error');
@@ -2239,7 +2460,6 @@ const TestReportApp = {
     const hasValidRef = this.hasValidImagePath(item.refImagePath);
     const hasValidDiff = this.hasValidImagePath(item.diffImagePath);
     const hasValidNew = this.hasValidImagePath(item.newImagePath) || (isPassed && hasValidRef);
-
     const refUrl = this.resolveImagePath(item.refImagePath);
     let newUrl = this.resolveImagePath(item.newImagePath);
     if ((!item.newImagePath || !this.hasValidImagePath(item.newImagePath)) && isPassed && item.refImagePath) {
@@ -2430,10 +2650,12 @@ const TestReportApp = {
     const copyNewBtn = pathsCard.querySelector('#btn-copy-new-path');
     if (copyNewBtn) copyNewBtn.addEventListener('click', () => this.copyToClipboard(item.newImagePath, copyNewBtn));
 
-    container.appendChild(wrapper);
+    mainContent.appendChild(wrapper);
 
     // Initialize interactive split slider
-    setTimeout(() => this.initSplitSlider(comparisonCard), 50);
+    if (!disableSlider) {
+      setTimeout(() => this.initSplitSlider(comparisonCard), 50);
+    }
   },
 
   switchScreenshotMode(mode, btnElement) {

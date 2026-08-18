@@ -16,7 +16,6 @@
 
 package com.android.build.gradle.internal.services
 
-import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.options.ProjectOptions
 import com.android.build.gradle.options.StringOption.LINT_HEAP_SIZE
 import com.android.build.gradle.options.StringOption.LINT_RESERVED_MEMORY_PER_TASK
@@ -36,12 +35,11 @@ abstract class LintParallelBuildService : BuildService<BuildServiceParameters.No
     const val LINT_PARALLEL_BUILD_SERVICE_IN_PROCESS = "LintParallelBuildServiceInProcess"
     const val LINT_PARALLEL_BUILD_SERVICE_OUT_OF_PROCESS = "LintParallelBuildServiceOutOfProcess"
 
-    @JvmOverloads
     fun calculateMaxParallelUsages(
       projectOptions: ProjectOptions,
       maxRuntimeMemory: Long,
       totalPhysicalMemory: Long?,
-      runInProcess: Boolean = projectOptions.get(BooleanOption.RUN_LINT_IN_PROCESS),
+      runInProcess: Boolean,
     ): Int? {
       return if (runInProcess) {
         calculateMaxParallelUsagesInProcess(projectOptions, maxRuntimeMemory)
@@ -111,10 +109,9 @@ abstract class LintParallelBuildService : BuildService<BuildServiceParameters.No
  *
  * This function uses registerIfAbsent in order to ensure locking when accessing build services.
  */
-@JvmOverloads
 fun BuildServiceRegistry.getLintParallelBuildService(
   projectOptions: ProjectOptions,
-  runInProcess: Boolean = projectOptions.get(BooleanOption.RUN_LINT_IN_PROCESS),
+  runInProcess: Boolean,
 ): Provider<LintParallelBuildService> {
   val serviceName =
     if (runInProcess) {
