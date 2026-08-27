@@ -634,6 +634,35 @@ public final class CoverageMetadataProto {
      * @return The branchCount.
      */
     int getBranchCount();
+
+    /**
+     * <pre>
+     * Unique block IDs of successor basic blocks in the control flow graph.
+     * </pre>
+     *
+     * <code>repeated uint32 successor_block_ids = 4;</code>
+     * @return A list containing the successorBlockIds.
+     */
+    java.util.List<java.lang.Integer> getSuccessorBlockIdsList();
+    /**
+     * <pre>
+     * Unique block IDs of successor basic blocks in the control flow graph.
+     * </pre>
+     *
+     * <code>repeated uint32 successor_block_ids = 4;</code>
+     * @return The count of successorBlockIds.
+     */
+    int getSuccessorBlockIdsCount();
+    /**
+     * <pre>
+     * Unique block IDs of successor basic blocks in the control flow graph.
+     * </pre>
+     *
+     * <code>repeated uint32 successor_block_ids = 4;</code>
+     * @param index The index of the element to return.
+     * @return The successorBlockIds at the given index.
+     */
+    int getSuccessorBlockIds(int index);
   }
   /**
    * <pre>
@@ -653,6 +682,7 @@ public final class CoverageMetadataProto {
     }
     private BlockMetadata() {
       lines_ = java.util.Collections.emptyList();
+      successorBlockIds_ = emptyIntList();
     }
 
     @java.lang.Override
@@ -772,6 +802,47 @@ public final class CoverageMetadataProto {
       return branchCount_;
     }
 
+    public static final int SUCCESSOR_BLOCK_IDS_FIELD_NUMBER = 4;
+    @SuppressWarnings("serial")
+    private com.google.protobuf.Internal.IntList successorBlockIds_;
+    /**
+     * <pre>
+     * Unique block IDs of successor basic blocks in the control flow graph.
+     * </pre>
+     *
+     * <code>repeated uint32 successor_block_ids = 4;</code>
+     * @return A list containing the successorBlockIds.
+     */
+    @java.lang.Override
+    public java.util.List<java.lang.Integer>
+        getSuccessorBlockIdsList() {
+      return successorBlockIds_;
+    }
+    /**
+     * <pre>
+     * Unique block IDs of successor basic blocks in the control flow graph.
+     * </pre>
+     *
+     * <code>repeated uint32 successor_block_ids = 4;</code>
+     * @return The count of successorBlockIds.
+     */
+    public int getSuccessorBlockIdsCount() {
+      return successorBlockIds_.size();
+    }
+    /**
+     * <pre>
+     * Unique block IDs of successor basic blocks in the control flow graph.
+     * </pre>
+     *
+     * <code>repeated uint32 successor_block_ids = 4;</code>
+     * @param index The index of the element to return.
+     * @return The successorBlockIds at the given index.
+     */
+    public int getSuccessorBlockIds(int index) {
+      return successorBlockIds_.getInt(index);
+    }
+    private int successorBlockIdsMemoizedSerializedSize = -1;
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -786,6 +857,7 @@ public final class CoverageMetadataProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      getSerializedSize();
       if (blockId_ != 0) {
         output.writeUInt32(1, blockId_);
       }
@@ -794,6 +866,13 @@ public final class CoverageMetadataProto {
       }
       if (branchCount_ != 0) {
         output.writeUInt32(3, branchCount_);
+      }
+      if (getSuccessorBlockIdsList().size() > 0) {
+        output.writeUInt32NoTag(34);
+        output.writeUInt32NoTag(successorBlockIdsMemoizedSerializedSize);
+      }
+      for (int i = 0; i < successorBlockIds_.size(); i++) {
+        output.writeUInt32NoTag(successorBlockIds_.getInt(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -816,6 +895,20 @@ public final class CoverageMetadataProto {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt32Size(3, branchCount_);
       }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < successorBlockIds_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeUInt32SizeNoTag(successorBlockIds_.getInt(i));
+        }
+        size += dataSize;
+        if (!getSuccessorBlockIdsList().isEmpty()) {
+          size += 1;
+          size += com.google.protobuf.CodedOutputStream
+              .computeInt32SizeNoTag(dataSize);
+        }
+        successorBlockIdsMemoizedSerializedSize = dataSize;
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -837,6 +930,8 @@ public final class CoverageMetadataProto {
           .equals(other.getLinesList())) return false;
       if (getBranchCount()
           != other.getBranchCount()) return false;
+      if (!getSuccessorBlockIdsList()
+          .equals(other.getSuccessorBlockIdsList())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -856,6 +951,10 @@ public final class CoverageMetadataProto {
       }
       hash = (37 * hash) + BRANCH_COUNT_FIELD_NUMBER;
       hash = (53 * hash) + getBranchCount();
+      if (getSuccessorBlockIdsCount() > 0) {
+        hash = (37 * hash) + SUCCESSOR_BLOCK_IDS_FIELD_NUMBER;
+        hash = (53 * hash) + getSuccessorBlockIdsList().hashCode();
+      }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -998,6 +1097,7 @@ public final class CoverageMetadataProto {
         }
         bitField0_ = (bitField0_ & ~0x00000002);
         branchCount_ = 0;
+        successorBlockIds_ = emptyIntList();
         return this;
       }
 
@@ -1040,6 +1140,11 @@ public final class CoverageMetadataProto {
         } else {
           result.lines_ = linesBuilder_.build();
         }
+        if (((bitField0_ & 0x00000008) != 0)) {
+          successorBlockIds_.makeImmutable();
+          bitField0_ = (bitField0_ & ~0x00000008);
+        }
+        result.successorBlockIds_ = successorBlockIds_;
       }
 
       private void buildPartial0(com.android.tools.coverage.proto.CoverageMetadataProto.BlockMetadata result) {
@@ -1096,6 +1201,16 @@ public final class CoverageMetadataProto {
         if (other.getBranchCount() != 0) {
           setBranchCount(other.getBranchCount());
         }
+        if (!other.successorBlockIds_.isEmpty()) {
+          if (successorBlockIds_.isEmpty()) {
+            successorBlockIds_ = other.successorBlockIds_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+          } else {
+            ensureSuccessorBlockIdsIsMutable();
+            successorBlockIds_.addAll(other.successorBlockIds_);
+          }
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -1145,6 +1260,22 @@ public final class CoverageMetadataProto {
                 bitField0_ |= 0x00000004;
                 break;
               } // case 24
+              case 32: {
+                int v = input.readUInt32();
+                ensureSuccessorBlockIdsIsMutable();
+                successorBlockIds_.addInt(v);
+                break;
+              } // case 32
+              case 34: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                ensureSuccessorBlockIdsIsMutable();
+                while (input.getBytesUntilLimit() > 0) {
+                  successorBlockIds_.addInt(input.readUInt32());
+                }
+                input.popLimit(limit);
+                break;
+              } // case 34
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -1579,6 +1710,115 @@ public final class CoverageMetadataProto {
       public Builder clearBranchCount() {
         bitField0_ = (bitField0_ & ~0x00000004);
         branchCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.Internal.IntList successorBlockIds_ = emptyIntList();
+      private void ensureSuccessorBlockIdsIsMutable() {
+        if (!((bitField0_ & 0x00000008) != 0)) {
+          successorBlockIds_ = mutableCopy(successorBlockIds_);
+          bitField0_ |= 0x00000008;
+        }
+      }
+      /**
+       * <pre>
+       * Unique block IDs of successor basic blocks in the control flow graph.
+       * </pre>
+       *
+       * <code>repeated uint32 successor_block_ids = 4;</code>
+       * @return A list containing the successorBlockIds.
+       */
+      public java.util.List<java.lang.Integer>
+          getSuccessorBlockIdsList() {
+        return ((bitField0_ & 0x00000008) != 0) ?
+                 java.util.Collections.unmodifiableList(successorBlockIds_) : successorBlockIds_;
+      }
+      /**
+       * <pre>
+       * Unique block IDs of successor basic blocks in the control flow graph.
+       * </pre>
+       *
+       * <code>repeated uint32 successor_block_ids = 4;</code>
+       * @return The count of successorBlockIds.
+       */
+      public int getSuccessorBlockIdsCount() {
+        return successorBlockIds_.size();
+      }
+      /**
+       * <pre>
+       * Unique block IDs of successor basic blocks in the control flow graph.
+       * </pre>
+       *
+       * <code>repeated uint32 successor_block_ids = 4;</code>
+       * @param index The index of the element to return.
+       * @return The successorBlockIds at the given index.
+       */
+      public int getSuccessorBlockIds(int index) {
+        return successorBlockIds_.getInt(index);
+      }
+      /**
+       * <pre>
+       * Unique block IDs of successor basic blocks in the control flow graph.
+       * </pre>
+       *
+       * <code>repeated uint32 successor_block_ids = 4;</code>
+       * @param index The index to set the value at.
+       * @param value The successorBlockIds to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSuccessorBlockIds(
+          int index, int value) {
+
+        ensureSuccessorBlockIdsIsMutable();
+        successorBlockIds_.setInt(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Unique block IDs of successor basic blocks in the control flow graph.
+       * </pre>
+       *
+       * <code>repeated uint32 successor_block_ids = 4;</code>
+       * @param value The successorBlockIds to add.
+       * @return This builder for chaining.
+       */
+      public Builder addSuccessorBlockIds(int value) {
+
+        ensureSuccessorBlockIdsIsMutable();
+        successorBlockIds_.addInt(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Unique block IDs of successor basic blocks in the control flow graph.
+       * </pre>
+       *
+       * <code>repeated uint32 successor_block_ids = 4;</code>
+       * @param values The successorBlockIds to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllSuccessorBlockIds(
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        ensureSuccessorBlockIdsIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, successorBlockIds_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Unique block IDs of successor basic blocks in the control flow graph.
+       * </pre>
+       *
+       * <code>repeated uint32 successor_block_ids = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSuccessorBlockIds() {
+        successorBlockIds_ = emptyIntList();
+        bitField0_ = (bitField0_ & ~0x00000008);
         onChanged();
         return this;
       }
@@ -5455,21 +5695,22 @@ public final class CoverageMetadataProto {
       "\n\027coverage_metadata.proto\022\034android.tools" +
       ".coverage.proto\">\n\014LineMetadata\022\023\n\013line_" +
       "number\030\001 \001(\005\022\031\n\021instruction_count\030\002 \001(\r\"" +
-      "r\n\rBlockMetadata\022\020\n\010block_id\030\001 \001(\r\0229\n\005li" +
-      "nes\030\002 \003(\0132*.android.tools.coverage.proto" +
-      ".LineMetadata\022\024\n\014branch_count\030\003 \001(\r\"n\n\016M" +
-      "ethodMetadata\022\014\n\004name\030\001 \001(\t\022\021\n\tsignature" +
-      "\030\002 \001(\t\022;\n\006blocks\030\003 \003(\0132+.android.tools.c" +
-      "overage.proto.BlockMetadata\"\205\001\n\rClassMet" +
-      "adata\022\022\n\nclass_name\030\001 \001(\t\022\023\n\013source_file" +
-      "\030\002 \001(\t\022\014\n\004smap\030\003 \001(\t\022=\n\007methods\030\004 \003(\0132,." +
-      "android.tools.coverage.proto.MethodMetad" +
-      "ata\"a\n\020CoverageMetadata\022\017\n\007version\030\001 \001(\r" +
-      "\022<\n\007classes\030\002 \003(\0132+.android.tools.covera" +
-      "ge.proto.ClassMetadata\"1\n\014CoverageHits\022\017" +
-      "\n\007version\030\001 \001(\r\022\020\n\010hit_mask\030\002 \001(\014B;\n com" +
-      ".android.tools.coverage.protoB\025CoverageM" +
-      "etadataProtoH\003b\006proto3"
+      "\217\001\n\rBlockMetadata\022\020\n\010block_id\030\001 \001(\r\0229\n\005l" +
+      "ines\030\002 \003(\0132*.android.tools.coverage.prot" +
+      "o.LineMetadata\022\024\n\014branch_count\030\003 \001(\r\022\033\n\023" +
+      "successor_block_ids\030\004 \003(\r\"n\n\016MethodMetad" +
+      "ata\022\014\n\004name\030\001 \001(\t\022\021\n\tsignature\030\002 \001(\t\022;\n\006" +
+      "blocks\030\003 \003(\0132+.android.tools.coverage.pr" +
+      "oto.BlockMetadata\"\205\001\n\rClassMetadata\022\022\n\nc" +
+      "lass_name\030\001 \001(\t\022\023\n\013source_file\030\002 \001(\t\022\014\n\004" +
+      "smap\030\003 \001(\t\022=\n\007methods\030\004 \003(\0132,.android.to" +
+      "ols.coverage.proto.MethodMetadata\"a\n\020Cov" +
+      "erageMetadata\022\017\n\007version\030\001 \001(\r\022<\n\007classe" +
+      "s\030\002 \003(\0132+.android.tools.coverage.proto.C" +
+      "lassMetadata\"1\n\014CoverageHits\022\017\n\007version\030" +
+      "\001 \001(\r\022\020\n\010hit_mask\030\002 \001(\014B;\n com.android.t" +
+      "ools.coverage.protoB\025CoverageMetadataPro" +
+      "toH\003b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -5486,7 +5727,7 @@ public final class CoverageMetadataProto {
     internal_static_android_tools_coverage_proto_BlockMetadata_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_android_tools_coverage_proto_BlockMetadata_descriptor,
-        new java.lang.String[] { "BlockId", "Lines", "BranchCount", });
+        new java.lang.String[] { "BlockId", "Lines", "BranchCount", "SuccessorBlockIds", });
     internal_static_android_tools_coverage_proto_MethodMetadata_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_android_tools_coverage_proto_MethodMetadata_fieldAccessorTable = new
