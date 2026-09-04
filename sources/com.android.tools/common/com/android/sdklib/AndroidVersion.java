@@ -136,6 +136,10 @@ public final class AndroidVersion implements Comparable<AndroidVersion>, Seriali
     }
 
     public static final Pattern PREVIEW_PATTERN = Pattern.compile("^[A-Z][0-9A-Za-z_]*$");
+    // The NDK uses hyphens in codenames in meta/platforms.json (e.g. "O-MR1"); Lint config allows
+    // lowercase codenames
+    public static final Pattern PREVIEW_PATTERN_RELAXED =
+            Pattern.compile("^[A-Za-z][0-9A-Za-z_-]*$");
     public static final Pattern API_LEVEL_PATTERN =
             Pattern.compile("(\\d+)(\\.(\\d+))?(-ext(\\d+))?");
     public static final Pattern BETA_PATTERN = Pattern.compile("(\\d+)(\\.(\\d+))?-beta(\\d+)");
@@ -287,7 +291,7 @@ public final class AndroidVersion implements Comparable<AndroidVersion>, Seriali
             checkNotNull(extensionLevel, "extensionLevel required when isBaseExtension is false");
         }
         mAndroidApiLevel = androidApiLevel;
-        mCodename = sanitizeCodename(codename);
+        mCodename = validateCodename(sanitizeCodename(codename));
         mExtensionLevel = extensionLevel;
         mIsBaseExtension = isBaseExtension;
         mBetaNumber = betaNumber;
@@ -347,7 +351,7 @@ public final class AndroidVersion implements Comparable<AndroidVersion>, Seriali
      * if the caller can guarantee that only {@link #getApiString()} will be used later. {@link
      * #getAndroidApiLevel()#getApiLevel()} will return 0.
      *
-     * <p>SdkVersionInfo.getVersion() can be used to get a valid AndroidVersion from known
+     * <p>SdkVersionUtil.getVersion() can be used to get a valid AndroidVersion from known
      * codenames, and should be preferred.
      *
      * @param apiString an API string that could have been produced by getApiStringWithExtension()
@@ -773,6 +777,13 @@ public final class AndroidVersion implements Comparable<AndroidVersion>, Seriali
             if (codename.isEmpty() || SdkConstants.CODENAME_RELEASE.equals(codename)) {
                 codename = null;
             }
+        }
+        return codename;
+    }
+
+    private static String validateCodename(@Nullable String codename) {
+        if (codename != null && !PREVIEW_PATTERN_RELAXED.matcher(codename).matches()) {
+            throw new IllegalArgumentException("Invalid codename: " + codename);
         }
         return codename;
     }

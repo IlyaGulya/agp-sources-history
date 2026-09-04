@@ -124,4 +124,23 @@ public interface TestInfoOrBuilder extends
    */
   com.google.protobuf.ByteString
       getInstrumentedTestTaskNameBytes();
+
+  /**
+   * <pre>
+   * Indicates test should be executed within the Private Compute Core on-device environment.
+   * </pre>
+   *
+   * <code>optional bool instrument_in_private_compute_core = 5;</code>
+   * @return Whether the instrumentInPrivateComputeCore field is set.
+   */
+  boolean hasInstrumentInPrivateComputeCore();
+  /**
+   * <pre>
+   * Indicates test should be executed within the Private Compute Core on-device environment.
+   * </pre>
+   *
+   * <code>optional bool instrument_in_private_compute_core = 5;</code>
+   * @return The instrumentInPrivateComputeCore.
+   */
+  boolean getInstrumentInPrivateComputeCore();
 }

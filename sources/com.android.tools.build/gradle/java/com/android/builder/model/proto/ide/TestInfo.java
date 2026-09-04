@@ -371,6 +371,33 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int INSTRUMENT_IN_PRIVATE_COMPUTE_CORE_FIELD_NUMBER = 5;
+  private boolean instrumentInPrivateComputeCore_ = false;
+  /**
+   * <pre>
+   * Indicates test should be executed within the Private Compute Core on-device environment.
+   * </pre>
+   *
+   * <code>optional bool instrument_in_private_compute_core = 5;</code>
+   * @return Whether the instrumentInPrivateComputeCore field is set.
+   */
+  @java.lang.Override
+  public boolean hasInstrumentInPrivateComputeCore() {
+    return ((bitField0_ & 0x00000008) != 0);
+  }
+  /**
+   * <pre>
+   * Indicates test should be executed within the Private Compute Core on-device environment.
+   * </pre>
+   *
+   * <code>optional bool instrument_in_private_compute_core = 5;</code>
+   * @return The instrumentInPrivateComputeCore.
+   */
+  @java.lang.Override
+  public boolean getInstrumentInPrivateComputeCore() {
+    return instrumentInPrivateComputeCore_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -397,6 +424,9 @@ private static final long serialVersionUID = 0L;
     if (((bitField0_ & 0x00000004) != 0)) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 4, instrumentedTestTaskName_);
     }
+    if (((bitField0_ & 0x00000008) != 0)) {
+      output.writeBool(5, instrumentInPrivateComputeCore_);
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -420,6 +450,10 @@ private static final long serialVersionUID = 0L;
     }
     if (((bitField0_ & 0x00000004) != 0)) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, instrumentedTestTaskName_);
+    }
+    if (((bitField0_ & 0x00000008) != 0)) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(5, instrumentInPrivateComputeCore_);
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -452,6 +486,11 @@ private static final long serialVersionUID = 0L;
       if (!getInstrumentedTestTaskName()
           .equals(other.getInstrumentedTestTaskName())) return false;
     }
+    if (hasInstrumentInPrivateComputeCore() != other.hasInstrumentInPrivateComputeCore()) return false;
+    if (hasInstrumentInPrivateComputeCore()) {
+      if (getInstrumentInPrivateComputeCore()
+          != other.getInstrumentInPrivateComputeCore()) return false;
+    }
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -479,6 +518,11 @@ private static final long serialVersionUID = 0L;
     if (hasInstrumentedTestTaskName()) {
       hash = (37 * hash) + INSTRUMENTED_TEST_TASK_NAME_FIELD_NUMBER;
       hash = (53 * hash) + getInstrumentedTestTaskName().hashCode();
+    }
+    if (hasInstrumentInPrivateComputeCore()) {
+      hash = (37 * hash) + INSTRUMENT_IN_PRIVATE_COMPUTE_CORE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getInstrumentInPrivateComputeCore());
     }
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
@@ -625,6 +669,7 @@ private static final long serialVersionUID = 0L;
       }
       bitField0_ = (bitField0_ & ~0x00000004);
       instrumentedTestTaskName_ = "";
+      instrumentInPrivateComputeCore_ = false;
       return this;
     }
 
@@ -684,6 +729,10 @@ private static final long serialVersionUID = 0L;
         result.instrumentedTestTaskName_ = instrumentedTestTaskName_;
         to_bitField0_ |= 0x00000004;
       }
+      if (((from_bitField0_ & 0x00000010) != 0)) {
+        result.instrumentInPrivateComputeCore_ = instrumentInPrivateComputeCore_;
+        to_bitField0_ |= 0x00000008;
+      }
       result.bitField0_ |= to_bitField0_;
     }
 
@@ -735,6 +784,9 @@ private static final long serialVersionUID = 0L;
         instrumentedTestTaskName_ = other.instrumentedTestTaskName_;
         bitField0_ |= 0x00000008;
         onChanged();
+      }
+      if (other.hasInstrumentInPrivateComputeCore()) {
+        setInstrumentInPrivateComputeCore(other.getInstrumentInPrivateComputeCore());
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -790,6 +842,11 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000008;
               break;
             } // case 34
+            case 40: {
+              instrumentInPrivateComputeCore_ = input.readBool();
+              bitField0_ |= 0x00000010;
+              break;
+            } // case 40
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -1378,6 +1435,62 @@ private static final long serialVersionUID = 0L;
       checkByteStringIsUtf8(value);
       instrumentedTestTaskName_ = value;
       bitField0_ |= 0x00000008;
+      onChanged();
+      return this;
+    }
+
+    private boolean instrumentInPrivateComputeCore_ ;
+    /**
+     * <pre>
+     * Indicates test should be executed within the Private Compute Core on-device environment.
+     * </pre>
+     *
+     * <code>optional bool instrument_in_private_compute_core = 5;</code>
+     * @return Whether the instrumentInPrivateComputeCore field is set.
+     */
+    @java.lang.Override
+    public boolean hasInstrumentInPrivateComputeCore() {
+      return ((bitField0_ & 0x00000010) != 0);
+    }
+    /**
+     * <pre>
+     * Indicates test should be executed within the Private Compute Core on-device environment.
+     * </pre>
+     *
+     * <code>optional bool instrument_in_private_compute_core = 5;</code>
+     * @return The instrumentInPrivateComputeCore.
+     */
+    @java.lang.Override
+    public boolean getInstrumentInPrivateComputeCore() {
+      return instrumentInPrivateComputeCore_;
+    }
+    /**
+     * <pre>
+     * Indicates test should be executed within the Private Compute Core on-device environment.
+     * </pre>
+     *
+     * <code>optional bool instrument_in_private_compute_core = 5;</code>
+     * @param value The instrumentInPrivateComputeCore to set.
+     * @return This builder for chaining.
+     */
+    public Builder setInstrumentInPrivateComputeCore(boolean value) {
+
+      instrumentInPrivateComputeCore_ = value;
+      bitField0_ |= 0x00000010;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Indicates test should be executed within the Private Compute Core on-device environment.
+     * </pre>
+     *
+     * <code>optional bool instrument_in_private_compute_core = 5;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearInstrumentInPrivateComputeCore() {
+      bitField0_ = (bitField0_ & ~0x00000010);
+      instrumentInPrivateComputeCore_ = false;
       onChanged();
       return this;
     }
