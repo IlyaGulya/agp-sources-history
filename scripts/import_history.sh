@@ -27,8 +27,8 @@ if ((target_count < 0)); then
   target_count=0
 fi
 
-git config user.name "AGP Sources Bot"
-git config user.email "agp-sources-bot@users.noreply.github.com"
+git config user.name "github-actions[bot]"
+git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
 for ((start = 0; start < target_count; start += batch_size)); do
   remaining=$((target_count - start))
@@ -48,7 +48,8 @@ for ((start = 0; start < target_count; start += batch_size)); do
     find sources -type f -exec chmod 0644 {} +
     printf '%s\n' "$version" > .agp-version
 
-    git add --all sources .agp-version
+    git add --all -- .agp-version
+    git add -f --all -- sources
     git commit --quiet -m "AGP $version"
     git tag -f -a "agp-$version" -m "Android Gradle Plugin $version sources"
     echo "Committed AGP $version"

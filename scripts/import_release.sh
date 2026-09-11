@@ -46,6 +46,7 @@ done
 find sources -type f -exec chmod 0644 {} +
 printf '%s\n' "$version" > .agp-version
 
-git add --all -- sources .agp-version "$proto_repo"
+git add --all -- .agp-version "$proto_repo"
+git add -f --all -- sources
 git commit --quiet -m "AGP $version"
 git tag -a "agp-$version" -m "Android Gradle Plugin $version sources"

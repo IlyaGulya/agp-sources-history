@@ -125,8 +125,8 @@ tasks.register("importHistory") {
     }
 
     logger.lifecycle("Importing ${pending.size()} AGP versions after ${current ?: 'initial state'}")
-    runCommand(["git", "config", "user.name", "AGP Sources Bot"])
-    runCommand(["git", "config", "user.email", "agp-sources-bot@users.noreply.github.com"])
+    runCommand(["git", "config", "user.name", "github-actions[bot]"])
+    runCommand(["git", "config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com"])
 
     pending.eachWithIndex { String version, int index ->
       logger.lifecycle("[${index + 1}/${pending.size()}] Resolving AGP $version")
@@ -168,7 +168,8 @@ tasks.register("importHistory") {
       }
       stateFile.text = "${version}\n"
 
-      runCommand(["git", "add", "--all", "sources", ".agp-version"])
+      runCommand(["git", "add", "--all", "--", ".agp-version"])
+      runCommand(["git", "add", "-f", "--all", "--", "sources"])
       runCommand(["git", "commit", "--quiet", "-m", "AGP $version"])
       runCommand(["git", "tag", "-f", "-a", "agp-$version", "-m", "Android Gradle Plugin $version sources"])
       logger.lifecycle("[${index + 1}/${pending.size()}] Committed AGP $version")
