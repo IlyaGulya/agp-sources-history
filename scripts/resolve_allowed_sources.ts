@@ -20,6 +20,10 @@ if (!version || !output || !cache || !manifest) {
 const allowed = (group: string) =>
   group === "com.android.tools" || group.startsWith("com.android.tools.");
 const key = (item: Coordinate) => `${item.group}:${item.module}:${item.version}`;
+const moduleKey = (item: Coordinate) => `${item.group}:${item.module}`;
+const versionOrder = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
+const newer = (left: Coordinate, right: Coordinate) =>
+  versionOrder.compare(left.version, right.version) >= 0 ? left : right;
 const url = (repository: string, item: Coordinate, suffix: string) =>
   `${repository}/${item.group.replaceAll(".", "/")}/${item.module}/${item.version}/${item.module}-${item.version}${suffix}`;
 
@@ -107,19 +111,49 @@ async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promis
 
 async function resolve(): Promise<Coordinate[]> {
   const root = { group: "com.android.tools.build", module: "gradle", version };
-  const found = new Map([[key(root), root]]);
-  let frontier = [root];
-  while (frontier.length) {
-    const nested = await mapLimit(frontier, workers, dependencies);
-    frontier = [];
-    for (const dependency of nested.flat()) {
-      if (!found.has(key(dependency))) {
-        found.set(key(dependency), dependency);
-        frontier.push(dependency);
+  const dependencyCache = new Map<string, Promise<Coordinate[]>>();
+  const dependenciesCached = (item: Coordinate) => {
+    const coordinate = key(item);
+    let pending = dependencyCache.get(coordinate);
+    if (!pending) {
+      pending = dependencies(item);
+      dependencyCache.set(coordinate, pending);
+    }
+    return pending;
+  };
+
+  // Gradle resolves one version per group:module. Recompute reachability until
+  // version selection stabilizes so dependencies of an evicted version vanish.
+  let selected = new Map([[moduleKey(root), root]]);
+  for (let iteration = 0; iteration < 32; iteration++) {
+    const discovered = new Map<string, Coordinate>([[moduleKey(root), root]]);
+    let frontier = [root];
+    const visited = new Set<string>();
+    while (frontier.length) {
+      const current = frontier
+        .map((item) => selected.get(moduleKey(item)) ?? discovered.get(moduleKey(item)) ?? item)
+        .filter((item) => !visited.has(key(item)));
+      current.forEach((item) => visited.add(key(item)));
+      if (!current.length) break;
+      const nested = await mapLimit(current, workers, dependenciesCached);
+      frontier = [];
+      for (const dependency of nested.flat()) {
+        const id = moduleKey(dependency);
+        const candidate = selected.has(id) ? newer(selected.get(id)!, dependency) : dependency;
+        const existing = discovered.get(id);
+        const winner = existing ? newer(existing, candidate) : candidate;
+        if (!existing || key(existing) !== key(winner)) {
+          discovered.set(id, winner);
+          frontier.push(winner);
+        }
       }
     }
+    const before = [...selected.values()].map(key).sort().join("\n");
+    const after = [...discovered.values()].map(key).sort().join("\n");
+    selected = discovered;
+    if (before === after) return [...selected.values()].sort((a, b) => key(a).localeCompare(key(b)));
   }
-  return [...found.values()].sort((a, b) => key(a).localeCompare(key(b)));
+  throw new Error("dependency conflict resolution did not converge");
 }
 
 async function sourceJar(item: Coordinate): Promise<string | null> {
