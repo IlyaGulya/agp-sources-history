@@ -26,9 +26,10 @@ pointer to exactly the protobuf sources shipped with that AGP release.
 
 ## Automation
 
-GitHub Actions checks the official Google Maven metadata daily. The protobuf repository imports
-first; this repository then records the matching submodule tags. Both workflows include alpha,
-beta, release candidate, and stable builds. They can also be started manually from the Actions tab.
+GitHub Actions checks the official Google Maven metadata daily using Bun. The protobuf repository
+imports first; this repository then records the matching submodule tags. Source JARs are downloaded
+directly with an allowlisted `com.android.tools` dependency graph, without invoking Gradle. Both
+workflows include alpha, beta, release candidate, and stable builds and support manual runs.
 
 The history starts at AGP `3.0.0-alpha1`, the earliest version of the plugin present in the current
 Google Maven metadata.
