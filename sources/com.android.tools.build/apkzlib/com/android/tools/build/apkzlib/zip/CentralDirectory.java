@@ -220,6 +220,14 @@ class CentralDirectory {
       }
     }
 
+    if (bytes.hasRemaining()) {
+      if (file.getStrictZipParsing()) {
+        throw new IOException("Extra bytes in central directory");
+      } else {
+        file.getVerifyLog().log("Extra bytes in central directory");
+      }
+    }
+
     return directory;
   }
 

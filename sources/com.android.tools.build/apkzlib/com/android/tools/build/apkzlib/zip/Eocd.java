@@ -133,8 +133,8 @@ class Eocd {
      * Read the EOCD record.
      */
     F_SIGNATURE.verify(bytes);
-    F_NUMBER_OF_DISK.verify(bytes);
-    F_DISK_CD_START.verify(bytes);
+    F_NUMBER_OF_DISK.skip(bytes);
+    F_DISK_CD_START.skip(bytes);
     long totalRecords1 = F_RECORDS_DISK.read(bytes);
     long totalRecords2 = F_RECORDS_TOTAL.read(bytes);
     long directorySize = F_CD_SIZE.read(bytes);

@@ -351,6 +351,9 @@ public class ZFile implements Closeable {
   /** Should skip expensive validation? */
   private final boolean skipValidation;
 
+  /** Should strict ZIP parsing be enforced? */
+  private final boolean strictZipParsing;
+
   /**
    * This field contains the comment in the zip's EOCD if there is no in-memory EOCD structure. This
    * may happen, for example, if the zip has been changed and the Central Directory and EOCD have
@@ -432,6 +435,7 @@ public class ZFile implements Closeable {
     verifyLogFactory = options.getVerifyLogFactory();
     verifyLog = verifyLogFactory.get();
     skipValidation = options.getSkipValidation();
+    strictZipParsing = options.getStrictZipParsing();
 
     /*
      * These two values will be overwritten by openReadOnlyIfClosed() below if the file exists.
@@ -555,6 +559,23 @@ public class ZFile implements Closeable {
 
   public boolean getSkipValidation() {
     return skipValidation;
+  }
+
+  /**
+   * Returns whether strict ZIP parsing is enabled.
+   *
+   * <p>When strict ZIP parsing is enabled, the parser strictly enforces ZIP file boundaries to
+   * prevent polyglot file vulnerabilities. Specifically, it throws an {@link IOException} if:
+   *
+   * <ul>
+   *   <li>There is trailing garbage data appended after the End of Central Directory (EOCD).
+   *   <li>There are unparsed extraneous bytes within the Central Directory.
+   * </ul>
+   *
+   * <p>When disabled, these anomalies are only logged but parsing proceeds.
+   */
+  public boolean getStrictZipParsing() {
+    return strictZipParsing;
   }
 
   /**
@@ -779,21 +800,6 @@ public class ZFile implements Closeable {
         try {
           eocd = new Eocd(eocdBytes);
           eocdStart = raf.length() - lastToRead + foundEocdSignature;
-
-          /*
-           * Make sure the EOCD takes the whole file up to the end. Log an error if it
-           * doesn't.
-           */
-          if (eocdStart + eocd.getEocdSize() != raf.length()) {
-            verifyLog.log(
-                "EOCD starts at "
-                    + eocdStart
-                    + " and has "
-                    + eocd.getEocdSize()
-                    + " bytes, but file ends at "
-                    + raf.length()
-                    + ".");
-          }
         } catch (IOException e) {
           if (errorFindingSignature != null) {
             e.addSuppressed(errorFindingSignature);
@@ -802,6 +808,26 @@ public class ZFile implements Closeable {
           errorFindingSignature = e;
           foundEocdSignature = -1;
           eocd = null;
+          continue;
+        }
+
+        /*
+         * Make sure the EOCD takes the whole file up to the end.
+         */
+        if (eocdStart + eocd.getEocdSize() != raf.length()) {
+          String msg =
+              "EOCD starts at "
+                  + eocdStart
+                  + " and has "
+                  + eocd.getEocdSize()
+                  + " bytes, but file ends at "
+                  + raf.length()
+                  + ".";
+          if (strictZipParsing) {
+            throw new IOException(msg);
+          } else {
+            verifyLog.log(msg);
+          }
         }
       }
     }
@@ -870,7 +896,9 @@ public class ZFile implements Closeable {
        * logging an error. If the central directory ends after the start of the EOCD (and
        * therefore, they overlap), throw an exception.
        */
-      if (centralDirectoryEnd > eocdEntry.getSize()) {
+      if (centralDirectoryEnd > eocdEntry.getStart()) {
+        throw new IOException(msg);
+      } else if (strictZipParsing) {
         throw new IOException(msg);
       } else {
         verifyLog.log(msg);
@@ -1341,6 +1369,10 @@ public class ZFile implements Closeable {
   /** Updates the file and closes it. */
   @Override
   public void close() throws IOException {
+    if (state == ZipFileState.CLOSED && !dirty) {
+      return;
+    }
+
     // We need to make sure to release raf, otherwise we end up locking the file on
     // Windows. Use try-with-resources to handle exception suppressing.
     try (Closeable ignored = this::innerClose) {

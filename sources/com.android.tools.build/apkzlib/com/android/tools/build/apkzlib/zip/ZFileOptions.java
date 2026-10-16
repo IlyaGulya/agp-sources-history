@@ -64,6 +64,17 @@ public class ZFileOptions {
    */
   private boolean alwaysGenerateJarManifest;
 
+  /**
+   * System property to control strict ZIP parsing globally if not explicitly set on ZFileOptions.
+   */
+  public static final String STRICT_ZIP_PARSING_PROPERTY = "apkzlib.strict_zip_parsing";
+
+  /**
+   * Whether to enforce strict ZIP validation (e.g. EOCD reaches EOF, CD has no trailing unparsed
+   * bytes).
+   */
+  private boolean strictZipParsing;
+
   /** Creates a new options object. All options are set to their defaults. */
   public ZFileOptions() {
     storageFactory =
@@ -79,6 +90,7 @@ public class ZFileOptions {
     skipValidation = false;
     // True by default for backwards compatibility.
     alwaysGenerateJarManifest = true;
+    strictZipParsing = Boolean.getBoolean(STRICT_ZIP_PARSING_PROPERTY);
   }
 
   /**
@@ -256,5 +268,40 @@ public class ZFileOptions {
   /** Returns whether the MANIFEST.MF file should always be generated. */
   public boolean getAlwaysGenerateJarManifest() {
     return alwaysGenerateJarManifest;
+  }
+
+  /**
+   * Sets whether strict ZIP parsing should be enforced.
+   *
+   * <p>When strict ZIP parsing is enabled, the parser will throw an {@link IOException} if it
+   * detects trailing garbage after the End of Central Directory (EOCD), an unparsed gap between the
+   * Central Directory and the EOCD, or unparsed extra bytes in the Central Directory buffer. This
+   * mitigates vulnerabilities where malicious payloads are appended to or hidden within ZIP
+   * structures.
+   */
+  public ZFileOptions setStrictZipParsing(boolean strictZipParsing) {
+    this.strictZipParsing = strictZipParsing;
+    return this;
+  }
+
+  /**
+   * Returns whether strict ZIP parsing is enforced.
+   *
+   * <p>When strict ZIP parsing is enabled, the parser will throw an {@link IOException} in the
+   * following scenarios to prevent polyglot vulnerabilities:
+   *
+   * <ul>
+   *   <li>The End of Central Directory (EOCD) does not reach the end of the file (i.e., there is
+   *       trailing garbage after the EOCD).
+   *   <li>There is an unparsed gap between the end of the Central Directory and the start of the
+   *       EOCD.
+   *   <li>There are unparsed trailing bytes in the Central Directory buffer after reading all
+   *       expected entries.
+   * </ul>
+   *
+   * <p>When disabled, these anomalies are merely logged but do not fail the parse.
+   */
+  public boolean getStrictZipParsing() {
+    return strictZipParsing;
   }
 }
