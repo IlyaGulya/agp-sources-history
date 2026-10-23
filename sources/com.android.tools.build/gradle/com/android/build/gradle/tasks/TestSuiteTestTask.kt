@@ -59,8 +59,10 @@ import com.android.build.gradle.internal.tasks.getApkFiles
 import com.android.build.gradle.internal.test.report.XMLReportAggregator
 import com.android.build.gradle.internal.test.report.clearTestReportAggregationResults
 import com.android.build.gradle.internal.test.report.processTestReportAggregation
+import com.android.build.gradle.internal.testing.INSTRUMENTATION_ARGS_KEY
 import com.android.build.gradle.internal.testing.TestData
 import com.android.build.gradle.internal.testing.configureAndroidTestEngine
+import com.android.build.gradle.internal.testing.formatInstrumentationArgs
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.options.IntegerOption
@@ -329,8 +331,24 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
     val desiredDeviceCount = if (shardCount.isPresent) shardCount.get() else 1
     avdService.get().runWithAvds(avdName, desiredDeviceCount) { onlineDeviceSerials ->
       if (desiredDeviceCount > 1) {
+        val devicesAcquired = onlineDeviceSerials.size
+        if (devicesAcquired != desiredDeviceCount) {
+          logger.warn(
+            "Unable to retrieve $desiredDeviceCount devices, only " +
+              "$devicesAcquired available. Proceeding to run tests on " +
+              "$devicesAcquired shards."
+          )
+        }
         onlineDeviceSerials.forEachIndexed { index, serial ->
-          onlineDevices.add(DeviceTestTarget(serial, DslDeviceConfigProvider(device), "${device.name}_$index"))
+          onlineDevices.add(
+            DeviceTestTarget(
+              serial,
+              DslDeviceConfigProvider(device),
+              "${device.name}_$index",
+              numShards = devicesAcquired,
+              shardIndex = index,
+            )
+          )
         }
       } else {
         onlineDevices.add(DeviceTestTarget(onlineDeviceSerials.first(), DslDeviceConfigProvider(device), device.name))
@@ -414,6 +432,11 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
           target.deviceName?.let { deviceName ->
             standardInputs.add(TestEngineInputProperty("android-test.device-id[$serial]", deviceName))
           }
+        }
+
+        if (target.numShards != null && target.shardIndex != null) {
+          standardInputs.add(TestEngineInputProperty("android-test.num-shards[$serial]", target.numShards.toString()))
+          standardInputs.add(TestEngineInputProperty("android-test.shard-index[$serial]", target.shardIndex.toString()))
         }
 
         if (!apkBundle.isEmpty) {
@@ -506,9 +529,14 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
           try {
             val coverageFiles = mutableListOf<File>()
 
-            // Device coverage files
+            // Device coverage files: JaCoCo's execution data, or the .pb files of the on-device coverage agent
             coverageFiles.addAll(
-              this.coverageDir.get().asFile.walk().filter { it.isFile && (it.extension == "ec" || it.extension == "exec") }.toList()
+              this.coverageDir
+                .get()
+                .asFile
+                .walk()
+                .filter { it.isFile && (it.extension == "ec" || it.extension == "exec" || it.extension == "pb") }
+                .toList()
             )
 
             // Host coverage files
@@ -683,6 +711,9 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
       val localDevices = creationConfig.global.androidTestOptions.managedDevices.localDevices
       testSuiteTarget.targetDevices.forEach { task.managedDevices.add(localDevices.getByName(it) as ManagedVirtualDevice) }
       task.managedDevices.disallowChanges()
+
+      val shardPoolSize = creationConfig.services.projectOptions.get(IntegerOption.MANAGED_DEVICE_SHARD_POOL_SIZE)
+      task.shardCount.setDisallowChanges(shardPoolSize ?: 1)
 
       val junitEngineSpec = (creationConfig.junitEngineSpec as JUnitEngineSpecImplForVariant)
       val resolvedInputs = junitEngineSpec.inputs
@@ -883,10 +914,26 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
       task.engineInputProperties.set(junitEngineSpec.inputProperties)
       // add default properties.
       task.engineInputProperties.put(TestEngineInputProperty.TESTED_APPLICATION_ID, testedVariant.applicationId)
-      task.engineInputProperties.put(
-        "com.android.agp.test.COVERAGE_TYPE",
-        if (creationConfig.services.projectOptions.get(BooleanOption.ENABLE_ON_THE_FLY_CODE_COVERAGE)) "ON_THE_FLY" else "NONE",
-      )
+      // Only a suite that collects coverage carries the on-device coverage agent in its test APK, so only such a suite asks the
+      // engine to attach it.
+      val onDeviceCoverage =
+        creationConfig.codeCoverageEnabled &&
+          !isUpdate &&
+          creationConfig.services.projectOptions.get(BooleanOption.ENABLE_ON_THE_FLY_CODE_COVERAGE)
+      task.engineInputProperties.put("com.android.agp.test.COVERAGE_TYPE", if (onDeviceCoverage) "ON_THE_FLY" else "NONE")
+      if (onDeviceCoverage) {
+        // The agent instruments the classes under the tested app's namespace, as for androidTest. Without this prefix, the engine
+        // falls back to the tested application id, which doesn't match when there is an applicationIdSuffix.
+        val suiteArgs = junitEngineSpec.inputProperties.getting(INSTRUMENTATION_ARGS_KEY).orElse("")
+        task.engineInputProperties.put(
+          INSTRUMENTATION_ARGS_KEY,
+          testedVariant.namespace.zip(suiteArgs) { namespace, args ->
+            val prefixArg = formatInstrumentationArgs(mapOf("com.android.tools.coverage.prefixes" to namespace.replace('.', '/')))
+            // The engine keeps the last value of a repeated key, so arguments set on the suite take precedence.
+            if (args.isBlank()) prefixArg else "$prefixArg,$args"
+          },
+        )
+      }
       task.engineInputProperties.disallowChanges()
 
       task.useJUnitPlatform { testFramework: JUnitPlatformOptions ->
@@ -1281,7 +1328,13 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
     @get:InputFiles @get:PathSensitive(PathSensitivity.RELATIVE) val fileCollection: FileCollection,
   )
 
-  class DeviceTestTarget(val serialNumber: String, val deviceConfigProvider: DeviceConfigProvider, val deviceName: String? = null)
+  class DeviceTestTarget(
+    val serialNumber: String,
+    val deviceConfigProvider: DeviceConfigProvider,
+    val deviceName: String? = null,
+    val numShards: Int? = null,
+    val shardIndex: Int? = null,
+  )
 
   /**
    * Implementation of [DeviceConfigProvider] that resolves device characteristics directly from the [ManagedVirtualDevice] DSL. This

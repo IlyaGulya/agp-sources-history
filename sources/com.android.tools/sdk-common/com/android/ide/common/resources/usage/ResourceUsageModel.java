@@ -20,6 +20,7 @@ import static com.android.SdkConstants.AAPT_URI;
 import static com.android.SdkConstants.ANDROID_STYLE_RESOURCE_PREFIX;
 import static com.android.SdkConstants.ANDROID_URI;
 import static com.android.SdkConstants.ATTR_DISCARD;
+import static com.android.SdkConstants.ATTR_FILE;
 import static com.android.SdkConstants.ATTR_ID;
 import static com.android.SdkConstants.ATTR_KEEP;
 import static com.android.SdkConstants.ATTR_NAME;
@@ -27,6 +28,9 @@ import static com.android.SdkConstants.ATTR_PARENT;
 import static com.android.SdkConstants.ATTR_SHRINK_MODE;
 import static com.android.SdkConstants.ATTR_TYPE;
 import static com.android.SdkConstants.CONSTRAINT_REFERENCED_IDS;
+import static com.android.SdkConstants.FN_WATCH_FACE_INFO_XML;
+import static com.android.SdkConstants.FN_WATCH_FACE_SHAPES_XML;
+import static com.android.SdkConstants.FN_WATCH_FACE_XML;
 import static com.android.SdkConstants.PREFIX_ANDROID;
 import static com.android.SdkConstants.PREFIX_BINDING_EXPR;
 import static com.android.SdkConstants.PREFIX_RESOURCE_REF;
@@ -40,6 +44,8 @@ import static com.android.SdkConstants.TAG_LAYOUT;
 import static com.android.SdkConstants.TAG_NAVIGATION;
 import static com.android.SdkConstants.TAG_STYLE;
 import static com.android.SdkConstants.TAG_WATCH_FACE;
+import static com.android.SdkConstants.TAG_WATCH_FACES;
+import static com.android.SdkConstants.TAG_WATCH_FACE_INFO;
 import static com.android.SdkConstants.TOOLS_URI;
 import static com.android.SdkConstants.VALUE_SAFE;
 import static com.android.SdkConstants.VALUE_STRICT;
@@ -547,7 +553,29 @@ public class ResourceUsageModel {
     }
 
     public List<Resource> findUnused(List<Resource> resources) {
+        checkWatchFaceRoots();
         return ResourcesUtil.findUnusedResources(resources, this::onRootResourcesFound);
+    }
+
+    /**
+     * When watch_face_shapes.xml is defined, only the watch faces explicitly declared in it are
+     * used; otherwise, the default res/raw/watchface.xml is used.
+     *
+     * <p>See <a
+     * href="https://developer.android.com/training/wearables/wff/setup#declare-support">Declare
+     * support for screen shapes</a>
+     */
+    private void checkWatchFaceRoots() {
+        Resource shapes =
+                getResource(ResourceType.XML, fileNameToResourceName(FN_WATCH_FACE_SHAPES_XML));
+        if (shapes != null && shapes.isReachable()) {
+            return;
+        }
+        Resource watchface =
+                getResource(ResourceType.RAW, fileNameToResourceName(FN_WATCH_FACE_XML));
+        if (watchface != null) {
+            markReachable(watchface);
+        }
     }
 
     protected void onRootResourcesFound(@NonNull List<Resource> roots) {
@@ -681,9 +709,14 @@ public class ResourceUsageModel {
             String name = fileNameToResourceName(file.getName());
 
             from = declareResource(type, name, document.getDocumentElement());
-            if (folderType == ResourceFolderType.RAW
+            if (folderType == ResourceFolderType.XML
                     && document.getDocumentElement() != null
-                    && TAG_WATCH_FACE.equals(document.getDocumentElement().getTagName())) {
+                    && ((FN_WATCH_FACE_INFO_XML.equals(file.getName())
+                                    && TAG_WATCH_FACE_INFO.equals(
+                                            document.getDocumentElement().getTagName()))
+                            || (FN_WATCH_FACE_SHAPES_XML.equals(file.getName())
+                                    && TAG_WATCH_FACES.equals(
+                                            document.getDocumentElement().getTagName())))) {
                 markReachable(from);
             }
         } else if (isAnalyticsFile(file)) {
@@ -785,7 +818,23 @@ public class ResourceUsageModel {
                             }
                         } else {
                             Element root = element.getOwnerDocument().getDocumentElement();
-                            if (root != null && TAG_WATCH_FACE.equals(root.getTagName())) {
+                            if (root != null && TAG_WATCH_FACES.equals(root.getTagName())) {
+                                String attrName = attr.getLocalName();
+                                if (attrName == null) {
+                                    attrName = attr.getName();
+                                }
+                                if (ATTR_FILE.equals(attrName)) {
+                                    String trimmedValue = value.trim();
+                                    if (ResourceUrl.isValidName(trimmedValue, ResourceType.RAW)) {
+                                        Resource res =
+                                                addResource(
+                                                        ResourceType.RAW,
+                                                        resourceNameToFieldName(trimmedValue),
+                                                        null);
+                                        from.addReference(res);
+                                    }
+                                }
+                            } else if (root != null && TAG_WATCH_FACE.equals(root.getTagName())) {
                                 String trimmedValue = value.trim();
                                 if (!trimmedValue.isEmpty()) {
                                     String attrName = attr.getLocalName();
@@ -810,6 +859,16 @@ public class ResourceUsageModel {
                                                         resourceNameToFieldName(trimmedValue),
                                                         null);
                                         from.addReference(res);
+                                    } else if ("displayName".equals(attrName)
+                                            || "screenReaderText".equals(attrName)) {
+                                        String fieldName = resourceNameToFieldName(trimmedValue);
+                                        if (ResourceUrl.isValidName(
+                                                fieldName, ResourceType.STRING)) {
+                                            Resource res =
+                                                    addResource(
+                                                            ResourceType.STRING, fieldName, null);
+                                            from.addReference(res);
+                                        }
                                     }
                                 }
                             }
