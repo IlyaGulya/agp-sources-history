@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,26 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.utils
 
-package com.android.builder.model;
+/** Identifies the operating system based on the [Environment], which may be faked in tests. */
+object OperatingSystem {
+  val name: String
+    get() = Environment.instance.getSystemProperty(Environment.SystemProperty.OS_NAME) ?: "unknown"
 
-import com.android.annotations.NonNull;
-import java.io.File;
-import java.util.List;
+  fun isMac(): Boolean = name.startsWith("mac", ignoreCase = true)
 
-/**
- * A Java library.
- */
-public interface JavaLibrary extends Library {
-    /**
-     * Returns the library's jar file.
-     */
-    @NonNull
-    File getJarFile();
+  fun isLinux(): Boolean = name.startsWith("linux", ignoreCase = true)
 
-    /**
-     * Returns the direct dependencies of this library.
-     */
-    @NonNull
-    List<? extends JavaLibrary> getDependencies();
+  fun isWindows(): Boolean = name.startsWith("win", ignoreCase = true)
 }
