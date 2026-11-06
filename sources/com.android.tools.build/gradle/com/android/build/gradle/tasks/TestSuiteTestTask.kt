@@ -28,9 +28,7 @@ import com.android.build.api.variant.impl.JUnitEngineSpecImplForVariant
 import com.android.build.api.variant.impl.TestSuiteSourceContainer
 import com.android.build.gradle.internal.AvdComponentsBuildService
 import com.android.build.gradle.internal.BuildToolsExecutableInput
-import com.android.build.gradle.internal.component.ApplicationCreationConfig
 import com.android.build.gradle.internal.component.DeviceTestCreationConfig
-import com.android.build.gradle.internal.component.HostTestCreationConfig
 import com.android.build.gradle.internal.component.InstrumentedTestCreationConfig
 import com.android.build.gradle.internal.component.TestSuiteCreationConfig
 import com.android.build.gradle.internal.component.TestSuiteTargetCreationConfig
@@ -43,9 +41,8 @@ import com.android.build.gradle.internal.coverage.getTestSuiteJacocoVersion
 import com.android.build.gradle.internal.dsl.ManagedVirtualDevice
 import com.android.build.gradle.internal.initialize
 import com.android.build.gradle.internal.publishing.AndroidArtifacts
-import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.CLASSES_JAR
 import com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.R_CLASS_JAR
-import com.android.build.gradle.internal.publishing.PublishingSpecs
+import com.android.build.gradle.internal.scope.BootClasspathBuilder
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.scope.InternalMultipleArtifactType
 import com.android.build.gradle.internal.services.TaskCreationServices
@@ -59,10 +56,21 @@ import com.android.build.gradle.internal.tasks.getApkFiles
 import com.android.build.gradle.internal.test.report.XMLReportAggregator
 import com.android.build.gradle.internal.test.report.clearTestReportAggregationResults
 import com.android.build.gradle.internal.test.report.processTestReportAggregation
+import com.android.build.gradle.internal.testing.COVERAGE_DIR_ON_DEVICE_KEY
+import com.android.build.gradle.internal.testing.COVERAGE_FILE_ON_DEVICE_KEY
+import com.android.build.gradle.internal.testing.COVERAGE_TYPE_KEY
 import com.android.build.gradle.internal.testing.INSTRUMENTATION_ARGS_KEY
+import com.android.build.gradle.internal.testing.INSTRUMENTATION_RUNNER_CLASS_KEY
+import com.android.build.gradle.internal.testing.INSTRUMENTATION_TARGET_PACKAGE_ID_KEY
+import com.android.build.gradle.internal.testing.TEST_COVERAGE_ENABLED_KEY
+import com.android.build.gradle.internal.testing.TEST_PACKAGE_ID_KEY
 import com.android.build.gradle.internal.testing.TestData
+import com.android.build.gradle.internal.testing.UNINSTALL_AFTER_TESTS_KEY
+import com.android.build.gradle.internal.testing.USE_TEST_STORAGE_SERVICE_KEY
 import com.android.build.gradle.internal.testing.configureAndroidTestEngine
 import com.android.build.gradle.internal.testing.formatInstrumentationArgs
+import com.android.build.gradle.internal.testsuites.impl.HostJarTestSuiteTaskManager
+import com.android.build.gradle.internal.testsuites.impl.TestSuiteHostJarCreationConfig
 import com.android.build.gradle.internal.utils.setDisallowChanges
 import com.android.build.gradle.options.BooleanOption
 import com.android.build.gradle.options.IntegerOption
@@ -74,20 +82,25 @@ import com.android.builder.testing.api.DeviceConfigProvider
 import com.android.builder.testing.api.DeviceConfigProviderImpl
 import com.android.builder.testing.api.DeviceConnector
 import com.android.builder.testing.api.DeviceException
+import com.android.utils.FileUtils
+import com.google.common.collect.ImmutableList
 import java.io.File
 import java.util.Locale
 import java.util.Properties
+import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import javax.inject.Inject
 import kotlin.collections.asIterable
 import kotlin.collections.joinToString
 import kotlin.collections.plus
+import org.gradle.api.JavaVersion
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.internal.tasks.testing.filter.DefaultTestFilter
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.provider.ListProperty
@@ -110,6 +123,7 @@ import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.VerificationException
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.junitplatform.JUnitPlatformOptions
+import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import org.gradle.workers.WorkerExecutor
 import shadow.bundletool.com.android.utils.PathUtils
@@ -191,6 +205,13 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
    */
   @get:Input @get:Optional abstract val androidDeviceSerials: Property<String>
 
+  /**
+   * Whether the tests also run on the devices connected through adb, in addition to [managedDevices]. Defaults to true.
+   *
+   * Gradle Managed Device tasks set this to false so that they run only on the managed devices they launch.
+   */
+  @get:Input @get:Optional abstract val includeConnectedDevices: Property<Boolean>
+
   @get:Nested abstract val managedDevices: ListProperty<ManagedVirtualDevice>
 
   /**
@@ -238,6 +259,8 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
 
   @get:Internal abstract val jacocoHostDestinationFile: RegularFileProperty
 
+  @get:Input @get:Optional abstract val hasDeviceTests: Property<Boolean>
+
   private val noDeviceListeners = mutableListOf<NoDeviceListener>()
 
   /** Adds a [listener] to notify when the tests can't start because no device is available. */
@@ -255,11 +278,17 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
     // In fact, I am suspecting that since the test engine is running in a separate process,
     // Gradle has no way to monitor what is written to these directories so it leaves it
     // untouched at the next execution.
-    PathUtils.deleteRecursivelyIfExists(resultsDir.get().asFile.toPath())
+    val testResultsDir = resultsDir.get().asFile
+    PathUtils.deleteRecursivelyIfExists(testResultsDir.toPath())
     PathUtils.deleteRecursivelyIfExists(coverageDir.get().asFile.toPath())
     if (additionalTestOutputDir.isPresent) {
       PathUtils.deleteRecursivelyIfExists(additionalTestOutputDir.get().asFile.toPath())
     }
+    val junitXmlDir = reports.junitXml.outputLocation.orNull?.asFile
+    if (junitXmlDir != null && !FileUtils.isSameFile(junitXmlDir, testResultsDir)) {
+      PathUtils.deleteRecursivelyIfExists(junitXmlDir.toPath())
+    }
+    clearTestReportAggregationResults(xmlResultsDirectory)
     logFile.get().asFile.delete()
 
     val streamingFile = streamingOutputFile.get().asFile
@@ -295,6 +324,16 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
   }
 
   private fun provisionDevicesAndExecute(onDevicesReady: (onlineDevices: List<DeviceTestTarget>) -> Unit) {
+    if (!includeConnectedDevices.getOrElse(true)) {
+      provisionManagedDevicesAndExecute { managedDevices ->
+        if (managedDevices.isEmpty()) {
+          noDeviceListeners.forEach { it.onNoDevice() }
+          throw DeviceException("No managed devices available!")
+        }
+        onDevicesReady(managedDevices)
+      }
+      return
+    }
     provisionConnectedDevicesAndExecute { connectedDevices, deviceException ->
       provisionManagedDevicesAndExecute { managedDevices ->
         val onlineDevices = connectedDevices + managedDevices
@@ -422,7 +461,7 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
       val onlineDeviceSerials = onlineDevices.joinToString(",") { it.serialNumber }
       standardInputs.add(TestEngineInputProperty(TestEngineInputProperty.SERIAL_IDS, onlineDeviceSerials))
 
-      val useDeviceSpecificPaths = managedDevices.get().size == 1
+      val useDeviceSpecificPaths = managedDevices.get().isNotEmpty()
 
       onlineDevices.forEach { target ->
         val serial = target.serialNumber
@@ -477,11 +516,31 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
       this.systemProperty("java.util.logging.config.file", julConfigFile.absolutePath)
     }
 
+    val effectiveEngineInputProperties = engineInputProperties.get().toMutableMap()
+    if (hasDeviceTests.getOrElse(false)) {
+      val testsRegex =
+        buildTestsRegexFromFilter(
+          includePatterns = filter.includePatterns,
+          // The public TestFilter doesn't expose `--tests` patterns; only Gradle's DefaultTestFilter does.
+          commandLineIncludePatterns = (filter as? DefaultTestFilter)?.commandLineIncludePatterns.orEmpty(),
+          excludePatterns = filter.excludePatterns,
+        )
+      if (testsRegex != null) {
+        val existingArgs = effectiveEngineInputProperties[INSTRUMENTATION_ARGS_KEY].orEmpty()
+        if (containsInstrumentationArgKey(existingArgs, "tests_regex")) {
+          logger.warn("Test filters are ignored for the device tests of $path because the instrumentation argument 'tests_regex' is set.")
+        } else {
+          val regexArg = formatInstrumentationArgs(mapOf("tests_regex" to testsRegex))
+          effectiveEngineInputProperties[INSTRUMENTATION_ARGS_KEY] = if (existingArgs.isBlank()) regexArg else "$existingArgs,$regexArg"
+        }
+      }
+    }
+
     // write all the input properties for the junit engine. This mean the input properties
     // that were requested through the TestSuite DSL/Variant APIs but also the default ones
     // that are always provided.
     AgpTestSuiteInputsSerializer.serialize(
-      engineInputProperties = engineInputProperties.get(),
+      engineInputProperties = effectiveEngineInputProperties,
       engineInputParameters = engineInputParameters.plus(standardInputs),
       into = engineInputPropertiesFiles.asFile.get(),
     )
@@ -502,7 +561,8 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
           .trimIndent()
 
       if (xmlResultsDirectory.isPresent) {
-        clearTestReportAggregationResults(xmlResultsDirectory)
+        val hasEngineXmlResults =
+          testResultsDir.exists() && testResultsDir.walk().any { it.isFile && it.name.endsWith(".xml", ignoreCase = true) }
         processTestReportAggregation(
           testResultsDir,
           xmlResultsDirectory,
@@ -512,6 +572,22 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
           this.testSuiteTarget.get(),
           logger,
         )
+        val junitXmlDir = this.reports.junitXml.outputLocation.orNull?.asFile
+        if (junitXmlDir != null && !FileUtils.isSameFile(junitXmlDir, testResultsDir)) {
+          processTestReportAggregation(
+            junitXmlDir,
+            xmlResultsDirectory,
+            this.modulePath.get(),
+            this.testedVariantName.get(),
+            this.testSuiteName.get(),
+            this.testSuiteTarget.get(),
+            logger,
+          ) { file ->
+            // Gradle reports each device of android-test-engine as a class named `device_<serial>`, which duplicates the
+            // engine's own per-device XML.
+            hasEngineXmlResults && file.name.startsWith("TEST-device_")
+          }
+        }
 
         val rootDir = this.rootProjectDir.get().asFile
         val aggregator = XMLReportAggregator(listOf(xmlResultsDirectory.get().asFile), this.modulePath.get(), rootDir)
@@ -591,6 +667,7 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
     val creationConfig: TestSuiteCreationConfig,
     val testSuiteTarget: TestSuiteTargetCreationConfig,
     val taskName: String,
+    private val targetManagedDevices: List<ManagedVirtualDevice>,
     private val deviceSerials: Provider<List<String>>? = null,
     private val isUpdate: Boolean = false,
   ) : GlobalTaskCreationAction<LegacyReportingTestSuiteTestTask>() {
@@ -605,7 +682,8 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
       task.group = JavaBasePlugin.VERIFICATION_GROUP
       task.outputs.upToDateWhen { false }
 
-      val hasHostJar = creationConfig.sourceContainers.any { it.source is TestSuiteSourceSet.HostJar }
+      val hostJarSourceContainers = creationConfig.sourceContainers.filter { it.source is TestSuiteSourceSet.HostJar }
+      val hasHostJar = hostJarSourceContainers.isNotEmpty()
       val testedVariant = creationConfig.testedVariant
       val testSuiteName = creationConfig.name
       val targetName = testSuiteTarget.name
@@ -629,38 +707,58 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
       task.testClassesDirs =
         creationConfig.services.fileCollection().also { fileCollection ->
           fileCollection.from(classesDir)
-          creationConfig.sourceContainers.forEach { sourceContainer ->
-            if (sourceContainer.source is TestSuiteSourceSet.HostJar) {
-              fileCollection.from(
-                sourceContainer.artifacts.forScope(ScopedArtifacts.Scope.PROJECT).getFinalArtifacts(ScopedArtifact.POST_COMPILATION_CLASSES)
-              )
-            }
+          hostJarSourceContainers.forEach { sourceContainer ->
+            fileCollection.from(
+              sourceContainer.artifacts.forScope(ScopedArtifacts.Scope.PROJECT).getFinalArtifacts(ScopedArtifact.POST_COMPILATION_CLASSES)
+            )
           }
         }
       task.classpath =
         creationConfig.services.fileCollection().also { fileCollection ->
           if (hasHostJar) {
-            fileCollection.from(classesDir)
-            fileCollection.from(getLinkedRClassJars())
-            val testedVariant = creationConfig.testedVariant
-            val spec =
-              PublishingSpecs.getVariantPublishingSpec(testedVariant.componentType)
-                .getSpec(CLASSES_JAR, AndroidArtifacts.ConsumedConfigType.COMPILE_CLASSPATH.publishedTo)
-                ?: error("No CLASSES_JAR spec found for ${testedVariant.componentType}")
-            val mainComponentClassesJar = spec.outputType
-            fileCollection.from(testedVariant.artifacts.get(mainComponentClassesJar))
-            creationConfig.sourceContainers
-              .filter { it.source is TestSuiteSourceSet.HostJar }
-              .forEach { sourceContainer ->
-                fileCollection.from(
-                  sourceContainer.suiteSourceClasspath.getHostRuntimeClasspathArtifacts(AndroidArtifacts.ArtifactType.CLASSES_JAR)
-                )
-                fileCollection.from(
-                  sourceContainer.artifacts
-                    .forScope(ScopedArtifacts.Scope.PROJECT)
-                    .getFinalArtifacts(ScopedArtifact.POST_COMPILATION_CLASSES)
-                )
+            // Place the generated test config directory (com/android/tools/test_config.properties) first on the classpath so host test
+            // runners can locate the suite's merged manifest, resources, and assets.
+            if (HostJarTestSuiteTaskManager.hasAndroidResources(creationConfig)) {
+              hostJarSourceContainers.forEach { sourceContainer ->
+                fileCollection.from(sourceContainer.artifacts.get(InternalArtifactType.UNIT_TEST_CONFIG_DIRECTORY))
               }
+            }
+            fileCollection.from(classesDir)
+            // The suite's compiled classes and Java resources (src/<suite>/resources) precede its dependencies.
+            hostJarSourceContainers.forEach { sourceContainer ->
+              fileCollection.from(
+                sourceContainer.artifacts.forScope(ScopedArtifacts.Scope.PROJECT).getFinalArtifacts(ScopedArtifact.POST_COMPILATION_CLASSES)
+              )
+              fileCollection.from(sourceContainer.artifacts.get(InternalArtifactType.JAVA_RES))
+            }
+            // The R classes linked for the suite precede the tested module's runtime classes, so the linked IDs are the ones loaded.
+            fileCollection.from(getLinkedRClassJars(hostJarSourceContainers))
+            // Classes and Java resources of the runtime dependencies, which include the tested module (see
+            // TestSuiteDependenciesBuilder.addTestedModuleDependencies). Classes come from the host runtime classpath, which also holds the
+            // test engines. Java resources come from the runtime classpath, which holds the suite's dependencies: the engine jars carry
+            // their own Java resources.
+            hostJarSourceContainers.forEach { sourceContainer ->
+              fileCollection.from(
+                sourceContainer.suiteSourceClasspath.getHostRuntimeClasspathArtifacts(AndroidArtifacts.ArtifactType.CLASSES_JAR)
+              )
+              fileCollection.from(
+                sourceContainer.suiteSourceClasspath
+                  .getArtifactCollection(AndroidArtifacts.ConsumedConfigType.RUNTIME_CLASSPATH, AndroidArtifacts.ArtifactType.JAVA_RES)
+                  .artifactFiles
+              )
+            }
+            // Generated runtime R classes of a tested library and its dependencies, for a suite that links no Android resources (see
+            // HostJarTestSuiteTaskManager.hasRuntimeStubRClasses).
+            if (HostJarTestSuiteTaskManager.hasRuntimeStubRClasses(creationConfig)) {
+              hostJarSourceContainers.forEach { sourceContainer ->
+                fileCollection.from(sourceContainer.artifacts.get(InternalArtifactType.COMPILE_AND_RUNTIME_R_CLASS_JAR))
+              }
+            }
+            // Any additional or requested optional libraries of the SDK (for example org.apache.http.legacy).
+            fileCollection.from(getAdditionalAndRequestedOptionalLibraries())
+            // The mockable android.jar is last, so that dependencies can shadow its classes. It honors
+            // testOptions.unitTests.isReturnDefaultValues.
+            fileCollection.from(creationConfig.global.mockableJarArtifact)
           } else {
             creationConfig.sourceContainers.forEach { sourceContainer ->
               fileCollection.from(
@@ -669,6 +767,15 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
             }
           }
         }
+
+      if (hasHostJar) {
+        task.systemProperty("java.awt.headless", "true")
+        val isJava17OrNewer =
+          task.javaLauncher
+            .map { it.metadata.languageVersion.canCompileOrRun(17) }
+            .orElse(JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_17))
+        task.jvmArgumentProviders.add(HostJarJvmArgumentProvider(isJava17OrNewer))
+      }
 
       // Get all project properties, and system properties (possibly overriding project
       // properties) and register them for the test engine.
@@ -713,12 +820,28 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
         }
       }
 
-      val localDevices = creationConfig.global.androidTestOptions.managedDevices.localDevices
-      testSuiteTarget.targetDevices.forEach { task.managedDevices.add(localDevices.getByName(it) as ManagedVirtualDevice) }
+      task.managedDevices.addAll(targetManagedDevices)
       task.managedDevices.disallowChanges()
 
       val shardPoolSize = creationConfig.services.projectOptions.get(IntegerOption.MANAGED_DEVICE_SHARD_POOL_SIZE)
       task.shardCount.setDisallowChanges(shardPoolSize ?: 1)
+
+      creationConfig.sourceContainers.forEach { sourceContainer: TestSuiteSourceContainer ->
+        when (val sourceSet = sourceContainer.source) {
+          is TestSuiteSourceSet.Assets -> {
+            task.sourceFolders.from(sourceSet.get().all)
+            task.testDefinitionDirs.from(sourceSet.get().all)
+          }
+          is TestSuiteSourceSet.HostJar -> {
+            task.binaryFolders.from(
+              sourceContainer.artifacts.forScope(ScopedArtifacts.Scope.PROJECT).getFinalArtifacts(ScopedArtifact.POST_COMPILATION_CLASSES)
+            )
+          }
+          is TestSuiteSourceSet.TestApk -> {
+            task.testDefinitionDirs.from(sourceContainer.artifacts.get(InternalArtifactType.ANDROID_TEST_DISCOVERY_LIST))
+          }
+        }
+      }
 
       val junitEngineSpec = (creationConfig.junitEngineSpec as JUnitEngineSpecImplForVariant)
       val resolvedInputs = junitEngineSpec.inputs
@@ -765,6 +888,11 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
             val testClasspath =
               task.project.objects.fileCollection().also { fc ->
                 creationConfig.sourceContainers.forEach { sc ->
+                  // The suite's Java resources (src/<suite>/resources) come first. Engines that load the test code in their own class
+                  // loader (for example the screenshot renderer) read them from this input.
+                  if (sc.source is TestSuiteSourceSet.HostJar) {
+                    fc.from(sc.artifacts.get(InternalArtifactType.JAVA_RES))
+                  }
                   fc.from(
                     sc.suiteSourceClasspath.getRuntimeClasspathArtifacts(
                       com.android.build.gradle.internal.publishing.AndroidArtifacts.ArtifactType.CLASSES_JAR
@@ -802,9 +930,13 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
           AgpTestSuiteInputParameters.R_CLASS_JARS -> {
             val testRClassJars =
               task.project.objects.fileCollection().also { fc ->
-                val linkedRClassJars = getLinkedRClassJars()
+                val linkedRClassJars = getLinkedRClassJars(hostJarSourceContainers)
                 fc.from(linkedRClassJars)
-                if (linkedRClassJars.isEmpty() && !testedVariant.componentType.isAar) {
+                if (HostJarTestSuiteTaskManager.hasRuntimeStubRClasses(creationConfig)) {
+                  hostJarSourceContainers.forEach { sc ->
+                    fc.from(sc.artifacts.get(InternalArtifactType.COMPILE_AND_RUNTIME_R_CLASS_JAR))
+                  }
+                } else if (linkedRClassJars.isEmpty() && !testedVariant.componentType.isAar) {
                   testedVariant.androidResourcesCreationConfig?.compiledRClassArtifact?.let { fc.from(it) }
                 }
                 // Only the compile classpath: R class jars of dependencies are published as api artifacts (see
@@ -842,12 +974,9 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
           }
 
           AgpTestSuiteInputParameters.LAYOUTLIB_DATA_DIR -> {
-            creationConfig.sourceContainers.forEach { sc ->
-              if (sc.source is TestSuiteSourceSet.HostJar) {
-                // setFrom, not from: the rendering engine reads LAYOUTLIB_DATA_DIR as a single directory, so these must not accumulate
-                // across source containers.
-                task.layoutlibDataDir.setFrom(sc.suiteSourceClasspath.getExtractedLayoutlibDataDir())
-              }
+            hostJarSourceContainers.forEach { sc ->
+              // setFrom: the rendering engine reads LAYOUTLIB_DATA_DIR as a single directory, so it holds one source container's value.
+              task.layoutlibDataDir.setFrom(sc.suiteSourceClasspath.getExtractedLayoutlibDataDir())
             }
             task.engineInputParameters.add(
               AgpTestSuiteInputParameter(AgpTestSuiteInputParameters.LAYOUTLIB_DATA_DIR, task.layoutlibDataDir)
@@ -901,8 +1030,8 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
             // Handled via task properties and standardInputs in executeTests
           }
 
-          else -> {
-            println("I don't know of this parameter $inputParameter")
+          AgpTestSuiteInputParameters.STATIC_FILES -> {
+            task.engineInputParameters.add(AgpTestSuiteInputParameter(AgpTestSuiteInputParameters.STATIC_FILES, task.sourceFolders))
           }
         }
       }
@@ -916,49 +1045,86 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
         creationConfig.global.buildToolsRevision,
       )
 
-      task.engineInputProperties.set(junitEngineSpec.inputProperties)
-      // add default properties.
-      task.engineInputProperties.put(TestEngineInputProperty.TESTED_APPLICATION_ID, testedVariant.applicationId)
+      val testApkSource =
+        creationConfig.sourceContainers.firstOrNull { it.source is TestSuiteSourceSet.TestApk }?.source as? TestSuiteSourceSet.TestApk
+      task.hasDeviceTests.setDisallowChanges(
+        testApkSource != null && (!hasHostJar || "android-test-engine" in creationConfig.junitEngineSpec.includeEngines)
+      )
+
+      val coverageEnabledForTask = creationConfig.codeCoverageEnabled && !isUpdate
       // Only a suite that collects coverage carries the on-device coverage agent in its test APK, so only such a suite asks the
       // engine to attach it.
       val onDeviceCoverage =
-        creationConfig.codeCoverageEnabled &&
-          !isUpdate &&
+        testApkSource != null &&
+          coverageEnabledForTask &&
           creationConfig.services.projectOptions.get(BooleanOption.ENABLE_ON_THE_FLY_CODE_COVERAGE)
-      task.engineInputProperties.put("com.android.agp.test.COVERAGE_TYPE", if (onDeviceCoverage) "ON_THE_FLY" else "NONE")
-      if (onDeviceCoverage) {
-        // The agent instruments the classes under the tested app's namespace, as for androidTest. Without this prefix, the engine
-        // falls back to the tested application id, which doesn't match when there is an applicationIdSuffix.
-        val suiteArgs = junitEngineSpec.inputProperties.getting(INSTRUMENTATION_ARGS_KEY).orElse("")
+
+      if (testApkSource != null) {
+        task.engineInputProperties.put(UNINSTALL_AFTER_TESTS_KEY, "true")
+        task.engineInputProperties.put(TEST_COVERAGE_ENABLED_KEY, coverageEnabledForTask.toString())
+      }
+
+      task.engineInputProperties.putAll(junitEngineSpec.inputProperties)
+      task.engineInputProperties.put(TestEngineInputProperty.TESTED_APPLICATION_ID, testedVariant.applicationId)
+      task.engineInputProperties.put(COVERAGE_TYPE_KEY, if (onDeviceCoverage) "ON_THE_FLY" else "NONE")
+
+      if (testApkSource != null) {
+        // These match the test APK manifest, which ProcessTestManifest builds from the same providers.
+        task.engineInputProperties.put(TEST_PACKAGE_ID_KEY, creationConfig.testApplicationId)
+        task.engineInputProperties.put(INSTRUMENTATION_TARGET_PACKAGE_ID_KEY, creationConfig.instrumentationTargetPackageId)
+        task.engineInputProperties.put(INSTRUMENTATION_RUNNER_CLASS_KEY, creationConfig.instrumentationRunner(testApkSource))
+        // Like the instrumentation arguments below, command-line options take precedence over the suite's values.
+        if (creationConfig.services.projectOptions.get(BooleanOption.ANDROID_TEST_LEAVE_APKS_INSTALLED_AFTER_RUN)) {
+          task.engineInputProperties.put(UNINSTALL_AFTER_TESTS_KEY, "false")
+        }
+
+        val extraRunnerArgs = creationConfig.services.projectOptions.extraInstrumentationTestRunnerArgs
         task.engineInputProperties.put(
-          INSTRUMENTATION_ARGS_KEY,
-          testedVariant.namespace.zip(suiteArgs) { namespace, args ->
-            val prefixArg = formatInstrumentationArgs(mapOf("com.android.tools.coverage.prefixes" to namespace.replace('.', '/')))
-            // The engine keeps the last value of a repeated key, so arguments set on the suite take precedence.
-            if (args.isBlank()) prefixArg else "$prefixArg,$args"
+          USE_TEST_STORAGE_SERVICE_KEY,
+          junitEngineSpec.inputProperties.getting(USE_TEST_STORAGE_SERVICE_KEY).orElse("").zip(extraRunnerArgs) { propValue, cliArgs ->
+            cliArgs["useTestStorageService"] ?: propValue.ifBlank { "false" }
           },
+        )
+        task.engineInputProperties.put(
+          COVERAGE_FILE_ON_DEVICE_KEY,
+          junitEngineSpec.inputProperties.getting(COVERAGE_FILE_ON_DEVICE_KEY).orElse("").zip(extraRunnerArgs) { propValue, cliArgs ->
+            cliArgs["coverageFile"] ?: propValue
+          },
+        )
+        task.engineInputProperties.put(
+          COVERAGE_DIR_ON_DEVICE_KEY,
+          junitEngineSpec.inputProperties.getting(COVERAGE_DIR_ON_DEVICE_KEY).orElse("").zip(extraRunnerArgs) { propValue, cliArgs ->
+            cliArgs["coverageFilePath"] ?: propValue
+          },
+        )
+
+        val suiteArgs = junitEngineSpec.inputProperties.getting(INSTRUMENTATION_ARGS_KEY).orElse("")
+        val mergedArgsProvider =
+          testedVariant.namespace
+            .zip(suiteArgs) { namespace, args -> namespace to args }
+            .zip(extraRunnerArgs) { (namespace, args), cliArgs ->
+              val parts = mutableListOf<String>()
+              if (onDeviceCoverage) {
+                // The agent instruments the classes under the tested app's namespace, as for androidTest. Without this prefix, the engine
+                // falls back to the tested application id, which doesn't match when there is an applicationIdSuffix.
+                parts.add(formatInstrumentationArgs(mapOf("com.android.tools.coverage.prefixes" to namespace.replace('.', '/'))))
+              }
+              if (args.isNotBlank()) {
+                parts.add(args)
+              }
+              if (cliArgs.isNotEmpty()) {
+                parts.add(formatInstrumentationArgs(cliArgs))
+              }
+              parts.joinToString(",")
+            }
+        task.engineInputProperties.putAll(
+          mergedArgsProvider.map { merged -> if (merged.isNotBlank()) mapOf(INSTRUMENTATION_ARGS_KEY to merged) else emptyMap() }
         )
       }
       task.engineInputProperties.disallowChanges()
 
       task.useJUnitPlatform { testFramework: JUnitPlatformOptions ->
         testFramework.includeEngines(*creationConfig.junitEngineSpec.includeEngines.toTypedArray())
-      }
-      creationConfig.sourceContainers.forEach { sourceContainer: TestSuiteSourceContainer ->
-        when (val sourceSet = sourceContainer.source) {
-          is TestSuiteSourceSet.Assets -> {
-            task.sourceFolders.from(sourceSet.get().all)
-            task.testDefinitionDirs.from(sourceSet.get().all)
-          }
-          is TestSuiteSourceSet.HostJar -> {
-            task.binaryFolders.from(
-              sourceContainer.artifacts.forScope(ScopedArtifacts.Scope.PROJECT).getFinalArtifacts(ScopedArtifact.POST_COMPILATION_CLASSES)
-            )
-          }
-          is TestSuiteSourceSet.TestApk -> {
-            task.testDefinitionDirs.from(sourceContainer.artifacts.get(InternalArtifactType.ANDROID_TEST_DISCOVERY_LIST))
-          }
-        }
       }
 
       task.engineInputParameters.disallowChanges()
@@ -994,7 +1160,7 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
       testTaskReports.html.required.setDisallowChanges(true)
       testTaskReports.junitXml.required.setDisallowChanges(true)
       val xmlReport = testTaskReports.junitXml
-      xmlReport.outputLocation.setDisallowChanges(task.resultsDir)
+      xmlReport.outputLocation.convention(creationConfig.services.projectInfo.getTestResultsFolder().map { it.dir(task.name) })
 
       val htmlReport = testTaskReports.html
       htmlReport.outputLocation.fileProvider(creationConfig.services.projectInfo.getTestReportFolder().map { it.dir(task.name).asFile })
@@ -1013,20 +1179,29 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
      * variant only holds placeholder IDs for a library, and misses the resources of the dependencies that only the test suite has for an
      * application.
      */
-    private fun getLinkedRClassJars() =
-      if (
-        creationConfig.androidResourcesIncluded &&
-          creationConfig.testedVariant.buildFeatures.androidResources &&
-          (creationConfig.testedVariant.componentType.isAar || creationConfig.testedVariant is ApplicationCreationConfig)
-      ) {
-        creationConfig.sourceContainers
-          .filter { it.source is TestSuiteSourceSet.HostJar }
-          .mapNotNull { sc ->
-            (sc.creationConfig as? HostTestCreationConfig)?.artifacts?.get(InternalArtifactType.COMPILE_AND_RUNTIME_R_CLASS_JAR)
-          }
-      } else {
-        emptyList()
-      }
+    private fun getLinkedRClassJars(hostJarSourceContainers: List<TestSuiteSourceContainer>) =
+      hostJarSourceContainers
+        .mapNotNull { sc -> (sc.creationConfig as? TestSuiteHostJarCreationConfig)?.takeIf { it.hasLinkedRClasses() } }
+        .map { it.artifacts.get(InternalArtifactType.COMPILE_AND_RUNTIME_R_CLASS_JAR) }
+
+    /**
+     * The SDK's additional libraries and the optional libraries requested via `useLibrary`, resolved lazily through a [Callable] when the
+     * test task's classpath is evaluated.
+     */
+    private fun getAdditionalAndRequestedOptionalLibraries(): FileCollection =
+      creationConfig.services.fileCollection(
+        Callable {
+          val versionedSdkLoader = creationConfig.global.versionedSdkLoader.get()
+          BootClasspathBuilder.computeAdditionalAndRequestedOptionalLibraries(
+            creationConfig.services,
+            versionedSdkLoader.additionalLibrariesProvider.get(),
+            versionedSdkLoader.optionalLibrariesProvider.get(),
+            false,
+            ImmutableList.copyOf(creationConfig.global.libraryRequests),
+            creationConfig.services.issueReporter,
+          )
+        }
+      )
 
     override fun handleProvider(taskProvider: TaskProvider<LegacyReportingTestSuiteTestTask>) {
       super.handleProvider(taskProvider)
@@ -1299,6 +1474,8 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
 
       task.managedDevices.add(device)
       task.managedDevices.disallowChanges()
+      // Run only on the managed device, not also on the devices that happen to be connected through adb.
+      task.includeConnectedDevices.setDisallowChanges(false)
 
       val shardPoolSize = creationConfig.services.projectOptions.get(IntegerOption.MANAGED_DEVICE_SHARD_POOL_SIZE)
       task.shardCount.setDisallowChanges(shardPoolSize ?: 1)
@@ -1470,6 +1647,70 @@ abstract class TestSuiteTestTask : Test(), GlobalTask {
       task.rootProjectDir.set(services.projectInfo.rootDir)
       task.rootProjectDir.disallowChanges()
     }
+
+    internal fun containsInstrumentationArgKey(rawArgs: String, key: String): Boolean {
+      if (rawArgs.isBlank()) return false
+      return Regex("(?:^|(?<!\\\\),)\\s*${Regex.escape(key)}\\s*=").containsMatchIn(rawArgs)
+    }
+
+    /**
+     * Translates Gradle `--tests` and DSL `filter` patterns into a single regex for AndroidX Runner's `tests_regex` argument, which matches
+     * against `<className>#<methodName>`. Returns `null` when no filtering is active.
+     */
+    internal fun buildTestsRegexFromFilter(
+      includePatterns: Set<String>,
+      commandLineIncludePatterns: Set<String>,
+      excludePatterns: Set<String>,
+    ): String? {
+      val dslIncludes = includePatterns.filter { it.isNotBlank() && it != "*" }
+      val cliIncludes = commandLineIncludePatterns.filter { it.isNotBlank() && it != "*" }
+      val excludes = excludePatterns.filter { it.isNotBlank() }
+
+      if (dslIncludes.isEmpty() && cliIncludes.isEmpty() && excludes.isEmpty()) {
+        return null
+      }
+
+      if (excludes.any { it == "*" }) {
+        return "^(?!)x$"
+      }
+
+      val dslUnion = dslIncludes.takeIf { it.isNotEmpty() }?.joinToString("|") { stripAnchors(gradleTestPatternToRegex(it)) }
+      val cliUnion = cliIncludes.takeIf { it.isNotEmpty() }?.joinToString("|") { stripAnchors(gradleTestPatternToRegex(it)) }
+      val excludeUnion = excludes.takeIf { it.isNotEmpty() }?.joinToString("|") { stripAnchors(gradleTestPatternToRegex(it)) }
+
+      val positiveBody =
+        when {
+          dslUnion != null && cliUnion != null -> "(?=(?:$dslUnion)$)(?:$cliUnion)"
+          dslUnion != null -> if (dslIncludes.size == 1) dslUnion else "(?:$dslUnion)"
+          cliUnion != null -> if (cliIncludes.size == 1) cliUnion else "(?:$cliUnion)"
+          else -> ".*"
+        }
+      val negativeLookahead = if (excludeUnion != null) "(?!(?:$excludeUnion)$)" else ""
+      return "^$negativeLookahead$positiveBody$"
+    }
+
+    private fun stripAnchors(regex: String): String = regex.removePrefix("^").removeSuffix("$")
+
+    /**
+     * Translates a Gradle test filter pattern into a regex over AndroidX Runner test ids (`<className>#<methodName>`), following Gradle's
+     * matching rules: the pattern matches `<className>` or `<className>.<methodName>`, `*` matches anything, and a pattern starting with an
+     * upper-case letter matches the simple class name. Parameterized methods (`method[0]`) match their method name.
+     */
+    internal fun gradleTestPatternToRegex(pattern: String): String {
+      val body = pattern.split('*').joinToString(".*") { literal -> literal.split('.').joinToString("[.#]") { escapeRegexLiteral(it) } }
+      val simpleClassNamePrefix = if (pattern.firstOrNull()?.isUpperCase() == true) "(?:[^#]*\\.)?" else ""
+      return "^$simpleClassNamePrefix$body(?:\\[.*\\])?(?:#.*)?$"
+    }
+
+    private fun escapeRegexLiteral(literal: String): String =
+      buildString(literal.length) {
+        for (c in literal) {
+          if (c in "\\.^$+?()[]{}|") {
+            append('\\')
+          }
+          append(c)
+        }
+      }
   }
 }
 
@@ -1491,4 +1732,13 @@ internal fun runUnwrappingVerificationFailures(action: () -> Unit) {
     }
     throw cause as? VerificationException ?: e
   }
+}
+
+internal class HostJarJvmArgumentProvider(@get:Input val java17OrNewer: Provider<Boolean>) : CommandLineArgumentProvider {
+  override fun asArguments(): Iterable<String> =
+    if (java17OrNewer.get()) {
+      listOf("--add-opens=java.base/java.io=ALL-UNNAMED")
+    } else {
+      emptyList()
+    }
 }

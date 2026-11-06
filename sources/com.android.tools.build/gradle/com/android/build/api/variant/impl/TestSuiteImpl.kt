@@ -18,7 +18,7 @@ package com.android.build.api.variant.impl
 
 import com.android.build.api.artifact.impl.ArtifactsImpl
 import com.android.build.api.component.impl.computeTaskName
-import com.android.build.api.component.impl.features.DexingImpl
+import com.android.build.api.dsl.AgpTestSuiteInputParameters
 import com.android.build.api.dsl.DefaultConfig
 import com.android.build.api.dsl.TestTaskContext
 import com.android.build.api.variant.JUnitEngineSpec
@@ -34,10 +34,14 @@ import com.android.build.gradle.internal.core.dsl.VariantDslInfo
 import com.android.build.gradle.internal.core.dsl.impl.getDefaultInstrumentationTestRunner
 import com.android.build.gradle.internal.core.dsl.impl.getInstrumentationRunner
 import com.android.build.gradle.internal.dsl.BackupAgpTestSuiteImpl
+import com.android.build.gradle.internal.dsl.TestSuiteHostJarSpecImpl
 import com.android.build.gradle.internal.manifest.ManifestDataProvider
 import com.android.build.gradle.internal.services.TaskCreationServices
 import com.android.build.gradle.internal.services.VariantServices
 import com.android.build.gradle.internal.tasks.factory.GlobalTaskCreationConfig
+import com.android.build.gradle.internal.testing.INSTRUMENTATION_RUNNER_CLASS_KEY
+import com.android.build.gradle.internal.testing.INSTRUMENTATION_TARGET_PACKAGE_ID_KEY
+import com.android.build.gradle.internal.testing.TEST_PACKAGE_ID_KEY
 import com.android.build.gradle.internal.testsuites.impl.JUnitEngineSpecForVariantBuilder
 import com.android.build.gradle.internal.testsuites.impl.TestSuiteBuilderImpl
 import com.android.build.gradle.internal.variant.VariantComponentInfo
@@ -69,23 +73,34 @@ internal constructor(
   //
   override fun getName() = _name
 
-  override val junitEngineSpec: JUnitEngineSpec =
+  private val _junitEngineSpec =
     JUnitEngineSpecImplForVariant(
       testSuiteBuilder.junitEngineSpec as JUnitEngineSpecForVariantBuilder,
       { variantServices.mapPropertyOf(String::class.java, String::class.java, mapOf()) },
     )
+
+  override val junitEngineSpec: JUnitEngineSpec
+    get() = _junitEngineSpec
+
   override val testedVariant: VariantCreationConfig
     get() = testedVariantComponent.variant
 
+  private val requiresDevices: Boolean =
+    junitEngineSpec.inputs.any {
+      it == AgpTestSuiteInputParameters.TESTED_APKS || it == AgpTestSuiteInputParameters.TEST_APKS
+    }
+
   override val targets: Map<String, TestSuiteTargetCreationConfig> =
     testSuiteBuilder.targets.mapValues { entry ->
+      val uniqueTargetName = if (requiresDevices) entry.value.uniqueName() else entry.value.name
       TestSuiteTargetImpl(
         entry.value,
         computeTaskName(
           testedVariant.name,
           "test",
-          "${_name.capitalizeFirstChar()}${entry.value.uniqueName().capitalizeFirstChar()}TestSuite",
+          "${_name.capitalizeFirstChar()}${uniqueTargetName.capitalizeFirstChar()}TestSuite",
         ),
+        requiresDevices = requiresDevices,
       )
     }
 
@@ -96,7 +111,7 @@ internal constructor(
 
   @Synchronized
   override fun configureTestTasks(action: Test.(context: TestTaskContext) -> Unit) {
-    testTaskConfigActions.add(action)
+    variantTestTaskConfigActions.add(action)
   }
 
   @Synchronized
@@ -106,7 +121,16 @@ internal constructor(
 
   override val codeCoverageEnabled: Boolean = testSuiteBuilder._enableCodeCoverage
 
-  override val androidResourcesIncluded: Boolean = testSuiteBuilder.testSuite.androidResourcesIncluded
+  /**
+   * Whether Android resources are enabled for this test suite.
+   *
+   * When the suite declares a `hostJar {}` source container, [TestSuiteHostJarSpecImpl.enableAndroidResources] is authoritative so that
+   * user configuration in `hostJar { enableAndroidResources = ... }` takes effect; otherwise this falls back to the suite type's default
+   * ([com.android.build.gradle.internal.dsl.AgpTestSuiteImpl.androidResourcesIncluded]).
+   */
+  override val androidResourcesIncluded: Boolean =
+    _testSuite.getSourceContainers().filterIsInstance<TestSuiteHostJarSpecImpl>().firstOrNull()?.enableAndroidResources
+      ?: _testSuite.androidResourcesIncluded
 
   override fun instrumentationRunner(source: TestSuiteSourceSet.TestApk): Provider<String> {
     // Backup tests require BackupRestoreTestRunner (which survives app process
@@ -118,27 +142,34 @@ internal constructor(
     val dslInfo = testedVariantComponent.variantDslInfo
     val variant = testedVariantComponent.variant
     val manifestDataProv = manifestDataProviderBuilder(source.manifestFile)
-    return manifestDataProv.manifestData.flatMap { manifestData ->
-      if (!manifestData.instrumentationRunner.isNullOrBlank()) {
-        variantServices.provider { manifestData.instrumentationRunner!! }
-      } else if (dslInfo is ApplicationVariantDslInfo && variant is ApplicationCreationConfig) {
-        getInstrumentationRunner(
-          dslInfo.productFlavorList,
-          defaultConfig,
-          manifestDataProv,
-          DexingImpl(variant, true, dslInfo.dexingDslInfo.multiDexKeepProguard, dslInfo.dexingDslInfo.multiDexKeepFile, variantServices)
-            .dexingType,
-          variantServices,
-        )
+    val fallbackRunner =
+      if (dslInfo is ApplicationVariantDslInfo && variant is ApplicationCreationConfig) {
+        getInstrumentationRunner(dslInfo.productFlavorList, defaultConfig, manifestDataProv, variant.dexing.dexingType, variantServices)
       } else {
         getDefaultInstrumentationTestRunner(variantServices, DexingType.MONO_DEX)
       }
-    }
+    return manifestDataProv.manifestData
+      .map { it.instrumentationRunner.orEmpty() }
+      .filter { it.isNotBlank() }
+      .orElse(engineInputProperty(INSTRUMENTATION_RUNNER_CLASS_KEY))
+      .orElse(fallbackRunner)
   }
 
+  override val testApplicationId: Provider<String>
+    get() = engineInputProperty(TEST_PACKAGE_ID_KEY).orElse(testedVariant.applicationId.map { "$it.test" })
+
+  override val instrumentationTargetPackageId: Provider<String>
+    get() =
+      engineInputProperty(INSTRUMENTATION_TARGET_PACKAGE_ID_KEY)
+        // A library has no APK of its own, so its test APK instruments itself.
+        .orElse(if (testedVariant.componentType.isAar) testApplicationId else testedVariant.applicationId)
+
+  private fun engineInputProperty(key: String): Provider<String> = _junitEngineSpec.inputProperties.getting(key).filter { it.isNotBlank() }
+
   /** Internal APIs */
-  private val testTaskConfigActions =
-    mutableListOf<Test.(TestTaskContext) -> Unit>().also { it.addAll(testSuiteBuilder.testSuite.testTaskConfigActions) }
+  private val testTaskConfigActions = testSuiteBuilder.testSuite.testTaskConfigActions.toList()
+  private val targetTestTaskConfigActions = testSuiteBuilder.testSuite.getTargetTestTaskConfigActions()
+  private val variantTestTaskConfigActions = mutableListOf<Test.(TestTaskContext) -> Unit>()
   private val testTaskProviderConfigActions =
     mutableListOf<TaskProvider<out Test>.(TestTaskContext) -> Unit>().also {
       it.addAll(testSuiteBuilder.testSuite.testTaskProviderConfigActions)
@@ -148,5 +179,9 @@ internal constructor(
   override fun runTestTaskConfigurationActions(context: TestTaskContext, testTaskProvider: TaskProvider<out Test>) {
     testTaskProviderConfigActions.forEach { testTaskProvider.it(context) }
     testTaskConfigActions.forEach { testTaskProvider.configure { testTask -> it(testTask, context) } }
+    targetTestTaskConfigActions[context.targetName]?.forEach {
+      testTaskProvider.configure { testTask -> it(testTask, context) }
+    }
+    variantTestTaskConfigActions.forEach { testTaskProvider.configure { testTask -> it(testTask, context) } }
   }
 }

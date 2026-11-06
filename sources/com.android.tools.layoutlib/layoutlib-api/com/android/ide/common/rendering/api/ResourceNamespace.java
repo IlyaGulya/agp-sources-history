@@ -21,10 +21,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * Represents a namespace used by aapt when processing resources.
@@ -48,32 +45,27 @@ public class ResourceNamespace implements Comparable<ResourceNamespace>, Seriali
     public static final ResourceNamespace RES_AUTO = new ResAutoNamespace();
     public static final ResourceNamespace TOOLS = new ToolsNamespace();
     public static final ResourceNamespace AAPT = new AaptNamespace();
-    /** The namespace of the Androidx appcompat library when namespaces are used. */
-    public static final ResourceNamespace APPCOMPAT = fromPackageName("androidx.appcompat");
-    /** The namespace of the old appcompat library when namespaces are used. */
-    public static final ResourceNamespace APPCOMPAT_LEGACY =
-            fromPackageName("android.support.v7.appcompat");
-
-    private static final Logger LOG = Logger.getLogger(ResourceNamespace.class.getSimpleName());
-
-    @SuppressWarnings("StaticNonFinalField") // Non-final to be able to set in code.
-    public static boolean noncomplianceLogging = false;
 
     /**
-     * Namespace used in code that needs to start keeping track of namespaces. For easy tracking of
-     * parts of codebase that need fixing.
+     * The namespace of the AndroidX appcompat library when namespaces are used.
+     *
+     * @deprecated Kept only for binary compatibility with older {@code
+     *     com.android.tools.layoutlib:layoutlib} prebuilts; non-namespaced resources use {@link
+     *     #RES_AUTO}.
      */
-    @NonNull
-    public static ResourceNamespace TODO() {
-        if (noncomplianceLogging) {
-            String trace =
-                    Arrays.stream(Thread.currentThread().getStackTrace())
-                            .map(Object::toString)
-                            .collect(Collectors.joining("\n"));
-            LOG.warning("This code does not support namespaces yet\n" + trace);
-        }
-        return RES_AUTO;
-    }
+    @Deprecated
+    public static final ResourceNamespace APPCOMPAT = fromPackageName("androidx.appcompat");
+
+    /**
+     * The namespace of the old appcompat library when namespaces are used.
+     *
+     * @deprecated Kept only for binary compatibility with older {@code
+     *     com.android.tools.layoutlib:layoutlib} prebuilts; non-namespaced resources use {@link
+     *     #RES_AUTO}.
+     */
+    @Deprecated
+    public static final ResourceNamespace APPCOMPAT_LEGACY =
+            fromPackageName("android.support.v7.appcompat");
 
     /**
      * Logic for looking up namespace prefixes defined in some context.
@@ -87,7 +79,6 @@ public class ResourceNamespace implements Comparable<ResourceNamespace>, Seriali
 
         @Nullable
         default String uriToPrefix(@NonNull String namespaceUri) {
-            // TODO(namespaces): remove the default implementation once layoutlib provides one.
             return null;
         }
 
@@ -165,14 +156,10 @@ public class ResourceNamespace implements Comparable<ResourceNamespace>, Seriali
         }
     }
 
-    /**
-     * Constructs a {@link ResourceNamespace} in code that does not keep track of namespaces yet,
-     * only of the boolean `isFramework` flag.
-     */
+    /** Constructs a {@link ResourceNamespace} from the boolean {@code isFramework} flag. */
     @NonNull
-    @Deprecated
     public static ResourceNamespace fromBoolean(boolean isFramework) {
-        return isFramework ? ANDROID : TODO();
+        return isFramework ? ANDROID : RES_AUTO;
     }
 
     /**
@@ -204,7 +191,6 @@ public class ResourceNamespace implements Comparable<ResourceNamespace>, Seriali
         if (uri != null) {
             return fromNamespaceUri(uri);
         } else {
-            // TODO(namespaces): What is considered a good package name by aapt?
             return fromPackageName(prefix);
         }
     }
@@ -230,7 +216,6 @@ public class ResourceNamespace implements Comparable<ResourceNamespace>, Seriali
             return AAPT;
         }
         if (uri.startsWith(AndroidConstants.URI_PREFIX)) {
-            // TODO(namespaces): What is considered a good package name by aapt?
             String packageName = uri.substring(AndroidConstants.URI_PREFIX.length());
             if (!packageName.isEmpty()) {
                 return fromPackageName(packageName);

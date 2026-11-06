@@ -74,6 +74,7 @@ import com.android.ide.common.workers.WorkerExecutorFacade
 import com.android.resources.Density
 import com.android.utils.FileUtils
 import com.android.utils.ILogger
+import com.android.utils.XmlUtils
 import com.google.common.base.Preconditions
 import com.google.common.collect.Iterables
 import com.google.wireless.android.sdk.stats.GradleBuildProfileSpan
@@ -81,8 +82,6 @@ import java.io.File
 import java.io.IOException
 import java.util.Locale
 import java.util.function.Supplier
-import javax.xml.bind.JAXBException
-import javax.xml.parsers.DocumentBuilderFactory
 import org.gradle.api.GradleException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
@@ -200,7 +199,7 @@ abstract class MergeResources : NewIncrementalTask() {
   private val ignoreNavigationFolder = "!<dir>navigation" // ignore merging navigation as it has parallel flow
   private val defaultIgnoreFolders = "!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"
 
-  @Throws(IOException::class, JAXBException::class)
+  @Throws(IOException::class)
   protected fun doFullTaskAction() {
     val preprocessor = preprocessor
     val incrementalFolder = incrementalFolder.get().asFile
@@ -214,7 +213,7 @@ abstract class MergeResources : NewIncrementalTask() {
     val resourceSets = getConfiguredResourceSets(preprocessor, aaptEnv.orNull)
 
     // create a new merger and populate it with the sets.
-    val documentBuilderFactory = DocumentBuilderFactory.newInstance()
+    val documentBuilderFactory = XmlUtils.createDocumentBuilderFactory()
     val merger = ResourceMerger(minSdk.get(), documentBuilderFactory)
     var mergingLog: MergingLog? = null
     if (blameLogOutputFolder.isPresent) {
@@ -263,7 +262,7 @@ abstract class MergeResources : NewIncrementalTask() {
           Blocks.recordSpan<MergingException>(path, GradleBuildProfileSpan.ExecutionType.TASK_EXECUTION_PHASE_2, analyticsService.get()) {
             merger.mergeData(writer, false /*doCleanUp*/)
           }
-          Blocks.recordSpan<JAXBException>(path, GradleBuildProfileSpan.ExecutionType.TASK_EXECUTION_PHASE_3, analyticsService.get()) {
+          Blocks.recordSpan<Exception>(path, GradleBuildProfileSpan.ExecutionType.TASK_EXECUTION_PHASE_3, analyticsService.get()) {
             dataBindingLayoutProcessor?.end()
           }
 
@@ -306,14 +305,8 @@ abstract class MergeResources : NewIncrementalTask() {
 
   override fun doTaskAction(inputChanges: InputChanges) {
     if (!inputChanges.isIncremental) {
-      try {
-        logger.info("[MergeResources] Inputs are non-incremental full task action.")
-        doFullTaskAction()
-      } catch (e: IOException) {
-        throw RuntimeException(e)
-      } catch (e: JAXBException) {
-        throw RuntimeException(e)
-      }
+      logger.info("[MergeResources] Inputs are non-incremental full task action.")
+      doFullTaskAction()
       return
     }
     val preprocessor = preprocessor
@@ -525,7 +518,6 @@ abstract class MergeResources : NewIncrementalTask() {
         processor.processFileWithNoDataBinding(file)
       }
 
-      @Throws(JAXBException::class)
       override fun end() {
         processor.writeLayoutInfoFiles(dataBindingLayoutInfoOutFolder.get().asFile)
       }
@@ -686,7 +678,7 @@ abstract class MergeResources : NewIncrementalTask() {
     private val includeDependencies: Boolean,
     private val processResources: Boolean,
     private val flags: Set<Flag>,
-    private val isLibrary: Boolean,
+    isLibrary: Boolean,
   ) :
     VariantTaskCreationAction<MergeResources, ComponentCreationConfig>(creationConfig),
     AndroidResourcesTaskCreationAction by AndroidResourcesTaskCreationActionImpl(creationConfig) {
@@ -781,7 +773,7 @@ abstract class MergeResources : NewIncrementalTask() {
       task.flags = flags
       task.errorFormatMode = SyncOptions.getErrorFormatMode(creationConfig.services.projectOptions)
       task.precompileDependenciesResources =
-        (mergeType == TaskManager.MergeType.MERGE && !isLibrary && androidResourcesCreationConfig.isPrecompileDependenciesResourcesEnabled)
+        (mergeType == TaskManager.MergeType.MERGE && androidResourcesCreationConfig.isPrecompileDependenciesResourcesEnabled)
       task.resourceDirsOutsideRootProjectDir.setDisallowChanges(
         task.project.provider { getResourcesDirsOutsideRoot(task, isDataBindingEnabled, isViewBindingEnabled) }
       )

@@ -18,6 +18,7 @@ package com.android.build.gradle.internal.tasks
 
 import com.android.build.gradle.internal.LoggerWrapper
 import com.android.build.gradle.internal.component.ConsumableCreationConfig
+import com.android.build.gradle.internal.dexing.withR8ClassLoader
 import com.android.build.gradle.internal.errors.MessageReceiverImpl
 import com.android.build.gradle.internal.scope.InternalArtifactType
 import com.android.build.gradle.internal.services.R8ClassloaderBuildService
@@ -48,6 +49,7 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.internal.logging.ConsoleRenderer
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
 
@@ -101,7 +103,9 @@ abstract class R8AnalysisTask @Inject constructor(projectLayout: ProjectLayout) 
 
     val reportFile = r8ConfigurationAnalyzerReportOutput.get().asFile
     val dataFile = r8ConfigurationAnalyzerDataOutput.get().asFile
-    val relativePath = projectLayout.projectDirectory.asFile.toURI().relativize(reportFile.toURI()).path
+    // Use an absolute file:// URL so that the report can be opened directly from the terminal/IDE,
+    // consistent with other Gradle and AGP reports (e.g. test, lint, problems reports).
+    val reportUrl = ConsoleRenderer().asClickableFileUrl(reportFile)
 
     val workerAction = { it: R8RunnableAnalysis.Params ->
       it.bootClasspath.from(bootClasspath.toList())
@@ -124,7 +128,7 @@ abstract class R8AnalysisTask @Inject constructor(projectLayout: ProjectLayout) 
       it.resourcesJar.set(resourcesJar)
       it.r8ConfigurationAnalyzerDataOutput.set(dataFile)
       it.r8ConfigurationAnalyzerReportOutput.set(reportFile)
-      it.reportRelativePath.set(relativePath)
+      it.reportUrl.set(reportUrl)
       it.featureClassJars.from(featureClassJars.toList())
       it.featureJavaResourceJars.from(featureJavaResourceJars.toList())
       it.libConfiguration.set(coreLibDesugarConfig.orNull)
@@ -167,7 +171,7 @@ abstract class R8AnalysisTask @Inject constructor(projectLayout: ProjectLayout) 
       abstract val proguardConfigurations: ListProperty<String>
       abstract val r8ConfigurationAnalyzerDataOutput: RegularFileProperty
       abstract val r8ConfigurationAnalyzerReportOutput: RegularFileProperty
-      abstract val reportRelativePath: Property<String>
+      abstract val reportUrl: Property<String>
       abstract val legacyMultiDexEnabled: Property<Boolean>
       abstract val referencedInputs: ConfigurableFileCollection
       abstract val classes: ConfigurableFileCollection
@@ -205,7 +209,6 @@ abstract class R8AnalysisTask @Inject constructor(projectLayout: ProjectLayout) 
         } else {
           parameters.r8D8ThreadPoolBuildServiceIfNonIsolationMode.get().threadPool
         }
-      val r8ClassLoader = getR8ClassLoader(parameters.r8Classpath, parameters.r8ClassloaderBuildServiceIfNonIsolationMode)
       try {
         val proguardOutputReports =
           ProguardOutputReports(
@@ -233,36 +236,37 @@ abstract class R8AnalysisTask @Inject constructor(projectLayout: ProjectLayout) 
           }
 
         val logger = LoggerWrapper.getLogger(R8AnalysisTask::class.java)
-        invokeRunR8(
-          r8ClassLoader,
-          filterMissingFiles(parameters.classes.files.toList(), logger),
-          null,
-          parameters.resourcesJar.asFile.get().toPath(),
-          null,
-          parameters.bootClasspath.files.map { it.toPath() },
-          filterMissingFiles(parameters.referencedInputs.files.toList(), logger),
-          parameters.toolConfig.get(),
-          proguardConfig,
-          mainDexListConfig,
-          parameters.resourceShrinkingConfig.orNull,
-          MessageReceiverImpl(parameters.errorFormatMode.get(), Logging.getLogger(R8RunnableAnalysis::class.java)),
-          parameters.featureClassJars.files.map { it.toPath() },
-          parameters.featureJavaResourceJars.files.map { it.toPath() },
-          null,
-          null,
-          parameters.libConfiguration.orNull,
-          parameters.inputArtProfile.orNull?.asFile?.toPath(),
-          null,
-          parameters.inputProfileForDexStartupOptimization.orNull?.asFile?.toPath(),
-          null,
-          parameters.partialShrinkingIncludes.orNull,
-          r8ThreadPool,
-        )
+        withR8ClassLoader(parameters.r8Classpath, parameters.r8ClassloaderBuildServiceIfNonIsolationMode) { r8ClassLoader ->
+          invokeRunR8(
+            r8ClassLoader,
+            filterMissingFiles(parameters.classes.files.toList(), logger),
+            null,
+            parameters.resourcesJar.asFile.get().toPath(),
+            null,
+            parameters.bootClasspath.files.map { it.toPath() },
+            filterMissingFiles(parameters.referencedInputs.files.toList(), logger),
+            parameters.toolConfig.get(),
+            proguardConfig,
+            mainDexListConfig,
+            parameters.resourceShrinkingConfig.orNull,
+            MessageReceiverImpl(parameters.errorFormatMode.get(), Logging.getLogger(R8RunnableAnalysis::class.java)),
+            parameters.featureClassJars.files.map { it.toPath() },
+            parameters.featureJavaResourceJars.files.map { it.toPath() },
+            null,
+            null,
+            parameters.libConfiguration.orNull,
+            parameters.inputArtProfile.orNull?.asFile?.toPath(),
+            null,
+            parameters.inputProfileForDexStartupOptimization.orNull?.asFile?.toPath(),
+            null,
+            parameters.partialShrinkingIncludes.orNull,
+            r8ThreadPool,
+          )
+        }
 
-        logger.lifecycle("R8 Keep Rules analysis report generated: ${parameters.reportRelativePath.get()}")
+        logger.lifecycle("R8 Keep Rules analysis report generated: ${parameters.reportUrl.get()}")
       } finally {
         if (isolationMode) {
-          (r8ClassLoader as? AutoCloseable)?.close()
           r8ThreadPool.doClose()
         }
       }

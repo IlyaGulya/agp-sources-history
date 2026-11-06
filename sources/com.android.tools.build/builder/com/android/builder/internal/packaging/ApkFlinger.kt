@@ -43,8 +43,8 @@ import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.ForkJoinTask
 import java.util.zip.Deflater.NO_COMPRESSION
 
-// TODO ensure that all input zip entries have desired compression -
-//  https://issuetracker.google.com/135275558
+// Note: While zip inputs (assets, Java resources) are pre-compressed upstream (b/135275558),
+// writeFile() still compresses and hashes directory inputs (such as DEX and JNI files).
 
 /**
  * An implementation of [ApkCreator] using the zipflinger library

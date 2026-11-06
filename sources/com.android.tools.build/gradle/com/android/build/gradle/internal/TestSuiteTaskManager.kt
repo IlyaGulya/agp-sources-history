@@ -62,6 +62,7 @@ class TestSuiteTaskManager(project: Project, globalConfig: GlobalTaskCreationCon
     // Like the androidTest APK, a suite's test APK carries the on-device coverage agent, which the test engine attaches from it.
     // Only suites that collect coverage need it.
     if (testSuite.codeCoverageEnabled) {
+      handleJacocoDependencies(apkCreationConfig)
       handleOnTheFlyCoverageDependencies(apkCreationConfig)
     }
 
@@ -117,6 +118,10 @@ class TestSuiteTaskManager(project: Project, globalConfig: GlobalTaskCreationCon
     return taskContainer.assembleTask
   }
 
+  /**
+   * Creates the manifest, asset, and resource tasks for [hostJarConfig], which has Android resources enabled (see
+   * [com.android.build.gradle.internal.testsuites.impl.HostJarTestSuiteTaskManager.hasAndroidResources]).
+   */
   fun createHostJarTestSuiteResourcesTasks(hostJarConfig: TestSuiteHostJarCreationConfig) {
     // Add a task to process the manifest
     createProcessTestManifestTask(hostJarConfig)
@@ -198,8 +203,10 @@ class TestSuiteTaskManager(project: Project, globalConfig: GlobalTaskCreationCon
     createAssembleTask(creationConfig)
   }
 
-  override val javaResMergingScopes: Set<InternalScopedArtifacts.InternalScope>
-    get() = setOf()
+  // Packages the Java resources of the suite's subproject and external library runtime dependencies into its test APK.
+  // TestSuiteApkCreationConfig.variantDependencies subtracts those a tested application APK already packages.
+  override val javaResMergingScopes: Set<InternalScopedArtifacts.InternalScope> =
+    setOf(InternalScopedArtifacts.InternalScope.SUB_PROJECTS, InternalScopedArtifacts.InternalScope.EXTERNAL_LIBS)
 
   fun createTasks(creationConfig: TestSuiteCreationConfig) {
     val isHostSuite = creationConfig.sourceContainers.any { it.source is TestSuiteSourceSet.HostJar }
@@ -224,56 +231,54 @@ class TestSuiteTaskManager(project: Project, globalConfig: GlobalTaskCreationCon
       tasks.add(Pair("update", true))
     }
 
+    val managedDevicesByTarget =
+      creationConfig.targets.values
+        .filter { it.enabled }
+        .associateWith { creationConfig.global.androidTestOptions.managedDevices.resolveTargetDevices(it.targetDevices) }
     tasks.forEach { (verb, isUpdate) ->
-      creationConfig.targets
-        .filter { it.value.enabled }
-        .forEach { mapEntry ->
-          val target = mapEntry.value
-          val taskName =
-            computeTaskName(
-              creationConfig.testedVariant.name,
-              verb,
-              "${creationConfig.name.capitalizeFirstChar()}${target.uniqueName.capitalizeFirstChar()}TestSuite",
-            )
-          val testSuiteTestTask =
-            taskFactory.register(
-              TestSuiteTestTask.CreationAction(creationConfig, target, taskName, connectedCheckSerials, isUpdate = isUpdate)
-            )
-          val context =
-            object : TestTaskContext {
-              override val targetName: String
-                get() = target.name
+      managedDevicesByTarget.forEach { (target, targetManagedDevices) ->
+        val taskName =
+          computeTaskName(
+            creationConfig.testedVariant.name,
+            verb,
+            "${creationConfig.name.capitalizeFirstChar()}${target.uniqueName.capitalizeFirstChar()}TestSuite",
+          )
+        val testSuiteTestTask =
+          taskFactory.register(
+            TestSuiteTestTask.CreationAction(creationConfig, target, taskName, targetManagedDevices, connectedCheckSerials, isUpdate)
+          )
+        val context =
+          object : TestTaskContext {
+            override val targetName: String
+              get() = target.name
 
-              override val isUpdateTask: Boolean
-                get() = isUpdate
+            override val isUpdateTask: Boolean
+              get() = isUpdate
 
-              override val suiteName: String
-                get() = creationConfig.name
+            override val suiteName: String
+              get() = creationConfig.name
 
-              override val targetedVariant: String
-                get() = creationConfig.testedVariant.name
+            override val targetedVariant: String
+              get() = creationConfig.testedVariant.name
 
-              override val targetedDevices: Collection<String>
-                get() = target.targetDevices
+            override val targetedDevices: Collection<String>
+              get() = target.targetDevices
 
-              override fun toString(): String {
-                return super.toString() +
-                  "targetName:$targetName, isUpdateTask:$isUpdateTask, suiteName:$suiteName," +
-                  " targetedVariant:$targetedVariant, " +
-                  "devices = ${targetedDevices.joinToString(separator = ":")}"
-              }
+            override fun toString(): String {
+              return super.toString() +
+                "targetName:$targetName, isUpdateTask:$isUpdateTask, suiteName:$suiteName," +
+                " targetedVariant:$targetedVariant, " +
+                "devices = ${targetedDevices.joinToString(separator = ":")}"
             }
-          creationConfig.runTestTaskConfigurationActions(context, testSuiteTestTask)
-
-          // add sources processing dependencies
-          allSourcesProcessingTasks.forEach { sourceProcessingTask -> testSuiteTestTask.dependsOn(sourceProcessingTask) }
-
-          // Adds GMD Setup task dependency.
-          target.targetDevices.forEach { targetDeviceName ->
-            val targetDevice = creationConfig.global.androidTestOptions.managedDevices.localDevices.getByName(targetDeviceName)
-            testSuiteTestTask.dependsOn(setupTaskName(targetDevice))
           }
-        }
+        creationConfig.runTestTaskConfigurationActions(context, testSuiteTestTask)
+
+        // add sources processing dependencies
+        allSourcesProcessingTasks.forEach { sourceProcessingTask -> testSuiteTestTask.dependsOn(sourceProcessingTask) }
+
+        // Adds GMD Setup task dependency.
+        targetManagedDevices.forEach { testSuiteTestTask.dependsOn(setupTaskName(it)) }
+      }
     }
   }
 

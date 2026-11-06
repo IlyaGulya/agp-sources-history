@@ -105,12 +105,15 @@ public class FileChannelDataSource implements DataSource {
             int chunkSize = (int) Math.min(remaining, buf.capacity());
             int chunkRemaining = chunkSize;
             buf.limit(chunkSize);
-            while (chunkRemaining > 0) {
-                int read = mChannel.read(buf, chunkOffsetInFile + chunkSize - chunkRemaining);
-                if (read < 0) {
-                    throw new IOException("Unexpected EOF encountered");
+            synchronized (mChannel) {
+                mChannel.position(chunkOffsetInFile);
+                while (chunkRemaining > 0) {
+                    int read = mChannel.read(buf);
+                    if (read < 0) {
+                        throw new IOException("Unexpected EOF encountered");
+                    }
+                    chunkRemaining -= read;
                 }
-                chunkRemaining -= read;
             }
             buf.flip();
             sink.consume(buf);
@@ -139,9 +142,10 @@ public class FileChannelDataSource implements DataSource {
             // the buffer's limit to avoid reading more than size bytes.
             dest.limit(dest.position() + size);
             while (remaining > 0) {
-                int chunkSize = mChannel.read(dest, offsetInFile);
-                if (chunkSize < 0) {
-                    throw new IOException("Unexpected EOF encountered");
+                int chunkSize;
+                synchronized (mChannel) {
+                    mChannel.position(offsetInFile);
+                    chunkSize = mChannel.read(dest);
                 }
                 offsetInFile += chunkSize;
                 remaining -= chunkSize;
